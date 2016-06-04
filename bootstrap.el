@@ -1,0 +1,26 @@
+;;; bootstrap.el --- install use-package
+
+
+;;; Commentary:
+;; 
+
+(require 'package)
+
+;;; Code:
+
+(package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(eval-when-compile
+  (require 'use-package))
+
+(require 'diminish) ;; if you use :diminish
+
+(require 'bind-key) ;; if you use any :bind variant
+
+(provide 'bootstrap)
+
+;;; bootstrap.el ends here
