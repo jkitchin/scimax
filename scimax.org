@@ -1,0 +1,232 @@
+#+TITLE: Scimax
+
+* ivy
+scimax currently uses ivy extensively for completion. 
+
+When you get an ivy minibuffer, start typing to select what you want, and when it is highlighted, press enter.
+
+There are a couple of nuances though.
+
+1. The order of words in your pattern matters, so type them in the order they appear in the candidates.  
+2. To eliminate matches use ! pattern, but you can only use one of these, and it comes last.
+
+I have extended the ivy-minibuffer-keymap to enable the following:
+
+1. C-spc or tab will show the actions, and spc to resume the selection process.
+2. C-RET to perform the action and move to the next candidate, and C-u C-RET to perform the action and move to the previous candidate.
+2. M-RET will perform the default action on every candidate from the current selection to the end of the candidates. C-u M-RET does that from the current candidate to the beginning.
+3. s-RET quits the selection buffer with no action.
+4. ? shows you the keymap.
+
+In the ivy selection buffer
+| C-spc         | Show the actions                                           |
+| tab           | Show the actions                                           |
+| RET           | Default action and exit                                    |
+| C-RET         | Default action and move to next line                       |
+| C-u C-RET     | Default action and move to previous line                   |
+| M-RET         | Default action on each candidate from current to end       |
+| C-u M-RET     | Default action on each candidate from current to beginning |
+| C-u C-u M-RET | Default action on all candidates                           |
+| s-RET         | quit with no action                                        |
+ 
+* Org-mode 
+
+- new speed commands
+** Markup shortcuts
+scimax defines some shortcuts for org-mode markup. You can select text and type the shortcut to wrap the region in the markup, or type the short cut to wrap the character at point or create the markup with the cursor inside it to keep typing.
+
+| markup            | keyshortcut | emacs-command                       |
+|-------------------+-------------+-------------------------------------|
+| *Bold*            | s-b         | `org-bold-region-or-point'          |
+| /italics/         | s-i         | `org-italics-region-or-point'       |
+| =verbatim=        | s-v         | `org-verbatim-region-or-point'      |
+| ~code~            | s-c         | `org-code-region-or-point'          |
+| _underline_       | s-u         | `org-underline-region-or-point'     |
+| +strike+          | s-+         | `org-strikethrough-region-or-point' |
+| _{subscript}      | s--         | `org-subscript-region-or-point'     |
+| ^{superscript}    | s-=         | `org-superscript-region-or-point'   |
+| \(equation\)      | s-4         | `org-latex-math-region-or-point'    |
+| $inline eqn$      | C-u s-4     |                                     |
+| @@latex:snippet@@ | C-u C-u 4   |                                     |
+| °                 | s-e         | `helm-insert-org-entity'            |
+| \deg              | s-e f2      |                                     |
+| \textdegree{}     | s-e f3      |                                     |
+| &deg;             | s-e f4      |                                     |
+
+Use  `ivy-insert-org-entity' (s-e) for all accented characters
+
+Here are some common ones, but there are alot of them!
+
+| angstrom | ("AA" "\\AA{}" nil "&Aring;" "A" "Å" "Å")     |
+|          | ("oslash" "\\o{}" nil "&oslash;" "o" "ø" "ø") |
+|          | ("uuml" "\\\"{u}" nil "&uuml;" "ue" "ü" "ü")  |
+
+** Block expansions in org-mode
+
+The following examples show the shortcuts defined in scimax for expansion. Put your cursor after the shortcut and press tab to expand them.
+
+<p
+#+BEGIN_SRC python :results org drawer
+
+#+END_SRC
+
+<por
+#+BEGIN_SRC python :results output raw
+
+#+END_SRC
+
+<pv
+#+BEGIN_SRC python :results value
+
+#+END_SRC
+
+<el
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+
+<sh
+#+BEGIN_SRC sh
+
+#+END_SRC
+
+<lh
+#+latex_header:
+
+<lc
+#+latex_class:
+
+<lco
+#+latex_class_options:
+
+<ao
+#+attr_org:
+
+<al
+#+attr_latex:
+
+<ca
+#+caption:
+
+<tn
+#+tblname:
+
+<n
+#+name:
+
+Here are some convenient table expansions.
+
+<t
+|  |
+
+<tt
+|  |   |
+
+<ttt
+|  |   |   |
+
+<tttt
+|  |   |   |   |
+
+<ttttt
+|  |   |   |   |   |
+
+<tttttt
+|  |   |   |   |   |   |
+
+** LaTeX
+#+BEGIN_SRC emacs-lisp
+(mapcar 'car org-latex-classes)
+#+END_SRC
+
+#+RESULTS:
+| article-1 | article-no-defaults | cmu-article | article | report | book |
+
+** org-ref
+
+** TODO Publishing (ox-manuscript)
+* Email
+mail headings
+
+mail merge
+* Programming
+** Python
+- elpy
+- pydoc
+
+** Emacs-lisp
+- lispy
+
+* Packages
+** counsel/avy/ivy/swiper
+** helm
+** hydra
+** magit
+** projectile
+** undo-tree
+
+** words
+** ore
+
+ `ore'
+* Scientific notebook
+scimax provides a scientific notebook capability. 
+
+Each "notebook" is actually collection of org-files in a "project".
+
+A project is the set of files in a directory that is under version control. Each project should have a master file (the default is README.org, but you can customize `nb-master-file' to change this).
+
+Use `nb-open' to open a project. This will open the project to your master file. Previously visited projects are remembered. 
+
+Probably you will keep your projects separate from your agenda files, but you still would like to see what tasks the project has? Use `nb-agenda' while in your project, and it will show you all the tasks in the org-files associated with the project.
+
+Here are some other interesting commands 
+- `counsel-git-grep'
+- `projectile-find-file'
+- `projectile-switch-to-buffer'
+- `projectile-kill-buffers'
+
+- `ivy-org-jump-to-heading' 
+- `ivy-org-jump-to-heading-in-directory'
+- `ivy-org-jump-to-project-headline'
+
+You can manage the version control with magit
+
+- `vc-next-action' will do the next logical thing for vc, e.g. add or commit.
+- `vc-diff' will show you what has changed in the buffer since the last commit.
+- `vc-print-log' will show you the vc log.
+- `magit-status' is the portal command to see the status of the repo.
+
+* Sandbox
+
+#+BEGIN_SRC emacs-lisp
+(ivy-add-actions
+ 'counsel-find-file
+ '(("a" (lambda (x)
+	  (unless (equal major-mode 'message-mode)
+	    (compose-mail)) 
+	  (mml-attach-file x)) "Attach to email")
+   ("p" (lambda (path)
+	  (insert (f-relative path))) "Insert relative path")
+   ("P" (lambda (path)
+	  (insert path)) "Insert absolute path")
+   ("l" (lambda (path)
+	  (insert (format "[[file:%s]]" path))) "Insert org-link")))
+#+END_SRC
+
+#+RESULTS:
+| ivy-switch-buffer | ((k (lambda (x) (kill-buffer x) (ivy--reset-state ivy-last)) kill) (j ivy--switch-buffer-other-window-action other window) (r ivy--rename-buffer-action rename)) | lispy-occur | ((m lispy-occur-action-mc multiple-cursors) (j lispy-occur-action-goto-beg goto start) (k lispy-occur-action-goto-end goto end)) | counsel-describe-variable | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-describe-function | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-M-x | ((d counsel--find-symbol definition) (h (lambda (x) (describe-function (intern x))) help)) | counsel-descbinds | ((d counsel-descbinds-action-find definition) (i counsel-descbinds-action-info info)) | counsel-git | ((j find-file-other-window other)) | counsel-find-file | ((j find-file-other-window other window)) | counsel-locate | ((x counsel-locate-action-extern xdg-open) (d counsel-locate-action-dired dired)) | counsel-linux-app | ((f counsel-linux-app-action-file run on a file)) | t | ((e (lambda (x) (mml-attach-file x)))) |
+
+#+BEGIN_SRC emacs-lisp
+(defun ivy-insert-action (x)
+  (with-ivy-window
+    (insert x)))
+
+(ivy-set-actions
+ t  ; all commands
+ '(("I" ivy-insert-action "insert")))
+#+END_SRC
+
+#+RESULTS:
+| ivy-switch-buffer | ((k (lambda (x) (kill-buffer x) (ivy--reset-state ivy-last)) kill) (j ivy--switch-buffer-other-window-action other window) (r ivy--rename-buffer-action rename)) | lispy-occur | ((m lispy-occur-action-mc multiple-cursors) (j lispy-occur-action-goto-beg goto start) (k lispy-occur-action-goto-end goto end)) | counsel-describe-variable | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-describe-function | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-M-x | ((d counsel--find-symbol definition) (h (lambda (x) (describe-function (intern x))) help)) | counsel-descbinds | ((d counsel-descbinds-action-find definition) (i counsel-descbinds-action-info info)) | counsel-git | ((j find-file-other-window other)) | counsel-find-file | ((j find-file-other-window other window)) | counsel-locate | ((x counsel-locate-action-extern xdg-open) (d counsel-locate-action-dired dired)) | counsel-linux-app | ((f counsel-linux-app-action-file run on a file)) | t | ((I ivy-insert-action insert)) |
+
