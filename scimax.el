@@ -50,15 +50,16 @@
 (add-hook 'edebug-mode-hook
 	  (lambda ()
 	    (define-key edebug-mode-map (kbd "h") 'edebug-goto-here)))
+
 ;; ** Emacs lisp
 ;; Setup pretty outlines in Emacs-lisp code
 "^;; \\(\\*+.*\\)$"
 (defconst lel-font-lock-keywords
-  '(("^;; \\(\\* .*\\)$" 1 'org-level-1 prepend)
-    ("^;; \\(\\*\\* .*\\)$" 1 'org-level-2 prepend)
-    ("^;; \\(\\*\\*\\* .*\\)$" 1 'org-level-3 prepend)
-    ("^;; \\(\\*\\*\\*\\* .*\\)$" 1 'org-level-4 prepend)
-    ("^;; \\(\\*\\*\\*\\*\\* .*\\)$" 1 'org-level-5 prepend)
+  '(("^;; ?\\(\\* .*\\)$" 1 'org-level-1 prepend)
+    ("^;; ?\\(\\*\\* .*\\)$" 1 'org-level-2 prepend)
+    ("^;; ?\\(\\*\\*\\* .*\\)$" 1 'org-level-3 prepend)
+    ("^;; ?\\(\\*\\*\\*\\* .*\\)$" 1 'org-level-4 prepend)
+    ("^;; ?\\(\\*\\*\\*\\*\\* .*\\)$" 1 'org-level-5 prepend)
     ;; (lel-outline-comment-highlight 1 'default prepend)
     ("`\\([^\n']+\\)'" 1 font-lock-constant-face prepend)))
 
