@@ -12,14 +12,14 @@ There are a couple of nuances though.
 
 I have extended the ivy-minibuffer-keymap to enable the following:
 
-1. C-spc or tab will show the actions, and spc to resume the selection process.
+1. M-spc will show the actions, and spc to resume the selection process.
 2. C-RET to perform the action and move to the next candidate, and C-u C-RET to perform the action and move to the previous candidate.
 2. M-RET will perform the default action on every candidate from the current selection to the end of the candidates. C-u M-RET does that from the current candidate to the beginning.
 3. s-RET quits the selection buffer with no action.
 4. ? shows you the keymap.
 
 In the ivy selection buffer
-| C-spc         | Show the actions                                           |
+| M-spc         | Show the actions                                           |
 | spc           | resume                                                     |
 | RET           | Default action and exit                                    |
 | C-RET         | Default action and move to next line                       |
@@ -197,9 +197,17 @@ Scimax provides some support for track changes using [[https://github.com/joostk
 The main command to use is `cm/body' which launches a hydra menu. You can mark text for insertion, deletion, and add comment text.
 Here is some example markup:
 
-{++Add this text++} 
-{--Delete this--}
-{>>a comment<<} 
+{++Add this text++} {--Delete this--} {>>a comment<<} 
+
+The markup should be clickable so you can accept/reject each change.
+
+You can use these commands
+- `cm-addition' - insert text at point
+- `cm-deletion' - mark the selected text for deletion
+- `cm-comment' - insert a comment at point
+
+To turn on track changes. Run this command again to turn it off.
+- `cm-follow-changes' 
 
 scimax provides some commands to:
 - `cm-accept-all-changes'
@@ -220,8 +228,8 @@ Or between the buffer and last saved version
 
 These require mu4e for mail, and store properties on the headline that indicate where it was sent.
 
-- `email-heading' :: email the current heading
-- `email-heading-body' 
+- `email-heading' :: email the current heading, including properties, deadlines, etc...
+- `email-heading-body' :: email just the body of the current heading
 
 ** TODO mail merge
 
