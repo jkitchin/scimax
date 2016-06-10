@@ -3,3 +3,4 @@ elpa
 *.tex
 *.pdf
 *.org#
+user/
