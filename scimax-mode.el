@@ -27,16 +27,16 @@
 ;;; Code:
 
 (define-prefix-command 'scimax-mode-map)
-(global-set-key (kbd "<f12> s") scimax-mode-map)
+;; (global-set-key (kbd "<f12> s") scimax-mode-map)
 
-(define-key scimax-mode-map (kbd "<f12> sr") 'email-region)
-(define-key scimax-mode-map (kbd "<f12> sh") 'email-heading)
-(define-key scimax-mode-map (kbd "<f12> sp") 'ox-manuscript-export-and-build-and-email)
-(define-key scimax-mode-map (kbd "<f12> sa") 'ox-archive-create-and-mail)
+;; (define-key scimax-mode-map (kbd "<f12> sr") 'email-region)
+;; (define-key scimax-mode-map (kbd "<f12> sh") 'email-heading)
+;; (define-key scimax-mode-map (kbd "<f12> sp") 'ox-manuscript-export-and-build-and-email)
+;; (define-key scimax-mode-map (kbd "<f12> sa") 'ox-archive-create-and-mail)
 ;; insert keys
-(define-key scimax-mode-map (kbd "<f12> sR") 'org-ref-insert-ref-link)
-(define-key scimax-mode-map (kbd "<f12> sC") 'org-ref-insert-cite-link)
-(define-key scimax-mode-map (kbd "<f12> sf") 'org-footnote-action)
+;; (define-key scimax-mode-map (kbd "<f12> sR") 'org-ref-insert-ref-link)
+;; (define-key scimax-mode-map (kbd "<f12> sC") 'org-ref-insert-cite-link)
+;; (define-key scimax-mode-map (kbd "<f12> sf") 'org-footnote-action)
 
 
 (defun kg-get-num-incoming-changes ()

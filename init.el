@@ -11,7 +11,7 @@
 ;;; Code:
 
 (when (version< emacs-version "24.4")
-  (warn "You probably need Emacs 24.4. You should upgrade. You may need to install leuven-theme manually."))
+  (warn "You probably need at least Emacs 24.4. You should upgrade. You may need to install leuven-theme manually."))
 
 ;; remember this directory
 (defconst scimax-dir (file-name-directory (or load-file-name (buffer-file-name)))
@@ -30,8 +30,6 @@
 
 (require 'bootstrap)
 (require 'packages)
-(require 'scimax)
-(require 'scimax-org)
 
 (provide 'init)
 

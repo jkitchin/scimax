@@ -1,2 +1,5 @@
 elpa
 *.html
+*.tex
+*.pdf
+*.org#

@@ -1,10 +1,12 @@
-;;; scimax-org.el ---
+;;; scimax-org.el --- org-mode configuration for scimax
 
 ;;; Commentary:
-;; * Configuration of org-mode
 
+
+;;; Code:
 (require 'org)
 
+;; * Configuration of org-mode
 ;; don't allow invisible regions to be edited
 (setq org-catch-invisible-edits t)
 
@@ -33,6 +35,60 @@
 			 (avy-with avy-goto-line
 			   (avy--generic-jump "^\\*+" nil avy-style)))))
 
+(defun org-teleport (&optional arg)
+  "Teleport the current heading to after a headline selected with avy.
+With a prefix ARG move the headline to before the selected
+headline. With a numeric prefix, set the headline level. If ARG
+is positive, move after, and if negative, move before."
+  (interactive "P")
+  ;; Kill current headline
+  (org-mark-subtree)
+  (kill-region (region-beginning) (region-end))
+  ;; Jump to a visible headline
+  (avy-with avy-goto-line (avy--generic-jump "^\\*+" nil avy-style))
+  (cond
+   ;; Move before  and change headline level
+   ((and (numberp arg) (> 0 arg))
+    (save-excursion
+      (yank))
+    ;; arg is what we want, second is what we have
+    ;; if n is positive, we need to demote (increase level)
+    (let ((n (- (abs arg) (car (org-heading-components)))))
+      (cl-loop for i from 1 to (abs n)
+	       do
+	       (if (> 0 n)
+		   (org-promote-subtree)
+		 (org-demote-subtree)))))
+   ;; Move after and change level
+   ((and (numberp arg) (< 0 arg))
+    (org-mark-subtree)
+    (goto-char (region-end))
+    (when (eobp) (insert "\n"))
+    (save-excursion
+      (yank))
+    ;; n is what we want and second is what we have
+    ;; if n is positive, we need to demote
+    (let ((n (- (abs arg) (car (org-heading-components)))))
+      (cl-loop for i from 1 to (abs n)
+	       do
+	       (if (> 0 n) (org-promote-subtree)
+		 (org-demote-subtree)))))
+
+   ;; move to before selection
+   ((equal arg '(4))
+    (save-excursion
+      (yank)))
+   ;; move to after selection
+   (t
+    (org-mark-subtree)
+    (goto-char (region-end))
+    (when (eobp) (insert "\n"))
+    (save-excursion
+      (yank))))
+  (outline-hide-leaves))
+
+(add-to-list 'org-speed-commands-user (cons "T" 'org-teleport))
+
 ;; * Org-id
 
 (setq org-id-link-to-org-use-id 'create-if-interactive)
@@ -48,7 +104,7 @@
 	       "<src lang=\"python\">\n?\n</src>"))
 
 (add-to-list 'org-structure-template-alist
-	     '("ip" "#+BEGIN_SRC ipython :session :results org drawer\n?\n#+END_SRC"
+	     '("ip" "#+BEGIN_SRC ipython :session :results output org drawer\n?\n#+END_SRC"
 	       "<src lang=\"python\">\n?\n</src>"))
 
 ;; add <por for python expansion with raw output
@@ -107,8 +163,6 @@
 	(setf (substring expansion 2 3) "?")
 	(add-to-list 'org-structure-template-alist
 		     `(,template ,expansion ""))))
-
-
 ;; * Babel settings
 ;; do not evaluate code on export by default
 (setq org-export-babel-evaluate nil)
@@ -140,14 +194,26 @@
 
 ;; use syntax highlighting in org-file code blocks
 (setq org-src-fontify-natively t)
+;; * Images in org-mode
+
+;; default with images open
+(setq org-startup-with-inline-images "inlineimages")
+
+;; default width
+(setq org-image-actual-width '(600))
+
+
+(add-hook 'org-babel-after-execute-hook
+	  'org-display-inline-images)
 
 
 ;; * Colored src blocks
 ;; This function overwrites the org-src function to make src blocks be colored again.
 (defun org-src-font-lock-fontify-block (lang start end)
   "Fontify code block.
-This function is called by emacs automatic fontification, as long
-as `org-src-fontify-natively' is non-nil."
+LANG is the language of the block.  START and END are positions of
+the block.  This function is called by Emacs automatic
+fontification, as long as `org-src-fontify-natively' is non-nil."
   (let ((lang-mode (org-src--get-lang-mode lang)))
     (when (fboundp lang-mode)
       (let ((string (buffer-substring-no-properties start end))
@@ -178,18 +244,6 @@ as `org-src-fontify-natively' is non-nil."
 	 start end
 	 '(font-lock-fontified t fontified t font-lock-multiline t))
 	(set-buffer-modified-p modified)))))
-
-;; * Images in org-mode
-
-;; default with images open
-(setq org-startup-with-inline-images "inlineimages")
-
-;; default width
-(setq org-image-actual-width '(600))
-
-
-(add-hook 'org-babel-after-execute-hook
-	  'org-display-inline-images)
 ;; * Latex Export settings
 
 ;; Interpret "_" and "^" for export when braces are used.
@@ -224,35 +278,26 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 	 "hyperref" nil)
 	("" "attachfile" nil)))
 
-;; do not put in \hypersetup use your own if you want it
-;; \hypersetup{pdfkeywords={%s},\n pdfsubject={%s},\n pdfcreator={%s}
+;; do not put in \hypersetup. Use your own if you want it e.g.
+;; \hypersetup{pdfkeywords={%s},\n pdfsubject={%s},\n pdfcreator={%}}
 (setq org-latex-with-hyperref nil)
 
-;; this is for code syntax highlighting in export
+;; this is for code syntax highlighting in export. you need to use
+;; -shell-escape with latex, and install pygments.
 (setq org-latex-listings 'minted)
 (setq org-latex-minted-options
       '(("frame" "lines")
 	("fontsize" "\\scriptsize")
 	("linenos" "")))
 
-;; for minted you must run latex with -shell-escape because it calls pygmentize as an external program
-;; (setq org-latex-pdf-process
-;;       '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %b"
-;;         "bibtex %b"
-;;         "makeindex %b"
-;;         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %b"
-;;         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %b"))
-
-;; I have not had good luck with this on windows
-					;(setq org-latex-to-pdf-process '("texi2dvi --pdf --clean --verbose --batch"))
-
 ;; avoid getting \maketitle right after begin{document}
 ;; you should put \maketitle if and where you want it.
 (setq org-latex-title-command "")
 
+;; ** Custom new classes
 ;; customized article. better margins
 (add-to-list 'org-latex-classes
-	     '("cmu-article"                          ;class-name
+	     '("article-1"                          ;class-name
 	       "\\documentclass{article}
 \\usepackage[top=1in, bottom=1.in, left=1in, right=1in]{geometry}
  [PACKAGES]
@@ -263,7 +308,8 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-
+;; This is for when you don't want any default packages, and you want
+;; to declare them all yourself.
 (add-to-list 'org-latex-classes
 	     '("article-no-defaults"                          ;class-name
 	       "\\documentclass{article}
@@ -276,7 +322,301 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
+
+;; * Markup commands for org-mode
+(loop for (type beginning-marker end-marker)
+      in '((subscript "_{" "}")
+	   (superscript "^{" "}")
+	   (italics "/" "/")
+	   (bold "*" "*")
+	   (verbatim "=" "=")
+	   (code "~" "~")
+	   (underline "_" "_")
+	   (strikethrough "+" "+"))
+      do
+      (eval `(defun ,(intern (format "org-%s-region-or-point" type)) ()
+	       ,(format "%s the region, word or character at point"
+			(upcase (symbol-name type)))
+	       (interactive)
+	       (cond
+		((region-active-p)
+		 (goto-char (region-end))
+		 (insert ,end-marker)
+		 (goto-char (region-beginning))
+		 (insert ,beginning-marker)
+		 (re-search-forward (regexp-quote ,end-marker))
+		 (goto-char (match-end 0)))
+		((thing-at-point 'word)
+		 (cond
+		  ((looking-back " " 1)
+		   (insert ,beginning-marker)
+		   (re-search-forward "\\>")
+		   (insert ,end-marker))
+		  (t
+		   (re-search-backward "\\<")
+		   (insert ,beginning-marker)
+		   (re-search-forward "\\>")
+		   (insert ,end-marker))))
+
+		(t
+		 (insert ,(concat beginning-marker end-marker))
+		 (backward-char ,(length end-marker)))))))
+
+(defun org-latex-math-region-or-point (&optional arg)
+  "Wrap the selected region in latex math markup.
+\(\) or $$ (with prefix ARG) or @@latex:@@ with double prefix.
+Or insert those and put point in the middle to add an equation."
+  (interactive "P")
+  (let ((chars
+	 (cond
+	  ((null arg)
+	   '("\\(" . "\\)"))
+	  ((equal arg '(4))
+	   '("$" . "$"))
+	  ((equal arg '(16))
+	   '("@@latex:" . "@@")))))
+    (if (region-active-p)
+	(progn
+	  (goto-char (region-end))
+	  (insert (cdr chars))
+	  (goto-char (region-beginning))
+	  (insert (car chars)))
+      (insert (concat  (car chars) (cdr chars)))
+      (backward-char (length (cdr chars))))))
+
+
+(defun helm-insert-org-entity ()
+  "Helm interface to insert an entity from `org-entities'.
+F1 inserts utf-8 character
+F2 inserts entity code
+F3 inserts LaTeX code (does not wrap in math-mode)
+F4 inserts HTML code
+F5 inserts the entity code."
+  (interactive)
+  (helm :sources
+	(reverse
+	 (let ((sources '())
+	       toplevel
+	       secondlevel)
+	   (dolist (element (append
+			     '("* User" "** User entities")
+			     org-entities-user org-entities))
+	     (when (and (stringp element)
+			(s-starts-with? "* " element))
+	       (setq toplevel element))
+	     (when (and (stringp element)
+			(s-starts-with? "** " element))
+	       (setq secondlevel element)
+	       (add-to-list
+		'sources
+		`((name . ,(concat
+			    toplevel
+			    (replace-regexp-in-string
+			     "\\*\\*" " - " secondlevel)))
+		  (candidates . nil)
+		  (action . (("insert utf-8 char" . (lambda (x)
+						      (mapc (lambda (candidate)
+							      (insert (nth 6 candidate)))
+							    (helm-marked-candidates))))
+			     ("insert org entity" . (lambda (x)
+						      (mapc (lambda (candidate)
+							      (insert
+							       (concat "\\" (car candidate))))
+							    (helm-marked-candidates))))
+			     ("insert latex" . (lambda (x)
+						 (mapc (lambda (candidate)
+							 (insert (nth 1 candidate)))
+						       (helm-marked-candidates))))
+			     ("insert html" . (lambda (x)
+						(mapc (lambda (candidate)
+							(insert (nth 3 candidate)))
+						      (helm-marked-candidates))))
+			     ("insert code" . (lambda (x)
+						(mapc (lambda (candidate)
+							(insert (format "%S" candidate)))
+						      (helm-marked-candidates)))))))))
+	     (when (and element (listp element))
+	       (setf (cdr (assoc 'candidates (car sources)))
+		     (append
+		      (cdr (assoc 'candidates (car sources)))
+		      (list (cons
+			     (format "%10s %s" (nth 6 element) element)
+			     element))))))
+	   sources))))
+
+
+(defun ivy-insert-org-entity ()
+  "Insert an org-entity using ivy."
+  (interactive)
+  (ivy-read "Entity: " (loop for element in (append org-entities org-entities-user)
+			     when (not (stringp element))
+			     collect
+			     (cons 
+			      (format "%10s | %s | %s | %s"
+				      (car element)
+				      (nth 1 element)
+				      (nth 3 element)
+				      (nth 5 element))
+			      element))
+	    :require-match t
+	    :action '(1
+		      ("u" (lambda (element) (insert (nth 5 element))) "utf-8")
+		      ("o" (lambda (element) (insert "\\" (car element))) "org-entity")
+		      ("l" (lambda (element) (insert (nth 1 element))) "latex")
+		      ("h" (lambda (element) (insert (nth 3 element))) "html"))))
+
+;; * Font-lock
+;; ** Latex fragments
+;; Show equations and fragments in a blue font.
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (font-lock-add-keywords
+	     nil
+	     `((,(mapconcat (lambda (x)
+			      (nth 1 x))
+			    org-latex-regexps
+			    "\\|") 0 '(:foreground "blue"))
+	       ("@@latex:[^@]*@@" 0 '(:foreground "blue"))))))
+
+;; * New org links
+
+(org-add-link-type
+ "attachfile"
+ (lambda (link-string) (org-open-file link-string))
+ ;; formatting
+ (lambda (keyword desc format)
+   (cond
+    ((eq format 'html) (format "")); no output for html
+    ((eq format 'latex)
+     ;; write out the latex command
+     (format "\\attachfile{%s}" keyword)))))
+
+
+;; * ivy navigation
+(defun ivy-org-jump-to-visible-headline ()
+  "Jump to visible headline in the buffer."
+  (interactive)
+  (org-mark-ring-push)
+  (avy-with avy-goto-line (avy--generic-jump "^\\*+" nil avy-style)))
+
+(defun ivy-org-jump-to-heading ()
+  "Jump to heading in the current buffer."
+  (interactive)
+  (let ((headlines '()))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward
+	      ;; this matches org headings in elisp too.
+	      "^\\(;; \\)?\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ 	]*$"  nil t)
+	(cl-pushnew (list
+		     (format "%-80s"
+			     (match-string 0))
+		     (cons 'position (match-beginning 0)))
+		    headlines)))
+    (ivy-read "Headline: "
+	      (reverse headlines)
+	      :action (lambda (candidate)
+			(org-mark-ring-push)
+			(goto-char (cdr (assoc 'position candidate)))
+			(outline-show-entry)))))
+
+
+(defun ivy-org-jump-to-agenda-heading ()
+  "Jump to a heading in an agenda file."
+  (interactive)
+  (let ((headlines '()))
+    ;; these files should be open already since they are agenda files.
+    (loop for file in (org-agenda-files) do
+	  (with-current-buffer (find-file-noselect file)
+	    (save-excursion
+	      (goto-char (point-min))
+	      (while (re-search-forward org-heading-regexp nil t)
+		(cl-pushnew (list
+			     (format "%-80s (%s)"
+				     (match-string 0)
+				     (file-name-nondirectory file))
+			     :file file
+			     :position (match-beginning 0))
+			    headlines)))))
+    (ivy-read "Headline: "
+	      (reverse headlines)
+	      :action (lambda (candidate)
+			(org-mark-ring-push)
+			(find-file (plist-get candidate :file))
+			(goto-char (plist-get candidate :position))
+			(outline-show-entry)))))
+
+
+
+(defun ivy-org-jump-to-heading-in-files (files &optional fontify)
+  "Jump to org heading in FILES.
+Optional FONTIFY colors the headlines. It might slow things down
+a lot with large numbers of org-files or long org-files. This
+function does not open the files."
+  (let ((headlines '())) 
+    (loop for file in files do
+	  (with-temp-buffer 
+	    (insert-file-contents file)
+	    (when fontify
+	      (org-mode)
+	      (font-lock-fontify-buffer))
+	    (goto-char (point-min))
+	    (while (re-search-forward org-heading-regexp nil t)
+	      (cl-pushnew (list
+			   (format "%-80s (%s)"
+				   (match-string 0)
+				   (file-name-nondirectory file))
+			   :file file
+			   :position (match-beginning 0))
+			  headlines))))
+    (ivy-read "Headline: "
+	      (reverse headlines)
+	      :action (lambda (candidate)
+			(org-mark-ring-push)
+			(find-file (plist-get candidate :file))
+			(goto-char (plist-get candidate :position))
+			(outline-show-entry)))))
+
+
+(defun ivy-org-jump-to-heading-in-directory (recursive)
+  "Jump to heading in an org file in the current directory.
+Use a prefix arg to make it RECURSIVE.
+Use a double prefix to make it recursive and fontified."
+  (interactive "P")
+
+  (let ((fontify nil))
+    (when (equal recursive '(16))
+      (setq fontify t))
+    (ivy-org-jump-to-heading-in-files
+     (f-entries "."
+		(lambda (f)
+		  (and 
+		   (f-ext? f "org")
+		   (not (s-contains? "#" f))))
+		recursive)
+     fontify)))
+
+(defun ivy-org-jump-to-project-headline (fontify)
+  "Jump to a headline in an org-file in the current project.
+Use a prefix arg FONTIFY for colored headlines."
+  (interactive "P")
+  (ivy-org-jump-to-heading-in-files
+   (mapcar
+    (lambda (f) (expand-file-name f (projectile-project-root)))
+    (-filter (lambda (f)
+	       (and 
+		(f-ext? f "org")
+		(not (s-contains? "#" f))))
+	     (projectile-current-project-files)))
+   fontify))
+
+
+;; * track changes
+(require 'cm-mods)
+(add-hook 'org-mode-hook #'cm-mode)
+
 ;; * The end
 (provide 'scimax-org)
 
 ;;; scimax-org.el ends here
+

@@ -405,7 +405,7 @@ _b_: buffer wdiff _g_: git wdiff
   ("b" cm-wdiff-buffer-with-file)
   ("s" cm-wdiff-save))
 
-(global-set-key (kbd "s-x") 'cm/body)
+(global-set-key (kbd "H-t") 'cm/body)
 
 (provide 'cm-mods)
 

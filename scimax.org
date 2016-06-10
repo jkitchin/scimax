@@ -20,7 +20,7 @@ I have extended the ivy-minibuffer-keymap to enable the following:
 
 In the ivy selection buffer
 | C-spc         | Show the actions                                           |
-| tab           | Show the actions                                           |
+| spc           | resume                                                     |
 | RET           | Default action and exit                                    |
 | C-RET         | Default action and move to next line                       |
 | C-u C-RET     | Default action and move to previous line                   |
@@ -28,12 +28,31 @@ In the ivy selection buffer
 | C-u M-RET     | Default action on each candidate from current to beginning |
 | C-u C-u M-RET | Default action on all candidates                           |
 | s-RET         | quit with no action                                        |
+| ?             | show keymap help                                           |
+
+A few counsel functions have been extended.
+
+** counsel-find-file
+
+| a   | attach to email      |
+| c   | copy relative path   |
+| 4   | Open in new window   |
+| 5/f | Open in new frame    |
+| C   | Copy absolute path   |
+| d   | open in dired        |
+| D   | Delete file          |
+| e   | open in external app |
+| p   | insert relative path |
+| P   | insert absolute path |
+| l   | relative org link    |
+| L   | absolute org link    |
+| r   | rename file          |
+ 
  
 * Org-mode 
 
-- new speed commands
 ** Markup shortcuts
-scimax defines some shortcuts for org-mode markup. You can select text and type the shortcut to wrap the region in the markup, or type the short cut to wrap the character at point or create the markup with the cursor inside it to keep typing.
+scimax defines some shortcuts for org-mode markup. You can select text and type the shortcut to wrap the region in the markup, or if on a word, type the shortcut to wrap the word, or type the short cut to create the markup with the cursor inside it to keep typing.
 
 | markup            | keyshortcut | emacs-command                       |
 |-------------------+-------------+-------------------------------------|
@@ -48,22 +67,18 @@ scimax defines some shortcuts for org-mode markup. You can select text and type 
 | \(equation\)      | s-4         | `org-latex-math-region-or-point'    |
 | $inline eqn$      | C-u s-4     |                                     |
 | @@latex:snippet@@ | C-u C-u 4   |                                     |
-| °                 | s-e         | `helm-insert-org-entity'            |
-| \deg              | s-e f2      |                                     |
-| \textdegree{}     | s-e f3      |                                     |
-| &deg;             | s-e f4      |                                     |
+| °                 | s-e         | `ivy-insert-org-entity'            |
 
-Use  `ivy-insert-org-entity' (s-e) for all accented characters
-
-Here are some common ones, but there are alot of them!
-
-| angstrom | ("AA" "\\AA{}" nil "&Aring;" "A" "Å" "Å")     |
-|          | ("oslash" "\\o{}" nil "&oslash;" "o" "ø" "ø") |
-|          | ("uuml" "\\\"{u}" nil "&uuml;" "ue" "ü" "ü")  |
+Use  `ivy-insert-org-entity' (s-e) for all accented characters. 
 
 ** Block expansions in org-mode
 
 The following examples show the shortcuts defined in scimax for expansion. Put your cursor after the shortcut and press tab to expand them.
+
+<ip
+#+BEGIN_SRC ipython :session :results output org drawer
+
+#+END_SRC
 
 <p
 #+BEGIN_SRC python :results org drawer
@@ -135,48 +150,179 @@ Here are some convenient table expansions.
 |  |   |   |   |   |   |
 
 ** LaTeX
+Here is a list of installed 
 #+BEGIN_SRC emacs-lisp
 (mapcar 'car org-latex-classes)
 #+END_SRC
 
 #+RESULTS:
-| article-1 | article-no-defaults | cmu-article | article | report | book |
+| cmu-memo | nature | elsarticle | svjour3 | revtex4-1 | achemso | article-nodefaults | article-no-defaults | article-1 | article | report | book |
 
 ** org-ref
 
-** TODO Publishing (ox-manuscript)
-* Email
-mail headings
+Run `org-ref-help' and read it.
 
-mail merge
+** TODO Publishing (ox-manuscript)
+
+** new speed commands
+
+scimax defines these new speed commands that are active when the cursor is on the first character of a headline.
+
+| m | Mark the subtree             |
+| S | widen                        |
+| k | kill the subtree             |
+| q | jump to a headline with avy  |
+| T | org-teleport (move headline) |
+
+The best way to see other speed commands is to put your cursor at the beginning of a headline and press ?. 
+
+* Writing
+** Spell-checking
+scimax is configured with flyspell and flycheck on. When you mispell a word you will see a message in the minibuffer that tells you how to fix it (C-;). Type that, and you will be able to fix the word spelling without losing your place!
+
+** Prose linting
+scimax is configured with prose linting for org-mode (https://github.com/amperser/proselint).
+
+You need to install proselint. This is automatically done for you by scimax.
+
+#+BEGIN_SRC sh
+pip install proselint
+#+END_SRC
+
+This will catch many issues with your prose that you probably should fix. The keybinding s-; will jump to the previous flycheck error. Back in the 1980's we did not have that. 
+
+** Track changes
+Scimax provides some support for track changes using [[https://github.com/joostkremers/criticmarkup-emacs][CriticMarkup]].
+
+The main command to use is `cm/body' which launches a hydra menu. You can mark text for insertion, deletion, and add comment text.
+Here is some example markup:
+
+{++Add this text++} 
+{--Delete this--}
+{>>a comment<<} 
+
+scimax provides some commands to:
+- `cm-accept-all-changes'
+- `cm-reject-all-changes'
+
+Note, for the next commands, you need a working wdiff command.
+
+You can also create diffs between git commits.
+- `cm-wdiff-git'
+
+Or between the buffer and last saved version
+- `cm-wdiff-buffer-with-file'
+
+* Email
+- `email-region' :: emails selected region
+- `email-buffer' :: email the whole buffer
+- `email-bibtex-entry' :: email the bibtex entry at point
+
+These require mu4e for mail, and store properties on the headline that indicate where it was sent.
+
+- `email-heading' :: email the current heading
+- `email-heading-body' 
+
+** TODO mail merge
+
 * Programming
 ** Python
 - elpy
-- pydoc
+- `pydoc' check it out.
+
+** TODO Ipython
+If you like sessions in Python, the ob-ipython library 
+
+Pygments doesn't support ipython out of the box for some reason. scimax fixes this with this package. It is automatically installed with scimax the first time you load it.
+
+#+BEGIN_SRC sh
+pip install git+git://github.com/sanguineturtle/pygments-ipython-console
+#+END_SRC
+
+Here is a protypical Ipython src block with a line magic.
+
+#+BEGIN_SRC ipython :session :results output
+%time print("hello world")
+a = 6
+#+END_SRC
+
+#+RESULTS:
+: hello world
+: CPU times: user 34 µs, sys: 3 µs, total: 37 µs
+: Wall time: 40.1 µs
+
+
+#+BEGIN_SRC ipython :session :results output org drawer
+print(a * 7)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+42
+:END:
+
+`ob-ipython-inspect'
+
+`org-babel-switch-to-session' will open the IPython REPL.
+
+M-x `ob-ipython-interrupt-kernel' 
+M-x `ob-ipython-kill-kernel'
+
+*** Using other kernels - hy
+#+LATEX_CLASS: article
+Amazing. You can use other language kernels. This is sure to cause trouble with exporting to LaTeX where the highlighting will be python-based..
+
+#+BEGIN_SRC ipython :session hy :results output :kernel hy
+(print "hello world")
+(import time)
+(print (time.asctime))
+#+END_SRC
+
+#+RESULTS:
+: hello world
+: Thu Jun  9 17:26:56 2016
+
+
+
 
 ** Emacs-lisp
-- lispy
+- `lispy-mode' is just amazing.
 
 * Packages
-** counsel/avy/ivy/swiper
-** helm
-** hydra
 ** magit
+Use f5 to enter `magit-status'.
+
 ** projectile
+
+https://github.com/bbatsov/projectile for project management.
+
 ** undo-tree
+There are a few undo features:
+| C-/   | undo the last action          |
+| C-x u | use the undo-tree (q to quit) |
 
 ** words
+
+Try out `words-hydra/body' on a selection or word. I bound it to \\[words-hydra/body].
+
 ** ore
 
- `ore'
+This command: `ore' tells you about the org-element your point is on.
+
 * Scientific notebook
 scimax provides a scientific notebook capability. 
 
 Each "notebook" is actually collection of org-files in a "project".
 
-A project is the set of files in a directory that is under version control. Each project should have a master file (the default is README.org, but you can customize `nb-master-file' to change this).
+A project is the set of files in a directory that is under git version control. Each project should have a master file (the default is README.org, but you can customize `nb-master-file' to change this). The master file contains what ever you want, but typically it links to other documents in the project and provides an overview of the project.
 
-Use `nb-open' to open a project. This will open the project to your master file. Previously visited projects are remembered. 
+You are basically free to structure the notebook however you want. You have all the freedom of org-mode at your fingers to document your work.
+
+We leverage [[http://projectile.readthedocs.io/en/latest/][projectile]] for project management in the notebook. We use [[https://magit.vc][magit]] for version control.
+
+Use `nb-new' to create a new project. You will be prompted for a name, which must be a valid directory name. The directory will be created in `nb-notebook-directory'. Note that all git repos will be considered projects, so it is not necessary to use `nb-new'. It just automates a few things for you.
+
+Use `nb-open' to open a project. This will open the project to your master file. Previously visited projects are remembered by projectile and should be shown in an ivy completion minibuffer for selection. 
 
 Probably you will keep your projects separate from your agenda files, but you still would like to see what tasks the project has? Use `nb-agenda' while in your project, and it will show you all the tasks in the org-files associated with the project.
 
@@ -189,6 +335,7 @@ Here are some other interesting commands
 - `ivy-org-jump-to-heading' 
 - `ivy-org-jump-to-heading-in-directory'
 - `ivy-org-jump-to-project-headline'
+- `counsel-org-tag'
 
 You can manage the version control with magit
 
@@ -196,6 +343,8 @@ You can manage the version control with magit
 - `vc-diff' will show you what has changed in the buffer since the last commit.
 - `vc-print-log' will show you the vc log.
 - `magit-status' is the portal command to see the status of the repo.
+
+** TODO archive the notebook with git
 
 * Sandbox
 
@@ -230,3 +379,27 @@ You can manage the version control with magit
 #+RESULTS:
 | ivy-switch-buffer | ((k (lambda (x) (kill-buffer x) (ivy--reset-state ivy-last)) kill) (j ivy--switch-buffer-other-window-action other window) (r ivy--rename-buffer-action rename)) | lispy-occur | ((m lispy-occur-action-mc multiple-cursors) (j lispy-occur-action-goto-beg goto start) (k lispy-occur-action-goto-end goto end)) | counsel-describe-variable | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-describe-function | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-M-x | ((d counsel--find-symbol definition) (h (lambda (x) (describe-function (intern x))) help)) | counsel-descbinds | ((d counsel-descbinds-action-find definition) (i counsel-descbinds-action-info info)) | counsel-git | ((j find-file-other-window other)) | counsel-find-file | ((j find-file-other-window other window)) | counsel-locate | ((x counsel-locate-action-extern xdg-open) (d counsel-locate-action-dired dired)) | counsel-linux-app | ((f counsel-linux-app-action-file run on a file)) | t | ((I ivy-insert-action insert)) |
 
+
+
+#+BEGIN_SRC emacs-lisp
+(require 'mustache)
+(require 'ht) ;; hash table library
+
+(let ((context (ht ("name" "J. Random user"))))
+  ;; evaluates to: "Hello J. Random user!"
+  (mustache-render "Hello {{name}}!" context))
+#+END_SRC
+
+#+RESULTS:
+: Hello J. Random user!
+
+
+
+#+BEGIN_SRC emacs-lisp
+(esup "~/tests/scimax/init.el")
+#+END_SRC
+
+#+RESULTS:
+: esup-child-process-sentinel
+
+cite:kitchin-2008-alloy,alesi-2010-co2-adsor,alesi-2012-evaluat-primar
