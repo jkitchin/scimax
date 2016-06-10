@@ -1,0 +1,6 @@
+#+TITLE: Scimax - Awesome editing 
+#+AUTHOR: John Kitchin
+
+Scimax is a rewrite of jmax, with lessons learned, and improvements.
+
+See the [[./scimax.org][manual]] for more details.
