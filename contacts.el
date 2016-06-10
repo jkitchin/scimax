@@ -218,6 +218,11 @@ e.g. on a person name, email, etc..."
 					(cdr (assoc "NAME" contact))
 					(cdr (assoc "EMAIL" contact))))))
 		       "Insert \"name\" <email>")
+		      ("c" (lambda (contact)
+			     (kill-new (format "\"%s\" <%s>"
+					       (cdr (assoc "NAME" contact))
+					       (cdr (assoc "EMAIL" contact)))))
+		       "Copy \"name\" <email> to clipboard")
 		      ("o" (lambda (contact)
 			     (find-file (cdr (assoc "FILE" contact)))
 			     (goto-char (cdr (assoc "POSITION" contact)))
