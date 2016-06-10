@@ -1,0 +1,16 @@
+#+TEMPLATE: NSF Proposal - Statement of work
+#+key: nsf-sow
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: sow.org
+
+#+LATEX_CLASS: cmu-article
+#+Latex_class_options: [12pt]
+#+OPTIONS: toc:nil
+
+#+TITLE: Statement of work
+\date{}
+\author{}
+\maketitle
+
+# This is a brief statement of work (1-2 paragraphs) for the Office of Sponsored research

@@ -1,0 +1,47 @@
+#+TEMPLATE: Response to reviewers
+#+key: response-reviewers
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: response-to-reviewers.org
+
+#+latex_class: cmu-memo
+#+CC:
+#+DEPARTMENT: Department of Chemical Engineering
+#+FROM: John Kitchin
+#+FROMNAME:
+#+SIGNATURE-LINES: nil
+#+SUBJECT:
+#+TO:
+
+Dear Editor:
+
+Thank you for the opportunity to revise our manuscript. We are pleased to provide a point-by-point response to the reviewer comments below.
+
+
+#+BEGIN_EXAMPLE
+<replace with comments>
+#+END_EXAMPLE
+
+
+
+Sincerely,\\
+\\
+\\
+\\
+\\
+John Kitchin \\
+Department of Chemical Engineering\\
+Carnegie Mellon University\\
+Pittsburgh, PA 15213\\
+Ph: 412-268-7803\\
+email: jkitchin@andrew.cmu.edu\\
+http://kitchingroup.cheme.cmu.edu\\
+
+
+
+* build :noexport:
+  :PROPERTIES:
+  :CUSTOM_ID: build
+  :END:
+
+  <<build>> elisp:cmu-memo-export-to-pdf-and-open

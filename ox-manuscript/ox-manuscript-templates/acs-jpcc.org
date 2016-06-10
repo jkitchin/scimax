@@ -1,0 +1,76 @@
+#+TEMPLATE: ACS - Journal of Physical Chemistry C
+#+key: acs-jpcc
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+TITLE: <replace: with title>
+#+LATEX_CLASS: achemso
+#+LATEX_CLASS_OPTIONS: [journal=jpccck,manuscript=article,email=true]
+#+latex_header: \setkeys{acs}{biblabel=brackets,super=true,articletitle=true}
+
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+OPTIONS: author:nil date:nil toc:nil
+
+#+latex_header: \usepackage[utf8]{inputenc}
+#+latex_header: \usepackage{url}
+#+latex_header: \usepackage{mhchem}
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{color}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \usepackage{textcomp}
+#+latex_header: \usepackage{latexsym}
+#+latex_header: \usepackage{amssymb}
+#+latex_header: \usepackage{lmodern}
+
+
+#+latex_header: \usepackage[linktocpage, pdfstartview=FitH, colorlinks, linkcolor=black, anchorcolor=black, citecolor=black, filecolor=black, menucolor=black, urlcolor=black]{hyperref}
+
+#+latex_header: \author{<replace: with name>}
+#+latex_header: \affiliation{<replace: with address>}
+
+#+latex_header: \author{<replace: with corresponding author>}
+# Email makes the corresponding author
+#+latex_header: \email{<replace: with email>}
+#+latex_header: \phone{<replace: with phone>}
+#+latex_header: \fax{<replace: with fax>}
+#+latex_header: \affiliation{<replace: address>}
+
+
+
+#+begin_abstract
+Abstract here
+*Keywords:* <replace: comma separated keywords>
+#+end_abstract
+
+\maketitle
+
+
+* Introduction
+
+* Methodology
+
+* Results and Discussion
+
+* Conclusions
+
+\begin{acknowledgement}
+<replace: or delete>
+\end{acknowledgement}
+
+\begin{suppinfo}
+<replace: with description>
+\end{suppinfo}
+
+# no bibliographystyle required.
+bibliography:<replace: with filenames>
+
+* Table of Contents Graphic
+
+
+
+
+* Help					:noexport:
+#+BEGIN_SRC sh
+texdoc achemso
+#+END_SRC

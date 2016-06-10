@@ -1,0 +1,71 @@
+#+TEMPLATE: ACS Applied Materials and Interfaces
+#+key: acs-aamick
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+TITLE: <replace: title>
+#+LATEX_CLASS: achemso
+#+LATEX_CLASS_OPTIONS: [journal=aamick,manuscript=article,email=true]
+#+latex_header: \setkeys{acs}{biblabel=brackets,super=true,articletitle=true}
+#+latex_header: \SectionNumbersOn
+
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+OPTIONS: author:nil date:nil
+
+#+latex_header: \author{<replace: with name>}
+#+latex_header: \affiliation{<replace: with address>}
+
+#+latex_header: \author{<replace: with corresponding author>}
+#+latex_header: \email{<replace: with email>}
+#+latex_header: \affiliation{<replace: with address>}
+
+#+latex_header: \keywords{<replace: comma separated keywords>}
+
+
+#+begin_abstract
+<replace: abstract text>
+#+end_abstract
+
+*Keywords*: <replace: comma separated keywords>
+
+\maketitle
+
+* Introduction
+
+* Methods
+
+* Results and Discussion
+
+* Conclusions
+
+\begin{acknowledgement}
+<replace: or delete>
+\end{acknowledgement}
+
+Supporting Information Available: <replace: with description>  This information is available free of charge via the Internet at http://pubs.acs.org.
+
+* References
+# no bibliographystyle required
+bibliography:<replace: bibfiles>
+
+
+
+#+BEGIN_LaTeX
+\begin{tocentry}\includegraphics{coverart}\end{tocentry}
+#+END_LaTeX
+
+
+* build					:noexport:
+elisp:ox-manuscript-build-submission-manuscript-and-open
+
+** Preparation of the manuscript zip file
+#+BEGIN_SRC sh
+rm -f manuscript.zip
+zip manuscript.zip figures/*.eps manuscript.tex figures/TOC.eps
+#+END_SRC
+
+* Help					:noexport:
+#+BEGIN_SRC sh
+texdoc achemso
+#+END_SRC

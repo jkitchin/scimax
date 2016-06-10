@@ -1,0 +1,251 @@
+#+TEMPLATE: NSF Proposal - Biographical sketch
+#+key: nsf-proposal-biosketch
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: biosketch.org
+
+#+latex_class: cmu-article
+#+latex_class_options: [12pt]
+# remove spacing in numbered lists
+#+latex_header: \usepackage{enumitem}
+#+latex_header:   \setlist{nosep} % or \setlist{noitemsep} to leave space around whole list
+# remove spacing around section headings
+#+latex_header: \usepackage[compact]{titlesec}
+#+latex_header: \titleformat{\section}{\normalfont\fontsize{12}{15}\bfseries}{\thesection}{1em}{}
+#+latex_header: \renewcommand\thesection{(\alph{section})}
+#+options: toc:nil
+*Biographical Sketch - John R. Kitchin (jkitchin@andrew.cmu.edu)*\\
+
+* Education and Training
+# (a)	Professional Preparation
+# A list of the individual's undergraduate and graduate education and postdoctoral training as indicated below:
+# Undergraduate Institution(s) Major Degree & Year
+# Graduate Institution(s) Major Degree & Year
+# Postdoctoral Institution(s) Area Inclusive Dates (years)
+- North Carolina State University, Raleigh, NC; Chemistry; B.S. 1996
+- University of Delaware, Newark, DE; Materials Science and Engineering; M.S. 2002
+- University of Delaware, Newark, DE; Chemical Engineering; PhD 2004
+- Fritz-Haber-Institut der Max-Planck-Gesellschaft, Berlin, Germany; Theory Department; 2004-2005
+
+
+* Appointments
+# (b)	Appointments
+# A list, in reverse chronological order, of all the individual's academic/professional appointments beginning with the current appointment.
+- 2014 Full Professor, Carnegie Mellon University, Dept. of Chemical Engineering
+- 2011 Associate Professor, Carnegie Mellon University, Dept. of Chemical Engineering
+- 2007 Courtesy appointment in Materials Science and Engineering, CMU
+- 2006 Assistant Professor, Carnegie Mellon University, Dept. of Chemical Engineering
+
+* Publications
+# (c)	Products
+# A list of: (i) up to five products most closely related to the proposed project; and (ii) up to five other significant products, whether or not related to the proposed project. Acceptable products must be citable and accessible including but not limited to publications, data sets, software, patents, and copyrights. Unacceptable products are unpublished documents not yet submitted for publication, invited lectures, and additional lists of products. Only the list of 10 will be used in the review of the proposal.
+# Each product must include full citation information including (where applicable and practicable) names of all authors, date of publication or release, title, title of enclosing work such as journal or book, volume, issue, pages, website and Uniform Resource Locator (URL) or other Persistent Identifier.
+# If only publications are included, the heading "Publications" may be used for this section of the Biographical Sketch.
+1.	Jacob Boes, Gamze Gumuslu, James Miller, Andrew Gellman, John R. Kitchin, Estimating bulk composition dependent H_{2} adsorption energies on Cu_{x}Pd_{1-x} alloy (111) surfaces, ACS Catalysis, 5(2) 1020-1026 (2015).
+2.	Zhongnan Xu and John R. Kitchin, Probing the Coverage Dependence of Site and Adsorbate Configurational Correlations on (111) Surfaces of Late Transition Metals, J. Phys. Chem. C., 118 (44), 25597 (2014).
+3.	Spencer D. Miller, Vladimir V. Pushkarev, Andrew J. Gellman and John R. Kitchin, Simulating Temperature Programmed Desorption of Oxygen on Pt(111) Using DFT Derived Coverage Dependent Desorption Barriers, Topics In Catalysis, 57(1), 106-117 (2013).
+4.	Federico Calle-Vallejo, Nilay G. Inoglu, Hai-Yan Su, José I. Martínez, Isabela C. Man, Marc T. M. Koper, John R. Kitchin, and Jan Rossmeisl, Number of Outer Electrons as Descriptor of the Reactivity of Transition Metals and Their Oxides. Chemical Science, 4, 1245-1249 (2013).
+5.	N. Inoglu, and J.R. Kitchin, Identification of sulfur tolerant bimetallic surfaces using DFT parameterized models and atomistic thermodynamics, ACS Catalysis, 1, 399-407 (2011).
+6.	Nilay Inoglu, John R. Kitchin, Simple model explaining and predicting coverage-dependent atomic adsorption energies on transition metal surfaces, Physical Review B, 82, 045414 (2010).
+7.	Nilay Inoglu, John R. Kitchin, New Solid State Table: Estimating d-band Characteristics for Transition Metal Atoms, Molecular Simulation, 36(7), 633 (2010).
+8.	H. L. Tierney, A.E. Baber, J. R. Kitchin, and E. C. Sykes, Tuning palladium’s reactivity via atomic-level alloying in inert substrates, Physical Review Letters, 103, 246102 (2009).
+9.	J.R. Kitchin, Correlations in coverage dependent atomic adsorption energies on Pd(111), Physical Review B, 79, 205412 (2009).
+10.	Spencer D. Miller and John R. Kitchin, Uncertainty and Figure Selection for DFT based Cluster Expansions for Oxygen Adsorption on Au and Pt (111) Surfaces, Molecular Simulation, 35, 936-941, (2009).
+
+
+* Synergistic Activities
+# (d)	Synergistic Activities
+
+# A list of up to five examples that demonstrate the broader impact of the individual’s professional and scholarly activities that focuses on the integration and transfer of knowledge as well as its creation. Examples could include, among others: innovations in teaching and training (e.g., development of curricular materials and pedagogical methods); contributions to the science of learning; development and/or refinement of research tools; computation methodologies, and algorithms for problem-solving; development of databases to support research and education; broadening the participation of groups underrepresented in science, mathematics, engineering and technology; and service to the scientific and engineering community outside of the individual’s immediate organization.
+1.	Active developer of the open source python interface to VASP (http://github.com/jkitchin/jasp).
+2.	 Author of http://matlab.cheme.cmu.edu (Viewed ~220,000 times 2/23/2015) and http://kitchingroup.cheme.cmu.edu/pycse (Viewed over 100,000 times 2/23/2015).
+3.	 Prime developer of the Reproducible Research publishing software jmax (http://github.com/jkitchin/jmax and http://github.com/jkitchin/org-ref).
+4.	Programming Chair for the 24th North American Catalysis Society meeting. Programming chair for Area 20 (Catalysis and Reaction Engineering) of the AICHE meeting (I oversee the organization of 80+ sessions). Chair and co-chair of sessions on Computational Catalysis at AICHE from 2005-present. Symposium organizer for “Data rich approaches to problem solving in catalysis”, ACS Spring 2012.
+5.	Past-President of the Pittsburgh-Cleveland Catalysis Society (two times)
+
+
+* Collaborators and Co-Editors
+# (e)	Collaborators & Other Affiliations
+
+# Collaborators and Co-Editors. A list of all persons in alphabetical order (including their current organizational affiliations) who are currently, or who have been collaborators or co-authors with the individual on a project, book, article, report, abstract or paper during the 48 months preceding the submission of the proposal. Also include those individuals who are currently or have been co-editors of a journal, compendium, or conference proceedings during the 24 months preceding the submission of the proposal. If there are no collaborators or co-editors to report, this should be so indicated.
+# Run this call to generate the collaborator list
+#+call: list-collaborators() :results raw
+
+#+RESULTS:
+Erik Albenze (NETL), Shelley Anna (CMU), Federico Calle-Vallejo (Leiden Inst. of Chem.), Terrence Collins (CMU), Krishnan Damodaran (UPitt), Adefemi Egbebi (NETL), John Eslick (NETL), Andrew Gellman (CMU), Gamze Gumuslu (CMU), Shayna Hilburg (CMU), David Hopkinson (NETL), Yogesh V. Joshi (Exxon), John Keith (UPitt), Peter Kondratyuk (unknown), Marc T. M. Koper (Leiden Inst. of Chem.), David Luebke (Lumishield), Isabela C. Man (unknown), James X. Mao (unknown), Jose I. Martinez (unknown), James Miller (U. Wisconsin), David Miller (NETL), Bryan Morreale (NETL), Christina Myers (NETL), Hunaid Nulwala (CMU), Vladimir Pushkarev (Dow Corning), Sumathy Raman (Exxon), Kevin Resnik (NETL), Jan Rossmeisl (DTU), Paul Salvador (CMU), Wei Shi (NETL), Nicholas Stephen Siefert (NETL), Hai-Yan Su (unknown), Robert L. Thompson (NETL), Newell Washburn (CMU), John Watkins (NETL), Chunrong Yin (CMU), Xu Zhou (unknown).
+
+# Graduate Advisors and Postdoctoral Sponsors. A list of the names of the individual’s own graduate advisor(s) and principal postdoctoral sponsor(s), and their current organizational affiliations.
+_Graduate Advisors (2) and Postdoctoral Sponsors (2)_: Mark Barteau  (PhD, U. Michigan), Jingguang Chen (PhD, Columbia U., New York), Matthias Scheffler (post. doc. FHI, Berlin, Germany) and Karsten Reuter  (Technical University of Munich).
+
+# Thesis Advisor and Postgraduate-Scholar Sponsor. A list of all persons (including their organizational affiliations), with whom the individual has had an association as thesis advisor, or with whom the individual has had an association within the last five years as a postgraduate-scholar sponsor. The total number of graduate students advised and postdoctoral scholars sponsored also must be identified.
+#+call: list-graduate-students() :results raw
+
+#+RESULTS:
+_Thesis Advisor (23) and Postgraduate-Scholar Sponsor (2)_: Sneha Akhade (MS), Rich Alesi (PhD), Robin Chao (PhD), Mehak Chawla (MS), Jing Chou (MS), Matt Curnan (PhD), Frank DeCarlo (MS), Ethan Demeter (PhD), Siddhard Deshpande (MS), Zhizhong Ding (MS), Qingqi Fan (MS), Nitish Govindarajan (MS), Steve Illes (MS), Nilay Inoglu (PhD), James Landon (PhD), Anita Lee (PhD), Yuan Li (PD), Bin Liu (PD), Meiheng Lu (MS), Prateek Mehta (MS), Spencer Miller (PhD), Venkatesh Naik (MS), Hari Thirumalai (MS), Vivek Vinodan (MS), Wenqin You (MS).
+
+
+# The information in section (e) above of the biographical sketch is used to help identify potential conflicts or bias in the selection of reviewers. See GPG Exhibit II-2 for additional information on potential reviewer conflicts.
+
+
+* Data					:noexport:
+
+Assuming you have a bibtex file that is up to date, you can extract the authors like this. You will have to do some manual editing to eliminate students and duplicates, and finally to add affiliations.
+
+#+BEGIN_SRC emacs-lisp
+(find-file "../../../bibliography/references.bib")
+
+; *BibTeX Search*
+(bibtex-display-entries (bibtex-search-entries "author" "kitchin"))
+(let ((author-strings '())
+      (current-year (string-to-number (format-time-string "%Y")))
+      author-string
+
+      year)
+  (with-current-buffer "*BibTeX Search*"
+    (bibtex-map-entries
+     (lambda (a b c)
+       (setq year (string-to-number (bibtex-autokey-get-field "year")))
+       (setq author-string (replace-regexp-in-string "\n" "" (bibtex-autokey-get-field "author")))
+       (setq author-string (replace-regexp-in-string "\\s-+" " " author-string))
+       (if (> year (- current-year 5))
+	   (loop for author in (s-split " and " author-string)
+		 do
+		 (add-to-list
+		  'author-strings
+		  (cond
+		   ;; last, first
+		   ((string-match "," author)
+		    (let ((fields (s-split "," author)))
+		      (list (nth 1 fields) (nth 0 fields) year)))
+		   ;; first last
+		   (t
+		    (let ((fields (s-split " " author)))
+		      (list (nth 0 fields) (mapconcat 'identity (cdr fields) " ") year))))))))))
+  author-strings)
+#+END_SRC
+
+#+RESULTS:
+
+#+tblname: collaborators
+| firstname  | lastname        | affiliation              | year |
+|------------+-----------------+--------------------------+------|
+| Erik       | Albenze         | NETL                     | 2014 |
+| Shelley    | Anna            | CMU                      | 2015 |
+| Federico   | Calle-Vallejo   | Leiden Inst. of Chem.    | 2013 |
+| Terrence   | Collins         | CMU                      | 2014 |
+| Krishnan   | Damodaran       | UPitt                    | 2014 |
+| Carmeline  | Dsilva          | Princeton                | 2012 |
+| Adefemi    | Egbebi          | NETL                     | 2015 |
+| John       | Eslick          | NETL                     | 2013 |
+| Anatoly    | Frenkel         | Yeshiva U.               | 2012 |
+| Andrew     | Gellman         | CMU                      | 2015 |
+| Kirk       | Gerdes          | NETL                     | 2012 |
+| Gamze      | Gumuslu         | CMU                      | 2015 |
+| Shayna     | Hilburg         | CMU                      | 2014 |
+| David      | Hopkinson       | NETL                     | 2015 |
+| Yogesh V.  | Joshi           | Exxon                    | 2015 |
+| John       | Keith           | UPitt                    | 2015 |
+| Chris      | Keturakis       | Lehigh                   | 2012 |
+| Peter      | Kondratyuk      | unknown                  | 2015 |
+| Marc T. M. | Koper           | Leiden Inst. of Chem.    | 2013 |
+| David      | Luebke          | Lumishield               | 2014 |
+| Isabela C. | Man             | unknown                  | 2013 |
+| Hari       | Mantripragada   | CMU                      | 2012 |
+| James X.   | Mao             | unknown                  | 2013 |
+| Aaron      | Marks           | CMU                      | 2012 |
+| Jose I.    | Martinez        | unknown                  | 2013 |
+| James      | Miller          | U. Wisconsin             | 2015 |
+| David      | Miller          | NETL                     | 2013 |
+| Bryan      | Morreale        | NETL                     | 2015 |
+| Ratiporn   | Munprom         | unknown                  | 2012 |
+| Christina  | Myers           | NETL                     | 2015 |
+| Hunaid     | Nulwala         | CMU                      | 2015 |
+| Rumyana    | Petrova         | unknown                  | 2012 |
+| Vladimir   | Pushkarev       | Dow Corning              | 2014 |
+| Sumathy    | Raman           | Exxon                    | 2015 |
+| Kevin      | Resnik          | NETL                     | 2015 |
+| Jan        | Rossmeisl       | DTU                      | 2015 |
+| Edward S.  | Rubin           | CMU                      | 2012 |
+| Paul       | Salvador        | CMU                      | 2015 |
+| Wei        | Shi             | NETL                     | 2014 |
+| Nicholas   | Stephen Siefert | NETL                     | 2015 |
+| Hai-Yan    | Su              | unknown                  | 2013 |
+| Robert L.  | Thompson        | NETL                     | 2014 |
+| Relja      | Vasi{\'c}       | Florida State University | 2012 |
+| Peter      | Versteeg        | unknown                  | 2012 |
+| Israel     | Wachs           | Lehigh                   | 2012 |
+| Newell     | Washburn        | CMU                      | 2014 |
+| John       | Watkins         | NETL                     | 2015 |
+| Chunrong   | Yin             | CMU                      | 2015 |
+| Xu         | Zhou            | unknown                  | 2015 |
+
+
+
+#+name: list-collaborators
+#+BEGIN_SRC emacs-lisp :var data=collaborators
+(concat
+ (mapconcat
+  'identity
+  (loop for (fname lname affil year) in data
+	with current-year = (string-to-number (format-time-string "%Y"))
+        if (stringp year) do (setq year current-year)
+	if (> year (- current-year 4))
+	collect (format "%s %s (%s)" fname lname affil)) ", ") ".")
+#+END_SRC
+
+#+RESULTS: list-collaborators
+: Erik Albenze (NETL), Shelley Anna (CMU), Federico Calle-Vallejo (Leiden Inst. of Chem.), Terrence Collins (CMU), Krishnan Damodaran (UPitt), Adefemi Egbebi (NETL), John Eslick (NETL), Andrew Gellman (CMU), Gamze Gumuslu (CMU), Shayna Hilburg (CMU), David Hopkinson (NETL), Yogesh V. Joshi (Exxon), John Keith (UPitt), Peter Kondratyuk (unknown), Marc T. M. Koper (Leiden Inst. of Chem.), David Luebke (Lumishield), Isabela C. Man (unknown), James X. Mao (unknown), Jose I. Martinez (unknown), James Miller (U. Wisconsin), David Miller (NETL), Bryan Morreale (NETL), Christina Myers (NETL), Hunaid Nulwala (CMU), Vladimir Pushkarev (Dow Corning), Sumathy Raman (Exxon), Kevin Resnik (NETL), Jan Rossmeisl (DTU), Paul Salvador (CMU), Wei Shi (NETL), Nicholas Stephen Siefert (NETL), Hai-Yan Su (unknown), Robert L. Thompson (NETL), Newell Washburn (CMU), John Watkins (NETL), Chunrong Yin (CMU), Xu Zhou (unknown).
+
+
+
+#+tblname: graduate-students
+| Firstname | Lastname     | year | degree | affiliation       |
+|-----------+--------------+------+--------+-------------------|
+| Sneha     | Akhade       | 2011 | MS     | Penn State        |
+| Rich      | Alesi        | 2012 | PhD    | Intel             |
+| Robin     | Chao         | 2012 | PhD    | IBM               |
+| Mehak     | Chawla       | 2015 | MS     | Dubai             |
+| Jing      | Chou         | 2007 | MS     | Taiwan            |
+| Matt      | Curnan       | 2015 | PhD    | unknown           |
+| Frank     | DeCarlo      | 2010 | MS     | ERC               |
+| Ethan     | Demeter      | 2013 | PhD    | FuelCell          |
+| Siddhard  | Deshpande    | 2015 | MS     | CMU               |
+| Zhizhong  | Ding         | 2012 | MS     | Lousiana State U. |
+| Qingqi    | Fan          | 2014 | MS     | unknown           |
+| Nitish    | Govindarajan | 2014 | MS     | unknown           |
+| Steve     | Illes        | 2014 | MS     | 3M                |
+| Nilay     | Inoglu       | 2011 | PhD    | Exxon             |
+| James     | Landon       | 2011 | PhD    | CAER              |
+| Anita     | Lee          | 2013 | PhD    | Exxon             |
+| Yuan      | Li           | 2008 | PD     | Taiwan            |
+| Bin       | Liu          | 2013 | PD     | Kansas State U.   |
+| Meiheng   | Lu           | 2014 | MS     | unknown           |
+| Prateek   | Mehta        | 2013 | MS     | Notre Dame        |
+| Spencer   | Miller       | 2011 | PhD    | Combinatorics     |
+| Venkatesh | Naik         | 2015 | MS     | unknown           |
+| Hari      | Thirumalai   | 2015 | MS     | U. Houston        |
+| Vivek     | Vinodan      | 2012 | MS     | unknown           |
+| Wenqin    | You          | 2014 | MS     | CMU               |
+
+
+
+#+name: list-graduate-students
+#+BEGIN_SRC emacs-lisp :var data=graduate-students :results raw
+(loop for (fname lname year degree affil) in data
+      count (or (string= "MS" degree) (string= "PhD" degree)) into graduate-count
+      count (string= "PD" degree) into postdoc-count
+      collect (format
+	       "%s %s (%s)"
+	       fname lname degree)
+      into strings
+      finally return
+      (format "_Thesis Advisor (%s) and Postgraduate-Scholar Sponsor (%s)_: %s."
+	      graduate-count postdoc-count
+	      (mapconcat 'identity strings ", ")))
+#+END_SRC
+
+* Help					:noexport:
+
+* Build					:noexport:
+
+  elisp:ox-manuscript-export-and-build-and-open

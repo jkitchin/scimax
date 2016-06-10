@@ -1,0 +1,46 @@
+#+TEMPLATE: ACS -Industrial & Engineering Chemistry Research
+#+key: acs-iecr
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+title: <replace title>
+#+OPTIONS: toc:nil author:nil
+#+Latex_class: achemso
+#+Latex_class_options: [journal=iecred,manuscript=article]
+#+latex_header: \setkeys{acs}{biblabel=brackets,super=true}
+
+#+latex_header: \author{<replace name>}
+#+latex_header: \author{<replace corresponding author>}
+#+latex_header: \email{<replace corr. email>}
+#+latex_header: \affiliation[<replace label>]{<replace address>}
+#+latex_header: \alsoaffiliation[<replace label>]{<replace address>}
+
+
+#+begin_abstract
+<replace abstract>
+#+end_abstract
+
+* Introduction
+
+* Methods
+
+* Results and Discussion
+
+* Conclusions
+
+\begin{acknowledgement}
+<replace or delete>
+\end{acknowledgement}
+
+
+Supporting Information Available: <replace with description>.  This information is available free of charge via the Internet at http://pubs.acs.org.
+
+bibliography:<replace with bibfile>
+
+
+
+* Help					:noexport:
+#+BEGIN_SRC sh
+texdoc achemso
+#+END_SRC

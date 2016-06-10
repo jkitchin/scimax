@@ -1,0 +1,44 @@
+#+TEMPLATE: Nature
+#+key: nature
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+title: <replace: title>
+#+LATEX_CLASS: cmu-article
+#+OPTIONS:   H:4 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:nil pri:nil tags:not-in-toc
+#+OPTIONS: author:nil
+#+latex_header: \usepackage[utf8]{inputenc}
+#+latex_header: \usepackage{fixltx2e}
+#+latex_header: \usepackage{url}
+#+latex_header: \usepackage[version=3]{mhchem}
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{float}
+#+latex_header: \usepackage{tcolorbox}
+#+latex_header: \usepackage{color}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \usepackage{textcomp}
+#+latex_header: \usepackage{wasysym}
+#+latex_header: \usepackage{latexsym}
+#+latex_header: \usepackage{amssymb}
+#+latex_header: \usepackage{minted}
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+DRAWERS: NOTES
+
+#+AUTHOR: <replace: author>
+\maketitle
+
+\begin{abstract}
+<replace: abstract>
+\end{abstract}
+
+\keywords{<replace: comma-separated list of keywords>}
+
+
+
+bibliographystyle:unsrtnat
+bibliography:<replace: filenames>
+
+* Help  :noexport:
+I have not actually had an accepted manuscript from this template. I did submit one from it.

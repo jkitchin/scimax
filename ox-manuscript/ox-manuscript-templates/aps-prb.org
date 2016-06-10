@@ -1,0 +1,57 @@
+#+TEMPLATE: Physical Review B
+#+key: aps-prb
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+LATEX_CLASS: revtex4-1
+#+LATEX_CLASS_OPTIONS: [aps,prb,citeautoscript,preprint,citeautoscript,showkeys,linenumbers]
+#+OPTIONS: toc:nil ^:{} author:nil
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LATEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage{url}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage[version=3]{mhchem}
+
+\title{<replace: title>}
+\author{<replace: name>}
+\altaffiliation[Also at ]{<replace: address>}
+
+\author{<replace: corresponding author>}
+\email{<replace: email>}
+\affiliation{<replace: address>}
+\altaffiliation[Also at ]{<replace: or delete>}
+
+\date{\today}
+
+#+begin_abstract
+<replace:with abstract>
+#+end_abstract
+
+\pacs{}
+\keywords{<replace:with comma separated keywords>}
+\maketitle
+
+* Introduction
+
+* Methods
+
+* Results and Discussion
+
+* Summary and Conclusions
+
+
+\begin{acknowledgments}
+<replace: or delete>
+\end{acknowledgments}
+
+
+bibliographystyle:unsrt
+bibliography:references.bib
+
+* Help  :noexport:
+
+#+BEGIN_SRC sh
+texdoc revtex4-1
+#+END_SRC

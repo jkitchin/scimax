@@ -1,0 +1,81 @@
+#+TEMPLATE: ACS J. Physical Chemistry Letters
+#+key: acs-jpchem-letter
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+TITLE: <replace: with your title>
+#+LATEX_CLASS: achemso
+#+LATEX_CLASS_OPTIONS: [journal=jpccck,manuscript=letter,email=true]
+#+latex_header: \setkeys{acs}{biblabel=brackets,super=true,articletitle=true}
+
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+OPTIONS: author:nil date:nil toc:nil num:t
+
+#+latex_header: \usepackage[utf8]{inputenc}
+#+latex_header: \usepackage{url}
+#+latex_header: \usepackage{mhchem}
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{color}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \usepackage{textcomp}
+#+latex_header: \usepackage{wasysym}
+#+latex_header: \usepackage{latexsym}
+#+latex_header: \usepackage{amssymb}
+#+latex_header: \usepackage{lmodern}
+
+#+latex_header: \usepackage[linktocpage, pdfstartview=FitH, colorlinks, linkcolor=black, anchorcolor=black, citecolor=black, filecolor=black, menucolor=black, urlcolor=black]{hyperref}
+
+#+latex_header: \author{<replace: with name>}
+#+latex_header: \affiliation{<replace: with address}
+
+#+latex_header: \author{<replace: with corresponding author>}
+#+latex_header: \email{<replace: with corresponding author email}
+#+latex_header: \affiliation{<replace: with address>}
+
+#+begin_abstract
+<replace:with text>
+#+end_abstract
+
+*Keywords:* <replace: with comma separated keywords>
+
+* Introduction
+
+* Methods
+
+* Results and Discussion
+
+* Conclusions
+
+\begin{acknowledgement}
+<replace: with text or delete>
+\end{acknowledgement}
+
+\begin{suppinfo}
+<replace: with description>
+\end{suppinfo}
+
+# no bibliographystyle required
+bibliography:<replace: with bibfile path>
+
+\begin{tocentry}
+
+\includegraphics{<replace: with path, no extension>}
+
+\end{toentry}
+
+
+* build							   :noexport:
+elisp:ox-manuscript-build-submission-manuscript-and-open
+
+** Preparation of the manuscript zip file
+#+BEGIN_SRC sh
+rm -f manuscript.zip
+zip manuscript.zip figures/*.eps manuscript.tex figures/TOC.eps
+#+END_SRC
+
+
+* Help					:noexport:
+#+BEGIN_SRC sh
+texdoc achemso
+#+END_SRC

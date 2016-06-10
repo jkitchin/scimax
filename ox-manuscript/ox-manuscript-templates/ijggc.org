@@ -1,0 +1,77 @@
+#+TEMPLATE: Int. J. Greenhouse Gas Control - Elsevier
+#+key: ijggc
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+LATEX_CLASS: elsarticle
+#+LATEX_CLASS_OPTIONS: [review, 12pt]
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+OPTIONS: toc:nil ^:{} author:nil
+
+#+latex_header: \usepackage[utf8]{inputenc}
+#+latex_header: \usepackage{fixltx2e}
+#+latex_header: \usepackage{url}
+#+latex_header: \usepackage[version=3]{mhchem}
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{float}
+#+latex_header: \usepackage{color}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \usepackage{textcomp}
+#+latex_header: \usepackage{wasysym}
+#+latex_header: \usepackage{latexsym}
+#+latex_header: \usepackage{amssymb}
+#+LATEX_HEADER: \usepackage[linktocpage,
+#+LATEX_HEADER:   pdfstartview=FitH,
+#+LATEX_HEADER:   colorlinks,
+#+LATEX_HEADER:   linkcolor=blue,
+#+LATEX_HEADER:   anchorcolor=blue,
+#+LATEX_HEADER:   citecolor=blue,
+#+LATEX_HEADER:   filecolor=blue,
+#+LATEX_HEADER:   menucolor=blue,
+#+LATEX_HEADER:   urlcolor=blue]{hyperref}
+# +LATEX_HEADER: \usepackage{lineno}
+# +LATEX_HEADER: \linenumbers
+#+LATEX_HEADER: \biboptions{authoryear}
+
+\begin{frontmatter}
+\title{<replace: title>}
+
+\author[X1, X2]{<replace: name>}
+\author[X1]{<replace: name>\corref{cor}}
+\ead{<replace: email>}
+
+\address[X1]{<replace: address>}
+\address[X2]{<replace: address>}
+\cortext[cor]{Corresponding author}
+
+\begin{abstract}
+<replace: abstract>
+\end{abstract}
+
+\begin{keyword}
+<replace:keywords separated by commas>
+\end{keyword}
+\end{frontmatter}
+
+
+
+* Introduction
+
+* Results
+
+* Discussion
+
+* Conclusions
+
+* Acknowledgment
+
+
+
+bibliographystyle:unsrt
+bibliography:<replace: bibfile>
+
+* Help					:noexport:
+#+BEGIN_SRC sh
+texdoc elsarticle
+#+END_SRC

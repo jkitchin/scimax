@@ -1,0 +1,22 @@
+#+TEMPLATE: NSF Proposal - Facilities, Equipment, and other Resources
+#+key: nsf-proposal-facilities
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: facilities.org
+
+#+LATEX_CLASS: cmu-article
+#+Latex_class_options: [12pt]
+#+OPTIONS: toc:nil
+
+#+TITLE: Facilities, Equipment, and other Resources
+\date{}
+\author{}
+\maketitle
+
+* Experimental facilities
+
+* Computational facilities
+
+* Equipment
+
+** Office space

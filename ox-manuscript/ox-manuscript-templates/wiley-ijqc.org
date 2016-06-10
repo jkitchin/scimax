@@ -1,0 +1,97 @@
+#+TEMPLATE: Wiley - Int. J. Quantum Chemistry
+#+key: wiley-ijqc
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+LATEX_CLASS: no-article
+#+LATEX_CLASS_OPTIONS: [12pt]
+#+TITLE: <replace with title>
+
+#+latex_header: \setlength{\oddsidemargin}{0in}
+#+latex_header: \setlength{\textwidth}{6.5in}
+#+latex_header: \setlength{\topmargin}{-0.5in}
+#+latex_header: \setlength{\textheight}{9in}
+
+#+latex_header: \usepackage{amssymb}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \usepackage{textcomp}
+#+latex_header: \usepackage{underscore}
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{caption}
+#+latex_header: \usepackage{color}
+#+latex_header: \usepackage{dcolumn}
+#+latex_header: \usepackage{bm}
+#+latex_header: \usepackage{authblk}
+#+latex_header: \usepackage[numbers,super,comma,sort&compress]{natbib}
+#+latex_header: \usepackage{natmove}
+#+latex_header: \usepackage[linktocpage,pdfstartview=FitH,colorlinks,
+#+latex_header: linkcolor=blue,anchorcolor=blue,
+#+latex_header: citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue]{hyperref}
+#+latex_header: \usepackage{float}
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+OPTIONS: author:nil date:nil ^:{} toc:nil
+
+#+latex_header: \author[1]{<replace with name>}
+#+latex_header: \author[2]{<replace with name>}
+#+latex_header: \author[2]{<replace with correspinding name>\thanks{<replace with email>}}
+#+latex_header: \affil[1]{<replace with address>}
+#+latex_header: \affil[2]{<replace with address>}
+
+\maketitle
+
+#+begin_abstract
+<replace with abstract>
+#+end_abstract
+
+*Keywords:* <replace with comma separated keywords>
+
+#+BEGIN_LaTeX
+\makeatletter
+\renewcommand\@biblabel[1]{#1.}
+\makeatother
+
+\bibliographystyle{apsrev}
+
+\renewcommand{\baselinestretch}{1.5}
+\normalsize
+#+END_LaTeX
+
+* Introduction
+
+* Methods
+
+* Results and Discussion
+
+* Conclusions
+
+
+* Acknowledgements
+<replace: or delete section>
+
+bibliography:<replace with bibfile>
+
+* Build								   :noexport:
+
+
+#+BEGIN_SRC emacs-lisp
+(ox-manuscript-build-submission-manuscript)
+
+(ox-manuscript-make-submission-archive nil nil nil nil nil
+"images/toc.png" "supporting-information.pdf")
+
+(loop for png in (f-entries "manuscript-2015-12-21" (lambda (f) (f-ext? f "png")))
+      do
+      (shell-command (format
+		      "convert %s %s"
+		      png
+		      (replace-regexp-in-string "\.png$" ".eps" png))))
+#+END_SRC
+
+#+RESULTS:
+
+
+* Help  :noexport:
+http://onlinelibrary.wiley.com/journal/10.1002/(ISSN)1097-461X
+
+Author guidelines: [[http://onlinelibrary.wiley.com/journal/10.1002/(ISSN)1097-461X/homepage/ForAuthors.html]]

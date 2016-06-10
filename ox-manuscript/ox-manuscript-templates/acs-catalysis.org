@@ -1,0 +1,88 @@
+#+TEMPLATE: ACS Catalysis
+#+key: acs-catalysis
+#+group: manuscript
+#+default-filename: manuscript.org
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+
+#+TITLE: <replace: with your title>
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+OPTIONS: author:nil date:nil ^:{} toc:nil
+
+#+LATEX_CLASS: achemso
+#+LATEX_CLASS_OPTIONS: [journal=accacs,manuscript=article,email=true]
+#+latex_header: \setkeys{acs}{biblabel=brackets,super=true,articletitle=false}
+#+latex_header: \SectionNumbersOn
+#+latex_header: \usepackage[utf8]{inputenc}
+#+latex_header: \usepackage{url}
+#+latex_header: \usepackage[version=3]{mhchem}
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{float}
+#+latex_header: \usepackage{color}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \usepackage{textcomp}
+#+latex_header: \usepackage{wasysym}
+#+latex_header: \usepackage{latexsym}
+#+latex_header: \usepackage{amssymb}
+#+latex_header: \usepackage[linktocpage, pdfstartview=FitH, colorlinks, linkcolor=black, anchorcolor=black, citecolor=black, filecolor=black, menucolor=black, urlcolor=black]{hyperref}
+#+latex_header: \author{<replace: with name>}
+#+latex_header: \author{<replace: with name>}
+#+latex_header: \author{<replace: with corresponding author>}
+#+latex_header: \email{<replace: with corresponding author email>}
+#+latex_header: \affiliation{<replace: with address>}
+#+latex_header: \setkeys{acs}{keywords = true}
+
+#+begin_abstract
+<replace: with abstract>
+#+end_abstract
+
+*Keywords:* <replace: with comma separated keywords>
+
+* Introduction
+
+* Methods
+
+* Results and Discussion
+
+* Conclusions
+
+\begin{acknowledgement}
+<replace: with acknowledgement, or delete the whole thing>
+\end{acknowledgement}
+
+\begin{suppinfo}
+<replace: with your supporting info description>
+\end{suppinfo}
+
+# No bibliographystyle required
+bibliography:<replace: with bibliography files>
+
+\newpage
+*Graphical TOC Entry*
+
+\includegraphics{<replace: with path to graphic, no extension>}
+
+
+* Notes                                      :noexport:
+When you make figures, make two versions: one in png and one in eps.
+The png version is good for org-mode and presentations. The eps version is the one that will get uploaded on submission.
+
+* Build manuscript                           :noexport:
+
+Click on this to see how the manuscript looks in pdf.
+[[elisp:ox-manuscript-build-manuscript-and-open]]
+
+Click this to insert standalone bibliography code
+[[elisp:ox-manuscript-build-submission-manuscript-and-open]]
+
+
+#+BEGIN_SRC emacs-lisp
+(ox-manuscript-build-submission-manuscript)
+
+(ox-manuscript-make-submission-archive nil nil nil nil nil
+<replace:with extra file in quotes> <replace:with extra file in quotes>)
+#+END_SRC
+
+* Help					:noexport:
+#+BEGIN_SRC sh
+texdoc achemso
+#+END_SRC

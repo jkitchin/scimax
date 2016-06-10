@@ -1,0 +1,54 @@
+#+TEMPLATE: Physical Review Letters
+#+key: aps-prl
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+LATEX_CLASS: revtex4-1
+#+LATEX_CLASS_OPTIONS:[aps,prl,citeautoscript,preprint,citeautoscript,showkeys,floatfix]
+#+OPTIONS: toc:nil author:nil ^:{}
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LATEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{float}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage[version=3]{mhchem}
+#+LATEX_HEADER: \usepackage[linktocpage,pdfstartview=FitH,colorlinks,linkcolor=blue,anchorcolor=blue,citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue]{hyperref}
+
+\raggedbottom
+
+\title{<replace: title>}
+
+\author{<replace: name>}
+\affiliation{<replace: address>}
+
+
+\author{<replace: corresponding author>}
+\email{<replace: email>}
+\affiliation{<replace: address>}
+
+\date{\today}
+
+#+begin_abstract
+<replace: abstract text>
+#+end_abstract
+
+\pacs{}
+\keywords{<replace: comma separated keywords>}
+\maketitle
+
+<replace: body of manuscript here>
+
+\begin{acknowledgments}
+<replace: or delete>
+\end{acknowledgments}
+
+bibliographystyle:unsrt
+bibliography:<replace: bibfile>
+
+* Help  :noexport:
+
+#+BEGIN_SRC sh
+texdoc revtex4-1
+#+END_SRC

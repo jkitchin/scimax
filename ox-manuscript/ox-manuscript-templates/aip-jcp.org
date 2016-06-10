@@ -1,0 +1,57 @@
+#+TEMPLATE: AIP - J. Chemical Physics
+#+key: aip-jcp
+#+group: manuscript
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+LATEX_CLASS: revtex4-1
+#+LATEX_CLASS_OPTIONS:[aip,jcp,citeautoscript,citeautoscript,showkeys,floatfix]
+#+OPTIONS: toc:nil author:nil ^:{}
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LATEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{float}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage{wasysym}
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage[version=3]{mhchem}
+#+LATEX_HEADER: \usepackage[linktocpage,pdfstartview=FitH,colorlinks,linkcolor=blue,anchorcolor=blue,citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue]{hyperref}
+
+\raggedbottom
+
+\title{<replace: with title>}
+
+\author{<replace: with name>}
+\affiliation{<replace: with address>}
+
+
+\author{<replace: with corresponding author>}
+\email{<replace: with email>}
+\affiliation{replace: with address>}
+
+\date{\today}
+
+#+begin_abstract
+<replace: with abstract>
+#+end_abstract
+
+\pacs{}
+\keywords{<replace: with comma-separated keywords>}
+\maketitle
+
+* Introduction
+* Methods
+* Results and Discussion
+* Conclusion
+
+\begin{acknowledgments}
+<replace: or delete>
+\end{acknowledgments}
+
+# no bibliography style required
+bibliography:<replace: with file>
+
+* Help					      :noexport:
+#+BEGIN_SRC sh
+texdoc revtex4-1
+#+END_SRC
