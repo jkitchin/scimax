@@ -1,0 +1,288 @@
+#+TITLE: org-show - simple presentations in org-mode
+#+AUTHOR: John Kitchin
+
+There are several options for "presenting" from org-mode. Here are the options I found.
+
+https://github.com/rlister/org-present
+https://github.com/eschulte/epresent
+
+https://github.com/yjwen/org-reveal
+https://github.com/takaxp/org-tree-slide/
+https://github.com/tucasp/org-presie
+
+http://orgmode.org/worg/exporters/beamer/tutorial.html
+http://orgmode.org/worg/org-tutorials/non-beamer-presentations.html#sec-3
+
+The one I like the best is discussed here: http://sachachua.com/blog/2013/04/how-to-present-using-org-mode-in-emacs/. I like it best because you can edit the slides as you go, execute arbitrary emacs code, and it is still pretty simple. I used Sacha's code as the basis for org-show. There is a lot of similarity.
+
+elisp:org-show-mode
+
+elisp:org-show-start-slideshow
+
+* org-show
+You can have:
+
+1. code run
+2. split to show slide and full image
+3. plain text
+
+** Title slide							      :slide:
+#+BEGIN_SRC emacs-lisp-slide
+(org-show-animate '("Welcome to the org-show" "John Kitchin"))
+#+END_SRC
+
+** Presentations in org-mode					      :slide:
+This should be easy
+
+1. Create your org-file. Tag headlines with :slide:
+2. Enter org-show-mode, press f5. Use PageUp and PageDn to navigate slides
+3. Go back and forth from the presentation to other files in Emacs or other software.
+4. Edit yours slides as you go, e.g. to demonstrate something
+5. Totally interactive, run code, etc...
+
+org-show is based on this blog post: http://sachachua.com/blog/2013/04/how-to-present-using-org-mode-in-emacs/
+
+Thanks Sacha!
+** Test out some themes						      :slide:
+
+[[elisp:(load-theme 'my)]] [[elisp:(disable-theme 'my)]]
+
+[[elisp:(load-theme 'adwaita)]] [[elisp:(disable-theme 'adwaita)]]
+
+[[elisp:(load-theme 'deeper-blue)]] [[elisp:(disable-theme 'deeper-blue)]]
+
+[[elisp:(load-theme 'light-blue)]] [[elisp:(disable-theme 'light-blue)]]
+
+[[elisp:(load-theme 'manoj-dark)]] [[elisp:(disable-theme 'manoj-dark)]]
+
+[[elisp:(load-theme 'misterioso)]] [[elisp:(disable-theme 'misterioso)]]
+
+[[elisp:(load-theme 'tango)]] [[elisp:(disable-theme 'tango)]]
+
+[[elisp:(load-theme 'tango-dark)]] [[elisp:(disable-theme 'tango-dark)]]
+
+[[elisp:(load-theme 'tsdh-dark)]] [[elisp:(disable-theme 'tsdh-dark)]]
+
+[[elisp:(load-theme 'tsdh-light)]] [[elisp:(disable-theme 'tsdh-light)]]
+
+[[elisp:(load-theme 'wheatgrass)]] [[elisp:(disable-theme 'wheatgrass)]]
+
+[[elisp:(load-theme 'whiteboard)]] [[elisp:(disable-theme 'whiteboard)]]
+
+[[elisp:(load-theme 'wombat)]] [[elisp:(disable-theme 'wombat)]]
+
+[[elisp:(load-theme 'solarized-light t)]] [[elisp:(disable-theme 'solarized-light)]]
+
+[[elisp:(load-theme 'solarized-dark t)]] [[elisp:(disable-theme 'solarized-dark)]]
+
+[[elisp:(load-theme 'zenburn t)]] [[elisp:(disable-theme 'zenburn)]]
+
+[[elisp:(load-theme 'anti-zenburn t)]] [[elisp:(disable-theme 'anti-zenburn)]]
+
+** Equations							      :slide:
+It should be easy to show equations like this  $\int_0^x \frac{1}{2} \sin x dx = 6$.
+
+It is. Maybe you prefer equation environments?
+
+\begin{equation}
+e^x = 55
+\end{equation}
+
+Want to see the equation source? elisp:org-toggle-latex-overlays
+
+Back to equations: C-c C-x C-l
+** Figures							      :slide:
+
+Figures show inline.
+
+Here is a little screen capture:
+[[./taskbar.png]]
+
+** Need a more complicated layout?				      :slide:
+Write some code to generate it, and put it in an emacs-lisp-slide block. org-show will run it and show you the result
+
+#+BEGIN_SRC emacs-lisp
+(delete-other-windows)
+(split-window-right)
+(other-window 1)
+(find-file "taskbar.png")
+(split-window-below)
+(other-window 1)
+(find-file "doi-utils.org")
+#+END_SRC
+
+#+RESULTS:
+: #<buffer doi-utils.org>
+
+#+BEGIN_EXAMPLE
+,#+BEGIN_SRC emacs-lisp-slide
+(delete-other-windows)
+(split-window-right)
+(other-window 1)
+(find-file "taskbar.png")
+(split-window-below)
+(other-window 1)
+(find-file "doi-utils.org")
+,#+END_SRC
+#+END_EXAMPLE
+
+** A complicated layout						      :slide:
+- We use a special emacs-lisp-slide block to configure the slide arrangement
+
+- So we can have bullets here
+
+- Figures in another window
+
+- and something else in another window
+
+Here is the custom code block.
+
+#+BEGIN_SRC emacs-lisp-slide
+(delete-other-windows)
+(split-window-right)
+(other-window 1)
+(find-file "taskbar.png")
+(split-window-below)
+(other-window 1)
+(find-file "org-show.el")
+#+END_SRC
+
+#+RESULTS:
+
+
+
+
+** Code blocks should be runnable and editable			      :slide:
+
+#+BEGIN_SRC python results: output
+print 6 + 62
+#+END_SRC
+
+
+They are.
+** We can use many languages					      :slide:
+(of course, you must have them installed on your computer)
+
+#+BEGIN_SRC emacs-lisp
+(+ 6 6)
+#+END_SRC
+
+
+#+BEGIN_SRC R
+sum(c(6, 6))
+#+END_SRC
+
+
+#+BEGIN_SRC perl :results output
+print 6 + 6
+#+END_SRC
+
+
+#+BEGIN_SRC ruby
+print 6 + 6
+#+END_SRC
+
+
+#+BEGIN_SRC C
+#include <stdio.h>
+
+int main() {
+    printf("%d", 6 + 6);
+    return 0;
+}
+#+END_SRC
+
+And so on, and so forth...
+
+
+
+** Interactivity is important
+We get it.
+*** Snake							      :slide:
+#+BEGIN_SRC emacs-lisp-slide
+(snake)
+#+END_SRC
+
+*** tetris							      :slide:
+
+#+BEGIN_SRC emacs-lisp-slide
+(when (and (boundp 'snake-buffer-name) (get-buffer snake-buffer-name))
+  (kill-buffer snake-buffer-name))
+(delete-other-windows)
+(tetris)
+#+END_SRC
+
+
+*** doctor							      :slide:
+#+BEGIN_SRC emacs-lisp-slide
+(doctor)
+#+END_SRC
+
+
+*** Become a graffiti artist					      :slide:
+#+BEGIN_SRC emacs-lisp-slide
+(progn
+  (switch-to-buffer (get-buffer-create "*artist*"))
+  (erase-buffer)
+  (artist-mode 1)
+  (menu-bar-mode 1)
+  (text-scale-set 0)
+  (artist-select-op-spray-can))
+#+END_SRC
+
+
+*** Or draw lines						      :slide:
+#+BEGIN_SRC emacs-lisp-slide
+(progn
+  (switch-to-buffer (get-buffer-create "*artist*"))
+  (artist-select-op-line))
+#+END_SRC
+
+** No seriously, we can do real work!				      :slide:
+   :PROPERTIES:
+   :CUSTOM_ID: sec:data-tab-code
+   :END:
+
+Use this table as a data source.
+#+tblname: tab-data
+| x |  y |
+|---+----|
+| 1 |  1 |
+| 2 |  4 |
+| 3 |  9 |
+| 4 | 16 |
+
+#+BEGIN_SRC python :var data=tab-data
+import matplotlib.pyplot as plt
+import numpy as np
+d = np.array(data)
+plt.plot(d[:, 0], d[:, 1])
+plt.show()
+#+END_SRC
+
+#+RESULTS:
+
+You can make links to a table like this: ref:tab-data.
+** Interactive links						      :slide:
+<<beginning>>
+
+You can have links that take you to places: [[beginning]], [[end]], to a [[#sec:data-tab-code][section]],
+
+Or links that are functional: cite:mehta-2014-ident-poten.
+
+Or that run code [[elisp:(message "Hello %s" user-full-name)]]
+
+Or links to info: [[info:org#External%20links][info:org#External links]]
+
+Or to open a [[http://kitchingroup.cheme.cmu.edu][website]].
+
+<<end>>
+
+Yes, org-mode is amazing.
+
+** Conclusions							      :slide:
+That is the end!
+
+#+BEGIN_SRC emacs-lisp-slide
+(org-show-animate '("That's the end of the org-show." "Thank you for your attention!" "http://github.com/jkitchin/jmax"))
+#+END_SRC
