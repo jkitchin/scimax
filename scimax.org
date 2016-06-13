@@ -1,16 +1,15 @@
 #+TITLE: Scimax
 
-* ivy
-scimax currently uses ivy extensively for completion. 
+* ivy/counsel
+scimax currently uses ivy extensively for completion, and enables `ivy-mode' and `counsel-mode'. The default matching behavior is `ivy--regex-ignore-order'.
 
 When you get an ivy minibuffer, start typing to select what you want, and when it is highlighted, press enter.
 
 There are a couple of nuances though.
 
-1. The order of words in your pattern matters, so type them in the order they appear in the candidates.  
-2. To eliminate matches use ! pattern, but you can only use one of these, and it comes last.
+1. To eliminate matches use ! pattern, but you can only use one of these, and it comes last.
 
-I have extended the ivy-minibuffer-keymap to enable the following:
+I have extended the `ivy-minibuffer-map' to enable the following:
 
 1. M-spc will show the actions, and spc to resume the selection process.
 2. C-RET to perform the action and move to the next candidate, and C-u C-RET to perform the action and move to the previous candidate.
@@ -30,9 +29,14 @@ In the ivy selection buffer
 | s-RET         | quit with no action                                        |
 | ?             | show keymap help                                           |
 
-A few counsel functions have been extended.
+I use Hyper-c as a prefix map for a lot of commands.
+
+| H-c r | `ivy-resume'           |
+| H-c l | `counsel-load-library' |
+| H-c a | `counsel-ag'           |
 
 ** counsel-find-file
+Here are some additional actions we define for `counsel-find-file'.
 
 | a   | attach to email      |
 | c   | copy relative path   |
@@ -48,7 +52,20 @@ A few counsel functions have been extended.
 | L   | absolute org link    |
 | r   | rename file          |
  
- 
+* avy 
+
+See `hydra-avy/body' which is bound <f12>. It provides a hydra to navigate to places.
+
+| f12 s | swiper                             |
+| f12 j | avy-goto-char-2                    |
+| f12 k | avy-goto-word-1                    |
+| f12 l | avy-goto-line                      |
+| f12 ; | avy-goto-char-in-line              |
+| f12 t | avy-goto-char-timer                |
+| f12 g | counsel-git-grep                   |
+| f12 h | avy-goto-org-heading               |
+| f12 a | jump to org heading in agenda file |
+
 * Org-mode 
 
 ** Markup shortcuts
@@ -164,6 +181,55 @@ Run `org-ref-help' and read it.
 
 ** TODO Publishing (ox-manuscript)
 
+The key-binding C-c C-e j should enter the ox-manuscript export menu. This process differs from the regular export process in a number of ways. It will detect if bibtex, makeindex, or  makeglossary, and if minted is used, -shell-escape will automatically be used with pdflatex. The function `ox-manuscript-latex-pdf-process' handles all of that.
+
+Additionally, you can generate different outputs of an org-file: 
+
+- `ox-manuscript-build-submission-manuscript-and-open' :: creates a standalone tex file with embedded bibliography, and image extensions stripped, and the pdf file.
+
+- `ox-manuscript-make-submission-archive' :: creates a directory containing all the files you normally need for submission.
+
+- `ox-manuscript-toggle-interactive-build'
+
+- `ox-manuscript-nobibliography'
+
+- `ox-manuscript-texcount'
+
+*** Manuscript templates
+We have templates prepared for the following manuscripts, proposals and documents.
+
+#+BEGIN_SRC emacs-lisp
+(mapcar (lambda (x) (list (plist-get x :template))) (ox-manuscript-candidates))
+#+END_SRC
+
+#+RESULTS:
+| ACS Applied Materials and Interfaces                      |
+| ACS Catalysis                                             |
+| ACS -Industrial & Engineering Chemistry Research          |
+| ACS - Journal of Physical Chemistry C                     |
+| ACS J. Physical Chemistry Letters                         |
+| AIP - J. Chemical Physics                                 |
+| Physical Review B                                         |
+| Physical Review Letters                                   |
+| Int. J. Greenhouse Gas Control - Elsevier                 |
+| Cover letter for manuscript submission                    |
+| Nature                                                    |
+| NSF Proposal - Biographical sketch                        |
+| NSF Proposal - Checklist                                  |
+| NSF Proposal - Current and pending                        |
+| NSF Proposal - data management plan                       |
+| NSF Proposal - Facilities, Equipment, and other Resources |
+| NSF Proposal - postdoctoral mentoring plan                |
+| NSF Proposal - Project description                        |
+| NSF Proposal - Project summary                            |
+| NSF Proposal - Statement of work                          |
+| Response to reviewers                                     |
+| Surface Science - Elsevier                                |
+| Wiley - Int. J. Quantum Chemistry                         |
+
+- `ox-manuscript-new-ivy'
+- `ox-manuscript-new-helm' 
+
 ** new speed commands
 
 scimax defines these new speed commands that are active when the cursor is on the first character of a headline.
@@ -238,10 +304,22 @@ These require mu4e for mail, and store properties on the headline that indicate 
 - elpy
 - `pydoc' check it out.
 
-** TODO Ipython
-If you like sessions in Python, the ob-ipython library 
+** Ipython
+If you like sessions in Python, the ob-ipython library is better than the default ob-python in org-mode.
 
-Pygments doesn't support ipython out of the box for some reason. scimax fixes this with this package. It is automatically installed with scimax the first time you load it.
+Pygments doesn't support ipython out of the box for some reason, which is a problem if you want to export your src block to LaTeX. scimax fixes this for you and automatically installs this if you don't already have it.
+
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+
+#+BEGIN_SRC python :results org drawer
+
+#+END_SRC
+
+#+BEGIN_SRC ipython
+
+#+END_SRC
 
 #+BEGIN_SRC sh
 pip install git+git://github.com/sanguineturtle/pygments-ipython-console
@@ -249,38 +327,52 @@ pip install git+git://github.com/sanguineturtle/pygments-ipython-console
 
 Here is a protypical Ipython src block with a line magic.
 
-#+BEGIN_SRC ipython :session :results output
-%time print("hello world")
+#+BEGIN_SRC ipython 
+%time print("hello world") 
 a = 6
 #+END_SRC
 
 #+RESULTS:
-: hello world
-: CPU times: user 34 µs, sys: 3 µs, total: 37 µs
-: Wall time: 40.1 µs
+: helloi world
+: CPU times: user 7 µs, sys: 2 µs, total: 9 µs
+: Wall time: 14.1 µs
 
+And a block with cell magic.
 
-#+BEGIN_SRC ipython :session :results output org drawer
-print(a * 7)
+#+BEGIN_SRC ipython 
+%%timeit
+7
 #+END_SRC
 
 #+RESULTS:
+: 100000000 loops, best of 3: 16.2 ns per loop
 :RESULTS:
 42
 :END:
 
-`ob-ipython-inspect'
+- `ob-ipython-inspect' seems to be broken
 
-`org-babel-switch-to-session' will open the IPython REPL.
+- `org-babel-switch-to-session' will open the IPython REPL.
 
-M-x `ob-ipython-interrupt-kernel' 
+M-x `ob-ipython-interrupt-kernel'  
 M-x `ob-ipython-kill-kernel'
 
-*** Using other kernels - hy
-#+LATEX_CLASS: article
-Amazing. You can use other language kernels. This is sure to cause trouble with exporting to LaTeX where the highlighting will be python-based..
+#+BEGIN_SRC ipython :var a=6
+%%timeit
+6 + a
+#+END_SRC
 
-#+BEGIN_SRC ipython :session hy :results output :kernel hy
+#+RESULTS:
+
+
+
+*** Using other kernels - hy
+
+Amazing. You can use other language kernels with ob-ipython.
+
+scimax provides the jupyter-hy src block to run hylang in src blocks. The required :session and :kernel headers are automatically provided.
+
+#+BEGIN_SRC jupyter-hy
 (print "hello world")
 (import time)
 (print (time.asctime))
@@ -288,8 +380,7 @@ Amazing. You can use other language kernels. This is sure to cause trouble with 
 
 #+RESULTS:
 : hello world
-: Thu Jun  9 17:26:56 2016
-
+: Fri Jun 10 10:21:24 2016
 
 
 
@@ -411,3 +502,7 @@ You can manage the version control with magit
 : esup-child-process-sentinel
 
 cite:kitchin-2008-alloy,alesi-2010-co2-adsor,alesi-2012-evaluat-primar
+
+# Local Variables:
+# eval: (progn (require 'emacs-keybinding-command-tooltip-mode) (emacs-keybinding-command-tooltip-mode +1))
+# End:
