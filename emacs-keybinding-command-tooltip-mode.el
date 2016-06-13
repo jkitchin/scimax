@@ -113,7 +113,7 @@ commands and variables."
       (set-match-data mdata)
       t)))
 
-
+;;;###autoload
 (define-minor-mode emacs-keybinding-command-tooltip-mode
   "Fontify on emacs keybinding syntax.
 Adds a tooltip for keybinding, and make the command clickable to
@@ -135,9 +135,9 @@ get to the documentation."
   (font-lock-fontify-buffer))
 
 
-(add-hook 'org-mode-hook
-	  (lambda ()
-	    (emacs-keybinding-command-tooltip-mode +1)))
+;; (add-hook 'org-mode-hook
+;; 	  (lambda ()
+;; 	    (emacs-keybinding-command-tooltip-mode +1)))
 
 (provide 'emacs-keybinding-command-tooltip-mode)
 
