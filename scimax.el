@@ -137,7 +137,8 @@ This enables you to use tab to open and close outlines."
   (";" avy-goto-char-in-line "char in line")
   ("t" avy-goto-char-timer "char timer")
   ("g" counsel-git-grep "git grep")
-  ("h" ivy-org-jump-to-heading "org heading"))
+  ("h" ivy-org-jump-to-heading "org heading")
+  ("a" ivy-org-jump-to-agenda-heading "agenda heading"))
 
 (global-set-key (kbd "<f12>") 'hydra-avy/body)
 ;; * The end
