@@ -103,10 +103,6 @@ is positive, move after, and if negative, move before."
 	     '("p" "#+BEGIN_SRC python :results org drawer\n?\n#+END_SRC"
 	       "<src lang=\"python\">\n?\n</src>"))
 
-(add-to-list 'org-structure-template-alist
-	     '("ip" "#+BEGIN_SRC ipython :session :results output org drawer\n?\n#+END_SRC"
-	       "<src lang=\"python\">\n?\n</src>"))
-
 ;; add <por for python expansion with raw output
 (add-to-list 'org-structure-template-alist
 	     '("por" "#+BEGIN_SRC python :results output raw\n?\n#+END_SRC"
@@ -163,6 +159,7 @@ is positive, move after, and if negative, move before."
 	(setf (substring expansion 2 3) "?")
 	(add-to-list 'org-structure-template-alist
 		     `(,template ,expansion ""))))
+
 ;; * Babel settings
 ;; do not evaluate code on export by default
 (setq org-export-babel-evaluate nil)
@@ -194,6 +191,46 @@ is positive, move after, and if negative, move before."
 
 ;; use syntax highlighting in org-file code blocks
 (setq org-src-fontify-natively t)
+
+;; ** jupyter ipython blocks
+
+(add-to-list 'org-structure-template-alist
+	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
+	       "<src lang=\"python\">\n?\n</src>"))
+
+(setq org-babel-default-header-args:ipython
+      '((:results . "output replace")
+	(:session . nil) 
+	(:exports . "both")
+	(:cache .   "no")
+	(:noweb . "no")
+	(:hlines . "no")
+	(:tangle . "no")))
+
+;; ** jupyter-hy blocks
+;; make src blocks open in the right mode
+(add-to-list 'org-src-lang-modes '("jupyter-hy" . hy))
+(add-to-list 'org-latex-minted-langs '(jupyter-hy  "hylang"))
+
+;; set default headers for convenience
+(setq org-babel-default-header-args:jupyter-hy
+      '((:results . "output replace")
+	(:session . "hy")
+	(:kernel . "hy")
+	(:exports . "code")
+	(:cache .   "no")
+	(:noweb . "no")
+	(:hlines . "no")
+	(:tangle . "no")))
+
+(defalias 'org-babel-execute:jupyter-hy 'org-babel-execute:ipython)
+(defalias 'org-babel-prep-session:jupyter-hy 'org-babel-prep-session:ipython)
+(defalias 'org-babel-jupyter-hy-initiate-session 'org-babel-ipython-initiate-session)
+
+(add-to-list 'org-structure-template-alist
+	     '("hy" "#+BEGIN_SRC jupyter-hy\n?\n#+END_SRC"
+	       "<src lang=\"hy\">\n?\n</src>"))
+
 ;; * Images in org-mode
 
 ;; default with images open
@@ -208,6 +245,8 @@ is positive, move after, and if negative, move before."
 
 
 ;; * Colored src blocks
+;; based on patches from Rasmus <rasmus@gmx.us>
+
 ;; This function overwrites the org-src function to make src blocks be colored again.
 (defun org-src-font-lock-fontify-block (lang start end)
   "Fontify code block.
@@ -218,7 +257,10 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
     (when (fboundp lang-mode)
       (let ((string (buffer-substring-no-properties start end))
 	    (modified (buffer-modified-p))
-	    (org-buffer (current-buffer)))
+	    (org-buffer (current-buffer))
+	    (block-faces (let ((face-name (intern (format "org-block-%s" lang))))
+			   (append (and (facep face-name) (list face-name))
+				   '(org-block)))))
 	(remove-text-properties start end '(face nil))
 	(with-current-buffer
 	    (get-buffer-create
@@ -233,17 +275,127 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
 		(put-text-property
 		 (+ start (1- pos)) (1- (+ start next)) 'face
 		 (list :inherit (append (and new-face (list new-face))
-					(list 'org-block)))
+					block-faces))
 		 org-buffer))
 	      (setq pos next))
 	    ;; Add the face to the remaining part of the font.
 	    (put-text-property (1- (+ start pos))
 			       end 'face
-			       '(:inherit org-block) org-buffer)))
+			       (list :inherit block-faces) org-buffer)))
 	(add-text-properties
 	 start end
 	 '(font-lock-fontified t fontified t font-lock-multiline t))
 	(set-buffer-modified-p modified)))))
+
+(defun org-fontify-meta-lines-and-blocks-1 (limit)
+  "Fontify #+ lines and blocks."
+  (let ((case-fold-search t))
+    (if (re-search-forward
+	 "^\\([ \t]*#\\(\\(\\+[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
+	 limit t)
+	(let ((beg (match-beginning 0))
+	      (block-start (match-end 0))
+	      (block-end nil)
+	      (lang (match-string 7))
+	      (beg1 (line-beginning-position 2))
+	      (dc1 (downcase (match-string 2)))
+	      (dc3 (downcase (match-string 3)))
+	      end end1 quoting block-type ovl)
+	  (cond
+	   ((and (match-end 4) (equal dc3 "+begin"))
+	    ;; Truly a block
+	    (setq block-type (downcase (match-string 5))
+		  quoting (member block-type org-protecting-blocks))
+	    (when (re-search-forward
+		   (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
+		   nil t)  ;; on purpose, we look further than LIMIT
+	      (setq end (min (point-max) (match-end 0))
+		    end1 (min (point-max) (1- (match-beginning 0))))
+	      (setq block-end (match-beginning 0))
+	      (when quoting
+		(org-remove-flyspell-overlays-in beg1 end1)
+		(remove-text-properties beg end
+					'(display t invisible t intangible t)))
+	      (add-text-properties
+	       beg end '(font-lock-fontified t font-lock-multiline t))
+	      (add-text-properties beg beg1 '(face org-meta-line))
+	      (org-remove-flyspell-overlays-in beg beg1)
+	      (add-text-properties	; For end_src
+	       end1 (min (point-max) (1+ end)) '(face org-meta-line))
+	      (org-remove-flyspell-overlays-in end1 end)
+	      (cond
+	       ((and lang (not (string= lang "")) org-src-fontify-natively)
+		(org-src-font-lock-fontify-block lang block-start block-end)
+		(add-text-properties beg1 block-end '(src-block t)))
+	       (quoting
+		(add-text-properties beg1 (min (point-max) (1+ end1))
+				     (let ((face-name (intern (format "org-block-%s" lang))))
+				       (append (and (facep face-name) (list face-name))
+					       '(face org-block))))) ; end of source block
+	       ((not org-fontify-quote-and-verse-blocks))
+	       ((string= block-type "quote")
+		(add-text-properties beg1 (min (point-max) (1+ end1)) '(face org-quote)))
+	       ((string= block-type "verse")
+		(add-text-properties beg1 (min (point-max) (1+ end1)) '(face org-verse))))
+	      (add-text-properties beg beg1 '(face org-block-begin-line))
+	      (add-text-properties (min (point-max) (1+ end)) (min (point-max) (1+ end1))
+				   '(face org-block-end-line))
+	      t))
+	   ((member dc1 '("+title:" "+author:" "+email:" "+date:"))
+	    (org-remove-flyspell-overlays-in
+	     (match-beginning 0)
+	     (if (equal "+title:" dc1) (match-end 2) (match-end 0)))
+	    (add-text-properties
+	     beg (match-end 3)
+	     (if (member (intern (substring dc1 1 -1)) org-hidden-keywords)
+		 '(font-lock-fontified t invisible t)
+	       '(font-lock-fontified t face org-document-info-keyword)))
+	    (add-text-properties
+	     (match-beginning 6) (min (point-max) (1+ (match-end 6)))
+	     (if (string-equal dc1 "+title:")
+		 '(font-lock-fontified t face org-document-title)
+	       '(font-lock-fontified t face org-document-info))))
+	   ((equal dc1 "+caption:")
+	    (org-remove-flyspell-overlays-in (match-end 2) (match-end 0))
+	    (remove-text-properties (match-beginning 0) (match-end 0)
+				    '(display t invisible t intangible t))
+	    (add-text-properties (match-beginning 1) (match-end 3)
+				 '(font-lock-fontified t face org-meta-line))
+	    (add-text-properties (match-beginning 6) (+ (match-end 6) 1)
+				 '(font-lock-fontified t face org-block))
+	    t)
+	   ((member dc3 '(" " ""))
+	    (org-remove-flyspell-overlays-in beg (match-end 0))
+	    (add-text-properties
+	     beg (match-end 0)
+	     '(font-lock-fontified t face font-lock-comment-face)))
+	   (t ;; just any other in-buffer setting, but not indented
+	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+	    (remove-text-properties (match-beginning 0) (match-end 0)
+				    '(display t invisible t intangible t))
+	    (add-text-properties beg (match-end 0)
+				 '(font-lock-fontified t face org-meta-line))
+	    t))))))
+
+
+
+(defface org-block-emacs-lisp
+  `((t (:background "LightCyan1")))
+  "Face for elisp src blocks")
+
+(defface org-block-python
+  `((t (:background "DarkSeaGreen1")))
+  "Face for python blocks")
+
+(defface org-block-ipython
+  `((t (:background "thistle1")))
+  "Face for python blocks") 
+
+(defface org-block-sh
+  `((t (:background "gray90")))
+  "Face for python blocks")
+
+
 ;; * Latex Export settings
 
 ;; Interpret "_" and "^" for export when braces are used.
