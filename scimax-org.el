@@ -643,6 +643,18 @@ F5 inserts the entity code."
      ;; write out the latex command
      (format "\\attachfile{%s}" keyword)))))
 
+(org-add-link-type
+ "altmetric"
+ (lambda (doi)
+   (browse-url (format  "http://dx.doi.org/%s" doi)))
+ (lambda (keyword desc format)
+   (cond
+    ((eq format 'html)
+     (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
+<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword)) 
+    ((eq format 'latex)
+     ""))))
+
 
 ;; * ivy navigation
 (defun ivy-org-jump-to-visible-headline ()
