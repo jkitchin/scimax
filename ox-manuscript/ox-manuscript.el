@@ -127,7 +127,7 @@ if you should continue to the next step."
 ;; http://www.nature.com/srep/authors/submissions.html
 ;; the example shows unnumbered sections which might require a full exporter to get.
 (add-to-list 'org-latex-classes '("nature"
-"\\documentclass[fleqn,10pt]{wlscirep}
+				  "\\documentclass[fleqn,10pt]{wlscirep}
  [NO-DEFAULT-PACKAGES]
  [PACKAGES]
  [EXTRA]"
@@ -151,9 +151,10 @@ if you should continue to the next step."
 ;; I have not been able to find a LaTeX package for Wiley
 
 ;; * Functions
+;;;###autoload
 
 (defun ox-manuscript-toggle-interactive-build ()
- "Toggle state of `ox-manuscript-interactive-build'.
+  "Toggle state of `ox-manuscript-interactive-build'.
 When interactive you will see the output of every step, and be
 prompted to continue it."
   (interactive)
@@ -162,6 +163,7 @@ prompted to continue it."
     (setq ox-manuscript-interactive-build t)))
 
 
+;;;###autoload
 (defun ox-manuscript-cleanup (&optional depth)
   "Delete a bunch of temporary files based on extension.
 DEPTH is an optional symbol to also remove the tex source and pdf
@@ -187,6 +189,8 @@ file.  DEPTH='deep will also remove the tex source and pdf file."
 	     (when (file-exists-p (concat org-base ".pdf"))
 	       (delete-file (concat org-base ".pdf"))))))))
 
+
+;;;###autoload
 (defun ox-manuscript-remove-image-extensions ()
   "Remove .png/pdf/eps extensions from \includegraphics directives.
 This happens in the  exported latex file.
@@ -203,6 +207,8 @@ file."
                                               "{\\([^}].*\\)\.\\(png\\|pdf\\|eps\\)}")
                                       "\\1{\\3}"  tex-contents)))))
 
+
+;;;###autoload
 (defun ox-manuscript-bibliography-to-bbl ()
   "Replace \\bibliography{} in tex file with contents of the bbl file.
 We check for a bbl file, and if there is not one, we run
@@ -229,6 +235,7 @@ pdflatex, then bibtex to get one."
     (kill-buffer)))
 
 
+;;;###autoload
 (defun ox-manuscript-nobibliography ()
   "Create the separate bibliography file and build it.
 This occurs if you use a nobibliography link to specify that
@@ -291,6 +298,7 @@ references should go into a separate file."
     (org-open-file references-pdf)))
 
 
+;;;###autoload
 (defun ox-manuscript-run-bibtex-p ()
   "Return whether we need to run bibtex or not.
 Based on there being a cite link in the buffer.  We assume there
@@ -303,6 +311,7 @@ is made for that."
 
 ;; * Build functions
 
+;;;###autoload
 (defun ox-manuscript-latex (tex-file)
   "Run `ox-manuscript-latex-command' on TEX-FILE.
 This function checks for the presence of minted, and uses
@@ -336,7 +345,7 @@ will be prompted for a tex file name."
     (with-current-buffer (get-buffer-create "*latex*")
       (insert results))))
 
-
+;;;###autoload
 (defun ox-manuscript-bibtex (tex-file)
   "Run `ox-manuscript-bibtex-command' on the TEX-FILE."
   (interactive "fTex file: ")
@@ -348,6 +357,7 @@ will be prompted for a tex file name."
       (insert output))))
 
 
+;;;###autoload
 (defun ox-manuscript-makeindex (tex-file)
   "Run makeindex program on TEX-FILE."
   (interactive "fTex file: ")
@@ -357,6 +367,7 @@ will be prompted for a tex file name."
       (insert output))))
 
 
+;;;###autoload
 (defun ox-manuscript-makeglossary (tex-file)
   "Run makeglossary program on TEX-FILE."
   (interactive "fTex file: ")
@@ -368,6 +379,7 @@ will be prompted for a tex file name."
       (insert output))))
 
 
+;;;###autoload
 (defun ox-manuscript-latex-pdf-process (quoted-tex-file)
   "Build QUOTED-TEX-FILE to pdf.
 The argument is called quoted-tex-file because this seems to be
@@ -510,7 +522,7 @@ intermediate output steps."
 ;; We use our function for building the manuscript
 (setq org-latex-pdf-process 'ox-manuscript-latex-pdf-process)
 
-
+;; 
 (defun ox-manuscript-build ()
   "Build manuscript.
 This is done manually here for building the submission manuscript
@@ -760,7 +772,7 @@ put the packages in the org file.
 ;; * The backend options
 (org-export-define-derived-backend 'cmu-manuscript 'latex
   :menu-entry
-  '(?j "Export with cmu-manuscript"
+  '(?j "Export with ox-manuscript"
        ((?L "As LaTeX buffer" org-latex-export-as-latex)
 	(?l "As LaTeX file" org-latex-export-to-latex)
 	(?p "As manuscript PDF file" ox-manuscript-export-and-build)
@@ -789,9 +801,11 @@ put the packages in the org file.
     t)))
 
 
-(defvar ox-manuscript-templates
+;; ** templates
+(defvar ox-manuscript-templates-dir
   (expand-file-name
-   "ox-manuscript-templates/" (or load-file-name (buffer-file-name)))
+   "ox-manuscript-templates/" (or load-file-name
+				  (file-name-directory (buffer-file-name))))
   "Directory where manuscript templates are.
 The templates are just org-files that can be inserted into a
   buffer.")
@@ -822,18 +836,37 @@ The templates are just org-files that can be inserted into a
 
 (defun ox-manuscript-candidates ()
   "Return a cons list of manuscript candidate templates
-These are snippets in `ox-manuscript-templates' in the \"manuscript\" group.
+These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 '((name . data))."
-  (loop for template-file in (f-entries ox-manuscript-templates
-				       (lambda (f)
-					 (f-ext? f "org")))
+  (loop for template-file in (f-entries ox-manuscript-templates-dir
+					(lambda (f)
+					  (f-ext? f "org")))
 	with data = nil
 	do (setq data (ox-manuscript-parse-template-file template-file))
 	if (string= (plist-get data :group) "manuscript")
 	collect data))
 
 
-(defun ox-manuscript-new-manuscript (template-key)
+;;;###autoload
+(defun ox-manuscript-new-ivy ()
+  "Create a new manuscript from a template in `ox-manuscript-templates-dir'"
+  (interactive)
+  (let ((candidates (ox-manuscript-candidates)))
+    (ivy-read "type: " (mapcar (lambda (x)
+				 (cons (plist-get x :template)
+				       x))
+			       candidates)
+	      :action (lambda (entry) 
+
+			(if (file-exists-p (plist-get entry :default-filename))
+			    (find-file (plist-get entry :default-filename))
+			  (find-file (plist-get entry :default-filename))
+			  (insert-file-contents (plist-get entry :filename))
+			  (goto-char (point-min))
+			  (font-lock-fontify-buffer))))))
+
+;;;###autoload
+(defun ox-manuscript-new-helm (template-key)
   "Create a new manuscript file from TEMPLATE-KEY."
   (interactive
    (list
@@ -855,20 +888,20 @@ These are snippets in `ox-manuscript-templates' in the \"manuscript\" group.
       (goto-char (point-min))
       (font-lock-fontify-buffer))))
 
-
+;;;###autoload
 (defun ox-manuscript-texcount ()
   "Use texcount to estimate words in an org-file if it exists.
 Fall back to `tex-count-words'"
   (interactive)
   (if (executable-find "texcount")
-    (let ((f (org-latex-export-to-latex)))
-      (shell-command
-       (concat "texcount "
-	       "-unicode "
-	       "-inc "
-	       (shell-quote-argument f))))
+      (let ((f (org-latex-export-to-latex)))
+	(shell-command
+	 (concat "texcount "
+		 "-unicode "
+		 "-inc "
+		 (shell-quote-argument f))))
     (message (concat "Warning: texcount not found. Word estimate does not exclude cite/ref commands. "
-	     (tex-count-words (region-beginning) (region-end))))))
+		     (tex-count-words (region-beginning) (region-end))))))
 
 
 (provide 'ox-manuscript)
