@@ -27,7 +27,10 @@
    ("C-c L" . org-insert-link-global)
    ("C-c o" . org-open-at-point-global)
    ("C-c a" . org-agenda)
-   ("C-c c" . org-capture)))
+   ("C-c c" . org-capture)
+   ("H-." . org-time-stamp-inactive)))
+
+(use-package el-get)
 
 ;; * Other packages
 
@@ -38,16 +41,7 @@
   :diminish auto-complete-mode
   :config (ac-config-default))
 
-(use-package avy
-  :bind
-  ("C-c ," . avy-goto-char)
-  ("C-c ." . avy-goto-char-2)
-  ("C-c j" . avy-goto-word-1)
-  ("C-c k" . avy-goto-line)
-  ("C-c L" . avy-goto-char-in-line)
-  ("C-c w" . ace-window)
-  :config
-  (setq hydra-is-helpful t))
+(use-package avy)
 
 ;; installation is failing
 ;; (use-package auctex)
@@ -58,93 +52,91 @@
   (beacon-mode 1))
 
 
-
 (use-package bookmark
   :init
   (setq bookmark-default-file (expand-file-name "user/bookmarks" scimax-dir)
 	bookmark-save-flag 1))
 
 
-(use-package bookmark+)
+(use-package bookmark+
+  ;; I am not currently using this, and it loads a bunch of files on startup.
+  :disabled t)
 
 ;; criticmarks
-(use-package cm-mode)
+;; This is my fork of cm-mode
+(el-get-bundle jkitchin/criticmarkup-emacs)
+
 
 (use-package counsel
   :init
   (setq projectile-completion-system 'ivy)
   (setq ivy-use-virtual-buffers t)
+  (define-prefix-command 'counsel-prefix-map)
+  (global-set-key (kbd "H-c") 'counsel-prefix-map)
+
+  (setf (cdr (assoc t ivy-re-builders-alist))
+	'ivy--regex-ignore-order)
   :bind
-  (("C-c r" . ivy-resume)
-   ("M-x" . counsel-M-x)
+  (("M-x" . counsel-M-x)
    ("C-x b" . ivy-switch-buffer)
    ("C-x C-f" . counsel-find-file)
    ("C-h f" . counsel-describe-function)
    ("C-h v" . counsel-describe-variable)
    ("C-h i" . counsel-info-lookup-symbol)
-   ("C-c g" . counsel-git)) 
+   ("H-c r" . ivy-resume)
+   ("H-c l" . counsel-load-library)
+   ("H-c g" . counsel-git-grep)
+   ("H-c a" . counsel-ag)
+   ("H-c p" . counsel-pt))
+  :diminish ""
   :config
-  (progn 
-    (define-key ivy-minibuffer-map (kbd "C-<SPC>") 'ivy-dispatching-done)
+  (progn
+    (counsel-mode)
+    
+    (define-key ivy-minibuffer-map (kbd "M-<SPC>") 'ivy-dispatching-done)
+
     ;; C-RET call and go to next
-    ;; C-u RET call and go to previous
     (define-key ivy-minibuffer-map (kbd "C-<return>")
       (lambda (arg)
 	"Apply action and move to next/previous candidate."
-	(interactive "P")
+	(interactive)
 	(ivy-call)
-	(if arg
-	    (ivy-previous-line)
-	  (ivy-next-line)) 
-	(ivy--exhibit)))
+	(ivy-next-line)))
+
     ;; M-RET calls action on all candidates to end.
-    ;; C-u M-RET calls caction
     (define-key ivy-minibuffer-map (kbd "M-<return>")
       (lambda (arg)
-	"Apply default action to candidates.
-No prefix ARG: from current candidate to end.
-One prefix ARG: from current candidate to beginning.
-Two prefix ARG: all candidates."
-	(interactive "P")
-	(cond
-	 ((equal arg '())
-	  (loop for i from ivy--index to (- ivy--length 1)
-		do
-		(ivy-call)
-		(ivy-next-line)
-		(ivy--exhibit))
-	  (exit-minibuffer))
-	 ((equal arg '(4))
-	  (loop for i from 0 to ivy--index
-		do
-		(ivy-call)
-		(ivy-previous-line)
-		(ivy--exhibit))
-	  (exit-minibuffer))
-	 ((equal arg '(16))
-	  (ivy-beginning-of-buffer)
-	  (loop for i from 0 to (- ivy--length 1)
-		do
-		(ivy-call)
-		(ivy-next-line)
-		(ivy--exhibit))
-	  (exit-minibuffer)))))
+	"Apply default action to all candidates."
+	(interactive)
+	(ivy-beginning-of-buffer)
+	(loop for i from 0 to (- ivy--length 1)
+	      do
+	      (ivy-call)
+	      (ivy-next-line)
+	      (ivy--exhibit))
+	(exit-minibuffer)))
+    
     ;; s-RET to quit
     (define-key ivy-minibuffer-map (kbd "s-<return>")
       (lambda ()
 	"Exit with no action."
 	(interactive)
 	(ivy-exit-with-action
-	 (lambda (x) nil))))    
+	 (lambda (x) nil))))
+    
     (define-key ivy-minibuffer-map (kbd "?")
       (lambda ()
 	(interactive)
 	(describe-keymap ivy-minibuffer-map)))
     
+    (define-key ivy-minibuffer-map (kbd "<left>") 'ivy-backward-delete-char)
+    
+    (define-key ivy-minibuffer-map (kbd "C-d") 'ivy-backward-delete-char)
+    
     (ivy-set-actions
      t
      '(("i" (lambda (x) (with-ivy-window
-			  (insert x))) "insert")
+			  (insert x))) "insert candidate")
        (" " (lambda (x) (ivy-resume)) "resume")
        ("?" (lambda (x)
 	      (interactive)
@@ -201,7 +193,6 @@ Two prefix ARG: all candidates."
 ;; Provides functions for working with files
 (use-package f)
 
-
 ;; https://github.com/amperser/proselint
 ;; pip install proselint
 (use-package flycheck
@@ -252,6 +243,9 @@ Two prefix ARG: all candidates."
 	    (lambda ()
 	      (flyspell-mode)
 	      (flycheck-mode))))
+
+
+(use-package flx)
 
 (use-package git-messenger
   :bind ("C-x v o" . git-messenger:popup-message))
@@ -308,7 +302,10 @@ Two prefix ARG: all candidates."
 (use-package hy-mode)
 
 (use-package hydra
-  :config
+  :init
+  (setq hydra-is-helpful t)
+  
+  :config 
   (require 'hydra-ox))
 
 (use-package ivy-hydra)
@@ -319,25 +316,26 @@ Two prefix ARG: all candidates."
 
 ;; Superior lisp editing
 (use-package lispy
-  :diminish emacs-lisp-mode
   :config
-  (add-hook 'emacs-lisp-mode-hook
-	    (lambda ()
-	      (lispy-mode)
-	      (eldoc-mode)))
-  (add-hook 'python-mode-hook
-	    (lambda ()
-	      (lispy-mode)
-	      (eldoc-mode))))
+  (dolist (hook '(emacs-lisp-mode-hook
+		  python-mode-hook))
+    (add-hook hook
+	      (lambda ()
+		(lispy-mode)
+		(eldoc-mode)))))
 
 (use-package magit
   :init (setq magit-completing-read-function 'ivy-completing-read)
-  :bind ("<f5>" . magit-status))
+  :bind
+  ("<f5>" . magit-status)
+  ("C-c v t" . magit-status))
 
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
+
 (use-package ob-ipython
+  :disabled t
   :config
   (defun ob-ipython--kernel-repl-cmd (name)
     (list "jupyter" "console" "--existing" (format "emacs-%s.json" name)))
@@ -345,11 +343,14 @@ Two prefix ARG: all candidates."
   (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
+(el-get-bundle jkitchin/ob-ipython
+  ;; Make sure pygments can handle ipython for exporting.
+  (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
+    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console"))
+  (require 'ob-ipython))
 
-(use-package org-ref
-  :init 
-  :bind ("H-b" . org-ref-bibtex-hydra/body)
-  :config
+;; Bleeding edge org-ref.
+(el-get-bundle jkitchin/org-ref
   (require 'doi-utils)
   (require 'org-ref-isbn)
   (require 'org-ref-pubmed)
@@ -363,7 +364,14 @@ Two prefix ARG: all candidates."
 	bibtex-autokey-titleword-separator "-"
 	bibtex-autokey-titlewords 2
 	bibtex-autokey-titlewords-stretch 1
-	bibtex-autokey-titleword-length 5))
+	bibtex-autokey-titleword-length 5)
+  (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
+
+;; This is the MELPA version
+(use-package org-ref
+  :disabled t
+  :init
+  :bind ("H-b" . org-ref-bibtex-hydra/body))
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
@@ -373,15 +381,12 @@ Two prefix ARG: all candidates."
   ("C-c pf" . projectile-find-file)
   ("C-c pg" . projectile-grep)
   ("C-c pk" . projectile-kill-buffers)
-  :diminish "prj"
+  ;; nothing good in the modeline to keep.
+  :diminish "" 			     
   :config
   (projectile-global-mode))
 
 (use-package pydoc)
-
-(use-package python
-  :mode ("\\.py\\'" . python-mode)
-  :interpreter ("python" . python-mode))
 
 (use-package rainbow-mode)
 
@@ -467,6 +472,11 @@ Two prefix ARG: all candidates."
     :ensure nil
     :load-path path))
 
+(let ((path (expand-file-name "org-show" scimax-dir)))
+  (use-package org-show
+    :ensure nil
+    :load-path path))
+
 (use-package words
   :ensure nil
   :load-path scimax-dir
@@ -480,7 +490,6 @@ Two prefix ARG: all candidates."
 (use-package cm-mods
   :ensure nil
   :load-path scimax-dir)
-
 
 
 ;; * User packages
