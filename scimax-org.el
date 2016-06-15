@@ -13,6 +13,10 @@
 ;; allow lists with letters in them.
 (setq org-list-allow-alphabetical t)
 
+;; setup archive location in archive directory in current folder
+(setq org-archive-location "archive/%s_archive::")
+
+
 ;; * Speed commands
 (setq org-use-speed-commands t)
 
