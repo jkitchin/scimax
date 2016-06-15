@@ -7,7 +7,7 @@
 ;; * Setup
 
 (defvar nb-notebook-directory
-  "~/Dropbox/research/"
+  "~/Dropbox/projects/"
   "Directory where projects are stored.")
 
 (unless (file-directory-p nb-notebook-directory)
@@ -35,6 +35,7 @@
 	(shell-command "git init")))
     (find-file (expand-file-name nb-master-file dir))
     (projectile-mode)))
+
 
 
 ;; * Notebook agenda

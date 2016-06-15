@@ -126,6 +126,124 @@ This enables you to use tab to open and close outlines."
 				       (kill-buffer (current-buffer))))
 
 ;; * Navigation
+
+(defvar gravy-forward 'forward-char
+  "The next item in a forward sense.")
+
+(defvar gravy-backward 'backward-char
+  "The previous item in a backward sense.")
+
+(defvar gravy-up 'previous-line
+  "The previous item in an up sense.")
+
+(defvar gravy-down 'next-line
+  "The next item in a down sense.")
+
+(defvar gravy-avy-1 'avy-goto-char-in-line
+  "Preferred avy for item.")
+
+(defvar gravy-avy-2 'avy-goto-char-2
+  "Preferred 2nd avy")
+
+(defvar gravy-avy-3 'avy-goto-line
+  "Preferred 3rd avy")
+
+(defvar gravy-beginning 'beginning-of-visual-line
+  "The beginning of an item.")
+
+(defvar gravy-end 'end-of-visual-line
+  "The end of an item.")
+
+
+(defhydra gravy (:color red :hint nil)
+  "
+               _j_: ← _i_: ↑ _k_: ↓ _l_: →
+  _h_: beginning _;_: end       _<_: point-min _>_: point-max     
+ _'_: char-in-line
+   
+"
+  ("j" (funcall gravy-backward))
+  ("l" (funcall gravy-forward))
+  ("i" (funcall gravy-up))
+  ("k" (funcall gravy-down))
+
+  ("q" nil "quit" :color blue)
+
+  ("h" (call-interactively gravy-beginning))
+  (";" (call-interactively gravy-end))
+  
+  ("'" (call-interactively gravy-avy-1))
+  ("," (call-interactively gravy-avy-2))
+  ("." (call-interactively gravy-avy-3))
+
+  ("<" beginning-of-buffer)
+  (">" end-of-buffer)
+  ;; these are different modes
+  ;; char
+  ("c" (lambda ()
+	 (interactive)
+	 (setq gravy-backward 'backward-char
+	       gravy-up 'previous-line
+	       gravy-forward 'forward-char 
+	       gravy-down 'next-line
+	       gravy-avy-1 'avy-goto-char-in-line
+	       gravy-avy-2 'avy-goto-char-2
+	       gravy-avy-3 'avy-goto-line))
+   "char mode")
+  ("w" (lambda ()
+	 (interactive)
+	 (setq gravy-backward 'backward-word
+	       gravy-up 'previous-line
+	       gravy-forward 'forward-word 
+	       gravy-down 'next-line
+	       gravy-avy-1 'avy-goto-char-in-line
+	       gravy-avy-2 'avy-goto-word-1 
+	       gravy-avy-3 'avy-goto-word-or-subword-1))
+   "word mode")
+  ("s" (lambda ()
+	 (interactive)
+	 (setq gravy-backward 'backward-sentence
+	       gravy-up 'previous-line
+	       gravy-down 'next-line
+	       gravy-forward 'forward-sentence 
+	       gravy-avy-1 'avy-goto-char-in-line
+	       gravy-avy-2 'avy-goto-char-2
+	       gravy-avy-3 'avy-goto-word-1))
+   "sentence mode")
+  
+  ("p" (lambda ()
+	 (interactive)
+	 (setq gravy-backward 'backward-paragraph
+	       gravy-forward 'forward-paragraph
+	       gravy-up 'previous-line
+	       gravy-down 'next-line
+	       gravy-avy-1 'avy-goto-char-in-line
+	       gravy-avy-2 'avy-goto-char-2
+	       gravy-avy-3 'avy-goto-line))
+   "paragraph mode")
+  
+  ("x" (lambda ()
+	 (interactive)
+	 (setq gravy-backward 'backward-sexp
+	       gravy-forward 'forward-sexp
+	       gravy-up 'previous-line
+	       gravy-down 'next-line
+	       gravy-avy-1 'avy-goto-char-in-line
+	       gravy-avy-2 'lispy-ace-paren
+	       gravy-avy-3 'lispy-ace-symbol))
+   "sexp mode"))
+
+(defun gravy ()
+  (interactive)
+  (setq gravy-backward 'backward-char
+	gravy-up 'previous-line
+	gravy-forward 'forward-char 
+	gravy-down 'next-line
+	gravy-avy-1 'avy-goto-char-in-line
+	gravy-avy-2 'avy-goto-char-2
+	gravy-avy-3 'avy-goto-line)
+  (gravy/body))
+
 ;;  I mapped Capslock to f12
 ;; https://pqrs.org/osx/karabiner/seil.html.en
 (defhydra hydra-avy (:color blue :hint nil)

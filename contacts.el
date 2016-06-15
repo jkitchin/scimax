@@ -68,6 +68,7 @@ These are stored persistently in `contacts-cache-file'.")
   (setq contacts
 	(cl-loop
 	 for contacts-file in contacts-files
+	 if (file-exists-p contacts-file)
 	 append (with-temp-buffer
 		  (insert-file-contents contacts-file)
 		  ;; return the known results if hash matches

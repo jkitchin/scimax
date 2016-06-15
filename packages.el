@@ -66,9 +66,16 @@
 ;; This is my fork of cm-mode
 (el-get-bundle jkitchin/criticmarkup-emacs)
 
+(use-package swiper
+  :bind
+  ("C-s" . counsel-grep-or-swiper)
+  :diminish ivy-mode
+  :config
+  (ivy-mode))
 
 (use-package counsel
   :init
+  (require 'ivy)
   (setq projectile-completion-system 'ivy)
   (setq ivy-use-virtual-buffers t)
   (define-prefix-command 'counsel-prefix-map)
@@ -105,7 +112,7 @@
 
     ;; M-RET calls action on all candidates to end.
     (define-key ivy-minibuffer-map (kbd "M-<return>")
-      (lambda (arg)
+      (lambda ()
 	"Apply default action to all candidates."
 	(interactive)
 	(ivy-beginning-of-buffer)
@@ -316,6 +323,7 @@
 
 ;; Superior lisp editing
 (use-package lispy
+  :after swiper
   :config
   (dolist (hook '(emacs-lisp-mode-hook
 		  python-mode-hook))
@@ -349,8 +357,11 @@
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console"))
   (require 'ob-ipython))
 
-;; Bleeding edge org-ref.
-(el-get-bundle jkitchin/org-ref
+
+(use-package org-ref
+  :ensure nil
+  :load-path "/Users/jkitchin/Dropbox/jkitchin-github/org-ref/"
+  :config
   (require 'doi-utils)
   (require 'org-ref-isbn)
   (require 'org-ref-pubmed)
@@ -367,11 +378,29 @@
 	bibtex-autokey-titleword-length 5)
   (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
 
+;; Bleeding edge org-ref from github.
+;; (el-get-bundle jkitchin/org-ref
+;;   (require 'doi-utils)
+;;   (require 'org-ref-isbn)
+;;   (require 'org-ref-pubmed)
+;;   (require 'org-ref-arxiv)
+;;   (require 'org-ref-bibtex)
+;;   (require 'org-ref-pdf)
+;;   (require 'org-ref-url-utils)
+;;   (setq bibtex-autokey-year-length 4
+;; 	bibtex-autokey-name-year-separator "-"
+;; 	bibtex-autokey-year-title-separator "-"
+;; 	bibtex-autokey-titleword-separator "-"
+;; 	bibtex-autokey-titlewords 2
+;; 	bibtex-autokey-titlewords-stretch 1
+;; 	bibtex-autokey-titleword-length 5)
+;;   (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
+
 ;; This is the MELPA version
-(use-package org-ref
-  :disabled t
-  :init
-  :bind ("H-b" . org-ref-bibtex-hydra/body))
+;; (use-package org-ref
+;;   :disabled t
+;;   :init
+;;   :bind ("H-b" . org-ref-bibtex-hydra/body))
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
@@ -384,6 +413,7 @@
   ;; nothing good in the modeline to keep.
   :diminish "" 			     
   :config
+  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
   (projectile-global-mode))
 
 (use-package pydoc)
@@ -412,13 +442,6 @@
 
 ;; keep recent commands available in M-x
 (use-package smex)
-
-(use-package swiper
-  :bind
-  ("C-s" . counsel-grep-or-swiper)
-  :diminish ivy-mode
-  :config
-  (ivy-mode))
 
 (use-package undo-tree
   :diminish undo-tree-mode 
