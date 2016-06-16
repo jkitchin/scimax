@@ -1,7 +1,13 @@
 ;;; ox-rtf.el --- An org-mode exporter to RTF
 
 ;;; Commentary:
-;; 
+;; See http://orgmode.org/manual/Advanced-configuration.html
+;;
+;; for RTF see http://www.biblioscape.com/rtf15_spec.htm
+;;
+;; It isn't my intention to full support RTF export to arbitrily complex
+;; documents, although I would like to get to where citations as footnotes are
+;; reasonable, and cross-references work.
 
 (defun rtf-bold (bold contents info)
   (format "{\\b %s}" contents))
@@ -64,6 +70,14 @@
  \"%s\"
  \\\\* MERGEFORMATINET }}{\\fldrslt {  }}}"
 	    (expand-file-name (org-element-property :path link))))
+   ;; org-ref citations. 
+   ((-contains? org-ref-cite-types (org-element-property :type link))
+    (let* ((path (org-element-property :path link)))
+      (mapconcat (lambda (key)
+		   (format "{\\super\\chftn}{\\footnote\\pard\\plain\\chftn %s.}"
+			   (org-ref-get-bibtex-entry-citation key)))
+		 (split-string path ",")
+		 "{\\super ,}")))
    (t (org-element-property :raw-link link))))
 
 (defun rtf-table (tbl contents info)
@@ -75,6 +89,36 @@
 	       (org-element-property :contents-end tbl))
 	      "\n")
 	     "\n"))
+
+(defun rtf-latex-fragment (ltx contents info)
+  (let ((f (concat temporary-file-directory
+		   "latex-fragment-"
+		   (md5 (org-element-property :value ltx))
+		   ".png")))
+    (org-create-formula-image
+     (org-element-property :value ltx)
+     f
+     '(:foreground default :background default
+		   :scale 1.0 :html-foreground "Black"
+		   :html-background "Transparent" :html-scale 1.0
+		   :matchers
+		   ("begin" "$1" "$" "$$" "\\(" "\\["))
+     (current-buffer)
+     org-latex-create-formula-image-program)
+    (format "{\\field\\fldedit{\\*\\fldinst { INCLUDEPICTURE  \\\\d
+ \"%s\"
+ \\\\* MERGEFORMATINET }}{\\fldrslt {  }}}"
+	    f)))
+
+;; This is not very sophisticated.
+;; TODO
+(defun rtf-footnote-reference (footnote-reference contents info)
+  (let ((def (org-export-get-footnote-definition footnote-reference info)))
+    (format "{\\super\\chftn}{\\footnote\\pard\\plain\\chftn %s}"
+	    (org-trim (org-export-data def info)))))
+
+(defun rtf-footnote-definition (footnote-definition contents info)
+  "")
 
 (org-export-define-derived-backend 'RTF 'ascii
   :translate-alist '((bold . rtf-bold)
@@ -89,25 +133,30 @@
 		     (src-block . rtf-src)
 		     (table . rtf-table) 
 		     (fixed-width . rtf-fixed-width)
-		     (link . rtf-link)))
+		     (link . rtf-link)
+		     (latex-fragment . rtf-latex-fragment)
+		     (footnote-reference . rtf-footnote-reference)
+		     (footnote-definition . rtf-footnote-definition)))
 
 ;;;###autoload
 (defun ox-rtf-formatted-copy (r1 r2)
   "Convert the selected region to RTF and put it on the clipboard."
   (interactive "r")
-  (save-window-excursion
-    (let* ((buf (org-export-to-buffer 'RTF "*Org RTF Export*" nil nil t t))
-	   (rtf (with-current-buffer buf (buffer-string))))
-      (with-temp-buffer
-	(insert (format "{\\rtf1\\ansi\\deff0
+  ;; temporarily overwrite this template from ox-ascii
+  (flet ((org-ascii-inner-template (contents info) contents)) 
+    (save-window-excursion
+      (let* ((buf (org-export-to-buffer 'RTF "*Org RTF Export*" nil nil t t))
+	     (rtf (with-current-buffer buf (buffer-string))))
+	(with-temp-buffer
+	  (insert (format "{\\rtf1\\ansi\\deff0
 {\\fonttbl
 {\\f0\\froman Times;}
 {\\f1\\fswiss Arial;}
 {\\f2\\fmodern Courier New;}}
 %s}" rtf))
-	(kill-new (buffer-string))
-	(shell-command-on-region (point-min) (point-max) "pbcopy")) 
-      (kill-buffer buf))))
+	  (kill-new (buffer-string))
+	  (shell-command-on-region (point-min) (point-max) "pbcopy")) 
+	(kill-buffer buf)))))
 
 ;;;###autoload
 (defun ox-rtf-export-to-rtf (&optional async subtreep visible-only body-only ext-plist)
