@@ -243,10 +243,21 @@ is positive, move after, and if negative, move before."
 ;; default width
 (setq org-image-actual-width '(600))
 
-
 (add-hook 'org-babel-after-execute-hook
 	  'org-display-inline-images)
 
+(defun scimax-align-result-table ()
+  "Align tables in the subtree."
+  (save-restriction
+    (save-excursion
+      (org-narrow-to-subtree)
+      (org-element-map (org-element-parse-buffer) 'table
+	(lambda (tbl)
+	  (goto-char (org-element-property :begin tbl))
+	  (org-table-align))))))
+
+(add-hook 'org-babel-after-execute-hook
+	  'scimax-align-result-table)
 
 ;; * Colored src blocks
 ;; based on patches from Rasmus <rasmus@gmx.us>
