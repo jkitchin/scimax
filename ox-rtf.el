@@ -158,9 +158,10 @@
 	  (shell-command-on-region (point-min) (point-max) "pbcopy")) 
 	(kill-buffer buf)))))
 
+;; TODO: this isn't up to the other exporters standards
 ;;;###autoload
-(defun ox-rtf-export-to-rtf (&optional async subtreep visible-only body-only ext-plist)
-  "Export to RTF."
+(defun ox-rtf-export-to-rtf-and-open ()
+  "Export to RTF and open the result."
   (interactive)
   (ox-rtf-formatted-copy (point-min) (point-max))
   (let ((fname (file-name-sans-extension (buffer-file-name)))) 
