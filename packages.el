@@ -203,6 +203,7 @@
 ;; https://github.com/amperser/proselint
 ;; pip install proselint
 (use-package flycheck
+  :disabled t
   :config
   (flycheck-define-checker
       proselint
@@ -476,6 +477,11 @@
   ("s-e" . ivy-insert-org-entity)
   :init
   (require 'scimax-org))
+
+(use-package ox-rtf
+  :ensure nil
+  :load-path scimax-dir
+  :bind ("H-k" . ox-rtf-formatted-copy))
 
 (use-package scimax-email
   :ensure nil
