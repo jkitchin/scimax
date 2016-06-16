@@ -28,7 +28,7 @@
   (format "{\\strike %s}" contents))
 
 (defun rtf-paragraph (el contents info)
-  (format "{\\pard%s\\par\\sa1}" contents))
+  (format "{\\pard %s\\par\\sa1}" contents))
 
 (defun rtf-headline (hl contents info)
   (format
@@ -53,12 +53,13 @@
 (defun rtf-link (link contents info)
   (cond
    ((-contains? '("http" "https") (org-element-property :type link))
-    (format "{\\cf2\\field{\\*\\fldinst{HYPERLINK \"%s\"}}{\\fldrslt{\\ul %s}}}" (org-element-property :raw-link link)
+    (format "{\\field{\\*\\fldinst{HYPERLINK \"%s\"}}{\\fldrslt{\\ul %s}}}" (org-element-property :raw-link link)
 	    (if (org-element-property :contents-begin link)
 		(buffer-substring (org-element-property :contents-begin link)
 				  (org-element-property :contents-end link))
 	      (org-element-property :raw-link link))))
-   ((string= "file" (org-element-property :type link))
+   ((and (string= "file" (org-element-property :type link))
+	 (-contains? '("png") (file-name-extension (org-element-property :path link))))
     (format "{\\field\\fldedit{\\*\\fldinst { INCLUDEPICTURE  \\\\d
  \"%s\"
  \\\\* MERGEFORMATINET }}{\\fldrslt {  }}}"
@@ -90,6 +91,7 @@
 		     (fixed-width . rtf-fixed-width)
 		     (link . rtf-link)))
 
+;;;###autoload
 (defun ox-rtf-formatted-copy (r1 r2)
   "Convert the selected region to RTF and put it on the clipboard."
   (interactive "r")
@@ -106,6 +108,16 @@
 	(kill-new (buffer-string))
 	(shell-command-on-region (point-min) (point-max) "pbcopy")) 
       (kill-buffer buf))))
+
+;;;###autoload
+(defun ox-rtf-export-to-rtf (&optional async subtreep visible-only body-only ext-plist)
+  "Export to RTF."
+  (interactive)
+  (ox-rtf-formatted-copy (point-min) (point-max))
+  (let ((fname (file-name-sans-extension (buffer-file-name)))) 
+    (with-temp-file fname
+      (yank))
+    (org-open-file fname)))
 
 
 (provide 'ox-rtf)
