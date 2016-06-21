@@ -250,10 +250,11 @@ is positive, move after, and if negative, move before."
   "Align tables in the subtree."
   (save-restriction
     (save-excursion
-      (org-narrow-to-subtree)
+      (unless (org-before-first-heading-p) (org-narrow-to-subtree))
       (org-element-map (org-element-parse-buffer) 'table
 	(lambda (tbl)
 	  (goto-char (org-element-property :begin tbl))
+	  (while (not (looking-at "|")) (forward-line))
 	  (org-table-align))))))
 
 (add-hook 'org-babel-after-execute-hook
@@ -677,6 +678,13 @@ F5 inserts the entity code."
   (interactive)
   (org-mark-ring-push)
   (avy-with avy-goto-line (avy--generic-jump "^\\*+" nil avy-style)))
+
+(defun ivy-jump-to-visible-sentence ()
+  "Jump to visible sentence in the buffer."
+  (interactive)
+  (org-mark-ring-push)
+  (avy-with avy-goto-line (avy--generic-jump (sentence-end) nil avy-style))
+  (forward-sentence))
 
 (defun ivy-org-jump-to-heading ()
   "Jump to heading in the current buffer."
