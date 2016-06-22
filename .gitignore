@@ -5,3 +5,4 @@ elpa
 *.org#
 user/
 sandbox
+el-get
