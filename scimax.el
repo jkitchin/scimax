@@ -121,60 +121,68 @@ This enables you to use tab to open and close outlines."
 ;; * Misc
 
 (require 'image-mode)
-(define-key image-mode-map (kbd "q") (lambda ()
-				       (interactive)
-				       (kill-buffer (current-buffer))))
+(define-key image-mode-map (kbd "q")
+  (lambda ()
+    (interactive)
+    (kill-buffer (current-buffer))))
 
 ;; * Navigation
 
-(defvar gravy-forward 'forward-char
+(defvar navy-forward 'forward-char
   "The next item in a forward sense.")
 
-(defvar gravy-backward 'backward-char
+(defvar navy-backward 'backward-char
   "The previous item in a backward sense.")
 
-(defvar gravy-up 'previous-line
+(defvar navy-up 'previous-line
   "The previous item in an up sense.")
 
-(defvar gravy-down 'next-line
+(defvar navy-down 'next-line
   "The next item in a down sense.")
 
-(defvar gravy-avy-1 'avy-goto-char-in-line
+(defvar navy-avy-1 'avy-goto-char-in-line
   "Preferred avy for item.")
 
-(defvar gravy-avy-2 'avy-goto-char-2
+(defvar navy-avy-2 'avy-goto-char-2
   "Preferred 2nd avy")
 
-(defvar gravy-avy-3 'avy-goto-line
+(defvar navy-avy-3 'avy-goto-line
   "Preferred 3rd avy")
 
-(defvar gravy-beginning 'beginning-of-visual-line
+(defvar navy-beginning 'beginning-of-visual-line
   "The beginning of an item.")
 
-(defvar gravy-end 'end-of-visual-line
+(defvar navy-end 'end-of-visual-line
   "The end of an item.")
 
+(defvar navy-mode "char"
+  "The active mode.")
 
-(defhydra gravy (:color red :hint nil)
+
+(defhydra navy (:color red :hint nil)
   "
-               _j_: ← _i_: ↑ _k_: ↓ _l_: →
-  _h_: beginning _;_: end       _<_: point-min _>_: point-max     
- _'_: char-in-line
+%(format \"%s-mode\" navy-mode)
+                                     _i_: %`navy-up
+_h_: %`navy-beginning    _j_:%`navy-backward    _k_: %`navy-forward  _;_: %`navy-end
+                                     _k_: %`navy-down
+                
+                              _<_: point-min _>_: point-max     
+                    _'_: %`navy-avy-1  _,_: %`navy-avy-2 _._: %`navy-avy-3
    
 "
-  ("j" (funcall gravy-backward))
-  ("l" (funcall gravy-forward))
-  ("i" (funcall gravy-up))
-  ("k" (funcall gravy-down))
+  ("j" (funcall navy-backward))
+  ("l" (funcall navy-forward))
+  ("i" (funcall navy-up))
+  ("k" (funcall navy-down))
 
   ("q" nil "quit" :color blue)
 
-  ("h" (call-interactively gravy-beginning))
-  (";" (call-interactively gravy-end))
+  ("h" (call-interactively navy-beginning))
+  (";" (call-interactively navy-end))
   
-  ("'" (call-interactively gravy-avy-1))
-  ("," (call-interactively gravy-avy-2))
-  ("." (call-interactively gravy-avy-3))
+  ("'" (call-interactively navy-avy-1))
+  ("," (call-interactively navy-avy-2))
+  ("." (call-interactively navy-avy-3))
 
   ("<" beginning-of-buffer)
   (">" end-of-buffer)
@@ -182,83 +190,120 @@ This enables you to use tab to open and close outlines."
   ;; char
   ("c" (lambda ()
 	 (interactive)
-	 (setq gravy-backward 'backward-char
-	       gravy-up 'previous-line
-	       gravy-forward 'forward-char 
-	       gravy-down 'next-line
-	       gravy-avy-1 'avy-goto-char-in-line
-	       gravy-avy-2 'avy-goto-char-2
-	       gravy-avy-3 'avy-goto-line))
+	 (setq navy-mode "char"
+	       navy-backward 'backward-char
+	       navy-up 'previous-line
+	       navy-forward 'forward-char 
+	       navy-down 'next-line
+	       navy-avy-1 'avy-goto-char-in-line
+	       navy-avy-2 'avy-goto-char-2
+	       navy-avy-3 'avy-goto-line))
    "char mode")
+
   ("w" (lambda ()
 	 (interactive)
-	 (setq gravy-backward 'backward-word
-	       gravy-up 'previous-line
-	       gravy-forward 'forward-word 
-	       gravy-down 'next-line
-	       gravy-avy-1 'avy-goto-char-in-line
-	       gravy-avy-2 'avy-goto-word-1 
-	       gravy-avy-3 'avy-goto-word-or-subword-1))
+	 (setq navy-mode "word"
+	       navy-backward 'backward-word
+	       navy-up 'previous-line
+	       navy-forward 'forward-word 
+	       navy-down 'next-line
+	       navy-avy-1 'avy-goto-char-in-line
+	       navy-avy-2 'avy-goto-word-1 
+	       navy-avy-3 'avy-goto-word-or-subword-1))
    "word mode")
   ("s" (lambda ()
 	 (interactive)
-	 (setq gravy-backward 'backward-sentence
-	       gravy-up 'previous-line
-	       gravy-down 'next-line
-	       gravy-forward 'forward-sentence 
-	       gravy-avy-1 'avy-goto-char-in-line
-	       gravy-avy-2 'avy-goto-char-2
-	       gravy-avy-3 'avy-goto-word-1))
+	 (setq navy-mode "sentence"
+	       navy-backward 'backward-sentence
+	       navy-up 'previous-line
+	       navy-down 'next-line
+	       navy-forward 'forward-sentence 
+	       navy-avy-1 'avy-goto-char-in-line
+	       navy-avy-2 'avy-goto-char-2
+	       navy-avy-3 'avy-goto-word-1))
    "sentence mode")
   
   ("p" (lambda ()
 	 (interactive)
-	 (setq gravy-backward 'backward-paragraph
-	       gravy-forward 'forward-paragraph
-	       gravy-up 'previous-line
-	       gravy-down 'next-line
-	       gravy-avy-1 'avy-goto-char-in-line
-	       gravy-avy-2 'avy-goto-char-2
-	       gravy-avy-3 'avy-goto-line))
+	 (setq navy-mode "paragraph"
+	       navy-backward 'backward-paragraph
+	       navy-forward 'forward-paragraph
+	       navy-up 'previous-line
+	       navy-down 'next-line
+	       navy-avy-1 'avy-goto-char-in-line
+	       navy-avy-2 'avy-goto-char-2
+	       navy-avy-3 'avy-goto-line))
    "paragraph mode")
+
+  ("g" (lambda ()
+	 (interactive)
+	 (setq navy-mode "page"
+	       navy-backward 'backward-page
+	       navy-forward 'forward-page
+	       navy-up 'backward-page
+	       navy-down 'forward-page
+	       navy-avy-1 'avy-goto-char-in-line
+	       navy-avy-2 'avy-goto-char-2
+	       navy-avy-3 'avy-goto-line))
+   "page mode")
+
+  ("n" (lambda ()
+	 (interactive)
+	 (setq navy-mode "line"
+	       navy-up 'avy-goto-line-above
+	       navy-down 'avy-goto-line-below
+	       navy-forward 'next-line
+	       navy-backward 'previous-line
+	       navy-avy-3 'avy-goto-line))
+   "line mode")
   
   ("x" (lambda ()
 	 (interactive)
-	 (setq gravy-backward 'backward-sexp
-	       gravy-forward 'forward-sexp
-	       gravy-up 'previous-line
-	       gravy-down 'next-line
-	       gravy-avy-1 'avy-goto-char-in-line
-	       gravy-avy-2 'lispy-ace-paren
-	       gravy-avy-3 'lispy-ace-symbol))
-   "sexp mode"))
+	 (setq navy-mode "sexp"
+	       navy-backward 'backward-sexp
+	       navy-forward 'forward-sexp
+	       navy-up 'previous-line
+	       navy-down 'next-line
+	       navy-avy-1 'avy-goto-char-in-line
+	       navy-avy-2 'lispy-ace-paren
+	       navy-avy-3 'lispy-ace-symbol)) 
+   "sexp mode")
 
-(defun gravy ()
+  ("r" counsel-git-grep "git grep")
+  ("t" avy-goto-char-timer "char timer"))
+
+
+(defun navy ()
   (interactive)
-  (setq gravy-backward 'backward-char
-	gravy-up 'previous-line
-	gravy-forward 'forward-char 
-	gravy-down 'next-line
-	gravy-avy-1 'avy-goto-char-in-line
-	gravy-avy-2 'avy-goto-char-2
-	gravy-avy-3 'avy-goto-line)
-  (gravy/body))
+  (setq navy-backward 'backward-char
+	navy-up 'previous-line
+	navy-forward 'forward-char 
+	navy-down 'next-line
+	navy-avy-1 'avy-goto-char-in-line
+	navy-avy-2 'avy-goto-char-2
+	navy-avy-3 'avy-goto-line
+	navy-beginning 'beginning-of-visual-line
+	navy-end 'end-of-visual-line)
+  (navy/body))
 
 ;;  I mapped Capslock to f12
-;; https://pqrs.org/osx/karabiner/seil.html.en
-(defhydra hydra-avy (:color blue :hint nil)
-  "jump" 
-  ("s" counsel-grep-or-swiper "swiper") 
-  ("j" avy-goto-char-2 "char2")
-  ("k" avy-goto-word-1 "word1")
-  ("l" avy-goto-line "line")
-  (";" avy-goto-char-in-line "char in line")
-  ("t" avy-goto-char-timer "char timer")
-  ("g" counsel-git-grep "git grep")
-  ("h" ivy-org-jump-to-heading "org heading")
-  ("a" ivy-org-jump-to-agenda-heading "agenda heading"))
+(global-set-key (kbd "<f12>") 'navy)
 
-(global-set-key (kbd "<f12>") 'hydra-avy/body)
+
+;; https://pqrs.org/osx/karabiner/seil.html.en
+;; (defhydra hydra-avy (:color blue :hint nil)
+;;   "jump" 
+;;   ("s" counsel-grep-or-swiper "swiper") 
+;;   ("j" avy-goto-char-2 "char2")
+;;   ("k" avy-goto-word-1 "word1")
+;;   ("l" avy-goto-line "line")
+;;   (";" avy-goto-char-in-line "char in line")
+;;   ("t" avy-goto-char-timer "char timer")
+;;   ("g" counsel-git-grep "git grep")
+;;   ("h" ivy-org-jump-to-heading "org heading")
+;;   ("a" ivy-org-jump-to-agenda-heading "agenda heading"))
+
+
 ;; * The end
 (provide 'scimax)
 
