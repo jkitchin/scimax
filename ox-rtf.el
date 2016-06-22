@@ -4,6 +4,7 @@
 ;; See http://orgmode.org/manual/Advanced-configuration.html
 ;;
 ;; for RTF see http://www.biblioscape.com/rtf15_spec.htm
+;; and https://www.safaribooksonline.com/library/view/rtf-pocket-guide/9781449302047/ch01.html
 ;;
 ;; It isn't my intention to full support RTF export to arbitrily complex
 ;; documents, although I would like to get to where citations as footnotes are
@@ -34,13 +35,14 @@
   (format "{\\strike %s}" contents))
 
 (defun rtf-paragraph (el contents info)
-  (format "{\\pard %s\\par\\sa1}" contents))
+  (format "{\\pard %s\\par\\sa1}" (or contents "")))
 
 (defun rtf-headline (hl contents info)
   (format
    "{\\b %s}\\par %s"
-   (org-element-property :raw-value hl) contents))
+   (or (org-element-property :raw-value hl) "")  contents))
 
+;; TODO: how to handle this fonttbl?
 (defun rtf-src (src contents info)
   (let ((lang (org-element-property :language src))
 	(code (org-element-property :value src)))
@@ -52,9 +54,14 @@
 {\\f0\\froman Times;}
 {\\f1\\fswiss Arial;}
 {\\f2\\fmodern Courier New;}}\\f0"
-	 (shell-command-to-string     
-	  (format "highlight -O rtf --src-lang=python rtf-exporter" lang)))
-      (delete-file "rtf-exporter"))))
+	 (with-temp-buffer
+	   (insert code)
+	   (shell-command-on-region
+	    (point-min)
+	    (point-max)
+	    (format "pygmentize -f rtf -l %s" lang))
+	   (with-current-buffer "*Shell Command Output*"
+	     (buffer-string)))))))
 
 (defun rtf-link (link contents info)
   (cond
@@ -111,11 +118,11 @@
 	    f)))
 
 ;; This is not very sophisticated.
-;; TODO
+;; TODO, neighboring footnotes, formatting.
 (defun rtf-footnote-reference (footnote-reference contents info)
   (let ((def (org-export-get-footnote-definition footnote-reference info)))
     (format "{\\super\\chftn}{\\footnote\\pard\\plain\\chftn %s}"
-	    (org-trim (org-export-data def info)))))
+	    (org-export-data def info))))
 
 (defun rtf-footnote-definition (footnote-definition contents info)
   "")
@@ -143,7 +150,7 @@
   "Convert the selected region to RTF and put it on the clipboard."
   (interactive "r")
   ;; temporarily overwrite this template from ox-ascii
-  (flet ((org-ascii-inner-template (contents info) contents)) 
+  (cl-flet ((org-ascii-inner-template (contents info) contents)) 
     (save-window-excursion
       (let* ((buf (org-export-to-buffer 'RTF "*Org RTF Export*" nil nil t t))
 	     (rtf (with-current-buffer buf (buffer-string))))
