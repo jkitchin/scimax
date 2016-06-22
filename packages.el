@@ -28,9 +28,13 @@
    ("C-c o" . org-open-at-point-global)
    ("C-c a" . org-agenda)
    ("C-c c" . org-capture)
+   ("s-<SPC>" . org-mark-ring-goto)
    ("H-." . org-time-stamp-inactive)))
 
-(use-package el-get)
+(use-package el-get
+  :init
+  (setq el-get-bundle-init-directory (file-name-as-directory
+				      (expand-file-name "el-get" scimax-dir))))
 
 ;; * Other packages
 
