@@ -274,8 +274,10 @@ _h_: %`navy-beginning    _j_:%`navy-backward    _k_: %`navy-forward  _;_: %`navy
 
 
 (defun navy ()
+  "Run the `navy/body' hydra."
   (interactive)
-  (setq navy-backward 'backward-char
+  (setq navy-mode "char"
+	navy-backward 'backward-char
 	navy-up 'previous-line
 	navy-forward 'forward-char 
 	navy-down 'next-line
