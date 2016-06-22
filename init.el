@@ -20,7 +20,11 @@
 (defvar user-dir (expand-file-name "user" scimax-dir)
   "User directory for personal code.")
 
+
 (setq package-user-dir (expand-file-name "elpa"  scimax-dir))
+
+(defvar scimax-load-user-dir t
+  "Controls if the user directory is loaded.")
 
 (setq package-archives
       '(("melpa" . "http://melpa.org/packages/")))
