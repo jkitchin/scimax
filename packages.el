@@ -108,7 +108,7 @@
 
     ;; C-RET call and go to next
     (define-key ivy-minibuffer-map (kbd "C-<return>")
-      (lambda (arg)
+      (lambda ()
 	"Apply action and move to next/previous candidate."
 	(interactive)
 	(ivy-call)
@@ -409,6 +409,10 @@
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
+  :init (setq projectile-cache-file
+	      (expand-file-name "user/projectile.cache" scimax-dir)
+	      projectile-known-projects-file
+	      (expand-file-name "user/projectile-bookmarks.eld" scimax-dir))
   :bind
   ("C-c pp" . projectile-switch-project)
   ("C-c pb" . projectile-switch-to-buffer)
@@ -529,7 +533,9 @@
 
 ;; We load one file: user.el
 
-(when (file-exists-p (expand-file-name "user.el" user-dir))
+(when (and
+       scimax-load-user-dir
+       (file-exists-p (expand-file-name "user.el" user-dir)))
   (load (expand-file-name "user.el" user-dir)))
 
 ;; * The end
