@@ -636,15 +636,18 @@ F5 inserts the entity code."
 ;; * Font-lock
 ;; ** Latex fragments
 ;; Show equations and fragments in a blue font.
-(add-hook 'org-mode-hook
-	  (lambda ()
-	    (font-lock-add-keywords
-	     nil
-	     `((,(mapconcat (lambda (x)
-			      (nth 1 x))
-			    org-latex-regexps
-			    "\\|") 0 '(:foreground "blue"))
-	       ("@@latex:[^@]*@@" 0 '(:foreground "blue"))))))
+;; (add-hook 'org-mode-hook
+;; 	  (lambda ()
+;; 	    (font-lock-add-keywords
+;; 	     nil
+;; 	     `((,(mapconcat (lambda (x)
+;; 			      (nth 1 x))
+;; 			    org-latex-regexps
+;; 			    "\\|") 0 '(:foreground "blue"))
+;; 	       ("@@latex:[^@]*@@" 0 '(:foreground "blue"))))))
+
+(setq org-highlight-latex-and-related '(latex script entities))
+(set-face-foreground 'org-latex-and-related "blue")
 
 ;; * New org links
 
