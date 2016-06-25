@@ -161,13 +161,13 @@ This enables you to use tab to open and close outlines."
 
 (defhydra navy (:color red :hint nil)
   "
-%(format \"%s-mode\" navy-mode)
-                                     _i_: %`navy-up
-_h_: %`navy-beginning    _j_:%`navy-backward    _k_: %`navy-forward  _;_: %`navy-end
-                                     _k_: %`navy-down
-                
-                              _<_: point-min _>_: point-max     
-                    _'_: %`navy-avy-1  _,_: %`navy-avy-2 _._: %`navy-avy-3
+%s(format \"%s-mode\" navy-mode)
+%s(make-string (length (symbol-name navy-backward)) ? )     _i_: %`navy-up
+%`navy-backward :_j_     _l_: %`navy-forward  
+%s(make-string (length (symbol-name navy-backward)) ? )     _k_: %`navy-down
+_h_:%`navy-beginning     _;_: %`navy-end
+      point-min: _<_    _>_: point-max     
+_'_: %`navy-avy-1  _,_: %`navy-avy-2 _._: %`navy-avy-3
    
 "
   ("j" (funcall navy-backward))
