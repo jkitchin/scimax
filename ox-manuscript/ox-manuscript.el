@@ -760,7 +760,7 @@ put the packages in the org file.
       (goto-char (point-min))
       (re-search-forward "\\\\begin{document}")
       (insert "
-\\presetkeys{todonotes}{fancyline, color=blue!30}{}
+\\presetkeys{todonotes}{color=blue!30}{}
 \\todotoc
 \\listoftodos")
       (re-search-backward "\\\\begin{document}")
