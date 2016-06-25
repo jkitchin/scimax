@@ -7,7 +7,7 @@
 ;; * Setup
 
 (defvar nb-notebook-directory
-  "~/Dropbox/projects/"
+  "~/vc/projects/"
   "Directory where projects are stored.")
 
 (unless (file-directory-p nb-notebook-directory)
