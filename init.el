@@ -9,6 +9,8 @@
 ;;
 
 ;;; Code:
+;; this makes garbage collection less frequent, which speeds up init by about 2 seconds.
+(setq gc-cons-threshold 80000000)
 
 (when (version< emacs-version "24.4")
   (warn "You probably need at least Emacs 24.4. You should upgrade. You may need to install leuven-theme manually."))
