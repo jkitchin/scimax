@@ -260,12 +260,12 @@ This will catch many issues with your prose that you probably should fix. The ke
 ** Track changes
 Scimax provides some support for track changes using [[https://github.com/joostkremers/criticmarkup-emacs][CriticMarkup]].
 
-The main command to use is `cm/body' which launches a hydra menu. You can mark text for insertion, deletion, and add comment text.
+The main command to use is `cm/body' which launches a hydra menu. You can mark text for insertion, deletion, and add comment text. Scimax modifies the comment syntax
 Here is some example markup:
 
-{++Add this text++} {--Delete this--} {>>a comment<<} 
+{++Add this text++} {--Delete this--} {@a comment@} 
 
-The markup should be clickable so you can accept/reject each change.
+The markup should be clickable so you can accept/reject each change. 
 
 You can use these commands
 - `cm-addition' - insert text at point
