@@ -29,7 +29,7 @@
   "Controls if the user directory is loaded.")
 
 (setq package-archives
-      '(("melpa" . "http://melpa.org/packages/")))
+      '(("melpa" . "https://melpa.org/packages/")))
 
 (add-to-list 'load-path scimax-dir)
 (add-to-list 'load-path user-dir)

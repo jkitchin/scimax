@@ -10,7 +10,7 @@
 	     '("org"         . "http://orgmode.org/elpa/"))
 
 (add-to-list 'package-archives
-	     '("gnu"         . "http://elpa.gnu.org/packages/"))
+	     '("gnu"         . "https://elpa.gnu.org/packages/"))
 
 ;; * org-mode
 ;; load this first before anything else to avoid mixed installations
@@ -18,7 +18,8 @@
   :mode ("\\.org\\'" . org-mode)
   :init
   ;; Use the current window for C-c ' source editing
-  (setq org-src-window-setup 'current-window)
+  (setq org-src-window-setup 'current-window
+	org-support-shift-select t)
 
   ;; I like to press enter to follow a link. mouse clicks also work.
   (setq org-return-follows-link t)
@@ -69,6 +70,10 @@
 ;; criticmarks
 ;; This is my fork of cm-mode
 (el-get-bundle jkitchin/criticmarkup-emacs)
+
+
+(use-package commander)
+
 
 (use-package swiper
   :bind
@@ -331,6 +336,7 @@
   :after swiper
   :config
   (dolist (hook '(emacs-lisp-mode-hook
+		  hy-mode-hook
 		  python-mode-hook))
     (add-hook hook
 	      (lambda ()
@@ -365,7 +371,7 @@
 
 (use-package org-ref
   :ensure nil
-  :load-path "/Users/jkitchin/Dropbox/jkitchin-github/org-ref/"
+  :load-path "/Users/jkitchin/vc/jkitchin-github/org-ref/"
   :config
   (require 'doi-utils)
   (require 'org-ref-isbn)
