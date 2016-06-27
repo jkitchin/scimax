@@ -5,6 +5,8 @@
 
 ;;; Code:
 (require 'org)
+(require 'ox-latex)
+(require 'org-ref)
 
 ;; * Configuration of org-mode
 ;; don't allow invisible regions to be edited
