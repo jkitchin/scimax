@@ -216,7 +216,11 @@ See `cm-forward-comment' for an alternative."
     (string-match "\n" content)))
 
 (defun cm-markup-to-org-latex ()
-  "Convert cm markup in an org-file to LaTeX."
+  "Convert cm markup in an org-file to LaTeX.
+Inserts some headers at the top for todonotes and ulem, and the
+LaTeX markup commands. This is not super robust, but works for
+simple changes. There are issues with changes in citations,
+tables, and other changes that cross org-element boundaries."
   (interactive)
   (goto-char (point-min))
   (insert "
