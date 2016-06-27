@@ -3,13 +3,17 @@
 ;;; Commentary: This module copies selected regions in org-mode as formatted
 ;;; text on the clipboard that can be pasted into other applications.
 
-;; For Windows you need this script:
-;; https://github.com/jkitchin/scimax/blob/master/bin/html-clip-w32.py and to
-;; set `ox-clip-w32-cmd' to the path to that script.
+;; For Windows the html-clip-w32.py script will be installed. It works pretty
+;; well, but I noticed that the hyperlinks in the TOC to headings don't work,
+;; and strike-through doesn't seem to work. I have no idea how to fix either
+;; issue.
 
 ;; Mac OSX needs textutils and pbcopy, which should be installed.
 
 ;; Linux needs a relatively modern xclip.
+
+;; There is one command: `formatted-copy' that should work across Windows, Mac
+;; and Linux.
 
 ;;; Code:
 
@@ -339,6 +343,7 @@ if __name__ == '__main__':
     "xclip -verbose -i /tmp/org.html -t text/html -selection clipboard" " ")))
 
 
+;;;###autoload
 (defun formatted-copy ()
   "Export the selected region to HTML and copy it to the clipboard.
 This just figures out your platform and runs the platform
