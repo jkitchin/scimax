@@ -409,6 +409,10 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
   `((t (:background "thistle1")))
   "Face for python blocks") 
 
+(defface org-block-jupyter-hy
+  `((t (:background "orange")))
+  "Face for hylang blocks")
+
 (defface org-block-sh
   `((t (:background "gray90")))
   "Face for python blocks")
