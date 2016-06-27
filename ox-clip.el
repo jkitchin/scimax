@@ -226,7 +226,7 @@ class HtmlClipboard:
         if html is None:
             html = self.DEFAULT_HTML_BODY % fragment
         if source is None:
-            source = \"file://HtmlClipboard.py\"
+            source = \"\"
 
         fragmentStart = html.index(fragment)
         fragmentEnd = fragmentStart + len(fragment)
