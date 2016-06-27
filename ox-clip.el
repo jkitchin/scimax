@@ -14,7 +14,7 @@
         (shell-command-on-region
          (point-min)
          (point-max)
-         "python html-clip-w32.py")) 
+         (format  "python %s" ox-clip-w32-cmd))) 
       (kill-buffer buf))))
 
 
