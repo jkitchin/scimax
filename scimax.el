@@ -28,6 +28,7 @@
 (setq custom-file (expand-file-name "user/custom.el" scimax-dir))
 (setq abbrev-file-name (expand-file-name "user/abbrev_defs" scimax-dir))
 (setq save-abbrevs t)
+(setq auto-save-list-file-prefix (expand-file-name "auto-save-list/saves-" scimax-dir))
 (setq-default abbrev-mode t)
 
 ;; * Version control
