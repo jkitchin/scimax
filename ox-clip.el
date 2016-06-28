@@ -66,38 +66,38 @@ class HtmlClipboard:
 
     CF_HTML = None
 
-    MARKER_BLOCK_OUTPUT = \
-        \"Version:1.0\\r\\n\" \
-        \"StartHTML:%09d\\r\\n\" \
-        \"EndHTML:%09d\\r\\n\" \
-        \"StartFragment:%09d\\r\\n\" \
-        \"EndFragment:%09d\\r\\n\" \
-        \"StartSelection:%09d\\r\\n\" \
-        \"EndSelection:%09d\\r\\n\" \
+    MARKER_BLOCK_OUTPUT = \\
+        \"Version:1.0\\r\\n\" \\
+        \"StartHTML:%09d\\r\\n\" \\
+        \"EndHTML:%09d\\r\\n\" \\
+        \"StartFragment:%09d\\r\\n\" \\
+        \"EndFragment:%09d\\r\\n\" \\
+        \"StartSelection:%09d\\r\\n\" \\
+        \"EndSelection:%09d\\r\\n\" \\
         \"SourceURL:%s\\r\\n\"
 
-    MARKER_BLOCK_EX = \
-        \"Version:(\\S+)\\s+\" \
-        \"StartHTML:(\\d+)\\s+\" \
-        \"EndHTML:(\\d+)\\s+\" \
-        \"StartFragment:(\\d+)\\s+\" \
-        \"EndFragment:(\\d+)\\s+\" \
-        \"StartSelection:(\\d+)\\s+\" \
-        \"EndSelection:(\\d+)\\s+\" \
+    MARKER_BLOCK_EX = \\
+        \"Version:(\\S+)\\s+\" \\
+        \"StartHTML:(\\d+)\\s+\" \\
+        \"EndHTML:(\\d+)\\s+\" \\
+        \"StartFragment:(\\d+)\\s+\" \\
+        \"EndFragment:(\\d+)\\s+\" \\
+        \"StartSelection:(\\d+)\\s+\" \\
+        \"EndSelection:(\\d+)\\s+\" \\
         \"SourceURL:(\\S+)\"
     MARKER_BLOCK_EX_RE = re.compile(MARKER_BLOCK_EX)
 
     MARKER_BLOCK = \
-        \"Version:(\\S+)\\s+\" \
-        \"StartHTML:(\\d+)\\s+\" \
-        \"EndHTML:(\\d+)\\s+\" \
-        \"StartFragment:(\\d+)\\s+\" \
-        \"EndFragment:(\\d+)\\s+\" \
+        \"Version:(\\S+)\\s+\" \\
+        \"StartHTML:(\\d+)\\s+\" \\
+        \"EndHTML:(\\d+)\\s+\" \\
+        \"StartFragment:(\\d+)\\s+\" \\
+        \"EndFragment:(\\d+)\\s+\" \\
            \"SourceURL:(\\S+)\"
     MARKER_BLOCK_RE = re.compile(MARKER_BLOCK)
 
     DEFAULT_HTML_BODY = \
-        \"<!DOCTYPE HTML PUBLIC \\\"-//W3C//DTD HTML 4.0 Transitional//EN\\\">\" \
+        \"<!DOCTYPE HTML PUBLIC \\\"-//W3C//DTD HTML 4.0 Transitional//EN\\\">\" \\
         \"<HTML><HEAD></HEAD><BODY><!--StartFragment-->%s<!--EndFragment--></BODY></HTML>\"
 
     def __init__(self):
@@ -150,8 +150,7 @@ class HtmlClipboard:
         try:
             win32clipboard.OpenClipboard(0)
             src = win32clipboard.GetClipboardData(self.GetCfHtml())
-            #print src
-            self.DecodeClipboardSource(src)
+            self.DecodeClipboardSource(src.decode('utf-8'))
         finally:
             win32clipboard.CloseClipboard()
 
@@ -248,8 +247,7 @@ class HtmlClipboard:
             win32clipboard.OpenClipboard(0)
             win32clipboard.EmptyClipboard()
             src = self.EncodeClipboardSource(html, fragmentStart, fragmentEnd, selectionStart, selectionEnd, source)
-            #print src
-            win32clipboard.SetClipboardData(self.GetCfHtml(), src)
+            win32clipboard.SetClipboardData(self.GetCfHtml(), src.encode('utf-8'))
         finally:
             win32clipboard.CloseClipboard()
 
@@ -272,16 +270,16 @@ class HtmlClipboard:
 def DumpHtml():
 
     cb = HtmlClipboard()
-    print \"GetAvailableFormats()=%s\" % str(cb.GetAvailableFormats())
-    print \"HasHtmlFormat()=%s\" % str(cb.HasHtmlFormat())
+    print(\"GetAvailableFormats()=%s\" % str(cb.GetAvailableFormats()))
+    print(\"HasHtmlFormat()=%s\" % str(cb.HasHtmlFormat()))
     if cb.HasHtmlFormat():
         cb.GetFromClipboard()
-        print \"prefix=>>>%s<<<END\" % cb.prefix
-        print \"htmlClipboardVersion=>>>%s<<<END\" % cb.htmlClipboardVersion
-        print \"GetSelection()=>>>%s<<<END\" % cb.GetSelection()
-        print \"GetFragment()=>>>%s<<<END\" % cb.GetFragment()
-        print \"GetHtml()=>>>%s<<<END\" % cb.GetHtml()
-        print \"GetSource()=>>>%s<<<END\" % cb.GetSource()
+        print(\"prefix=>>>%s<<<END\" % cb.prefix)
+        print(\"htmlClipboardVersion=>>>%s<<<END\" % cb.htmlClipboardVersion)
+        print(\"GetSelection()=>>>%s<<<END\" % cb.GetSelection())
+        print(\"GetFragment()=>>>%s<<<END\" % cb.GetFragment())
+        print(\"GetHtml()=>>>%s<<<END\" % cb.GetHtml())
+        print(\"GetSource()=>>>%s<<<END\" % cb.GetSource())
 
         
 if __name__ == '__main__':
