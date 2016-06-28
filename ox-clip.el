@@ -300,7 +300,7 @@ if __name__ == '__main__':
   (with-temp-file "html-clip-w32.py"
     (insert ox-clip-w32-py)))
 
-(defun formatted-copy-win32 ()
+(defun ox-clip-formatted-copy-win32 ()
   "Export region to html and copy to Windows clipboard."
   (interactive)
   (unless (file-exists-p ox-clip-w32-cmd)
@@ -316,7 +316,7 @@ if __name__ == '__main__':
       (kill-buffer buf))))
 
 
-(defun formatted-copy-osx ()
+(defun ox-clip-formatted-copy-osx ()
   "Export region to HTML, convert to RTF and copy to Mac clipboard."
   (interactive)
   (save-window-excursion
@@ -330,7 +330,7 @@ if __name__ == '__main__':
       (kill-buffer buf))))
 
 
-(defun formatted-copy-linux ()
+(defun ox-clip-formatted-copy-linux ()
   "Export region to HTML and copy to Linux clipboard."
   (interactive)
   ;; from https://github.com/abo-abo/oremacs/blob/6c86696c0a1f66bf690e1a934683f85f04c6f34d/auto.el#L386
@@ -342,7 +342,7 @@ if __name__ == '__main__':
 
 
 ;;;###autoload
-(defun formatted-copy ()
+(defun ox-clip-formatted-copy ()
   "Export the selected region to HTML and copy it to the clipboard.
 This just figures out your platform and runs the platform
 dependent commands above."
@@ -354,11 +354,6 @@ dependent commands above."
     formatted-copy-osx)
    ((eq system-type 'gnu/linux)
     (formatted-copy-linux))))
-
-
-
-
-
 
 (provide 'ox-clip)
 
