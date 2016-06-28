@@ -17,11 +17,12 @@
 
 ;; remember this directory
 (defconst scimax-dir (file-name-directory (or load-file-name (buffer-file-name)))
-    "Directory where the scimax is installed.")
+  "Directory where the scimax is installed.")
 
 (defvar user-dir (expand-file-name "user" scimax-dir)
   "User directory for personal code.")
 
+(setq user-emacs-directory user-dir)
 
 (setq package-user-dir (expand-file-name "elpa"  scimax-dir))
 
