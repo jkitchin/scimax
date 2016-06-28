@@ -400,7 +400,7 @@
   :config
   (setq recentf-exclude
         '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
-          ".*png$" "\\*message\\*"))
+          ".*png$" "\\*message\\*" "auto-save-list\\*"))
   (setq recentf-max-saved-items 60))
 
 
