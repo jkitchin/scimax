@@ -287,6 +287,9 @@ You can also create diffs between git commits.
 Or between the buffer and last saved version
 - `cm-wdiff-buffer-with-file'
 
+You can convert the cm-markup to LaTeX commands with this command: `cm-markup-to-org-latex'. This changes your file. It is normally used with `cm-wdiff-to-pdf' to generate a PDF version of the diffs.
+
+
 * Email
 - `email-region' :: emails selected region
 - `email-buffer' :: email the whole buffer
