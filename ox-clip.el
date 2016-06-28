@@ -349,11 +349,11 @@ dependent commands above."
   (interactive)
   (cond
    ((eq system-type 'windows-nt)
-    (formatted-copy-win32))
+    (ox-clip-formatted-copy-win32))
    ((eq system-type 'darwin)
-    formatted-copy-osx)
+    (ox-clip-formatted-copy-osx))
    ((eq system-type 'gnu/linux)
-    (formatted-copy-linux))))
+    (ox-clip-formatted-copy-linux))))
 
 (provide 'ox-clip)
 
