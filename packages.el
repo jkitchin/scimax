@@ -1,8 +1,14 @@
 ;;; packages.el --- Install and configure scimax packages
-
 ;;; Commentary:
-;; see https://github.com/jwiegley/use-package
-;; These are packages that should get installed from an external repo.
+;;
+;; This is a starter kit for scimax. This package provides a
+;; customized setup for emacs that we use daily for scientific
+;; programming and publication.
+;;
+;; see https://github.com/jwiegley/use-package for details on use-package
+
+
+;;; Code:
 
 (setq use-package-always-ensure t)
 
@@ -32,17 +38,19 @@
    ("s-<SPC>" . org-mark-ring-goto)
    ("H-." . org-time-stamp-inactive)))
 
+
 (use-package el-get
   :init
-  (setq el-get-bundle-init-directory (file-name-as-directory
-				      (expand-file-name "el-get" scimax-dir))))
+  (setq
+   el-get-dir (expand-file-name "el-get/" scimax-dir)
+   el-get-bundle-init-directory (expand-file-name "el-get/" scimax-dir)))
 
 ;; * Other packages
 
 (use-package aggressive-indent
   :config (aggressive-indent-global-mode 1))
 
-(use-package auto-complete
+(use-package auto-complete 
   :diminish auto-complete-mode
   :config (ac-config-default))
 
@@ -72,7 +80,9 @@
 (el-get-bundle jkitchin/criticmarkup-emacs)
 
 
-(use-package commander)
+;; Potential for commandline scripts using emacs
+(use-package commander
+  :disabled t)
 
 
 (use-package swiper
@@ -90,6 +100,7 @@
   (define-prefix-command 'counsel-prefix-map)
   (global-set-key (kbd "H-c") 'counsel-prefix-map)
 
+  ;; default pattern ignores order.
   (setf (cdr (assoc t ivy-re-builders-alist))
 	'ivy--regex-ignore-order)
   :bind
@@ -145,58 +156,8 @@
 	(interactive)
 	(describe-keymap ivy-minibuffer-map)))
     
-    (define-key ivy-minibuffer-map (kbd "<left>") 'ivy-backward-delete-char)
-    
-    (define-key ivy-minibuffer-map (kbd "C-d") 'ivy-backward-delete-char)
-    
-    (ivy-set-actions
-     t
-     '(("i" (lambda (x) (with-ivy-window
-			  (insert x))) "insert candidate")
-       (" " (lambda (x) (ivy-resume)) "resume")
-       ("?" (lambda (x)
-	      (interactive)
-	      (describe-keymap ivy-minibuffer-map)) "Describe keys")))
-    
-    (ivy-add-actions
-     'counsel-find-file
-     '(("a" (lambda (x)
-	      (unless (memq major-mode '(mu4e-compose-mode message-mode))
-		(compose-mail)) 
-	      (mml-attach-file x)) "Attach to email")
-       ("c" (lambda (x) (kill-new (f-relative x))) "Copy relative path")
-       ("4" (lambda (x) (find-file-other-window x)) "Open in new window")
-       ("5" (lambda (x) (find-file-other-frame x)) "Open in new frame")
-       ("C" (lambda (x) (kill-new x)) "Copy absolute path")
-       ("d" (lambda (x) (dired x)) "Open in dired")
-       ("D" (lambda (x) (delete-file x)) "Delete file")
-       ("e" (lambda (x) (shell-command (format "open %s" x)))
-	"Open in external program")
-       ("f" (lambda (x)
-	      "Open X in another frame."
-	      (find-file-other-frame x))
-	"Open in new frame")
-       ("p" (lambda (path)
-	      (with-ivy-window
-		(insert (f-relative path))))
-	"Insert relative path")
-       ("P" (lambda (path)
-	      (with-ivy-window
-		(insert path)))
-	"Insert absolute path")
-       ("l" (lambda (path)
-	      "Insert org-link with relative path"
-	      (with-ivy-window
-		(insert (format "[[file:%s]]" (f-relative path)))))
-	"Insert org-link (rel. path)")
-       ("L" (lambda (path)
-	      "Insert org-link with absolute path"
-	      (with-ivy-window
-		(insert (format "[[file:%s]]" path))))
-	"Insert org-link (abs. path)")
-       ("r" (lambda (path)
-	      (rename-file path (read-string "New name: ")))
-	"Rename")))))
+    (define-key ivy-minibuffer-map (kbd "<left>") 'ivy-backward-delete-char) 
+    (define-key ivy-minibuffer-map (kbd "C-d") 'ivy-backward-delete-char)))
 
 ;; Provides functions for working on lists
 (use-package dash)
@@ -212,6 +173,7 @@
 ;; https://github.com/amperser/proselint
 ;; pip install proselint
 (use-package flycheck
+  ;; Jun 28 - I like this idea, but sometimes this is too slow.
   :disabled t
   :config
   (flycheck-define-checker
@@ -279,7 +241,6 @@
   :config
   (add-hook 'helm-find-files-before-init-hook
 	    (lambda ()
-
 	      (helm-add-action-to-source
 	       "Insert path"
 	       (lambda (target)
@@ -333,7 +294,6 @@
 
 ;; Superior lisp editing
 (use-package lispy
-  :after swiper
   :config
   (dolist (hook '(emacs-lisp-mode-hook
 		  hy-mode-hook
@@ -349,18 +309,19 @@
   ("<f5>" . magit-status)
   ("C-c v t" . magit-status))
 
+;; Templating system
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
 
-(use-package ob-ipython
-  :disabled t
-  :config
-  (defun ob-ipython--kernel-repl-cmd (name)
-    (list "jupyter" "console" "--existing" (format "emacs-%s.json" name)))
-  ;; Make sure pygments can handle ipython for exporting.
-  (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
-    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
+;; (use-package ob-ipython
+;;   :disabled t
+;;   :config
+;;   (defun ob-ipython--kernel-repl-cmd (name)
+;;     (list "jupyter" "console" "--existing" (format "emacs-%s.json" name)))
+;;   ;; Make sure pygments can handle ipython for exporting.
+;;   (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
+;;     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
 (el-get-bundle jkitchin/ob-ipython
   ;; Make sure pygments can handle ipython for exporting.
@@ -369,28 +330,10 @@
   (require 'ob-ipython))
 
 
-(use-package org-ref
-  :ensure nil
-  :load-path "/Users/jkitchin/vc/jkitchin-github/org-ref/"
-  :config
-  (require 'doi-utils)
-  (require 'org-ref-isbn)
-  (require 'org-ref-pubmed)
-  (require 'org-ref-arxiv)
-  (require 'org-ref-bibtex)
-  (require 'org-ref-pdf)
-  (require 'org-ref-url-utils)
-  (setq bibtex-autokey-year-length 4
-	bibtex-autokey-name-year-separator "-"
-	bibtex-autokey-year-title-separator "-"
-	bibtex-autokey-titleword-separator "-"
-	bibtex-autokey-titlewords 2
-	bibtex-autokey-titlewords-stretch 1
-	bibtex-autokey-titleword-length 5)
-  (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
-
-;; Bleeding edge org-ref from github.
-;; (el-get-bundle jkitchin/org-ref
+;; (use-package org-ref
+;;   :ensure nil
+;;   :load-path "/Users/jkitchin/vc/jkitchin-github/org-ref/"
+;;   :config
 ;;   (require 'doi-utils)
 ;;   (require 'org-ref-isbn)
 ;;   (require 'org-ref-pubmed)
@@ -407,11 +350,29 @@
 ;; 	bibtex-autokey-titleword-length 5)
 ;;   (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
 
+;; Bleeding edge org-ref from github.
+(el-get-bundle jkitchin/org-ref
+  (require 'doi-utils)
+  (require 'org-ref-isbn)
+  (require 'org-ref-pubmed)
+  (require 'org-ref-arxiv)
+  (require 'org-ref-bibtex)
+  (require 'org-ref-pdf)
+  (require 'org-ref-url-utils)
+  (setq bibtex-autokey-year-length 4
+	bibtex-autokey-name-year-separator "-"
+	bibtex-autokey-year-title-separator "-"
+	bibtex-autokey-titleword-separator "-"
+	bibtex-autokey-titlewords 2
+	bibtex-autokey-titlewords-stretch 1
+	bibtex-autokey-titleword-length 5)
+  (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
+
 ;; This is the MELPA version
-;; (use-package org-ref
-;;   :disabled t
-;;   :init
-;;   :bind ("H-b" . org-ref-bibtex-hydra/body))
+(use-package org-ref
+  :disabled t
+  :init
+  :bind ("H-b" . org-ref-bibtex-hydra/body))
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
@@ -428,7 +389,7 @@
   ;; nothing good in the modeline to keep.
   :diminish "" 			     
   :config
-  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+  (define-key projectile-mode-map (kbd "H-p") 'projectile-command-map)
   (projectile-global-mode))
 
 (use-package pydoc)
@@ -492,10 +453,10 @@
   :init
   (require 'scimax-org))
 
-(use-package ox-rtf
+(use-package ox-clip
   :ensure nil
   :load-path scimax-dir
-  :bind ("H-k" . ox-rtf-formatted-copy))
+  :bind ("H-k" . ox-clip-formatted-copy))
 
 (use-package scimax-email
   :ensure nil
