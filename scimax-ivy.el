@@ -3,6 +3,59 @@
 ;;; Commentary:
 ;; 
 
+;; * Generic ivy actions
+(ivy-set-actions
+ t
+ '(("i" (lambda (x) (with-ivy-window
+		      (insert x))) "insert candidate")
+   (" " (lambda (x) (ivy-resume)) "resume")
+   ("?" (lambda (x)
+	  (interactive)
+	  (describe-keymap ivy-minibuffer-map)) "Describe keys")))
+
+;; ** Find file actions
+(ivy-add-actions
+ 'counsel-find-file
+ '(("a" (lambda (x)
+	  (unless (memq major-mode '(mu4e-compose-mode message-mode))
+	    (compose-mail)) 
+	  (mml-attach-file x)) "Attach to email")
+   ("c" (lambda (x) (kill-new (f-relative x))) "Copy relative path")
+   ("4" (lambda (x) (find-file-other-window x)) "Open in new window")
+   ("5" (lambda (x) (find-file-other-frame x)) "Open in new frame")
+   ("C" (lambda (x) (kill-new x)) "Copy absolute path")
+   ("d" (lambda (x) (dired x)) "Open in dired")
+   ("D" (lambda (x) (delete-file x)) "Delete file")
+   ("e" (lambda (x) (shell-command (format "open %s" x)))
+    "Open in external program")
+   ("f" (lambda (x)
+	  "Open X in another frame."
+	  (find-file-other-frame x))
+    "Open in new frame")
+   ("p" (lambda (path)
+	  (with-ivy-window
+	    (insert (f-relative path))))
+    "Insert relative path")
+   ("P" (lambda (path)
+	  (with-ivy-window
+	    (insert path)))
+    "Insert absolute path")
+   ("l" (lambda (path)
+	  "Insert org-link with relative path"
+	  (with-ivy-window
+	    (insert (format "[[file:%s]]" (f-relative path)))))
+    "Insert org-link (rel. path)")
+   ("L" (lambda (path)
+	  "Insert org-link with absolute path"
+	  (with-ivy-window
+	    (insert (format "[[file:%s]]" path))))
+    "Insert org-link (abs. path)")
+   ("r" (lambda (path)
+	  (rename-file path (read-string "New name: ")))
+    "Rename")))
+
+
+;; * ivy colors
 (defun ivy-colors ()
   "List colors in ivy."
   (interactive)
