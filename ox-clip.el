@@ -1,4 +1,4 @@
-;;; ox-clip.el --- Formatted copy commands across platforms
+;;; ox-clip.el --- Cross-platform Formatted copy commands for org-mode 
 
 ;; Copyright(C) 2016 John Kitchin
 
