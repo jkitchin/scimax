@@ -31,7 +31,7 @@
 
 ;; Linux needs a relatively modern xclip.
 
-;; There is one command: `formatted-copy' that should work across Windows, Mac
+;; There is one command: `ox-clip-formatted-copy' that should work across Windows, Mac
 ;; and Linux.
 
 ;;; Code:
