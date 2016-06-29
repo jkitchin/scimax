@@ -352,6 +352,7 @@
 
 ;; Bleeding edge org-ref from github.
 (el-get-bundle jkitchin/org-ref
+  (require 'org-ref)
   (require 'doi-utils)
   (require 'org-ref-isbn)
   (require 'org-ref-pubmed)
