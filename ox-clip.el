@@ -347,51 +347,6 @@ if __name__ == '__main__':
   "Windows Python Script for copying formatted text.")
 
 
-(defun ox-clip-formatted-copy-win32 (r1 r2)
-  "Export region to html and copy to Windows clipboard."
-  (interactive "r")
-  (unless (file-exists-p ox-clip-w32-cmd)
-    (error "You need to set `ox-clip-w32-cmd' to the absolute path to html-clip-w32.py"))
-  (save-window-excursion
-    (let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
-           (html (with-current-buffer buf (buffer-string))))
-      (with-current-buffer buf
-        (shell-command-on-region
-         (point-min)
-         (point-max)
-         (format  "python %s" ox-clip-w32-cmd)))
-      (kill-buffer buf))))
-
-
-
-(defun ox-clip-formatted-copy-osx (r1 r2)
-  "Export region to HTML, convert to RTF and copy to Mac clipboard."
-  (interactive "r")
-  (save-window-excursion
-    (let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
-	   (html (with-current-buffer buf (buffer-string))))
-      (with-current-buffer buf
-	(shell-command-on-region
-	 (point-min)
-	 (point-max)
-	 ox-clip-osx-cmd))
-      (kill-buffer buf))))
-
-
-(defun ox-clip-formatted-copy-linux (r1 r2)
-  "Export region to HTML, convert to RTF and copy to linux clipboard."
-  (interactive "r")
-  (save-window-excursion
-    (let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
-	   (html (with-current-buffer buf (buffer-string))))
-      (with-current-buffer buf
-	(shell-command-on-region
-	 (point-min)
-	 (point-max)
-	 ox-clip-linux-cmd))
-      (kill-buffer buf))))
-
-
 ;;;###autoload
 (defun ox-clip-formatted-copy (r1 r2)
   "Export the selected region to HTML and copy it to the clipboard.
@@ -399,13 +354,22 @@ R1 and R2 define the selected region."
   (interactive "r")
   (copy-region-as-kill r1 r2)
   (when (equal major-mode 'org-mode)
-    (cond
-     ((eq system-type 'windows-nt)
-      (ox-clip-formatted-copy-win32 r1 r2))
-     ((eq system-type 'darwin)
-      (ox-clip-formatted-copy-osx r1 r2))
-     ((eq system-type 'gnu/linux)
-      (ox-clip-formatted-copy-linux r1 r2)))))
+    (save-window-excursion
+      (let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
+	     (html (with-current-buffer buf (buffer-string))))
+	(with-current-buffer buf
+	  (shell-command-on-region
+	   (point-min)
+	   (point-max)
+	   ;; get the system specific command.
+	   (cond
+	    ((eq system-type 'windows-nt)
+	     (format  "python %s" ox-clip-w32-cmd))
+	    ((eq system-type 'darwin)
+	     ox-clip-osx-cmd)
+	    ((eq system-type 'gnu/linux)
+	     ox-clip-linux-cmd))))
+	(kill-buffer buf)))))
 
 (provide 'ox-clip)
 
