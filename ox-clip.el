@@ -69,7 +69,7 @@
 
 
 (defcustom ox-clip-linux-cmd
-  "xclip -verbose -i /tmp/org.html -t text/html -selection clipboard"
+  "xclip -t text/html -selection clipboard"
   "Command to copy formatted text on linux."
   :group 'ox-clip)
 
@@ -379,14 +379,17 @@ if __name__ == '__main__':
 
 
 (defun ox-clip-formatted-copy-linux (r1 r2)
-  "Export region to HTML and copy to Linux clipboard."
+  "Export region to HTML, convert to RTF and copy to linux clipboard."
   (interactive "r")
-  ;; from https://github.com/abo-abo/oremacs/blob/6c86696c0a1f66bf690e1a934683f85f04c6f34d/auto.el#L386
-  (org-export-to-file 'html "/tmp/org.html" nil nil t t)
-  (apply
-   'start-process "xclip" "*xclip*"
-   (split-string
-    ox-clip-linux-cmd " ")))
+  (save-window-excursion
+    (let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
+	   (html (with-current-buffer buf (buffer-string))))
+      (with-current-buffer buf
+	(shell-command-on-region
+	 (point-min)
+	 (point-max)
+	 ox-clip-linux-cmd))
+      (kill-buffer buf))))
 
 
 ;;;###autoload
