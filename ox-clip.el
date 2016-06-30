@@ -65,7 +65,7 @@
 
 
 (defcustom ox-clip-linux-cmd
-  "xclip -i /tmp/ox-clip-org.html -t text/html -selection clipboard"
+  "xclip -verbose -i /tmp/ox-clip-org.html -t text/html -selection clipboard"
   "Command to copy formatted text on linux."
   :group 'ox-clip)
 
