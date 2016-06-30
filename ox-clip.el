@@ -395,13 +395,14 @@ if __name__ == '__main__':
 R1 and R2 define the selected region."
   (interactive "r")
   (copy-region-as-kill r1 r2)
-  (cond
-   ((eq system-type 'windows-nt)
-    (ox-clip-formatted-copy-win32 r1 r2))
-   ((eq system-type 'darwin)
-    (ox-clip-formatted-copy-osx r1 r2))
-   ((eq system-type 'gnu/linux)
-    (ox-clip-formatted-copy-linux r1 r2))))
+  (when (equal major-mode 'org-mode)
+    (cond
+     ((eq system-type 'windows-nt)
+      (ox-clip-formatted-copy-win32 r1 r2))
+     ((eq system-type 'darwin)
+      (ox-clip-formatted-copy-osx r1 r2))
+     ((eq system-type 'gnu/linux)
+      (ox-clip-formatted-copy-linux r1 r2)))))
 
 (provide 'ox-clip)
 
