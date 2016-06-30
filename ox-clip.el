@@ -347,9 +347,9 @@ if __name__ == '__main__':
   "Windows Python Script for copying formatted text.")
 
 
-(defun ox-clip-formatted-copy-win32 ()
+(defun ox-clip-formatted-copy-win32 (r1 r2)
   "Export region to html and copy to Windows clipboard."
-  (interactive)
+  (interactive "r")
   (unless (file-exists-p ox-clip-w32-cmd)
     (error "You need to set `ox-clip-w32-cmd' to the absolute path to html-clip-w32.py"))
   (save-window-excursion
@@ -364,9 +364,9 @@ if __name__ == '__main__':
 
 
 
-(defun ox-clip-formatted-copy-osx ()
+(defun ox-clip-formatted-copy-osx (r1 r2)
   "Export region to HTML, convert to RTF and copy to Mac clipboard."
-  (interactive)
+  (interactive "r")
   (save-window-excursion
     (let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
 	   (html (with-current-buffer buf (buffer-string))))
@@ -378,9 +378,9 @@ if __name__ == '__main__':
       (kill-buffer buf))))
 
 
-(defun ox-clip-formatted-copy-linux ()
+(defun ox-clip-formatted-copy-linux (r1 r2)
   "Export region to HTML and copy to Linux clipboard."
-  (interactive)
+  (interactive "r")
   ;; from https://github.com/abo-abo/oremacs/blob/6c86696c0a1f66bf690e1a934683f85f04c6f34d/auto.el#L386
   (org-export-to-file 'html "/tmp/org.html" nil nil t t)
   (apply
@@ -390,18 +390,18 @@ if __name__ == '__main__':
 
 
 ;;;###autoload
-(defun ox-clip-formatted-copy ()
+(defun ox-clip-formatted-copy (r1 r2)
   "Export the selected region to HTML and copy it to the clipboard.
-This just figures out your platform and runs the platform
-dependent commands above."
-  (interactive)
+R1 and R2 define the selected region."
+  (interactive "r")
+  (copy-region-as-kill r1 r2)
   (cond
    ((eq system-type 'windows-nt)
-    (ox-clip-formatted-copy-win32))
+    (ox-clip-formatted-copy-win32 r1 r2))
    ((eq system-type 'darwin)
-    (ox-clip-formatted-copy-osx))
+    (ox-clip-formatted-copy-osx r1 r2))
    ((eq system-type 'gnu/linux)
-    (ox-clip-formatted-copy-linux))))
+    (ox-clip-formatted-copy-linux r1 r2))))
 
 (provide 'ox-clip)
 
