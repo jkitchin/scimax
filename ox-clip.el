@@ -376,7 +376,9 @@ R1 and R2 define the selected region."
 	  ;; For some reason shell-command on region does not work with xlcip.
 	  (with-temp-file "/tmp/ox-clip-org.html"
 	    (insert (with-current-buffer buf (buffer-string))))
-	  (shell-command ox-clip-linux-cmd))) 
+	  (apply
+	   'start-process "ox-clip" "*ox-clip*"
+	   (split-string ox-clip-linux-cmd " ")))) 
 	(kill-buffer buf)))))
 
 (provide 'ox-clip)
