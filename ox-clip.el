@@ -50,8 +50,10 @@
 
 
 (defcustom ox-clip-w32-cmd
-  (expand-file-name "html-clip-w32.py"
-		    (file-name-directory (or load-file-name (buffer-file-name))))
+  (format "python %s"
+	  (expand-file-name
+	   "html-clip-w32.py"
+	   (file-name-directory (or load-file-name (buffer-file-name)))))
   "Absolute path to html-clip-w32.py."
   :group 'ox-clip)
 
@@ -63,7 +65,7 @@
 
 
 (defcustom ox-clip-linux-cmd
-  "xclip -t text/html -selection clipboard"
+  "xclip -i /tmp/ox-clip-org.html -t text/html -selection clipboard"
   "Command to copy formatted text on linux."
   :group 'ox-clip)
 
@@ -357,18 +359,24 @@ R1 and R2 define the selected region."
     (save-window-excursion
       (let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
 	     (html (with-current-buffer buf (buffer-string))))
-	(with-current-buffer buf
-	  (shell-command-on-region
-	   (point-min)
-	   (point-max)
-	   ;; get the system specific command.
-	   (cond
-	    ((eq system-type 'windows-nt)
-	     (format  "python %s" ox-clip-w32-cmd))
-	    ((eq system-type 'darwin)
-	     ox-clip-osx-cmd)
-	    ((eq system-type 'gnu/linux)
-	     ox-clip-linux-cmd))))
+	(cond
+	 ((eq system-type 'windows-nt)
+	  (with-current-buffer buf
+	    (shell-command-on-region
+	     (point-min)
+	     (point-max)
+	     ox-clip-w32-cmd)))
+	 ((eq system-type 'darwin)
+	  (with-current-buffer buf
+	    (shell-command-on-region
+	     (point-min)
+	     (point-max)
+	     ox-clip-osx-cmd)))
+	 ((eq system-type 'gnu/linux)
+	  ;; For some reason shell-command on region does not work with xlcip.
+	  (with-temp-file "/tmp/ox-clip-org.html"
+	    (insert (with-current-buffer buf (buffer-string))))
+	  (shell-command ox-clip-linux-cmd))) 
 	(kill-buffer buf)))))
 
 (provide 'ox-clip)
