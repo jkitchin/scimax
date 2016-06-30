@@ -56,12 +56,6 @@
   :group 'ox-clip)
 
 
-(unless (and (eq system-type 'windows-nt)
-	     (file-exists-p ox-clip-w32-cmd))
-  (with-temp-file "html-clip-w32.py"
-    (insert ox-clip-w32-py)))
-
-
 (defcustom ox-clip-osx-cmd
   "textutil -inputencoding UTF-8 -stdin -format html -convert rtf -stdout | pbcopy"
   "Command to copy formatted text on osX."
@@ -345,6 +339,12 @@ if __name__ == '__main__':
     PutHtml(data)
 "
   "Windows Python Script for copying formatted text.")
+
+;; Create the windows python script if needed.
+(unless (and (eq system-type 'windows-nt)
+	     (file-exists-p ox-clip-w32-cmd))
+  (with-temp-file "html-clip-w32.py"
+    (insert ox-clip-w32-py)))
 
 
 ;;;###autoload
