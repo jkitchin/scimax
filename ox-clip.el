@@ -1,6 +1,12 @@
-;;; ox-clip.el --- Cross-platform Formatted copy commands for org-mode 
+;;; ox-clip.el --- Cross-platform Formatted copy commands for org-mode
 
 ;; Copyright(C) 2016 John Kitchin
+
+;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
+;; URL: https://github.com/jkitchin/scimax/ox-clip.el
+;; Version: 0.1
+;; Keywords: org-mode
+;; Package-Requires:
 
 ;; This file is not currently part of GNU Emacs.
 
@@ -19,22 +25,54 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
-;;; Commentary: This module copies selected regions in org-mode as formatted
-;;; text on the clipboard that can be pasted into other applications.
+;;; Commentary:
+;; 
+;; This module copies selected regions in org-mode as formatted text on the
+;; clipboard that can be pasted into other applications.
 
 ;; For Windows the html-clip-w32.py script will be installed. It works pretty
 ;; well, but I noticed that the hyperlinks in the TOC to headings don't work,
 ;; and strike-through doesn't seem to work. I have no idea how to fix either
 ;; issue.
 
-;; Mac OSX needs textutils and pbcopy, which should be installed.
+;; Mac OSX needs textutils and pbcopy, which should be part of the base install.
 
-;; Linux needs a relatively modern xclip.
+;; Linux needs a relatively modern xclip. https://github.com/astrand/xclip
 
-;; There is one command: `ox-clip-formatted-copy' that should work across Windows, Mac
-;; and Linux.
+;; There is one command: `ox-clip-formatted-copy' that should work across
+;; Windows, Mac and Linux.
 
 ;;; Code:
+(defgroup ox-clip nil
+  "Customization group for ox-clip."
+  :tag "ox-clip"
+  :group 'org)
+
+
+(defcustom ox-clip-w32-cmd
+  (expand-file-name "html-clip-w32.py"
+		    (file-name-directory (or load-file-name (buffer-file-name))))
+  "Absolute path to html-clip-w32.py."
+  :group 'ox-clip)
+
+
+(unless (and (eq system-type 'windows-nt)
+	     (file-exists-p ox-clip-w32-cmd))
+  (with-temp-file "html-clip-w32.py"
+    (insert ox-clip-w32-py)))
+
+
+(defcustom ox-clip-osx-cmd
+  "textutil -inputencoding UTF-8 -stdin -format html -convert rtf -stdout | pbcopy"
+  "Command to copy formatted text on osX."
+  :group 'ox-clip)
+
+
+(defcustom ox-clip-linux-cmd
+  "xclip -verbose -i /tmp/org.html -t text/html -selection clipboard"
+  "Command to copy formatted text on linux."
+  :group 'ox-clip)
+
 
 (defvar ox-clip-w32-py "#!/usr/bin/env python
 # Adapted from http://code.activestate.com/recipes/474121-getting-html-from-the-windows-clipboard/
@@ -306,18 +344,8 @@ if __name__ == '__main__':
     data = sys.stdin.read()
     PutHtml(data)
 "
-  "Windows Python Script for copying formatted text")
+  "Windows Python Script for copying formatted text.")
 
-
-(defvar ox-clip-w32-cmd
-  (expand-file-name "html-clip-w32.py"
-		    (file-name-directory (or load-file-name (buffer-file-name))))
-  "Absolute path to html-clip-w32.py.")
-
-(unless (and (eq system-type 'windows-nt)
-	     (file-exists-p ox-clip-w32-cmd))
-  (with-temp-file "html-clip-w32.py"
-    (insert ox-clip-w32-py)))
 
 (defun ox-clip-formatted-copy-win32 ()
   "Export region to html and copy to Windows clipboard."
@@ -335,6 +363,7 @@ if __name__ == '__main__':
       (kill-buffer buf))))
 
 
+
 (defun ox-clip-formatted-copy-osx ()
   "Export region to HTML, convert to RTF and copy to Mac clipboard."
   (interactive)
@@ -345,7 +374,7 @@ if __name__ == '__main__':
 	(shell-command-on-region
 	 (point-min)
 	 (point-max)
-	 "textutil -stdin -format html -convert rtf -stdout | pbcopy"))
+	 ox-clip-osx-cmd))
       (kill-buffer buf))))
 
 
@@ -357,7 +386,7 @@ if __name__ == '__main__':
   (apply
    'start-process "xclip" "*xclip*"
    (split-string
-    "xclip -verbose -i /tmp/org.html -t text/html -selection clipboard" " ")))
+    ox-clip-linux-cmd " ")))
 
 
 ;;;###autoload
