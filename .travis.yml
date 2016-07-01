@@ -11,4 +11,5 @@ env:
 
 script:
   - emacs --version -l init.el
+  - make build
   - make test
