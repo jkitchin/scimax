@@ -10,5 +10,5 @@ env:
   - EVM_EMACS=emacs-git-snapshot-travis
 
 script:
-  - emacs --version
+  - emacs --version -l init.el
   - make test
