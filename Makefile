@@ -10,7 +10,7 @@ test: clean
 	${CASK_EXEC} ert-runner
 
 build:
-	${CASK_EXEC} ${emacs} -Q -batch -l ${INIT}
+	${CASK_EXEC} ${emacs} -l ${INIT}
 
 compile:
 	${CASK_EXEC} ${emacs} -Q -batch -l ${INIT} -L "." -f batch-byte-compile *.el
