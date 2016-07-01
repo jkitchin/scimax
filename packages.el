@@ -161,6 +161,7 @@
 
 ;; Provides functions for working on lists
 (use-package dash)
+(use-package dash-functional)
 
 (use-package elfeed)
 
