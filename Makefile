@@ -9,9 +9,8 @@ INIT = init.el
 test: clean
 	${CASK_EXEC} ert-runner
 
-unit:
-	${CASK_EXEC} ${emacs} -Q -batch -L "." -l ${INIT} -l org -l org-ref.el -l test/org-ref-test.el --eval "(ert t)"
-
+build:
+	${CASK_EXEC} ${emacs} -Q -batch -l ${INIT}
 
 compile:
 	${CASK_EXEC} ${emacs} -Q -batch -l ${INIT} -L "." -f batch-byte-compile *.el
