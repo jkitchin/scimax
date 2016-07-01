@@ -1,10 +1,22 @@
-EMACS ?= emacs
+emacs ?= emacs
+CASK ?= cask
+CASK_EXEC ?= ${CASK} exec
+EL_SOURCES = *.el
+SOURCES =   ${EL_SOURCES}
+
+INIT = init.el
+
+test: clean
+	${CASK_EXEC} ert-runner
+
+unit:
+	${CASK_EXEC} ${emacs} -Q -batch -L "." -l ${INIT} -l org -l org-ref.el -l test/org-ref-test.el --eval "(ert t)"
 
 
-all:
-	${EMACS} -Q -l init.el test.org &
+compile:
+	${CASK_EXEC} ${emacs} -Q -batch -l ${INIT} -L "." -f batch-byte-compile *.el
 
 clean:
-	rm -fr elpa
-	${EMACS} -Q -l init.el test.org
+	rm -f *.elc
 
+.PHONY:	all test package clean-elc test-melpa

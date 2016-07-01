@@ -330,26 +330,6 @@
   (require 'ob-ipython))
 
 
-;; (use-package org-ref
-;;   :ensure nil
-;;   :load-path "/Users/jkitchin/vc/jkitchin-github/org-ref/"
-;;   :config
-;;   (require 'doi-utils)
-;;   (require 'org-ref-isbn)
-;;   (require 'org-ref-pubmed)
-;;   (require 'org-ref-arxiv)
-;;   (require 'org-ref-bibtex)
-;;   (require 'org-ref-pdf)
-;;   (require 'org-ref-url-utils)
-;;   (setq bibtex-autokey-year-length 4
-;; 	bibtex-autokey-name-year-separator "-"
-;; 	bibtex-autokey-year-title-separator "-"
-;; 	bibtex-autokey-titleword-separator "-"
-;; 	bibtex-autokey-titlewords 2
-;; 	bibtex-autokey-titlewords-stretch 1
-;; 	bibtex-autokey-titleword-length 5)
-;;   (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
-
 ;; Bleeding edge org-ref from github.
 (el-get-bundle jkitchin/org-ref
   (require 'org-ref)
@@ -368,12 +348,6 @@
 	bibtex-autokey-titlewords-stretch 1
 	bibtex-autokey-titleword-length 5)
   (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
-
-;; This is the MELPA version
-(use-package org-ref
-  :disabled t
-  :init
-  :bind ("H-b" . org-ref-bibtex-hydra/body))
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
