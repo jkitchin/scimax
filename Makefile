@@ -18,4 +18,10 @@ compile:
 clean:
 	rm -f *.elc
 
+travis:
+	open https://travis-ci.org/jkitchin/scimax
+
+github:
+	open https://github.com/jkitchin/scimax
+
 .PHONY:	all test package clean-elc test-melpa

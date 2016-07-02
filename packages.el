@@ -39,11 +39,11 @@
    ("H-." . org-time-stamp-inactive)))
 
 
-(use-package el-get
-  :init
-  (setq
-   el-get-dir (expand-file-name "el-get/" scimax-dir)
-   el-get-bundle-init-directory (expand-file-name "el-get/" scimax-dir)))
+;; (use-package el-get
+;;   :init
+;;   (setq
+;;    el-get-dir (expand-file-name "el-get/" scimax-dir)
+;;    el-get-bundle-init-directory (expand-file-name "el-get/" scimax-dir)))
 
 ;; * Other packages
 
@@ -77,7 +77,10 @@
 
 ;; criticmarks
 ;; This is my fork of cm-mode
-(el-get-bundle jkitchin/criticmarkup-emacs)
+(let ((path (expand-file-name "criticmarkup-emacs   " scimax-dir)))
+  (use-package cm-mode
+    :ensure nil
+    :load-path path))
 
 
 ;; Potential for commandline scripts using emacs
@@ -315,32 +318,32 @@
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
+;; this is a git submodule
+(let ((path (expand-file-name "ob-ipython" scimax-dir)))
+  (use-package ob-ipython
+    :ensure nil
+    :load-path path
+    :init (unless (= 0
+		     (shell-command
+		      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
+	    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console"))))
 
-(el-get-bundle jkitchin/ob-ipython
-  ;; Make sure pygments can handle ipython for exporting.
-  (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
-    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console"))
-  (require 'ob-ipython))
 
+;; this is a git submodule
+(let ((path (expand-file-name "org-ref " scimax-dir)))
+  (use-package org-ref
+    :ensure nil
+    :load-path path
+    :init 
+    (setq bibtex-autokey-year-length 4
+	  bibtex-autokey-name-year-separator "-"
+	  bibtex-autokey-year-title-separator "-"
+	  bibtex-autokey-titleword-separator "-"
+	  bibtex-autokey-titlewords 2
+	  bibtex-autokey-titlewords-stretch 1
+	  bibtex-autokey-titleword-length 5)
+    (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body)))
 
-;; Bleeding edge org-ref from github.
-(el-get-bundle jkitchin/org-ref
-  (require 'org-ref)
-  (require 'doi-utils)
-  (require 'org-ref-isbn)
-  (require 'org-ref-pubmed)
-  (require 'org-ref-arxiv)
-  (require 'org-ref-bibtex)
-  (require 'org-ref-pdf)
-  (require 'org-ref-url-utils)
-  (setq bibtex-autokey-year-length 4
-	bibtex-autokey-name-year-separator "-"
-	bibtex-autokey-year-title-separator "-"
-	bibtex-autokey-titleword-separator "-"
-	bibtex-autokey-titlewords 2
-	bibtex-autokey-titlewords-stretch 1
-	bibtex-autokey-titleword-length 5)
-  (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
