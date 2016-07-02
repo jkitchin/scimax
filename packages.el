@@ -275,8 +275,7 @@
 ;; Functions for working with hash tables
 (use-package ht)
 
-(use-package htmlize
-  :disabled t)
+(use-package htmlize)
 
 (use-package hy-mode)
 
