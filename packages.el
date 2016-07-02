@@ -71,10 +71,12 @@
 
 ;; criticmarks
 ;; This is my fork of cm-mode
-(let ((path (expand-file-name "criticmarkup-emacs   " scimax-dir)))
+(let ((path (expand-file-name "criticmarkup-emacs" scimax-dir)))
   (use-package cm-mode
     :ensure nil
-    :load-path path))
+    :load-path path
+    :init (add-to-list 'load-path
+		       (expand-file-name "criticmarkup-emacs" scimax-dir))))
 
 
 ;; Potential for commandline scripts using emacs
