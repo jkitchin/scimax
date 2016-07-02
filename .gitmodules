@@ -1,9 +1,9 @@
 [submodule "criticmarkup-emacs"]
 	path = criticmarkup-emacs
-	url = https://github.com:jkitchin/criticmarkup-emacs.git
+	url = https://github.com/jkitchin/criticmarkup-emacs.git
 [submodule "org-ref"]
 	path = org-ref
 	url = https://github.com/jkitchin/org-ref.git
 [submodule "ob-ipython"]
 	path = ob-ipython
-	url = https://github.com:jkitchin/ob-ipython.git
+	url = https://github.com/jkitchin/ob-ipython.git
