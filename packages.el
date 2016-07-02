@@ -277,7 +277,7 @@
 (use-package ht)
 
 (use-package htmlize
-  :disable t)
+  :disabled t)
 
 (use-package hy-mode)
 
