@@ -39,12 +39,6 @@
    ("H-." . org-time-stamp-inactive)))
 
 
-;; (use-package el-get
-;;   :init
-;;   (setq
-;;    el-get-dir (expand-file-name "el-get/" scimax-dir)
-;;    el-get-bundle-init-directory (expand-file-name "el-get/" scimax-dir)))
-
 ;; * Other packages
 
 (use-package aggressive-indent
