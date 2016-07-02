@@ -328,7 +328,9 @@
   (use-package org-ref
     :ensure nil
     :load-path path
-    :init 
+    :init
+    (add-to-list 'load-path
+		 (expand-file-name "org-ref" scimax-dir))
     (setq bibtex-autokey-year-length 4
 	  bibtex-autokey-name-year-separator "-"
 	  bibtex-autokey-year-title-separator "-"
