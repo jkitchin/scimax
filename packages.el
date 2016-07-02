@@ -77,7 +77,7 @@
 
 ;; criticmarks
 ;; This is my fork of cm-mode
-;; (el-get-bundle jkitchin/criticmarkup-emacs)
+(el-get-bundle jkitchin/criticmarkup-emacs)
 
 
 ;; Potential for commandline scripts using emacs
@@ -315,15 +315,6 @@
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
-
-;; (use-package ob-ipython
-;;   :disabled t
-;;   :config
-;;   (defun ob-ipython--kernel-repl-cmd (name)
-;;     (list "jupyter" "console" "--existing" (format "emacs-%s.json" name)))
-;;   ;; Make sure pygments can handle ipython for exporting.
-;;   (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
-;;     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
 (el-get-bundle jkitchin/ob-ipython
   ;; Make sure pygments can handle ipython for exporting.
