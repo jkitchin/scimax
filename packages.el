@@ -319,10 +319,13 @@
   (use-package ob-ipython
     :ensure nil
     :load-path path
-    :init (unless (= 0
-		     (shell-command
-		      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
-	    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console"))))
+    :init
+    (add-to-list 'load-path
+		 (expand-file-name "ob-ipython" scimax-dir))
+    (unless (= 0
+	       (shell-command
+		"python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
+      (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console"))))
 
 
 ;; this is a git submodule
