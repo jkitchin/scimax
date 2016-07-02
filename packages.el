@@ -276,7 +276,8 @@
 ;; Functions for working with hash tables
 (use-package ht)
 
-(use-package htmlize)
+(use-package htmlize
+  :disable t)
 
 (use-package hy-mode)
 
@@ -315,40 +316,40 @@
 (use-package mustache)
 
 
-;; (use-package ob-ipython
-;;   :disabled t
-;;   :config
-;;   (defun ob-ipython--kernel-repl-cmd (name)
-;;     (list "jupyter" "console" "--existing" (format "emacs-%s.json" name)))
-;;   ;; Make sure pygments can handle ipython for exporting.
-;;   (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
-;;     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
+(use-package ob-ipython
+  :disabled t
+  :config
+  (defun ob-ipython--kernel-repl-cmd (name)
+    (list "jupyter" "console" "--existing" (format "emacs-%s.json" name)))
+  ;; Make sure pygments can handle ipython for exporting.
+  (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
+    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
-;; (el-get-bundle jkitchin/ob-ipython
-;;   ;; Make sure pygments can handle ipython for exporting.
-;;   (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
-;;     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console"))
-;;   (require 'ob-ipython))
+(el-get-bundle jkitchin/ob-ipython
+  ;; Make sure pygments can handle ipython for exporting.
+  (unless (= 0 (shell-command "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
+    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console"))
+  (require 'ob-ipython))
 
 
 ;; Bleeding edge org-ref from github.
-;; (el-get-bundle jkitchin/org-ref
-;;   (require 'org-ref)
-;;   (require 'doi-utils)
-;;   (require 'org-ref-isbn)
-;;   (require 'org-ref-pubmed)
-;;   (require 'org-ref-arxiv)
-;;   (require 'org-ref-bibtex)
-;;   (require 'org-ref-pdf)
-;;   (require 'org-ref-url-utils)
-;;   (setq bibtex-autokey-year-length 4
-;; 	bibtex-autokey-name-year-separator "-"
-;; 	bibtex-autokey-year-title-separator "-"
-;; 	bibtex-autokey-titleword-separator "-"
-;; 	bibtex-autokey-titlewords 2
-;; 	bibtex-autokey-titlewords-stretch 1
-;; 	bibtex-autokey-titleword-length 5)
-;;   (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
+(el-get-bundle jkitchin/org-ref
+  (require 'org-ref)
+  (require 'doi-utils)
+  (require 'org-ref-isbn)
+  (require 'org-ref-pubmed)
+  (require 'org-ref-arxiv)
+  (require 'org-ref-bibtex)
+  (require 'org-ref-pdf)
+  (require 'org-ref-url-utils)
+  (setq bibtex-autokey-year-length 4
+	bibtex-autokey-name-year-separator "-"
+	bibtex-autokey-year-title-separator "-"
+	bibtex-autokey-titleword-separator "-"
+	bibtex-autokey-titlewords 2
+	bibtex-autokey-titlewords-stretch 1
+	bibtex-autokey-titleword-length 5)
+  (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
