@@ -35,6 +35,9 @@
 (add-to-list 'load-path scimax-dir)
 (add-to-list 'load-path user-dir)
 
+(shell-command "git submodule init")
+(shell-command "git submodule update")
+
 (require 'bootstrap)
 (require 'packages)
 
