@@ -7,9 +7,14 @@ before_install:
 env:
   - EVM_EMACS=emacs-24.4-travis
   - EVM_EMACS=emacs-24.5-travis
-#  - EVM_EMACS=emacs-25-pre-travis
-#  - EVM_EMACS=emacs-git-snapshot-travis
+  - EVM_EMACS=emacs-25-pre-travis
+  - EVM_EMACS=emacs-git-snapshot-travis
 
+matrix:
+  allow_failures:
+    - env: EVM_EMACS=emacs-25-pre-travis
+    - env: EVM_EMACS=emacs-git-snapshot-travis
+    
 script:
   - emacs --version -l init.el
   - make build
