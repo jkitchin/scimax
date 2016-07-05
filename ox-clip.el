@@ -4,9 +4,9 @@
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
 ;; URL: https://github.com/jkitchin/scimax/ox-clip.el
-;; Version: 0.1
+;; Version: 0.2
 ;; Keywords: org-mode
-;; Package-Requires:
+;; Package-Requires: ((org "8.2") (htmlize "0"))
 
 ;; This file is not currently part of GNU Emacs.
 
@@ -28,7 +28,8 @@
 ;;; Commentary:
 ;; 
 ;; This module copies selected regions in org-mode as formatted text on the
-;; clipboard that can be pasted into other applications.
+;; clipboard that can be pasted into other applications. When not in org-mode,
+;; the htmlize library is used instead.
 
 ;; For Windows the html-clip-w32.py script will be installed. It works pretty
 ;; well, but I noticed that the hyperlinks in the TOC to headings don't work,
@@ -41,6 +42,8 @@
 
 ;; There is one command: `ox-clip-formatted-copy' that should work across
 ;; Windows, Mac and Linux.
+
+(require 'htmlize)
 
 ;;; Code:
 (defgroup ox-clip nil
@@ -355,31 +358,54 @@ if __name__ == '__main__':
 R1 and R2 define the selected region."
   (interactive "r")
   (copy-region-as-kill r1 r2)
-  (when (equal major-mode 'org-mode)
-    (save-window-excursion
-      (let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
-	     (html (with-current-buffer buf (buffer-string))))
-	(cond
-	 ((eq system-type 'windows-nt)
-	  (with-current-buffer buf
-	    (shell-command-on-region
-	     (point-min)
-	     (point-max)
-	     ox-clip-w32-cmd)))
-	 ((eq system-type 'darwin)
-	  (with-current-buffer buf
-	    (shell-command-on-region
-	     (point-min)
-	     (point-max)
-	     ox-clip-osx-cmd)))
-	 ((eq system-type 'gnu/linux)
-	  ;; For some reason shell-command on region does not work with xlcip.
-	  (with-temp-file "/tmp/ox-clip-org.html"
-	    (insert (with-current-buffer buf (buffer-string))))
-	  (apply
-	   'start-process "ox-clip" "*ox-clip*"
-	   (split-string ox-clip-linux-cmd " ")))) 
-	(kill-buffer buf)))))
+  (if (equal major-mode 'org-mode)
+      (save-window-excursion
+	(let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
+	       (html (with-current-buffer buf (buffer-string))))
+	  (cond
+	   ((eq system-type 'windows-nt)
+	    (with-current-buffer buf
+	      (shell-command-on-region
+	       (point-min)
+	       (point-max)
+	       ox-clip-w32-cmd)))
+	   ((eq system-type 'darwin)
+	    (with-current-buffer buf
+	      (shell-command-on-region
+	       (point-min)
+	       (point-max)
+	       ox-clip-osx-cmd)))
+	   ((eq system-type 'gnu/linux)
+	    ;; For some reason shell-command on region does not work with xlcip.
+	    (with-temp-file "/tmp/ox-clip-org.html"
+	      (insert (with-current-buffer buf (buffer-string))))
+	    (apply
+	     'start-process "ox-clip" "*ox-clip*"
+	     (split-string ox-clip-linux-cmd " ")))) 
+	  (kill-buffer buf)))
+    ;; Use htmlize when not in org-mode.
+    (let ((html (htmlize-region-for-paste r1 r2)))
+      (cond
+       ((eq system-type 'windows-nt)
+	(with-temp-buffer
+	  (insert html)
+	  (shell-command-on-region
+	   (point-min)
+	   (point-max)
+	   ox-clip-w32-cmd)))
+       ((eq system-type 'darwin)
+	(with-temp-buffer
+	  (insert html)
+	  (shell-command-on-region
+	   (point-min)
+	   (point-max)
+	   ox-clip-osx-cmd)))
+       ((eq system-type 'gnu/linux)
+	(with-temp-file "/tmp/ox-clip-org.html"
+	  (insert html))
+	(apply
+	 'start-process "ox-clip" "*ox-clip*"
+	 (split-string ox-clip-linux-cmd " ")))))))
 
 (provide 'ox-clip)
 
