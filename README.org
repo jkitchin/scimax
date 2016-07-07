@@ -9,3 +9,29 @@ See the [[./scimax.org][manual]] for more details.
 <a href="https://travis-ci.org/jkitchin/scimax"><img src="https://travis-ci.org/jkitchin/scimax.svg?branch=master"></a>
 <a href='https://coveralls.io/github/jkitchin/scimax?branch=master'><img src='https://coveralls.io/repos/github/jkitchin/scimax/badge.svg?branch=master' alt='Coverage Status' /></a>
 #+END_HTML
+
+* Installation
+
+** Windows users
+Install git (http://git-scm.com/download/win). Open a git bash terminal. Run this command.
+
+#+BEGIN_SRC sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/jkitchin/scimax/master/install-scimax-win.sh)"
+#+END_SRC
+
+There is an emacs binary in this repository for Windows. You should be able to run the scimax.sh command to launch scimax now.
+
+** Mac users
+
+Run the next command in your terminal in the location you want to install scimax. The command will make sure you have [[http://brew.sh][homebrew]], git, and emacs installed, and then will clone scimax and tell you how to use it. It will take some time to install. You need to install your own LaTeX and Python probably.
+
+#+BEGIN_SRC sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/jkitchin/scimax/master/install-scimax-mac.sh)"
+#+END_SRC
+
+** Linux users
+Run this command. It checks for a git and emacs, but does not install them. You will have to use your package manager for that. You also need to install your own LaTeX and Python (and other languages you might want).
+
+#+BEGIN_SRC sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/jkitchin/scimax/master/install-scimax-linux.sh)"
+#+END_SRC
