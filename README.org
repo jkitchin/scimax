@@ -29,6 +29,36 @@ Run the next command in your terminal in the location you want to install scimax
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/jkitchin/scimax/master/install-scimax-mac.sh)"
 #+END_SRC
 
+*** Alternative manual installation of scimax for Mac users
+Alternatively, you can install [[http://brew.sh][homebrew]] yourself, install git from http://git-scm.com/download/mac, build your emacs like this:
+
+#+BEGIN_SRC sh
+brew install emacs --with-gnutls --with-imagemagick --with-librsvg --with-x11 --use-git-head --HEAD --with-cocoa
+#+END_SRC
+
+This got me:
+#+BEGIN_SRC emacs-lisp :result org drawer
+(emacs-version)
+#+END_SRC
+
+#+RESULTS:
+: GNU Emacs 25.0.95.1 (x86_64-apple-darwin13.4.0, NS appkit-1265.21 Version 10.9.5 (Build 13F1603))
+:  of 2016-06-10
+
+These days I am using [[https://www.continuum.io/downloads][Python3 from Continuum IO]] and MacTeX from http://www.tug.org/mactex.
+
+After that, I clone scimax like this:
+
+#+BEGIN_SRC sh
+git clone https://github.com/jkitchin/scimax.git
+#+END_SRC
+
+and launch emacs with:
+
+#+BEGIN_SRC sh
+emacs -q -l scimax/init.el
+#+END_SRC
+
 ** Linux users
 Run this command. It checks for a git and emacs, but does not install them. You will have to use your package manager for that. You also need to install your own LaTeX and Python (and other languages you might want).
 
