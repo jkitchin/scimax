@@ -4,8 +4,6 @@
 ;;; Commentary:
 ;; 
 
-(require 'package)
-
 ;;; Code:
 
 (package-initialize)
