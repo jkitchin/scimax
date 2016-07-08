@@ -29,13 +29,16 @@
 (defvar scimax-load-user-dir t
   "Controls if the user directory is loaded.")
 
-(setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")))
+(add-to-list
+ 'package-archives
+ '("melpa" . "http://melpa.org/packages/")
+ t)
 
 (add-to-list 'load-path scimax-dir)
 (add-to-list 'load-path user-dir)
 
-(shell-command "git submodule update --init")
+(let ((default-directory scimax-dir))
+  (shell-command "git submodule update --init"))
 
 (require 'bootstrap)
 (require 'packages)
