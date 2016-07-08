@@ -29,6 +29,8 @@
 (defvar scimax-load-user-dir t
   "Controls if the user directory is loaded.")
 
+(require 'package)
+
 (add-to-list
  'package-archives
  '("melpa" . "http://melpa.org/packages/")
