@@ -12,11 +12,6 @@
 
 (setq use-package-always-ensure t)
 
-(add-to-list 'package-archives
-	     '("org"         . "http://orgmode.org/elpa/"))
-
-(add-to-list 'package-archives
-	     '("gnu"         . "https://elpa.gnu.org/packages/"))
 
 ;; * org-mode
 ;; load this first before anything else to avoid mixed installations
