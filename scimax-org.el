@@ -198,6 +198,15 @@ is positive, move after, and if negative, move before."
 ;; use syntax highlighting in org-file code blocks
 (setq org-src-fontify-natively t)
 
+(setq org-babel-default-header-args:python
+      '((:results . "output replace")
+	(:session . nil) 
+	(:exports . "both")
+	(:cache .   "no")
+	(:noweb . "no")
+	(:hlines . "no")
+	(:tangle . "no")))
+
 ;; ** jupyter ipython blocks
 
 (add-to-list 'org-structure-template-alist
