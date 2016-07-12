@@ -39,7 +39,7 @@
 (use-package aggressive-indent
   :config (aggressive-indent-global-mode 1))
 
-(use-package auto-complete 
+(use-package auto-complete
   :diminish auto-complete-mode
   :config (ac-config-default))
 
@@ -113,7 +113,7 @@
   :config
   (progn
     (counsel-mode)
-    
+
     (define-key ivy-minibuffer-map (kbd "M-<SPC>") 'ivy-dispatching-done)
 
     ;; C-RET call and go to next
@@ -136,7 +136,7 @@
 	      (ivy-next-line)
 	      (ivy--exhibit))
 	(exit-minibuffer)))
-    
+
     ;; s-RET to quit
     (define-key ivy-minibuffer-map (kbd "s-<return>")
       (lambda ()
@@ -144,13 +144,13 @@
 	(interactive)
 	(ivy-exit-with-action
 	 (lambda (x) nil))))
-    
+
     (define-key ivy-minibuffer-map (kbd "?")
       (lambda ()
 	(interactive)
 	(describe-keymap ivy-minibuffer-map)))
-    
-    (define-key ivy-minibuffer-map (kbd "<left>") 'ivy-backward-delete-char) 
+
+    (define-key ivy-minibuffer-map (kbd "<left>") 'ivy-backward-delete-char)
     (define-key ivy-minibuffer-map (kbd "C-d") 'ivy-backward-delete-char)))
 
 ;; Provides functions for working on lists
@@ -185,7 +185,7 @@
   (add-to-list 'flycheck-checkers 'proselint)
   (unless (executable-find "proselint")
     (shell-command "pip install proselint"))
-  
+
   (add-hook 'text-mode-hook #'flycheck-mode)
   (add-hook 'org-mode-hook #'flycheck-mode)
   (define-key flycheck-mode-map (kbd "s-;") 'flycheck-previous-error))
@@ -196,10 +196,10 @@
   :ensure t
   :init (setq ispell-program-name (executable-find "hunspell")
 	      ispell-dictionary "en_US"
-	      flyspell-correct-interface 'flyspell-correct-ivy) 
-  :after flyspell 
-  :config 
-  (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic) 
+	      flyspell-correct-interface 'flyspell-correct-ivy)
+  :after flyspell
+  :config
+  (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)
   (add-hook 'flyspell-incorrect-hook
 	    (lambda (beg end sym)
 	      (message "%s misspelled. Type %s to fix it."
@@ -251,7 +251,7 @@
 	      (helm-add-action-to-source
 	       "Attach file to email"
 	       (lambda (candidate)
-		 (mml-attach-file candidate)) 
+		 (mml-attach-file candidate))
 	       helm-source-find-files)
 
 	      (helm-add-action-to-source
@@ -277,8 +277,8 @@
 (use-package hydra
   :init
   (setq hydra-is-helpful t)
-  
-  :config 
+
+  :config
   (require 'hydra-ox))
 
 (use-package ivy-hydra)
@@ -291,8 +291,7 @@
 (use-package lispy
   :config
   (dolist (hook '(emacs-lisp-mode-hook
-		  hy-mode-hook
-		  python-mode-hook))
+		  hy-mode-hook))
     (add-hook hook
 	      (lambda ()
 		(lispy-mode)
@@ -353,7 +352,7 @@
   ("C-c pg" . projectile-grep)
   ("C-c pk" . projectile-kill-buffers)
   ;; nothing good in the modeline to keep.
-  :diminish "" 			     
+  :diminish ""
   :config
   (define-key projectile-mode-map (kbd "H-p") 'projectile-command-map)
   (projectile-global-mode))
@@ -384,7 +383,7 @@
 (use-package smex)
 
 (use-package undo-tree
-  :diminish undo-tree-mode 
+  :diminish undo-tree-mode
   :config (global-undo-tree-mode))
 
 
