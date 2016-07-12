@@ -106,7 +106,7 @@ is positive, move after, and if negative, move before."
 ;; * Block templates
 ;; add <p for python expansion
 (add-to-list 'org-structure-template-alist
-	     '("p" "#+BEGIN_SRC python :results org drawer\n?\n#+END_SRC"
+	     '("p" "#+BEGIN_SRC python :results output org drawer\n?\n#+END_SRC"
 	       "<src lang=\"python\">\n?\n</src>"))
 
 ;; add <por for python expansion with raw output
@@ -820,6 +820,139 @@ Use a prefix arg FONTIFY for colored headlines."
 (require 'cm-mods)
 (add-hook 'org-mode-hook #'cm-mode)
 
+;; * Asynchronous python
+
+(defun org-babel-async-execute:python (&optional arg)
+  "Execute the python src-block at point asynchronously.
+:var headers are supported.
+:results output is all that is supported for output.
+
+A new window will pop up showing you the output as it appears,
+and the output in that window will be put in the RESULTS section
+of the code block.
+
+Use a prefix arg to force it to run.
+"
+  (interactive "P")
+  (let* ((current-file (buffer-file-name)) 
+	 (code (org-element-property :value (org-element-context))) 
+	 (varcmds (org-babel-variable-assignments:python
+		   (nth 2 (org-babel-get-src-block-info))))
+	 py-file
+	 md5-hash
+	 pbuffer 
+	 process)
+    
+    ;; First, check if something is running
+    (let ((location (org-babel-where-is-src-block-result))
+	  results)
+      (when location
+	(save-excursion
+	  (goto-char location)
+	  (when (looking-at (concat org-babel-result-regexp ".*$"))
+	    (setq results (buffer-substring-no-properties
+			   location
+			   (save-excursion 
+			     (forward-line 1) (org-babel-result-end))))))) 
+      (when (and results (string-match "<async:\\(.*\\)>" results))
+	(if (not arg)
+	    (error "%s is running. Use prefix arg to kill it." (match-string 0 results))
+	  ;; we want to kill stuff, delete results and continue.
+	  (interrupt-process (format "*py-%s*" (match-string 1 results))))))
+
+
+    ;; Get the md5 for the current block
+    (with-temp-buffer
+      (dolist (cmd varcmds)
+	(insert cmd)
+	(insert "\n"))
+      (insert code)
+      (setq md5-hash (md5 (buffer-string))
+	    pbuffer (format "*py-%s*" md5-hash)
+	    py-file (format "py-%s.py" md5-hash)))
+
+    ;; create the file to run
+    (with-temp-file py-file
+      (dolist (cmd varcmds)
+	(insert cmd)
+	(insert "\n"))
+      (insert code))
+
+    ;; get rid of old results, and put a place-holder for the new results to
+    ;; come. This does not work for anything but vanilla results now.
+    (org-babel-remove-result)
+    (save-excursion
+      (re-search-forward "#\\+END_SRC")
+      (insert (format
+	       "\n\n#+RESULTS: %s\n: %s"
+	       (or (org-element-property :name (org-element-context))
+		   "")
+	       (format "<async:%s>" md5-hash))))
+
+    ;; open the results buffer to see the results in.
+    (switch-to-buffer-other-window pbuffer)
+
+    ;; run the code
+    (setq process (start-process
+		   md5-hash
+		   pbuffer
+		   "python"
+		   py-file))
+    
+    ;; when the process is done, run this code to put the results in the
+    ;; org-mode buffer.
+    (set-process-sentinel
+     process
+     `(lambda (process event)
+	;; (message "Deleting %s" ,(expand-file-name py-file))
+	;; (delete-file ,py-file)
+	(unwind-protect
+	    (save-window-excursion
+	      (save-excursion
+		(save-restriction
+		  (with-current-buffer (find-file-noselect ,current-file)
+		    (goto-char (point-min))
+		    (when (re-search-forward (format "<async:%s>" ,md5-hash) nil t)
+		      (beginning-of-line)
+		      (kill-line)
+		      (when (with-current-buffer
+				,pbuffer
+			      (buffer-string)))
+		      (insert
+		       (mapconcat
+			(lambda (x)
+			  (format ": %s" x))
+			(butlast (split-string
+				  (with-current-buffer
+				      ,pbuffer
+				    (buffer-string))
+				  "\n"))
+			"\n")))))))
+	  ;; delete the results buffer then delete the tempfile.
+	  ;; finally, delete the process.
+	  (when (get-buffer ,pbuffer)
+	    (kill-buffer ,pbuffer))
+	  ;;   (delete-window))
+	  (when process
+	    (delete-process process)))))))
+
+
+(defun org-babel-kill-async ()
+  "Kill the current async process.
+Run this in the code block that is running."
+  (interactive)
+  (let ((location (org-babel-where-is-src-block-result))
+	results)
+    (when location
+      (save-excursion
+	(goto-char location)
+	(when (looking-at (concat org-babel-result-regexp ".*$"))
+	  (setq results (buffer-substring-no-properties
+			 location
+			 (save-excursion 
+			   (forward-line 1) (org-babel-result-end))))))) 
+    (when (and results (string-match "<async:\\(.*\\)>" results))
+      (interrupt-process (match-string 1 results)))))
 ;; * The end
 (provide 'scimax-org)
 
