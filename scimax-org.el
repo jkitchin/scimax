@@ -200,7 +200,7 @@ is positive, move after, and if negative, move before."
 
 (setq org-babel-default-header-args:python
       '((:results . "output replace")
-	(:session . nil) 
+	(:session . "none")
 	(:exports . "both")
 	(:cache .   "no")
 	(:noweb . "no")
@@ -215,7 +215,7 @@ is positive, move after, and if negative, move before."
 
 (setq org-babel-default-header-args:ipython
       '((:results . "output replace")
-	(:session . nil) 
+	(:session . "none")
 	(:exports . "both")
 	(:cache .   "no")
 	(:noweb . "no")
