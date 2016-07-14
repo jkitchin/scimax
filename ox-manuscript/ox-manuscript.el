@@ -744,8 +744,7 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 
 (defun ox-manuscript-build-with-comments (&optional async subtreep visible-only body-only options)
   "Builds a manuscript with comments.
-This assumes you use `org-comment' and have it setup to use todonotes.
-(setq org-comment-latex-export-function 'org-comment-export-latex-todonote)
+This assumes you use `org-editmarks'.
 
 This function modifies the exported LaTeX so you do not have to
 put the packages in the org file.
