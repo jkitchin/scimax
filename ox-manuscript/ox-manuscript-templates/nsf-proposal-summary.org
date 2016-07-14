@@ -1,6 +1,6 @@
 #+TEMPLATE: NSF Proposal - Project summary
 #+key: nsf-project-summary
-#+group: manuscript
+#+group: proposal
 #+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 #+default-filename: project-summary.org
 

@@ -1,6 +1,6 @@
 #+TEMPLATE: NSF Proposal - Biographical sketch
 #+key: nsf-proposal-biosketch
-#+group: manuscript
+#+group: proposal
 #+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 #+default-filename: biosketch.org
 

@@ -800,10 +800,10 @@ put the packages in the org file.
     t)))
 
 
-;; ** templates
 (defvar ox-manuscript-templates-dir
   (expand-file-name
-   "ox-manuscript-templates/" (or load-file-name
+   "ox-manuscript-templates/" (or (when load-file-name
+				    (file-name-directory load-file-name))
 				  (file-name-directory (buffer-file-name))))
   "Directory where manuscript templates are.
 The templates are just org-files that can be inserted into a
@@ -842,7 +842,6 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 					  (f-ext? f "org")))
 	with data = nil
 	do (setq data (ox-manuscript-parse-template-file template-file))
-	if (string= (plist-get data :group) "manuscript")
 	collect data))
 
 
@@ -852,8 +851,11 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
   (interactive)
   (let ((candidates (ox-manuscript-candidates)))
     (ivy-read "type: " (mapcar (lambda (x)
-				 (cons (plist-get x :template)
-				       x))
+				 (cons
+				  (format "%15s | %s"
+					  (plist-get x :group)
+					  (plist-get x :template))
+				  x))
 			       candidates)
 	      :action (lambda (entry) 
 

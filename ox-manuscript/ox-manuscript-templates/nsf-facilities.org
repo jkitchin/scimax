@@ -1,6 +1,6 @@
 #+TEMPLATE: NSF Proposal - Facilities, Equipment, and other Resources
 #+key: nsf-proposal-facilities
-#+group: manuscript
+#+group: proposal
 #+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 #+default-filename: facilities.org
 

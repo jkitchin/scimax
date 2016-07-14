@@ -1,6 +1,6 @@
 #+TEMPLATE: NSF Proposal - postdoctoral mentoring plan
 #+key: nsf-proposal-postdoc-plan
-#+group: manuscript
+#+group: proposal
 #+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 #+default-filename: postdoctoral-mentoring-plan.org
 

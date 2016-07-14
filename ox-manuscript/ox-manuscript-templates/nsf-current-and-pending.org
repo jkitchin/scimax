@@ -1,7 +1,7 @@
 #+TODO: TODO PENDING | DONE DECLINED AWARDED EXPIRED
 #+TEMPLATE: NSF Proposal - Current and pending
 #+key: nsf-proposal-current-and-pending
-#+group: manuscript
+#+group: proposal
 #+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 #+default-filename: current-and-pending.org
 

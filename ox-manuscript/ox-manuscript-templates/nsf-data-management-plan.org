@@ -1,6 +1,6 @@
 #+TEMPLATE: NSF Proposal - data management plan
 #+key: nsf-proposal-data-plan
-#+group: manuscript
+#+group: proposal
 #+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 #+default-filename: data-management-plan.org
 

@@ -1,6 +1,6 @@
 #+TEMPLATE: NSF Proposal - Checklist
 #+key: nsf-proposal-checklist
-#+group: manuscript
+#+group: proposal
 #+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 #+default-filename: checklist.org
 
