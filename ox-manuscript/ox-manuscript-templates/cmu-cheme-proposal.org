@@ -1,0 +1,39 @@
+#+TEMPLATE: CMU ChemE Written Proposal
+#+key: cmu-cheme-written-proposal
+#+group: reports
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: proposal.org
+
+#+TITLE: <replace: with your title>
+#+AUTHOR: <replace: with your name>
+#+DATE: <replace: with the date>
+
+# Put the packages you need here. Sometimes the order matters.
+#+LATEX_HEADER: \documentclass[12pt]{article}
+#+LATEX_HEADER: \usepackage[top=1in, bottom=1.in, left=1in, right=1in]{geometry}
+#+LATEX_HEADER: \usepackage[sort&compress,super,comma]{natbib}
+#+LATEX_HEADER: \usepackage{natmove}  % move citations after punctuation
+#+LATEX_HEADER: \usepackage[linktocpage, pdfstartview=FitH, colorlinks, linkcolor=blue, anchorcolor=blue, citecolor=blue,  filecolor=blue,  menucolor=blue,  urlcolor=blue]{hyperref}
+#+OPTIONS: toc:nil ^:{}
+
+\begin{titlepage}
+\maketitle
+\thispagestyle{empty}
+\end{titlepage}
+
+\setstretch{1.33}
+
+* Introduction
+# Provide background information about the research are you work with proper scientific citations. Describe the problem you are working on, and prior work on the problem. You should include how the problem will be addressed, including background on the methods.
+
+* Preliminary work
+# Use this section to describe work you have done to date on the problem, the results you have obtained and how they inform the proposed work in the next section, e.g. why they confirm the approach you plan to take is appropriate, or how they confirm or refute a hypothesis. 
+
+* Proposed Work
+# Describe the work you propose to do to complete your PhD. This should normally address a central hypothesis, and should demonstrate how the work will test the hypothesis to come to some conclusion about it.
+
+* Timeline
+# Provide a timeline of research activities that will lead to graduation.
+
+bibliographystyle:unsrt
+bibliography:<replace: with your bibfile>
