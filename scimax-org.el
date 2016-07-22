@@ -6,6 +6,8 @@
 ;;; Code:
 (require 'org)
 (require 'ox-latex)
+(require 'org-inlinetask)
+(require 'org-mouse)
 (require 'org-ref)
 
 ;; * Configuration of org-mode
@@ -639,11 +641,11 @@ F5 inserts the entity code."
 				      (car element)
 				      (nth 1 element)
 				      (nth 3 element)
-				      (nth 5 element))
+				      (nth 6 element))
 			      element))
 	    :require-match t
 	    :action '(1
-		      ("u" (lambda (element) (insert (nth 5 element))) "utf-8")
+		      ("u" (lambda (element) (insert (nth 6 element))) "utf-8")
 		      ("o" (lambda (element) (insert "\\" (car element))) "org-entity")
 		      ("l" (lambda (element) (insert (nth 1 element))) "latex")
 		      ("h" (lambda (element) (insert (nth 3 element))) "html"))))
@@ -665,6 +667,10 @@ F5 inserts the entity code."
 (set-face-foreground 'org-latex-and-related "blue")
 
 ;; * New org links
+(org-add-link-type
+ "pydoc"
+ (lambda (path)
+   (pydoc path)))
 
 (org-add-link-type
  "attachfile"
@@ -838,6 +844,7 @@ Use a prefix arg to force it to run.
 	 (code (org-element-property :value (org-element-context))) 
 	 (varcmds (org-babel-variable-assignments:python
 		   (nth 2 (org-babel-get-src-block-info))))
+	 (params (nth 2 (org-babel-get-src-block-info)))
 	 py-file
 	 md5-hash
 	 pbuffer 
@@ -883,11 +890,15 @@ Use a prefix arg to force it to run.
     (org-babel-remove-result)
     (save-excursion
       (re-search-forward "#\\+END_SRC")
-      (insert (format
-	       "\n\n#+RESULTS: %s\n: %s"
-	       (or (org-element-property :name (org-element-context))
-		   "")
-	       (format "<async:%s>" md5-hash))))
+      (insert
+       (org-babel-reassemble-table
+	(format
+	 "\n\n%s"
+	 (format "<async:%s>" md5-hash))
+	(org-babel-pick-name (cdr (assoc :colname-names params))
+			     (cdr (assoc :colnames params)))
+	(org-babel-pick-name (cdr (assoc :rowname-names params))
+			     (cdr (assoc :rownames params))))))
 
     ;; open the results buffer to see the results in.
     (switch-to-buffer-other-window pbuffer)
@@ -917,17 +928,10 @@ Use a prefix arg to force it to run.
 		      (kill-line)
 		      (when (with-current-buffer
 				,pbuffer
-			      (buffer-string)))
-		      (insert
-		       (mapconcat
-			(lambda (x)
-			  (format ": %s" x))
-			(butlast (split-string
-				  (with-current-buffer
-				      ,pbuffer
-				    (buffer-string))
-				  "\n"))
-			"\n")))))))
+			      (buffer-string))
+			(insert (with-current-buffer
+				    ,pbuffer
+				  (buffer-string)))))))))
 	  ;; delete the results buffer then delete the tempfile.
 	  ;; finally, delete the process.
 	  (when (get-buffer ,pbuffer)
