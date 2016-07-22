@@ -64,17 +64,6 @@
   ;; I am not currently using this, and it loads a bunch of files on startup.
   :disabled t)
 
-;; criticmarks
-;; This is my fork of cm-mode
-;; 2016-07-18 disabled in favor of org-editmarks
-(let ((path (expand-file-name "criticmarkup-emacs" scimax-dir)))
-  (use-package cm-mode
-    :disabled t
-    :ensure nil
-    :load-path path
-    :init (add-to-list 'load-path
-		       (expand-file-name "criticmarkup-emacs" scimax-dir))))
-
 
 ;; Potential for commandline scripts using emacs
 (use-package commander
