@@ -7,7 +7,7 @@ fi
 
 cd scimax
 git submodule add https://github.com/jkitchin/emacs-win
-git submodule add https://github.com/jkitchin/scimax-win-elpa elpa
+git submodule add -f https://github.com/jkitchin/scimax-win-elpa elpa
 git submodule init
 git submodule update
 
