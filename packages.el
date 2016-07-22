@@ -435,6 +435,11 @@
     :ensure nil
     :load-path path))
 
+(let ((path (expand-file-name "techela" scimax-dir)))
+  (use-package techela
+    :ensure nil
+    :load-path path))
+
 (use-package words
   :ensure nil
   :load-path scimax-dir
