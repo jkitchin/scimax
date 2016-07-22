@@ -822,10 +822,6 @@ Use a prefix arg FONTIFY for colored headlines."
    fontify))
 
 
-;; * track changes
-(require 'cm-mods)
-(add-hook 'org-mode-hook #'cm-mode)
-
 ;; * Asynchronous python
 
 (defun org-babel-async-execute:python (&optional arg)
