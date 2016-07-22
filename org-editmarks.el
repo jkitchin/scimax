@@ -23,6 +23,8 @@
 ;; Alternatively, use `ox-manuscript-build-with-comments'.
 ;;; Code:
 
+(require 'org-inlinetask)
+
 ;; * The links
 (org-add-link-type
  "comment"
@@ -36,6 +38,7 @@
 	     path
 	     (if description (format "{%s}" description) ""))))))
 
+
 (org-add-link-type
  "delete"
  (lambda (path)
@@ -45,6 +48,7 @@
     ((eq format 'latex)
      (format "\\textcolor{red}{%s}" path)))))
 
+
 (org-add-link-type
  "insert"
  (lambda (path)
@@ -53,6 +57,7 @@
    (cond
     ((eq format 'latex)
      (format "\\textcolor{blue}{%s}" path)))))
+
 
 (org-add-link-type
  "typo"
@@ -73,16 +78,19 @@
     ((eq format 'latex)
      (format "\\bold{\\textcolor{red}{%s}}" path)))))
 
+
 ;; ** Link faces and font-lock
 (defface em-comment-face
   `((t (:inherit org-link
                  :foreground "DarkOrange1")))
   "Color for comment links.")
 
+
 (defface em-insert-face
   `((t (:inherit org-link
                  :foreground "blue")))
   "Color for insert links.")
+
 
 (defface em-delete-face
   `((t (:inherit org-link
@@ -90,14 +98,16 @@
 		 :strike-through t)))
   "Color for delete links.")
 
+
 (defface em-typo-face
   `((t (:inherit org-link
                  :foreground "red"
 		 :weight bold)))
   "Color for typo links.")
 
+
 (defun em-activate-links (link-type face limit)
-  "Add text properties for Edit Mark bracketed links."
+  "Add text properties for editmark bracketed links."
   (while (and (re-search-forward org-bracket-link-regexp limit t)
 	      (not (org-in-src-block-p)))
     (let* ((hl (org-match-string-no-properties 1))
@@ -143,17 +153,22 @@
 	  (org-rear-nonsticky-at (match-end 0)))
 	t))))
 
+
 (defun em-activate-comments (limit)
   (em-activate-links "comment" 'em-comment-face limit))
+
 
 (defun em-activate-typos (limit)
   (em-activate-links "typo" 'em-typo-face limit))
 
+
 (defun em-activate-inserts (limit)
   (em-activate-links "insert" 'em-insert-face limit))
 
+
 (defun em-activate-deletes (limit)
   (em-activate-links "delete" 'em-delete-face limit))
+
 
 (defun em-font-lock-enable ()
   "Add the font "
@@ -164,6 +179,7 @@
      (em-activate-inserts (0  'em-insert-face t))
      (em-activate-deletes (0  'em-delete-face t)))
    t))
+
 
 (add-hook 'org-mode-hook 'em-font-lock-enable)
 
@@ -183,6 +199,7 @@ If region is active, it is wrapped in the comment."
     (insert (format "[[comment:%s]] " 
 		    comment))))
 
+
 (defun em-typo ()
   "Insert a typo link.
 If the region is active, enclose it in the link, otherwise wrap the word at point."
@@ -199,6 +216,7 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
       (setf (buffer-substring (match-beginning 0) (match-end 0))
 	    (format "[[typo:%s]]" (match-string 0))))))
 
+
 (defun em-insert ()
   "Insert an insert link, or mark the active region for insertion."
   (interactive)
@@ -208,7 +226,8 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
 	    (format "[[insert:%s]] " 
 		    (buffer-substring (region-beginning) (region-end))))
     (insert "[[insert:]] ")
-    (backward-char 2)))
+    (backward-char 3)))
+
 
 (defun em-delete (r1 r2)
   "Mark the region from R1 to R2 for deletion."
@@ -228,7 +247,22 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
   (em-insert))
 
 
+(defun em-next-editmark ()
+  "Jump to next editmark."
+  (interactive)
+  (re-search-forward "\\(insert\\|delete\\|typo\\|comment\\):" nil t))
+
+
+(defun em-previous-editmark ()
+  "Jump to previous editmark."
+  (interactive)
+  (when
+      (re-search-backward "\\(insert\\|delete\\|typo\\|comment\\):" nil t)
+    (forward-char 1)))
+
+
 ;; * Delete an editmark
+;;;###autoload
 (defun em-delete-editmark-at-point ()
   "Delete the editmark at point."
   (interactive)
@@ -240,8 +274,7 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
       (setf (buffer-substring (org-element-property :begin link)
 			      (org-element-property :end link))
 	    ""))
-     ((string= (org-element-property :type link) "comment")
-      
+     ((string= (org-element-property :type link) "comment") 
       (setf (buffer-substring (org-element-property :begin link)
 			      (org-element-property :end link))
 	    (if (org-element-property :contents-begin link)
@@ -253,6 +286,73 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
      (t
       (error "%s not implemented" (org-element-property :type link))))))
 
+;;;###autoload
+(defun em-accept-edit-mark-at-point ()
+  "Accept the editmark at point.
+For insert, it means delete the link and keep the insert text.
+For delete, comment, and typo it means delete the link."
+  (interactive)
+  (let ((link (org-element-context)))
+    (cond
+     ;; accept means delete these links
+     ((member (org-element-property :type link) '("typo"
+						  "comment"
+						  "delete"))
+      (setf (buffer-substring (org-element-property :begin link)
+			      (- (org-element-property :end link)
+				 (org-element-property :post-blank link)))
+	    ""))
+     ;; accept means take the insert path.
+     ((string= (org-element-property :type link) "insert") 
+      (setf (buffer-substring (org-element-property :begin link)
+			      (- (org-element-property :end link)
+				 (org-element-property :post-blank link)))
+	    (org-element-property :path link)))
+     (t
+      (error "%s not implemented" (org-element-property :type link))))))
+
+
+;;;###autoload
+(defun em-reject-edit-mark-at-point ()
+  "Reject the editmark at point.
+For delete, it means delete the link and keep the delete text.
+For insert, comment, and typo it means delete the link."
+  (interactive)
+  (let ((link (org-element-context)))
+    (cond
+     ;; accept means delete these links
+     ((member (org-element-property :type link) '("typo"
+						  "comment"
+						  "insert"))
+      (setf (buffer-substring (org-element-property :begin link)
+			      (- (org-element-property :end link)
+				 (org-element-property :post-blank link)))
+	    ""))
+     ;; reject means take the delete path.
+     ((string= (org-element-property :type link) "delete") 
+      (setf (buffer-substring (org-element-property :begin link)
+			      (- (org-element-property :end link)
+				 (org-element-property :post-blank link)))
+	    (org-element-property :path link)))
+     (t
+      (error "%s not implemented" (org-element-property :type link))))))
+
+
+;; * Convenience
+
+;;;###autoload
+(defun em-accept-all-changes ()
+  (interactive)
+  (goto-char (point-min))
+  (while (em-next-editmark)
+    (em-accept-edit-mark-at-point)))
+
+;;;###autoload
+(defun em-reject-all-changes ()
+  (interactive)
+  (goto-char (point-min))
+  (while (em-next-editmark)
+    (em-reject-edit-mark-at-point)))
 
 ;; * See all Edit Marks
 
@@ -267,6 +367,7 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
 	(cons (buffer-substring (org-element-property :begin link)
 				(org-element-property :end link))
 	      (org-element-property :begin link))))))
+
 
 (defun em-editmarks ()
   "Show an ivy selection buffer of all the editmarks in the buffer.
@@ -295,6 +396,91 @@ The default action is to visit the mark."
 (define-key em-map "k" 'em-delete-editmark-at-point)
 (define-key em-map "l" 'em-editmarks)
 (define-key em-map "r" 'em-replace)
+(define-key em-map "o" 'org-inlinetask-insert-task)
+
+(define-key em-map "n" 'em-next-editmark)
+(define-key em-map "p" 'em-previous-editmark)
+
+(define-key em-map "a" 'em-accept-edit-mark-at-point)
+(define-key em-map "j" 'em-reject-edit-mark-at-point)
+
+(define-key em-map "A" 'em-accept-all-changes)
+(define-key em-map "R" 'em-reject-all-changes)
+
+
+;; * editmarks diff
+
+(defcustom em-wdiff-cmd
+  "wdiff -w [[delete: -x ]] -y [[insert: -z ]] "
+  "Command to run wdiff with.")
+
+(defun em-git-commit-selector ()
+  "Return list of commits."
+  (helm :sources `((name . "commits")
+		   (candidates . ,(mapcar (lambda (s)
+					    (let ((commit
+						   (nth
+						    0
+						    (split-string s))))
+					      (cons s
+						    commit)))
+					  (split-string
+					   (shell-command-to-string
+					    "git log --pretty=format:\"%h %ad | %s%d [%an]\" --date=relative") "\n")))
+		   (action . (lambda (candidate)
+			       (helm-marked-candidates))))))
+
+(defun em-wdiff-git (commits)
+  "Perform a wdiff between git COMMITS.
+A helm selection buffer is used to choose commits.
+
+If you choose one commit, the wdiff is between that commit and
+the current version.
+
+If you choose two commits, the wdiff is between those two
+commits. Returns the buffer."
+  (interactive
+   (list (em-git-commit-selector)))
+  (let ((buf (get-buffer-create
+	      "*org-wdiff-git*"))
+	(mmode major-mode)
+	(git-root (vc-git-root
+		   (buffer-file-name)))
+	(fname
+	 (file-relative-name
+	  (buffer-file-name)
+	  (vc-git-root (buffer-file-name))))
+	cmd)
+    (cond
+     ;; current version vs commit
+     ((= 1 (length commits))
+      (setq cmd (format "%s <(git show %s:%s) %s"
+			em-wdiff-cmd
+			(car commits) fname
+			fname)))
+     ;; more than 1 commit, we just take first two
+     ((> (length commits) 1)
+      (setq cmd (format "%s <(git show %s:%s) <(git show %s:%s)"
+			em-wdiff-cmd
+			(nth 0 commits) fname
+			(nth 1 commits) fname))))
+
+    ;; Save fname in global var for convenience to save buffer later
+    (setq *em-wdiff-git-source* fname)
+    (switch-to-buffer-other-window buf)
+    (let ((inhibit-read-only t))
+      (erase-buffer))
+
+    ;; Try to keep same major mode
+    (funcall mmode)
+
+    ;; get the wdiff. we do this in git-root so the paths are all correct.
+    (let ((default-directory git-root))
+      (insert (shell-command-to-string cmd))) 
+    (goto-char (point-min))
+    buf))
+
+
 
 
 (provide 'org-editmarks)
