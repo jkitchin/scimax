@@ -1,6 +1,3 @@
-[submodule "criticmarkup-emacs"]
-	path = criticmarkup-emacs
-	url = https://github.com/jkitchin/criticmarkup-emacs.git
 [submodule "org-ref"]
 	path = org-ref
 	url = https://github.com/jkitchin/org-ref.git
