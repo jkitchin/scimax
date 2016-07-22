@@ -21,9 +21,9 @@ echo "`pwd`/scimax/emacs-win/bin/runemacs.exe -q -l `pwd`/scimax/init.el"
 echo "or"
 echo "run the scimax.sh script created in this directory as ./scimax.sh in the terminal."
 
-echo "start \"\" \".\scimax\emacs-win\bin\runemacs.exe\" -l \".\scimax\init.el\"" > scimax.bat
+echo "start \"\" \".\emacs-win\bin\runemacs.exe\" -l \".\init.el\"" > scimax.bat
 
 
 echo "Opening scimax. The first time it will install a lot of packages. Be patient."
-start "" ".\scimax\emacs-win\bin\runemacs.exe" -l ".\scimax\init.el"
+start "" ".\emacs-win\bin\runemacs.exe" -l ".\init.el"
 #end
