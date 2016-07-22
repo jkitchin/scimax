@@ -36,6 +36,13 @@
 ;; except git and svn which I actually use
 (setq vc-handled-backends '(Git SVN))
 
+(defun scimax-update ()
+  "Update"
+  (let ((default-directory scimax-dir))
+    (shell-command "git pull origin master")
+    (shell-command "git submodule update")
+    (load-file "init.el")))
+
 ;; * Diminish modes
 (diminish 'orgstruct-mode)
 (diminish 'ivy-mode)
