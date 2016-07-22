@@ -66,8 +66,10 @@
 
 ;; criticmarks
 ;; This is my fork of cm-mode
+;; 2016-07-18 disabled in favor of org-editmarks
 (let ((path (expand-file-name "criticmarkup-emacs" scimax-dir)))
   (use-package cm-mode
+    :disabled t
     :ensure nil
     :load-path path
     :init (add-to-list 'load-path
@@ -454,7 +456,11 @@
   :load-path scimax-dir
   :bind ("H-o" . ore))
 
-(use-package cm-mods
+(use-package org-editmarks
+  :ensure nil
+  :load-path scimax-dir)
+
+(use-package scimax-ivy
   :ensure nil
   :load-path scimax-dir)
 
