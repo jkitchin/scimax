@@ -26,19 +26,6 @@
 
 ;;; Code:
 
-(define-prefix-command 'scimax-mode-map)
-;; (global-set-key (kbd "<f12> s") scimax-mode-map)
-
-;; (define-key scimax-mode-map (kbd "<f12> sr") 'email-region)
-;; (define-key scimax-mode-map (kbd "<f12> sh") 'email-heading)
-;; (define-key scimax-mode-map (kbd "<f12> sp") 'ox-manuscript-export-and-build-and-email)
-;; (define-key scimax-mode-map (kbd "<f12> sa") 'ox-archive-create-and-mail)
-;; insert keys
-;; (define-key scimax-mode-map (kbd "<f12> sR") 'org-ref-insert-ref-link)
-;; (define-key scimax-mode-map (kbd "<f12> sC") 'org-ref-insert-cite-link)
-;; (define-key scimax-mode-map (kbd "<f12> sf") 'org-footnote-action)
-
-
 (defun kg-get-num-incoming-changes ()
   "Return number of changes the remote is different than local."
   (unless (shell-command "git rev-parse --is-inside-work-tree")
@@ -68,7 +55,7 @@ one and open it."
 		 user-file))
     (find-file user-file)))
 
-
+(define-prefix-command 'scimax-mode-map)
 (easy-menu-define my-menu scimax-mode-map "My own menu"
   '("Scimax"
     [(format "Update (-%s)" (kg-get-num-incoming-changes)) kg-update t]
@@ -76,7 +63,7 @@ one and open it."
      ["email region" email-region t]
      ["email org-mode heading" email-heading t]
      ["email org-mode as PDF" ox-manuscript-export-and-build-and-email t]
-     ["email org-archive" ox-archive-create-and-mail t])
+     ["email org-zip" org-create-zip-and-mail t])
     ("org-mode"
      ["Toggle symbols" org-toggle-pretty-entities t]
      ["Toggle inline images" org-toggle-inline-images t]
