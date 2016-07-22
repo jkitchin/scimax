@@ -176,18 +176,47 @@ e.g. on a person name, email, etc..."
 
 ;; * Ivy-contacts
 
-;;;###autoload
-(defun ivy-contacts (arg)
-  "Select contacts using ivy."
-  (interactive "P")
+(defvar ivy-marked-candidates '()
+  "Holds marked candidates")
 
+(defun ivy-mark-candidate () 
+  "Add current candidate to `ivy-marked-candidates'.
+If candidate is already in, remove it."
+  (interactive) 
+  (let ((cand (or (assoc ivy--current (ivy-state-collection ivy-last))
+		  ivy--current)))
+    (if (-contains? ivy-marked-candidates cand)
+	;; remove it from the marked list
+	(setq ivy-marked-candidates
+	      (-remove-item cand ivy-marked-candidates))
+      
+      ;; add to list
+      (setq ivy-marked-candidates
+	    (append ivy-marked-candidates (list cand))))) 
+  (ivy-next-line))
+
+
+(defun ivy-show-marked-candidates ()
+  "Show marked candidates."
+  (interactive)
+  (when ivy-marked-candidates
+    (setf (ivy-state-collection ivy-last) ivy-marked-candidates)
+    (setf (ivy-state-preselect ivy-last) ivy--current)
+    (ivy--reset-state ivy-last)))
+
+
+(defun ivy-contacts-show-all ()
+  "Show all the candidates."
+  (interactive)
+  (setf (ivy-state-collection ivy-last)
+	(ivy-contacts-candidates)) 
+  (ivy--reset-state ivy-last))
+
+(defun ivy-contacts-candidates ()
+  "Return list of contacts to choose from.
+Loads cache file."
   (unless contacts-cache-data
     (contacts-load-cache-file))
-  
-  (when arg
-    (message "Clearing cache")
-    (setq contacts-cache-data '((hashes . ())
-				(contacts . ()))))
 
   (contacts-update-cache)
 
@@ -195,9 +224,46 @@ e.g. on a person name, email, etc..."
   (unless (and (featurep 'mu4e) (boundp 'mu4e~contacts))
     (mu4e t))
   
-  (ivy-read "Contact: " (append contacts
-				(loop for contact being the hash-key of mu4e~contacts
-				      collect (list contact (cons "EMAIL" contact))))
+  (append contacts
+	  (loop for contact being the hash-key of mu4e~contacts
+		collect (list contact (cons "EMAIL" contact)))))
+
+(defvar ivy-contacts-keymap
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-<SPC>") 'ivy-mark-candidate)
+    (define-key map (kbd "C-,") 'ivy-show-marked-candidates)
+    (define-key map (kbd "C-.") 'ivy-contacts-show-all) 
+    (define-key map (kbd "C-<return>")
+      (lambda ()
+	"Apply action and move to next/previous candidate."
+	(interactive)
+	(ivy-call)
+	(ivy-next-line)))
+    map))
+
+(defun ivy-marked-transformer (s)
+  "Make entry red if it is marked."
+  (if (-contains?
+       (if (listp (car ivy-marked-candidates))
+	   (mapcar 'car ivy-marked-candidates)
+	 ;; we have a list of strings
+	 ivy-marked-candidates)
+       s)
+      (propertize s 'face 'font-lock-warning-face)
+    (propertize s 'face s)))
+
+(ivy-set-display-transformer
+ 'ivy-contacts
+ 'ivy-marked-transformer)
+
+;;;###autoload
+(defun ivy-contacts (arg)
+  "Select contacts using ivy."
+  (interactive "P")
+  (setq ivy-marked-candidates '())
+  (ivy-read "Contact: " (ivy-contacts-candidates)
+	    :keymap ivy-contacts-keymap
+	    :caller 'ivy-contacts
 	    :action '(1
 		      ("i" (lambda (contact)
 			     (with-ivy-window
@@ -207,10 +273,17 @@ e.g. on a person name, email, etc..."
 				 (re-search-forward "\\>"))
 			       ;; put in a comma unless we are looking back at a
 			       ;; space or comma
-			       (when (not (looking-back " \\|,")) (insert ",")) 
-			       (insert (if (listp contact)
-					   (cdr (assoc "EMAIL" contact))
-					 contact))))
+			       (when (not (looking-back " \\|,")) (insert ","))
+			       (if ivy-marked-candidates
+				   (insert (mapconcat (lambda (contact)
+							(if (listp contact)
+							    (cdr (assoc "EMAIL" contact))
+							  contact))
+						      ivy-marked-candidates
+						      ","))
+				 (insert (if (listp contact)
+					     (cdr (assoc "EMAIL" contact))
+					   contact)))))
 		       "Insert email")
 		      ("n" (lambda (contact)
 			     (with-ivy-window
