@@ -4,3 +4,6 @@
 [submodule "ob-ipython"]
 	path = ob-ipython
 	url = https://github.com/jkitchin/ob-ipython.git
+[submodule "techela"]
+	path = techela
+	url = https://github.com/jkitchin/techela
