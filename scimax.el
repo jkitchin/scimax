@@ -37,7 +37,8 @@
 (setq vc-handled-backends '(Git SVN))
 
 (defun scimax-update ()
-  "Update"
+  "Update scimax from github."
+  (interactive)
   (let ((default-directory scimax-dir))
     (shell-command "git pull origin master")
     (shell-command "git submodule update")
