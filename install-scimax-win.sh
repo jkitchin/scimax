@@ -21,5 +21,5 @@ echo "#!/bin/bash
 chmod +x scimax.sh
 
 echo "Opening scimax. The first time it will install a lot of packages. Be patient."
-./scimax/emacs-win/bin/runemacs.exe -q -l ./scimax/init.el
+start "" "%~dp0\emacs-win\bin\runemacs.exe" -l "%~dp0\scimax\init.el"
 #end
