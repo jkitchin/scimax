@@ -160,23 +160,7 @@
 ;; pip install proselint
 (use-package flycheck
   ;; Jun 28 - I like this idea, but sometimes this is too slow.
-  :disabled t
-  :config
-  (flycheck-define-checker
-      proselint
-    "A linter for prose."
-    :command ("proselint" source-inplace)
-    :error-patterns
-    ((warning line-start (file-name) ":" line ":" column ": "
-	      (id (one-or-more (not (any " "))))
-	      (message (one-or-more not-newline)
-		       (zero-or-more "\n" (any " ") (one-or-more not-newline)))
-	      line-end))
-    :modes (text-mode org-mode))
-  (add-to-list 'flycheck-checkers 'proselint)
-  (unless (executable-find "proselint")
-    (shell-command "pip install proselint"))
-
+  :config 
   (add-hook 'text-mode-hook #'flycheck-mode)
   (add-hook 'org-mode-hook #'flycheck-mode)
   (define-key flycheck-mode-map (kbd "s-;") 'flycheck-previous-error))
@@ -185,9 +169,31 @@
 ;; https://manuel-uberti.github.io/emacs/2016/06/06/spellchecksetup/
 (use-package flyspell-correct-ivy
   :ensure t
-  :init (setq ispell-program-name (executable-find "hunspell")
-	      ispell-dictionary "en_US"
-	      flyspell-correct-interface 'flyspell-correct-ivy)
+  :init
+  (if (file-directory-p (expand-file-name "emacs-win" scimax-dir))
+      (progn
+	;; spell-checking on windows
+	(setq ispell-program-name
+	      (expand-file-name
+	       "emacs-win/bin/hunspell"
+	       scimax-dir))
+
+	(setq ispell-dictionary "english")
+
+	(setq ispell-local-dictionary-alist
+	      `(("english"
+		 "[[:alpha:]]"
+		 "[^[:alpha:]]"
+		 "[']"
+		 t
+		 ("-d" "en_US" "-p" ,(expand-file-name
+				      "emacs-win/share/hunspell/en_US"
+				      scimax-dir))
+		 nil
+		 utf-8))))
+    (setq ispell-program-name (executable-find "hunspell")
+	  ispell-dictionary "en_US"
+	  flyspell-correct-interface 'flyspell-correct-ivy))
   :after flyspell
   :config
   (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)
