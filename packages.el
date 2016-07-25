@@ -194,9 +194,6 @@
     (setq ispell-program-name (executable-find "hunspell")
 	  ispell-dictionary "en_US"
 	  flyspell-correct-interface 'flyspell-correct-ivy))
-  :after flyspell
-  :config
-  (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)
   (add-hook 'flyspell-incorrect-hook
 	    (lambda (beg end sym)
 	      (message "%s misspelled. Type %s to fix it."
@@ -212,8 +209,13 @@
 
   (add-hook 'org-mode-hook
 	    (lambda ()
-	      (flyspell-mode)
-	      (flycheck-mode))))
+	      (flyspell-mode +1)
+	      (flycheck-mode +1)))
+  
+  :after flyspell
+  :config
+  (progn
+    (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)))
 
 
 (use-package flx)
