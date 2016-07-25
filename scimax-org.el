@@ -1057,14 +1057,8 @@ boundaries."
 				     e))
 				  (attr_org (org-element-property :attr_org paragraph)))
 			     (when attr_org
-			       (if org-inline-image-resize-function
-				   (or
-				    (plist-get
-				     (org-export-read-attribute :attr_org  paragraph) :resize)
-				    (plist-get
-				     (org-export-read-attribute :attr_org  paragraph) :width))
-				 (plist-get
-				  (org-export-read-attribute :attr_org  paragraph) :width))))
+			       (plist-get
+				(org-export-read-attribute :attr_org  paragraph) :width)))
 			   ;; Otherwise, fall-back to provided number.
 			   (car org-image-actual-width)))
 			 ((numberp org-image-actual-width)
