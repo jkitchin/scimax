@@ -224,6 +224,15 @@ is positive, move after, and if negative, move before."
 	(:hlines . "no")
 	(:tangle . "no")))
 
+(defun scimax-install-ipython-lexer ()
+  "Install the IPython lexer for Pygments.
+You need this to get syntax highlighting."
+  (interactive)
+  (unless (= 0
+	     (shell-command
+	      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
+    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
+
 ;; ** jupyter-hy blocks
 ;; make src blocks open in the right mode
 (add-to-list 'org-src-lang-modes '("jupyter-hy" . hy))

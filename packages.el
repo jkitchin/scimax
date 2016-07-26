@@ -312,11 +312,7 @@
   :load-path (lambda () (expand-file-name "ob-ipython" scimax-dir))
   :init
   (add-to-list 'load-path
-	       (expand-file-name "ob-ipython" scimax-dir))
-  (unless (= 0
-	     (shell-command
-	      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
-    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
+	       (expand-file-name "ob-ipython" scimax-dir)))
 
 
 ;; this is a git submodule
