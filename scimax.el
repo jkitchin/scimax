@@ -94,7 +94,8 @@ This enables you to use tab to open and close outlines."
 
 ;; This eliminates an annoying message about the interpreter not using
 ;; readline. That doesn't seem to matter at all.
-(setq warning-suppress-types '((python)))
+(setq warning-suppress-types '((python)
+			       (emacs)))
 
 ;; *** Outlines in python code
 (defconst lpy-font-lock-keywords
