@@ -973,7 +973,7 @@ Run this in the code block that is running."
 
 (defun org-inline-image-resize (fname resize-options)
   "Resize FNAME with RESIZE-OPTIONS.
-RESIZE-OPTIONS are passed to \"convert fname -resize resize-options\ resized-fname\".
+RESIZE-OPTIONS are passed to \"mogrify resized-fname -resize resize-options\".
 RESIZE-OPTIONS could be:
 
 N% to scale the image by a percentage.
@@ -985,17 +985,19 @@ See http://www.imagemagick.org/Usage/resize/#resize for more options."
   (let* ((md5-hash (with-temp-buffer (insert-file-contents fname)
 				     (insert (format "%s" resize-options))
 				     (md5 (buffer-string))))
-	 (resized-fname (expand-file-name
-			 md5-hash
-			 temporary-file-directory))
-	 (cmd (format "convert %s -resize %s %s"
-		      fname
+	 (resized-fname (concat (expand-file-name
+				 md5-hash
+				 temporary-file-directory)
+				"."
+				(file-name-extension fname)))
+	 (cmd (format "mogrify -resize %s %s"
 		      resize-options
 		      resized-fname)))
-    (when (not (executable-find "convert"))
+    (when (not (executable-find "mogrify"))
       (browse-url "http://www.imagemagick.org/script/binary-releases.php")
-      (error "No \"convert\" executable found. Please install imagemagick."))
+      (error "No \"mogrify\" executable found. Please install imagemagick."))
     (unless (file-exists-p resized-fname)
+      (copy-file fname resized-fname)
       (shell-command cmd))
     resized-fname))
 
