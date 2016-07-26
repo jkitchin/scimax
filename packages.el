@@ -307,35 +307,33 @@
 (use-package mustache)
 
 ;; this is a git submodule
-(let ((path (expand-file-name "ob-ipython" scimax-dir)))
-  (use-package ob-ipython
-    :ensure nil
-    :load-path path
-    :init
-    (add-to-list 'load-path
-		 (expand-file-name "ob-ipython" scimax-dir))
-    (unless (= 0
-	       (shell-command
-		"python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
-      (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console"))))
+(use-package ob-ipython
+  :ensure nil
+  :load-path (lambda () (expand-file-name "ob-ipython" scimax-dir))
+  :init
+  (add-to-list 'load-path
+	       (expand-file-name "ob-ipython" scimax-dir))
+  (unless (= 0
+	     (shell-command
+	      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
+    (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
 
 ;; this is a git submodule
-(let ((path (expand-file-name "org-ref " scimax-dir)))
-  (use-package org-ref
-    :ensure nil
-    :load-path path
-    :init
-    (add-to-list 'load-path
-		 (expand-file-name "org-ref" scimax-dir))
-    (setq bibtex-autokey-year-length 4
-	  bibtex-autokey-name-year-separator "-"
-	  bibtex-autokey-year-title-separator "-"
-	  bibtex-autokey-titleword-separator "-"
-	  bibtex-autokey-titlewords 2
-	  bibtex-autokey-titlewords-stretch 1
-	  bibtex-autokey-titleword-length 5)
-    (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body)))
+(use-package org-ref
+  :ensure nil
+  :load-path (lambda () (expand-file-name "org-ref " scimax-dir))
+  :init
+  (add-to-list 'load-path
+	       (expand-file-name "org-ref" scimax-dir))
+  (setq bibtex-autokey-year-length 4
+	bibtex-autokey-name-year-separator "-"
+	bibtex-autokey-year-title-separator "-"
+	bibtex-autokey-titleword-separator "-"
+	bibtex-autokey-titlewords 2
+	bibtex-autokey-titlewords-stretch 1
+	bibtex-autokey-titleword-length 5)
+  (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
 
 
 ;; https://github.com/bbatsov/projectile
@@ -433,20 +431,17 @@
   :load-path scimax-dir
   :bind ( "<f9>" . hotspots))
 
-(let ((path (expand-file-name "ox-manuscript" scimax-dir)))
-  (use-package ox-manuscript
-    :ensure nil
-    :load-path path))
+(use-package ox-manuscript
+  :ensure nil
+  :load-path (lambda () (expand-file-name "ox-manuscript" scimax-dir)))
 
-(let ((path (expand-file-name "org-show" scimax-dir)))
-  (use-package org-show
-    :ensure nil
-    :load-path path))
+(use-package org-show
+  :ensure nil
+  :load-path (lambda () (expand-file-name "org-show" scimax-dir)))
 
-(let ((path (expand-file-name "techela" scimax-dir)))
-  (use-package techela
-    :ensure nil
-    :load-path path))
+(use-package techela
+  :ensure nil
+  :load-path (lambda () (expand-file-name "techela" scimax-dir)))
 
 (use-package words
   :ensure nil
