@@ -23,7 +23,7 @@ echo "run the scimax.bat script created in this directory as ./scimax.sh in the 
 
 # This converts the posix style path from git bash to a windows path.
 SCIMAX_ROOT=$(echo `pwd` | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
-echo "start \"\" \"${SCIMAX_ROOT}\\emacs-win\\bin\\runemacs.exe\" -l \"${SCIMAX_ROOT}\\init.el\" \"\$@\"" > scimax.bat
+echo "start \"\" \"${SCIMAX_ROOT}\\emacs-win\\bin\\runemacs.exe\" -l \"${SCIMAX_ROOT}\\init.el\" %1" > scimax.bat
 
 
 echo "Opening scimax.  Be patient."
