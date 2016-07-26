@@ -19,11 +19,11 @@ git commit .gitmodules -m "windows setup for submodules"
 echo "scimax is installed. To use it, run this command in your terminal."
 echo "`pwd`/scimax/emacs-win/bin/runemacs.exe -q -l `pwd`/scimax/init.el"
 echo "or"
-echo "run the scimax.sh script created in this directory as ./scimax.sh in the terminal."
+echo "run the scimax.bat script created in this directory as ./scimax.bat in the terminal."
 
-echo "start \"\" \".\emacs-win\bin\runemacs.exe\" -l \".\init.el\"" > scimax.bat
+echo "start \"\" \".\emacs-win\bin\runemacs.exe\" -l \".\init.el\" \"$@\"" > scimax.bat
 
 
-echo "Opening scimax. The first time it will install a lot of packages. Be patient."
+echo "Opening scimax.  Be patient."
 start "" ".\emacs-win\bin\runemacs.exe" -l ".\init.el"
 #end
