@@ -27,7 +27,7 @@ SCIMAX_ROOT=$(echo `pwd` | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
 echo "start \"\" \"${SCIMAX_ROOT}\\emacs-win\\bin\\runemacs.exe\" -l \"${SCIMAX_ROOT}\\init.el\" \"%1\"" > scimax.bat
 
 # Use this in git bash
-echo "start \"\" \"${SCIMAX_ROOT}\\emacs-win\\bin\\runemacs.exe\" -l \"${SCIMAX_ROOT}\\init.el\" \"$1\"" > scimax.sh
+echo "start \"\" \"${SCIMAX_ROOT}\\emacs-win\\bin\\runemacs.exe\" -l \"${SCIMAX_ROOT}\\init.el\" \"\$1\"" > scimax.sh
 
 
 echo "Opening scimax.  Be patient."
