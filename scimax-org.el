@@ -993,13 +993,14 @@ See http://www.imagemagick.org/Usage/resize/#resize for more options."
 	 (cmd (format "mogrify -resize %s %s"
 		      resize-options
 		      resized-fname)))
-    (when (not (executable-find "mogrify"))
-      (browse-url "http://www.imagemagick.org/script/binary-releases.php")
-      (error "No \"mogrify\" executable found. Please install imagemagick."))
-    (unless (file-exists-p resized-fname)
-      (copy-file fname resized-fname)
-      (shell-command cmd))
-    resized-fname))
+    (if (not (executable-find "mogrify"))
+	(progn
+	  (message "No mogrify executable found. To eliminate this message, set  `org-inline-image-resize-function' to nil or install imagemagick from http://www.imagemagick.org/script/binary-releases.php")
+	  fname)
+      (unless (file-exists-p resized-fname)
+	(copy-file fname resized-fname)
+	(shell-command cmd)
+	resized-fname))))
 
 ;; this is copied and modified from org.el
 (defun org-display-inline-images (&optional include-linked refresh beg end)
