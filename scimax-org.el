@@ -893,17 +893,7 @@ Use a prefix arg to force it to run.
     ;; get rid of old results, and put a place-holder for the new results to
     ;; come. This does not work for anything but vanilla results now.
     (org-babel-remove-result)
-    (save-excursion
-      (re-search-forward "#\\+END_SRC")
-      (insert
-       (org-babel-reassemble-table
-	(format
-	 "\n\n%s"
-	 (format "<async:%s>" md5-hash))
-	(org-babel-pick-name (cdr (assoc :colname-names params))
-			     (cdr (assoc :colnames params)))
-	(org-babel-pick-name (cdr (assoc :rowname-names params))
-			     (cdr (assoc :rownames params))))))
+    (org-babel-insert-result (format "<async:%s>" md5-hash))
 
     ;; open the results buffer to see the results in.
     (switch-to-buffer-other-window pbuffer)
@@ -914,29 +904,29 @@ Use a prefix arg to force it to run.
 		   pbuffer
 		   "python"
 		   py-file))
-    
+
     ;; when the process is done, run this code to put the results in the
     ;; org-mode buffer.
     (set-process-sentinel
      process
      `(lambda (process event)
-	;; (message "Deleting %s" ,(expand-file-name py-file))
-	;; (delete-file ,py-file)
+	(message "Deleting %s" ,(expand-file-name py-file))
+	(delete-file ,py-file)
 	(unwind-protect
 	    (save-window-excursion
 	      (save-excursion
 		(save-restriction
 		  (with-current-buffer (find-file-noselect ,current-file)
+		    (widen)
 		    (goto-char (point-min))
 		    (when (re-search-forward (format "<async:%s>" ,md5-hash) nil t)
-		      (beginning-of-line)
-		      (kill-line)
-		      (when (with-current-buffer
-				,pbuffer
-			      (buffer-string))
-			(insert (with-current-buffer
-				    ,pbuffer
-				  (buffer-string)))))))))
+		      (org-babel-previous-src-block)
+		      (org-babel-remove-result)
+		      (org-babel-insert-result
+		       (with-current-buffer
+			   ,pbuffer
+			 (buffer-string))
+		       (cdr (assoc :result-params (nth 2 (org-babel-get-src-block-info))))))))))
 	  ;; delete the results buffer then delete the tempfile.
 	  ;; finally, delete the process.
 	  (when (get-buffer ,pbuffer)

@@ -51,8 +51,8 @@ Here are some additional actions we define for `counsel-find-file'.
 | l   | relative org link    |
 | L   | absolute org link    |
 | r   | rename file          |
- 
-* avy 
+
+* avy
 
 See `hydra-avy/body' which is bound <f12>. It provides a hydra to navigate to places.
 
@@ -66,7 +66,7 @@ See `hydra-avy/body' which is bound <f12>. It provides a hydra to navigate to pl
 | f12 h | avy-goto-org-heading               |
 | f12 a | jump to org heading in agenda file |
 
-* Org-mode 
+* Org-mode
 
 ** Markup shortcuts
 scimax defines some shortcuts for org-mode markup. You can select text and type the shortcut to wrap the region in the markup, or if on a word, type the shortcut to wrap the word, or type the short cut to create the markup with the cursor inside it to keep typing.
@@ -86,7 +86,7 @@ scimax defines some shortcuts for org-mode markup. You can select text and type 
 | @@latex:snippet@@ | C-u C-u 4   |                                     |
 | °                 | s-e         | `ivy-insert-org-entity'            |
 
-Use  `ivy-insert-org-entity' (s-e) for all accented characters. 
+Use  `ivy-insert-org-entity' (s-e) for all accented characters.
 
 ** Block expansions in org-mode
 
@@ -167,7 +167,7 @@ Here are some convenient table expansions.
 |  |   |   |   |   |   |
 
 ** LaTeX
-Here is a list of installed 
+Here is a list of installed
 #+BEGIN_SRC emacs-lisp
 (mapcar 'car org-latex-classes)
 #+END_SRC
@@ -183,7 +183,7 @@ Run `org-ref-help' and read it.
 
 The key-binding C-c C-e j should enter the ox-manuscript export menu. This process differs from the regular export process in a number of ways. It will detect if bibtex, makeindex, or  makeglossary, and if minted is used, -shell-escape will automatically be used with pdflatex. The function `ox-manuscript-latex-pdf-process' handles all of that.
 
-Additionally, you can generate different outputs of an org-file: 
+Additionally, you can generate different outputs of an org-file:
 
 - `ox-manuscript-build-submission-manuscript-and-open' :: creates a standalone tex file with embedded bibliography, and image extensions stripped, and the pdf file.
 
@@ -228,7 +228,7 @@ We have templates prepared for the following manuscripts, proposals and document
 | Wiley - Int. J. Quantum Chemistry                         |
 
 - `ox-manuscript-new-ivy'
-- `ox-manuscript-new-helm' 
+- `ox-manuscript-new-helm'
 
 ** new speed commands
 
@@ -240,7 +240,7 @@ scimax defines these new speed commands that are active when the cursor is on th
 | q | jump to a headline with avy  |
 | T | org-teleport (move headline) |
 
-The best way to see other speed commands is to put your cursor at the beginning of a headline and press ?. 
+The best way to see other speed commands is to put your cursor at the beginning of a headline and press ?.
 
 * Writing
 ** Spell-checking
@@ -255,7 +255,7 @@ You need to install proselint. This is automatically done for you by scimax.
 pip install proselint
 #+END_SRC
 
-This will catch many issues with your prose that you probably should fix. The keybinding s-; will jump to the previous flycheck error. Back in the 1980's we did not have that. 
+This will catch many issues with your prose that you probably should fix. The keybinding s-; will jump to the previous flycheck error. Back in the 1980's we did not have that.
 
 ** Track changes
 Scimax provides some support for track changes using [[https://github.com/joostkremers/criticmarkup-emacs][CriticMarkup]].
@@ -263,9 +263,9 @@ Scimax provides some support for track changes using [[https://github.com/joostk
 The main command to use is `cm/body' which launches a hydra menu. You can mark text for insertion, deletion, and add comment text. Scimax modifies the comment syntax
 Here is some example markup:
 
-{++Add this text++} {--Delete this--} {@a comment@} 
+{++Add this text++} {--Delete this--} {@a comment@}
 
-The markup should be clickable so you can accept/reject each change. 
+The markup should be clickable so you can accept/reject each change.
 
 You can use these commands
 - `cm-addition' - insert text at point
@@ -273,7 +273,7 @@ You can use these commands
 - `cm-comment' - insert a comment at point
 
 To turn on track changes. Run this command again to turn it off.
-- `cm-follow-changes' 
+- `cm-follow-changes'
 
 scimax provides some commands to:
 - `cm-accept-all-changes'
@@ -307,6 +307,9 @@ These require mu4e for mail, and store properties on the headline that indicate 
 - elpy
 - `pydoc' check it out.
 
+** Asynchronous Python
+You can run python blocks asynchronously with M-x org-babel-async-execute:python with the cursor in a code block. This will allow you to keep typing, and show you a buffer with the progress of your code block. When it is done, the results will be inserted into the buffer where it belongs when the job is done. A temporary hash mark will go in the results. You usually won't be able to run the script while that exists. You can run M-x org-babel-kill-async in the source block to kill a running async process.
+
 ** Ipython
 If you like sessions in Python, the ob-ipython library is better than the default ob-python in org-mode.
 
@@ -315,6 +318,20 @@ Pygments doesn't support ipython out of the box for some reason, which is a prob
 #+BEGIN_SRC emacs-lisp
 
 #+END_SRC
+
+#+RESULTS:
+#+begin_example
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+#+end_example
 
 #+BEGIN_SRC python :results org drawer
 
@@ -330,8 +347,8 @@ pip install git+git://github.com/sanguineturtle/pygments-ipython-console
 
 Here is a protypical Ipython src block with a line magic.
 
-#+BEGIN_SRC ipython 
-%time print("hello world") 
+#+BEGIN_SRC ipython
+%time print("hello world")
 a = 6
 #+END_SRC
 
@@ -342,7 +359,7 @@ a = 6
 
 And a block with cell magic.
 
-#+BEGIN_SRC ipython 
+#+BEGIN_SRC ipython
 %%timeit
 7
 #+END_SRC
@@ -357,7 +374,7 @@ And a block with cell magic.
 
 - `org-babel-switch-to-session' will open the IPython REPL.
 
-M-x `ob-ipython-interrupt-kernel'  
+M-x `ob-ipython-interrupt-kernel'
 M-x `ob-ipython-kill-kernel'
 
 #+BEGIN_SRC ipython :var a=6
@@ -412,7 +429,7 @@ Try out `words-hydra/body' on a selection or word. I bound it to \\[words-hydra/
 This command: `ore' tells you about the org-element your point is on.
 
 * Scientific notebook
-scimax provides a scientific notebook capability. 
+scimax provides a scientific notebook capability.
 
 Each "notebook" is actually collection of org-files in a "project".
 
@@ -424,17 +441,17 @@ We leverage [[http://projectile.readthedocs.io/en/latest/][projectile]] for proj
 
 Use `nb-new' to create a new project. You will be prompted for a name, which must be a valid directory name. The directory will be created in `nb-notebook-directory'. Note that all git repos will be considered projects, so it is not necessary to use `nb-new'. It just automates a few things for you.
 
-Use `nb-open' to open a project. This will open the project to your master file. Previously visited projects are remembered by projectile and should be shown in an ivy completion minibuffer for selection. 
+Use `nb-open' to open a project. This will open the project to your master file. Previously visited projects are remembered by projectile and should be shown in an ivy completion minibuffer for selection.
 
 Probably you will keep your projects separate from your agenda files, but you still would like to see what tasks the project has? Use `nb-agenda' while in your project, and it will show you all the tasks in the org-files associated with the project.
 
-Here are some other interesting commands 
+Here are some other interesting commands
 - `counsel-git-grep'
 - `projectile-find-file'
 - `projectile-switch-to-buffer'
 - `projectile-kill-buffers'
 
-- `ivy-org-jump-to-heading' 
+- `ivy-org-jump-to-heading'
 - `ivy-org-jump-to-heading-in-directory'
 - `ivy-org-jump-to-project-headline'
 - `counsel-org-tag'
@@ -455,7 +472,7 @@ You can manage the version control with magit
  'counsel-find-file
  '(("a" (lambda (x)
 	  (unless (equal major-mode 'message-mode)
-	    (compose-mail)) 
+	    (compose-mail))
 	  (mml-attach-file x)) "Attach to email")
    ("p" (lambda (path)
 	  (insert (f-relative path))) "Insert relative path")
