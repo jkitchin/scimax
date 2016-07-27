@@ -19,7 +19,7 @@ git commit .gitmodules -m "windows setup for submodules"
 echo "scimax is installed. To use it, run this command in your terminal."
 echo "`pwd`/scimax/emacs-win/bin/runemacs.exe -q -l `pwd`/scimax/init.el"
 echo "or"
-echo "run the scimax.bat script created in this directory as ./scimax.sh in the terminal."
+echo "run the scimax.bat script created in this directory or as ./scimax.sh in the terminal."
 
 # This converts the posix style path from git bash to a windows path.
 # You can use this as the application to open
