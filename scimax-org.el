@@ -999,8 +999,8 @@ See http://www.imagemagick.org/Usage/resize/#resize for more options."
 	  fname)
       (unless (file-exists-p resized-fname)
 	(copy-file fname resized-fname)
-	(shell-command cmd)
-	resized-fname))))
+	(shell-command cmd))
+      resized-fname)))
 
 ;; this is copied and modified from org.el
 (defun org-display-inline-images (&optional include-linked refresh beg end)
