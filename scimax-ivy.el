@@ -2,6 +2,7 @@
 
 ;;; Commentary:
 ;; 
+(require 'counsel)
 
 ;; * Generic ivy actions
 (ivy-set-actions
