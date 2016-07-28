@@ -351,6 +351,31 @@ Loads cache file."
 	tell application \"System Events\" to key code 36 #return
 end tell" (cdr (assoc "PHONE" contact)))))
 		       "Call")
+		      ("g" (lambda (contact)
+			     (let ((tags (split-string
+					  (read-string "Tag (space separated): ")
+					  " " t)))
+			       (if ivy-marked-candidates 
+				   (loop for contact in ivy-marked-candidates
+					 do
+					 (message "%s" contact)
+					 ;; this edits the buffer, so points can get messed up.
+					 (save-window-excursion
+					   (find-file (cdr (assoc "FILE" contact)))
+					   (goto-char (point-min))
+					   (re-search-forward (regexp-quote
+							       (cdr (assoc "ITEM" contact)))) 
+					   (org-set-tags-to
+					    (-uniq (append (org-get-tags-at) tags))))
+					 (save-buffer))
+				 
+				 (save-window-excursion
+				   (find-file (cdr (assoc "FILE" contact)))
+				   (goto-char (cdr (assoc "POSITION" contact)))
+				   (org-set-tags-to (-uniq (append (org-get-tags-at) tags))))
+				 (save-buffer)))
+			     )
+		       "Add tag to contact")
 		      
 		      ("q" nil "Quit"))))
 
