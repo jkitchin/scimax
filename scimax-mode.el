@@ -23,6 +23,7 @@
 ;; some utilities for the scimax
 
 (require 'easymenu)
+(require 'scimax-utils)
 
 ;;; Code:
 
@@ -47,11 +48,11 @@ one and open it."
   (interactive)
   (let ((user-file (expand-file-name
 		    "user/user.el"
-		    starter-kit-dir)))
+		    scimax-dir)))
     (unless (file-exists-p user-file)
       (copy-file (expand-file-name
 		  "user/user.example"
-		  starter-kit-dir)
+		  scimax-dir)
 		 user-file))
     (find-file user-file)))
 
