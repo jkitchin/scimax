@@ -71,7 +71,8 @@
 	 (save-excursion
 	   (setf (buffer-substring
 		  (org-element-property :begin link)
-		  (org-element-property :end link))
+		  (- (org-element-property :end link)
+		     (org-element-property :post-blank link)))
 		 (org-element-property :path (org-element-context))))))))
  (lambda (path description format)
    (cond
