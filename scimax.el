@@ -87,9 +87,6 @@ This enables you to use tab to open and close outlines."
 	  #'lisp-outline-setup)
 
 ;; ** Python
-
-(elpy-enable)
-
 (setq python-indent-offset 4)
 
 ;; This eliminates an annoying message about the interpreter not using

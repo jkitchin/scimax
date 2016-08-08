@@ -151,7 +151,9 @@
 (use-package elfeed)
 
 ;; Python editing mode
-(use-package elpy)
+(use-package elpy
+  :config
+  (elpy-enable))
 
 ;; Provides functions for working with files
 (use-package f)
