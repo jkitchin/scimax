@@ -90,6 +90,26 @@ recent files and bookmarks. You can set a bookmark also."
 (define-key 'vc-prefix-map "p" 'vc-git-push)
 (define-key 'vc-prefix-map "P" 'vc-pull)
 
+;; * Windows
+(defun explorer ()
+  "Open Finder or Windows Explorer in the current directory."
+  (interactive)
+  (cond
+   ((string= system-type "darwin")
+    (shell-command (format "open -b com.apple.finder %s"
+			   (if (buffer-file-name)
+			       (file-name-directory (buffer-file-name))
+			     "~/"))))
+   ((string= system-type "windows-nt")
+    (shell-command (format "explorer %s"
+			   (replace-regexp-in-string
+			    "/" "\\\\"
+			    (if (buffer-file-name)
+				(file-name-directory (buffer-file-name))
+			      (expand-file-name  "~/"))))))))
+
+(defalias 'finder 'explorer "Alias for `explorer'.")
+
 ;; * The end
 (provide 'scimax-utils)
 
