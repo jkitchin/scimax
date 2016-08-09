@@ -22,6 +22,10 @@
 
 
 ;; * Speed commands
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "|" "DONE(d)")))
+
+
 (setq org-use-speed-commands t)
 
 ;; Mark a subtree
@@ -104,6 +108,44 @@ is positive, move after, and if negative, move before."
 (setq org-id-locations-file
       (expand-file-name "user/.org-id-locations" scimax-dir))
 (require 'org-id)
+
+;; * Agenda setup
+;; record time I finished a task when I change it to DONE
+(setq org-log-done 'time)
+
+;; I don't want to see things that are done. turn that off here.
+;; http://orgmode.org/manual/Global-TODO-list.html#Global-TODO-list
+(setq org-agenda-skip-scheduled-if-done t)
+(setq org-agenda-skip-deadline-if-done t)
+(setq org-agenda-skip-timestamp-if-done t)
+(setq org-agenda-todo-ignore-scheduled t)
+(setq org-agenda-todo-ignore-deadlines t)
+(setq org-agenda-todo-ignore-timestamp t)
+(setq org-agenda-todo-ignore-with-date t)
+(setq org-agenda-start-on-weekday nil) ;; start on current day
+
+(setq org-upcoming-deadline '(:foreground "blue" :weight bold))
+
+(add-to-list
+ 'org-agenda-custom-commands
+ '("w" "Weekly Review"
+   ( ;; deadlines
+    (tags-todo "+DEADLINE<=\"<today>\""
+	       ((org-agenda-overriding-header "Late Deadlines")))
+    ;; scheduled  past due
+    (tags-todo "+SCHEDULED<=\"<today>\""
+	       ((org-agenda-overriding-header "Late Scheduled")))
+
+    ;; now the agenda
+    (agenda ""
+	    ((org-agenda-overriding-header "weekly agenda")
+	     (org-agenda-ndays 7)
+	     (org-agenda-tags-todo-honor-ignore-options t)
+	     (org-agenda-todo-ignore-scheduled nil)
+	     (org-agenda-todo-ignore-deadlines nil)
+	     (org-deadline-warning-days 0)))
+    ;; and last a global todo list
+    (todo "TODO"))))
 
 ;; * Block templates
 ;; add <p for python expansion
@@ -881,7 +923,7 @@ Use a prefix arg to force it to run.
       (insert code)
       (setq md5-hash (md5 (buffer-string))
 	    pbuffer (format "*py-%s*" md5-hash)
-	    py-file (format "py-%s.py" md5-hash)))
+	    py-file (expand-file-name (format "py-%s.py" md5-hash))))
 
     ;; create the file to run
     (with-temp-file py-file
@@ -910,7 +952,7 @@ Use a prefix arg to force it to run.
     (set-process-sentinel
      process
      `(lambda (process event)
-	(message "Deleting %s" ,(expand-file-name py-file))
+	(message "Deleting %s" ,py-file)
 	(delete-file ,py-file)
 	(unwind-protect
 	    (save-window-excursion
