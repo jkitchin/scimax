@@ -77,11 +77,13 @@ recent files and bookmarks. You can set a bookmark also."
 ;; Some new bindings to add to vc-prefix-map
 (define-key 'vc-prefix-map "t" 'magit-status)
 
+;;;###autoload
 (defun vc-git-push ()
   "Run git push."
   (interactive)
   (shell-command "git push"))
 
+;;;###autoload
 (defun vc-git-pull (&optional arg)
   "Run git pull"
   (interactive)
@@ -91,6 +93,7 @@ recent files and bookmarks. You can set a bookmark also."
 (define-key 'vc-prefix-map "P" 'vc-pull)
 
 ;; * Windows
+;;;###autoload
 (defun explorer ()
   "Open Finder or Windows Explorer in the current directory."
   (interactive)
