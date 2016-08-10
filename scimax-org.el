@@ -9,6 +9,7 @@
 (require 'org-inlinetask)
 (require 'org-mouse)
 (require 'org-ref)
+(require 'org-agenda)
 
 ;; * Configuration of org-mode
 ;; don't allow invisible regions to be edited
