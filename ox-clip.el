@@ -376,7 +376,7 @@ R1 and R2 define the selected region."
 	       (point-max)
 	       ox-clip-osx-cmd)))
 	   ((eq system-type 'gnu/linux)
-	    ;; For some reason shell-command on region does not work with xlcip.
+	    ;; For some reason shell-command on region does not work with xclip.
 	    (with-temp-file "/tmp/ox-clip-org.html"
 	      (insert (with-current-buffer buf (buffer-string))))
 	    (apply
