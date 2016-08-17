@@ -125,7 +125,7 @@ recent files and bookmarks. You can set a bookmark also."
 		 (file-name-directory (buffer-file-name))
 	       (expand-file-name default-directory)))))
    ((string= system-type "windows-nt")
-    (shell-command "start \"\" \"%SYSTEMDRIVE%\\Program Files\Git\bin\bash.exe\" --login"))))
+    (shell-command "start \"\" \"%SYSTEMDRIVE%\\Program Files\\Git\\bin\\bash.exe\" --login"))))
 
 
 ;; * The end
