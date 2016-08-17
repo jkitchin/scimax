@@ -113,6 +113,21 @@ recent files and bookmarks. You can set a bookmark also."
 
 (defalias 'finder 'explorer "Alias for `explorer'.")
 
+
+(defun bash ()
+  "Open a bash window."
+  (interactive)
+  (cond
+   ((string= system-type "darwin")
+    (shell-command
+     (format "open -b com.apple.terminal \"%s\""
+	     (if (buffer-file-name)
+		 (file-name-directory (buffer-file-name))
+	       (expand-file-name default-directory)))))
+   ((string= system-type "windows-nt")
+    (shell-command "start \"\" \"%SYSTEMDRIVE%\\Program Files\Git\bin\bash.exe\" --login"))))
+
+
 ;; * The end
 (provide 'scimax-utils)
 
