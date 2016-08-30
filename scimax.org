@@ -84,7 +84,7 @@ scimax defines some shortcuts for org-mode markup. You can select text and type 
 | \(equation\)      | s-4         | `org-latex-math-region-or-point'    |
 | $inline eqn$      | C-u s-4     |                                     |
 | @@latex:snippet@@ | C-u C-u 4   |                                     |
-| °                 | s-e         | `ivy-insert-org-entity'            |
+| °                 | s-e         | `ivy-insert-org-entity'             |
 
 Use  `ivy-insert-org-entity' (s-e) for all accented characters.
 
