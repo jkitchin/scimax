@@ -52,19 +52,16 @@ Here are some additional actions we define for `counsel-find-file'.
 | L   | absolute org link    |
 | r   | rename file          |
 
-* avy
+* navy
 
-See `hydra-avy/body' which is bound <f12>. It provides a hydra to navigate to places.
+`navy' is bound to f12. It opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
 
-| f12 s | swiper                             |
-| f12 j | avy-goto-char-2                    |
-| f12 k | avy-goto-word-1                    |
-| f12 l | avy-goto-line                      |
-| f12 ; | avy-goto-char-in-line              |
-| f12 t | avy-goto-char-timer                |
-| f12 g | counsel-git-grep                   |
-| f12 h | avy-goto-org-heading               |
-| f12 a | jump to org heading in agenda file |
+| j | left  |
+| l | right |
+| i | up    |
+| k | down  |
+
+The default mode is character mode, and you can change the mode with single characters, include a word mode, sentence, paragraph, page and sexp mode.
 
 * Org-mode
 
