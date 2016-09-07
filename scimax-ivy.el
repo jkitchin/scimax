@@ -44,12 +44,12 @@
    ("l" (lambda (path)
 	  "Insert org-link with relative path"
 	  (with-ivy-window
-	    (insert (format "[[file:%s]]" (f-relative path)))))
+	    (insert (format "[[./%s]]" (f-relative path)))))
     "Insert org-link (rel. path)")
    ("L" (lambda (path)
 	  "Insert org-link with absolute path"
 	  (with-ivy-window
-	    (insert (format "[[file:%s]]" path))))
+	    (insert (format "[[%s]]" path))))
     "Insert org-link (abs. path)")
    ("r" (lambda (path)
 	  (rename-file path (read-string "New name: ")))
