@@ -138,6 +138,19 @@ if you should continue to the next step."
 				  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 
+;; ** Taylor and Francis
+(add-to-list 'org-latex-classes '("gMOS2e"
+				  "\\documentclass[]{gMOS2e}
+ [NO-DEFAULT-PACKAGES]
+ [PACKAGES]
+ [EXTRA]"
+				  ("\\section{%s}" . "\\section*{%s}")
+				  ("\\subsection{%s}" . "\\subsection*{%s}")
+				  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+				  ("\\paragraph{%s}" . "\\paragraph*{%s}")
+				  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+
 ;; ** RSC
 ;; See http://www.rsc.org/Publishing/Journals/guidelines/AuthorGuidelines/AuthoringTools/Templates/tex.asp
 ;; I think their structure is too complex for ox-manuscript, and a real exporter would be required.
