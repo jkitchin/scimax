@@ -185,12 +185,15 @@
 (add-hook 'org-mode-hook 'em-font-lock-enable)
 
 ;; * Insertion functions
+(defvar em-comment-list '()
+  "A list of previously used comments.")
 
 
 (defun em-comment (comment)
   "Insert a link with COMMENT as the description.
 If region is active, it is wrapped in the comment."
-  (interactive "sComment: ")
+  (interactive (list (ivy-read "Comment: " em-comment-list)))
+  (pushnew comment em-comment-list)
   (if (region-active-p)
       (setf (buffer-substring (region-beginning)
 			      (region-end))
