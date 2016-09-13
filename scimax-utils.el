@@ -118,6 +118,20 @@ recent files and bookmarks. You can set a bookmark also."
     (shell-command "start \"\" \"%SYSTEMDRIVE%\\Program Files\\Git\\bin\\bash.exe\" --login &"))))
 
 
+
+;; case on regions
+(defun sentence-case-region (r1 r2)
+  "Capitalize the word at point, and the first word of each
+sentence in the region."
+  (interactive "r")
+  (save-excursion
+    (goto-char r1)
+    (capitalize-word 1)
+    (while (< (point) r2)
+      (forward-sentence)
+      (capitalize-word 1))))
+
+
 ;; * The end
 (provide 'scimax-utils)
 
