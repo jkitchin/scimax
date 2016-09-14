@@ -446,6 +446,11 @@
   :load-path scimax-dir
   :bind ("H-w" . words-hydra/body))
 
+(use-package org-ov-highlighter
+  :ensure nil
+  :load-path scimax-dir
+  :bind ("H-h" . org-ov-highlighter/body))
+
 (use-package ore
   :ensure nil
   :load-path scimax-dir
