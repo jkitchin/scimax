@@ -531,6 +531,8 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 ;; you should put \maketitle if and where you want it.
 (setq org-latex-title-command "")
 
+(setq org-latex-prefer-user-labels t)
+
 ;; ** Custom new classes
 ;; customized article. better margins
 (add-to-list 'org-latex-classes
