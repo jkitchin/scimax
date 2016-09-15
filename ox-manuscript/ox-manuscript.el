@@ -93,11 +93,11 @@ if you should continue to the next step."
  [NO-DEFAULT-PACKAGES]
  [PACKAGES]
  [EXTRA]"
-				   ("\\section{%s}" . "\\section*{%s}")
-				   ("\\subsection{%s}" . "\\subsection*{%s}")
-				   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-				   ("\\paragraph{%s}" . "\\paragraph*{%s}")
-				   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+				  ("\\section{%s}" . "\\section*{%s}")
+				  ("\\subsection{%s}" . "\\subsection*{%s}")
+				  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+				  ("\\paragraph{%s}" . "\\paragraph*{%s}")
+				  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 ;; ** <<Springer journals>>
 (add-to-list 'org-latex-classes '("svjour3"
@@ -113,7 +113,7 @@ if you should continue to the next step."
 
 ;; ** <<Elsevier journals>>
 (add-to-list 'org-latex-classes '("elsarticle"
-"\\documentclass{elsarticle}
+				  "\\documentclass{elsarticle}
  [NO-DEFAULT-PACKAGES]
  [PACKAGES]
  [EXTRA]"
@@ -720,8 +720,7 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 		   (match-string 3)
 		   eps-file
 		   pdf-file
-		   png-file
-		   )))
+		   png-file)))
 	  ;; flatten the filename in the tex-file
 	  (replace-match (format "\\1{%s}" fname)))))
 
