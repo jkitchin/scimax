@@ -371,7 +371,7 @@ Data is saved in an org-section in the document."
 ;; add the local var we use as safe so we don't get annoyed by permission to run
 ;; it.
 (add-to-list 'safe-local-eval-forms
-	     '(progn (require (quote org-ov-highlighter)) (org-ov-highlight-load)))
+	     '(progn (org-ov-highlight-load)))
 
 
 ;; * Feedback functions
