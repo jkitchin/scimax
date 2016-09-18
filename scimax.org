@@ -64,7 +64,6 @@ Here are some additional actions we define for `counsel-find-file'.
 The default mode is character mode, and you can change the mode with single characters, include a word mode, sentence, paragraph, page and sexp mode.
 
 * Org-mode
-
 ** Markup shortcuts
 scimax defines some shortcuts for org-mode markup. You can select text and type the shortcut to wrap the region in the markup, or if on a word, type the shortcut to wrap the word, or type the short cut to create the markup with the cursor inside it to keep typing.
 
@@ -243,49 +242,82 @@ The best way to see other speed commands is to put your cursor at the beginning 
 ** Spell-checking
 scimax is configured with flyspell and flycheck on. When you mispell a word you will see a message in the minibuffer that tells you how to fix it (C-;). Type that, and you will be able to fix the word spelling without losing your place!
 
-** Prose linting
-scimax is configured with prose linting for org-mode (https://github.com/amperser/proselint).
-
-You need to install proselint. This is automatically done for you by scimax.
-
-#+BEGIN_SRC sh
-pip install proselint
-#+END_SRC
-
-This will catch many issues with your prose that you probably should fix. The keybinding s-; will jump to the previous flycheck error. Back in the 1980's we did not have that.
 
 ** Track changes
-Scimax provides some support for track changes using [[https://github.com/joostkremers/criticmarkup-emacs][CriticMarkup]].
+Scimax provides some support for track changes and edit marks in org-mode.
 
-The main command to use is `cm/body' which launches a hydra menu. You can mark text for insertion, deletion, and add comment text. Scimax modifies the comment syntax
-Here is some example markup:
+[[insert:Add this text]] [[delete:Delete this]] 
+ [[comment:A comment]]
 
-{++Add this text++} {--Delete this--} {@a comment@}
-
-The markup should be clickable so you can accept/reject each change.
+The markup is clickable, and clicking on it deletes the markup.
 
 You can use these commands
-- `cm-addition' - insert text at point
-- `cm-deletion' - mark the selected text for deletion
-- `cm-comment' - insert a comment at point
+- `em-insert' - insert text at point
+- `em-delete' - mark the selected text for deletion
+- `em-comment' - insert a comment from minibuffer and comment history.
+- `em-comment-1' - insert a comment at point with buffer editing, and multiline comments.
+- `em-replace' - marks selected text for deletion, inserts new text
 
-To turn on track changes. Run this command again to turn it off.
-- `cm-follow-changes'
+- `em-editmarks' - list all editmarks in an ivy selection buffer.
+
+On an editmark you can:
+- `em-accept-edit-mark-at-point'
+- `em-reject-edit-mark-at-point'
+- `em-delete-edit-mark-at-point' 
+
+-`em-typo' to mark a [[typo:tpyo]]
 
 scimax provides some commands to:
-- `cm-accept-all-changes'
-- `cm-reject-all-changes'
+- `em-accept-all-changes'
+- `em-reject-all-changes'
+
+You can navigate the editmarks with:
+- `em-next-editmark'
+- `em-previous-editmark'
 
 Note, for the next commands, you need a working wdiff command.
 
-You can also create diffs between git commits.
-- `cm-wdiff-git'
+You can also create diffs between git commits using helm to select them.
+- `em-wdiff-git'
 
-Or between the buffer and last saved version
-- `cm-wdiff-buffer-with-file'
+The commands all have key bindings. The prefix key for these is H-e.
+#+BEGIN_SRC emacs-lisp
+(loop for (char . func) in (cdr em-map) collect (list (char-to-string char) (format "`%s'" func)))
+#+END_SRC
 
-You can convert the cm-markup to LaTeX commands with this command: `cm-markup-to-org-latex'. This changes your file. It is normally used with `cm-wdiff-to-pdf' to generate a PDF version of the diffs.
+#+RESULTS:
+| m | `em-comment'                   |
+| w | `em-wdiff-git'                 |
+| R | `em-reject-all-changes'        |
+| A | `em-accept-all-changes'        |
+| j | `em-reject-edit-mark-at-point' |
+| a | `em-accept-edit-mark-at-point' |
+| p | `em-previous-editmark'         |
+| n | `em-next-editmark'             |
+| o | `org-inlinetask-insert-task'   |
+| r | `em-replace'                   |
+| l | `em-editmarks'                 |
+| k | `em-delete-editmark-at-point'  |
+| d | `em-delete'                    |
+| i | `em-insert'                    |
+| c | `em-comment-1'                 |
+| t | `em-typo'                      |
 
+
+** Highlighting
+Scimax provides `ov-highlighter' to enable some support for highlighting, comment overlays, and edit marks.
+
+The main way to access the functions is via a hydra menu: `ov-highlighter/body' that is bound to H-h (hyper-h).
+
+You can highlight in blue, yellow, green, pink and salmon.
+
+Highlights can have notes attached to them that are visible as tooltips, or you can click on them to see them in dedicated buffer. You can also add a note to any highlight, or edit the note with `ov-highlight-note-edit'.
+
+There are also tyop highlights, comment highlights.
+
+You can list the highlights with `ov-highlight-list', clear a highlight (`ov-highlight-clear') or all the highlights (`ov-highlight-clear-all'). Those are all available in the hydra menu.  The highlights are saved in the document and loaded using file local variables.
+
+The highlights are not part of org-mode, and they do not export to any backend. The highlights should work in any kind of file.
 
 * Email
 - `email-region' :: emails selected region
@@ -462,64 +494,11 @@ You can manage the version control with magit
 
 ** TODO archive the notebook with git
 
-* Sandbox
-
-#+BEGIN_SRC emacs-lisp
-(ivy-add-actions
- 'counsel-find-file
- '(("a" (lambda (x)
-	  (unless (equal major-mode 'message-mode)
-	    (compose-mail))
-	  (mml-attach-file x)) "Attach to email")
-   ("p" (lambda (path)
-	  (insert (f-relative path))) "Insert relative path")
-   ("P" (lambda (path)
-	  (insert path)) "Insert absolute path")
-   ("l" (lambda (path)
-	  (insert (format "[[file:%s]]" path))) "Insert org-link")))
-#+END_SRC
-
-#+RESULTS:
-| ivy-switch-buffer | ((k (lambda (x) (kill-buffer x) (ivy--reset-state ivy-last)) kill) (j ivy--switch-buffer-other-window-action other window) (r ivy--rename-buffer-action rename)) | lispy-occur | ((m lispy-occur-action-mc multiple-cursors) (j lispy-occur-action-goto-beg goto start) (k lispy-occur-action-goto-end goto end)) | counsel-describe-variable | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-describe-function | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-M-x | ((d counsel--find-symbol definition) (h (lambda (x) (describe-function (intern x))) help)) | counsel-descbinds | ((d counsel-descbinds-action-find definition) (i counsel-descbinds-action-info info)) | counsel-git | ((j find-file-other-window other)) | counsel-find-file | ((j find-file-other-window other window)) | counsel-locate | ((x counsel-locate-action-extern xdg-open) (d counsel-locate-action-dired dired)) | counsel-linux-app | ((f counsel-linux-app-action-file run on a file)) | t | ((e (lambda (x) (mml-attach-file x)))) |
-
-#+BEGIN_SRC emacs-lisp
-(defun ivy-insert-action (x)
-  (with-ivy-window
-    (insert x)))
-
-(ivy-set-actions
- t  ; all commands
- '(("I" ivy-insert-action "insert")))
-#+END_SRC
-
-#+RESULTS:
-| ivy-switch-buffer | ((k (lambda (x) (kill-buffer x) (ivy--reset-state ivy-last)) kill) (j ivy--switch-buffer-other-window-action other window) (r ivy--rename-buffer-action rename)) | lispy-occur | ((m lispy-occur-action-mc multiple-cursors) (j lispy-occur-action-goto-beg goto start) (k lispy-occur-action-goto-end goto end)) | counsel-describe-variable | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-describe-function | ((i counsel-info-lookup-symbol info) (d counsel--find-symbol definition)) | counsel-M-x | ((d counsel--find-symbol definition) (h (lambda (x) (describe-function (intern x))) help)) | counsel-descbinds | ((d counsel-descbinds-action-find definition) (i counsel-descbinds-action-info info)) | counsel-git | ((j find-file-other-window other)) | counsel-find-file | ((j find-file-other-window other window)) | counsel-locate | ((x counsel-locate-action-extern xdg-open) (d counsel-locate-action-dired dired)) | counsel-linux-app | ((f counsel-linux-app-action-file run on a file)) | t | ((I ivy-insert-action insert)) |
 
 
-
-#+BEGIN_SRC emacs-lisp
-(require 'mustache)
-(require 'ht) ;; hash table library
-
-(let ((context (ht ("name" "J. Random user"))))
-  ;; evaluates to: "Hello J. Random user!"
-  (mustache-render "Hello {{name}}!" context))
-#+END_SRC
-
-#+RESULTS:
-: Hello J. Random user!
-
-
-
-#+BEGIN_SRC emacs-lisp
-(esup "~/tests/scimax/init.el")
-#+END_SRC
-
-#+RESULTS:
-: esup-child-process-sentinel
-
-cite:kitchin-2008-alloy,alesi-2010-co2-adsor,alesi-2012-evaluat-primar
+#  ov-highlight-data: ((11089%2011107%20"Orange1"%20"A%20comment%20highlight%20is%20like%20a%20note,%20but%20with%20an%20orange%20background.")%20(11072%2011076%20"PaleVioletRed1"%20"typo")%20(10979%2010989%20"Pink"%20"I%20added%20this%20note%20after%20highlighting%20the%20text.")%20(10855%2010877%20"Thistle"%20"Notes%20are%20created%20in%20a%20separate%20org-mode%20buffer.%20They%20can%20contain%20code%20blocks:%0A%0A#+BEGIN_SRC%20emacs-lisp%0A(princ%20\"Hello%20world!\")%0A#+END_SRC%0A%0A#+RESULTS:%0A:%20Hello%20world!%0A%0AClick%20on%20the%20note%20to%20open%20it%20in%20an%20org-buffer%20where%20you%20can%20edit%20it.")%20(10826%2010832%20"Lightsalmon1"%20nil)%20(10817%2010821%20"Pink"%20nil)%20(10810%2010815%20"Darkolivegreen1"%20nil)%20(10802%2010808%20"Yellow"%20nil)%20(10796%2010800%20"LightBlue"%20nil))
 
 # Local Variables:
 # eval: (progn (require 'emacs-keybinding-command-tooltip-mode) (emacs-keybinding-command-tooltip-mode +1))
+# eval: (ov-highlight-load)
 # End:
