@@ -40,6 +40,9 @@ recent files and bookmarks. You can set a bookmark also."
 		   helm-source-bookmark-set)))
 
 
+(add-to-list 'safe-local-eval-forms 
+	     '(progn (require 'emacs-keybinding-command-tooltip-mode) (emacs-keybinding-command-tooltip-mode +1)))
+
 ;;;###autoload
 (defun scimax-help ()
   "Open the ‘scimax’ manual."
