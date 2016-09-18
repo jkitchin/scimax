@@ -185,15 +185,44 @@
 (add-hook 'org-mode-hook 'em-font-lock-enable)
 
 ;; * Insertion functions
+
+(defun em-finish-comment (buffer)
+  "Run in a comment indirect buffer."
+  (interactive "b")
+  (let ((comment (buffer-string)))
+    (kill-ring-save (point-min) (point-max))
+    (setf (buffer-substring (point-min) (point-max))
+	  (format
+	   (if (string-match "\n" comment)
+	       "#+BEGIN_COMMENT\n%s\n#+END_COMMENT\n"
+	     "[[comment:%s]]")
+	   comment)) 
+    (kill-buffer)
+    (switch-to-buffer buffer)
+    (delete-other-windows)))
+
+
+(defun em-comment-1 ()
+  "Insert a comment with an indirect buffer."
+  (interactive)
+  (let ((cb (current-buffer)))
+    (clone-indirect-buffer-other-window nil t)
+    (setq header-line-format "Enter comment. Type s-<return> to finish.")
+    (narrow-to-region (point) (point))
+    (local-set-key (kbd "s-<return>")
+		   `(lambda ()
+		      (interactive)
+		      (em-finish-comment ,cb)))))
+
+
 (defvar em-comment-list '()
   "A list of previously used comments.")
-
 
 (defun em-comment (comment)
   "Insert a link with COMMENT as the description.
 If region is active, it is wrapped in the comment."
-  (interactive (list (ivy-read "Comment: " em-comment-list)))
-  (pushnew comment em-comment-list)
+  (interactive (list (read-string "Comment: " nil 'em-comment-list)))
+  (add-to-list 'em-comment-list comment)
   (if (region-active-p)
       (setf (buffer-substring (region-beginning)
 			      (region-end))
@@ -267,7 +296,7 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
 
 ;; * Delete an editmark
 ;;;###autoload
-(defun em-delete-editmark-at-point ()
+(defun em-delete-edit-mark-at-point ()
   "Delete the editmark at point."
   (interactive)
   (let ((link (org-element-context)))
@@ -346,13 +375,16 @@ For insert, comment, and typo it means delete the link."
 
 ;;;###autoload
 (defun em-accept-all-changes ()
+  "Accept all editmarks."
   (interactive)
   (goto-char (point-min))
   (while (em-next-editmark)
     (em-accept-edit-mark-at-point)))
 
+
 ;;;###autoload
 (defun em-reject-all-changes ()
+  "Reject all editmarks."
   (interactive)
   (goto-char (point-min))
   (while (em-next-editmark)
@@ -373,6 +405,7 @@ For insert, comment, and typo it means delete the link."
 	      (org-element-property :begin link))))))
 
 
+;;;###autoload
 (defun em-editmarks ()
   "Show an ivy selection buffer of all the editmarks in the buffer.
 The default action is to visit the mark."
@@ -380,10 +413,10 @@ The default action is to visit the mark."
   (ivy-read "Select editmark: " (em-editmark-candidates)
 	    :action '(1
 		      ("o" (lambda (x)
-			     (goto-char x))
+			     (goto-char (cdr x)))
 		       "open editmark")
 		      ("d" (lambda (x)
-			     (goto-char x)
+			     (goto-char (cdr x))
 			     (em-delete-editmark-at-point))
 		       "delete editmark"))))
 
@@ -394,7 +427,8 @@ The default action is to visit the mark."
 (global-set-key (kbd "H-e") em-map)
 
 (define-key em-map "t" 'em-typo)
-(define-key em-map "c" 'em-comment)
+(define-key em-map "c" 'em-comment-1)
+(define-key em-map "m" 'em-comment)
 (define-key em-map "i" 'em-insert)
 (define-key em-map "d" 'em-delete)
 (define-key em-map "k" 'em-delete-editmark-at-point)
@@ -410,6 +444,8 @@ The default action is to visit the mark."
 
 (define-key em-map "A" 'em-accept-all-changes)
 (define-key em-map "R" 'em-reject-all-changes)
+
+(define-key em-map "w" 'em-wdiff-git)
 
 
 ;; * editmarks diff
@@ -483,9 +519,6 @@ commits. Returns the buffer."
       (insert (shell-command-to-string cmd))) 
     (goto-char (point-min))
     buf))
-
-
-
 
 (provide 'org-editmarks)
 
