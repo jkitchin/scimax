@@ -137,7 +137,7 @@ The list is from first to last."
 				    (propertize
 				     (concat
 				      (substring s 0 (min (length s) 40))
-				      (make-string (- 40 (length s)) ? )
+				      (make-string (- 40 (min (length s) 40)) ? )
 				      "|" 
 				      (overlay-get ov 'help-echo)
 				      "\n")
@@ -251,6 +251,7 @@ buffer."
 
 (defun ov-highlight-finish-comment (buffer beg end color comment)
   "Callback function when you are finished editing a note."
+  (kill-buffer "*ov-note*")
   (switch-to-buffer buffer)
   (when (not (string= "" comment))
     (ov-highlight-note beg end color comment t)))
@@ -345,7 +346,6 @@ They are really deleted when you save the buffer."
 
 ;; * The hydra menu
 
-;;;###autoload
 (defhydra ov-highlighter (:color blue) "highlighter"
   ("b" ov-highlight-blue "blue")
   ("g" ov-highlight-green "Green")
