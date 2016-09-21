@@ -130,6 +130,23 @@ The list is from first to last."
 				    (define-key map "q" #'(lambda ()
 							    (interactive)
 							    (delete-window)))
+				    ;; delete comment
+				    (define-key map
+				      (kbd "k")
+				      `(lambda ()
+					 (interactive)
+					 (save-window-excursion
+					   (switch-to-buffer ,cb)
+					   (goto-char ,(ov-beg ov))
+					   (ov-highlight-clear))))
+				    ;; edit note
+				    (define-key map
+				      (kbd "e")
+				      `(lambda ()
+					 (interactive)
+					 (switch-to-buffer ,cb)
+					 (goto-char ,(ov-beg ov))
+					 (ov-highlight-note-edit)))
 				    (setq s (propertize
 					     (buffer-substring (ov-beg ov) (ov-end ov))
 					     'mouse-face 'highlight
@@ -148,7 +165,7 @@ The list is from first to last."
 					    (mapconcat #'identity (append (list (car lines))
 									  (loop for line in (cdr lines)
 										collect
-										(concat (make-string 42 ? ) line)))
+										(concat (make-string 41 ? ) line)))
 						       "\n")))) 
 				      "\n")
 				     'local-map map)))
@@ -158,7 +175,7 @@ The list is from first to last."
 	  (switch-to-buffer-other-window "*highlights*")
 	  (read-only-mode -1) 
 	  (erase-buffer)
-	  (insert "Click on link to jump to the position. Press q to quit.\n\n")
+	  (setq header-line-format "Click on link to jump to the position. Press q to quit. e to edit a note. k to delete the highlight.")
 	  (dolist (s (nreverse strings))
 	    (insert s)) 
 	  (setq buffer-read-only t))
@@ -261,7 +278,7 @@ buffer."
 
 (defun ov-highlight-finish-comment (buffer beg end color comment)
   "Callback function when you are finished editing a note."
-  (kill-buffer "*ov-note*")
+  (when (get-buffer "*ov-note*") (kill-buffer "*ov-note*"))
   (switch-to-buffer buffer)
   (when (not (string= "" comment))
     (ov-highlight-note beg end color comment t)))
