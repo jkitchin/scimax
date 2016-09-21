@@ -139,7 +139,17 @@ The list is from first to last."
 				      (substring s 0 (min (length s) 40))
 				      (make-string (- 40 (min (length s) 40)) ? )
 				      "|" 
-				      (overlay-get ov 'help-echo)
+				      (let ((note (overlay-get ov 'help-echo)))
+					(with-temp-buffer
+					  (insert (or note ""))
+					  (let ((fill-column 40))
+					    (fill-paragraph))
+					  (let ((lines (split-string  (buffer-string) "\n")))
+					    (mapconcat #'identity (append (list (car lines))
+									  (loop for line in (cdr lines)
+										collect
+										(concat (make-string 42 ? ) line)))
+						       "\n")))) 
 				      "\n")
 				     'local-map map)))
 				ovs))

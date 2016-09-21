@@ -449,7 +449,8 @@
 (use-package ov-highlighter
   :ensure nil
   :load-path scimax-dir
-  :bind ("H-h" . ov-highlighter/body))
+  :bind ("H-h" . ov-highlighter/body)
+  :init (require 'ov-highlighter))
 
 (use-package ore
   :ensure nil
