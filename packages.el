@@ -316,6 +316,7 @@
   (add-to-list 'load-path
 	       (expand-file-name "ob-ipython" scimax-dir)))
 
+(use-package ov)
 
 ;; this is a git submodule
 (use-package org-ref
