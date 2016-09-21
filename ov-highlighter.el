@@ -242,7 +242,7 @@ buffer."
     (unless color (setq color (ov-highlight-color-chooser)))
     
     (let ((cb (current-buffer)))
-      (switch-to-buffer "*ov-note*")
+      (switch-to-buffer-other-window "*ov-note*")
       (erase-buffer)
       (org-mode)
       (let ((map (make-sparse-keymap))) 
@@ -279,9 +279,9 @@ buffer."
 (defun ov-highlight-finish-comment (buffer beg end color comment)
   "Callback function when you are finished editing a note."
   (when (get-buffer "*ov-note*") (kill-buffer "*ov-note*"))
-  (switch-to-buffer buffer)
-  (when (not (string= "" comment))
-    (ov-highlight-note beg end color comment t)))
+  (when buffer  (switch-to-buffer buffer)
+	(when (not (string= "" comment))
+	  (ov-highlight-note beg end color comment t))))
 
 
 ;;;###autoload
