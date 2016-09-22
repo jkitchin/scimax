@@ -26,6 +26,14 @@
 
 (setq package-user-dir (expand-file-name "elpa"  scimax-dir))
 
+;; we load the user/preload.el file if it exists. This lets users define
+;; variables that might affect packages when they are loaded, e.g. key-bindings,
+;; etc... setup autoupdate, .
+
+(let ((preload (expand-file-name "user/preload.el" scimax-dir)))
+  (when (file-exists-p preload)
+    (load preload)))
+
 (defvar scimax-load-user-dir t
   "Controls if the user directory is loaded.")
 
