@@ -1,0 +1,76 @@
+#+TEMPLATE: Taylor & Francis Molecular Simulation
+#+key: t&f-mol-sim
+#+group: manuscripts
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+
+#+STARTUP: showall
+
+#+LATEX_CLASS: gMOS2e
+#+LATEX_CLASS_OPTIONS: [number, sort&compress, review]
+
+#+OPTIONS: H:4 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:nil pri:nil tags:not-in-toc author:nil
+
+#+latex_header: \usepackage[utf8]{inputenc}
+#+latex_header: \usepackage{fixltx2e}
+#+latex_header: \usepackage[version=3]{mhchem}
+#+latex_header: \usepackage{url}
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{float}
+#+latex_header: \usepackage{color}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \usepackage{textcomp}
+#+latex_header: \usepackage{wasysym}
+#+latex_header: \usepackage{latexsym}
+#+latex_header: \usepackage[T1]{fontenc}
+#+latex_header: \usepackage{amssymb}
+#+latex_header: \usepackage[nomarkers, nolists, figuresonly]{endfloat}
+#+latex_header: \usepackage[linktocpage, pdfstartview=FitH, colorlinks, linkcolor=blue, anchorcolor=blue, citecolor=blue, filecolor=blue, menucolor=blue, urlcolor=blue]{hyperref}
+
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+OPTIONS: author:nil date:nil ^:{} toc:nil
+
+#+latex_header: \author{\name{<replace: Jacob R. Boes and John R. Kitchin>$^{\ast}$\thanks{$^\ast$Corresponding author. Email: <replace: jkitchin@andrew.cmu.edu>}}\affil{<replace: Department of Chemical Engineering, Carnegie Mellon University, 5000 Forbes Ave, Pittsburgh, PA 15213, USA>}}
+
+#+BEGIN_LaTeX
+\title{<replace: Neural Network Predictions of Oxygen Interactions on a Dynamic Pd Surface>}
+\maketitle
+#+END_LaTeX
+
+
+\begin{abstract}
+<replace: abstract text>
+\end{abstract}
+
+\begin{keywords}
+<replace: DFT; neural networks; palladium; oxygen; molecular dynamics>
+\end{keywords}
+
+* Introduction
+
+* Methods
+
+
+* Results and Discussion
+
+* Conclusions
+
+* Acknowledgements
+
+
+bibliographystyle:unsrt
+bibliography:references.bib
+
+
+
+* build								   :noexport:
+
+You need to make sure to have the gMOS2e.cls file in this directory or on your LaTeX path.
+
+#+BEGIN_SRC emacs-lisp
+(ox-manuscript-build-submission-manuscript)
+
+(ox-manuscript-make-submission-archive nil nil nil nil nil
+ "gMOS2e.cls" "supporting-information.pdf")
+#+END_SRC
