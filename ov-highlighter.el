@@ -258,6 +258,8 @@ buffer."
 	       'mouse-face 'highlight
 	       'local-map map)))
 
+      (use-local-map (copy-keymap org-mode-map))
+      
       ;; Cancel
       (local-set-key
        (kbd "C-x k")
