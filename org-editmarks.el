@@ -30,7 +30,7 @@
  "comment"
  (lambda (path)
    "Offer to delete the comment."
-   (em-delete-editmark-at-point))
+   (em-delete-edit-mark-at-point))
  (lambda (path description format)
    (cond
     ((eq format 'latex)
@@ -42,7 +42,7 @@
 (org-add-link-type
  "delete"
  (lambda (path)
-   (em-delete-editmark-at-point))
+   (em-delete-edit-mark-at-point))
  (lambda (path description format)
    (cond
     ((eq format 'latex)
@@ -52,7 +52,7 @@
 (org-add-link-type
  "insert"
  (lambda (path)
-   (em-delete-editmark-at-point))
+   (em-delete-edit-mark-at-point))
  (lambda (path description format)
    (cond
     ((eq format 'latex)
