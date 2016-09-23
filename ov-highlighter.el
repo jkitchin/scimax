@@ -444,19 +444,37 @@ Data is saved in an org-section in the document."
 
   (save-excursion
     (goto-char (point-min))
-    (unless (re-search-forward
+    (let ((match (unless
+		     (re-search-forward
+		      (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
+		      nil 'mv)
+		   (re-search-backward
+		    (format "^%s.*Local Variables" comment-start)) 
+		   (beginning-of-line)
+		   (insert (format
+			    "%s ov-highlight-data: nil\n\n"
+			    (if (eq major-mode 'emacs-lisp-mode)
+				";;" comment-start))) 
+		   (re-search-forward
+		    (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
+		    nil 'mv))))
+      (when match
+	(setf (buffer-substring (match-beginning 1) (match-end 1))
+	      (org-link-escape (prin1-to-string (ov-highlight-get-highlights)))))))
+
+  ;; cleanup if we have no highlights
+  (unless (ov-highlight-get-highlights)
+    (remove-hook 'after-save-hook 'ov-highlight-save t)
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward
 	     (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
-	     nil 'mv)
-      (re-search-backward (format "^%s.*Local Variables" comment-start)) 
-      (beginning-of-line)
-      (insert (format  "%s ov-highlight-data: nil\n\n"
-		       (if (eq major-mode 'emacs-lisp-mode) ";;" comment-start))) 
-      (re-search-forward
-       (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
-       nil 'mv))
-    
-    (setf (buffer-substring (match-beginning 1) (match-end 1))
-	  (org-link-escape (prin1-to-string (ov-highlight-get-highlights)))))
+	     nil t)
+	(replace-match ""))
+      (goto-char (point-min))
+      (when (re-search-forward "eval: (ov-highlight-load)" nil t)
+	(beginning-of-line)
+	(kill-line))))
   
   (let ((after-save-hook '()))
     (save-buffer)))
