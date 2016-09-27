@@ -91,7 +91,7 @@ It returns the created overlay."
     (setq color (ov-highlight-color-chooser)))
 
   ;; add a local hook to make sure it gets saved
-  (add-hook 'after-save-hook 'ov-highlight-save nil t)
+  (add-hook 'before-save-hook 'ov-highlight-save nil t)
   
   (let ((ov (make-overlay beg end)))
     (overlay-put ov 'face `(:background ,color))
@@ -224,7 +224,7 @@ buffer."
     (setq beg (line-beginning-position)
 	  end (line-end-position)))
   
-  (add-hook 'after-save-hook 'ov-highlight-save nil t)
+  (add-hook 'before-save-hook 'ov-highlight-save nil t)
   (if continue
       ;; this is coming from a special buffer 
       (let ((ov (ov-at))
@@ -280,9 +280,11 @@ buffer."
 
 (defun ov-highlight-finish-comment (buffer beg end color comment)
   "Callback function when you are finished editing a note."
-  (when (get-buffer "*ov-note*") (kill-buffer "*ov-note*"))
+  (when (get-buffer "*ov-note*") (kill-buffer "*ov-note*")
+	(delete-window))
   (when buffer  (switch-to-buffer buffer)
 	(when (not (string= "" comment))
+	  (kill-new comment)
 	  (ov-highlight-note beg end color comment t))))
 
 
@@ -428,64 +430,72 @@ They are really deleted when you save the buffer."
 	   (ov-highlight-note beg end color help-echo t)
 	 (ov-highlight beg end color))))
    (ov-highlight-read-data))
-  (add-hook 'after-save-hook 'ov-highlight-save nil t))
+  (add-hook 'before-save-hook 'ov-highlight-save nil t))
 
 
 (defun ov-highlight-save ()
   "Save highlight information.
-Data is saved in an org-section in the document."
-  ;; first make sure we have a Local variable section.
-  (unless
+Data is saved in comment in the document."
+  (let ((data (ov-highlight-get-highlights)))
+    (if data
+	;; save results
+	(progn
+	  ;; first make sure we have a Local variable section, and add one if
+	  ;; not.
+	  (unless
+	      (save-excursion
+		(goto-char (point-min))
+		(re-search-forward
+		 (format "^%s.*eval: (ov-highlight-load)" comment-start) nil t))
+	    (add-file-local-variable 'eval '(ov-highlight-load)))
+
+	  ;; Now search down to either the data line, or add it above the Local
+	  ;; Variables.
+	  (save-excursion
+	    (goto-char (point-min))
+	    (if (re-search-forward
+		 (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
+		 nil 'mv)
+		(setf (buffer-substring (match-beginning 1) (match-end 1))
+		      (org-link-escape (prin1-to-string data)))
+	      (progn
+		(re-search-backward
+		 (format "^%s.*Local Variables" comment-start))
+		(beginning-of-line)
+		(insert (format
+			 "%s ov-highlight-data: %s\n\n"
+			 (if (eq major-mode 'emacs-lisp-mode)
+			     ";;"
+			   comment-start)
+			 (org-link-escape (prin1-to-string data))))))))
+      ;; cleanup if we have no highlights
+      (remove-hook 'before-save-hook 'ov-highlight-save t)
       (save-excursion
 	(goto-char (point-min))
-	(re-search-forward
-	 (format "^%s.*eval: (ov-highlight-load)" comment-start) nil t))
-    (add-file-local-variable 'eval '(ov-highlight-load)))
-
-  (save-excursion
-    (goto-char (point-min))
-    (let ((match (unless
-		     (re-search-forward
-		      (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
-		      nil 'mv)
-		   (re-search-backward
-		    (format "^%s.*Local Variables" comment-start)) 
-		   (beginning-of-line)
-		   (insert (format
-			    "%s ov-highlight-data: nil\n\n"
-			    (if (eq major-mode 'emacs-lisp-mode)
-				";;" comment-start))) 
-		   (re-search-forward
-		    (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
-		    nil 'mv))))
-      (when match
-	(setf (buffer-substring (match-beginning 1) (match-end 1))
-	      (org-link-escape (prin1-to-string (ov-highlight-get-highlights)))))))
-
-  ;; cleanup if we have no highlights
-  (unless (ov-highlight-get-highlights)
-    (remove-hook 'after-save-hook 'ov-highlight-save t)
-    (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward
-	     (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
-	     nil t)
-	(replace-match ""))
-      (goto-char (point-min))
-      (when (re-search-forward "eval: (ov-highlight-load)" nil t)
-	(beginning-of-line)
-	(kill-line))))
-  
-  (let ((after-save-hook '()))
-    (save-buffer)))
+	(when (re-search-forward
+	       (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
+	       nil t)
+	  (beginning-of-line)
+	  (kill-line))
+	(goto-char (point-min))
+	(when
+	    (and (re-search-forward "eval: (ov-highlight-load)" nil t)
+		 ;; obfuscated pattern to avoid adding local variables here.
+		 (re-search-backward (concat "Local" " Variables:"))
+		 (re-search-forward "End:"))
+	  (re-search-backward "eval: (ov-highlight-load)")
+	  (beginning-of-line)
+	  (kill-line)
+	  (delete-char -1))))))
 
 ;; add the local var we use as safe so we don't get annoyed by permission to run
 ;; it.
 (add-to-list 'safe-local-eval-forms
 	     '(ov-highlight-load))
 
+
+
 (provide 'ov-highlighter)
 
 ;;; ov-highlighter.el ends here
-
 
