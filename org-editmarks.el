@@ -10,9 +10,15 @@
 ;; [[delete:some text]]
 ;; [[typo:mispeling]]
 
+
+;; `em-typo'
+;; `em-comment-1'
+
 ;; It has org-mode link limitations. So, don't include line breaks in the links.
 
-;; The links export to LaTeX as todonotes, or colored text. 
+;; The comment links export to LaTeX as todonotes. The delete,insert, and typo links export as colored text.
+
+;; You need to put this in your header to get todonotes:
 ;; #+LATEX_HEADER: \usepackage[colorinlistoftodos]{todonotes}
 ;;
 ;; Put these in your org-file
@@ -20,7 +26,9 @@
 ;; \todotoc
 ;; \listoftodos
 
-;; Alternatively, use `ox-manuscript-build-with-comments'.
+;; Alternatively, use `ox-manuscript-build-with-comments', which should insert
+;; those things automatically for you.
+
 ;;; Code:
 
 (require 'org-inlinetask)
@@ -185,10 +193,14 @@
 (add-hook 'org-mode-hook 'em-font-lock-enable)
 
 ;; * Insertion functions
+(defvar *em-window-configuration* nil
+  "Stores window configuration when inserting a comment.")
 
 (defun em-finish-comment (buffer)
-  "Run in a comment indirect buffer."
-  (interactive "b")
+  "Finish a comment indirect buffer.
+This replaces the text with a link, or if there is a line break
+in the comment a block."
+  (interactive "b") 
   (let ((comment (buffer-string)))
     (kill-ring-save (point-min) (point-max))
     (setf (buffer-substring (point-min) (point-max))
@@ -197,14 +209,14 @@
 	       "#+BEGIN_COMMENT\n%s\n#+END_COMMENT\n"
 	     "[[comment:%s]]")
 	   comment)) 
-    (kill-buffer)
-    (switch-to-buffer buffer)
-    (delete-other-windows)))
+    (kill-buffer) 
+    (set-window-configuration *em-window-configuration*)))
 
 
 (defun em-comment-1 ()
   "Insert a comment with an indirect buffer."
   (interactive)
+  (setq *em-window-configuration* (current-window-configuration))
   (let ((cb (current-buffer)))
     (clone-indirect-buffer-other-window nil t)
     (setq header-line-format "Enter comment. Type s-<return> to finish.")
@@ -220,7 +232,8 @@
 
 (defun em-comment (comment)
   "Insert a link with COMMENT as the description.
-If region is active, it is wrapped in the comment."
+The comment is entered interactively in the minibuffer. If region
+is active, it is wrapped in the comment."
   (interactive (list (read-string "Comment: " nil 'em-comment-list)))
   (add-to-list 'em-comment-list comment)
   (if (region-active-p)
@@ -304,20 +317,22 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
      ((member (org-element-property :type link) '("typo"
 						  "insert"
 						  "delete"))
-      (setf (buffer-substring (org-element-property :begin link)
-			      (org-element-property :end link))
-	    ""))
-     ((string= (org-element-property :type link) "comment") 
-      (setf (buffer-substring (org-element-property :begin link)
-			      (org-element-property :end link))
-	    (if (org-element-property :contents-begin link)
-		;; this is a [[comment:text][wrapped text]]
-		(buffer-substring (org-element-property :contents-begin link)
-				  (org-element-property :contents-end link))
-
+      (when (y-or-n-p "Delete? ")
+	(setf (buffer-substring (org-element-property :begin link)
+				(org-element-property :end link))
 	      "")))
+     ((string= (org-element-property :type link) "comment")
+      (when (y-or-n-p "Delete? ")
+	(setf (buffer-substring (org-element-property :begin link)
+				(org-element-property :end link))
+	      (if (org-element-property :contents-begin link)
+		  ;; this is a [[comment:text][wrapped text]]
+		  (buffer-substring (org-element-property :contents-begin link)
+				    (org-element-property :contents-end link))
+
+		""))))
      (t
-      (error "%s not implemented" (org-element-property :type link))))))
+      (error "%s not implemented for deletion." (org-element-property :type link))))))
 
 ;;;###autoload
 (defun em-accept-edit-mark-at-point ()
