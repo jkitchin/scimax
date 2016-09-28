@@ -100,7 +100,8 @@ It returns the created overlay."
     (let ((p (point)))
       (when (mark)
 	(deactivate-mark))
-      (goto-char p)) 
+      (goto-char p))
+    (save-buffer)
     ov))
 
 
@@ -210,6 +211,10 @@ The list is from first to last."
   (ov-highlight (region-beginning) (region-end) "Darkolivegreen1"))
 
 
+(defvar *ov-window-configuration* nil
+  "Stores the window configuration so we can later restore it.")
+
+
 ;;;###autoload
 (defun ov-highlight-note (beg end &optional color note continue)
   "Highlight selected text from BEG to END with COLOR.
@@ -240,6 +245,8 @@ buffer."
 	ov)
     ;; We initiate the special buffer
     (unless color (setq color (ov-highlight-color-chooser)))
+
+    (setq *ov-window-configuration* (current-window-configuration))
     
     (let ((cb (current-buffer)))
       (switch-to-buffer-other-window "*ov-note*")
@@ -280,18 +287,20 @@ buffer."
 
 (defun ov-highlight-finish-comment (buffer beg end color comment)
   "Callback function when you are finished editing a note."
-  (when (get-buffer "*ov-note*") (kill-buffer "*ov-note*")
-	(delete-window))
-  (when buffer  (switch-to-buffer buffer)
+  (when (get-buffer "*ov-note*") (kill-buffer "*ov-note*"))
+  (when buffer (switch-to-buffer buffer)
 	(when (not (string= "" comment))
 	  (kill-new comment)
-	  (ov-highlight-note beg end color comment t))))
+	  (ov-highlight-note beg end color comment t)
+	  (save-buffer)))
+  (set-window-configuration *ov-window-configuration*))
 
 
 ;;;###autoload
 (defun ov-highlight-note-edit ()
-  "Set tooltip of highlight at point to NEW-NOTE."
+  "Open tooltip of highlight at point in a buffer for editing."
   (interactive)
+  (setq *ov-window-configuration* (current-window-configuration))
   (let ((cb (current-buffer))
 	(current-note (overlay-get (ov-at) 'help-echo))
 	(beg (overlay-start (ov-at)))
@@ -328,7 +337,8 @@ buffer."
   (interactive)
   (let* ((r1 (progn (re-search-backward "\\<") (set-mark (point)) (point)))
 	 (r2 (progn (re-search-forward "\\>") (point))))
-    (ov-highlight-note r1 r2 "PaleVioletRed1" "typo" t)))
+    (ov-highlight-note r1 r2 "PaleVioletRed1" "typo" t)
+    (save-buffer)))
 
 
 ;;;###autoload
@@ -349,9 +359,11 @@ buffer."
       (let ((bounds (bounds-of-thing-at-point 'word)))
 	(setq r1 (car bounds)
 	      r2 (cdr bounds))))
+     ;; comment on whatever is between spaces on each side of point. 
      (t
       (setq r1 (re-search-backward " ")
-	    r2 (re-search-forward " ")))) 
+	    r2 (re-search-forward " "))))
+    
     (ov-highlight-note r1 r2 "Orange1")))
 
 
