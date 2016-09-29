@@ -27,7 +27,7 @@
 
 \author{<replace: with corresponding author>}
 \email{<replace: with email>}
-\affiliation{replace: with address>}
+\affiliation{<replace: with address>}
 
 \date{\today}
 
