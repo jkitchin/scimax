@@ -100,87 +100,8 @@ It returns the created overlay."
     (let ((p (point)))
       (when (mark)
 	(deactivate-mark))
-      (goto-char p))
-    (save-buffer)
+      (goto-char p)) 
     ov))
-
-
-(defun ov-get-highlight-overlays ()
-  "Return a list of the highlight overlays.
-The list is from first to last."
-  (reverse (-filter (lambda (ov) (overlay-get ov 'ov-highlight)) 
-		    (overlays-in (point-min) (point-max)))))
-
-
-;;;###autoload
-(defun ov-highlight-list ()
-  "Make a list of highlighted text in another buffer."
-  (interactive)
-  (let ((ovs (ov-get-highlight-overlays))
-	(cb (current-buffer))
-	strings)
-    (if ovs
-	(progn
-	  (setq strings (mapcar (lambda (ov)
-				  (let* ((map (make-sparse-keymap))
-					 (s))
-				    (define-key map [mouse-1] `(lambda ()
-								 (interactive)
-								 (switch-to-buffer-other-window ,cb)
-								 (goto-char ,(ov-beg ov))))
-				    (define-key map "q" #'(lambda ()
-							    (interactive)
-							    (delete-window)))
-				    ;; delete comment
-				    (define-key map
-				      (kbd "k")
-				      `(lambda ()
-					 (interactive)
-					 (save-window-excursion
-					   (switch-to-buffer ,cb)
-					   (goto-char ,(ov-beg ov))
-					   (ov-highlight-clear))))
-				    ;; edit note
-				    (define-key map
-				      (kbd "e")
-				      `(lambda ()
-					 (interactive)
-					 (switch-to-buffer ,cb)
-					 (goto-char ,(ov-beg ov))
-					 (ov-highlight-note-edit)))
-				    (setq s (propertize
-					     (buffer-substring (ov-beg ov) (ov-end ov))
-					     'mouse-face 'highlight
-					     'font-lock-face (overlay-get ov 'face)))
-				    (propertize
-				     (concat
-				      (substring s 0 (min (length s) 40))
-				      (make-string (- 40 (min (length s) 40)) ? )
-				      "|" 
-				      (let ((note (overlay-get ov 'help-echo)))
-					(with-temp-buffer
-					  (insert (or note ""))
-					  (let ((fill-column 40))
-					    (fill-paragraph))
-					  (let ((lines (split-string  (buffer-string) "\n")))
-					    (mapconcat #'identity (append (list (car lines))
-									  (loop for line in (cdr lines)
-										collect
-										(concat (make-string 41 ? ) line)))
-						       "\n")))) 
-				      "\n")
-				     'local-map map)))
-				ovs))
-	  (when (= (length (window-list)) 1)
-	    (split-window-horizontally))
-	  (switch-to-buffer-other-window "*highlights*")
-	  (read-only-mode -1) 
-	  (erase-buffer)
-	  (setq header-line-format "Click on link to jump to the position. Press q to quit. e to edit a note. k to delete the highlight.")
-	  (dolist (s (nreverse strings))
-	    (insert s)) 
-	  (setq buffer-read-only t))
-      (message "No highlights found."))))
 
 
 ;;;###autoload
@@ -292,7 +213,7 @@ buffer."
 	(when (not (string= "" comment))
 	  (kill-new comment)
 	  (ov-highlight-note beg end color comment t)
-	  (save-buffer)))
+	  (set-buffer-modified-p t)))
   (set-window-configuration *ov-window-configuration*))
 
 
@@ -337,8 +258,7 @@ buffer."
   (interactive)
   (let* ((r1 (progn (re-search-backward "\\<") (set-mark (point)) (point)))
 	 (r2 (progn (re-search-forward "\\>") (point))))
-    (ov-highlight-note r1 r2 "PaleVioletRed1" "typo" t)
-    (save-buffer)))
+    (ov-highlight-note r1 r2 "PaleVioletRed1" "typo" t)))
 
 
 ;;;###autoload
@@ -381,33 +301,91 @@ buffer."
   "Clear all highlighted text.
 They are really deleted when you save the buffer."
   (interactive)
-  (mapc 'delete-overlay (ov-get-highlight-overlays)) 
-  (when (get-buffer "*highlights*")
-    (kill-buffer "*highlights*"))
-  (set-buffer-modified-p t) 
-  (save-buffer))
+  (mapc 'delete-overlay (ov-get-highlight-overlays))
+  (set-buffer-modified-p t))
 
-;; * The hydra menu
+;; * List highlights
 
-(defhydra ov-highlighter (:color blue) "highlighter"
-  ("b" ov-highlight-blue "blue")
-  ("g" ov-highlight-green "Green")
-  ("p" ov-highlight-pink "Pink")
-  ;; define as many special colors as you like.
-  ("s" (ov-highlight (region-beginning) (region-end) "Lightsalmon1") "Salmon")
-  ("y" ov-highlight-yellow "yellow")
-  ("c" ov-highlight "Choose color")
-  ("n" (ov-highlight-note (region-beginning) (region-end) "Thistle") "Note")
-  ("N" ov-highlight-note "Note (c)") 
-  ("e" ov-highlight-note-edit "Edit note")
+(defun ov-get-highlight-overlays ()
+  "Return a list of the highlight overlays.
+The list is from first to last."
+  (reverse (-filter (lambda (ov) (overlay-get ov 'ov-highlight)) 
+		    (overlays-in (point-min) (point-max)))))
 
-  ;; editmark/feedback options
-  ("t" ov-highlight-typo "Typo") 
-  ("m" ov-highlight-comment "Comment highlight")
+
+(defvar ov-highlight-source nil
+  "A cons cell of the buffer to get highlights from.")
+
+(defvar ov-highlight-window-configuration nil
+  "Stores the window configuration.")
+
+(defun ov-highlight-display ()
+  "Display all highlights in the current buffer in a tabulated list form."
+  (interactive)
+  (let ((buf (current-buffer)))
+    (setq ov-highlight-window-configuration (current-window-configuration))
+    (switch-to-buffer-other-window
+     (get-buffer-create "*ov-highlights*"))
+    (ov-highlight-list-mode)
+    (setq ov-highlight-source buf)
+    (ov-highlight-refresh-list)))
+
+
+(defun ov-highlight-refresh-list ()
+  "Refresh the list of highlights in the buffer."
+  (let ((highlights) (entries))
+    (with-current-buffer ov-highlight-source
+      (setq highlights (ov-get-highlight-overlays))
+      (setq entries (loop for ov in highlights 
+			  collect
+			  (list
+			   nil		;id
+			   (vector
+			    (cons (buffer-substring (ov-beg ov) (ov-end ov))
+				  (list 'face (overlay-get ov 'face)
+					'ov-position (ov-beg ov)))
+			    ;; the help-echo
+			    (or (replace-regexp-in-string "\n" " " (overlay-get ov 'help-echo)) "nil"))))))
+    (setq tabulated-list-entries entries
+	  tabulated-list-format (vector '("Highlight" 40 t) '("Note" 40 t)))
+    (tabulated-list-init-header)
+    (tabulated-list-print)))
+
+
+(defun ov-highlight-jump ()
+  "In list mode, jump to the highlight."
+  (interactive) 
+  (let ((pos (get-text-property (line-beginning-position) 'ov-position)))
+    (when pos
+      (switch-to-buffer-other-window ov-highlight-source)
+      (goto-char pos))))
+
+
+(define-derived-mode ov-highlight-list-mode
+  tabulated-list-mode "ov-highlights"
+  "Mode for viewing ov-highlights as a tabular list."
+  (setq tabulated-list-sort-key nil)
+
+  (define-key tabulated-list-mode-map (kbd "q") (lambda () (interactive) (kill-buffer) (set-window-configuration ov-highlight-window-configuration)))
+  (define-key tabulated-list-mode-map (kbd "r") (lambda () (interactive) (ov-highlight-refresh-list)))
+  (define-key tabulated-list-mode-map (kbd "o") 'ov-highlight-jump)
+  (define-key tabulated-list-mode-map (kbd "[mouse-1]") 'ov-highlight-jump)
+  (define-key tabulated-list-mode-map (kbd "<return>") 'ov-highlight-jump)
+  (define-key tabulated-list-mode-map (kbd "k")
+    (lambda ()
+      (interactive)
+      (save-window-excursion
+	(ov-highlight-jump)
+	(ov-highlight-clear))
+      (ov-highlight-refresh-list)))
+  (define-key tabulated-list-mode-map (kbd "e")
+    (lambda ()
+      (interactive)
+      (ov-highlight-jump)
+      (ov-highlight-note-edit)))
   
-  ("l" ov-highlight-list "List highlights")
-  ("k" ov-highlight-clear "Clear highlight")
-  ("K" ov-highlight-clear-all "Clear all highlights"))
+  (add-hook 'tabulated-list-revert-hook
+	    #'ov-highlight-refresh-list))
 
 
 ;; * Save and load functions
@@ -416,7 +394,7 @@ They are really deleted when you save the buffer."
   (mapcar (lambda (ov)
 	    (list (overlay-start ov)
 		  (overlay-end ov)
-		  (plist-get  (overlay-get ov 'face) :background)
+		  (plist-get (overlay-get ov 'face) :background)
 		  (overlay-get ov 'help-echo)))
 	  (ov-get-highlight-overlays)))
 
@@ -448,57 +426,66 @@ They are really deleted when you save the buffer."
 (defun ov-highlight-save ()
   "Save highlight information.
 Data is saved in comment in the document."
-  (let ((data (ov-highlight-get-highlights)))
-    (if data
-	;; save results
-	(progn
-	  ;; first make sure we have a Local variable section, and add one if
-	  ;; not.
-	  (unless
+  (save-restriction
+    (widen)
+    (save-excursion
+      (let ((data (ov-highlight-get-highlights)))
+	(if data
+	    ;; save results
+	    (progn
+	      ;; first make sure we have a Local variable section, and add one if
+	      ;; not.
+	      (unless
+		  (save-excursion
+		    (goto-char (point-min))
+		    (re-search-forward
+		     (format "^%s.*eval: (ov-highlight-load)" comment-start) nil t))
+		(add-file-local-variable 'eval '(ov-highlight-load)))
+
+	      ;; Now search down to either the data line, or add it above the Local
+	      ;; Variables.
 	      (save-excursion
 		(goto-char (point-min))
-		(re-search-forward
-		 (format "^%s.*eval: (ov-highlight-load)" comment-start) nil t))
-	    (add-file-local-variable 'eval '(ov-highlight-load)))
-
-	  ;; Now search down to either the data line, or add it above the Local
-	  ;; Variables.
+		(if (re-search-forward
+		     (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
+		     nil 'mv)
+		    ;; We found old data. Let's replace it.
+		    (setf (buffer-substring (match-beginning 1) (match-end 1))
+			  (org-link-escape (let ((print-length nil)
+						 (eval-expression-print-length nil))
+					     (prin1-to-string data))))
+		  ;; No data found. Find the place to put it.
+		  (progn
+		    (re-search-backward
+		     (format "^%s.*Local Variables" comment-start))
+		    (beginning-of-line)
+		    (insert (format
+			     "%s ov-highlight-data: %s\n\n"
+			     (if (eq major-mode 'emacs-lisp-mode)
+				 ";;"
+			       comment-start)
+			     (org-link-escape (let ((print-length nil)
+						    (eval-expression-print-length nil))
+						(prin1-to-string data)))))))))
+	  ;; cleanup if we have no highlights
+	  (remove-hook 'before-save-hook 'ov-highlight-save t)
 	  (save-excursion
 	    (goto-char (point-min))
-	    (if (re-search-forward
-		 (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
-		 nil 'mv)
-		(setf (buffer-substring (match-beginning 1) (match-end 1))
-		      (org-link-escape (prin1-to-string data)))
-	      (progn
-		(re-search-backward
-		 (format "^%s.*Local Variables" comment-start))
-		(beginning-of-line)
-		(insert (format
-			 "%s ov-highlight-data: %s\n\n"
-			 (if (eq major-mode 'emacs-lisp-mode)
-			     ";;"
-			   comment-start)
-			 (org-link-escape (prin1-to-string data))))))))
-      ;; cleanup if we have no highlights
-      (remove-hook 'before-save-hook 'ov-highlight-save t)
-      (save-excursion
-	(goto-char (point-min))
-	(when (re-search-forward
-	       (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
-	       nil t)
-	  (beginning-of-line)
-	  (kill-line))
-	(goto-char (point-min))
-	(when
-	    (and (re-search-forward "eval: (ov-highlight-load)" nil t)
-		 ;; obfuscated pattern to avoid adding local variables here.
-		 (re-search-backward (concat "Local" " Variables:"))
-		 (re-search-forward "End:"))
-	  (re-search-backward "eval: (ov-highlight-load)")
-	  (beginning-of-line)
-	  (kill-line)
-	  (delete-char -1))))))
+	    (when (re-search-forward
+		   (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
+		   nil t)
+	      (beginning-of-line)
+	      (kill-line))
+	    (goto-char (point-min))
+	    (when
+		(and (re-search-forward "eval: (ov-highlight-load)" nil t)
+		     ;; obfuscated pattern to avoid adding local variables here.
+		     (re-search-backward (concat "Local" " Variables:"))
+		     (re-search-forward "End:"))
+	      (re-search-backward "eval: (ov-highlight-load)")
+	      (beginning-of-line)
+	      (kill-line)
+	      (delete-char -1))))))))
 
 ;; add the local var we use as safe so we don't get annoyed by permission to run
 ;; it.
@@ -506,8 +493,30 @@ Data is saved in comment in the document."
 	     '(ov-highlight-load))
 
 
+;; * The hydra menu
 
+(defhydra ov-highlighter (:color blue) "highlighter"
+  ("b" ov-highlight-blue "blue")
+  ("g" ov-highlight-green "Green")
+  ("p" ov-highlight-pink "Pink")
+  ;; define as many special colors as you like.
+  ("s" (ov-highlight (region-beginning) (region-end) "Lightsalmon1") "Salmon")
+  ("y" ov-highlight-yellow "yellow")
+  ("c" ov-highlight "Choose color")
+  ("n" (ov-highlight-note (region-beginning) (region-end) "Thistle") "Note")
+  ("N" ov-highlight-note "Note (c)") 
+  ("e" ov-highlight-note-edit "Edit note")
+
+  ;; editmark/feedback options
+  ("t" ov-highlight-typo "Typo") 
+  ("m" ov-highlight-comment "Comment highlight")
+  
+  ("l" ov-highlight-display "List highlights")
+  ("k" ov-highlight-clear "Clear highlight")
+  ("K" ov-highlight-clear-all "Clear all highlights"))
+
+
+;; * The End
 (provide 'ov-highlighter)
 
 ;;; ov-highlighter.el ends here
-
