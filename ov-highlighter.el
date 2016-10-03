@@ -358,32 +358,38 @@ The list is from first to last."
   (let ((pos (get-text-property (line-beginning-position) 'ov-position)))
     (when pos
       (switch-to-buffer-other-window ov-highlight-source)
-      (goto-char pos))))
+      (goto-char pos)
+      (org-show-entry))))
+
+
+(defvar ov-highlight-list-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key tabulated-list-mode-map (kbd "q") (lambda () (interactive) (kill-buffer) (set-window-configuration ov-highlight-window-configuration)))
+    (define-key map (kbd "r") (lambda () (interactive) (ov-highlight-refresh-list)))
+    (define-key map (kbd "o") 'ov-highlight-jump)
+    (define-key map (kbd "[mouse-1]") 'ov-highlight-jump)
+    (define-key map (kbd "<return>") 'ov-highlight-jump)
+    (define-key map (kbd "k")
+      (lambda ()
+	(interactive)
+	(save-window-excursion
+	  (ov-highlight-jump)
+	  (ov-highlight-clear))
+	(ov-highlight-refresh-list)))
+    (define-key map (kbd "e")
+      (lambda ()
+	(interactive)
+	(ov-highlight-jump)
+	(ov-highlight-note-edit)))
+    map)
+  "Local keymap for `ov-highlight-list-mode.")
 
 
 (define-derived-mode ov-highlight-list-mode
   tabulated-list-mode "ov-highlights"
-  "Mode for viewing ov-highlights as a tabular list."
-  (setq tabulated-list-sort-key nil)
-
-  (define-key tabulated-list-mode-map (kbd "q") (lambda () (interactive) (kill-buffer) (set-window-configuration ov-highlight-window-configuration)))
-  (define-key tabulated-list-mode-map (kbd "r") (lambda () (interactive) (ov-highlight-refresh-list)))
-  (define-key tabulated-list-mode-map (kbd "o") 'ov-highlight-jump)
-  (define-key tabulated-list-mode-map (kbd "[mouse-1]") 'ov-highlight-jump)
-  (define-key tabulated-list-mode-map (kbd "<return>") 'ov-highlight-jump)
-  (define-key tabulated-list-mode-map (kbd "k")
-    (lambda ()
-      (interactive)
-      (save-window-excursion
-	(ov-highlight-jump)
-	(ov-highlight-clear))
-      (ov-highlight-refresh-list)))
-  (define-key tabulated-list-mode-map (kbd "e")
-    (lambda ()
-      (interactive)
-      (ov-highlight-jump)
-      (ov-highlight-note-edit)))
-  
+  "Mode for viewing ov-highlights as a tabular list.
+\\{ov-highlight-list-mode-map}"
+  (setq tabulated-list-sort-key nil) 
   (add-hook 'tabulated-list-revert-hook
 	    #'ov-highlight-refresh-list))
 
