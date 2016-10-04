@@ -426,7 +426,10 @@ The list is from first to last."
 	   (ov-highlight-note beg end color help-echo t)
 	 (ov-highlight beg end color))))
    (ov-highlight-read-data))
-  (add-hook 'before-save-hook 'ov-highlight-save nil t))
+  (add-hook 'before-save-hook 'ov-highlight-save nil t)
+  ;; loading marks the buffer as modified, but it isn't. We mark it unmodified
+  ;; here.
+  (set-buffer-modified-p nil))
 
 
 (defun ov-highlight-save ()
@@ -465,14 +468,15 @@ Data is saved in comment in the document."
 		    (re-search-backward
 		     (format "^%s.*Local Variables" comment-start))
 		    (beginning-of-line)
-		    (insert (format
-			     "%s ov-highlight-data: %s\n\n"
-			     (if (eq major-mode 'emacs-lisp-mode)
-				 ";;"
-			       comment-start)
-			     (org-link-escape (let ((print-length nil)
-						    (eval-expression-print-length nil))
-						(prin1-to-string data)))))))))
+		    (insert
+		     (format
+		      "%s ov-highlight-data: %s\n\n"
+		      (if (eq major-mode 'emacs-lisp-mode)
+			  ";;"
+			comment-start)
+		      (org-link-escape (let ((print-length nil)
+					     (eval-expression-print-length nil))
+					 (prin1-to-string data)))))))))
 	  ;; cleanup if we have no highlights
 	  (remove-hook 'before-save-hook 'ov-highlight-save t)
 	  (save-excursion
