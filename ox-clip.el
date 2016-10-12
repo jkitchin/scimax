@@ -346,8 +346,8 @@ if __name__ == '__main__':
   "Windows Python Script for copying formatted text.")
 
 ;; Create the windows python script if needed.
-(unless (and (eq system-type 'windows-nt)
-	     (not (file-exists-p ox-clip-w32-cmd)))
+(when (and (eq system-type 'windows-nt)
+	   (not (file-exists-p ox-clip-w32-cmd)))
   (with-temp-file "html-clip-w32.py"
     (insert ox-clip-w32-py)))
 
