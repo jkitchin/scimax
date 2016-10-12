@@ -1,8 +1,12 @@
 #!/bin/bash
 
+# Setup git.
+[[ -z `git config --global user.name` ]] && read -p "Full name: " name && git config --global user.name "$name"
+[[ -z `git config --global user.email` ]] && read -p "Email: " email && git config --global user.email $email
+
 # Now clone scimax
 if [ ! -d "scimax" ]; then
-  git clone https://github.com/jkitchin/scimax.git
+    git clone https://github.com/jkitchin/scimax.git
 fi
 
 cd scimax
