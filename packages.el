@@ -466,6 +466,10 @@
   :ensure nil
   :load-path scimax-dir)
 
+(use-package kitchingroup
+  :ensure nil
+  :load-path scimax-dir)
+
 
 ;; * User packages
 
