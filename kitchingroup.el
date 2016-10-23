@@ -38,6 +38,8 @@ report is for the previous week.
     (let ((default-directory (expand-file-name dir)))
       (ox-manuscript-new-helm "weekly-progress-report"))))
 
+(defalias 'kitchinhub-weekly-report 'kitchingroup-weekly-report)
+
 (provide 'kitchingroup)
 
 ;;; kitchingroup.el ends here
