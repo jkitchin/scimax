@@ -3,7 +3,7 @@
 ;;; Commentary:
 ;; 
 
-(defun kitchingroup-weekly-report (arg) 
+(defun kitchingroup-weekly-report (&optional arg) 
   "Create/open this week's progress report.
 With a prefix arg, specify the week to open.
 
