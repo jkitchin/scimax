@@ -985,10 +985,7 @@ To make C-c C-c use this, try this.
 			  (org-babel-remove-result) 
 			  (org-babel-insert-result
 			   (with-current-buffer ,pbuffer
-			     (concat
-			      (buffer-string)
-			      (propertize "\n test" 'font-lock-face '(:foreground "red")
-					  'help-echo "ok")))
+			     (buffer-string))
 			   (cdr (assoc :result-params
 				       (nth 2 (org-babel-get-src-block-info)))))))
 		    ;; delete the results buffer then delete the tempfile.
@@ -997,8 +994,7 @@ To make C-c C-c use this, try this.
 		      (kill-buffer ,pbuffer))
 		    (when process
 		      (delete-process process))))))
-	    (set-window-configuration ,wc)
-	    (message "%s" ,md5-hash)
+	    (set-window-configuration ,wc) 
 	    ;; Finally, if we got a line number, move point and shine beacon
 	    (when line-number
 	      (save-excursion
@@ -1015,8 +1011,7 @@ To make C-c C-c use this, try this.
 			     (progn
 			       (org-babel-previous-src-block)
 			       (goto-char (org-element-property :begin (org-element-context)))
-			       (forward-line ,ln) 
-			       (let ((beacon-color "red")) (beacon--shine)))
+			       (forward-line ,ln))
 			   ;; regular file
 			   (find-file ,fname)
 			   (goto-line ,ln))))
@@ -1032,6 +1027,7 @@ To make C-c C-c use this, try this.
 	      (goto-char (org-element-property :begin (org-element-context)))
 	      (forward-line line-number) 
 	      (let ((beacon-color "red")) (beacon--shine)))))))))
+
 
 (defun org-babel-kill-async ()
   "Kill the current async process.
