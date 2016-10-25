@@ -907,11 +907,13 @@ To make C-c C-c use this, try this.
 			     (save-excursion 
 			       (forward-line 1) (org-babel-result-end))))))) 
 	(when (and results (string-match "<async:\\(.*\\)>" results))
-	  (if (not arg)
+	  (if (and (get-process (match-string 1 results)) (not arg))
 	      (error "%s is running. Use prefix arg to kill it."
 		     (match-string 0 results))
 	    ;; we want to kill stuff, delete results and continue.
-	    (interrupt-process (format "*py-%s*" (match-string 1 results))))))
+	    (if (get-process (match-string 1 results))
+		(interrupt-process (format "*py-%s*" (match-string 1 results)))
+	      (kill-buffer (format "*py-%s*" (match-string 1 results)))))))
       
       ;; Get the md5 for the current block
       (with-temp-buffer
@@ -958,9 +960,11 @@ To make C-c C-c use this, try this.
 				(with-current-buffer ,pbuffer
 				  (setq results (buffer-string))
 				  (goto-char (point-min))
-				  (re-search-forward
-				   (format "\"%s\", line \\([0-9]+\\)" ,py-file) nil t)
-				  (string-to-number (match-string 1))))))
+				  (let ((LNs '()))
+				    (while (re-search-forward
+					    (format "\"%s\", line \\([0-9]+\\)" ,py-file) nil t)
+				      (add-to-list 'LNs (string-to-number (match-string 1))))
+				    (-min LNs))))))
 	    ;; these nested save macros try to save narrowing, point, and window
 	    ;; arrangement.
 	    (save-window-excursion
