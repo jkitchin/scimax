@@ -692,31 +692,21 @@ F5 inserts the entity code."
 			     collect
 			     (cons 
 			      (format "%10s | %s | %s | %s"
-				      (car element)
-				      (nth 1 element)
-				      (nth 3 element)
-				      (nth 6 element))
+				      (car element) ;name
+				      (nth 1 element) ; latex
+				      (nth 3 element) ; html
+				      (nth 6 element)) ;utf-8
 			      element))
 	    :require-match t
 	    :action '(1
-		      ("u" (lambda (element) (insert (nth 6 element))) "utf-8")
-		      ("o" (lambda (element) (insert "\\" (car element))) "org-entity")
-		      ("l" (lambda (element) (insert (nth 1 element))) "latex")
-		      ("h" (lambda (element) (insert (nth 3 element))) "html"))))
+		      ("u" (lambda (element) (insert (nth 6 (cdr element)))) "utf-8")
+		      ("o" (lambda (element) (insert "\\" (cadr element))) "org-entity")
+		      ("l" (lambda (element) (insert (nth 1 (cdr element)))) "latex")
+		      ("h" (lambda (element) (insert (nth 3 (cdr element)))) "html"))))
+
 
 ;; * Font-lock
 ;; ** Latex fragments
-;; Show equations and fragments in a blue font.
-;; (add-hook 'org-mode-hook
-;; 	  (lambda ()
-;; 	    (font-lock-add-keywords
-;; 	     nil
-;; 	     `((,(mapconcat (lambda (x)
-;; 			      (nth 1 x))
-;; 			    org-latex-regexps
-;; 			    "\\|") 0 '(:foreground "blue"))
-;; 	       ("@@latex:[^@]*@@" 0 '(:foreground "blue"))))))
-
 (setq org-highlight-latex-and-related '(latex script entities))
 (set-face-foreground 'org-latex-and-related "blue")
 
