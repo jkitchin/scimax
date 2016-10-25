@@ -887,7 +887,11 @@ A new window will pop up showing you the output as it appears,
 and the output in that window will be put in the RESULTS section
 of the code block.
 
-Use a prefix arg to force it to run."
+Use a prefix arg to force it to run.
+
+To make C-c C-c use this, try this.
+ (add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-async-execute:python)
+"
   (interactive "P")
   (when (and (org-in-src-block-p) 
 	     (string= "python" (nth 0 (org-babel-get-src-block-info))))
