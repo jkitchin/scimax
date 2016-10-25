@@ -889,115 +889,115 @@ of the code block.
 
 Use a prefix arg to force it to run."
   (interactive "P")
-  (let* ((current-file (buffer-file-name)) 
-	 (code (org-element-property :value (org-element-context))) 
-	 (varcmds (org-babel-variable-assignments:python
-		   (nth 2 (org-babel-get-src-block-info))))
-	 (params (nth 2 (org-babel-get-src-block-info)))
-	 py-file
-	 md5-hash
-	 pbuffer 
-	 process)
-    
-    ;; First, check if something is running
-    (let ((location (org-babel-where-is-src-block-result))
-	  results)
-      (when location
-	(save-excursion
-	  (goto-char location)
-	  (when (looking-at (concat org-babel-result-regexp ".*$"))
-	    (setq results (buffer-substring-no-properties
-			   location
-			   (save-excursion 
-			     (forward-line 1) (org-babel-result-end))))))) 
-      (when (and results (string-match "<async:\\(.*\\)>" results))
-	(if (not arg)
-	    (error "%s is running. Use prefix arg to kill it."
-		   (match-string 0 results))
-	  ;; we want to kill stuff, delete results and continue.
-	  (interrupt-process (format "*py-%s*" (match-string 1 results))))))
+  (when (string= "python" (nth 0 (org-babel-get-src-block-info)))
+    (let* ((current-file (buffer-file-name)) 
+	   (code (org-element-property :value (org-element-context))) 
+	   (varcmds (org-babel-variable-assignments:python
+		     (nth 2 (org-babel-get-src-block-info))))
+	   (params (nth 2 (org-babel-get-src-block-info)))
+	   py-file
+	   md5-hash
+	   pbuffer 
+	   process)
+      
+      ;; First, check if something is running
+      (let ((location (org-babel-where-is-src-block-result))
+	    results)
+	(when location
+	  (save-excursion
+	    (goto-char location)
+	    (when (looking-at (concat org-babel-result-regexp ".*$"))
+	      (setq results (buffer-substring-no-properties
+			     location
+			     (save-excursion 
+			       (forward-line 1) (org-babel-result-end))))))) 
+	(when (and results (string-match "<async:\\(.*\\)>" results))
+	  (if (not arg)
+	      (error "%s is running. Use prefix arg to kill it."
+		     (match-string 0 results))
+	    ;; we want to kill stuff, delete results and continue.
+	    (interrupt-process (format "*py-%s*" (match-string 1 results))))))
+      
+      ;; Get the md5 for the current block
+      (with-temp-buffer
+	(dolist (cmd varcmds)
+	  (insert cmd)
+	  (insert "\n"))
+	(insert code)
+	(setq md5-hash (md5 (buffer-string))
+	      pbuffer (format "*py-%s*" md5-hash)
+	      py-file (expand-file-name (format "py-%s.py" md5-hash))))
 
+      ;; create the file to run
+      (with-temp-file py-file
+	(dolist (cmd varcmds)
+	  (insert cmd)
+	  (insert "\n"))
+	(insert code))
 
-    ;; Get the md5 for the current block
-    (with-temp-buffer
-      (dolist (cmd varcmds)
-	(insert cmd)
-	(insert "\n"))
-      (insert code)
-      (setq md5-hash (md5 (buffer-string))
-	    pbuffer (format "*py-%s*" md5-hash)
-	    py-file (expand-file-name (format "py-%s.py" md5-hash))))
+      ;; get rid of old results, and put a place-holder for the new results to
+      ;; come. This does not work for anything but vanilla results now.
+      (org-babel-remove-result)
+      (org-babel-insert-result (format "<async:%s>" md5-hash))
 
-    ;; create the file to run
-    (with-temp-file py-file
-      (dolist (cmd varcmds)
-	(insert cmd)
-	(insert "\n"))
-      (insert code))
+      ;; open the results buffer to see the results in.
+      (switch-to-buffer-other-window pbuffer)
 
-    ;; get rid of old results, and put a place-holder for the new results to
-    ;; come. This does not work for anything but vanilla results now.
-    (org-babel-remove-result)
-    (org-babel-insert-result (format "<async:%s>" md5-hash))
+      ;; run the code
+      (setq process (start-process
+		     md5-hash
+		     pbuffer
+		     "python"
+		     py-file))
 
-    ;; open the results buffer to see the results in.
-    (switch-to-buffer-other-window pbuffer)
-
-    ;; run the code
-    (setq process (start-process
-		   md5-hash
-		   pbuffer
-		   "python"
-		   py-file))
-
-    ;; when the process is done, run this code to put the results in the
-    ;; org-mode buffer.
-    (set-process-sentinel
-     process
-     `(lambda (process event) 
-	(delete-file ,py-file)
-	(let* (results
-	       (line-number (unless (string= "finished\n" event) 
-			      ;; Probably got an exception. Let's parse it and move
-			      ;; point to where it belongs in the code block.
-			      (with-current-buffer ,pbuffer
-				(setq results (buffer-string))
-				(goto-char (point-max))
-				(re-search-backward
-				 "File.*,? line \\([0-9]+\\)" nil t)
-				(string-to-number (match-string 1))))))
-	  ;; these nested save macros try to save narrowing, point, and window
-	  ;; arrangement.
-	  (save-window-excursion
-	    (save-excursion
-	      (save-restriction
-		;; Make sure we end up deleting the temp file and buffer
-		(unwind-protect
-		    (with-current-buffer (find-file-noselect ,current-file)
-		      (widen)
-		      (goto-char (point-min))
-		      (when (re-search-forward
-			     (format "<async:%s>" ,md5-hash)
-			     nil t)
-			(org-babel-previous-src-block)
-			(org-babel-remove-result) 
-			(org-babel-insert-result
-			 results
-			 (cdr (assoc :result-params
-				     (nth 2 (org-babel-get-src-block-info)))))))
-		  ;; delete the results buffer then delete the tempfile.
-		  ;; finally, delete the process.
-		  (when (get-buffer ,pbuffer)
-		    (kill-buffer ,pbuffer))
-		  (when process
-		    (delete-process process))))))
-	  ;; Finally, if we got a line number, move point and shine beacon
-	  (when line-number 
-	    (pop-to-buffer (find-file-noselect ,current-file)) 
-	    (goto-char (org-element-property :begin (org-element-context)))
-	    (forward-line line-number)
-	    (message "%s" results)
-	    (let ((beacon-color "red")) (beacon--shine))))))))
+      ;; when the process is done, run this code to put the results in the
+      ;; org-mode buffer.
+      (set-process-sentinel
+       process
+       `(lambda (process event) 
+	  (delete-file ,py-file)
+	  (let* (results
+		 (line-number (unless (string= "finished\n" event) 
+				;; Probably got an exception. Let's parse it and move
+				;; point to where it belongs in the code block.
+				(with-current-buffer ,pbuffer
+				  (setq results (buffer-string))
+				  (goto-char (point-max))
+				  (re-search-backward
+				   "File.*,? line \\([0-9]+\\)" nil t)
+				  (string-to-number (match-string 1))))))
+	    ;; these nested save macros try to save narrowing, point, and window
+	    ;; arrangement.
+	    (save-window-excursion
+	      (save-excursion
+		(save-restriction
+		  ;; Make sure we end up deleting the temp file and buffer
+		  (unwind-protect
+		      (with-current-buffer (find-file-noselect ,current-file)
+			(widen)
+			(goto-char (point-min))
+			(when (re-search-forward
+			       (format "<async:%s>" ,md5-hash)
+			       nil t)
+			  (org-babel-previous-src-block)
+			  (org-babel-remove-result) 
+			  (org-babel-insert-result
+			   results
+			   (cdr (assoc :result-params
+				       (nth 2 (org-babel-get-src-block-info)))))))
+		    ;; delete the results buffer then delete the tempfile.
+		    ;; finally, delete the process.
+		    (when (get-buffer ,pbuffer)
+		      (kill-buffer ,pbuffer))
+		    (when process
+		      (delete-process process))))))
+	    ;; Finally, if we got a line number, move point and shine beacon
+	    (when line-number 
+	      (pop-to-buffer (find-file-noselect ,current-file)) 
+	      (goto-char (org-element-property :begin (org-element-context)))
+	      (forward-line line-number)
+	      (message "%s" results)
+	      (let ((beacon-color "red")) (beacon--shine)))))))))
 
 (defun org-babel-kill-async ()
   "Kill the current async process.
