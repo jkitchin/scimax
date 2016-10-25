@@ -889,7 +889,8 @@ of the code block.
 
 Use a prefix arg to force it to run."
   (interactive "P")
-  (when (string= "python" (nth 0 (org-babel-get-src-block-info)))
+  (when (and (org-in-src-block-p) 
+	     (string= "python" (nth 0 (org-babel-get-src-block-info))))
     (let* ((current-file (buffer-file-name)) 
 	   (code (org-element-property :value (org-element-context))) 
 	   (varcmds (org-babel-variable-assignments:python
