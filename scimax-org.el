@@ -986,7 +986,8 @@ To make C-c C-c use this, try this.
 			  (org-babel-previous-src-block)
 			  (org-babel-remove-result) 
 			  (org-babel-insert-result
-			   results
+			   (with-current-buffer ,pbuffer
+			     (buffer-string))
 			   (cdr (assoc :result-params
 				       (nth 2 (org-babel-get-src-block-info)))))))
 		    ;; delete the results buffer then delete the tempfile.
