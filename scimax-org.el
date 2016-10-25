@@ -887,8 +887,7 @@ A new window will pop up showing you the output as it appears,
 and the output in that window will be put in the RESULTS section
 of the code block.
 
-Use a prefix arg to force it to run.
-"
+Use a prefix arg to force it to run."
   (interactive "P")
   (let* ((current-file (buffer-file-name)) 
 	 (code (org-element-property :value (org-element-context))) 
@@ -913,7 +912,8 @@ Use a prefix arg to force it to run.
 			     (forward-line 1) (org-babel-result-end))))))) 
       (when (and results (string-match "<async:\\(.*\\)>" results))
 	(if (not arg)
-	    (error "%s is running. Use prefix arg to kill it." (match-string 0 results))
+	    (error "%s is running. Use prefix arg to kill it."
+		   (match-string 0 results))
 	  ;; we want to kill stuff, delete results and continue.
 	  (interrupt-process (format "*py-%s*" (match-string 1 results))))))
 
@@ -955,46 +955,48 @@ Use a prefix arg to force it to run.
     (set-process-sentinel
      process
      `(lambda (process event) 
-	(message "Deleting %s" ,py-file)
 	(delete-file ,py-file)
-	(let ((line-number (unless (string= "finished\n" event) 
-			     ;; Probably got an exception. Let's parse it and move
-			     ;; point to where it belongs in the code block.
-			     (with-current-buffer ,pbuffer
-			       (goto-char (point-max))
-			       (re-search-backward
-				"File.*,? line \\([0-9]+\\)" nil t)
-			       (string-to-number (match-string 1))))))
-	  (unwind-protect
-	      (save-window-excursion
-		(save-excursion
-		  (save-restriction
-		    (unwind-protect
-			(with-current-buffer (find-file-noselect ,current-file)
-			  (widen)
-			  (goto-char (point-min))
-			  (when (re-search-forward
-				 (format "<async:%s>" ,md5-hash)
-				 nil t)
-			    (org-babel-previous-src-block)
-			    (org-babel-remove-result) 
-			    (org-babel-insert-result
-			     (with-current-buffer
-				 ,pbuffer
-			       (buffer-string))
-			     (cdr (assoc :result-params
-					 (nth 2 (org-babel-get-src-block-info)))))))
-		      ;; delete the results buffer then delete the tempfile.
-		      ;; finally, delete the process.
-		      (when (get-buffer ,pbuffer)
-			(kill-buffer ,pbuffer))
-		      ;;   (delete-window))
-		      (when process
-			(delete-process process)))))))
+	(let* (results
+	       (line-number (unless (string= "finished\n" event) 
+			      ;; Probably got an exception. Let's parse it and move
+			      ;; point to where it belongs in the code block.
+			      (with-current-buffer ,pbuffer
+				(setq results (buffer-string))
+				(goto-char (point-max))
+				(re-search-backward
+				 "File.*,? line \\([0-9]+\\)" nil t)
+				(string-to-number (match-string 1))))))
+	  ;; these nested save macros try to save narrowing, point, and window
+	  ;; arrangement.
+	  (save-window-excursion
+	    (save-excursion
+	      (save-restriction
+		;; Make sure we end up deleting the temp file and buffer
+		(unwind-protect
+		    (with-current-buffer (find-file-noselect ,current-file)
+		      (widen)
+		      (goto-char (point-min))
+		      (when (re-search-forward
+			     (format "<async:%s>" ,md5-hash)
+			     nil t)
+			(org-babel-previous-src-block)
+			(org-babel-remove-result) 
+			(org-babel-insert-result
+			 results
+			 (cdr (assoc :result-params
+				     (nth 2 (org-babel-get-src-block-info)))))))
+		  ;; delete the results buffer then delete the tempfile.
+		  ;; finally, delete the process.
+		  (when (get-buffer ,pbuffer)
+		    (kill-buffer ,pbuffer))
+		  (when process
+		    (delete-process process))))))
+	  ;; Finally, if we got a line number, move point and shine beacon
 	  (when line-number 
 	    (pop-to-buffer (find-file-noselect ,current-file)) 
 	    (goto-char (org-element-property :begin (org-element-context)))
 	    (forward-line line-number)
+	    (message "%s" results)
 	    (let ((beacon-color "red")) (beacon--shine))))))))
 
 (defun org-babel-kill-async ()
