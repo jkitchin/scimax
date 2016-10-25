@@ -887,7 +887,8 @@ To make C-c C-c use this, try this.
   (interactive "P")
   (when (and (org-in-src-block-p) 
 	     (string= "python" (nth 0 (org-babel-get-src-block-info))))
-    (let* ((current-file (buffer-file-name)) 
+    (let* ((current-file (buffer-file-name))
+	   (cb (current-buffer))
 	   (code (org-element-property :value (org-element-context))) 
 	   (varcmds (org-babel-variable-assignments:python
 		     (nth 2 (org-babel-get-src-block-info))))
@@ -964,6 +965,7 @@ To make C-c C-c use this, try this.
 	      ;; Probably got an exception. Let's parse it and move
 	      ;; point to where it belongs in the code block.
 	      (with-current-buffer ,pbuffer
+		(setq results (buffer-string))
 		(goto-char (point-min))
 		(while (re-search-forward
 			(format "\"%s\", line \\([0-9]+\\)" ,py-file) nil t) 
@@ -975,7 +977,7 @@ To make C-c C-c use this, try this.
 		(save-restriction
 		  ;; Make sure we end up deleting the temp file and buffer
 		  (unwind-protect
-		      (with-current-buffer (find-file-noselect ,current-file)
+		      (with-current-buffer ,cb
 			(widen)
 			(goto-char (point-min))
 			(when (re-search-forward
@@ -1025,7 +1027,8 @@ To make C-c C-c use this, try this.
 	      
 	      
 	      (goto-char (org-element-property :begin (org-element-context)))
-	      (forward-line line-number) 
+	      (forward-line line-number)
+	      (message "%s" results)
 	      (let ((beacon-color "red")) (beacon--shine)))))))))
 
 
