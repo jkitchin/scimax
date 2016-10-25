@@ -10,8 +10,7 @@ With a prefix arg, specify the week to open.
 This function will create a folder called reports/year-mm-dd and put a weekly-report template inside it, or open the one that exists.
 
 The week beginning is defined by `calendar-week-start-day'. The
-report is for the previous week.
-"
+report is for the previous week."
   (interactive "P")
   
   (let* ((date (if arg (org-read-date) (format-time-string "%Y-%m-%d")))
