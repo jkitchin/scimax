@@ -957,9 +957,9 @@ To make C-c C-c use this, try this.
 				;; point to where it belongs in the code block.
 				(with-current-buffer ,pbuffer
 				  (setq results (buffer-string))
-				  (goto-char (point-max))
-				  (re-search-backward
-				   "File.*,? line \\([0-9]+\\)" nil t)
+				  (goto-char (point-min))
+				  (re-search-forward
+				   (format "\"%s\", line \\([0-9]+\\)" ,py-file) nil t)
 				  (string-to-number (match-string 1))))))
 	    ;; these nested save macros try to save narrowing, point, and window
 	    ;; arrangement.
