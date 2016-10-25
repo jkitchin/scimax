@@ -890,8 +890,7 @@ of the code block.
 Use a prefix arg to force it to run.
 
 To make C-c C-c use this, try this.
- (add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-async-execute:python)
-"
+ (add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-async-execute:python)"
   (interactive "P")
   (when (and (org-in-src-block-p) 
 	     (string= "python" (nth 0 (org-babel-get-src-block-info))))
