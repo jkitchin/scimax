@@ -899,6 +899,7 @@ To make C-c C-c use this, try this.
 	   (varcmds (org-babel-variable-assignments:python
 		     (nth 2 (org-babel-get-src-block-info))))
 	   (params (nth 2 (org-babel-get-src-block-info)))
+	   (wc (current-window-configuration))
 	   py-file
 	   md5-hash
 	   pbuffer 
@@ -996,9 +997,10 @@ To make C-c C-c use this, try this.
 		      (kill-buffer ,pbuffer))
 		    (when process
 		      (delete-process process))))))
+	    (set-window-configuration ,wc)
+	    
 	    ;; Finally, if we got a line number, move point and shine beacon
 	    (when line-number 
-	      (pop-to-buffer (find-file-noselect ,current-file)) 
 	      (goto-char (org-element-property :begin (org-element-context)))
 	      (forward-line line-number)
 	      (message "%s" results)
