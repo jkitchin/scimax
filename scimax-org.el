@@ -868,6 +868,9 @@ Use a prefix arg FONTIFY for colored headlines."
 
 ;; * Asynchronous python
 
+(defvar org-babel-async-python-show-results nil
+  "Determines if the async buffer is shown")
+
 (defun org-babel-async-execute:python (&optional arg)
   "Execute the python src-block at point asynchronously.
 :var headers are supported.
@@ -890,6 +893,7 @@ To make C-c C-c use this, try this.
 		     (nth 2 (org-babel-get-src-block-info))))
 	   (params (nth 2 (org-babel-get-src-block-info)))
 	   (wc (current-window-configuration))
+	   (file-line-regexp "File \"\\(.*\\)\",? line \\([0-9]*\\)")
 	   py-file
 	   md5-hash
 	   pbuffer 
@@ -923,7 +927,7 @@ To make C-c C-c use this, try this.
 	(insert code)
 	(setq md5-hash (md5 (buffer-string))
 	      pbuffer (format "*py-%s*" md5-hash)
-	      py-file (expand-file-name (format "py-%s.py" md5-hash))))
+	      py-file (expand-file-name (format "pymd5-%s.py" md5-hash))))
 
       ;; create the file to run
       (with-temp-file py-file
@@ -938,7 +942,8 @@ To make C-c C-c use this, try this.
       (org-babel-insert-result (format "<async:%s>" md5-hash))
 
       ;; open the results buffer to see the results in.
-      (switch-to-buffer-other-window pbuffer)
+      (when org-babel-async-python-show-results
+	(switch-to-buffer-other-window pbuffer))
 
       ;; run the code
       (setq process (start-process
@@ -953,20 +958,18 @@ To make C-c C-c use this, try this.
        process
        `(lambda (process event) 
 	  (delete-file ,py-file)
-	  (let* (results
-		 (line-number (unless (string= "finished\n" event) 
-				;; Probably got an exception. Let's parse it and move
-				;; point to where it belongs in the code block.
-				(with-current-buffer ,pbuffer
-				  (setq results (buffer-string))
-				  (goto-char (point-min))
-				  (let ((LNs '()))
-				    (while (re-search-forward
-					    (format "\"%s\", line \\([0-9]+\\)" ,py-file) nil t)
-				      (add-to-list 'LNs (string-to-number (match-string 1))))
-				    (-min LNs))))))
+	  (message "%s" event)
+	  (let* ((line-number))
+	    (unless (string= "finished\n" event) 
+	      ;; Probably got an exception. Let's parse it and move
+	      ;; point to where it belongs in the code block.
+	      (with-current-buffer ,pbuffer
+		(goto-char (point-min))
+		(while (re-search-forward
+			(format "\"%s\", line \\([0-9]+\\)" ,py-file) nil t) 
+		  (setq line-number (string-to-number (match-string 1))))))
 	    ;; these nested save macros try to save narrowing, point, and window
-	    ;; arrangement.
+	    ;; arrangement. 
 	    (save-window-excursion
 	      (save-excursion
 		(save-restriction
@@ -982,7 +985,10 @@ To make C-c C-c use this, try this.
 			  (org-babel-remove-result) 
 			  (org-babel-insert-result
 			   (with-current-buffer ,pbuffer
-			     (buffer-string))
+			     (concat
+			      (buffer-string)
+			      (propertize "\n test" 'font-lock-face '(:foreground "red")
+					  'help-echo "ok")))
 			   (cdr (assoc :result-params
 				       (nth 2 (org-babel-get-src-block-info)))))))
 		    ;; delete the results buffer then delete the tempfile.
@@ -992,12 +998,39 @@ To make C-c C-c use this, try this.
 		    (when process
 		      (delete-process process))))))
 	    (set-window-configuration ,wc)
-	    
+	    (message "%s" ,md5-hash)
 	    ;; Finally, if we got a line number, move point and shine beacon
-	    (when line-number 
+	    (when line-number
+	      (save-excursion
+		(while (re-search-forward ,file-line-regexp nil t)
+		  (let ((map (make-sparse-keymap))
+			(start (match-beginning 1))
+			(end (match-end 1))
+			(fname (match-string 1))
+			(ln (string-to-number (match-string 2))))
+		    (define-key map [mouse-1]
+		      `(lambda ()
+			 (interactive)
+			 (if (string-match "pymd5-" ,fname)
+			     (progn
+			       (org-babel-previous-src-block)
+			       (goto-char (org-element-property :begin (org-element-context)))
+			       (forward-line ,ln) 
+			       (let ((beacon-color "red")) (beacon--shine)))
+			   ;; regular file
+			   (find-file ,fname)
+			   (goto-line ,ln))))
+		    (set-text-properties
+		     start
+		     end 
+		     `(font-lock-face 'org-link
+				      mouse-face highlight
+				      local-map ,map
+				      help-echo "Click to open")))))
+	      
+	      
 	      (goto-char (org-element-property :begin (org-element-context)))
-	      (forward-line line-number)
-	      (message "%s" results)
+	      (forward-line line-number) 
 	      (let ((beacon-color "red")) (beacon--shine)))))))))
 
 (defun org-babel-kill-async ()
