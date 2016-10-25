@@ -969,27 +969,28 @@ Use a prefix arg to force it to run.
 	      (save-window-excursion
 		(save-excursion
 		  (save-restriction
-		    (with-current-buffer (find-file-noselect ,current-file)
-		      (widen)
-		      (goto-char (point-min))
-		      (when (re-search-forward
-			     (format "<async:%s>" ,md5-hash)
-			     nil t)
-			(org-babel-previous-src-block)
-			(org-babel-remove-result) 
-			(org-babel-insert-result
-			 (with-current-buffer
-			     ,pbuffer
-			   (buffer-string))
-			 (cdr (assoc :result-params
-				     (nth 2 (org-babel-get-src-block-info))))))))))
-	    ;; delete the results buffer then delete the tempfile.
-	    ;; finally, delete the process.
-	    (when (get-buffer ,pbuffer)
-	      (kill-buffer ,pbuffer))
-	    ;;   (delete-window))
-	    (when process
-	      (delete-process process)))
+		    (unwind-protect
+			(with-current-buffer (find-file-noselect ,current-file)
+			  (widen)
+			  (goto-char (point-min))
+			  (when (re-search-forward
+				 (format "<async:%s>" ,md5-hash)
+				 nil t)
+			    (org-babel-previous-src-block)
+			    (org-babel-remove-result) 
+			    (org-babel-insert-result
+			     (with-current-buffer
+				 ,pbuffer
+			       (buffer-string))
+			     (cdr (assoc :result-params
+					 (nth 2 (org-babel-get-src-block-info)))))))
+		      ;; delete the results buffer then delete the tempfile.
+		      ;; finally, delete the process.
+		      (when (get-buffer ,pbuffer)
+			(kill-buffer ,pbuffer))
+		      ;;   (delete-window))
+		      (when process
+			(delete-process process)))))))
 	  (when line-number 
 	    (pop-to-buffer (find-file-noselect ,current-file)) 
 	    (goto-char (org-element-property :begin (org-element-context)))
