@@ -910,15 +910,21 @@ To make C-c C-c use this, try this.
 	      (setq results (buffer-substring-no-properties
 			     location
 			     (save-excursion 
-			       (forward-line 1) (org-babel-result-end))))))) 
-	(when (and results (string-match "<async:\\(.*\\)>" results))
-	  (if (and (get-process (match-string 1 results)) (not arg))
+			       (forward-line 1) (org-babel-result-end)))))))
+	(with-temp-buffer (insert (or results ""))
+			  (goto-char (point-min))
+			  (re-search-forward "<async:\\(.*\\)>" nil t)
+			  (setq md5-hash (match-string 1)))
+	(when md5-hash 
+	  (if (and (get-process md5-hash) (not arg))
 	      (error "%s is running. Use prefix arg to kill it."
 		     (match-string 0 results))
-	    ;; we want to kill stuff, delete results and continue.
-	    (if (get-process (match-string 1 results))
-		(interrupt-process (format "*py-%s*" (match-string 1 results)))
-	      (kill-buffer (format "*py-%s*" (match-string 1 results)))))))
+	    ;; we want to kill stuff, delete results and continue. we either
+	    ;; asked for it to be killed, or the process is dead/stale
+	    (if (get-process md5-hash)
+		(interrupt-process (format "*py-%s*" md5-hash))
+	      (when (get-buffer (format "*py-%s*" md5-hash))
+		(kill-buffer (format "*py-%s*" md5-hash)))))))
       
       ;; Get the md5 for the current block
       (with-temp-buffer
@@ -938,9 +944,27 @@ To make C-c C-c use this, try this.
 	(insert code))
 
       ;; get rid of old results, and put a place-holder for the new results to
-      ;; come. This does not work for anything but vanilla results now.
+      ;; come. The place holder is clickable, and kills the process.
       (org-babel-remove-result)
-      (org-babel-insert-result (format "<async:%s>" md5-hash))
+      (org-babel-insert-result
+       (format "<async:%s> click to kill" md5-hash)
+       (cdr (assoc :result-params
+		   (nth 2 (org-babel-get-src-block-info)))))
+      (save-excursion
+	(re-search-forward (format "<async:%s> click to kill" md5-hash))
+	(flyspell-delete-region-overlays (match-beginning 0) (match-end 0))
+	(let ((map (make-sparse-keymap)))
+	  (define-key map [mouse-1]
+	    (lambda ()
+	      (interactive)
+	      (org-babel-previous-src-block) 
+	      (org-babel-kill-async))) 
+	  (set-text-properties
+	   (match-beginning 0) (match-end 0)
+	   `(font-lock-face org-link
+			    local-map ,map
+			    help-echo "Click to kill async process" 
+			    mouse-face highlight))))
 
       ;; open the results buffer to see the results in.
       (when org-babel-async-python-show-results
@@ -1017,10 +1041,11 @@ To make C-c C-c use this, try this.
 			   ;; regular file
 			   (find-file ,fname)
 			   (goto-line ,ln))))
+		    (flyspell-delete-region-overlays start end)
 		    (set-text-properties
 		     start
 		     end 
-		     `(font-lock-face 'org-link
+		     `(font-lock-face org-link
 				      mouse-face highlight
 				      local-map ,map
 				      help-echo "Click to open")))))
