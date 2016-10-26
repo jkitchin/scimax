@@ -747,12 +747,14 @@ F5 inserts the entity code."
   (org-mark-ring-push)
   (avy-with avy-goto-line (avy--generic-jump "^\\*+" nil avy-style)))
 
+
 (defun ivy-jump-to-visible-sentence ()
   "Jump to visible sentence in the buffer."
   (interactive)
   (org-mark-ring-push)
   (avy-with avy-goto-line (avy--generic-jump (sentence-end) nil avy-style))
   (forward-sentence))
+
 
 (defun ivy-org-jump-to-heading ()
   "Jump to heading in the current buffer."
@@ -838,7 +840,6 @@ function does not open the files."
 Use a prefix arg to make it RECURSIVE.
 Use a double prefix to make it recursive and fontified."
   (interactive "P")
-
   (let ((fontify nil))
     (when (equal recursive '(16))
       (setq fontify t))
@@ -851,9 +852,11 @@ Use a double prefix to make it recursive and fontified."
 		recursive)
      fontify)))
 
+
 (defun ivy-org-jump-to-project-headline (fontify)
   "Jump to a headline in an org-file in the current project.
-Use a prefix arg FONTIFY for colored headlines."
+The project is defined by projectile. Use a prefix arg FONTIFY
+for colored headlines."
   (interactive "P")
   (ivy-org-jump-to-heading-in-files
    (mapcar
@@ -865,6 +868,48 @@ Use a prefix arg FONTIFY for colored headlines."
 	     (projectile-current-project-files)))
    fontify))
 
+
+;; * Numbered lines in code blocks
+(defvar number-line-overlays '()
+  "List of overlays for line numbers.")
+
+(make-variable-buffer-local 'number-line-overlays)
+
+(defun number-line-clear ()
+  "Clear the numbered lines in a code block."
+  (mapc 'delete-overlay number-line-overlays)
+  (setq number-line-overlays '()))
+
+
+(defun number-line-src-block ()
+  "Add line numbers to an org src-block."
+  (interactive)
+  (save-excursion
+    (let* ((src-block (org-element-context))
+           (nlines (- (length
+                       (s-split
+                        "\n"
+                        (org-element-property :value src-block)))
+                      1)))
+      (goto-char (org-element-property :begin src-block))
+      (re-search-forward (regexp-quote (org-element-property :value src-block)))
+      (goto-char (match-beginning 0))
+
+      (loop for i from 1 to nlines
+            do
+            (beginning-of-line)
+            (let (ov)
+              (setq ov (make-overlay (point) (point)))
+              (overlay-put ov 'before-string (propertize
+					      (format "%03s:" (number-to-string i))
+					      'font-lock-face '(:foreground "black" :background "gray80")))
+              (add-to-list 'number-line-overlays ov))
+            (next-line))))
+
+  ;; now read a char to clear them
+  (read-key "Press a key to clear numbers.")
+  (mapc 'delete-overlay number-line-overlays)
+  (setq number-line-overlays '()))
 
 ;; * Asynchronous python
 
@@ -1053,10 +1098,24 @@ To make C-c C-c use this, try this.
 			     (progn
 			       (org-babel-previous-src-block)
 			       (goto-char (org-element-property :begin (org-element-context)))
-			       (forward-line ,ln))
+			       (forward-line ,ln)
+			       ;; For some reason clicking on these links
+			       ;; sometimes folds the results drawer. This makes
+			       ;; sure it is unfolded.
+			       (when (-contains? (cdr
+						  (assoc
+						   :result-params
+						   (nth 2 (org-babel-get-src-block-info))))
+						 "drawer")
+				 (save-excursion
+				   (search-forward ":RESULTS:")
+				   (org-flag-drawer nil))))
 			   ;; regular file
 			   (find-file ,fname)
-			   (goto-line ,ln))))
+			   (goto-line ,ln)
+			   (save-excursion
+			     (goto-char (org-babel-where-is-src-block-result))
+			     (org-cycle)))))
 		    (flyspell-delete-region-overlays start end)
 		    (set-text-properties
 		     start
@@ -1068,9 +1127,10 @@ To make C-c C-c use this, try this.
 
 	      (goto-char (org-element-property :begin (org-element-context)))
 	      (forward-line (- line-number (length (org-babel-variable-assignments:python
-						    (nth 2 (org-babel-get-src-block-info))))))
+						    (nth 2 (org-babel-get-src-block-info)))))) 
 	      (message "%s" results)
-	      (let ((beacon-color "red")) (beacon--shine)))))))))
+	      (let ((beacon-color "red")) (beacon--shine))
+	      (number-line-src-block))))))))
 
 
 (defun org-babel-kill-async ()
