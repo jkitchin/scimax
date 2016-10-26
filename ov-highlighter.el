@@ -61,6 +61,7 @@
 (require 'ov)
 
 ;;; Code:
+
 ;; * Highlight text and functions
 
 (defun ov-highlight-color-chooser ()
@@ -90,6 +91,7 @@ It returns the created overlay."
   (unless color
     (setq color (ov-highlight-color-chooser)))
 
+  (flyspell-delete-region-overlays beg end)
   ;; add a local hook to make sure it gets saved
   (add-hook 'before-save-hook 'ov-highlight-save nil t)
   
@@ -149,7 +151,7 @@ buffer."
     (insert " ")
     (setq beg (line-beginning-position)
 	  end (line-end-position)))
-  
+  (flyspell-delete-region-overlays beg end)
   (add-hook 'before-save-hook 'ov-highlight-save nil t)
   (if continue
       ;; this is coming from a special buffer 
@@ -412,10 +414,30 @@ The list is from first to last."
     (re-search-forward (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start))
     (read (org-link-unescape (match-string 1)))))
 
+(defvar ov-highlight-data nil "Data for the highlights")
+(make-variable-buffer-local 'ov-highlight-data)
+(put 'ov-highlight-data 'safe-local-variable #'stringp)
+
+
+(defun ov-convert ()
+  "Convert the old format to the new format."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward "#  ov-highlight-data: \\(.*\\)" nil t)
+    (setq ov-highlight-data (match-string 1))
+    (ov-highlight-load)))
+
 
 (defun ov-highlight-load ()
   "Load and apply highlighted text."
-  (interactive) 
+  (interactive)
+  ;; try old form
+  (unless ov-highlight-data
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "#  ov-highlight-data: \\(.*\\)" nil t)
+	(setq ov-highlight-data (match-string 1)))))
   (mapc
    (lambda (entry)
      (let ((beg (nth 0 entry))
@@ -424,78 +446,29 @@ The list is from first to last."
 	   (help-echo (nth 3 entry)))
        (if help-echo
 	   (ov-highlight-note beg end color help-echo t)
-	 (ov-highlight beg end color))))
-   (ov-highlight-read-data))
+	 (ov-highlight beg end color)))) 
+   (read (org-link-unescape (or ov-highlight-data ""))))
   (add-hook 'before-save-hook 'ov-highlight-save nil t)
-  ;; loading marks the buffer as modified, but it isn't. We mark it unmodified
-  ;; here.
+  ;; loading marks the buffer as modified, because the overlay functions mark
+  ;; it, but it isn't. We mark it unmodified here.
   (set-buffer-modified-p nil))
 
 
 (defun ov-highlight-save ()
   "Save highlight information.
 Data is saved in comment in the document."
-  (save-restriction
-    (widen)
-    (save-excursion
-      (let ((data (ov-highlight-get-highlights)))
-	(if data
-	    ;; save results
-	    (progn
-	      ;; first make sure we have a Local variable section, and add one if
-	      ;; not.
-	      (unless
-		  (save-excursion
-		    (goto-char (point-min))
-		    (re-search-forward
-		     (format "^%s.*eval: (ov-highlight-load)" comment-start) nil t))
-		(add-file-local-variable 'eval '(ov-highlight-load)))
+  (let ((data (ov-highlight-get-highlights)))
+    (add-file-local-variable 'ov-highlight-data (org-link-escape (format "%S" data)))
 
-	      ;; Now search down to either the data line, or add it above the Local
-	      ;; Variables.
-	      (save-excursion
-		(goto-char (point-min))
-		(if (re-search-forward
-		     (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
-		     nil 'mv)
-		    ;; We found old data. Let's replace it.
-		    (setf (buffer-substring (match-beginning 1) (match-end 1))
-			  (org-link-escape (let ((print-length nil)
-						 (eval-expression-print-length nil))
-					     (prin1-to-string data))))
-		  ;; No data found. Find the place to put it.
-		  (progn
-		    (re-search-backward
-		     (format "^%s.*Local Variables" comment-start))
-		    (beginning-of-line)
-		    (insert
-		     (format
-		      "%s ov-highlight-data: %s\n\n"
-		      (if (eq major-mode 'emacs-lisp-mode)
-			  ";;"
-			comment-start)
-		      (org-link-escape (let ((print-length nil)
-					     (eval-expression-print-length nil))
-					 (prin1-to-string data)))))))))
-	  ;; cleanup if we have no highlights
-	  (remove-hook 'before-save-hook 'ov-highlight-save t)
-	  (save-excursion
-	    (goto-char (point-min))
-	    (when (re-search-forward
-		   (format "^%s.*?ov-highlight-data: \\(.*\\)" comment-start)
-		   nil t)
-	      (beginning-of-line)
-	      (kill-line))
-	    (goto-char (point-min))
-	    (when
-		(and (re-search-forward "eval: (ov-highlight-load)" nil t)
-		     ;; obfuscated pattern to avoid adding local variables here.
-		     (re-search-backward (concat "Local" " Variables:"))
-		     (re-search-forward "End:"))
-	      (re-search-backward "eval: (ov-highlight-load)")
-	      (beginning-of-line)
-	      (kill-line)
-	      (delete-char -1))))))))
+    (save-excursion
+      (goto-char (point-min))
+      (unless (re-search-forward "eval: (ov-highlight-load)" nil 'mv)
+	(add-file-local-variable 'eval '(ov-highlight-load))))
+    
+    (unless data
+      ;; cleanup if we have no highlights
+      (remove-hook 'before-save-hook 'ov-highlight-save t)
+      (delete-file-local-variable 'ov-highlight-data))))
 
 ;; add the local var we use as safe so we don't get annoyed by permission to run
 ;; it.
