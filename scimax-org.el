@@ -970,8 +970,8 @@ To make C-c C-c use this, try this.
 			       (forward-line 1) (org-babel-result-end)))))))
 	(with-temp-buffer (insert (or results ""))
 			  (goto-char (point-min))
-			  (re-search-forward "<async:\\(.*\\)>" nil t)
-			  (setq md5-hash (match-string 1)))
+			  (when (re-search-forward "<async:\\(.*\\)>" nil t)
+			    (setq md5-hash (match-string 1))))
 	(when md5-hash 
 	  (if (and (get-process md5-hash) (not arg))
 	      (error "%s is running. Use prefix arg to kill it."
