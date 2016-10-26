@@ -873,14 +873,23 @@ Use a prefix arg FONTIFY for colored headlines."
 
 (defun org-babel-async-execute:python (&optional arg)
   "Execute the python src-block at point asynchronously.
+
 :var headers are supported.
 :results output is all that is supported for output.
 
-A new window will pop up showing you the output as it appears,
+The variable `org-babel-async-python-show-results' determines if
+a new window will pop up showing you the output as it appears,
 and the output in that window will be put in the RESULTS section
-of the code block.
+of the code block. If there is an exception, the cursor will jump
+back to the line it occurred on in the code block, and the files
+in the traceback are clickable.
 
-Use a prefix arg to force it to run.
+Use a prefix arg to force it to run if it is already running, or
+there is an async marker present.
+
+Note that if there are side effects from the code block these do
+not get undone when you kill the process, e.g. if you modify
+files.
 
 To make C-c C-c use this, try this.
  (add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-async-execute:python)"
@@ -950,6 +959,8 @@ To make C-c C-c use this, try this.
        (format "<async:%s> click to kill" md5-hash)
        (cdr (assoc :result-params
 		   (nth 2 (org-babel-get-src-block-info)))))
+
+      ;; make the placeholder clickable
       (save-excursion
 	(re-search-forward (format "<async:%s> click to kill" md5-hash))
 	(flyspell-delete-region-overlays (match-beginning 0) (match-end 0))
@@ -966,7 +977,7 @@ To make C-c C-c use this, try this.
 			    help-echo "Click to kill async process" 
 			    mouse-face highlight))))
 
-      ;; open the results buffer to see the results in.
+      ;; open the results buffer to see the results in when we want it.
       (when org-babel-async-python-show-results
 	(switch-to-buffer-other-window pbuffer))
 
@@ -982,8 +993,7 @@ To make C-c C-c use this, try this.
       (set-process-sentinel
        process
        `(lambda (process event) 
-	  (delete-file ,py-file)
-	  (message "%s" event)
+	  (delete-file ,py-file) 
 	  (let* ((line-number))
 	    (unless (string= "finished\n" event) 
 	      ;; Probably got an exception. Let's parse it and move
@@ -991,11 +1001,12 @@ To make C-c C-c use this, try this.
 	      (with-current-buffer ,pbuffer
 		(setq results (buffer-string))
 		(goto-char (point-min))
+		;; get the last line that matches the code block
 		(while (re-search-forward
 			(format "\"%s\", line \\([0-9]+\\)" ,py-file) nil t) 
 		  (setq line-number (string-to-number (match-string 1))))))
-	    ;; these nested save macros try to save narrowing, point, and window
-	    ;; arrangement. 
+
+	    ;; Now get the results and insert them
 	    (save-window-excursion
 	      (save-excursion
 		(save-restriction
@@ -1020,8 +1031,13 @@ To make C-c C-c use this, try this.
 		      (kill-buffer ,pbuffer))
 		    (when process
 		      (delete-process process))))))
-	    (set-window-configuration ,wc) 
-	    ;; Finally, if we got a line number, move point and shine beacon
+
+	    ;; restore window configuration
+	    (set-window-configuration ,wc)
+	    (org-redisplay-inline-images)
+	    
+	    ;; Finally, if we got a line number, add click properties to file
+	    ;; lines, move point and shine beacon
 	    (when line-number
 	      (save-excursion
 		(while (re-search-forward ,file-line-regexp nil t)
@@ -1049,8 +1065,7 @@ To make C-c C-c use this, try this.
 				      mouse-face highlight
 				      local-map ,map
 				      help-echo "Click to open")))))
-	      
-	      
+
 	      (goto-char (org-element-property :begin (org-element-context)))
 	      (forward-line (- line-number (length (org-babel-variable-assignments:python
 						    (nth 2 (org-babel-get-src-block-info))))))
