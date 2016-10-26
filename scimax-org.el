@@ -1052,7 +1052,8 @@ To make C-c C-c use this, try this.
 	      
 	      
 	      (goto-char (org-element-property :begin (org-element-context)))
-	      (forward-line line-number)
+	      (forward-line (- line-number (length (org-babel-variable-assignments:python
+						    (nth 2 (org-babel-get-src-block-info))))))
 	      (message "%s" results)
 	      (let ((beacon-color "red")) (beacon--shine)))))))))
 
