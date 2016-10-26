@@ -916,6 +916,9 @@ for colored headlines."
 (defvar org-babel-async-python-show-results nil
   "Determines if the async buffer is shown")
 
+(defvar org-babel-async-python-show-line-numbers t
+  "Determines if line numbers are shown after an exception.")
+
 (defun org-babel-async-execute:python (&optional arg)
   "Execute the python src-block at point asynchronously.
 
@@ -1130,7 +1133,8 @@ To make C-c C-c use this, try this.
 						    (nth 2 (org-babel-get-src-block-info)))))) 
 	      (message "%s" results)
 	      (let ((beacon-color "red")) (beacon--shine))
-	      (number-line-src-block))))))))
+	      (when org-babel-async-python-show-line-numbers
+		(number-line-src-block)))))))))
 
 
 (defun org-babel-kill-async ()
