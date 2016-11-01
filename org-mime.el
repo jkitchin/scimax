@@ -332,7 +332,6 @@ otherwise export the entire body."
 		(mapconcat 'identity images "\n")))))
     (mapc #'mml-attach-file files)))
 
-
 (defun org-mime-org-buffer-htmlize ()
   "Create an email buffer containing the current org-mode file
   exported to html and encoded in both html and in org formats as
@@ -349,5 +348,88 @@ otherwise export the entire body."
   (org-mime-send-subtree
    (or (org-entry-get nil "MAIL_FMT" org-mime-use-property-inheritance) 'org))
   (message-goto-to))
+
+
+;; * htmlize to send org that looks like org
+
+(defun org-mime-compose-htmlize (body fmt file &optional to subject headers)
+  "Compose an html email of the current buffer using htmlize for styling."
+  (require 'message)
+  (let ((bhook
+	 (lambda (body fmt)
+	   (let ((hook (intern (concat "org-mime-pre-"
+				       (symbol-name fmt)
+				       "-hook"))))
+	     (if (> (eval `(length ,hook)) 0)
+		 (with-temp-buffer
+		   (insert body)
+		   (goto-char (point-min))
+		   (eval `(run-hooks ',hook))
+		   (buffer-string))
+	       body))))
+	(fmt (if (symbolp fmt) fmt (intern fmt)))
+	(html (with-current-buffer (htmlize-buffer) (buffer-string)))
+	(files (org-element-map (org-element-parse-buffer) 'link
+		 (lambda (link)
+		   (when (string= (org-element-property :type link) "file")
+		     (file-truename (org-element-property :path link)))))))
+    (compose-mail to subject headers nil)
+    (message-goto-body)
+    (cond
+     ((eq fmt 'org)
+      (require 'ox-org)
+      (insert (org-export-string-as
+	       (org-babel-trim (funcall bhook body 'org)) 'org t)))
+     ((eq fmt 'ascii)
+      (require 'ox-ascii)
+      (insert (org-export-string-as
+	       (concat "#+Title:\n" (funcall bhook body 'ascii)) 'ascii t)))
+     ((or (eq fmt 'html) (eq fmt 'html-ascii))
+      (require 'ox-ascii)
+      (require 'ox-org)
+      (let* ((org-link-file-path-type 'absolute)
+	     ;; we probably don't want to export a huge style file
+	     (org-html-htmlize-output-type 'inline-css)
+	     (org-html-with-latex 'dvipng)
+	     (html-and-images
+	      (org-mime-replace-images
+	       html))
+	     (images (cdr html-and-images))
+	     (html (org-mime-apply-html-hook (car html-and-images))))
+	(insert (org-mime-multipart
+		 (org-export-string-as
+		  (org-babel-trim
+		   (funcall bhook body (if (eq fmt 'html) 'org 'ascii)))
+		  (if (eq fmt 'html) 'org 'ascii) t)
+		 html)
+		(mapconcat 'identity images "\n")))))
+    (mapc #'mml-attach-file files)
+    (message-goto-to)))
+
+
+(defun org-mime-subtree-htmlize ()
+  "Create an email buffer containing the current org-mode subtree
+  exported to a org format or to the format specified by the
+  MAIL_FMT property of the subtree."
+  (interactive)
+  (save-restriction
+    (org-narrow-to-subtree)
+    (run-hooks 'org-mime-send-subtree-hook)
+    (let* ((mp (lambda (p) (org-entry-get nil p org-mime-use-property-inheritance)))
+	   (file (buffer-file-name (current-buffer)))
+	   (subject (or (funcall mp "MAIL_SUBJECT") (nth 4 (org-heading-components))))
+	   (to (funcall mp "MAIL_TO"))
+	   (cc (funcall mp "MAIL_CC"))
+	   (bcc (funcall mp "MAIL_BCC"))
+	   (body (buffer-substring
+		  (save-excursion (goto-char (point-min))
+				  (forward-line 1)
+				  (when (looking-at "[ \t]*:PROPERTIES:")
+				    (re-search-forward ":END:" nil)
+				    (forward-char))
+				  (point))
+		  (point-max))))
+      (org-mime-compose-htmlize body 'html
+				`((cc . ,cc) (bcc . ,bcc))))))
 
 (provide 'org-mime)
