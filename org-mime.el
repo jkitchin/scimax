@@ -283,8 +283,6 @@ otherwise export the entire body."
 
 (defun org-mime-compose (body fmt file &optional to subject headers)
   (require 'message)
-  (compose-mail to subject headers nil)
-  (message-goto-body)
   (let ((bhook
 	 (lambda (body fmt)
 	   (let ((hook (intern (concat "org-mime-pre-"
@@ -297,7 +295,13 @@ otherwise export the entire body."
 		   (eval `(run-hooks ',hook))
 		   (buffer-string))
 	       body))))
-	(fmt (if (symbolp fmt) fmt (intern fmt))))
+	(fmt (if (symbolp fmt) fmt (intern fmt)))
+	(files (org-element-map (org-element-parse-buffer) 'link
+		 (lambda (link)
+		   (when (string= (org-element-property :type link) "file")
+		     (file-truename (org-element-property :path link)))))))
+    (compose-mail to subject headers nil)
+    (message-goto-body)
     (cond
      ((eq fmt 'org)
       (require 'ox-org)
@@ -312,7 +316,8 @@ otherwise export the entire body."
       (require 'ox-org)
       (let* ((org-link-file-path-type 'absolute)
 	     ;; we probably don't want to export a huge style file
-	     (org-export-htmlize-output-type 'inline-css)
+	     (org-html-htmlize-output-type 'inline-css)
+	     (org-html-with-latex 'dvipng)
 	     (html-and-images
 	      (org-mime-replace-images
 	       (org-export-string-as (funcall bhook body 'html) 'html t)))
@@ -324,7 +329,9 @@ otherwise export the entire body."
 		   (funcall bhook body (if (eq fmt 'html) 'org 'ascii)))
 		  (if (eq fmt 'html) 'org 'ascii) t)
 		 html)
-		(mapconcat 'identity images "\n")))))))
+		(mapconcat 'identity images "\n")))))
+    (mapc #'mml-attach-file files)))
+
 
 (defun org-mime-org-buffer-htmlize ()
   "Create an email buffer containing the current org-mode file
