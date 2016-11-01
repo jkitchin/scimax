@@ -331,7 +331,8 @@ otherwise export the entire body."
   exported to html and encoded in both html and in org formats as
   mime alternatives."
   (interactive)
-  (org-mime-send-buffer 'html))
+  (org-mime-send-buffer 'html)
+  (message-goto-to))
 
 (defun org-mime-subtree ()
   "Create an email buffer containing the current org-mode subtree
