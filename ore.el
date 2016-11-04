@@ -44,10 +44,9 @@ toggle LaTeX images on it.
 (defun ore-link (element)
   "`ore' documentation for org links."
   (let* ((link (org-element-context))
-	 (type (org-element-property :type link))
-	 (protocols (assoc type org-link-protocols))
-	 (follow-func (cadr protocols))
-	 (export-func (caddr protocols)))
+	 (type (org-element-property :type link)) 
+	 (follow-func (org-link-get-parameter type :follow))
+	 (export-func (org-link-get-parameter type :export)))
     (concat
      (format
       (substitute-command-keys "You are on a %s link.
