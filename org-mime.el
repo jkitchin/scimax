@@ -66,7 +66,7 @@
 (defcustom org-mime-default-header
   "#+OPTIONS: latex:t\n"
   "Default header to control html export options, and ensure
-  first line isn't assumed to be a title line."
+first line isn't assumed to be a title line."
   :group 'org-mime
   :type 'string)
 
@@ -77,7 +77,7 @@
 
 (defcustom org-mime-preserve-breaks t
   "Used as temporary value of `org-export-preserve-breaks' during
-  mime encoding."
+mime encoding."
   :group 'org-mime
   :type 'boolean)
 
@@ -89,7 +89,7 @@
 
 (defcustom org-mime-html-hook nil
   "Hook to run over the html buffer before attachment to email.
-  This could be used for example to post-process html elements."
+This could be used for example to post-process html elements."
   :group 'org-mime
   :type 'hook)
 
@@ -110,7 +110,7 @@
 
 ;; example hook, for setting a dark background in <pre style="background-color: #EEE;"> elements
 (defun org-mime-change-element-style (element style)
-  "Set new default htlm style for <ELEMENT> elements in exported html."
+  "Set new default html <ELEMENT>  STYLE for in exported html."
   (while (re-search-forward (format "<%s\\>" element) nil t)
     (replace-match (format "<%s style=\"%s\"" element style))))
 
@@ -131,7 +131,10 @@ exported html."
 ;;              "verse" "border-left: 2px solid gray; padding-left: 4px;")))
 
 (defun org-mime-file (ext path id)
-  "Markup a file for attachment."
+  "Markup a file for attachment.
+Argument EXT the file extension.
+Argument PATH is the path to the file.
+Argument ID is the internal id used in the html."
   (case org-mime-library
     ('mml (format (concat "<#part type=\"%s\" filename=\"%s\" "
 			  "disposition=inline id=\"<%s>\">\n<#/part>\n")
@@ -233,6 +236,8 @@ otherwise export the entire body."
       (goto-char html-start)
       (insert (org-mime-multipart
 	       body html (mapconcat 'identity html-images "\n"))))))
+
+
 
 (defun org-mime-apply-html-hook (html)
   (if org-mime-html-hook
@@ -432,4 +437,142 @@ otherwise export the entire body."
       (org-mime-compose-htmlize body 'html
 				`((cc . ,cc) (bcc . ,bcc))))))
 
+
+;; * org-mime-compose-mode
+
+;; This is adapted from `org~mu4e-mime-switch-headers-or-body'. The idea is to
+;; switch modes in a message depending on whether you are in the headers or the
+;; body. You still send with C-c C-c in either place.
+
+(defvar org-mime-compose-mode-map (make-sparse-keymap)
+  "Keymap while temp-mode is active.")
+
+
+(define-key org-mime-compose-mode-map (kbd "C-c C-c")
+  (lambda (&optional arg)
+    (interactive "P")
+    (message-goto-body)
+    (org-mime-htmlize-and-send arg)))
+
+
+(define-key org-mime-compose-mode-map (kbd "C-c C-h")
+  (lambda (&optional arg)
+    (interactive "P")
+    (message-goto-body)
+    (org-mime-htmlize-and-send t)))
+
+
+(define-minor-mode org-mime-compose-mode
+  "Minor mode to simulate buffer local keybindings."
+  :init-value nil
+  :keymap org-mime-compose-mode-map
+  (if org-mime-compose-mode
+      ;; turn it on
+      (org-mime-switch-header-body) 
+    ;; turn it off
+    (remove-hook 'post-command-hook 'org-mime-switch-header-body t)))
+
+
+(defun org-mime-switch-header-body ()
+  "Switch the mode to message-mode when in headers, and org-mode when in the body."
+  (let* ((separator (save-excursion
+		      (goto-char (point-min))
+		      (search-forward-regexp mail-header-separator nil t))))
+    (when separator
+      (if (> (point) separator)
+	  ;; We are in the body
+	  (unless (eq major-mode 'org-mode)
+	    (org-mode)
+	    (add-hook 'org-ctrl-c-ctrl-c-hook 'org-mime-htmlize-and-send t t))
+	;; in the header
+	(message-mode))
+      ;; Make sure we check for a mode switch after each command
+      (add-hook 'post-command-hook 'org-mime-switch-header-body t t))))
+
+
+(defvar org-mime-html-method 'html
+  "Method for turning org to html. Symbol, either 'html or 'htmlize.")
+
+
+(defun org-mime-htmlize-and-send ()
+  "When in an org-mime-compose-mode message, htmlize and send it.
+This is usually run from a C-c C-c hook function in org-mode."
+  (interactive)
+  (when (member 'org-mime-switch-header-body post-command-hook) 
+    (cond
+     ((eq org-mime-html-method 'html)
+      (org-mime-htmlize))
+     ((eq org-mime-html-method 'htmlize)
+      ;; use htmlize.el instead
+      (message-goto-body) 
+      (let* ((org (buffer-substring (point) (point-max)))
+	     (cb (htmlize-region (point) (point-max)))
+	     (html (prog1 (with-current-buffer cb (buffer-string))
+		     (kill-buffer cb)))
+	     (html-and-images (org-mime-replace-images
+			       html))
+	     (images (cdr html-and-images)))
+	(setf (buffer-substring (point) (point-max)) "")
+	(insert (org-mime-multipart
+		 org
+		 html)
+		(mapconcat 'identity images "\n")))))
+    (goto-char (point-min))
+    (remove-hook 'post-command-hook 'org-mime-switch-header-body)
+    (message-mode)
+    (message-send-and-exit)))
+
+
+(defun org-mime-compose-mail ()
+  "Compose an email in `org-mime-compose-mode'."
+  (interactive)
+  (compose-mail)
+  (setq org-mime-html-method 'html)
+  (org-mime-compose-mode))
+
+
+(defun org-mime ()
+  "Send the current SCOPE by email in FORMAT.
+SCOPE is a string: new, buffer, subtree or region
+FORMAT is a string:
+html :: export the SCOPE to html and send it.
+htmlize :: Generate html of SCOPE using a the `htmlize' library."
+  (interactive)
+
+  (let* ((scope (completing-read "Scope: " '(new buffer subtree region)
+				 nil t (when (region-active-p) "region")))
+	 (format (completing-read "Format: " '(html htmlize))))
+
+    (if (string= scope "new")
+	(progn
+	  (compose-mail)
+	  (setq org-mime-html-method (intern format))
+	  (org-mime-compose-mode))
+      (save-excursion
+	(save-restriction
+	  ;; first narrow to the scope
+	  (cond 
+	   ((string= scope "buffer")
+	    nil)
+	   ((string= scope "subtree")
+	    (org-narrow-to-subtree))
+	   ((string= scope "region") 
+	    (narrow-to-region (region-beginning) (region-end))
+	    (goto-char (point-min))))
+
+	  ;; Now, prepare the email
+	  (cond
+	   ((string= format "html")
+	    (org-mime-compose (buffer-string) 'html nil))
+	   ((string= format "htmlize")
+	    (org-mime-compose-htmlize
+	     (let ((cb (htmlize-buffer)))
+	       (prog1 
+		   (kill-buffer cb)))
+	     'html
+	     nil))))))))
+
+
 (provide 'org-mime)
+
+;;; org-mime.el ends here
