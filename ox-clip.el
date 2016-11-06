@@ -56,7 +56,7 @@
   (format "python %s"
 	  (expand-file-name
 	   "html-clip-w32.py"
-	   (file-name-directory (or load-file-name (buffer-file-name)))))
+	   (file-name-directory (or load-file-name (locate-library "ox-clip")))))
   "Absolute path to html-clip-w32.py."
   :group 'ox-clip)
 
