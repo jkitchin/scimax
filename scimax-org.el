@@ -711,33 +711,63 @@ F5 inserts the entity code."
 (set-face-foreground 'org-latex-and-related "blue")
 
 ;; * New org links
-(org-add-link-type
- "pydoc"
- (lambda (path)
-   (pydoc path)))
 
-(org-add-link-type
- "attachfile"
- (lambda (link-string) (org-open-file link-string))
- ;; formatting
- (lambda (keyword desc format)
-   (cond
-    ((eq format 'html) (format "")); no output for html
-    ((eq format 'latex)
-     ;; write out the latex command
-     (format "\\attachfile{%s}" keyword)))))
+(if (fboundp 'org-link-set-parameters)
+    (org-link-set-parameters
+     "pydoc"
+     :follow (lambda (path)
+	       (pydoc path)))
+  (org-add-link-type
+   "pydoc"
+   (lambda (path)
+     (pydoc path))))
 
-(org-add-link-type
- "altmetric"
- (lambda (doi)
-   (browse-url (format  "http://dx.doi.org/%s" doi)))
- (lambda (keyword desc format)
-   (cond
-    ((eq format 'html)
-     (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
+(if (fboundp 'org-link-set-parameters)
+    (org-link-set-parameters
+     "attachfile"
+     :follow (lambda (link-string) (org-open-file link-string))
+     :export (lambda (keyword desc format)
+	       (cond
+		((eq format 'html) (format ""))	; no output for html
+		((eq format 'latex)
+		 ;; write out the latex command
+		 (format "\\attachfile{%s}" keyword)))))
+  
+  (org-add-link-type
+   "attachfile"
+   (lambda (link-string) (org-open-file link-string))
+   ;; formatting
+   (lambda (keyword desc format)
+     (cond
+      ((eq format 'html) (format ""))	; no output for html
+      ((eq format 'latex)
+       ;; write out the latex command
+       (format "\\attachfile{%s}" keyword))))))
+
+(if (fboundp 'org-link-set-parameters)
+    (org-link-set-parameters
+     "altmetric"
+     :follow (lambda (doi)
+	       (browse-url (format  "http://dx.doi.org/%s" doi)))
+     :export (lambda (keyword desc format)
+	       (cond
+		((eq format 'html)
+		 (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
 <div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword)) 
-    ((eq format 'latex)
-     ""))))
+		((eq format 'latex)
+		 ""))))
+  
+  (org-add-link-type
+   "altmetric"
+   (lambda (doi)
+     (browse-url (format  "http://dx.doi.org/%s" doi)))
+   (lambda (keyword desc format)
+     (cond
+      ((eq format 'html)
+       (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
+<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword)) 
+      ((eq format 'latex)
+       "")))))
 
 
 ;; * ivy navigation
