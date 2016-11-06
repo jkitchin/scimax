@@ -2,6 +2,52 @@
 
 ;;; Commentary:
 ;; `beacon' is required
+;; The main goal in this library is providing asynchronous Python execution in org-mode.
+
+;; * Numbered lines in code blocks
+(defvar number-line-overlays '()
+  "List of overlays for line numbers.")
+
+(make-variable-buffer-local 'number-line-overlays)
+
+(defun number-line-clear ()
+  "Clear the numbered lines in a code block."
+  (mapc 'delete-overlay number-line-overlays)
+  (setq number-line-overlays '()))
+
+
+(defun number-line-src-block ()
+  "Add line numbers to an org src-block."
+  (interactive)
+  (save-excursion
+    (let* ((src-block (org-element-context))
+           (nlines (- (length
+                       (s-split
+                        "\n"
+                        (org-element-property :value src-block)))
+                      1)))
+      (goto-char (org-element-property :begin src-block))
+      (re-search-forward (regexp-quote (org-element-property :value src-block)))
+      (goto-char (match-beginning 0))
+
+      (loop for i from 1 to nlines
+            do
+            (beginning-of-line)
+            (let (ov)
+              (setq ov (make-overlay (point) (point)))
+              (overlay-put
+	       ov
+	       'before-string (propertize
+			       (format "%03s:" (number-to-string i))
+			       'font-lock-face '(:foreground "black" :background "gray80")))
+              (add-to-list 'number-line-overlays ov))
+            (next-line))))
+
+  ;; now read a char to clear them
+  (read-key "Press a key to clear numbers.")
+  (mapc 'delete-overlay number-line-overlays)
+  (setq number-line-overlays '()))
+
 
 ;; * Asynchronous python
 
