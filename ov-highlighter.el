@@ -458,9 +458,9 @@ The list is from first to last."
   "Save highlight information.
 Data is saved in comment in the document."
   (let ((data (ov-highlight-get-highlights)))
-    (add-file-local-variable 'ov-highlight-data (org-link-escape (format "%S" data)))
-
+    
     (save-excursion
+      (add-file-local-variable 'ov-highlight-data (org-link-escape (format "%S" data)))
       (goto-char (point-min))
       (unless (re-search-forward "eval: (ov-highlight-load)" nil 'mv)
 	(add-file-local-variable 'eval '(ov-highlight-load))))
