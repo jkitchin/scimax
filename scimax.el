@@ -142,61 +142,65 @@ This enables you to use tab to open and close outlines."
 
 ;; * Navigation
 
-(defvar navy-forward 'forward-char
+(defvar navy-l 'forward-char
   "The next item in a forward sense.")
 
-(defvar navy-backward 'backward-char
+(defvar navy-j 'backward-char
   "The previous item in a backward sense.")
 
-(defvar navy-up 'previous-line
+(defvar navy-i 'previous-line
   "The previous item in an up sense.")
 
-(defvar navy-down 'next-line
+(defvar navy-k 'next-line
   "The next item in a down sense.")
 
-(defvar navy-avy-1 'avy-goto-char-in-line
-  "Preferred avy for item.")
+(defvar navy-semicolon 'avy-goto-char
+  "Command bound to ;.")
 
-(defvar navy-avy-2 'avy-goto-char-2
-  "Preferred 2nd avy")
+(defvar navy-quote 'avy-goto-line
+  "Command bound to '.")
 
-(defvar navy-avy-3 'avy-goto-line
-  "Preferred 3rd avy")
+(defvar navy-comma 'avy-goto-char-2
+  "Command bound to ,")
 
-(defvar navy-beginning 'beginning-of-visual-line
-  "The beginning of an item.")
+(defvar navy-period 'avy-goto-word-0
+  "Command bound to .")
 
-(defvar navy-end 'end-of-visual-line
+(defvar navy-slash 'end-of-visual-line
   "The end of an item.")
+
+(defvar navy-h 'beginning-of-visual-line
+  "Command bound to h, usually a beginning of command.")
 
 (defvar navy-mode "char"
   "The active mode.")
 
 
-(defhydra navy (:color red :hint nil)
+(defhydra navy (:color red :hint nil) 
   "
 %s(format \"%s-mode\" navy-mode)
-%s(make-string (length (symbol-name navy-backward)) ? )     _i_: %`navy-up
-%`navy-backward :_j_     _l_: %`navy-forward  
-%s(make-string (length (symbol-name navy-backward)) ? )     _k_: %`navy-down
-_h_:%`navy-beginning     _;_: %`navy-end
-      point-min: _<_    _>_: point-max     
-_'_: %`navy-avy-1  _,_: %`navy-avy-2 _._: %`navy-avy-3
+%s(make-string (length (symbol-name navy-j)) ? )     _i_: %`navy-i
+%`navy-j :_j_     _l_: %`navy-l     _;_: %`navy-semicolon  _'_: %`navy-quote
+%s(make-string (length (symbol-name navy-j)) ? )     _k_: %`navy-k
+  _,_: %`navy-comma _._: %`navy-period _/_: %`navy-slash
+  point-min: _<_    _>_: point-max     
    
 "
-  ("j" (funcall navy-backward))
-  ("l" (funcall navy-forward))
-  ("i" (funcall navy-up))
-  ("k" (funcall navy-down))
+  ("j" (funcall navy-j))
+  ("l" (funcall navy-l))
+  ("i" (funcall navy-i))
+  ("k" (funcall navy-k))
 
   ("q" nil "quit" :color blue)
 
-  ("h" (call-interactively navy-beginning))
-  (";" (call-interactively navy-end))
+  ("h" (call-interactively navy-h))
   
-  ("'" (call-interactively navy-avy-1))
-  ("," (call-interactively navy-avy-2))
-  ("." (call-interactively navy-avy-3))
+  (";" (call-interactively navy-semicolon))
+  ("'" (call-interactively navy-quote))
+
+  ("," (call-interactively navy-comma))
+  ("." (call-interactively navy-period))
+  ("/" (call-interactively navy-slash))
 
   ("<" beginning-of-buffer)
   (">" end-of-buffer)
@@ -205,84 +209,97 @@ _'_: %`navy-avy-1  _,_: %`navy-avy-2 _._: %`navy-avy-3
   ("c" (lambda ()
 	 (interactive)
 	 (setq navy-mode "char"
-	       navy-backward 'backward-char
-	       navy-up 'previous-line
-	       navy-forward 'forward-char 
-	       navy-down 'next-line
-	       navy-avy-1 'avy-goto-char-in-line
-	       navy-avy-2 'avy-goto-char-2
-	       navy-avy-3 'avy-goto-line))
+	       navy-j 'backward-char
+	       navy-i 'previous-line
+	       navy-l 'forward-char 
+	       navy-k 'next-line
+	       navy-semicolon 'avy-goto-char-2
+	       navy-quote 'avy-goto-line
+	       navy-comma 'avy-goto-char-in-line
+	       navy-period 'avy-goto-word-1))
    "char mode")
 
   ("w" (lambda ()
 	 (interactive)
 	 (setq navy-mode "word"
-	       navy-backward 'backward-word
-	       navy-up 'previous-line
-	       navy-forward 'forward-word 
-	       navy-down 'next-line
-	       navy-avy-1 'avy-goto-char-in-line
-	       navy-avy-2 'avy-goto-word-1 
-	       navy-avy-3 'avy-goto-word-or-subword-1))
+	       navy-j 'backward-word
+	       navy-i 'previous-line
+	       navy-l 'forward-word 
+	       navy-k 'next-
+	       navy-semicolon 'avy-goto-char-2
+	       navy-quote 'avy-goto-line
+	       navy-comma 'avy-goto-word-1 
+	       navy-period 'avy-goto-word-or-subword-1))
    "word mode")
+  
   ("s" (lambda ()
 	 (interactive)
 	 (setq navy-mode "sentence"
-	       navy-backward 'backward-sentence
-	       navy-up 'previous-line
-	       navy-down 'next-line
-	       navy-forward 'forward-sentence 
-	       navy-avy-1 'avy-goto-char-in-line
-	       navy-avy-2 'avy-goto-char-2
-	       navy-avy-3 'avy-goto-word-1))
+	       navy-j 'backward-sentence
+	       navy-i 'previous-line
+	       navy-k 'next-line
+	       navy-l 'forward-sentence
+	       navy-semicolon 'avy-goto-char-2
+	       navy-quote 'avy-goto-line
+	       navy-comma 'avy-goto-word-1 
+	       navy-period 'avy-goto-word-or-subword-1))
    "sentence mode")
-  
+
   ("p" (lambda ()
 	 (interactive)
 	 (setq navy-mode "paragraph"
-	       navy-backward 'backward-paragraph
-	       navy-forward 'forward-paragraph
-	       navy-up 'previous-line
-	       navy-down 'next-line
-	       navy-avy-1 'avy-goto-char-in-line
-	       navy-avy-2 'avy-goto-char-2
-	       navy-avy-3 'avy-goto-line))
+	       navy-j 'backward-paragraph
+	       navy-l 'forward-paragraph
+	       navy-i 'previous-line
+	       navy-k 'next-line 
+	       navy-semicolon 'avy-goto-char-2
+	       navy-quote 'avy-goto-line
+	       navy-comma 'avy-goto-word-1 
+	       navy-period 'avy-goto-word-or-subword-1))
    "paragraph mode")
 
   ("g" (lambda ()
 	 (interactive)
 	 (setq navy-mode "page"
-	       navy-backward 'backward-page
-	       navy-forward 'forward-page
-	       navy-up 'backward-page
-	       navy-down 'forward-page
-	       navy-avy-1 'avy-goto-char-in-line
-	       navy-avy-2 'avy-goto-char-2
-	       navy-avy-3 'avy-goto-line))
+	       navy-j 'backward-page
+	       navy-l 'forward-page
+	       navy-i 'backward-page
+	       navy-k 'forward-page 
+	       navy-semicolon 'avy-goto-char-2
+	       navy-quote 'avy-goto-line
+	       navy-comma 'avy-goto-word-1 
+	       navy-period 'avy-goto-word-or-subword-1))
    "page mode")
 
   ("n" (lambda ()
 	 (interactive)
 	 (setq navy-mode "line"
-	       navy-up 'avy-goto-line-above
-	       navy-down 'avy-goto-line-below
-	       navy-forward 'next-line
-	       navy-backward 'previous-line
-	       navy-avy-3 'avy-goto-line))
+	       navy-i 'avy-goto-line-above
+	       navy-k 'avy-goto-line-below
+	       navy-l 'next-line
+	       navy-j 'previous-line 
+	       navy-semicolon 'avy-goto-char-2
+	       navy-quote 'avy-goto-line
+	       navy-comma 'avy-goto-word-1 
+	       navy-period 'avy-goto-word-or-subword-1))
    "line mode")
-  
+
   ("x" (lambda ()
 	 (interactive)
 	 (setq navy-mode "sexp"
-	       navy-backward 'backward-sexp
-	       navy-forward 'forward-sexp
-	       navy-up 'previous-line
-	       navy-down 'next-line
-	       navy-avy-1 'avy-goto-char-in-line
-	       navy-avy-2 'lispy-ace-paren
-	       navy-avy-3 'lispy-ace-symbol)) 
+	       navy-j 'backward-sexp
+	       navy-l 'forward-sexp
+	       navy-i 'previous-line
+	       navy-k 'next-line
+	       navy-semicolon 'avy-goto-char-2
+	       navy-quote 'avy-goto-line
+	       navy-comma 'lispy-ace-symbol
+	       navy-period 'lispy-ace-paren)) 
    "sexp mode")
 
+  ("s" swiper "swiper")
+  ("a" swiper-all "swiper-all")
+  ("o" helm-org-agenda-files-headings "org headlines")
   ("r" counsel-git-grep "git grep")
   ("t" avy-goto-char-timer "char timer"))
 
@@ -291,15 +308,15 @@ _'_: %`navy-avy-1  _,_: %`navy-avy-2 _._: %`navy-avy-3
   "Run the `navy/body' hydra."
   (interactive)
   (setq navy-mode "char"
-	navy-backward 'backward-char
-	navy-up 'previous-line
-	navy-forward 'forward-char 
-	navy-down 'next-line
-	navy-avy-1 'avy-goto-char-in-line
-	navy-avy-2 'avy-goto-char-2
-	navy-avy-3 'avy-goto-line
-	navy-beginning 'beginning-of-visual-line
-	navy-end 'end-of-visual-line)
+	navy-j 'backward-char
+	navy-i 'previous-line
+	navy-l 'forward-char 
+	navy-k 'next-line
+	navy-quote 'avy-goto-line
+	navy-comma 'avy-goto-char-2
+	navy-period 'avy-goto-char-in-line
+	navy-h 'beginning-of-visual-line
+	navy-semicolon 'avy-goto-char)
   (navy/body))
 
 ;;  I mapped Capslock to f12
