@@ -1,8 +1,39 @@
 ;;; scimax-org-babel-python.el --- Scimax extensions for Python in org-mode
 
 ;;; Commentary:
-;; `beacon' is required
+;; `beacon' is required - https://github.com/Malabarba/beacon fellow
 ;; The main goal in this library is providing asynchronous Python execution in org-mode.
+
+;; `number-line-src-block' will put temporary line numbers in a src block that
+;; disappear when you type.
+
+;; The variable `org-babel-async-python-show-results' determines if a buffer
+;; pops up during execution.
+
+;; The variable `org-babel-async-python-show-line-numbers' determines if line
+;; numbers are shown in the src-block if an exception occurs. They disappear
+;; when you press a key.
+
+;; The command `org-babel-async-execute:python' executes the src-block at point
+;; asynchronously, i.e. you can continue using Emacs while it runs. The results
+;; section has two links while it is running, one to open the results buffer,
+;; and one to cancel the process. After the job is done, the results are
+;; inserted into the buffer.
+
+;; If there is an Exception, then the Traceback is inserted into the buffer,
+;; with clickable links to the line(s) causing the error. The cursor will jump
+;; to the last line in the Traceback that is in the src-block and shine a beacon
+;; to show you where the error is.
+
+;; The links described above are not persistent, and are not regenerated if you
+;; close the buffer and reopen it. They are created when you execute the
+;; src-block, and they should be active until you close the buffer.
+
+;; `autopep8' will reformat a src-block.
+
+;; `pylint' will run pylint on a src-block and generate a buffer with links to
+;; lines that need attention.
+
 
 ;; * Numbered lines in code blocks
 (defvar number-line-overlays '()
@@ -13,7 +44,8 @@
 (defun number-line-clear ()
   "Clear the numbered lines in a code block."
   (mapc 'delete-overlay number-line-overlays)
-  (setq number-line-overlays '()))
+  (setq number-line-overlays '())
+  (remove-hook 'post-command-hook 'number-line-clear))
 
 
 (defun number-line-src-block ()
@@ -43,10 +75,7 @@
               (add-to-list 'number-line-overlays ov))
             (next-line))))
 
-  ;; now read a char to clear them
-  (read-key "Press a key to clear numbers.")
-  (mapc 'delete-overlay number-line-overlays)
-  (setq number-line-overlays '()))
+  (add-hook 'post-command-hook 'number-line-clear))
 
 
 ;; * Asynchronous python
@@ -219,8 +248,9 @@ To make C-c C-c use this, try this.
 		(goto-char (point-min))
 		;; get the last line that matches the code block
 		(while (re-search-forward
-			(format "\"%s\", line \\([0-9]+\\)" ,py-file) nil t) 
-		  (setq line-number (string-to-number (match-string 1))))))
+			(format "\"\\(%s\\)\", line \\([0-9]+\\)" ,py-file) nil t)
+		  (replace-match "Org SRC" nil nil nil 1)
+		  (setq line-number (string-to-number (match-string 2))))))
 
 	    ;; Now get the results and insert them
 	    (save-window-excursion
@@ -265,7 +295,7 @@ To make C-c C-c use this, try this.
 		    (define-key map [mouse-1]
 		      `(lambda ()
 			 (interactive)
-			 (if (string-match "pymd5-" ,fname)
+			 (if (string-match "Org SRC" ,fname)
 			     (progn
 			       (org-babel-previous-src-block)
 			       (goto-char (org-element-property :begin (org-element-context)))
@@ -289,9 +319,7 @@ To make C-c C-c use this, try this.
 		     start
 		     end 
 		     `(font-lock-face org-link
-				      mouse-face highlight
-				      display ,(when (string-match "pymd5-" fname)
-						 "Org SRC")
+				      mouse-face highlight 
 				      local-map ,map
 				      help-echo "Click to open")))))
 
@@ -321,6 +349,7 @@ Run this in the code block that is running."
     (when (and results (string-match "<async:\\(.*\\)>" results))
       (interrupt-process (match-string 1 results)))))
 
+;; * autopep8
 
 (defun autopep8 ()
   "Replace Python code block contents with autopep8 corrected code."
