@@ -54,14 +54,27 @@ Here are some additional actions we define for `counsel-find-file'.
 
 * navy
 
-`navy' is bound to f12. It opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
+  `navy' is bound to f12. It opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
 
 | j | left  |
 | l | right |
 | i | up    |
 | k | down  |
 
-The default mode is character mode, and you can change the mode with single characters, include a word mode, sentence, paragraph, page and sexp mode.
+The default mode is character mode, and you can change the mode with single characters, include a word mode (w), sentence (s), paragraph (p), page (g), line (n) and sexp (x) mode. These modes allow you navigate forward and backward by those elements. They also define binding
+
+I have tried to make the following keys consistent:
+
+| ; | avy-goto-char-2 |
+| ' | avy-goto-line   |
+| < | goto point-min  |
+| > | goto point-max  |
+
+There are some useful bindings in `navy' also.
+| r | counsel-git-grep |
+| o | swiper           |
+| a | swiper-all       |
+
 
 * Org-mode
 ** Markup shortcuts
