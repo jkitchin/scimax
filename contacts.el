@@ -250,7 +250,7 @@ Loads cache file."
 	 ivy-marked-candidates)
        s)
       (propertize s 'face 'font-lock-warning-face)
-    (propertize s 'face s)))
+    (propertize s 'face nil)))
 
 (ivy-set-display-transformer
  'ivy-contacts
