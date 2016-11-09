@@ -108,7 +108,7 @@ files.
 
 To make C-c C-c use this, try this.
  (add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-async-execute:python)"
-  (interactive "P")
+  (interactive "P") 
   (when (and (org-in-src-block-p) 
 	     (string= "python" (nth 0 (org-babel-get-src-block-info))))
     (let* ((current-file (buffer-file-name))
@@ -222,6 +222,8 @@ To make C-c C-c use this, try this.
 			    mouse-face highlight
 			    help-echo "Click to open results buffer"))))
 
+      (setq font-lock-extra-managed-props (delq 'local-map font-lock-extra-managed-props))
+
       ;; open the results buffer to see the results in when we want it.
       (when org-babel-async-python-show-results
 	(switch-to-buffer-other-window pbuffer))
@@ -232,6 +234,7 @@ To make C-c C-c use this, try this.
 		     pbuffer
 		     "python"
 		     py-file))
+
 
       ;; when the process is done, run this code to put the results in the
       ;; org-mode buffer.
