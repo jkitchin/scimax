@@ -324,6 +324,7 @@ The list is from first to last."
 (defun ov-highlight-display ()
   "Display all highlights in the current buffer in a tabulated list form."
   (interactive)
+  (save-buffer)
   (let ((buf (current-buffer)))
     (setq ov-highlight-window-configuration (current-window-configuration))
     (switch-to-buffer-other-window
@@ -347,7 +348,7 @@ The list is from first to last."
 				  (list 'face (overlay-get ov 'face)
 					'ov-position (ov-beg ov)))
 			    ;; the help-echo
-			    (or (replace-regexp-in-string "\n" " " (overlay-get ov 'help-echo)) "nil"))))))
+			    (replace-regexp-in-string "\n" " " (or (overlay-get ov 'help-echo) "")))))))
     (setq tabulated-list-entries entries
 	  tabulated-list-format (vector '("Highlight" 40 t) '("Note" 40 t)))
     (tabulated-list-init-header)
