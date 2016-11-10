@@ -34,58 +34,111 @@
 (require 'org-inlinetask)
 
 ;; * The links
-(org-add-link-type
- "comment"
- (lambda (path)
-   "Offer to delete the comment."
-   (em-delete-edit-mark-at-point))
- (lambda (path description format)
-   (cond
-    ((eq format 'latex)
-     (format "\\todo[inline]{%s}%s"
-	     path
-	     (if description (format "{%s}" description) ""))))))
+(if (fboundp 'org-link-set-parameters)
+    (org-link-set-parameters
+     "comment"
+     :follow (lambda (path)
+	       "Offer to delete the comment."
+	       (em-delete-edit-mark-at-point))
+     :export (lambda (path description format)
+	       (cond
+		((eq format 'latex)
+		 (format "\\todo[inline]{%s}%s"
+			 path
+			 (if description (format "{%s}" description) "")))))
+     :face 'em-comment-face)
+  (org-add-link-type
+   "comment"
+   (lambda (path)
+     "Offer to delete the comment."
+     (em-delete-edit-mark-at-point))
+   (lambda (path description format)
+     (cond
+      ((eq format 'latex)
+       (format "\\todo[inline]{%s}%s"
+	       path
+	       (if description (format "{%s}" description) "")))))))
 
 
-(org-add-link-type
- "delete"
- (lambda (path)
-   (em-delete-edit-mark-at-point))
- (lambda (path description format)
-   (cond
-    ((eq format 'latex)
-     (format "\\textcolor{red}{%s}" path)))))
+(if (fboundp 'org-link-set-parameters)
+    (org-link-set-parameters
+     "delete"
+     :follow (lambda (path)
+	       (em-delete-edit-mark-at-point))
+     :export (lambda (path description format)
+	       (cond
+		((eq format 'latex)
+		 (format "\\textcolor{red}{%s}" path))))
+     :face 'em-delete-face) 
+  (org-add-link-type
+   "delete"
+   (lambda (path)
+     (em-delete-edit-mark-at-point))
+   (lambda (path description format)
+     (cond
+      ((eq format 'latex)
+       (format "\\textcolor{red}{%s}" path))))))
+
+(if (fboundp 'org-link-set-parameters)
+    (org-link-set-parameters
+     "insert"
+     :follow (lambda (path)
+	       (em-delete-edit-mark-at-point))
+     :export (lambda (path description format)
+	       (cond
+		((eq format 'latex)
+		 (format "\\textcolor{blue}{%s}" path))))
+     :face 'em-insert-face) 
+  (org-add-link-type
+   "insert"
+   (lambda (path)
+     (em-delete-edit-mark-at-point))
+   (lambda (path description format)
+     (cond
+      ((eq format 'latex)
+       (format "\\textcolor{blue}{%s}" path))))))
 
 
-(org-add-link-type
- "insert"
- (lambda (path)
-   (em-delete-edit-mark-at-point))
- (lambda (path description format)
-   (cond
-    ((eq format 'latex)
-     (format "\\textcolor{blue}{%s}" path)))))
-
-
-(org-add-link-type
- "typo"
- (lambda (path)
-   "Spell check region, and offer to delete."
-   (let ((link (org-element-context)))
-     (save-excursion
-       (ispell-region (org-element-property :begin link)
-		      (org-element-property :end link))
-       (when (y-or-n-p "Delete link? ")
-	 (save-excursion
-	   (setf (buffer-substring
-		  (org-element-property :begin link)
-		  (- (org-element-property :end link)
-		     (org-element-property :post-blank link)))
-		 (org-element-property :path (org-element-context))))))))
- (lambda (path description format)
-   (cond
-    ((eq format 'latex)
-     (format "\\bold{\\textcolor{red}{%s}}" path)))))
+(if (fboundp 'org-link-set-parameters)
+    (org-link-set-parameters
+     "typo"
+     :follow (lambda (path)
+	       "Spell check region, and offer to delete."
+	       (let ((link (org-element-context)))
+		 (save-excursion
+		   (ispell-region (org-element-property :begin link)
+				  (org-element-property :end link))
+		   (when (y-or-n-p "Delete link? ")
+		     (save-excursion
+		       (setf (buffer-substring
+			      (org-element-property :begin link)
+			      (- (org-element-property :end link)
+				 (org-element-property :post-blank link)))
+			     (org-element-property :path (org-element-context))))))))
+     :export (lambda (path description format)
+	       (cond
+		((eq format 'latex)
+		 (format "\\bold{\\textcolor{red}{%s}}" path))))
+     :face 'em-typo-face)
+  (org-add-link-type
+   "typo"
+   (lambda (path)
+     "Spell check region, and offer to delete."
+     (let ((link (org-element-context)))
+       (save-excursion
+	 (ispell-region (org-element-property :begin link)
+			(org-element-property :end link))
+	 (when (y-or-n-p "Delete link? ")
+	   (save-excursion
+	     (setf (buffer-substring
+		    (org-element-property :begin link)
+		    (- (org-element-property :end link)
+		       (org-element-property :post-blank link)))
+		   (org-element-property :path (org-element-context))))))))
+   (lambda (path description format)
+     (cond
+      ((eq format 'latex)
+       (format "\\bold{\\textcolor{red}{%s}}" path))))))
 
 
 ;; ** Link faces and font-lock
@@ -114,83 +167,83 @@
 		 :weight bold)))
   "Color for typo links.")
 
-
-(defun em-activate-links (link-type face limit)
-  "Add text properties for editmark bracketed links."
-  (while (and (re-search-forward org-bracket-link-regexp limit t)
-	      (not (org-in-src-block-p)))
-    (let* ((hl (org-match-string-no-properties 1))
-	   (type (save-match-data
-		   (and (string-match org-plain-link-re hl)
-			(match-string-no-properties 1 hl))))
-	   help ip vp)
-      
-      (when (string= type link-type)
-	(setq help (concat "LINK: " (save-match-data (org-link-unescape hl))) 
-	      ip (org-maybe-intangible
-		  (list 'invisible 'org-link
-			'face face
-			'keymap org-mouse-map
-			'mouse-face 'highlight
-			'font-lock-multiline t
-			'help-echo help
-			'htmlize-link `(:uri ,hl)))
-	      vp (list 'keymap org-mouse-map
-		       'face face
-		       'mouse-face 'highlight
-		       'font-lock-multiline t
-		       'help-echo help
-		       'htmlize-link `(:uri ,hl)))
-	;; We need to remove the invisible property here.  Table narrowing
-	;; may have made some of this invisible.
-	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
-	(remove-text-properties (match-beginning 0) (match-end 0)
-				'(invisible nil))
-	(if (match-end 3)
-	    (progn
-	      (add-text-properties (match-beginning 0) (match-beginning 3) ip)
-	      (org-rear-nonsticky-at (match-beginning 3))
-	      (add-text-properties (match-beginning 3) (match-end 3) vp)
-	      (org-rear-nonsticky-at (match-end 3))
-	      (add-text-properties (match-end 3) (match-end 0) ip)
-	      (org-rear-nonsticky-at (match-end 0)))
-	  (add-text-properties (match-beginning 0) (match-beginning 1) ip)
-	  (org-rear-nonsticky-at (match-beginning 1))
-	  (add-text-properties (match-beginning 1) (match-end 1) vp)
-	  (org-rear-nonsticky-at (match-end 1))
-	  (add-text-properties (match-end 1) (match-end 0) ip)
-	  (org-rear-nonsticky-at (match-end 0)))
-	t))))
-
-
-(defun em-activate-comments (limit)
-  (em-activate-links "comment" 'em-comment-face limit))
+(unless (fboundp 'org-link-set-parameters)
+  (defun em-activate-links (link-type face limit)
+    "Add text properties for editmark bracketed links."
+    (while (and (re-search-forward org-bracket-link-regexp limit t)
+		(not (org-in-src-block-p)))
+      (let* ((hl (org-match-string-no-properties 1))
+	     (type (save-match-data
+		     (and (string-match org-plain-link-re hl)
+			  (match-string-no-properties 1 hl))))
+	     help ip vp)
+	
+	(when (string= type link-type)
+	  (setq help (concat "LINK: " (save-match-data (org-link-unescape hl))) 
+		ip (org-maybe-intangible
+		    (list 'invisible 'org-link
+			  'face face
+			  'keymap org-mouse-map
+			  'mouse-face 'highlight
+			  'font-lock-multiline t
+			  'help-echo help
+			  'htmlize-link `(:uri ,hl)))
+		vp (list 'keymap org-mouse-map
+			 'face face
+			 'mouse-face 'highlight
+			 'font-lock-multiline t
+			 'help-echo help
+			 'htmlize-link `(:uri ,hl)))
+	  ;; We need to remove the invisible property here.  Table narrowing
+	  ;; may have made some of this invisible.
+	  (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+	  (remove-text-properties (match-beginning 0) (match-end 0)
+				  '(invisible nil))
+	  (if (match-end 3)
+	      (progn
+		(add-text-properties (match-beginning 0) (match-beginning 3) ip)
+		(org-rear-nonsticky-at (match-beginning 3))
+		(add-text-properties (match-beginning 3) (match-end 3) vp)
+		(org-rear-nonsticky-at (match-end 3))
+		(add-text-properties (match-end 3) (match-end 0) ip)
+		(org-rear-nonsticky-at (match-end 0)))
+	    (add-text-properties (match-beginning 0) (match-beginning 1) ip)
+	    (org-rear-nonsticky-at (match-beginning 1))
+	    (add-text-properties (match-beginning 1) (match-end 1) vp)
+	    (org-rear-nonsticky-at (match-end 1))
+	    (add-text-properties (match-end 1) (match-end 0) ip)
+	    (org-rear-nonsticky-at (match-end 0)))
+	  t))))
 
 
-(defun em-activate-typos (limit)
-  (em-activate-links "typo" 'em-typo-face limit))
+  (defun em-activate-comments (limit)
+    (em-activate-links "comment" 'em-comment-face limit))
 
 
-(defun em-activate-inserts (limit)
-  (em-activate-links "insert" 'em-insert-face limit))
+  (defun em-activate-typos (limit)
+    (em-activate-links "typo" 'em-typo-face limit))
 
 
-(defun em-activate-deletes (limit)
-  (em-activate-links "delete" 'em-delete-face limit))
+  (defun em-activate-inserts (limit)
+    (em-activate-links "insert" 'em-insert-face limit))
 
 
-(defun em-font-lock-enable ()
-  "Add the font "
-  (font-lock-add-keywords
-   nil
-   '((em-activate-comments (0  'em-comment-face t))
-     (em-activate-typos (0  'em-typo-face t))
-     (em-activate-inserts (0  'em-insert-face t))
-     (em-activate-deletes (0  'em-delete-face t)))
-   t))
+  (defun em-activate-deletes (limit)
+    (em-activate-links "delete" 'em-delete-face limit))
 
 
-(add-hook 'org-mode-hook 'em-font-lock-enable)
+  (defun em-font-lock-enable ()
+    "Add the font "
+    (font-lock-add-keywords
+     nil
+     '((em-activate-comments (0  'em-comment-face t))
+       (em-activate-typos (0  'em-typo-face t))
+       (em-activate-inserts (0  'em-insert-face t))
+       (em-activate-deletes (0  'em-delete-face t)))
+     t))
+
+
+  (add-hook 'org-mode-hook 'em-font-lock-enable))
 
 ;; * Insertion functions
 (defvar *em-window-configuration* nil
