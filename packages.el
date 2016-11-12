@@ -45,8 +45,10 @@
 
 (use-package avy)
 
-;; installation is failing
-;; (use-package auctex)
+
+(use-package tex
+  :ensure auctex)
+
 
 ;; Make cursor more visible when you move a long distance
 (use-package beacon
