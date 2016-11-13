@@ -185,7 +185,7 @@ evaluated. The function takes no arguments."
 						    (completing-read
 						     "Color: "
 						     (progn
-						       (save-selected-window
+						       (save-window-excursion
 							 (list-colors-display))
 						       (prog1
 							   (with-current-buffer
@@ -235,7 +235,7 @@ evaluated. The function takes no arguments."
 						(kill-buffer)
 						(set-window-configuration
 						 *ov-window-configuration*)
-						(setq *ov-window-configuration* nil)
+						(setq n*ov-window-configuration* nil)
 						(overlay-put (ov-at) 'help-echo tooltip))))))))
 				 (define-key map [mouse-1] edit-func)
 				 map))
@@ -269,7 +269,10 @@ evaluated. The function takes no arguments."
 				     (kill-buffer)
 				     (set-window-configuration *ov-window-configuration*)
 				     (setq *ov-window-configuration* nil)
-				     (overlay-put (ov-at) 'help-echo tooltip))))))
+				     (overlay-put (if (ov-at)
+						      (ov-at)
+						    (ov-at (- (point) 1)))
+						  'help-echo tooltip))))))
 ;; font color
 (ov-make-highlight "red-fg" '(:foreground "red"))
 
@@ -541,45 +544,28 @@ The list is from first to last."
     (read (org-link-unescape (match-string 1)))))
 
 
-(defvar ov-highlight-data nil "Data for the highlights")
-(make-variable-buffer-local 'ov-highlight-data)
-(put 'ov-highlight-data 'safe-local-variable #'stringp)
-
-
-(defun ov-convert ()
-  "Convert the old format to the new format."
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (re-search-forward "#  ov-highlight-data: \\(.*\\)" nil t)
-    (setq ov-highlight-data (match-string 1))
-    (ov-highlight-load)))
-
-
 (defun ov-highlight-load ()
   "Load and apply highlighted text."
   (interactive)
-  ;; try old form
-  (unless ov-highlight-data
-    (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward "#  ov-highlight-data: \\(.*\\)" nil t)
-	(setq ov-highlight-data (match-string 1)))))
-  (mapc
-   (lambda (entry)
-     (let ((beg (nth 0 entry))
-	   (end (nth 1 entry))
-	   (properties (nth 2 entry)))
-       (flyspell-delete-region-overlays beg end)
-       (let ((ov (make-overlay beg end)))
-	 (apply 'ov-put ov properties) 
-	 (set-buffer-modified-p t)
-	 (let ((p (point)))
-	   (when (mark)
-	     (deactivate-mark))
-	   (goto-char p)) 
-	 ov))) 
-   (read (org-link-unescape (or ov-highlight-data ""))))
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "#  ov-highlight-data: \\(.*\\)" nil t)
+      (setq ov-highlight-data (match-string 1)))
+    (mapc
+     (lambda (entry)
+       (let ((beg (nth 0 entry))
+	     (end (nth 1 entry))
+	     (properties (nth 2 entry)))
+	 (flyspell-delete-region-overlays beg end)
+	 (let ((ov (make-overlay beg end)))
+	   (apply 'ov-put ov properties) 
+	   (set-buffer-modified-p t)
+	   (let ((p (point)))
+	     (when (mark)
+	       (deactivate-mark))
+	     (goto-char p)) 
+	   ov))) 
+     (read (org-link-unescape (or ov-highlight-data "")))))
   (add-hook 'before-save-hook 'ov-highlight-save nil t)
   ;; loading marks the buffer as modified, because the overlay functions mark
   ;; it, but it isn't. We mark it unmodified here.
@@ -590,12 +576,22 @@ The list is from first to last."
   "Save highlight information.
 Data is saved in comment in the document."
   (let ((data (ov-highlight-get-highlights)))
-    
-    (save-excursion
-      (add-file-local-variable 'ov-highlight-data (org-link-escape (format "%S" data)))
-      (goto-char (point-min))
-      (unless (re-search-forward "eval: (ov-highlight-load)" nil 'mv)
-	(add-file-local-variable 'eval '(ov-highlight-load))))
+
+    (save-restriction
+      (widen)
+      (save-excursion
+	(goto-char (point-min))
+	(unless (re-search-forward "eval: (ov-highlight-load)" nil 'mv)
+	  (add-file-local-variable 'eval '(ov-highlight-load)))
+
+	(goto-char (point-min))
+	(if (re-search-forward "#  ov-highlight-data: \\(.*\\)" nil 'mv)
+	    (progn
+	      (setf (buffer-substring (match-beginning 0) (match-end 0)) "")
+	      (insert (format "#  ov-highlight-data: %s" (org-link-escape (format "%S" data)))))
+	  (re-search-backward "Local Variables:")
+	  (goto-char (line-beginning-position))
+	  (insert (format "#  ov-highlight-data: %s\n\n" (org-link-escape (format "%S" data)))))))
     
     (unless data
       ;; cleanup if we have no highlights
@@ -667,7 +663,98 @@ It returns the created overlay."
     ov))
 
 
+;; * Copy, cut and paste
+(defvar ov-highlight-copy-data  '()
+  "p-list of overlays to recreate on copying and pasting.")
 
+(defun ov-highlight-copy (beg end)
+  "Copy the region from BEG to END with overlays for pasting with `ov-highlight-paste'.
+Notes: we save the starts and ends separately, because the ends
+get lost when you cut overlays."
+  (interactive "r")
+  (let ((ovs (loop for ov in (overlays-in beg end)
+		   if (overlay-get ov 'ov-highlight)
+		   collect (copy-overlay ov))))
+    (setq ov-highlight-copy-data (list
+				  :point beg
+				  :text (buffer-substring beg end)
+				  :overlays ovs 
+				  :starts (mapcar #'ov-beg ovs)
+				  :ends (mapcar #'ov-end ovs)))))
+
+
+(defun ov-highlight-paste ()
+  "Paste the data from `ov-highlight-copy-data' at point."
+  (interactive)
+  (let ((p (point)))
+    (let* ((text (plist-get ov-highlight-copy-data :text))
+	   (ovs (plist-get ov-highlight-copy-data :overlays))
+	   (starts (plist-get ov-highlight-copy-data :starts))
+	   (ends (plist-get ov-highlight-copy-data :ends)))
+      (save-excursion (insert text))
+      (loop for ov in ovs for beg in starts for end in ends
+	    if (overlay-get ov 'ov-highlight)
+	    do
+	    (let* ((delta (- beg (plist-get ov-highlight-copy-data :point)))
+		   (nov (make-overlay (+ p delta) (+ p delta (- end beg)))))
+	      (apply #'ov-put nov (overlay-properties ov))
+	      (delete-overlay ov))))
+    (setq ov-highlight-copy-data nil)))
+
+
+;; *** Advices - copy
+
+(defun ov-highlight-copy-advice (orig-func &rest args)
+  "Advise copy to enable ov-highlights to be copied."
+  (let ((beg (nth 0 args))
+	(end (nth 1 args)))
+    (if (mapcar (lambda (ov) (overlay-get ov 'ov-highlight)) (overlays-in beg end))
+	(ov-highlight-copy beg end)
+      (apply orig-func args))))
+
+(advice-add 'kill-ring-save :around 'ov-highlight-copy-advice)
+
+
+;; *** cut advice
+
+(defun ov-highlight-cut-advice (orig-func &rest args)
+  "Advise cut so we get ov-highlights."
+  (let ((beg (nth 0 args))
+	(end (nth 1 args))) 
+    (if (mapcar (lambda (ov) (overlay-get ov 'ov-highlight)) (overlays-in beg end))
+	(progn (ov-highlight-copy beg end)
+	       (ov-clear beg end)
+	       (setf (buffer-substring beg end) "")) 
+      (apply orig-func args))))
+
+(advice-add 'kill-region :around 'ov-highlight-cut-advice)
+
+;; *** Paste advice
+
+(defun ov-highlight-paste-advice (orig-func &rest args)
+  "Advise paste so we can get ov-highlights."
+  (if (not (null ov-highlight-copy-data))
+      (ov-highlight-paste) 
+    (apply orig-func args)))
+
+(advice-add 'yank :around 'ov-highlight-paste-advice)
+
+;; *** kill line advice
+(defun ov-highlight-kill-line-advice (orig-func &rest args)
+  "Advise kill line so we get ov-highlights."
+  (if (mapcar (lambda (ov) (overlay-get ov 'ov-highlight))
+	      (overlays-in (line-beginning-position)
+			   (line-end-position)))
+      (progn
+	(ov-highlight-copy (line-beginning-position) (line-end-position))
+	(ov-clear (line-beginning-position) (line-end-position))
+	(setf (buffer-substring (line-beginning-position) (line-end-position)) ""))
+    (apply orig-func args)))
+
+(advice-add 'kill-visual-line :around 'ov-highlight-kill-line-advice)
+
+
+;; * HTML
 
 (defun ov-highlighter-html (file)
   "Convert the buffer to html using htmlize and write to FILE."
