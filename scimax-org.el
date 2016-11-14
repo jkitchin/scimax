@@ -225,7 +225,7 @@ is positive, move after, and if negative, move before."
  'org-babel-load-languages
  '((emacs-lisp . t)
    (python . t)
-   (sh . t)
+   (shell . t)
    (matlab . t)
    (sqlite . t)
    (ruby . t)
@@ -560,6 +560,102 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
 	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+
+;; * Fragment overlays
+
+(defun org-latex-fragment-tooltip (beg end image imagetype)
+  "Add the fragment tooltip to the overlay and set click function to toggle it."
+  (overlay-put (ov-at) 'help-echo
+	       (concat (buffer-substring beg end)
+		       "\nmouse-1 to toggle."))
+  (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
+				    (define-key map [mouse-1]
+				      `(lambda ()
+					 (interactive)
+					 (org-remove-latex-fragment-image-overlays ,beg ,end)))
+				    map)))
+
+(advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-tooltip)
+
+(defun org-latex-fragment-justify (justification)
+  "Justify the latex fragment at point with JUSTIFICATION.
+JUSTIFICATION is a symbol for 'left, 'center or 'right."
+  (interactive
+   (list (intern-soft
+          (completing-read "Justification (left): " '(left center right)
+                           nil t nil nil 'left))))
+
+  (let* ((ov (ov-at))
+	 (beg (ov-beg ov))
+	 (end (ov-end ov))
+	 (shift (- beg (line-beginning-position)))
+	 (img (overlay-get ov 'display))
+	 (img (and (and img (consp img) (eq (car img) 'image)
+			(image-type-available-p (plist-get (cdr img) :type)))
+		   img))
+	 space-left offset)
+    (when (and img (= beg (line-beginning-position)))
+      (setq space-left (- (window-max-chars-per-line) (car (image-display-size img)))
+	    offset (floor (cond
+			   ((eq justification 'center)
+			    (- (/ space-left 2) shift))
+			   ((eq justification 'right)
+			    (- space-left shift))
+			   (t
+			    0))))
+      (when (>= offset 0)
+	(overlay-put ov 'before-string (make-string offset ?\ ))))))
+
+(defun org-latex-fragment-justify-advice (beg end image imagetype)
+  "After advice function to justify fragments."
+  (org-latex-fragment-justify (or (plist-get org-format-latex-options :justify) 'left)))
+
+(advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-justify-advice)
+
+;; ** numbering latex equations
+(defun org-renumber-environment (orig-func &rest args)
+  "A function to inject numbers in LaTeX fragment previews."
+  (let ((results '()) 
+	(counter -1)
+	(numberp))
+
+    (setq results (loop for (begin .  env) in 
+			(org-element-map (org-element-parse-buffer) 'latex-environment
+			  (lambda (env)
+			    (cons
+			     (org-element-property :begin env)
+			     (org-element-property :value env))))
+			collect
+			(cond
+			 ((and (string-match "\\\\begin{equation}" env)
+			       (not (string-match "\\\\tag{" env)))
+			  (incf counter)
+			  (cons begin counter))
+			 ((string-match "\\\\begin{align}" env)
+			  (prog2
+			      (incf counter)
+			      (cons begin counter)			    
+			    (with-temp-buffer
+			      (insert env)
+			      (goto-char (point-min))
+			      ;; \\ is used for a new line. Each one leads to a number
+			      (incf counter (count-matches "\\\\$"))
+			      ;; unless there are nonumbers.
+			      (goto-char (point-min))
+			      (decf counter (count-matches "\\nonumber")))))
+			 (t
+			  (cons begin nil)))))
+
+    (when (setq numberp (cdr (assoc (point) results)))
+      (setf (car args)
+	    (concat
+	     (format "\\setcounter{equation}{%s}\n" numberp)
+	     (car args)))))
+  
+  (apply orig-func args))
+
+(advice-add 'org-create-formula-image :around #'org-renumber-environment)
 
 
 ;; * Markup commands for org-mode
