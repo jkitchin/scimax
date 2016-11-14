@@ -687,7 +687,7 @@ get lost when you cut overlays."
   "Paste the data from `ov-highlight-copy-data' at point."
   (interactive)
   (let ((p (point)))
-    (let* ((text (plist-get ov-highlight-copy-data :text))
+    (let* ((text (plist-get ov-highlight-copy-data :text)) 
 	   (ovs (plist-get ov-highlight-copy-data :overlays))
 	   (starts (plist-get ov-highlight-copy-data :starts))
 	   (ends (plist-get ov-highlight-copy-data :ends)))
@@ -698,7 +698,8 @@ get lost when you cut overlays."
 	    (let* ((delta (- beg (plist-get ov-highlight-copy-data :point)))
 		   (nov (make-overlay (+ p delta) (+ p delta (- end beg)))))
 	      (apply #'ov-put nov (overlay-properties ov))
-	      (delete-overlay ov))))
+	      (delete-overlay ov)))
+      (forward-char (length text))) 
     (setq ov-highlight-copy-data nil)))
 
 
@@ -708,7 +709,9 @@ get lost when you cut overlays."
   "Advise copy to enable ov-highlights to be copied."
   (let ((beg (nth 0 args))
 	(end (nth 1 args)))
-    (if (mapcar (lambda (ov) (overlay-get ov 'ov-highlight)) (overlays-in beg end))
+    (if (-any #'identity (mapcar (lambda (ov)
+				   (overlay-get ov 'ov-highlight))
+				 (overlays-in beg end)))
 	(ov-highlight-copy beg end)
       (apply orig-func args))))
 
@@ -721,13 +724,16 @@ get lost when you cut overlays."
   "Advise cut so we get ov-highlights."
   (let ((beg (nth 0 args))
 	(end (nth 1 args))) 
-    (if (mapcar (lambda (ov) (overlay-get ov 'ov-highlight)) (overlays-in beg end))
+    (if (-any #'identity (mapcar (lambda (ov)
+				   (overlay-get ov 'ov-highlight))
+				 (overlays-in beg end))) 
 	(progn (ov-highlight-copy beg end)
 	       (ov-clear beg end)
 	       (setf (buffer-substring beg end) "")) 
       (apply orig-func args))))
 
 (advice-add 'kill-region :around 'ov-highlight-cut-advice)
+;; (advice-remove 'kill-region 'ov-highlight-cut-advice)
 
 ;; *** Paste advice
 
@@ -738,13 +744,16 @@ get lost when you cut overlays."
     (apply orig-func args)))
 
 (advice-add 'yank :around 'ov-highlight-paste-advice)
+;; (advice-remove 'yank 'ov-highlight-paste-advice)
 
 ;; *** kill line advice
 (defun ov-highlight-kill-line-advice (orig-func &rest args)
   "Advise kill line so we get ov-highlights."
-  (if (mapcar (lambda (ov) (overlay-get ov 'ov-highlight))
-	      (overlays-in (line-beginning-position)
-			   (line-end-position)))
+  (if (-any #'identity (mapcar (lambda (ov)
+				 (overlay-get ov 'ov-highlight))
+			       (overlays-in
+				(line-beginning-position)
+				(line-end-position)))) 
       (progn
 	(ov-highlight-copy (line-beginning-position) (line-end-position))
 	(ov-clear (line-beginning-position) (line-end-position))
@@ -752,14 +761,14 @@ get lost when you cut overlays."
     (apply orig-func args)))
 
 (advice-add 'kill-visual-line :around 'ov-highlight-kill-line-advice)
-
+;; (advice-remove 'kill-visual-line 'ov-highlight-kill-line-advice)
 
 ;; * HTML
 
 (defun ov-highlighter-html (file)
   "Convert the buffer to html using htmlize and write to FILE."
-  (interactive (list (read-file-name "File: " nil (let ((bfn (buffer-file-name)))
-						    (concat (file-name-base) ".html")))))
+  (interactive (list (read-file-name
+		      "File: " nil (concat (file-name-base) ".html"))))
   (let ((buf (htmlize-buffer)))
     (with-current-buffer buf
       (write-file file (buffer-string)))
