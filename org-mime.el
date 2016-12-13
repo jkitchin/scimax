@@ -567,8 +567,9 @@ htmlize :: Generate html of SCOPE using a the `htmlize' library."
 	   ((string= format "htmlize")
 	    (org-mime-compose-htmlize
 	     (let ((cb (htmlize-buffer)))
-	       (prog1 
-		   (kill-buffer cb)))
+	       (prog1
+		   (buffer-string)
+		 (kill-buffer cb)))
 	     'html
 	     nil))))))))
 
