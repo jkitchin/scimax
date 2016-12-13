@@ -68,7 +68,9 @@
      :export (lambda (path description format)
 	       (cond
 		((eq format 'latex)
-		 (format "\\textcolor{red}{%s}" path))))
+		 (format "\\textcolor{red}{%s}" path))
+		((eq format 'html)
+		 (format "<font color=\"red\">%s</font>" path))))
      :face 'em-delete-face) 
   (org-add-link-type
    "delete"
@@ -87,7 +89,9 @@
      :export (lambda (path description format)
 	       (cond
 		((eq format 'latex)
-		 (format "\\textcolor{blue}{%s}" path))))
+		 (format "\\textcolor{blue}{%s}" path))
+		((eq format 'html)
+		 (format "<font color=\"blue\">%s</font>" path))))
      :face 'em-insert-face) 
   (org-add-link-type
    "insert"
