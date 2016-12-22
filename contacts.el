@@ -604,14 +604,10 @@ end tell" (cdr (assoc "PHONE" contact))))))
 ;; * Speed keys
 
 (defun org-speed-contacts (keys)
+  "Find the command to run for KEYS."
   (when (or (and (bolp) (looking-at org-outline-regexp)
-		 (not (null (org-entry-get (point) "EMAIL")))) 
-	    (and (functionp org-use-speed-commands)
-		 (funcall org-use-speed-commands)))
-    (cdr (assoc keys(append
-		     org-speed-commands-contacts
-		     org-speed-commands-user
-		     org-speed-commands-default)))))
+		 (not (null (org-entry-get (point) "EMAIL")))))
+    (cdr (assoc keys org-speed-commands-contacts))))
 
 (setq org-speed-commands-contacts
       '(("b" . (lambda ()
@@ -646,7 +642,19 @@ end tell" (cdr (assoc "PHONE" contact))))))
 	tell application \"System Events\" to keystroke \"n\" using {shift down, command down}
 	tell application \"System Events\" to keystroke \"%s\"
 	tell application \"System Events\" to key code 36 #return
-end tell" (org-entry-get (point) "PHONE"))))))))
+end tell" (org-entry-get (point) "PHONE"))))))
+	("?" . (lambda ()
+		 "Print contacts speed key help."
+		 (with-output-to-temp-buffer "*Help*"
+		   (princ "Contacts Speed commands\n===========================\n")
+		   (mapc #'org-print-speed-command org-speed-commands-contacts)
+		   (princ "\n")
+		   (princ "User-defined Speed commands\n===========================\n")
+		   (mapc #'org-print-speed-command org-speed-commands-user)
+		   (princ "Built-in Speed commands\n=======================\n")
+		   (mapc #'org-print-speed-command org-speed-commands-default))
+		 (with-current-buffer "*Help*"
+		   (setq truncate-lines t))))))
 
 
 (add-hook 'org-speed-command-hook 'org-speed-contacts)
