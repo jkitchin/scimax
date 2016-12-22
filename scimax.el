@@ -206,6 +206,7 @@ This enables you to use tab to open and close outlines."
   (">" end-of-buffer)
   ;; these are different modes
   ;; char
+
   ("c" (lambda ()
 	 (interactive)
 	 (setq navy-mode "char"
@@ -297,7 +298,6 @@ This enables you to use tab to open and close outlines."
 	       navy-period 'lispy-ace-paren)) 
    "sexp mode")
 
-  ("s" swiper "swiper")
   ("a" swiper-all "swiper-all")
   ("o" helm-org-agenda-files-headings "org headlines")
   ("r" counsel-git-grep "git grep")
@@ -336,6 +336,47 @@ This enables you to use tab to open and close outlines."
 ;;   ("h" ivy-org-jump-to-heading "org heading")
 ;;   ("a" ivy-org-jump-to-agenda-heading "agenda heading"))
 
+;; * dired enhancements
+;; http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html
+(require 'dired )
+
+(defun xah-dired-rename-space-to-underscore ()
+  "In dired, rename current or marked files by replacing space to underscore _.
+If not in `dired', do nothing.
+URL `http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html'
+Version 2016-12-22"
+  (interactive)
+  (require 'dired-aux)
+  (if (equal major-mode 'dired-mode)
+      (progn
+        (mapc (lambda (x)
+                (when (string-match " " x )
+                  (dired-rename-file x (replace-regexp-in-string " " "_" x) nil)
+                  ))
+              (dired-get-marked-files ))
+        (revert-buffer)
+        (forward-line ))
+    (user-error "Not in dired")))
+
+
+(defun xah-dired-rename-space-to-hyphen ()
+  "In dired, rename current or marked files by replacing space to hyphen -.
+If not in `dired', do nothing.
+URL `http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html'
+Version 2016-12-22"
+  (interactive)
+  (require 'dired-aux)
+  (if (equal major-mode 'dired-mode)
+      (progn
+        (mapc (lambda (x)
+                (when (string-match " " x )
+                  (dired-rename-file x (replace-regexp-in-string " " "_" x) nil)))
+              (dired-get-marked-files ))
+        (revert-buffer))
+    (user-error "Not in dired")))
+
+(define-key dired-mode-map (kbd "_") 'xah-dired-rename-space-to-underscore)
+(define-key dired-mode-map (kbd "-") 'xah-dired-rename-space-to-hyphen)
 
 ;; * The end
 (provide 'scimax)
