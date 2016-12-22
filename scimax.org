@@ -1,82 +1,12 @@
 #+TITLE: Scimax
+#+AUTHOR: John Kitchin
+#+DATE: 2016
 
-* ivy/counsel
-scimax currently uses ivy extensively for completion, and enables `ivy-mode' and `counsel-mode'. The default matching behavior is `ivy--regex-ignore-order'.
-
-When you get an ivy minibuffer, start typing to select what you want, and when it is highlighted, press enter.
-
-There are a couple of nuances though.
-
-1. To eliminate matches use ! pattern, but you can only use one of these, and it comes last.
-
-I have extended the `ivy-minibuffer-map' to enable the following:
-
-1. M-spc will show the actions, and spc to resume the selection process.
-2. C-RET to perform the action and move to the next candidate, and C-u C-RET to perform the action and move to the previous candidate.
-2. M-RET will perform the default action on every candidate from the current selection to the end of the candidates. C-u M-RET does that from the current candidate to the beginning.
-3. s-RET quits the selection buffer with no action.
-4. ? shows you the keymap.
-
-In the ivy selection buffer
-| M-spc         | Show the actions                                           |
-| spc           | resume                                                     |
-| RET           | Default action and exit                                    |
-| C-RET         | Default action and move to next line                       |
-| C-u C-RET     | Default action and move to previous line                   |
-| M-RET         | Default action on each candidate from current to end       |
-| C-u M-RET     | Default action on each candidate from current to beginning |
-| C-u C-u M-RET | Default action on all candidates                           |
-| s-RET         | quit with no action                                        |
-| ?             | show keymap help                                           |
-
-I use Hyper-c as a prefix map for a lot of commands.
-
-| H-c r | `ivy-resume'           |
-| H-c l | `counsel-load-library' |
-| H-c a | `counsel-ag'           |
-
-** counsel-find-file
-Here are some additional actions we define for `counsel-find-file'.
-
-| a   | attach to email      |
-| c   | copy relative path   |
-| 4   | Open in new window   |
-| 5/f | Open in new frame    |
-| C   | Copy absolute path   |
-| d   | open in dired        |
-| D   | Delete file          |
-| e   | open in external app |
-| p   | insert relative path |
-| P   | insert absolute path |
-| l   | relative org link    |
-| L   | absolute org link    |
-| r   | rename file          |
-
-* navy
-
-  `navy' is bound to f12. It opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
-
-| j | left  |
-| l | right |
-| i | up    |
-| k | down  |
-
-The default mode is character mode, and you can change the mode with single characters, include a word mode (w), sentence (s), paragraph (p), page (g), line (n) and sexp (x) mode. These modes allow you navigate forward and backward by those elements. They also define binding
-
-I have tried to make the following keys consistent:
-
-| ; | avy-goto-char-2 |
-| ' | avy-goto-line   |
-| < | goto point-min  |
-| > | goto point-max  |
-
-There are some useful bindings in `navy' also.
-| r | counsel-git-grep |
-| o | swiper           |
-| a | swiper-all       |
-
+Scimax is an Emacs starterkit designed for people interested in reproducible research and publishing. Scimax is just Emacs that has been configured extensively to make it act like we need it to for research documentation and publication. The notes below document some features we have built into scimax.
 
 * Org-mode
+scimax provides a lot of customization of org-mode. 
+
 ** Markup shortcuts
 scimax defines some shortcuts for org-mode markup. You can select text and type the shortcut to wrap the region in the markup, or if on a word, type the shortcut to wrap the word, or type the short cut to create the markup with the cursor inside it to keep typing.
 
@@ -176,7 +106,7 @@ Here are some convenient table expansions.
 |  |   |   |   |   |   |
 
 ** LaTeX
-Here is a list of installed
+Here is a list of installed latex classes.
 #+BEGIN_SRC emacs-lisp
 (mapcar 'car org-latex-classes)
 #+END_SRC
@@ -184,62 +114,8 @@ Here is a list of installed
 #+RESULTS:
 | cmu-memo | nature | elsarticle | svjour3 | revtex4-1 | achemso | article-nodefaults | article-no-defaults | article-1 | article | report | book |
 
-** org-ref
-
-Run `org-ref-help' and read it.
-
-** TODO Publishing (ox-manuscript)
-
-The key-binding C-c C-e j should enter the ox-manuscript export menu. This process differs from the regular export process in a number of ways. It will detect if bibtex, makeindex, or  makeglossary, and if minted is used, -shell-escape will automatically be used with pdflatex. The function `ox-manuscript-latex-pdf-process' handles all of that.
-
-Additionally, you can generate different outputs of an org-file:
-
-- `ox-manuscript-build-submission-manuscript-and-open' :: creates a standalone tex file with embedded bibliography, and image extensions stripped, and the pdf file.
-
-- `ox-manuscript-make-submission-archive' :: creates a directory containing all the files you normally need for submission.
-
-- `ox-manuscript-toggle-interactive-build'
-
-- `ox-manuscript-nobibliography'
-
-- `ox-manuscript-texcount'
-
-*** Manuscript templates
-We have templates prepared for the following manuscripts, proposals and documents.
-
-#+BEGIN_SRC emacs-lisp
-(mapcar (lambda (x) (list (plist-get x :template))) (ox-manuscript-candidates))
-#+END_SRC
-
-#+RESULTS:
-| ACS Applied Materials and Interfaces                      |
-| ACS Catalysis                                             |
-| ACS -Industrial & Engineering Chemistry Research          |
-| ACS - Journal of Physical Chemistry C                     |
-| ACS J. Physical Chemistry Letters                         |
-| AIP - J. Chemical Physics                                 |
-| Physical Review B                                         |
-| Physical Review Letters                                   |
-| Int. J. Greenhouse Gas Control - Elsevier                 |
-| Cover letter for manuscript submission                    |
-| Nature                                                    |
-| NSF Proposal - Biographical sketch                        |
-| NSF Proposal - Checklist                                  |
-| NSF Proposal - Current and pending                        |
-| NSF Proposal - data management plan                       |
-| NSF Proposal - Facilities, Equipment, and other Resources |
-| NSF Proposal - postdoctoral mentoring plan                |
-| NSF Proposal - Project description                        |
-| NSF Proposal - Project summary                            |
-| NSF Proposal - Statement of work                          |
-| Response to reviewers                                     |
-| Surface Science - Elsevier                                |
-| Wiley - Int. J. Quantum Chemistry                         |
-
-- `ox-manuscript-new-ivy'
-- `ox-manuscript-new-helm'
-
 ** new speed commands
+
 
 scimax defines these new speed commands that are active when the cursor is on the first character of a headline.
 
@@ -251,12 +127,17 @@ scimax defines these new speed commands that are active when the cursor is on th
 
 The best way to see other speed commands is to put your cursor at the beginning of a headline and press ?.
 
+** Formatted copy and paste
+`ox-clip-formatted-copy' provides a way to copy org-mode with formatting so it can be pasted into other programs like MS Word and web browsers. It does this by copying the selected text to the HTML clipboard.  
+
 * Writing
 ** Spell-checking
-scimax is configured with flyspell and flycheck on. When you mispell a word you will see a message in the minibuffer that tells you how to fix it (C-;). Type that, and you will be able to fix the word spelling without losing your place!
+
+scimax is configured with flyspell and flycheck on. When you mispell a word you will see a message in the minibuffer that tells you how to fix it (C-;). Type that, and you will be able to fix the word spelling without losing your place! Spell-checking is configured with ivy, so if the word is correct, you can type M-o s to save the word in your dictionary so you will not see it again
 
 
 ** Track changes
+
 Scimax provides some support for track changes and edit marks in org-mode.
 
 [[insert:Add this text]] [[delete:Delete this]] 
@@ -318,19 +199,70 @@ The commands all have key bindings. The prefix key for these is H-e.
 
 
 ** Highlighting
-Scimax provides `ov-highlighter' to enable some support for highlighting, comment overlays, and edit marks.
 
-The main way to access the functions is via a hydra menu: `ov-highlighter/body' that is bound to H-h (hyper-h).
+Scimax provides some support for highlighting, comment overlays, and edit marks.
 
-You can highlight in blue, yellow, green, pink and salmon.
-
-Highlights can have notes attached to them that are visible as tooltips, or you can click on them to see them in dedicated buffer. You can also add a note to any highlight, or edit the note with `ov-highlight-note-edit'.
-
-There are also tyop highlights, comment highlights.
-
-You can list the highlights with `ov-highlight-list', clear a highlight (`ov-highlight-clear') or all the highlights (`ov-highlight-clear-all'). Those are all available in the hydra menu.  The highlights are saved in the document and loaded using file local variables.
+The main way to access the functions is via a hydra menu: `ov-highlighter/body' that is bound to H-h (hyper-h). 
 
 The highlights are not part of org-mode, and they do not export to any backend. The highlights should work in any kind of file.
+
+** org-ref
+
+org-ref is the answer to citations and bibliographies in scientific writing. Run `org-ref-help' and read it.
+
+** TODO Publishing (ox-manuscript)
+
+The key-binding C-c C-e j should enter the ox-manuscript export menu. This process differs from the regular export process in a number of ways. It will detect if bibtex, makeindex, or  makeglossary, and if minted is used, -shell-escape will automatically be used with pdflatex. The function `ox-manuscript-latex-pdf-process' handles all of that.
+
+Additionally, you can generate different outputs of an org-file:
+
+- `ox-manuscript-build-submission-manuscript-and-open' :: creates a standalone tex file with embedded bibliography, and image extensions stripped, and the pdf file.
+
+- `ox-manuscript-make-submission-archive' :: creates a directory containing all the files you normally need for submission.
+
+- `ox-manuscript-toggle-interactive-build'
+
+- `ox-manuscript-nobibliography'
+
+- `ox-manuscript-texcount'
+
+*** Manuscript templates
+We have templates prepared for the following manuscripts, proposals and documents.
+
+#+BEGIN_SRC emacs-lisp
+(mapcar (lambda (x) (list (plist-get x :template))) (ox-manuscript-candidates))
+#+END_SRC
+
+#+RESULTS:
+| ACS Applied Materials and Interfaces                      |
+| ACS Catalysis                                             |
+| ACS -Industrial & Engineering Chemistry Research          |
+| ACS - Journal of Physical Chemistry C                     |
+| ACS J. Physical Chemistry Letters                         |
+| AIP - J. Chemical Physics                                 |
+| Physical Review B                                         |
+| Physical Review Letters                                   |
+| Int. J. Greenhouse Gas Control - Elsevier                 |
+| Cover letter for manuscript submission                    |
+| Nature                                                    |
+| NSF Proposal - Biographical sketch                        |
+| NSF Proposal - Checklist                                  |
+| NSF Proposal - Current and pending                        |
+| NSF Proposal - data management plan                       |
+| NSF Proposal - Facilities, Equipment, and other Resources |
+| NSF Proposal - postdoctoral mentoring plan                |
+| NSF Proposal - Project description                        |
+| NSF Proposal - Project summary                            |
+| NSF Proposal - Statement of work                          |
+| Response to reviewers                                     |
+| Surface Science - Elsevier                                |
+| Wiley - Int. J. Quantum Chemistry                         |
+
+- `ox-manuscript-new-ivy'
+- `ox-manuscript-new-helm'
+
+* Bibliography management
+see also `org-ref'.
 
 * Email
 - `email-region' :: emails selected region
@@ -343,71 +275,77 @@ These require mu4e for mail, and store properties on the headline that indicate 
 - `email-heading-body' :: email just the body of the current heading
 
 ** TODO mail merge
+* Contacts
+scimax provides a emacs-lisp library to interface with a contact database written in org-mode. 
+
+First, add some org-files to the variable `contacts-files'. Any headline in these files that has an EMAIL property will be considered a contact. Then, you can search your database with `ivy-contacts' or `helm-contacts'. There are a variety of actions to choose from ranging from inserting email addresses, copying properties, opening contact urls, etc...
+
+See `contacts-help' for more information.
+
+* RSS feeds
+
+It is a major challenge to keep up with the scientific literature. `elfeed' is the package we use in scimax for that. It aggregates RSS feeds and provides a pretty easy way to consume them, capture them in to org-mode, search them, and do things with them. scimax preconfigures elfeed with some python, and emacs feeds, and you can easily add new feeds:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'elfeed-feeds "http://feeds.feedburner.com/acs/accacs")
+#+END_SRC
+
+or if you want entries from a feed to be automatically tagged, e.g. anything from Nature magazine could be tagged with nature:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'elfeed-feeds '("http://feeds.nature.com/nchem/rss/current" nature))
+#+END_SRC
+
+
+Elfeed is configured to run every half hour after Emacs is started.
+
+On an entry you can type:
+| e | email entry to someone        |
+| c | capture the entry to org-mode |
+| d | add bibtex entry              |
+
+In the list of entries you can type:
+| f,j | marks entry as read                                                       |
+| o   | open the entry                                                            |
+| b   | open browser to entry url                                                 |
+| s   | start a search query (see https://github.com/skeeto/elfeed#filter-syntax) |
+
+
 
 * Programming
 ** Python
-- elpy
-- `pydoc' check it out.
+- scimpy is setup with `elpy-mode'.
+- `pydoc' provides nice, hyperlinked documentation for python.
 
 ** Asynchronous Python
-You can run python blocks asynchronously with M-x org-babel-async-execute:python with the cursor in a code block. This will allow you to keep typing, and show you a buffer with the progress of your code block. When it is done, the results will be inserted into the buffer where it belongs when the job is done. A temporary hash mark will go in the results. You usually won't be able to run the script while that exists. You can run M-x org-babel-kill-async in the source block to kill a running async process.
+You can run python blocks asynchronously with M-x `org-babel-async-execute:python' with the cursor in a code block. This will allow you to keep typing, and show you a buffer with the progress of your code block. When it is done, the results will be inserted into the buffer where it belongs when the job is done. A temporary hash mark will go in the results. 
 
 ** Ipython
 If you like sessions in Python, the ob-ipython library is better than the default ob-python in org-mode.
 
 Pygments doesn't support ipython out of the box for some reason, which is a problem if you want to export your src block to LaTeX. scimax fixes this for you and automatically installs this if you don't already have it.
 
-#+BEGIN_SRC emacs-lisp
-
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-0
-1
-2
-3
-4
-5
-6
-7
-8
-9
-#+end_example
-
-#+BEGIN_SRC python :results org drawer
-
-#+END_SRC
-
-#+BEGIN_SRC ipython
-
-#+END_SRC
-
-#+BEGIN_SRC sh
-pip install git+git://github.com/sanguineturtle/pygments-ipython-console
-#+END_SRC
-
 Here is a protypical Ipython src block with a line magic.
 
-#+BEGIN_SRC ipython
+#+BEGIN_SRC ipython :session
 %time print("hello world")
 a = 6
 #+END_SRC
 
 #+RESULTS:
-: helloi world
-: CPU times: user 7 µs, sys: 2 µs, total: 9 µs
-: Wall time: 14.1 µs
+: hello world
+: CPU times: user 32 µs, sys: 5 µs, total: 37 µs
+: Wall time: 39.8 µs
 
 And a block with cell magic.
 
-#+BEGIN_SRC ipython
+#+BEGIN_SRC ipython :session
 %%timeit
 7
 #+END_SRC
 
 #+RESULTS:
-: 100000000 loops, best of 3: 16.2 ns per loop
+: 100000000 loops, best of 3: 13.5 ns per loop
 :RESULTS:
 42
 :END:
@@ -418,15 +356,6 @@ And a block with cell magic.
 
 M-x `ob-ipython-interrupt-kernel'
 M-x `ob-ipython-kill-kernel'
-
-#+BEGIN_SRC ipython :var a=6
-%%timeit
-6 + a
-#+END_SRC
-
-#+RESULTS:
-
-
 
 *** Using other kernels - hy
 
@@ -449,7 +378,7 @@ scimax provides the jupyter-hy src block to run hylang in src blocks. The requir
 ** Emacs-lisp
 - `lispy-mode' is just amazing.
 
-* Packages
+* Other Packages
 ** magit
 Use f5 to enter `magit-status'.
 
@@ -470,12 +399,9 @@ Try out `words-hydra/body' on a selection or word. I bound it to \\[words-hydra/
 
 This command: `ore' tells you about the org-element your point is on.
 
+
 * Scientific notebook
-scimax provides a scientific notebook capability.
-
-Each "notebook" is actually collection of org-files in a "project".
-
-A project is the set of files in a directory that is under git version control. Each project should have a master file (the default is README.org, but you can customize `nb-master-file' to change this). The master file contains what ever you want, but typically it links to other documents in the project and provides an overview of the project.
+scimax provides a scientific notebook capability. Each "notebook" is actually collection of org-files in a "project". A project is the set of files in a directory that is under git version control. Each project should have a master file (the default is README.org, but you can customize `nb-master-file' to change this). The master file contains what ever you want, but typically it links to other documents in the project and provides an overview of the project.
 
 You are basically free to structure the notebook however you want. You have all the freedom of org-mode at your fingers to document your work.
 
@@ -508,10 +434,82 @@ You can manage the version control with magit
 ** TODO archive the notebook with git
 
 
+* ivy/counsel
 
-#  ov-highlight-data: ((11089%2011107%20"Orange1"%20"A%20comment%20highlight%20is%20like%20a%20note,%20but%20with%20an%20orange%20background.")%20(11072%2011076%20"PaleVioletRed1"%20"typo")%20(10979%2010989%20"Pink"%20"I%20added%20this%20note%20after%20highlighting%20the%20text.")%20(10855%2010877%20"Thistle"%20"Notes%20are%20created%20in%20a%20separate%20org-mode%20buffer.%20They%20can%20contain%20code%20blocks:%0A%0A#+BEGIN_SRC%20emacs-lisp%0A(princ%20\"Hello%20world!\")%0A#+END_SRC%0A%0A#+RESULTS:%0A:%20Hello%20world!%0A%0AClick%20on%20the%20note%20to%20open%20it%20in%20an%20org-buffer%20where%20you%20can%20edit%20it.")%20(10826%2010832%20"Lightsalmon1"%20nil)%20(10817%2010821%20"Pink"%20nil)%20(10810%2010815%20"Darkolivegreen1"%20nil)%20(10802%2010808%20"Yellow"%20nil)%20(10796%2010800%20"LightBlue"%20nil))
+scimax currently uses ivy extensively for completion, and enables `ivy-mode' and `counsel-mode'. The default matching behavior is `ivy--regex-ignore-order'.
 
+When you get an ivy minibuffer, start typing to select what you want, and when it is highlighted, press enter.
+
+There are a couple of nuances though.
+
+1. To eliminate matches use ! pattern, but you can only use one of these, and it comes last.
+
+I have extended the `ivy-minibuffer-map' to enable the following:
+
+1. M-spc will show the actions, and spc to resume the selection process.
+2. C-RET to perform the action and move to the next candidate, and C-u C-RET to perform the action and move to the previous candidate.
+2. M-RET will perform the default action on every candidate from the current selection to the end of the candidates. C-u M-RET does that from the current candidate to the beginning.
+3. s-RET quits the selection buffer with no action.
+4. ? shows you the keymap.
+
+In the ivy selection buffer
+| M-spc         | Show the actions                                           |
+| spc           | resume                                                     |
+| RET           | Default action and exit                                    |
+| C-RET         | Default action and move to next line                       |
+| C-u C-RET     | Default action and move to previous line                   |
+| M-RET         | Default action on each candidate from current to end       |
+| C-u M-RET     | Default action on each candidate from current to beginning |
+| C-u C-u M-RET | Default action on all candidates                           |
+| s-RET         | quit with no action                                        |
+| ?             | show keymap help                                           |
+
+I use Hyper-c as a prefix map for a lot of commands.
+
+| H-c r | `ivy-resume'           |
+| H-c l | `counsel-load-library' |
+| H-c a | `counsel-ag'           |
+
+** counsel-find-file
+Here are some additional actions we define for `counsel-find-file'.
+
+| a   | attach to email      |
+| c   | copy relative path   |
+| 4   | Open in new window   |
+| 5/f | Open in new frame    |
+| C   | Copy absolute path   |
+| d   | open in dired        |
+| D   | Delete file          |
+| e   | open in external app |
+| p   | insert relative path |
+| P   | insert absolute path |
+| l   | relative org link    |
+| L   | absolute org link    |
+| r   | rename file          |
+* Navigation - navy
+
+`navy' is bound to f12. It opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
+
+| j | left  |
+| l | right |
+| i | up    |
+| k | down  |
+
+The default mode is character mode, and you can change the mode with single characters, include a word mode (w), sentence (s), paragraph (p), page (g), line (n) and sexp (x) mode. These modes allow you navigate forward and backward by those elements. They also define binding
+
+I have tried to make the following keys consistent:
+
+| ; | avy-goto-char-2 |
+| ' | avy-goto-line   |
+| < | goto point-min  |
+| > | goto point-max  |
+
+There are some useful bindings in `navy' also.
+| r | counsel-git-grep               |
+| o | helm-org-agenda-files-headings |
+| a | swiper-all                     |
+
+* Local Variables
 # Local Variables:
 # eval: (progn (require 'emacs-keybinding-command-tooltip-mode) (emacs-keybinding-command-tooltip-mode +1))
-# eval: (ov-highlight-load)
 # End:
