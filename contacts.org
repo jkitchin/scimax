@@ -1,0 +1,36 @@
+#+TITLE: Contacts - an org-mode contact manager
+
+A "contact" is any headline with an EMAIL property, and the "contact name" is the tile of the headline.  The variable `contacts-files' contains a list of files to make your contact database from.
+
+* Useful commands
+
+- ivy-contacts :: an ivy selection command to choose contacts and do something with them.
+- helm-contacts :: a helm selection command to choose contacts and do something with them.
+
+- contacts-search :: use multi-occur to search for a word or region in your contacts files
+- contacts-agenda :: Search for contacts org-agenda style, e.g. by tags, properties or todo states.
+
+
+The variable `contacts' contains a list of all the contacts. Each element is a list of (descriptive-string a-list). the descriptive string is used in ivy for selection, and the a-list contains all the properties in the entry along with a FILE (the file the contact is in) and POSITION (the char position where the contact starts) entries. Not all contacts will have the same properties.
+
+* Contact links
+
+Contacts have an ID property that stores a uuid. 
+
+C-c l on a contact will store a link to it. C-c C-l will insert the link.
+
+The link is clickable which launches a hydra command. The links have a tooltip to show you the contents of the contact.
+ 
+[[contact:4A9897F3-2E69-4C10-9281-6C0BF4138A94][John Kitchin]]
+
+* Contact filter
+
+#+BEGIN_SRC emacs-lisp
+(mapconcat (lambda (c) (substring-no-properties (car c))) 
+ (contacts-filter "EMAIL={kitchin}") "\n")
+#+END_SRC
+
+#+RESULTS:
+: |P| | |                                 John Kitchin |                  jkitchin@andrew.cmu.edu | :department:cheme:faculty:full:hiring:css:teqie:cfs:bias: | /Users/jkitchin/Dropbox/org-mode/contacts/department-contacts.org
+: | | | |                       John Kitchin |                  jkitchin@andrew.cmu.edu |                     :nam:2015: | /Users/jkitchin/Dropbox/org-mode/contacts/nam.org
+: | |W| |                                 John Kitchin |                   johnrkitchin@gmail.com |                          :CSS: | /Users/jkitchin/vc/projects/hiring-2016/applications.org
