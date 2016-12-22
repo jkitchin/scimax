@@ -925,8 +925,8 @@ F5 inserts the entity code."
 	      (reverse headlines)
 	      :action (lambda (candidate)
 			(org-mark-ring-push)
-			(find-file (plist-get candidate :file))
-			(goto-char (plist-get candidate :position))
+			(find-file (plist-get (cdr candidate) :file))
+			(goto-char (plist-get (cdr candidate) :position))
 			(outline-show-entry)))))
 
 
@@ -956,8 +956,8 @@ function does not open the files."
 	      (reverse headlines)
 	      :action (lambda (candidate)
 			(org-mark-ring-push)
-			(find-file (plist-get candidate :file))
-			(goto-char (plist-get candidate :position))
+			(find-file (plist-get (cdr candidate) :file))
+			(goto-char (plist-get (cdr candidate) :position))
 			(outline-show-entry)))))
 
 
