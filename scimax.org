@@ -106,13 +106,50 @@ Here are some convenient table expansions.
 |  |   |   |   |   |   |
 
 ** LaTeX
+
+For numbered equations, scimax will make sure that the overlays have correct numbers on them.
+
+*** Latex classes that scimax knows about
+
 Here is a list of installed latex classes.
 #+BEGIN_SRC emacs-lisp
 (mapcar 'car org-latex-classes)
 #+END_SRC
 
 #+RESULTS:
-| cmu-memo | nature | elsarticle | svjour3 | revtex4-1 | achemso | article-nodefaults | article-no-defaults | article-1 | article | report | book |
+| cmu-memo | gMOS2e | nature | elsarticle | svjour3 | revtex4-1 | achemso | article-nodefaults | article-no-defaults | article-1 | article | report | book |
+
+** Better image scaling
+
+Image rescaling in org-mode/Emacs used to require an Emacs with imagemagick support compiled in. This is a problem on Windows. Scimax support image rescaling with an external imagemagick program called mogrify. You can rescale the appearance of an image in org-mode by adding an attribute like this above the figure.
+
+#+attr_org: :width resize-option
+
+where resize-option is one of:
+| N%   | to scale the image by a percentage.                     |
+| N    | to set the width, keeping the aspect ratio constant.    |
+| xN   | to set the height, keeping the aspect ratio constant.   |
+| NxM! | to set the width and height, ignoring the aspect ratio. |
+
+Here are some examples.
+
+#+CAPTION: An unscaled image.
+[[./org-show/taskbar.png]]
+
+#+attr_org: :width 20%
+[[./org-show/taskbar.png]]
+
+#+attr_org: :width 20%
+[[./org-show/taskbar.png]]
+
+#+attr_org: :width 200
+[[./org-show/taskbar.png]]
+
+#+attr_org: :width x50
+[[./org-show/taskbar.png]]
+
+#+attr_org: :width 200x50!
+[[./org-show/taskbar.png]]
 
 ** new speed commands
 
@@ -275,6 +312,7 @@ These require mu4e for mail, and store properties on the headline that indicate 
 - `email-heading-body' :: email just the body of the current heading
 
 ** TODO mail merge
+** TODO html mail
 * Contacts
 scimax provides a emacs-lisp library to interface with a contact database written in org-mode. 
 
@@ -309,7 +347,6 @@ In the list of entries you can type:
 | o   | open the entry                                                            |
 | b   | open browser to entry url                                                 |
 | s   | start a search query (see https://github.com/skeeto/elfeed#filter-syntax) |
-
 
 
 * Programming
@@ -378,6 +415,35 @@ scimax provides the jupyter-hy src block to run hylang in src blocks. The requir
 ** Emacs-lisp
 - `lispy-mode' is just amazing.
 
+* Miscellaneous scimax utilities
+** Open a bash window
+`bash' will open an external bash terminal in the current working directory.
+
+** Open Finder/Explorer
+`explorer' and `finder' will open a Windows Explorer or Mac Finder window in the current working directory.
+
+** Hotspots
+`hotspots' is a helm command that provides easy access to a variety of locations including user-defined commands, locations, org-agenda files, recent files, and bookmarks.
+
+You customize `scimax-user-hotspot-commands' and `scimax-user-hotspot-locations'.
+
+I bind this to a key like "f9" and set it up to easily open my mail, calendar and other things. For example, here is part of my setup.
+
+#+BEGIN_SRC emacs-lisp
+(setq scimax-user-hotspot-commands
+      '(("Mail" . (lambda ()
+		    (browse-url "https://www.google.com/gmail")))
+	("Calendar" . (lambda ()
+			(browse-url "https://www.google.com/calendar/render")))
+	("Contacts" . ivy-contacts)
+	("RSS" . elfeed)
+	("Twitter" . twit)
+	("Agenda" . (lambda () (org-agenda "" "w"))) 
+	("CV" . (lambda ()
+		  (org-open-file
+		   "/Users/jkitchin/Dropbox/CMU/CV and bios/kitchin_cv.docx" '(16))))))
+#+END_SRC
+
 * Other Packages
 ** magit
 Use f5 to enter `magit-status'.
@@ -399,6 +465,7 @@ Try out `words-hydra/body' on a selection or word. I bound it to \\[words-hydra/
 
 This command: `ore' tells you about the org-element your point is on.
 
+** TODO org-show
 
 * Scientific notebook
 scimax provides a scientific notebook capability. Each "notebook" is actually collection of org-files in a "project". A project is the set of files in a directory that is under git version control. Each project should have a master file (the default is README.org, but you can customize `nb-master-file' to change this). The master file contains what ever you want, but typically it links to other documents in the project and provides an overview of the project.
@@ -508,6 +575,66 @@ There are some useful bindings in `navy' also.
 | r | counsel-git-grep               |
 | o | helm-org-agenda-files-headings |
 | a | swiper-all                     |
+
+* Appendix
+`scimax-help' will open this document.
+
+** Emacs
+Emacs is described as "self-documenting", and it provides a lot of introspective ways to access documentation. A classic way to access help is via "info" pages. These are hyperlinked documents containing a lot of detail about Emacs and its libraries. In an info page, type these keys to do some basic navigation:
+
+| n | goto next page            |
+| u | up a node                 |
+| d | Main directory            |
+| ? | list of keys and commands |
+| q | quit                      |
+
+Emacs-manual: info:Emacs
+Emacs libraries: info:dir
+Emacs-lisp manual: info:elisp
+
+org-mode manual: info:org
+
+*** Getting help on Emacs functions
+
+
+To get help on functions use: `counsel-describe-function' and on variables use `counsel-describe-variable'.
+
+If you do not know exactly what you are looking for try: `helm-apropos'. This covers commands, functions, variables, faces, classes, and some other things.
+
+*** Getting help on system commands
+If you have man pages installed (Linux/Mac for sure, maybe on windows) you can access them easily via Emacs. I like to read man pages in Emacs with `helm-man-woman' although `man' is also good.
+
+Note while on a man page you can use these keys:
+
+m       Prompt to retrieve a new manpage.
+r       Retrieve reference in SEE ALSO section.
+M-n   Jump to next manpage in circular list.
+M-p   Jump to previous manpage in circular list.
+n       Jump to next manpage section.
+p       Jump to previous manpage section.
+g       Go to a manpage section.
+s       Jumps to the SEE ALSO manpage section.
+q       Deletes the manpage window, bury its buffer.
+k       Deletes the manpage window, kill its buffer.
+?       Prints this help text.
+
+*** What happens if I press a key?
+
+The `describe-key' function will prompt you for a key sequence or you can click on a menu item to see what it does.
+
+The `describe-mode' function will provide a full list of all the keybindings in the current buffer.
+
+In org-mode the `ore' command will give you information about the org-element under your cursor, including some commands that you can use at the point. You can also customize this by adding your own notes (click on User documentation in the help buffer).
+
+*** How do I learn shortcuts?
+
+If you use the menus, they will often have the shortcut in the menu. 
+
+The help functions usually show you if a shortcut is defined for a command.
+
+If you really want to define your own keys, see `define-key' and `global-set-key'. 
+
+Make yourself some notes in org-mode using `emacs-keybinding-command-tooltip-mode'. 
 
 * Local Variables
 # Local Variables:
