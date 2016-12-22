@@ -323,19 +323,6 @@ This enables you to use tab to open and close outlines."
 (global-set-key (kbd "<f12>") 'navy)
 
 
-;; https://pqrs.org/osx/karabiner/seil.html.en
-;; (defhydra hydra-avy (:color blue :hint nil)
-;;   "jump" 
-;;   ("s" counsel-grep-or-swiper "swiper") 
-;;   ("j" avy-goto-char-2 "char2")
-;;   ("k" avy-goto-word-1 "word1")
-;;   ("l" avy-goto-line "line")
-;;   (";" avy-goto-char-in-line "char in line")
-;;   ("t" avy-goto-char-timer "char timer")
-;;   ("g" counsel-git-grep "git grep")
-;;   ("h" ivy-org-jump-to-heading "org heading")
-;;   ("a" ivy-org-jump-to-agenda-heading "agenda heading"))
-
 ;; * dired enhancements
 ;; http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html
 (require 'dired )
