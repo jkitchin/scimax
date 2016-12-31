@@ -428,6 +428,14 @@ are the same text size."
       (re-search-forward (org-element-property :value src))
       (eval-region (match-beginning 0) (match-end 0)))))
 
+;; * help
+(defun org-show-help ()
+  "Open the help file."
+  (interactive)
+  (find-file (expand-file-name "org-show.org"
+			       (file-name-directory
+				(locate-library "org-show")))))
+
 
 
 ;;* The end
