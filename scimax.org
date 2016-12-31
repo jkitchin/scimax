@@ -5,10 +5,20 @@
 Scimax is an Emacs starterkit designed for people interested in reproducible research and publishing. Scimax is just Emacs that has been configured extensively to make it act like we need it to for research documentation and publication. The notes below document some features we have built into scimax.
 
 * Org-mode
-scimax provides a lot of customization of org-mode. 
+scimax provides a lot of customization of org-mode. Here are some of the more important ones.
 
 ** Markup shortcuts
 scimax defines some shortcuts for org-mode markup. You can select text and type the shortcut to wrap the region in the markup, or if on a word, type the shortcut to wrap the word, or type the short cut to create the markup with the cursor inside it to keep typing.
+
+Note these modifier keys:
+
+| S | shift    |
+| M | alt/meta |
+| C | Ctrl     |
+| s | super    |
+| H | hyper    |
+
+Notation like s-b means press super and b together.
 
 | markup            | keyshortcut | emacs-command                       |
 |-------------------+-------------+-------------------------------------|
@@ -107,7 +117,7 @@ Here are some convenient table expansions.
 
 ** LaTeX
 
-For numbered equations, scimax will make sure that the overlays have correct numbers on them.
+For numbered LaTeX equations, scimax will make sure that the overlays have correct numbers on them.
 
 *** Latex classes that scimax knows about
 
@@ -153,7 +163,6 @@ Here are some examples.
 
 ** new speed commands
 
-
 scimax defines these new speed commands that are active when the cursor is on the first character of a headline.
 
 | m | Mark the subtree             |
@@ -162,15 +171,17 @@ scimax defines these new speed commands that are active when the cursor is on th
 | q | jump to a headline with avy  |
 | T | org-teleport (move headline) |
 
-The best way to see other speed commands is to put your cursor at the beginning of a headline and press ?.
+The best way to see other speed commands is to put your cursor at the beginning of a headline and press ?. You can also run `org-speed-command-help' to see a full list of speed commands.
 
 ** Formatted copy and paste
 `ox-clip-formatted-copy' provides a way to copy org-mode with formatting so it can be pasted into other programs like MS Word and web browsers. It does this by copying the selected text to the HTML clipboard.  
 
-* Writing
+* Writing tools
 ** Spell-checking
 
-scimax is configured with flyspell and flycheck on. When you mispell a word you will see a message in the minibuffer that tells you how to fix it (C-;). Type that, and you will be able to fix the word spelling without losing your place! Spell-checking is configured with ivy, so if the word is correct, you can type M-o s to save the word in your dictionary so you will not see it again
+scimax is configured with flyspell and flycheck on. When you mispell a word you will see a message in the minibuffer that tells you how to fix it (C-;). Type that, and you will be able to fix the word spelling without losing your place! 
+
+Spell-checking is configured with ivy, so if the word is correct, you can type M-o s to save the word in your dictionary so you will not see it again
 
 
 ** Track changes
@@ -235,7 +246,7 @@ The commands all have key bindings. The prefix key for these is H-e.
 | t | `em-typo'                      |
 
 
-** Highlighting
+** Highlighting and annotation
 
 Scimax provides some support for highlighting, comment overlays, and edit marks.
 
@@ -257,13 +268,14 @@ Additionally, you can generate different outputs of an org-file:
 
 - `ox-manuscript-make-submission-archive' :: creates a directory containing all the files you normally need for submission.
 
-- `ox-manuscript-toggle-interactive-build'
+- `ox-manuscript-toggle-interactive-build' :: if you are having trouble building a PDF, this will show you what happens at each step.
 
 - `ox-manuscript-nobibliography'
 
-- `ox-manuscript-texcount'
+- `ox-manuscript-texcount' :: Estimate how many words are in your manuscript. For when you are limited to a fixed number of words.
 
 *** Manuscript templates
+
 We have templates prepared for the following manuscripts, proposals and documents.
 
 #+BEGIN_SRC emacs-lisp
@@ -277,8 +289,12 @@ We have templates prepared for the following manuscripts, proposals and document
 | ACS - Journal of Physical Chemistry C                     |
 | ACS J. Physical Chemistry Letters                         |
 | AIP - J. Chemical Physics                                 |
+| Annual student review                                     |
 | Physical Review B                                         |
 | Physical Review Letters                                   |
+| CMU ChemE Written Proposal                                |
+| CMU ChemE Written Qualifier                               |
+| CMU ChemE Written Qualifier                               |
 | Int. J. Greenhouse Gas Control - Elsevier                 |
 | Cover letter for manuscript submission                    |
 | Nature                                                    |
@@ -293,6 +309,8 @@ We have templates prepared for the following manuscripts, proposals and document
 | NSF Proposal - Statement of work                          |
 | Response to reviewers                                     |
 | Surface Science - Elsevier                                |
+| Taylor & Francis Molecular Simulation                     |
+| Weekly progress report                                    |
 | Wiley - Int. J. Quantum Chemistry                         |
 
 - `ox-manuscript-new-ivy'
@@ -663,7 +681,8 @@ Here are the bibtex entry types and fields you should use. You can add extra fie
 
 
 
-* Email
+* Email utilities
+
 - `email-region' :: emails selected region
 - `email-buffer' :: email the whole buffer
 - `email-bibtex-entry' :: email the bibtex entry at point
@@ -673,9 +692,10 @@ These require mu4e for mail, and store properties on the headline that indicate 
 - `email-heading' :: email the current heading, including properties, deadlines, etc...
 - `email-heading-body' :: email just the body of the current heading
 
-** TODO mail merge
 ** TODO html mail
+** TODO mail merge
 * Contacts
+
 scimax provides a emacs-lisp library to interface with a contact database written in org-mode. 
 
 First, add some org-files to the variable `contacts-files'. Any headline in these files that has an EMAIL property will be considered a contact. Then, you can search your database with `ivy-contacts' or `helm-contacts'. There are a variety of actions to choose from ranging from inserting email addresses, copying properties, opening contact urls, etc...
@@ -683,7 +703,8 @@ First, add some org-files to the variable `contacts-files'. Any headline in thes
 See `contacts-help' for more information.
 
 * Google
-[[https://github.com/Malabarba/emacs-google-this][google-this]] is installed in scimax. You can use these commands:
+
+[[https://github.com/Malabarba/emacs-google-this][google-this]] is installed in scimax. You can use these commands to search for things from Emacs:
 
 C-c / SPC	`google-this-region'
 C-c / a		`google-this-ray'
@@ -702,13 +723,14 @@ C-c / w		`google-this-word'
 C-c / <return>	`google-this-search'
 
 * Magit
+  :PROPERTIES:
+  :ID:       2695CB66-23F3-45B9-B75D-1A50206900E0
+  :END:
 Magit is a front-end for git version control. There is a good manual here: [[info:magit#Top][info:magit#Top]]
-
-Use f5 to enter `magit-status'.
-
 
 ** Basic magit
 *** Create a git repo
+
   [[info:magit#Repository%20setup][info:magit#Repository setup]]
   You can create a git repo with M-x magit-init. This will create a git-repo in the current directory.
 
@@ -719,6 +741,7 @@ Use f5 to enter `magit-status'.
   help:magit-init
 
 *** Clone a repo
+
   [[info:magit#Repository%20setup][info:magit#Repository setup]]
 
   M-x magit-clone
@@ -728,6 +751,7 @@ Use f5 to enter `magit-status'.
   help:magit-clone
 
 *** Check the status of your repo
+
   [[info:magit#Status%20buffer][info:magit#Status buffer]]
 
   Run M-x magit-status to see the status of your repo.
@@ -739,6 +763,7 @@ Use f5 to enter `magit-status'.
   help:magit-status
 
 *** Stage a file
+
   [[info:magit#Staging%20and%20unstaging][info:magit#Staging and unstaging]]
 
   In the magit-status window, put your cursor on an unstaged file and press "s".
@@ -884,10 +909,20 @@ Use f5 to enter `magit-status'.
 *** Cherry-picking 
  [[info:magit#Cherry%20picking][info:magit#Cherry picking]]
 
-
 * Project management - projectile
 
-https://github.com/bbatsov/projectile for project management.
+https://github.com/bbatsov/projectile for project management. A project is basically a directory under version control, e.g. git.
+
+Projectile makes it easy to jump to projects, find files in projects, search projects, etc...
+
+| C-c p p | Switch to a project  |
+| C-c p k | Kill project buffers |
+
+You can see all the key bindings with C-c p C-h.
+
+While in a project, you may want to try:
+
+`helm-projectile-grep' or `counsel-git-grep' to search all project files for a phrase.
 
 * Programming
 ** Python
@@ -1011,25 +1046,70 @@ I bind this to a key like "f9" and set it up to easily open my mail, calendar an
 		   "/Users/jkitchin/Dropbox/CMU/CV and bios/kitchin_cv.docx" '(16))))))
 #+END_SRC
 
-* Other Packages
-
-
-** undo-tree
-There are a few undo features:
-| C-/   | undo the last action          |
-| C-x u | use the undo-tree (q to quit) |
-
 ** words
 
 Try out `words-hydra/body' on a selection or word. I bound it to \\[words-hydra/body].
 
 ** ore
 
-This command: `ore' tells you about the org-element your point is on.
+This command: `ore' tells you about the org-element your point is on. It gives some hints on commands you can use on the element, and provides a way for you to write your own notes.
 
-** TODO org-show
+** org-show
+
+This is a simple library to make simple presentations in org-mode. See `org-show-help' for an example use.
+
+* External Packages
+
+These are external packages that are included in scimax and might be useful for you.
+
+** avy
+
+avy lets you jump to things in Emacs. See https://github.com/abo-abo/avy
+
+There are a lot of avy commands. Click this to see them: [[elisp:(apropos-command "^avy")]]
+
+We use a lot of them in [[id:845FEBB4-A733-4EF2-8329-4B7C2AF2767B][Navigation - navy]].
+
+** counsel
+
+This is for completing stuff. See http://oremacs.com/2015/04/09/counsel-completion/
+
+In particular, scimax sets these keybindings:
+
+("M-x" . counsel-M-x)
+("C-x b" . ivy-switch-buffer)
+("C-x C-f" . counsel-find-file)
+("C-h f" . counsel-describe-function)
+("C-h v" . counsel-describe-variable)
+("C-h i" . counsel-info-lookup-symbol)
+("H-c r" . ivy-resume)
+("H-c l" . counsel-load-library)
+("H-c g" . counsel-git-grep)
+("H-c a" . counsel-ag)
+("H-c p" . counsel-pt)
+
+** helm
+
+Helm is another completion tool. See https://github.com/emacs-helm/helm
+
+Type C-c h C-h to see the helm key bindings. There are so many good things in there!
+
+** swiper
+
+This is a powerful search tool in Emacs. See https://github.com/abo-abo/swiper
+
+C-s is bound to `counsel-grep-or-swiper' for searching.
+
+** undo-tree
+
+There are a few undo features:
+
+| C-/   | undo the last action          |
+| C-x u | use the undo-tree (q to quit) |
+
 
 * Scientific notebook
+
 scimax provides a scientific notebook capability. Each "notebook" is actually collection of org-files in a "project". A project is the set of files in a directory that is under git version control. Each project should have a master file (the default is README.org, but you can customize `nb-master-file' to change this). The master file contains what ever you want, but typically it links to other documents in the project and provides an overview of the project.
 
 You are basically free to structure the notebook however you want. You have all the freedom of org-mode at your fingers to document your work.
@@ -1042,23 +1122,31 @@ Use `nb-open' to open a project. This will open the project to your master file.
 
 Probably you will keep your projects separate from your agenda files, but you still would like to see what tasks the project has? Use `nb-agenda' while in your project, and it will show you all the tasks in the org-files associated with the project.
 
-Here are some other interesting commands
-- `counsel-git-grep'
-- `projectile-find-file'
-- `projectile-switch-to-buffer'
-- `projectile-kill-buffers'
+Here are some other interesting commands you may want to use.
 
-- `ivy-org-jump-to-heading'
-- `ivy-org-jump-to-heading-in-directory'
-- `ivy-org-jump-to-project-headline'
-- `counsel-org-tag'
+- `counsel-git-grep' :: grep for a string in the project
+- `projectile-find-file' :: jump to a file in the project
+- `projectile-switch-to-buffer' :: switch to a project buffer
+- `projectile-kill-buffers' :: kill all the buffers associated with the project
 
-You can manage the version control with magit
+These commands help you navigate to a headline.
+
+- `ivy-org-jump-to-heading' :: in the current file
+- `ivy-org-jump-to-heading-in-directory' :: in the current directory
+- `ivy-org-jump-to-project-headline' :: in the project
+
+- `counsel-org-tag' :: add/remove tags on a headline
+
+You can manage the version control with [[id:2695CB66-23F3-45B9-B75D-1A50206900E0][Magit]]. There are also keyboard shortcuts for version control. Type C-x v C-h to see them.
 
 - `vc-next-action' will do the next logical thing for vc, e.g. add or commit.
 - `vc-diff' will show you what has changed in the buffer since the last commit.
 - `vc-print-log' will show you the vc log.
-- `magit-status' is the portal command to see the status of the repo.
+
+scimax defines these additional key bindings:
+
+| C-x v p | git push |
+| C-x v P | git pull |
 
 ** TODO archive the notebook with git
 
@@ -1093,7 +1181,7 @@ In the ivy selection buffer
 | s-RET         | quit with no action                                        |
 | ?             | show keymap help                                           |
 
-I use Hyper-c as a prefix map for a lot of commands.
+I use Hyper-c as a prefix map for a these commands.
 
 | H-c r | `ivy-resume'           |
 | H-c l | `counsel-load-library' |
@@ -1116,6 +1204,9 @@ Here are some additional actions we define for `counsel-find-file'.
 | L   | absolute org link    |
 | r   | rename file          |
 * Navigation - navy
+  :PROPERTIES:
+  :ID:       845FEBB4-A733-4EF2-8329-4B7C2AF2767B
+  :END:
 
 `navy' is bound to f12. It opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
 
@@ -1139,18 +1230,22 @@ There are some useful bindings in `navy' also.
 | a | swiper-all                     |
 
 * Appendix
+
 `scimax-help' will open this document.
 
 ** Emacs
-Emacs is described as "self-documenting", and it provides a lot of introspective ways to access documentation. A classic way to access help is via "info" pages. These are hyperlinked documents containing a lot of detail about Emacs and its libraries. In an info page, type these keys to do some basic navigation:
+Emacs is described as "self-documenting", and it provides a lot of introspective ways to access documentation. A classic way to access help is via "info" pages. These are hyperlinked documents containing a lot of detail about Emacs and its libraries. 
 
+Emacs-manual: info:Emacs
+
+#+caption: Type these keys to do some basic navigation in an Info page.
 | n | goto next page            |
 | u | up a node                 |
 | d | Main directory            |
 | ? | list of keys and commands |
 | q | quit                      |
 
-Emacs-manual: info:Emacs
+
 Emacs libraries: info:dir
 Emacs-lisp manual: info:elisp
 
@@ -1179,6 +1274,10 @@ s       Jumps to the SEE ALSO manpage section.
 q       Deletes the manpage window, bury its buffer.
 k       Deletes the manpage window, kill its buffer.
 ?       Prints this help text.
+
+scimax also defines a link for man pages.
+
+[[man:BSDTAR(1)%20][Manpage for BSDTAR(1)]]
 
 *** What happens if I press a key?
 
