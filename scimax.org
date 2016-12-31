@@ -245,7 +245,7 @@ The highlights are not part of org-mode, and they do not export to any backend. 
 
 ** org-ref
 
-org-ref is the answer to citations and bibliographies in scientific writing. Run `org-ref-help' and read it.
+org-ref is the answer to citations and bibliographies in scientific writing. Run `org-ref-help'  and read it.
 
 ** TODO Publishing (ox-manuscript)
 
@@ -299,7 +299,369 @@ We have templates prepared for the following manuscripts, proposals and document
 - `ox-manuscript-new-helm'
 
 * Bibliography management
-see also `org-ref'.
+
+Bibliographies in scimax are stored in bibtex files. A bibtex file is a plain text file containing bibtex entries. Each entry describes an item. Here is a typical example.
+
+#+BEGIN_EXAMPLE
+@article{kitchin-2015-examp,
+  author =	 {Kitchin, John R.},
+  title =	 {Examples of Effective Data Sharing in Scientific Publishing},
+  journal =	 {ACS Catalysis},
+  volume =	 {5},
+  number =	 {6},
+  pages =	 {3894-3899},
+  year =	 2015,
+  doi =		 {10.1021/acscatal.5b00538},
+  url =		 { http://dx.doi.org/10.1021/acscatal.5b00538 },
+  keywords =	 {DESC0004031, early-career, orgmode, Data sharing },
+  eprint =	 { http://dx.doi.org/10.1021/acscatal.5b00538 },
+}
+#+END_EXAMPLE
+
+This entry identifies the item as an article, labels it with a key (kitchin-2015-examp), and describes the details of the item in a series of key = {value} lines. You can learn more about bibtex here http://www.bibtex.org.
+
+
+If you know the DOI I recommend you use `doi-add-bibtex-entry' as much as possible to add bibtex entries to your bibliography files. This will add properly formatted and cleaned entries and download the pdf if it knows how. You may also find `crossref-add-bibtex-entry' useful if you have a freeform citation and want to search for it.
+
+In a bibtex file, `org-ref-bibtex-hydra/body' will give you a menu of options to do things on an entry including:
+
+1. Search pubmed, WebOfScience (wos), wos-citing, wos-related, crossref, and google scholar using the DOI or title of the entry.
+2. Clean the entry, replace non-ascii characters, sort the entry fields, or change the case of the title.
+3. Update the entry or fields using the doi.
+4. Open the notes, pdf, or url associated with the entry.
+5. Email the entry to someone
+6. Copy or cut the entry to paste somewhere
+7. Copy a formatted bibliography entry
+8. Add tags to an entry
+9. Add a new entry
+
+`org-ref-bibtex-file/body' provides menu access to bibtex file functions:
+1. `bibtex-validate' - Checks if the file is syntactically valid, and for duplicate keys.
+2. `bibtex-sort-buffer'
+3. `bibtex-reformat'
+4. `bibtex-count-entries'
+5. `org-ref-build-full-bibliography'
+
+
+** Searching your bibliography files
+
+I like `helm-bibtex'. You type C-SPC to mark multiple entries. Type TAB to see what actions you can perform on the entries.
+
+See `org-ref-help' for information on using org-ref to insert citations.
+
+
+** Bibtex entries
+
+Here are the bibtex entry types and fields you should use. You can add extra fields like keywords, doi, url, notes, etc... to each entry. Usually they will be ignored by bibtex, but they are useful for you. Note that [[https://www.ctan.org/pkg/biblatex?lang=en][biblatex]] is considered a more powerful bibliography formatting tool, but we use bibtex because that is what most of the publishers we use support.
+
+#+BEGIN_SRC emacs-lisp :results output drawer org raw
+(loop for (type doc required crossref optional) in bibtex-BibTeX-entry-alist
+      do
+      (princ (format "\n*** %s (%s)\n" type doc))
+      (princ "\n**** Required fields\n\n")
+      (loop for field in required
+	    do
+	    (princ (format "- %s" (car field)))
+	    (message "%s" field)
+	    (if (>= (length field) 2)
+		(princ (format " :: %s\n" (nth 1 field)))
+	      (princ "\n")))
+      
+      (princ "\n**** Optional if Crossref present but otherwise required fields\n\n")
+      (loop for field in crossref
+	    do
+	    (princ (format "- %s" (car field)))
+	    (if (>= (length field) 2)
+		(princ (format " :: %s\n" (nth 1 field)))
+	      (princ "\n")))
+      (princ "\n**** Optional fields\n\n")
+      (loop for field in optional
+	    do
+	    (princ (format "- %s" (car field)))
+	    (if (>= (length field) 2)
+		(princ (format " :: %s\n" (nth 1 field)))
+	      (princ "\n"))))
+#+END_SRC
+
+#+RESULTS:
+
+*** Article (Article in Journal)
+
+**** Required fields
+
+- author
+- title :: Title of the article (BibTeX converts it to lowercase)
+
+**** Optional if Crossref present but otherwise required fields
+
+- journal
+- year
+
+**** Optional fields
+
+- volume :: Volume of the journal
+- number :: Number of the journal (only allowed if entry contains volume)
+- pages :: Pages in the journal
+- month
+- note
+
+*** InProceedings (Article in Conference Proceedings)
+
+**** Required fields
+
+- author
+- title :: Title of the article in proceedings (BibTeX converts it to lowercase)
+
+**** Optional if Crossref present but otherwise required fields
+
+- booktitle :: Name of the conference proceedings
+- year
+
+**** Optional fields
+
+- editor
+- volume :: Volume of the conference proceedings in the series
+- number :: Number of the conference proceedings in a small series (overwritten by volume)
+- series :: Series in which the conference proceedings appeared
+- pages :: Pages in the conference proceedings
+- month
+- address
+- organization :: Sponsoring organization of the conference
+- publisher :: Publishing company, its location
+- note
+
+*** InCollection (Article in a Collection)
+
+**** Required fields
+
+- author
+- title :: Title of the article in book (BibTeX converts it to lowercase)
+- booktitle :: Name of the book
+
+**** Optional if Crossref present but otherwise required fields
+
+- publisher
+- year
+
+**** Optional fields
+
+- editor
+- volume :: Volume of the book in the series
+- number :: Number of the book in a small series (overwritten by volume)
+- series :: Series in which the book appeared
+- type :: Word to use instead of "chapter"
+- chapter :: Chapter in the book
+- pages :: Pages in the book
+- edition :: Edition of the book as a capitalized English word
+- month
+- address
+- note
+
+*** InBook (Chapter or Pages in a Book)
+
+**** Required fields
+
+- author :: nil
+- editor :: nil
+- title :: Title of the book
+- chapter :: Chapter in the book
+
+**** Optional if Crossref present but otherwise required fields
+
+- publisher
+- year
+
+**** Optional fields
+
+- volume :: Volume of the book in the series
+- number :: Number of the book in a small series (overwritten by volume)
+- series :: Series in which the book appeared
+- type :: Word to use instead of "chapter"
+- address
+- edition :: Edition of the book as a capitalized English word
+- month
+- pages :: Pages in the book
+- note
+
+*** Proceedings (Conference Proceedings)
+
+**** Required fields
+
+- title :: Title of the conference proceedings
+- year
+
+**** Optional if Crossref present but otherwise required fields
+
+
+**** Optional fields
+
+- booktitle :: Title of the proceedings for cross references
+- editor
+- volume :: Volume of the conference proceedings in the series
+- number :: Number of the conference proceedings in a small series (overwritten by volume)
+- series :: Series in which the conference proceedings appeared
+- address
+- month
+- organization :: Sponsoring organization of the conference
+- publisher :: Publishing company, its location
+- note
+
+*** Book (Book)
+
+**** Required fields
+
+- author :: nil
+- editor :: nil
+- title :: Title of the book
+
+**** Optional if Crossref present but otherwise required fields
+
+- publisher
+- year
+
+**** Optional fields
+
+- volume :: Volume of the book in the series
+- number :: Number of the book in a small series (overwritten by volume)
+- series :: Series in which the book appeared
+- address
+- edition :: Edition of the book as a capitalized English word
+- month
+- note
+
+*** Booklet (Booklet (Bound, but no Publisher))
+
+**** Required fields
+
+- title :: Title of the booklet (BibTeX converts it to lowercase)
+
+**** Optional if Crossref present but otherwise required fields
+
+
+**** Optional fields
+
+- author
+- howpublished :: The way in which the booklet was published
+- address
+- month
+- year
+- note
+
+*** PhdThesis (PhD. Thesis)
+
+**** Required fields
+
+- author
+- title :: Title of the PhD. thesis
+- school :: School where the PhD. thesis was written
+- year
+
+**** Optional if Crossref present but otherwise required fields
+
+
+**** Optional fields
+
+- type :: Type of the PhD. thesis
+- address :: Address of the school (if not part of field "school") or country
+- month
+- note
+
+*** MastersThesis (Master's Thesis)
+
+**** Required fields
+
+- author
+- title :: Title of the master's thesis (BibTeX converts it to lowercase)
+- school :: School where the master's thesis was written
+- year
+
+**** Optional if Crossref present but otherwise required fields
+
+
+**** Optional fields
+
+- type :: Type of the master's thesis (if other than "Master's thesis")
+- address :: Address of the school (if not part of field "school") or country
+- month
+- note
+
+*** TechReport (Technical Report)
+
+**** Required fields
+
+- author
+- title :: Title of the technical report (BibTeX converts it to lowercase)
+- institution :: Sponsoring institution of the report
+- year
+
+**** Optional if Crossref present but otherwise required fields
+
+
+**** Optional fields
+
+- type :: Type of the report (if other than "technical report")
+- number :: Number of the technical report
+- address
+- month
+- note
+
+*** Manual (Technical Manual)
+
+**** Required fields
+
+- title :: Title of the manual
+
+**** Optional if Crossref present but otherwise required fields
+
+
+**** Optional fields
+
+- author
+- organization :: Publishing organization of the manual
+- address
+- edition :: Edition of the manual as a capitalized English word
+- month
+- year
+- note
+
+*** Unpublished (Unpublished)
+
+**** Required fields
+
+- author
+- title :: Title of the unpublished work (BibTeX converts it to lowercase)
+- note
+
+**** Optional if Crossref present but otherwise required fields
+
+
+**** Optional fields
+
+- month
+- year
+
+*** Misc (Miscellaneous)
+
+**** Required fields
+
+
+**** Optional if Crossref present but otherwise required fields
+
+
+**** Optional fields
+
+- author
+- title :: Title of the work (BibTeX converts it to lowercase)
+- howpublished :: The way in which the work was published
+- month
+- year
+- note
+
+
+
+
+
+
 
 * Email
 - `email-region' :: emails selected region
@@ -320,34 +682,212 @@ First, add some org-files to the variable `contacts-files'. Any headline in thes
 
 See `contacts-help' for more information.
 
-* RSS feeds
+* Google
+[[https://github.com/Malabarba/emacs-google-this][google-this]] is installed in scimax. You can use these commands:
 
-It is a major challenge to keep up with the scientific literature. `elfeed' is the package we use in scimax for that. It aggregates RSS feeds and provides a pretty easy way to consume them, capture them in to org-mode, search them, and do things with them. scimax preconfigures elfeed with some python, and emacs feeds, and you can easily add new feeds:
+C-c / SPC	`google-this-region'
+C-c / a		`google-this-ray'
+C-c / c		`google-this-translate-query-or-region'
+C-c / e		`google-this-error'
+C-c / f		`google-this-forecast'
+C-c / g		`google-this-lucky-search'
+C-c / i		`google-this-lucky-and-insert-url'
+C-c / l		`google-this-line'
+C-c / m		`google-maps'
+C-c / n		`google-this-noconfirm'
+C-c / r		`google-this-cpp-reference'
+C-c / s		`google-this-symbol'
+C-c / t		`google-this'
+C-c / w		`google-this-word'
+C-c / <return>	`google-this-search'
 
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'elfeed-feeds "http://feeds.feedburner.com/acs/accacs")
-#+END_SRC
+* Magit
+Magit is a front-end for git version control. There is a good manual here: [[info:magit#Top][info:magit#Top]]
 
-or if you want entries from a feed to be automatically tagged, e.g. anything from Nature magazine could be tagged with nature:
-
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'elfeed-feeds '("http://feeds.nature.com/nchem/rss/current" nature))
-#+END_SRC
+Use f5 to enter `magit-status'.
 
 
-Elfeed is configured to run every half hour after Emacs is started.
+** Basic magit
+*** Create a git repo
+  [[info:magit#Repository%20setup][info:magit#Repository setup]]
+  You can create a git repo with M-x magit-init. This will create a git-repo in the current directory.
 
-On an entry you can type:
-| e | email entry to someone        |
-| c | capture the entry to org-mode |
-| d | add bibtex entry              |
+  #+BEGIN_SRC emacs-lisp
+(magit-init)
+  #+END_SRC
 
-In the list of entries you can type:
-| f,j | marks entry as read                                                       |
-| o   | open the entry                                                            |
-| b   | open browser to entry url                                                 |
-| s   | start a search query (see https://github.com/skeeto/elfeed#filter-syntax) |
+  help:magit-init
 
+*** Clone a repo
+  [[info:magit#Repository%20setup][info:magit#Repository setup]]
+
+  M-x magit-clone
+
+  This will prompt you for a repo, which is either a url, or a path, and a path to clone it to.
+
+  help:magit-clone
+
+*** Check the status of your repo
+  [[info:magit#Status%20buffer][info:magit#Status buffer]]
+
+  Run M-x magit-status to see the status of your repo.
+
+  Press "g" in the window to refresh it.
+
+  press "n" (next) or "p" (previous) to navigate in this window.
+
+  help:magit-status
+
+*** Stage a file
+  [[info:magit#Staging%20and%20unstaging][info:magit#Staging and unstaging]]
+
+  In the magit-status window, put your cursor on an unstaged file and press "s".
+
+  If you press TAB on the file, it will expand to show the changes that are unstaged. Deletions show in red, and additions in green. The changes are in "hunks".
+
+  You can unstage a file with "u"
+
+*** Commit a file
+  [[info:magit#Initiating%20a%20commit][info:magit#Initiating a commit]]
+
+  [[info:magit#Editing%20commit%20messages][info:magit#Editing commit messages]]
+
+  In the magit-status window with some files that are staged, press "c", review the options, and probably press "c" again. Enter a commit message and type "C-c C-c" to commit it, or "C-c C-k" to cancel it.
+
+*** Diffs
+  [[info:magit#Diffing][info:magit#Diffing]]
+
+  From the magit-status window, press "d" then "d" to see what has changed.
+
+*** See the log
+  [[info:magit#Logging][info:magit#Logging]]
+
+  In the magit-status window press "l", review the options, and press "l" again.
+
+  If you want to see only the commits that affected a file, in the magit-status window press "l" then "=f", enter the filename, and then press "l" again.
+
+*** Push
+  [[info:magit#Pushing][info:magit#Pushing]]
+
+  In the magit-status window press "P" then "p".
+
+  Note that tags don't normally get pushed, but there are options ("T" to push a tag, and "t" to push all tags).
+
+*** Pull
+  [[info:magit#Pulling][info:magit#Pulling]]
+  In the magit-status window press "F" then "p".
+
+*** Run a command-line git command manually
+  [[info:magit#Running%20Git%20manually][info:magit#Running Git manually]]
+  In the magit-status window, type "!" to get the popup and choose what you want to do (e.g. where to run the command, etc... You do not need to type "git" in the command. Note you can also run a shell command from this interface.
+
+*** Check the output of the git command
+  Press "$"
+
+*** Keybindings
+  [[info:magit#Keystroke%20Index][info:magit#Keystroke Index]]
+** Intermediate concepts
+*** Checkout an older version of a file
+  Use M-x magit-checkout-file select the branch, or enter a revision, and then choose a file.
+
+ help:magit-checkout-file 
+
+ help:magit-find-file
+ help:magit-find-file-other-window
+
+*** Search the commit messages for a pattern
+ In a magit-status window press "l =g" enter a pattern to grep for, and then press "l".
+*** Revert a commit
+ [[info:magit#Reverting][info:magit#Reverting]]
+
+  Got to the log, select the commit and type "V" then "V".
+*** Tag a version
+  [[info:magit#Tagging][info:magit#Tagging]]
+
+  press "t" in the magit-status window. You can then create a tag, annotate it, delete tags, and prune them.
+*** Checkout an existing branch.
+  [[info:magit#The%20branch%20popup][info:magit#The branch popup]]
+
+  In the magit-status window press "b" then "b" and choose the branch.
+
+  To checkout a new branch, in the magit-status window press "b" then "c". Choose the branch to start from then a name for the new branch.
+
+*** Merge two branches
+  [[info:magit#Merging][info:magit#Merging]]
+
+  In the magit-status window press "m", then "m" and select the branch to merge into the current one.
+*** TODO Resolving conflicts
+ [[info:magit#Resolving%20conflicts][info:magit#Resolving conflicts]]
+
+ You will probably also want to get familiar with [[info:ediff#Top][info:ediff#Top]].
+
+ On a file in a magit-status window, press "e" to enter the 3-window ediff view. The A window is the version at HEAD, the B window is what is in the index, and the C window is the current version.
+
+*** Fetching
+ [[info:magit#Fetching][info:magit#Fetching]]
+
+ In the magit-status window press "f".
+
+*** Add a remote
+  [[info:magit#Remotes][info:magit#Remotes]]
+
+  M-x magit-remote-add
+  then enter an alias, and the url.
+
+*** Stashing
+ [[info:magit#Stashing][info:magit#Stashing]]
+
+ Press "z" in the magit-status window
+*** Git blame
+** Advanced concepts
+*** Resetting
+ [[info:magit#Resetting][info:magit#Resetting]]
+
+*** Rebasing 
+  [[info:magit#Rebasing][info:magit#Rebasing]]
+
+**** Interactve rebasing
+  Open the log, select the oldest commit you want to rebase on then press "r" and then "i". Use M-p and M-n to move commits around. Press "s" on any commits you want to squash into the commit above it. C-c C-c will start the commands.
+
+  From the magit-status on unpushed commits, you can also press "r" to get the rebase popup.
+
+**** Reword a commit message
+  "r w" allows you to reword the commit message.
+
+*** Create patches
+  [[info:magit#Creating%20and%20sending%20patches][info:magit#Creating and sending patches]]
+
+  In magit-status window, press "W"
+
+  "W p" creates patches
+  "W r" makes a pull request. This just creates an email with information in it. It is not a GitHUB request, and it is only useful if there is a public, external copy of the repo.
+*** Cherry-picking 
+ [[info:magit#Cherry%20picking][info:magit#Cherry picking]]
+
+ Press "A"
+
+*** Apply patches
+  [[info:magit#Applying%20patches][info:magit#Applying patches]]
+
+*** Notes about commits
+  [[info:magit#Notes][info:magit#Notes]]
+
+  Press "T" to attach a note.
+
+  A typical use of notes is to supplement a commit message without changing the
+	  commit itself. Notes can be shown by git log along with the original
+	  commit message. To distinguish these notes from the message stored in
+	  the commit object, the notes are indented like the message, after an
+	  unindented line saying "Notes (<refname>):" (or "Notes:" for
+	  refs/notes/commits).
+
+*** Cherry-picking 
+ [[info:magit#Cherry%20picking][info:magit#Cherry picking]]
+
+
+* Project management - projectile
+
+https://github.com/bbatsov/projectile for project management.
 
 * Programming
 ** Python
@@ -411,9 +951,36 @@ scimax provides the jupyter-hy src block to run hylang in src blocks. The requir
 : Fri Jun 10 10:21:24 2016
 
 
-
 ** Emacs-lisp
 - `lispy-mode' is just amazing.
+
+* RSS feeds
+
+It is a major challenge to keep up with the scientific literature. `elfeed' is the package we use in scimax for that. It aggregates RSS feeds and provides a pretty easy way to consume them, capture them in to org-mode, search them, and do things with them. scimax preconfigures elfeed with some python, and emacs feeds, and you can easily add new feeds:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'elfeed-feeds "http://feeds.feedburner.com/acs/accacs")
+#+END_SRC
+
+or if you want entries from a feed to be automatically tagged, e.g. anything from Nature magazine could be tagged with nature:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'elfeed-feeds '("http://feeds.nature.com/nchem/rss/current" nature))
+#+END_SRC
+
+
+Elfeed is configured to run every half hour after Emacs is started.
+
+On an entry you can type:
+| e | email entry to someone        |
+| c | capture the entry to org-mode |
+| d | add bibtex entry              |
+
+In the list of entries you can type:
+| f,j | marks entry as read                                                       |
+| o   | open the entry                                                            |
+| b   | open browser to entry url                                                 |
+| s   | start a search query (see https://github.com/skeeto/elfeed#filter-syntax) |
 
 * Miscellaneous scimax utilities
 ** Open a bash window
@@ -445,12 +1012,7 @@ I bind this to a key like "f9" and set it up to easily open my mail, calendar an
 #+END_SRC
 
 * Other Packages
-** magit
-Use f5 to enter `magit-status'.
 
-** projectile
-
-https://github.com/bbatsov/projectile for project management.
 
 ** undo-tree
 There are a few undo features:
