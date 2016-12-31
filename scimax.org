@@ -683,17 +683,24 @@ Here are the bibtex entry types and fields you should use. You can add extra fie
 
 * Email utilities
 
-- `email-region' :: emails selected region
 - `email-buffer' :: email the whole buffer
-- `email-bibtex-entry' :: email the bibtex entry at point
-
-These require mu4e for mail, and store properties on the headline that indicate where it was sent.
-
+- `email-region' :: emails selected region
 - `email-heading' :: email the current heading, including properties, deadlines, etc...
 - `email-heading-body' :: email just the body of the current heading
+- `email-bibtex-entry' :: email the bibtex entry at point
 
-** TODO html mail
-** TODO mail merge
+** html mail
+
+You can send html email from org-mode.
+
+From an org-file run `org-mime'. You will be prompted for the scope to send, which is either the whole buffer, the heading you are in, or the selected region. Then you will select how to make the email: html will export the text to html and put it in an email, and htmlize will use the htmlize library to generate the html.
+
+Alternatively, you may want to type org-mode directly in an email buffer. Use `org-mime-compose-mail' to do that.
+
+** mail merge
+
+scimax provides some tools to do a mail merge in org-mode. The idea is to run `mail-merge-make-headings' with a template and data-source to generate a series of org-mode headings that are the messages. You can inspect these, edit them if needed, and then run `mail-merge' to actually send them. Each heading will be tagged as sent, and marked DONE.
+
 * Contacts
 
 scimax provides a emacs-lisp library to interface with a contact database written in org-mode. 
