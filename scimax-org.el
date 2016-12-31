@@ -866,6 +866,33 @@ F5 inserts the entity code."
        "")))))
 
 
+(defun org-man-store-link ()
+  "Store a link to a man page."
+  (when (memq major-mode '(Man-mode woman-mode))
+    (let* ((page (save-excursion
+		   (goto-char (point-min))
+		   (re-search-forward " ")
+		   (buffer-substring (point-min) (point))))
+	   (link (concat "man:" page))
+	   (description (format "Manpage for %s" page)))
+      (org-store-link-props
+       :type "man"
+       :link link
+       :description description))))
+
+(if (fboundp 'org-link-set-parameters)
+    (org-link-set-parameters
+     "man"
+     :follow (lambda (path)
+	       (man path))
+     :store 'org-man-store-link))
+
+
+
+
+
+
+
 ;; * ivy navigation
 (defun ivy-org-jump-to-visible-headline ()
   "Jump to visible headline in the buffer."
