@@ -283,7 +283,7 @@ Example usage:
 	       (end-of-line)
 	       (insert (or (cdr (assoc "HEADLINE" data))
 			   (cdr (assoc "SUBJECT" data))))
-	       (org-end-of-meta-data-and-drawers)
+	       (org-end-of-meta-data)
 	       (insert (s-format s-template 'aget data))
 	       ;; refill now that it is expanded
 	       (save-restriction
