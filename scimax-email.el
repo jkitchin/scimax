@@ -308,7 +308,7 @@ With prefix arg, also send the message and move to the next one."
 		     (unless (org-on-heading-p) (outline-previous-heading))
 		     (let ((headline (org-element-at-point)))
 		       (buffer-substring
-			(org-end-of-meta-data-and-drawers)
+			(progn (org-end-of-meta-data t) (point))
 			(org-element-property :contents-end headline)))))
 	  (TO (org-entry-get (point) "TO" t))
 	  (CC (org-entry-get (point) "CC" t))
