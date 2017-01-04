@@ -29,6 +29,9 @@
 
 (setq org-use-speed-commands t)
 
+(add-to-list 'org-speed-commands-user (cons "P" 'org-set-property))
+(add-to-list 'org-speed-commands-user (cons "d" 'org-deadline))
+
 ;; Mark a subtree
 (add-to-list 'org-speed-commands-user (cons "m" 'org-mark-subtree))
 
