@@ -634,7 +634,7 @@ end tell" (cdr (assoc "PHONE" contact))))))
 			   (format "%s <%s>"
 				   (nth 4 (org-heading-components))
 				   (org-entry-get (point) "EMAIL"))))))
-	("p" . (lambda ()
+	("P" . (lambda ()
 		 (when (org-entry-get (point) "PHONE")
 		   (do-applescript
 		    (format "tell application \"Cisco Jabber\"
