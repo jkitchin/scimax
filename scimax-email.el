@@ -118,7 +118,7 @@ subsequent sends."
 	  (CC (org-entry-get (point) "CC" t))
 	  (BCC (org-entry-get (point) "BCC" t))
 	  (SUBJECT (nth 4 (org-heading-components)))
-	  (OTHER-HEADERS (eval (org-entry-get (point) "OTHER-HEADERS")))
+	  (OTHER-HEADERS (read (org-entry-get (point) "OTHER-HEADERS")))
 	  (continue nil)
 	  (switch-function nil)
 	  (yank-action nil)
@@ -240,7 +240,9 @@ The function will make a headline called Messages as a subheading
 of the current heading, and each message will be a subheading of
 the Messages heading.
 
-an org-id will be created for each message.  you can use ${ID} in the S-TEMPLATE.
+an org-id will be created for each message. you can use ${ID} in
+the S-TEMPLATE to refer to the ID property of the generated
+message headline.
 
 Each message will be tagged :unsent:
 
@@ -357,7 +359,7 @@ With prefix arg, also send the message and move to the next one."
   "Run a mail-merge in the current heading.
 This will map over entries tagged unsent with a TO property, and
 mail the body of each heading using
-`email-heading-body'. Headings tagged ignore will be ignored."
+`mail-merge-send-heading'. Headings tagged ignore will be ignored."
   (interactive)
   (org-map-entries
    (lambda ()
@@ -367,6 +369,32 @@ mail the body of each heading using
    "unsent-ignore+TO={.}"))
 
 
+;; ** Speed commands for mail-merge
+(defun org-speed-mail-merge (keys)
+  "Find the command to run for KEYS."
+  (when (or (and (bolp) (looking-at org-outline-regexp)
+		 (not (null (org-entry-get (point) "TO")))))
+    (cdr (assoc keys org-speed-commands-mail-merge))))
+
+(defun mail-merge-speed-key-help ()
+  "Print speed key help."
+  (with-output-to-temp-buffer "*Help*"
+    (princ "Mail merge speed commands\n==========================\n")
+    (mapc #'org-print-speed-command org-speed-commands-mail-merge)
+    (princ "\n")
+    (princ "User-defined Speed commands\n===========================\n")
+    (mapc #'org-print-speed-command org-speed-commands-user)
+    (princ "Built-in Speed commands\n=======================\n")
+    (mapc #'org-print-speed-command org-speed-commands-default))
+  (with-current-buffer "*Help*"
+    (setq truncate-lines t)))
+
+(setq org-speed-commands-mail-merge
+      '(("m" . (mail-merge-send-heading))
+	("s" . (mail-merge-send-heading t))
+	("?" . mail-merge-speed-key-help)))
+
+(add-hook 'org-speed-command-hook 'org-speed-mail-merge)
 
 (provide 'scimax-email)
 
