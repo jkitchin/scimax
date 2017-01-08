@@ -347,8 +347,12 @@ if __name__ == '__main__':
 
 ;; Create the windows python script if needed.
 (when (and (eq system-type 'windows-nt)
-	   (not (file-exists-p ox-clip-w32-cmd)))
-  (with-temp-file "html-clip-w32.py"
+	   (not (file-exists-p (expand-file-name
+				"html-clip-w32.py"
+				(file-name-directory (or load-file-name (locate-library "ox-clip")))))))
+  (with-temp-file (expand-file-name
+		   "html-clip-w32.py"
+		   (file-name-directory (or load-file-name (locate-library "ox-clip"))))
     (insert ox-clip-w32-py)))
 
 
