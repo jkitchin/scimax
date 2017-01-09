@@ -256,9 +256,10 @@ cycling, checkboxes, etc...
 (defun ore-keyword (element)
   "`ore' documentation for a keyword."
   (concat
+   (format "You are on a keyword.
+%s: %s\n" (org-element-property :key element) (org-element-property :value element))
    (substitute-command-keys
-    "You are on a keyword.
-
+    "
 You may need to run \\[org-ctrl-c-ctrl-c] or `org-ctrl-c-ctrl-c'
 to refresh its value if you change it.
 
@@ -266,6 +267,11 @@ You can move keywords up and down with \\[org-metaup] or
 `org-metaup' and \\[org-metadown] or `org-metadown'.
 
 ")
+   (format "These keywords change export behavior:
+%s\n\n" (mapconcat 'identity (org-get-export-keywords) " "))
+   (format "These keywords change options:
+%s\n\n" (mapconcat 'identity org-options-keywords " "))
+
    (format  "\nClick for details on the face [[face:%s]]\n" (face-at-point))
    (ore-user-documentation 'keyword)))
 
