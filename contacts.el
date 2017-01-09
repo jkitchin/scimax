@@ -667,6 +667,43 @@ end tell" (org-entry-get (point) "PHONE"))))))
   (find-file (expand-file-name "contacts.org" (file-name-directory
 					       (locate-library "contacts")))))
 
+;; * Locations
+;; We can treat a headline like a location if they have an ADDRESS
+(defun location-google-maps ()
+  (interactive)
+  (google-maps (org-entry-get (point) "ADDRESS")))
+
+(defun contact-store-location-link ()
+  "Store a contact location link"
+  (when (org-entry-get (point) "ADDRESS")
+    (push (list (format "location:%s" (org-id-get-create))
+		(or (org-entry-get (point) "NAME")
+		    (nth 4 (org-heading-components))))
+	  org-stored-links)))
+
+(org-link-set-parameters
+ "location"
+ :follow (lambda (path) (contact/body))
+ :complete (lambda (&optional arg)
+	     (format "location:%s" (org-link-unescape
+				    (completing-read
+				     "Name: "
+				     (mapcar (lambda (contact)
+					       (cdr (assoc "NAME" (cdr contact))))
+					     contacts)))))
+ :face '(:foreground "BlueViolet")
+ :help-echo (lambda (window object position)
+	      (save-excursion
+		(goto-char position)
+		(let ((id (org-element-property
+			   :path (org-element-context))))
+		  (save-window-excursion
+		    (org-id-goto id)
+		    (save-restriction
+		      (org-narrow-to-subtree)
+		      (buffer-string))))))
+ :store #'contact-store-location-link)
+
 ;; * The end
 (provide 'contacts)
 
