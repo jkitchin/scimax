@@ -916,6 +916,27 @@ Fall back to `tex-count-words'"
     (message (concat "Warning: texcount not found. Word estimate does not exclude cite/ref commands. "
 		     (tex-count-words (region-beginning) (region-end))))))
 
+;; * Sync-mode
+(define-minor-mode ox-manuscript-sync-mode
+  "Minor mode for synchronizing an org-file and pdf."
+  :init-value nil
+  :lighter " sync"
+  ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Minor-Mode-Conventions.html
+  (let ((enable ox-manuscript-sync-mode))
+    (if enable
+	(add-hook 'after-save-hook (lambda ()
+				     (org-latex-export-to-pdf 't)
+				     (find-file-other-window
+				      (concat
+				       (file-name-base (buffer-file-name))
+				       ".pdf")))
+		  nil t)
+      (remove-hook 'after-save-hook (lambda ()
+				      (org-latex-export-to-pdf 't)
+				      (find-file-other-window
+				       (concat
+					(file-name-base (buffer-file-name))
+					".pdf")))))))
 
 (provide 'ox-manuscript)
 
