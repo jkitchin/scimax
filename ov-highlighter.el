@@ -618,7 +618,7 @@ _f_: foreground   _x_: box
   ("g" ov-highlight-green "green")
   ("p" ov-highlight-pink "pink") 
   ("y" ov-highlight-yellow "yellow")
-  ("c" ov-highlight "Choose color")
+  ("c" ov-highlight-color "Choose color")
   ("f" ov-highlight-foreground "Foreground")
 
   ("[" ov-highlight-decrease-font-size "Make size smaller" :color red)
