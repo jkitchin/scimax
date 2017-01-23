@@ -288,6 +288,7 @@ Example usage:
 	       (org-end-of-meta-data)
 	       (insert (s-format s-template 'aget data))
 	       ;; refill now that it is expanded
+	       (outline-previous-heading)
 	       (save-restriction
 		 (org-narrow-to-subtree)
 		 (goto-char (point-min))
