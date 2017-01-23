@@ -258,7 +258,7 @@ is positive, move after, and if negative, move before."
 ;; ** jupyter ipython blocks
 
 (add-to-list 'org-structure-template-alist
-	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
+	     '("ip" "#+BEGIN_SRC ipython :session\n?\n#+END_SRC"
 	       "<src lang=\"python\">\n?\n</src>"))
 
 (setq org-babel-default-header-args:ipython
