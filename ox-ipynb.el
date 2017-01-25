@@ -5,22 +5,47 @@
 
 ;;; Code:
 
+
 (defun export-ipynb-code-cell (src-result)
   "Return a lisp code cell for the org-element SRC-BLOCK."
   (let* ((src-block (car src-result))
 	 (results-end (cdr src-result))
-	 (results (car results-end)))
+	 (results (s-trim (substring-no-properties (car results-end))))
+	 output-cells
+	 img-path img-data)
+
+    ;; See if we have an inline image
+    (if (string-match "\\[\\[file:\\(.*?\\)\\]\\]" results)
+	(progn
+	  ;; We have an image so we make a data cell. It will be the only cell.
+	  (setq img-path (substring results 7 -2) ;; (match-string 1 results)
+		img-data (base64-encode-string
+			  (encode-coding-string
+			   (with-temp-buffer
+			     (insert-file-contents img-path)
+			     (buffer-string))
+			   'binary)
+			  t))
+	  (setq output-cells `(((data . ((image/png . ,img-data)
+					 ("text/plain" . "<matplotlib.figure.Figure>")))
+				(metadata . ,(make-hash-table))
+				(output_type . "display_data")))))
+      
+      (if results
+	  ;; For now we only support one output cell
+	  (setq output-cells `(((name . "stdout")
+				(output_type . "stream")
+				(text . ,results))))))
     
     `((cell_type . "code")
       (execution_count . 1)
-      ;; the hashtable trick converts to {} in json
-      (metadata . ,(make-hash-table))
-      ;; (vector) converts to [] in json
-      (outputs . ,(if (null results)
+      ;; the hashtable trick converts to {} in json. jupyter can't take a null here.
+      (metadata . ,(make-hash-table)) 
+      (outputs . ,(if (null output-cells)
+		      ;; (vector) json-encodes to  [], not null which
+		      ;; jupyter does not like.
 		      (vector)
-		    (vconcat `(((name . "stdout")
-				(output_type . "stream")
-				(text . ,(s-trim results)))))))
+		    (vconcat output-cells)))
       (source . ,(vconcat
 		  (list (s-trim (org-element-property :value src-block))))))))
 
@@ -34,6 +59,7 @@
 
 (defun ox-ipynb-filter-link (text back-end info)
   "Make a link into markdown.
+For some reason I was getting angle brackets in them I wanted to remove.
 This only fixes file links with no description I think."
   (if (s-starts-with? "<" text)
       (let ((path (substring text 1 -1)))
@@ -184,7 +210,7 @@ else is exported as a markdown cell.
 		'((nbformat . 4)
 		  (nbformat_minor . 0))))
     (with-temp-file ipynb
-      (insert (json-encode data))))))
+      (insert (json-encode data)))))
 
 (provide 'ox-ipynb)
 
