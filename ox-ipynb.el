@@ -4,38 +4,40 @@
 ;; 
 
 ;;; Code:
-
+(require 'ox-md)
 
 (defun export-ipynb-code-cell (src-result)
   "Return a lisp code cell for the org-element SRC-BLOCK."
   (let* ((src-block (car src-result))
 	 (results-end (cdr src-result))
-	 (results (s-trim (substring-no-properties (car results-end))))
-	 output-cells
-	 img-path img-data)
+	 (results (org-no-properties (car results-end)))
+	 (output-cells '())
+	 img-path img-data
+	 (start 0))
 
-    ;; See if we have an inline image
-    (if (string-match "\\[\\[file:\\(.*?\\)\\]\\]" results)
-	(progn
-	  ;; We have an image so we make a data cell. It will be the only cell.
-	  (setq img-path (substring results 7 -2) ;; (match-string 1 results)
-		img-data (base64-encode-string
-			  (encode-coding-string
-			   (with-temp-buffer
-			     (insert-file-contents img-path)
-			     (buffer-string))
-			   'binary)
-			  t))
-	  (setq output-cells `(((data . ((image/png . ,img-data)
-					 ("text/plain" . "<matplotlib.figure.Figure>")))
-				(metadata . ,(make-hash-table))
-				(output_type . "display_data")))))
-      
-      (if results
-	  ;; For now we only support one output cell
-	  (setq output-cells `(((name . "stdout")
-				(output_type . "stream")
-				(text . ,results))))))
+    ;; Handle inline images first
+    (while (string-match "\\[\\[file:\\(.*?\\)\\]\\]" results start)
+      (setq start (match-end 0))
+      (setq img-path (match-string 1 results) 
+	    img-data (base64-encode-string
+		      (encode-coding-string
+		       (with-temp-buffer
+			 (insert-file-contents img-path)
+			 (buffer-string))
+		       'binary)
+		      t))
+      (add-to-list 'output-cells `((data . ((image/png . ,img-data)
+					    ("text/plain" . "<matplotlib.figure.Figure>")))
+				   (metadata . ,(make-hash-table))
+				   (output_type . "display_data"))
+		   t))
+    ;; now remove the inline images and put the results in.
+    (setq results (s-trim (replace-regexp-in-string "\\[\\[file:\\(.*?\\)\\]\\]" "" results)))
+    (setq output-cells (append `(((name . "stdout")
+				  (output_type . "stream")
+				  (text . ,results)))
+			       output-cells))
+    
     
     `((cell_type . "code")
       (execution_count . 1)
@@ -76,7 +78,7 @@ This only fixes file links with no description I think."
 	      (buffer-substring-no-properties
 	       beg end)
 	      'md t '(:with-toc nil))))
-    
+
     `((cell_type . "markdown")
       (metadata . ,(make-hash-table))
       (source . ,(vconcat
@@ -101,10 +103,10 @@ This only fixes file links with no description I think."
 			(replace-regexp-in-string
 			 "<\\|>" ""
 			 value))))
-    
-    `((cell_type . "markdown")
-      (metadata . ,(make-hash-table))
-      (source . ,(vconcat keywords)))))
+    (when keywords
+      `((cell_type . "markdown")
+	(metadata . ,(make-hash-table))
+	(source . ,(vconcat keywords))))))
 
 (defun export-ipynb-buffer ()
   "Export the current buffer to ipynb format.
@@ -112,7 +114,7 @@ Only ipython source blocks are exported as code cells. Everything
 else is exported as a markdown cell.
 "
   (interactive)
-  (let ((cells `(,(export-ipynb-keyword-cell)))
+  (let ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
 	(metadata `(metadata . ((org . ,(org-element-map (org-element-parse-buffer)
 					    'keyword
 					  (lambda (key)
@@ -152,22 +154,27 @@ else is exported as a markdown cell.
 		      (save-excursion
 			(goto-char (org-element-property :begin src))
 			(let ((location (org-babel-where-is-src-block-result nil nil))
-			      start end)
+			      start end
+			      result-content)
 			  (when location
 			    (save-excursion
 			      (goto-char location)
 			      (when (looking-at
 				     (concat org-babel-result-regexp ".*$")) 
 				(setq start (1- (match-beginning 0))
-				      end (progn (forward-line 1) (org-babel-result-end)))
-				(cons
-				 (replace-regexp-in-string
-				  "#\\+RESULTS:\n" ""
-				  (replace-regexp-in-string
-				   "^: " ""
-				   (buffer-substring start end)))
-				 
-				 end))))))) 
+				      end (progn (forward-line 1) (org-babel-result-end))
+				      result-content (buffer-substring-no-properties start end))
+				;; clean up the results a little. This gets rid
+				;; of the RESULTS markers for output and drawers
+				(loop for pat in '("#\\+RESULTS:" "^: " "^:RESULTS:\\|^:END:")
+				      do
+				      (setq result-content (replace-regexp-in-string
+							    pat
+							    ""
+							    result-content)))
+				;; the results and the end of the results.
+				;; we use the end later to move point.
+				(cons (s-trim result-content) end))))))) 
 		collect
 		(cons src result)))
     
@@ -175,9 +182,10 @@ else is exported as a markdown cell.
 
     ;; First block before a src is markdown
     (if (car current-source)
-	(push (export-ipynb-markdown-cell
-	       (point-min) (org-element-property :begin (car current-source)))
-	      cells)
+	(unless (string= "" (s-trim (buffer-substring-no-properties (point-min) (org-element-property :begin (car current-source)))))
+	  (push (export-ipynb-markdown-cell
+		 (point-min) (org-element-property :begin (car current-source)))
+		cells))
       (push (export-ipynb-markdown-cell
 	     (point-min) (point-max))
 	    cells))
@@ -196,11 +204,15 @@ else is exported as a markdown cell.
       (setq current-source (pop src-results))
       
       (if current-source
-	  (push (export-ipynb-markdown-cell 
-		 end
-		 (org-element-property :begin
-				       (car current-source)))
-		cells)
+	  (when (not (string= "" (s-trim (buffer-substring
+					  end
+					  (org-element-property :begin
+								(car current-source))))))
+	    (push (export-ipynb-markdown-cell 
+		   end
+		   (org-element-property :begin
+					 (car current-source)))
+		  cells))
 	;; on last block so add rest of document
 	(push (export-ipynb-markdown-cell end (point-max)) cells)))
 
@@ -211,6 +223,13 @@ else is exported as a markdown cell.
 		  (nbformat_minor . 0))))
     (with-temp-file ipynb
       (insert (json-encode data)))))
+
+
+
+(defun export-ipynb-buffer-and-open ()
+  (interactive)
+  (export-ipynb-buffer)
+  (shell-command (format "nbopen %s.ipynb" (file-name-base))))
 
 (provide 'ox-ipynb)
 
