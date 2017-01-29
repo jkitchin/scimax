@@ -258,7 +258,7 @@ is positive, move after, and if negative, move before."
 ;; ** jupyter ipython blocks
 
 (add-to-list 'org-structure-template-alist
-	     '("ip" "#+BEGIN_SRC ipython :session\n?\n#+END_SRC"
+	     '("ip" "#+BEGIN_SRC ipython :session :results output drawer\n?\n#+END_SRC"
 	       "<src lang=\"python\">\n?\n</src>"))
 
 (setq org-babel-default-header-args:ipython
@@ -278,6 +278,48 @@ You need this to get syntax highlighting."
 	     (shell-command
 	      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
+
+;; I added this function
+(defun ob-ipython-inline-image (b64-string)
+  "Write the b64-string to a temporary file.
+Returns an org-link to the file."
+  (let* ((tfile (make-temp-file "ob-ipython-" nil ".png"))
+	 (link (format "[[file:%s]]" tfile)))
+    (ob-ipython--write-base64-string tfile b64-string)
+    link))
+
+
+;; This overwrites the ob-ipython function
+(defun org-babel-execute:ipython (body params)
+  "Execute a block of IPython code with Babel.
+This function is called by `org-babel-execute-src-block'."
+  (let* ((file (cdr (assoc :file params)))
+         (session (cdr (assoc :session params)))
+         (result-type (cdr (assoc :result-type params))))
+    (org-babel-ipython-initiate-session session params)
+    (-when-let (ret (ob-ipython--eval
+                     (ob-ipython--execute-request
+                      (org-babel-expand-body:generic (encode-coding-string body 'utf-8)
+                                                     params (org-babel-variable-assignments:python params))
+                      (ob-ipython--normalize-session session))))
+      (let ((result (cdr (assoc :result ret)))
+            (output (cdr (assoc :output ret))))
+        (if (eq result-type 'output)
+	    (concat
+	     output 
+	     (format "%s"
+		     (mapconcat 'identity
+				(loop for res in result
+				      if (eq 'image/png (car res))
+				      collect (ob-ipython-inline-image (cdr res)))
+				"\n")))
+          (ob-ipython--create-stdout-buffer output)
+          (cond ((and file (string= (f-ext file) "png"))
+                 (->> result (assoc 'image/png) cdr (ob-ipython--write-base64-string file)))
+                ((and file (string= (f-ext file) "svg"))
+                 (->> result (assoc 'image/svg+xml) cdr (ob-ipython--write-string-to-file file)))
+                (file (error "%s is currently an unsupported file extension." (f-ext file)))
+                (t (->> result (assoc 'text/plain) cdr))))))))
 
 ;; ** jupyter-hy blocks
 ;; make src blocks open in the right mode
