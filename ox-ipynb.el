@@ -16,7 +16,7 @@
 	 (start 0))
 
     ;; Handle inline images first
-    (while (string-match "\\[\\[file:\\(.*?\\)\\]\\]" results start)
+    (while (string-match "\\[\\[file:\\(.*?\\)\\]\\]" (or results "") start)
       (setq start (match-end 0))
       (setq img-path (match-string 1 results) 
 	    img-data (base64-encode-string
@@ -32,7 +32,8 @@
 				   (output_type . "display_data"))
 		   t))
     ;; now remove the inline images and put the results in.
-    (setq results (s-trim (replace-regexp-in-string "\\[\\[file:\\(.*?\\)\\]\\]" "" results)))
+    (setq results (s-trim (replace-regexp-in-string "\\[\\[file:\\(.*?\\)\\]\\]" ""
+						    (or results ""))))
     (setq output-cells (append `(((name . "stdout")
 				  (output_type . "stream")
 				  (text . ,results)))
