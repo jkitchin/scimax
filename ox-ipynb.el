@@ -93,8 +93,8 @@ This only fixes file links with no description I think."
 		       (cons (org-element-property :key key)
 			     (org-element-property :value key))))))
     (loop for key in '("RESULTS" "OPTIONS" "LATEX_HEADER" "ATTR_ORG")
-	  do
-	  (setq keywords (delq (assoc key keywords) keywords)))
+	  do 
+	  (setq keywords (-remove (lambda (cell) (string= (car cell) key)) keywords)))
 
     (setq keywords
 	  (loop for (key . value) in keywords
