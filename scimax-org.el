@@ -857,7 +857,28 @@ F5 inserts the entity code."
     (org-link-set-parameters
      "pydoc"
      :follow (lambda (path)
-	       (pydoc path)))
+	       (pydoc path))
+     :export (lambda (path desc format)
+	       "Generate a url"
+	       (let (url)
+		 (setq url (cond
+			    ((s-starts-with? "scipy" path)
+			     (format
+			      "https://docs.scipy.org/doc/scipy/reference/generated/%s.html"
+			      path))
+			    ((s-starts-with? "numpy" path)
+			     (format
+			      "https://docs.scipy.org/doc/numpy/reference/generated/%s.html"
+			      path))
+			    (t
+			     (format
+			      "https://www.google.com/#safe=off&q=%s"
+			      path))))
+		 
+		 
+		 (cond
+		  ((eq format 'md)
+		   (format "[%s](%s)" (or desc path) url))))))
   (org-add-link-type
    "pydoc"
    (lambda (path)
