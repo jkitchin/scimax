@@ -54,10 +54,10 @@
 
 
 (defun ox-ipynb-filter-latex-fragment (text back-end info)
-  "Export fragments the right way for markdown."
-  (if (s-starts-with? "\\(" text)
-      (format " $%s$ " (substring (s-trim text) 2 -2))
-    text))
+  "Export fragments the right way for markdown.
+They usually come as \(fragment\) and they need to be $fragment$
+in the notebook."
+  (replace-regexp-in-string "\\\\(\\|\\\\)" "$" text))
 
 
 (defun ox-ipynb-filter-link (text back-end info)
@@ -223,14 +223,36 @@ else is exported as a markdown cell.
 		'((nbformat . 4)
 		  (nbformat_minor . 0))))
     (with-temp-file ipynb
-      (insert (json-encode data)))))
+      (insert (json-encode data)))
+    ipynb))
 
 
 
 (defun export-ipynb-buffer-and-open ()
-  (interactive)
-  (export-ipynb-buffer)
-  (shell-command (format "nbopen %s.ipynb" (file-name-base))))
+  "Export the current buffer to an ipynb and open it."
+  (interactive) 
+  (shell-command (format "nbopen %s" (export-ipynb-buffer))))
+
+
+(defun export-ipynb-file (fname)
+  "Export FNAME to an ipynb.
+FNAME should be an org-file."
+  (with-current-buffer (find-file-noselect fname)
+    (export-ipynb-buffer)))
+
+
+(defun export-ipynb-file-and-open (fname)
+  "Export FNAME to an ipynb and open it.
+FNAME should be an org-file."
+  
+  (shell-command (format "nbopen %s" (export-ipynb-file fname))))
+
+
+(defun nbopen (fname)
+  "Open fname in jupyter notebook."
+  (interactive  (list (read-file-name "Notebook: ")))
+  (shell-command (format "nbopen %s" fname)))
+
 
 (provide 'ox-ipynb)
 
