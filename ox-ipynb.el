@@ -1,4 +1,4 @@
-;;; ox-ipynb.el --- Convert an org-file to an ipynb.
+;;; ox-ipynb.el --- Convert an org-file to an ipynb.  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; 
@@ -13,7 +13,11 @@
 	 (results (org-no-properties (car results-end)))
 	 (output-cells '())
 	 img-path img-data
-	 (start 0))
+	 (start 0)
+	 end
+	 block-start block-end
+	 html
+	 latex)
 
     ;; Handle inline images first
     (while (string-match "\\[\\[file:\\(.*?\\)\\]\\]" (or results "") start)
@@ -34,6 +38,54 @@
     ;; now remove the inline images and put the results in.
     (setq results (s-trim (replace-regexp-in-string "\\[\\[file:\\(.*?\\)\\]\\]" ""
 						    (or results ""))))
+    
+    ;; Check for HTML cells. I think there can only be one I don't know what the
+    ;; problem is, but I can't get the match-end functions to work correctly
+    ;; here. Its like the match-data is not getting updated.
+    (when (string-match "#\\+BEGIN_EXPORT HTML" (or results ""))
+      (setq block-start (s-index-of "#+BEGIN_EXPORT HTML" results)
+	    start (+ block-start (length "#+BEGIN_EXPORT HTML\n")))
+      
+      ;; Now, get the end of the block. 
+      (setq end (s-index-of "#+END_EXPORT" results)
+	    block-end (+ end (length "#+END_EXPORT")))
+      
+      (setq html (substring results start end))
+      
+      ;; remove the old output.
+      (setq results (concat (substring results 0 block-start)
+			    (substring results block-end)))
+      (message "html: %s\nresults: %s" html results)
+      (add-to-list 'output-cells `((data . ((text/html . ,html)
+					    ("text/plain" . "HTML object")))
+				   (metadata . ,(make-hash-table))
+				   (output_type . "display_data"))
+		   t))
+
+    ;; Handle latex cells
+    (when (string-match "#\\+BEGIN_EXPORT latex" (or results ""))
+      (setq block-start (s-index-of "#+BEGIN_EXPORT latex" results)
+	    start (+ block-start (length "#+BEGIN_EXPORT latex\n")))
+      
+      ;; Now, get the end of the block. 
+      (setq end (s-index-of "#+END_EXPORT" results)
+	    block-end (+ end (length "#+END_EXPORT")))
+      
+      (setq latex (substring results start end))
+      
+      ;; remove the old output.
+      (setq results (concat (substring results 0 block-start)
+			    (substring results block-end)))
+      
+      (add-to-list 'output-cells `((data . ((text/latex . ,latex)
+					    ("text/plain" . "Latex object")))
+				   (metadata . ,(make-hash-table))
+				   (output_type . "display_data"))
+		   t))
+    
+
+    ;; Check for Latex cells
+    
     (setq output-cells (append `(((name . "stdout")
 				  (output_type . "stream")
 				  (text . ,results)))
@@ -78,7 +130,7 @@ This only fixes file links with no description I think."
 	 (md (org-export-string-as
 	      (buffer-substring-no-properties
 	       beg end)
-	      'md t '(:with-toc nil))))
+	      'md t '(:with-toc nil :with-tags nil))))
 
     `((cell_type . "markdown")
       (metadata . ,(make-hash-table))
@@ -251,7 +303,7 @@ FNAME should be an org-file."
 (defun nbopen (fname)
   "Open fname in jupyter notebook."
   (interactive  (list (read-file-name "Notebook: ")))
-  (shell-command (format "nbopen %s" fname)))
+  (shell-command (format "nbopen %s&" fname)))
 
 
 (provide 'ox-ipynb)
