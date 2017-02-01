@@ -289,6 +289,7 @@ Returns an org-link to the file."
     link))
 
 
+
 ;; This overwrites the ob-ipython function
 (defun org-babel-execute:ipython (body params)
   "Execute a block of IPython code with Babel.
@@ -310,6 +311,12 @@ This function is called by `org-babel-execute-src-block'."
 	     (format "%s"
 		     (mapconcat 'identity
 				(loop for res in result
+				      ;; if (and (eq 'text/plain (car res)) (cdr res))
+				      ;; collect (cdr res)
+				      if (eq 'text/html (car res))
+				      collect (format "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n" (cdr res))
+				      if (eq 'text/latex (car res))
+				      collect (format "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n" (cdr res))
 				      if (eq 'image/png (car res))
 				      collect (ob-ipython-inline-image (cdr res)))
 				"\n")))
