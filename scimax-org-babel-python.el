@@ -232,7 +232,7 @@ To make C-c C-c use this, try this.
       (setq process (start-process
 		     md5-hash
 		     pbuffer
-		     "python"
+		     python-shell-interpreter
 		     py-file))
 
 
