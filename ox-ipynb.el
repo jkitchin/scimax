@@ -5,6 +5,7 @@
 
 ;;; Code:
 (require 'ox-md)
+(require 'ox-org)
 
 (defun export-ipynb-code-cell (src-result)
   "Return a lisp code cell for the org-element SRC-BLOCK."
@@ -161,11 +162,10 @@ This only fixes file links with no description I think."
 	(metadata . ,(make-hash-table))
 	(source . ,(vconcat keywords))))))
 
-(defun export-ipynb-buffer ()
-  "Export the current buffer to ipynb format.
+(defun ox-ipynb-export-to-buffer ()
+  "Export the current buffer to ipynb format in a buffer.
 Only ipython source blocks are exported as code cells. Everything
-else is exported as a markdown cell.
-"
+else is exported as a markdown cell. The output is in *ox-ipynb*."
   (interactive)
   (let ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
 	(metadata `(metadata . ((org . ,(org-element-map (org-element-parse-buffer)
@@ -183,8 +183,9 @@ else is exported as a markdown cell.
 						  (name . "python")
 						  (nbconvert_exporter . "python")
 						  (pygments_lexer . "ipython3")
-						  (version . "3.5.2")))))) 
-	(ipynb (concat (file-name-base (buffer-file-name)) ".ipynb"))
+						  (version . "3.5.2"))))))
+	(ipynb (or (and (boundp 'export-file-name) export-file-name)
+		   (concat (file-name-base (buffer-file-name)) ".ipynb")))
 	src-blocks
 	src-results
 	current-src
@@ -235,7 +236,10 @@ else is exported as a markdown cell.
 
     ;; First block before a src is markdown
     (if (car current-source)
-	(unless (string= "" (s-trim (buffer-substring-no-properties (point-min) (org-element-property :begin (car current-source)))))
+	(unless (string= "" (s-trim
+			     (buffer-substring-no-properties
+			      (point-min)
+			      (org-element-property :begin (car current-source)))))
 	  (push (export-ipynb-markdown-cell
 		 (point-min) (org-element-property :begin (car current-source)))
 		cells))
@@ -274,36 +278,67 @@ else is exported as a markdown cell.
 		(list metadata)
 		'((nbformat . 4)
 		  (nbformat_minor . 0))))
-    (with-temp-file ipynb
+
+    (with-current-buffer (get-buffer-create "*ox-ipynb*")
+      (erase-buffer)
       (insert (json-encode data)))
-    ipynb))
+
+    (switch-to-buffer "*ox-ipynb*")
+    (setq-local export-file-name ipynb)
+    (get-buffer "*ox-ipynb*")))
 
 
-
-(defun export-ipynb-buffer-and-open ()
-  "Export the current buffer to an ipynb and open it."
-  (interactive) 
-  (shell-command (format "nbopen %s" (export-ipynb-buffer))))
-
-
-(defun export-ipynb-file (fname)
-  "Export FNAME to an ipynb.
-FNAME should be an org-file."
-  (with-current-buffer (find-file-noselect fname)
-    (export-ipynb-buffer)))
+(defun ox-ipynb-export-to-file ()
+  "Export current buffer to an ipynb file."
+  (interactive)
+  (with-current-buffer (ox-ipynb-ipynb-export-to-buffer)
+    (write-file export-file-name))
+  export-file-name)
 
 
-(defun export-ipynb-file-and-open (fname)
-  "Export FNAME to an ipynb and open it.
-FNAME should be an org-file."
-  
-  (shell-command (format "nbopen %s" (export-ipynb-file fname))))
+(defun ox-ipynb-export-to-file-and-open ()
+  "Export the current buffer to a notebook and open it."
+  (interactive)
+  (async-shell-command (format "jupyter notebook %s" (ox-ipynb-export-to-file))))
 
 
 (defun nbopen (fname)
   "Open fname in jupyter notebook."
   (interactive  (list (read-file-name "Notebook: ")))
   (shell-command (format "nbopen %s&" fname)))
+
+
+;; * export menu
+(defun ox-ipynb-export-to-ipynb-buffer (async subtreep visible-only body-only &optional info) 
+  (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
+    (org-org-export-as-org async subtreep visible-only body-only info)
+    (with-current-buffer "*Org ORG Export*"
+      (setq-local export-file-name ipynb)
+      (ox-ipynb-export-to-buffer))))
+
+
+(defun ox-ipynb-export-to-ipynb-file (async subtreep visible-only body-only &optional info) 
+  (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
+    (org-org-export-as-org async subtreep visible-only body-only info)
+    (with-current-buffer "*Org ORG Export*"
+      (setq-local export-file-name ipynb)
+      (ox-ipynb-export-to-file))))
+
+
+(defun ox-ipynb-export-to-ipynb-file-and-open (async subtreep visible-only body-only &optional info) 
+  (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
+    (org-org-export-as-org async subtreep visible-only body-only info)
+    (with-current-buffer "*Org ORG Export*"
+      (setq-local export-file-name ipynb)
+      (ox-ipynb-export-to-file-and-open))))
+
+
+(org-export-define-derived-backend 'jupyter-notebook 'org
+  :menu-entry
+  '(?n "Export to jupyter notebook"
+       ((?b "to buffer" ox-ipynb-export-to-buffer)
+	(?n "to notebook" ox-ipynb-export-to-ipynb-file)
+	(?o "to notebook and open" ox-ipynb-export-to-ipynb-file-and-open))))
 
 
 (provide 'ox-ipynb)
