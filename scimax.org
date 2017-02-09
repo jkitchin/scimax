@@ -976,6 +976,135 @@ And a block with cell magic.
 M-x `ob-ipython-interrupt-kernel'
 M-x `ob-ipython-kill-kernel'
 
+*** Scimax enhancement to ob-ipython
+
+We have made a few improvements to ob-ipython. Inline images are supported now similar to how they are supported in the Jupyter notebook. You specify the %matplotlib inline magic, and then plots will appear "inline" along with any output from your cell block. The plots are saved in a directory ipython-inline-images in filenames derived from and md5 hash of the image. You can have more than one image, and you also get the output from your block, similar to the way the Jupyter notebook behaves.
+
+You need a header like this, i.e. you need to specify the results as output, and for them to be in a drawer so that org-mode can display the file links.
+
+#+BEGIN_EXAMPLE
+,#+BEGIN_SRC ipython :session :results output drawer
+#+END_EXAMPLE
+
+#+BEGIN_SRC ipython :session :results output drawer
+print('Hello world!')
+
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 20 * np.pi, 200)
+y = np.exp(-0.1 * x) * np.sin(x)
+plt.plot(x, y)
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Decaying sin wave')
+
+# new plot
+plt.figure()
+y2 = np.exp(-0.1 * x) * np.cos(x)
+plt.plot(x, y2)
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Decaying cosine')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+Hello world!
+[[file:ipython-inline-images/ob-ipython-16d0b561f004e2fd3ff8cba4dfd648b1.png]]
+[[file:ipython-inline-images/ob-ipython-4c47a49cc1cb84980ecbb91aef2e5b20.png]]
+:END:
+
+It also works with :results set to value.
+
+#+BEGIN_SRC ipython :session :results value drawer
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 20 * np.pi, 200)
+y = np.exp(-0.1 * x) * np.sin(x)
+plt.plot(x, y)
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Decaying sin wave')
+
+a = 5
+b = 6
+a + b
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+11
+[[file:ipython-inline-images/ob-ipython-16d0b561f004e2fd3ff8cba4dfd648b1.png]]
+:END:
+
+
+We also support HTML and Latex outputs like this. The results will contain an HTML or LaTeX block. As with the Jupyter notebook
+
+#+BEGIN_SRC ipython :session :results output drawer
+from IPython.display import HTML, Latex
+
+HTML('H<sub>2</sub>O')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+BEGIN_EXPORT HTML
+H<sub>2</sub>O
+#+END_EXPORT
+:END:
+
+and
+
+#+BEGIN_SRC ipython :session :results output drawer
+Latex('H$_2$O')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+BEGIN_EXPORT latex
+H$_2$O
+#+END_EXPORT
+:END:
+
+As with the Jupyter notebook, only the last returned cell is rendered.
+
+
+**** Asynchronous evaluation
+
+ We finally have asynchronous execution of ipython blocks. This allows you to run a block, and keep working in Emacs. A temporary string is inserted into the results which is replaced when the code is done running. To get this behavior, you need to set ":async t" in the header, and then run is: `org-babel-execute-async:ipython'. This command will make a clickable link to interrupt the kernel. The regular C-c C-c also works, but the temporary string is not clickable. I experienced some difficulties with kernel interruptions; after doing it, it seems like I had to kill all the related processes to get working again. I am not sure this is handled cleanly in ob-ipython.
+
+#+BEGIN_SRC ipython :session :results output drawer 
+import time
+time.sleep(5)
+#print(8)
+
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 20 * np.pi, 200)
+y1 = np.exp(-0.1 * x) * np.sin(x)
+y2 = np.exp(-0.1 * x) * np.cos(x)
+plt.plot(y1, y2)
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Decaying spiral')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:ipython-inline-images/ob-ipython-2437ed56a19c7f7a4a6e19616e50e491.png]]
+:END:
+
+
+*** Export org to ipynb
+Finally, we can export org-mode files to Jupyter notebooks with the ox-ipynb library. If you load the library, there is a new export option in the export menu. Or you can use  `ox-ipynb-export-to-ipynb-notebook-and-open'.
+
+
 *** Using other kernels - hy
 
 Amazing. You can use other language kernels with ob-ipython.
