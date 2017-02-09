@@ -265,39 +265,44 @@ Example usage:
     (\"file\" . \" tees.org \")
     (\"SUBJECT\" . \" [J] Person \"))))"
   ;; create Messages heading if needed
-  (save-excursion
-    (unless (and (outline-next-heading)
-		 (string= "Messages" (nth 4 (org-heading-components))))
-      (org-insert-heading)
-      (insert "Messages")
-      (org-do-demote)))
+  (save-restriction
+    (org-narrow-to-subtree)
+    (let ((this-id nil))
+      (save-excursion
+	(unless (and (outline-next-heading)
+		     (string= "Messages" (nth 4 (org-heading-components)))) 
+	  (org-insert-subheading nil) 
+	  (insert "Messages"))
+	(setq this-id (org-id-get-create)))
 
-  ;; create Message entries
-  (loop for data in data-source
-	do (save-excursion
-	     (save-restriction
-	       (org-narrow-to-subtree)
-	       (org-open-link-from-string "[[*Messages]]")
-	       (org-insert-heading-after-current)
-	       (org-do-demote)
-	       (setq data (add-to-list 'data (cons "ID" (org-id-get-create))))
-	       (outline-previous-heading)
-	       (end-of-line)
-	       (insert (or (cdr (assoc "HEADLINE" data))
-			   (cdr (assoc "SUBJECT" data))))
-	       (org-end-of-meta-data)
-	       (insert (s-format s-template 'aget data))
-	       ;; refill now that it is expanded
-	       (outline-previous-heading)
-	       (save-restriction
-		 (org-narrow-to-subtree)
-		 (goto-char (point-min))
-		 (fill-region (point-min) (or (re-search-forward "^--" nil t)
-					      (point-max))))
-	       (org-entry-put (point) "TO" (cdr (assoc "TO" data)))
-	       (when (cdr (assoc "SUBJECT" data))
-		 (org-entry-put (point) "SUBJECT" (cdr (assoc "SUBJECT" data))))
-	       (org-set-tags-to (append '("unsent") (org-get-tags-at)))))))
+      ;; create Message entries
+      (loop for data in data-source
+	    do (save-excursion
+		 (save-restriction
+		   (org-narrow-to-subtree)
+		   (goto-char (cdr (org-id-find this-id)))
+		   (org-insert-heading-after-current)
+		   (org-do-demote)
+		   (setq data (add-to-list 'data
+					   (cons "ID" (org-id-get-create))))
+		   (outline-previous-heading)
+		   (end-of-line)
+		   (insert (or (cdr (assoc "HEADLINE" data))
+			       (cdr (assoc "SUBJECT" data))))
+		   (org-end-of-meta-data)
+		   (insert (s-format s-template 'aget data))
+		   ;; refill now that it is expanded
+		   (outline-previous-heading)
+		   (save-restriction
+		     (org-narrow-to-subtree)
+		     (goto-char (point-min))
+		     (fill-region (point-min) (or (re-search-forward "^--"
+								     nil t)
+						  (point-max))))
+		   (org-entry-put (point) "TO" (cdr (assoc "TO" data)))
+		   (when (cdr (assoc "SUBJECT" data))
+		     (org-entry-put (point) "SUBJECT" (cdr (assoc "SUBJECT" data))))
+		   (org-set-tags-to (-uniq (append '("unsent") (org-get-tags-at))))))))))
 
 
 ;;;###autoload

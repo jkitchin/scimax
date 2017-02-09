@@ -37,6 +37,7 @@ These are stored persistently in `contacts-cache-file'.")
 (defvar contacts '()
   "List of contacts. (display-string property-a-list)")
 
+
 ;; * load and clear cache functions
 (defun contacts-load-cache-file ()
   "Load the cache file to set `contacts-cache-data'."
@@ -239,14 +240,23 @@ Loads cache file."
     (contacts-load-cache-file))
 
   (contacts-update-cache)
-
+  
   ;; Add mu4e contacts if we have them
   (unless (and (featurep 'mu4e) (boundp 'mu4e~contacts))
     (mu4e t))
-  
+
   (append contacts
-	  (loop for contact being the hash-key of mu4e~contacts
-		collect (list contact (cons "EMAIL" contact)))))
+
+	  (loop for entry in 
+		(split-string (shell-command-to-string "mu cfind --format=mutt-ab") "\n" t)
+		collect
+		(let ((tup (split-string  entry "\t")))
+		  (format "\"%s\" <%s>" (nth 1 tup) (nth 0 tup)))))
+  ;; 1/12/2017 this stopped working. I think in an update I did for mu4e
+  ;; (append contacts
+  ;; 	  (loop for contact being the hash-key of mu4e~contacts
+  ;; 		collect (list contact (cons "EMAIL" contact))))
+  )
 
 (defvar ivy-contacts-keymap
   (let ((map (make-sparse-keymap)))
@@ -452,16 +462,17 @@ end tell" (cdr (assoc "PHONE" contact)))))
 					      (cdr (assoc "NAME" (cdr contact))))
 					    contacts)))))
  :face '(:foreground "OrangeRed1")
- :help-echo (lambda (window object position)
-	      (save-excursion
-		(goto-char position)
-		(let ((id (org-element-property
-			   :path (org-element-context))))
-		  (save-window-excursion
-		    (org-id-goto id)
-		    (save-restriction
-		      (org-narrow-to-subtree)
-		      (buffer-string))))))
+ :help-echo "An org-contact."
+ ;; (lambda (window object position)
+ ;;   (save-excursion
+ ;; 	(goto-char position)
+ ;; 	(let ((id (org-element-property
+ ;; 		   :path (org-element-context))))
+ ;; 	  (save-window-excursion
+ ;; 	    (org-id-goto id)
+ ;; 	    (save-restriction
+ ;; 	      (org-narrow-to-subtree)
+ ;; 	      (buffer-string))))))
  :store #'contact-store-link)
 
 
@@ -518,7 +529,7 @@ end tell" (cdr (assoc "PHONE" contact)))))
 			       ("Open contact" . (lambda (contact)
 						   (find-file (cdr (assoc "FILE" contact)))
 						   (goto-char (cdr (assoc "POSITION" contact)))
-						   (outline-show-entry)))
+						   (outline-show-entry))) 
 			       ("Insert \"name\" <email>" . contact-insert-name-email)
 			       ("Copy \"name\" <email>" . contact-copy-name-email)
 			       ("Send email" . (lambda (contact)
@@ -591,6 +602,18 @@ end tell" (cdr (assoc "PHONE" contact))))))
 								     (or (cdr (assoc "ID" contact)) "")
 								     "\\|"
 								     (cdr (assoc "NAME" contact))))))
+			       ;; this needs some more work. you can use it to customize on the fly what is done to the selected
+			       ;; Maybe it should just take property names instead of a sexp input. Or an s-format string.
+			       ("Apply and insert" . (lambda (contact) 
+						       (eval
+							`(insert (mapconcat
+								  (lambda (it)
+								    ,(read (read-string "Body (it):")))
+								  (helm-marked-candidates) 
+								  ,(if (> (length (helm-marked-candidates)) 1)
+								       (read-string "Separator:" nil nil ", ")
+								     ""))))))
+			       
 
 			       )))
 		   ((name . "New contact")
@@ -684,24 +707,8 @@ end tell" (org-entry-get (point) "PHONE"))))))
 (org-link-set-parameters
  "location"
  :follow (lambda (path) (contact/body))
- :complete (lambda (&optional arg)
-	     (format "location:%s" (org-link-unescape
-				    (completing-read
-				     "Name: "
-				     (mapcar (lambda (contact)
-					       (cdr (assoc "NAME" (cdr contact))))
-					     contacts)))))
  :face '(:foreground "BlueViolet")
- :help-echo (lambda (window object position)
-	      (save-excursion
-		(goto-char position)
-		(let ((id (org-element-property
-			   :path (org-element-context))))
-		  (save-window-excursion
-		    (org-id-goto id)
-		    (save-restriction
-		      (org-narrow-to-subtree)
-		      (buffer-string))))))
+ :help-echo "An org-location" 
  :store #'contact-store-location-link)
 
 ;; * The end
