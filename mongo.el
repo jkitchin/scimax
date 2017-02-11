@@ -101,8 +101,7 @@
       (with-current-buffer (get-buffer-create "*Mongo*")
 	(apply 'make-comint-in-buffer "Mongo" (get-buffer-create "*Mongo*") 
 	       mongo-program mongo-program-arguments)
-	(mongo-mode)))
-     
+	(mongo-mode))) 
      (t
       (message "Mongo seems to be running already."))))
   (unless bury
@@ -123,29 +122,27 @@
   (bury-buffer "*Mongo*"))
 
 
-(defvar mongo-output '()
+(defvar mongo-output ""
   "A variable for storing the output of a command.
 This will normally be empty, or a list of strings while
 collecting output, or a string when the output is done
 collecting.")
 
+(defvar mongo-output-finished nil
+  "Flag for when the output is finished.")
 
 (defun mongo-output-filter (output)
-  "Hook function for handling process output."
-  (message "Handling: %s" output)
+  "Hook function for handling process output." 
   (with-current-buffer "*Mongo*"
     (goto-char (point-max))
     (forward-line 0)
-    (setq mongo-output (append mongo-output (list output)))
-    (when (looking-at mongo-prompt-regexp) 
+    (setq mongo-output (concat mongo-output output)) 
+    (when (looking-at mongo-prompt-regexp)
+      (setq mongo-output-finished t)
       (setq mongo-output
 	    (replace-regexp-in-string
 	     mongo-prompt-regexp ""
-	     (mapconcat 'identity mongo-output ""))))
-    ;; corner case for when a single chunk is returned and it containes the last line..
-    ;; (when (s-ends-with? "\n>" mongo-output)
-    ;;   (setq mongo-output (substring mongo-output 0 -2)))
-    ))
+	     mongo-output)))))
 
 
 (add-to-list 'comint-output-filter-functions 'mongo-output-filter)
@@ -157,18 +154,20 @@ CMD should be a string, as if you had typed it into the mongo
 shell. For short commands, they are sent directly to mongo, so
 you can use interactive commands there. For long commands they
 are written to a javascript file which is then loaded by mongo."
-  (setq mongo-output '())
+  (setq mongo-output ""
+	mongo-output-finished nil) 
   (if (> (length cmd) 255)
       (let ((tf (make-temp-file "mongo-" nil ".js")))
 	(with-temp-file tf
 	  (insert cmd))
 	(comint-simple-send (get-buffer-process "*Mongo*") (format "load(\"%s\")" tf)))
     (comint-simple-send (get-buffer-process "*Mongo*") cmd))
-  (while (listp mongo-output)
+  (while (not mongo-output-finished)
     (sleep-for 0.05))
   (prog1
       mongo-output
-    (setq mongo-output '())))
+    (setq mongo-output ""
+	  mongo-output-finished nil)))
 
 ;; ** CRUD operations
 
@@ -226,8 +225,7 @@ documents. If LIMIT is non-nil use it to limit the number of responses. If SORT 
 		      (if limit
 			  (format ".limit(%s)" limit)
 			"")))
-	 (output))
-    (message cmd)
+	 (output)) 
     (setq output (mongo--requote-output 
 		  (mongo-cmd cmd))) 
     (json-read-from-string output)))
