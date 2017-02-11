@@ -291,7 +291,7 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 (defun ox-ipynb-export-to-file ()
   "Export current buffer to an ipynb file."
   (interactive)
-  (with-current-buffer (ox-ipynb-ipynb-export-to-buffer)
+  (with-current-buffer (ox-ipynb-export-to-buffer)
     (write-file export-file-name))
   export-file-name)
 
