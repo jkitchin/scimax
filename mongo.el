@@ -73,24 +73,6 @@
 
 ;; * mongo command
 
-;; (defun mongo (&optional bury)
-;;   "Run an inferior instance of `mongo' inside Emacs."
-;;   (interactive "P")
-;;   (let* ((mongo-program mongo-cli-file-path)
-;;          (buffer (comint-check-proc "Mongo")))
-;;     ;; pop to the "*Mongo*" buffer if the process is dead, the
-;;     ;; buffer is missing or it's got the wrong mode.
-;;     (pop-to-buffer-same-window
-;;      (if (or buffer (not (derived-mode-p 'mongo-mode))
-;;              (comint-check-proc (current-buffer)))
-;;          (get-buffer-create (or buffer "*Mongo*"))
-;;        (current-buffer)))
-;;     ;; create the comint process if there is no buffer.
-;;     (unless buffer
-;;       (apply 'make-comint-in-buffer "Mongo" buffer
-;;              mongo-program mongo-cli-arguments)
-;;       (mongo-mode))))
-
 (defun mongo (&optional bury)
   "Run an inferior instance of `mongo' inside Emacs."
   (interactive "P")
@@ -177,7 +159,7 @@ are written to a javascript file which is then loaded by mongo."
   "Insert into COLLECTION the DOCUMENT.
 COLLECTION is a string and must be in the current database.
 DOCUMENT is a lisp data structure that will be json-encoded."
-  (let* ((json (json-encode document))
+  (let* ((json (mongo--unquote-query document))
 	 (cmd (format "var result = db.%s.insert(%s); printjsononeline(result);"
 		      collection
 		      json))
@@ -187,28 +169,43 @@ DOCUMENT is a lisp data structure that will be json-encoded."
 ;; *** Finding documents
 
 (defun mongo--unquote-query (query)
-  "Json encodes QUERY, and unquotes any ObjectId calls.
+  "Json encodes QUERY, and unquotes some things in the query.
 
 We don't have syntax for the ObjectId call that mongo wants in
  lisp, so a query has to look like this:
 '((_id .  \"ObjectId(\"587babfaef131d0d4603b3ad\")\"))
 
 Mongo can't have the quotes around the call, so this function
-removes them.
-"
-  (replace-regexp-in-string "\"\\(ObjectID(\\\\\"\\(.*?\\)\\\\\")\\)\""
-			    "ObjectId(\"\\2\")"
-			    (json-encode query)))
+removes them."
+  (let ((result (json-encode query)))
+    (setq result
+	  (replace-regexp-in-string "\"\\(ObjectID(\\\\\"\\(.*?\\)\\\\\")\\)\""
+				    "ObjectId(\"\\2\")"
+				    result))
+    (setq result (replace-regexp-in-string "\"<js>\\(.*\\)</js>\""
+					   "\\1" result)) 
+    result))
 
 (defun mongo--requote-output (output)
-  "Adds quotes around ObjectId in OUTPUT.
-When mongo outputs json, it has unquoted ObjectIds in it that
+  "Adds quotes around some things in OUTPUT.
+When mongo outputs json, it has unquoted ObjectIds and IsoDate in it that
 emacs cannot interpret as json. This function adds quotes around
-ObjectID() so that we can read it as json."
-  (replace-regexp-in-string
-   "ObjectId(\"\\(.*?\\)\")"
-   "\"ObjectId(\\\\\"\\1\\\\\")\""
-   output))
+those things so that we can read it as json.
+
+It would be nice to find a way to get emacs to read these without
+this hackery."
+  (let ((result output))
+    (setq result
+	  (replace-regexp-in-string
+	   "ObjectId(\"\\(.*?\\)\")"
+	   "\"ObjectId(\\\\\"\\1\\\\\")\""
+	   result))
+    (setq result
+	  (replace-regexp-in-string
+	   "ISODate(\"\\(.*?\\)\")"
+	   "\"ISODate(\\\\\"\\1\\\\\")\""
+	   result)) 
+    result))
 
 (defun mongo-find (collection query &optional projection limit sort)
   "Find documents in COLLECTION that match QUERY,
