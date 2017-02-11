@@ -1,7 +1,7 @@
 ;;; ox-ipynb.el --- Convert an org-file to an ipynb.  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 (require 'ox-md)
@@ -23,7 +23,7 @@
     ;; Handle inline images first
     (while (string-match "\\[\\[file:\\(.*?\\)\\]\\]" (or results "") start)
       (setq start (match-end 0))
-      (setq img-path (match-string 1 results) 
+      (setq img-path (match-string 1 results)
 	    img-data (base64-encode-string
 		      (encode-coding-string
 		       (with-temp-buffer
@@ -39,20 +39,20 @@
     ;; now remove the inline images and put the results in.
     (setq results (s-trim (replace-regexp-in-string "\\[\\[file:\\(.*?\\)\\]\\]" ""
 						    (or results ""))))
-    
+
     ;; Check for HTML cells. I think there can only be one I don't know what the
     ;; problem is, but I can't get the match-end functions to work correctly
     ;; here. Its like the match-data is not getting updated.
     (when (string-match "#\\+BEGIN_EXPORT HTML" (or results ""))
       (setq block-start (s-index-of "#+BEGIN_EXPORT HTML" results)
 	    start (+ block-start (length "#+BEGIN_EXPORT HTML\n")))
-      
-      ;; Now, get the end of the block. 
+
+      ;; Now, get the end of the block.
       (setq end (s-index-of "#+END_EXPORT" results)
 	    block-end (+ end (length "#+END_EXPORT")))
-      
+
       (setq html (substring results start end))
-      
+
       ;; remove the old output.
       (setq results (concat (substring results 0 block-start)
 			    (substring results block-end)))
@@ -67,36 +67,36 @@
     (when (string-match "#\\+BEGIN_EXPORT latex" (or results ""))
       (setq block-start (s-index-of "#+BEGIN_EXPORT latex" results)
 	    start (+ block-start (length "#+BEGIN_EXPORT latex\n")))
-      
-      ;; Now, get the end of the block. 
+
+      ;; Now, get the end of the block.
       (setq end (s-index-of "#+END_EXPORT" results)
 	    block-end (+ end (length "#+END_EXPORT")))
-      
+
       (setq latex (substring results start end))
-      
+
       ;; remove the old output.
       (setq results (concat (substring results 0 block-start)
 			    (substring results block-end)))
-      
+
       (add-to-list 'output-cells `((data . ((text/latex . ,latex)
 					    ("text/plain" . "Latex object")))
 				   (metadata . ,(make-hash-table))
 				   (output_type . "display_data"))
 		   t))
-    
+
 
     ;; Check for Latex cells
-    
+
     (setq output-cells (append `(((name . "stdout")
 				  (output_type . "stream")
 				  (text . ,results)))
 			       output-cells))
-    
-    
+
+
     `((cell_type . "code")
       (execution_count . 1)
       ;; the hashtable trick converts to {} in json. jupyter can't take a null here.
-      (metadata . ,(make-hash-table)) 
+      (metadata . ,(make-hash-table))
       (outputs . ,(if (null output-cells)
 		      ;; (vector) json-encodes to  [], not null which
 		      ;; jupyter does not like.
@@ -105,13 +105,17 @@
       (source . ,(vconcat
 		  (list (s-trim (org-element-property :value src-block))))))))
 
-
 (defun ox-ipynb-filter-latex-fragment (text back-end info)
-  "Export fragments the right way for markdown.
-They usually come as \(fragment\) and they need to be $fragment$
-in the notebook."
-  (replace-regexp-in-string "\\\\(\\|\\\\)" "$" text))
-
+  "Export org latex fragments for ipynb markdown.
+Latex fragments come from org as \(fragment\) for inline math or
+\[fragment\] for displayed math. Convert to $fragment$
+or $$fragment$$ for ipynb."
+  ;; \\[frag\\] or \\(frag\\) are also accepted by ipynb markdown (need double backslash)
+  ;; (setq text (replace-regexp-in-string "\\\[" "\\\\["
+  ;;                                     (replace-regexp-in-string "\\\]" "\\\\]" text)))
+  (setq text (replace-regexp-in-string "\\\\\\[" "$$"
+                                       (replace-regexp-in-string "\\\\\\]" "$$" text)))
+    (replace-regexp-in-string "\\\\(\\|\\\\)" "$" text))
 
 (defun ox-ipynb-filter-link (text back-end info)
   "Make a link into markdown.
@@ -122,12 +126,11 @@ This only fixes file links with no description I think."
 	(format "[%s](%s)" path path))
     text))
 
-
 (defun export-ipynb-markdown-cell (beg end)
   "Return the markdown cell for the region defined by BEG and END."
   (let* ((org-export-filter-latex-fragment-functions '(ox-ipynb-filter-latex-fragment))
 	 (org-export-filter-link-functions '(ox-ipynb-filter-link))
-	 (org-export-filter-keyword-functions '(ox-ipynb-keyword-link)) 
+	 (org-export-filter-keyword-functions '(ox-ipynb-keyword-link))
 	 (md (org-export-string-as
 	      (buffer-substring-no-properties
 	       beg end)
@@ -146,7 +149,7 @@ This only fixes file links with no description I think."
 		       (cons (org-element-property :key key)
 			     (org-element-property :value key))))))
     (loop for key in '("RESULTS" "OPTIONS" "LATEX_HEADER" "ATTR_ORG")
-	  do 
+	  do
 	  (setq keywords (-remove (lambda (cell) (string= (car cell) key)) keywords)))
 
     (setq keywords
@@ -214,7 +217,7 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 			    (save-excursion
 			      (goto-char location)
 			      (when (looking-at
-				     (concat org-babel-result-regexp ".*$")) 
+				     (concat org-babel-result-regexp ".*$"))
 				(setq start (1- (match-beginning 0))
 				      end (progn (forward-line 1) (org-babel-result-end))
 				      result-content (buffer-substring-no-properties start end))
@@ -228,10 +231,10 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 							    result-content)))
 				;; the results and the end of the results.
 				;; we use the end later to move point.
-				(cons (s-trim result-content) end))))))) 
+				(cons (s-trim result-content) end)))))))
 		collect
 		(cons src result)))
-    
+
     (setq current-source (pop src-results))
 
     ;; First block before a src is markdown
@@ -246,26 +249,26 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
       (push (export-ipynb-markdown-cell
 	     (point-min) (point-max))
 	    cells))
-    
+
     (while current-source
       ;; add the src cell
       (push (export-ipynb-code-cell current-source) cells)
       (setq result-end (cdr current-source)
 	    result (car result-end)
 	    result-end (cdr result-end))
-      
+
       (setq end (max
 		 (or result-end 0)
 		 (org-element-property :end (car current-source))))
-      
+
       (setq current-source (pop src-results))
-      
+
       (if current-source
 	  (when (not (string= "" (s-trim (buffer-substring
 					  end
 					  (org-element-property :begin
 								(car current-source))))))
-	    (push (export-ipynb-markdown-cell 
+	    (push (export-ipynb-markdown-cell
 		   end
 		   (org-element-property :begin
 					 (car current-source)))
@@ -309,7 +312,7 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 
 
 ;; * export menu
-(defun ox-ipynb-export-to-ipynb-buffer (async subtreep visible-only body-only &optional info) 
+(defun ox-ipynb-export-to-ipynb-buffer (async subtreep visible-only body-only &optional info)
   (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
     (org-org-export-as-org async subtreep visible-only body-only info)
     (with-current-buffer "*Org ORG Export*"
@@ -317,7 +320,7 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
       (ox-ipynb-export-to-buffer))))
 
 
-(defun ox-ipynb-export-to-ipynb-file (async subtreep visible-only body-only &optional info) 
+(defun ox-ipynb-export-to-ipynb-file (async subtreep visible-only body-only &optional info)
   (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
     (org-org-export-as-org async subtreep visible-only body-only info)
     (with-current-buffer "*Org ORG Export*"
@@ -325,7 +328,7 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
       (ox-ipynb-export-to-file))))
 
 
-(defun ox-ipynb-export-to-ipynb-file-and-open (async subtreep visible-only body-only &optional info) 
+(defun ox-ipynb-export-to-ipynb-file-and-open (async subtreep visible-only body-only &optional info)
   (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
     (org-org-export-as-org async subtreep visible-only body-only info)
     (with-current-buffer "*Org ORG Export*"
