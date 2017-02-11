@@ -111,11 +111,10 @@ Latex fragments come from org as \(fragment\) for inline math or
 \[fragment\] for displayed math. Convert to $fragment$
 or $$fragment$$ for ipynb."
   ;; \\[frag\\] or \\(frag\\) are also accepted by ipynb markdown (need double backslash)
-  ;; (setq text (replace-regexp-in-string "\\\[" "\\\\["
-  ;;                                     (replace-regexp-in-string "\\\]" "\\\\]" text)))
-  (setq text (replace-regexp-in-string "\\\\\\[" "$$"
-                                       (replace-regexp-in-string "\\\\\\]" "$$" text)))
-    (replace-regexp-in-string "\\\\(\\|\\\\)" "$" text))
+  (setq text (replace-regexp-in-string
+	      "\\\\\\[" "$$"
+	      (replace-regexp-in-string "\\\\\\]" "$$" text)))
+  (replace-regexp-in-string "\\\\(\\|\\\\)" "$" text))
 
 (defun ox-ipynb-filter-link (text back-end info)
   "Make a link into markdown.
