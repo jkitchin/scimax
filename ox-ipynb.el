@@ -1,7 +1,10 @@
 ;;; ox-ipynb.el --- Convert an org-file to an ipynb.  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;;
+;; It is possible to set metadata at the notebook level using
+;; #+ox-ipynb-keyword-metadata: key1 key2
+;; This will use store key:value pairs in
+;; the notebook metadata section, in an org section.
 
 ;;; Code:
 (require 'ox-md)
@@ -84,13 +87,12 @@
 				   (output_type . "display_data"))
 		   t))
 
-
-    ;; Check for Latex cells
-
-    (setq output-cells (append `(((name . "stdout")
-				  (output_type . "stream")
-				  (text . ,results)))
-			       output-cells))
+    ;; output cells
+    (unless (string= "" results)
+      (setq output-cells (append `(((name . "stdout")
+				    (output_type . "stream")
+				    (text . ,results)))
+				 output-cells)))
 
 
     `((cell_type . "code")
@@ -105,6 +107,7 @@
       (source . ,(vconcat
 		  (list (s-trim (org-element-property :value src-block))))))))
 
+
 (defun ox-ipynb-filter-latex-fragment (text back-end info)
   "Export org latex fragments for ipynb markdown.
 Latex fragments come from org as \(fragment\) for inline math or
@@ -116,6 +119,7 @@ or $$fragment$$ for ipynb."
 	      (replace-regexp-in-string "\\\\\\]" "$$" text)))
   (replace-regexp-in-string "\\\\(\\|\\\\)" "$" text))
 
+
 (defun ox-ipynb-filter-link (text back-end info)
   "Make a link into markdown.
 For some reason I was getting angle brackets in them I wanted to remove.
@@ -124,6 +128,7 @@ This only fixes file links with no description I think."
       (let ((path (substring text 1 -1)))
 	(format "[%s](%s)" path path))
     text))
+
 
 (defun export-ipynb-markdown-cell (beg end)
   "Return the markdown cell for the region defined by BEG and END."
@@ -140,17 +145,19 @@ This only fixes file links with no description I think."
       (source . ,(vconcat
 		  (list md))))))
 
-(defun export-ipynb-keyword-cell ()
-  "Make a markdown cell containing org-file keywords."
-  (let* ((keywords (org-element-map (org-element-parse-buffer)
-		       'keyword
-		     (lambda (key)
-		       (cons (org-element-property :key key)
-			     (org-element-property :value key))))))
-    (loop for key in '("RESULTS" "OPTIONS" "LATEX_HEADER" "ATTR_ORG")
-	  do
-	  (setq keywords (-remove (lambda (cell) (string= (car cell) key)) keywords)))
 
+(defun export-ipynb-keyword-cell ()
+  "Make a markdown cell containing org-file keywords and values."
+  (let* ((all-keywords (org-element-map (org-element-parse-buffer)
+			   'keyword
+			 (lambda (key)
+			   (cons (org-element-property :key key)
+				 (org-element-property :value key)))))
+	 (ipynb-keywords (cdr (assoc "OX-IPYNB-KEYWORD-METADATA" all-keywords)))
+	 (include-keywords (mapcar 'upcase (split-string (or ipynb-keywords ""))))
+	 (keywords (loop for key in include-keywords
+			 collect (cons key (cdr (assoc key all-keywords))))))
+    
     (setq keywords
 	  (loop for (key . value) in keywords
 		collect
@@ -164,17 +171,22 @@ This only fixes file links with no description I think."
 	(metadata . ,(make-hash-table))
 	(source . ,(vconcat keywords))))))
 
+
 (defun ox-ipynb-export-to-buffer ()
   "Export the current buffer to ipynb format in a buffer.
 Only ipython source blocks are exported as code cells. Everything
-else is exported as a markdown cell. The output is in *ox-ipynb*."
-  (interactive)
+else is exported as a markdown cell. The output is in *ox-ipynb*." 
   (let ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
-	(metadata `(metadata . ((org . ,(org-element-map (org-element-parse-buffer)
-					    'keyword
-					  (lambda (key)
-					    (cons (org-element-property :key key)
-						  (org-element-property :value key)))))
+	(metadata `(metadata . ((org . ,(let* ((all-keywords (org-element-map (org-element-parse-buffer)
+								 'keyword
+							       (lambda (key)
+								 (cons (org-element-property :key key)
+								       (org-element-property :value key)))))
+					       (ipynb-keywords (cdr (assoc "OX-IPYNB-KEYWORD-METADATA" all-keywords)))
+					       (include-keywords (mapcar 'upcase (split-string (or ipynb-keywords ""))))
+					       (keywords (loop for key in include-keywords
+							       collect (assoc key all-keywords))))
+					  keywords))
 				(kernelspec . ((display_name . "Python 3")
 					       (language . "python")
 					       (name . "python3")))
@@ -222,7 +234,8 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 				      result-content (buffer-substring-no-properties start end))
 				;; clean up the results a little. This gets rid
 				;; of the RESULTS markers for output and drawers
-				(loop for pat in '("#\\+RESULTS:" "^: " "^:RESULTS:\\|^:END:")
+				(loop for pat in '("#\\+RESULTS:"
+						   "^: " "^:RESULTS:\\|^:END:")
 				      do
 				      (setq result-content (replace-regexp-in-string
 							    pat
@@ -291,54 +304,62 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 
 
 (defun ox-ipynb-export-to-file ()
-  "Export current buffer to an ipynb file."
-  (interactive)
-  (with-current-buffer (ox-ipynb-export-to-buffer)
-    (write-file export-file-name))
-  export-file-name)
+  "Export current buffer to an ipynb file." 
+  (with-current-buffer (ox-ipynb-export-to-buffer) 
+    (write-file export-file-name)
+    export-file-name))
 
 
 (defun ox-ipynb-export-to-file-and-open ()
-  "Export the current buffer to a notebook and open it."
-  (interactive)
-  (async-shell-command (format "jupyter notebook %s" (ox-ipynb-export-to-file))))
+  "Export the current buffer to a notebook and open it." 
+  (async-shell-command (format "jupyter notebook \"%s\""
+			       (expand-file-name (ox-ipynb-export-to-file)))))
 
 
 (defun nbopen (fname)
   "Open fname in jupyter notebook."
   (interactive  (list (read-file-name "Notebook: ")))
-  (shell-command (format "nbopen %s&" fname)))
+  (shell-command (format "nbopen \"%s\" &" fname)))
 
 
 ;; * export menu
-(defun ox-ipynb-export-to-ipynb-buffer (async subtreep visible-only body-only &optional info)
+(defun ox-ipynb-export-to-ipynb-buffer (&optional async subtreep visible-only body-only info) 
   (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
     (org-org-export-as-org async subtreep visible-only body-only info)
-    (with-current-buffer "*Org ORG Export*"
-      (setq-local export-file-name ipynb)
+    (with-current-buffer "*Org ORG Export*" 
+      (setq-local export-file-name (or
+				    (and (boundp '*export-file-name*)
+					 *export-file-name*)
+				    ipynb))
       (ox-ipynb-export-to-buffer))))
 
 
-(defun ox-ipynb-export-to-ipynb-file (async subtreep visible-only body-only &optional info)
+(defun ox-ipynb-export-to-ipynb-file (&optional async subtreep visible-only body-only info)
   (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
     (org-org-export-as-org async subtreep visible-only body-only info)
     (with-current-buffer "*Org ORG Export*"
-      (setq-local export-file-name ipynb)
+      (setq-local export-file-name (or
+				    (and (boundp '*export-file-name*)
+					 *export-file-name*)
+				    ipynb))
       (ox-ipynb-export-to-file))))
 
 
-(defun ox-ipynb-export-to-ipynb-file-and-open (async subtreep visible-only body-only &optional info)
+(defun ox-ipynb-export-to-ipynb-file-and-open (&optional async subtreep visible-only body-only info)
   (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
     (org-org-export-as-org async subtreep visible-only body-only info)
     (with-current-buffer "*Org ORG Export*"
-      (setq-local export-file-name ipynb)
+      (setq-local export-file-name (or
+				    (and (boundp '*export-file-name*)
+					 *export-file-name*)
+				    ipynb))
       (ox-ipynb-export-to-file-and-open))))
 
 
 (org-export-define-derived-backend 'jupyter-notebook 'org
   :menu-entry
   '(?n "Export to jupyter notebook"
-       ((?b "to buffer" ox-ipynb-export-to-buffer)
+       ((?b "to buffer" ox-ipynb-export-to-ipynb-buffer)
 	(?n "to notebook" ox-ipynb-export-to-ipynb-file)
 	(?o "to notebook and open" ox-ipynb-export-to-ipynb-file-and-open))))
 
