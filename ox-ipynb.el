@@ -156,7 +156,8 @@ This only fixes file links with no description I think."
 	 (ipynb-keywords (cdr (assoc "OX-IPYNB-KEYWORD-METADATA" all-keywords)))
 	 (include-keywords (mapcar 'upcase (split-string (or ipynb-keywords ""))))
 	 (keywords (loop for key in include-keywords
-			 collect (cons key (cdr (assoc key all-keywords))))))
+			 if (assoc key all-keywords)
+			 collect (cons key (or (cdr (assoc key all-keywords)) "")))))
     
     (setq keywords
 	  (loop for (key . value) in keywords
@@ -165,7 +166,7 @@ This only fixes file links with no description I think."
 			key
 			(replace-regexp-in-string
 			 "<\\|>" ""
-			 value))))
+			 (or value "")))))
     (when keywords
       `((cell_type . "markdown")
 	(metadata . ,(make-hash-table))
