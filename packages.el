@@ -195,8 +195,27 @@
 				      scimax-dir))
 		 nil
 		 utf-8))))
+    (setenv "DICPATH" (expand-file-name "~/Library/Spelling"))
     (setq ispell-program-name (executable-find "hunspell")
 	  ispell-dictionary "en_US"
+	  ispell-local-dictionary "en_US"
+	  ispell-local-dictionary-alist
+	  `(("english"
+	     "[[:alpha:]]"
+	     "[^[:alpha:]]"
+	     "[']"
+	     t
+	     ("-d" "en_US" "-p" ,(expand-file-name "~/Library/Spelling/"))
+	     nil
+	     utf-8)
+	    ("en_US"
+	     "[[:alpha:]]"
+	     "[^[:alpha:]]"
+	     "[']"
+	     t
+	     ("-d" "en_US" "-p" ,(expand-file-name "~/Library/Spelling/"))
+	     nil
+	     utf-8))
 	  flyspell-correct-interface 'flyspell-correct-ivy))
   (add-hook 'flyspell-incorrect-hook
 	    (lambda (beg end sym)
