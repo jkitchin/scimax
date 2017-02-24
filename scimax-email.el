@@ -118,7 +118,7 @@ subsequent sends."
 	  (CC (org-entry-get (point) "CC" t))
 	  (BCC (org-entry-get (point) "BCC" t))
 	  (SUBJECT (nth 4 (org-heading-components)))
-	  (OTHER-HEADERS (read (org-entry-get (point) "OTHER-HEADERS")))
+	  (OTHER-HEADERS (read (or (org-entry-get (point) "OTHER-HEADERS") "()")))
 	  (continue nil)
 	  (switch-function nil)
 	  (yank-action nil)
