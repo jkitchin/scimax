@@ -489,7 +489,7 @@ The default action is to visit the mark."
 		       "open editmark")
 		      ("d" (lambda (x)
 			     (goto-char (cdr x))
-			     (em-delete-editmark-at-point))
+			     (em-delete-edit-mark-at-point))
 		       "delete editmark"))))
 
 
@@ -503,7 +503,7 @@ The default action is to visit the mark."
 (define-key em-map "m" 'em-comment)
 (define-key em-map "i" 'em-insert)
 (define-key em-map "d" 'em-delete)
-(define-key em-map "k" 'em-delete-editmark-at-point)
+(define-key em-map "k" 'em-delete-edit-mark-at-point)
 (define-key em-map "l" 'em-editmarks)
 (define-key em-map "r" 'em-replace)
 (define-key em-map "o" 'org-inlinetask-insert-task)
