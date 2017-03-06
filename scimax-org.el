@@ -218,9 +218,6 @@ is positive, move after, and if negative, move before."
 		     `(,template ,expansion ""))))
 
 ;; * Babel settings
-;; do not evaluate code on export by default
-(setq org-export-babel-evaluate nil)
-
 ;; enable prompt-free code running
 (setq org-confirm-babel-evaluate nil
       org-confirm-elisp-link-function nil
