@@ -130,6 +130,9 @@ is positive, move after, and if negative, move before."
 
 (setq org-upcoming-deadline '(:foreground "blue" :weight bold))
 
+;; use timestamps in date-trees. for the journal
+(setq org-datetree-add-timestamp 'active)
+
 (add-to-list
  'org-agenda-custom-commands
  '("w" "Weekly Review"
