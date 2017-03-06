@@ -403,6 +403,9 @@
   :diminish undo-tree-mode
   :config (global-undo-tree-mode))
 
+(use-package ws-butler
+  :config (ws-butler-global-mode))
+
 
 ;; * Scimax packages
 (use-package scimax
