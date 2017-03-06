@@ -288,6 +288,9 @@ You can move a paragraph up with \\[org-metadown] or `org-metadown'.
 
 You can mark the paragraph with `mark-paragraph'.
 
+Are you looking for general Info node `(org)' help?
+Perhaps Info node `(org) Tables'?
+
 ")
    (format  "\nClick for details on the face [[face:%s]]\n" (face-at-point))
    (ore-user-documentation 'paragraph)))
