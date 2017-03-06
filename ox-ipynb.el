@@ -173,45 +173,70 @@ This only fixes file links with no description I think."
 	(source . ,(vconcat keywords))))))
 
 
+(defvar ox-ipynb-kernelspecs '((ipython . (kernelspec . ((display_name . "Python 3")
+							 (language . "python")
+							 (name . "python3"))))
+			       (R . (kernelspec . ((display_name . "R")
+						   (language . "R")
+						   (name . "ir")))))
+  "kernelspec metadata for different kernels.")
+
+(defvar ox-ipynb-language-infos '((ipython . (language_info . ((codemirror_mode . ((name . ipython)
+										   (version . 3)))
+							       (file_extension . ".py")
+							       (mimetype . "text/x-python")
+							       (name . "python")
+							       (nbconvert_exporter . "python")
+							       (pygments_lexer . "ipython3")
+							       (version . "3.5.2"))))
+				  (R . (language_info . ((codemirror_mode . "r")
+							 (file_extension . ".r")
+							 (mimetype . "text/x-r-source")
+							 (name . "R")
+							 (pygments_lexer . "r")
+							 (version . "3.3.2"))))))
+
+(defun ox-ipynb-get-language ()
+  "Get the language for the exporter.
+We assume the first code-block contains the language you want."
+  (intern (org-element-map (org-element-parse-buffer)
+	      'src-block
+	    (lambda (src)
+	      (org-element-property :language src))
+	    nil t)))
+
 (defun ox-ipynb-export-to-buffer ()
   "Export the current buffer to ipynb format in a buffer.
 Only ipython source blocks are exported as code cells. Everything
 else is exported as a markdown cell. The output is in *ox-ipynb*." 
-  (let ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
-	(metadata `(metadata . ((org . ,(let* ((all-keywords (org-element-map (org-element-parse-buffer)
-								 'keyword
-							       (lambda (key)
-								 (cons (org-element-property :key key)
-								       (org-element-property :value key)))))
-					       (ipynb-keywords (cdr (assoc "OX-IPYNB-KEYWORD-METADATA" all-keywords)))
-					       (include-keywords (mapcar 'upcase (split-string (or ipynb-keywords ""))))
-					       (keywords (loop for key in include-keywords
-							       collect (assoc key all-keywords))))
-					  keywords))
-				(kernelspec . ((display_name . "Python 3")
-					       (language . "python")
-					       (name . "python3")))
-				(language_info . ((codemirror_mode . ((name . ipython)
-								      (version . 3)))
-						  (file_extension . ".py")
-						  (mimetype . "text/x-python")
-						  (name . "python")
-						  (nbconvert_exporter . "python")
-						  (pygments_lexer . "ipython3")
-						  (version . "3.5.2"))))))
-	(ipynb (or (and (boundp 'export-file-name) export-file-name)
-		   (concat (file-name-base (buffer-file-name)) ".ipynb")))
-	src-blocks
-	src-results
-	current-src
-	result
-	result-end
-	end
-	data)
+  (let* ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
+	 (ox-ipynb-language (ox-ipynb-get-language))
+	 (metadata `(metadata . ((org . ,(let* ((all-keywords (org-element-map (org-element-parse-buffer)
+								  'keyword
+								(lambda (key)
+								  (cons (org-element-property :key key)
+									(org-element-property :value key)))))
+						(ipynb-keywords (cdr (assoc "OX-IPYNB-KEYWORD-METADATA" all-keywords)))
+						(include-keywords (mapcar 'upcase (split-string (or ipynb-keywords ""))))
+						(keywords (loop for key in include-keywords
+								collect (assoc key all-keywords))))
+					   keywords))
+				 ,(cdr (assoc ox-ipynb-language ox-ipynb-kernelspecs))
+				 ,(cdr (assoc ox-ipynb-language ox-ipynb-language-infos)))))
+	 (ipynb (or (and (boundp 'export-file-name) export-file-name)
+		    (concat (file-name-base (buffer-file-name)) ".ipynb")))
+	 src-blocks
+	 src-results
+	 current-src
+	 result
+	 result-end
+	 end
+	 data)
 
     (setq src-blocks (org-element-map (org-element-parse-buffer) 'src-block
 		       (lambda (src)
-			 (when (string= "ipython" (org-element-property :language src))
+			 (when (string= (symbol-name ox-ipynb-language)
+					(org-element-property :language src))
 			   src))))
 
     ;; Get a list of (src . results)
@@ -232,7 +257,8 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 				     (concat org-babel-result-regexp ".*$"))
 				(setq start (1- (match-beginning 0))
 				      end (progn (forward-line 1) (org-babel-result-end))
-				      result-content (buffer-substring-no-properties start end))
+				      result-content (buffer-substring-no-properties
+						      start end))
 				;; clean up the results a little. This gets rid
 				;; of the RESULTS markers for output and drawers
 				(loop for pat in '("#\\+RESULTS:"
@@ -304,17 +330,21 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
     (get-buffer "*ox-ipynb*")))
 
 
-(defun ox-ipynb-export-to-file ()
-  "Export current buffer to an ipynb file." 
-  (with-current-buffer (ox-ipynb-export-to-buffer) 
-    (write-file export-file-name)
-    export-file-name))
+;; I don't think we need these. Leaving them for now.
+
+;; (defun ox-ipynb-export-to-file (&optional fname)
+;;   "Export current buffer to an ipynb file."
+;;   (with-current-buffer (ox-ipynb-export-to-buffer)
+;;     (write-file (or fname export-file-name))
+;;     (or fname export-file-name)))
 
 
-(defun ox-ipynb-export-to-file-and-open ()
-  "Export the current buffer to a notebook and open it." 
-  (async-shell-command (format "jupyter notebook \"%s\""
-			       (expand-file-name (ox-ipynb-export-to-file)))))
+;; (defun ox-ipynb-export-to-file-and-open (&optional fname)
+;;   "Export the current buffer to a notebook and open it."
+;;   (async-shell-command
+;;    (format "jupyter notebook \"%s\""
+;; 	   (expand-file-name
+;; 	    (ox-ipynb-export-to-file fname)))))
 
 
 (defun nbopen (fname)
@@ -324,37 +354,37 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 
 
 ;; * export menu
-(defun ox-ipynb-export-to-ipynb-buffer (&optional async subtreep visible-only body-only info) 
-  (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
+(defun ox-ipynb-export-to-ipynb-buffer (&optional async subtreep visible-only
+						  body-only info)
+  (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb"))
+	buf)
     (org-org-export-as-org async subtreep visible-only body-only info)
-    (with-current-buffer "*Org ORG Export*" 
-      (setq-local export-file-name (or
-				    (and (boundp '*export-file-name*)
-					 *export-file-name*)
-				    ipynb))
-      (ox-ipynb-export-to-buffer))))
+    (with-current-buffer "*Org ORG Export*"
+      (setq-local export-file-name ipynb)
+
+      (setq buf (ox-ipynb-export-to-buffer))
+      (with-current-buffer buf
+	(setq-local export-file-name ipynb))
+      (prog1
+	  buf
+	(kill-buffer "*Org ORG Export*")))))
 
 
 (defun ox-ipynb-export-to-ipynb-file (&optional async subtreep visible-only body-only info)
-  (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
-    (org-org-export-as-org async subtreep visible-only body-only info)
-    (with-current-buffer "*Org ORG Export*"
-      (setq-local export-file-name (or
-				    (and (boundp '*export-file-name*)
-					 *export-file-name*)
-				    ipynb))
-      (ox-ipynb-export-to-file))))
+  (with-current-buffer (ox-ipynb-export-to-ipynb-buffer async subtreep visible-only body-only info)
+    (let ((efn export-file-name))
+      (write-file efn)
+      (with-current-buffer efn
+	(setq-local export-file-name efn))
+      (kill-buffer efn)
+      efn)))
 
 
 (defun ox-ipynb-export-to-ipynb-file-and-open (&optional async subtreep visible-only body-only info)
-  (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb")))
-    (org-org-export-as-org async subtreep visible-only body-only info)
-    (with-current-buffer "*Org ORG Export*"
-      (setq-local export-file-name (or
-				    (and (boundp '*export-file-name*)
-					 *export-file-name*)
-				    ipynb))
-      (ox-ipynb-export-to-file-and-open))))
+  (async-shell-command
+   (format "jupyter notebook \"%s\""
+	   (expand-file-name
+	    (ox-ipynb-export-to-ipynb-file async subtreep visible-only body-only info)))))
 
 
 (org-export-define-derived-backend 'jupyter-notebook 'org
