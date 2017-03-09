@@ -208,7 +208,19 @@ We assume the first code-block contains the language you want."
 (defun ox-ipynb-export-to-buffer ()
   "Export the current buffer to ipynb format in a buffer.
 Only ipython source blocks are exported as code cells. Everything
-else is exported as a markdown cell. The output is in *ox-ipynb*." 
+else is exported as a markdown cell. The output is in *ox-ipynb*."
+
+  ;; This is a hack to remove empty Results. I think this is a bug in org-mode,
+  ;; that it exports empty results to have a nil in them without a \n, which
+  ;; causes this exporter to fail to find them.
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "#\\+RESULTS:
+:RESULTS:
+nil:END:" nil t)
+      (replace-match "")))
+
+
   (let* ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
 	 (ox-ipynb-language (ox-ipynb-get-language))
 	 (metadata `(metadata . ((org . ,(let* ((all-keywords (org-element-map (org-element-parse-buffer)
