@@ -13,7 +13,8 @@
   (package-install 'use-package))
 
 (eval-when-compile
-  (require 'use-package))
+  (require 'use-package)
+  (package-refresh-contents))
 
 (require 'diminish) ;; if you use :diminish
 
