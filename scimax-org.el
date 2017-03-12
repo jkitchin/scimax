@@ -253,7 +253,8 @@ is positive, move after, and if negative, move before."
 	(:cache .   "no")
 	(:noweb . "no")
 	(:hlines . "no")
-	(:tangle . "no")))
+	(:tangle . "no")
+	(:eval . "never-export")))
 
 ;; ** jupyter ipython blocks
 
