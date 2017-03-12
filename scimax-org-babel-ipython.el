@@ -12,13 +12,14 @@
 	       "<src lang=\"python\">\n?\n</src>"))
 
 (setq org-babel-default-header-args:ipython
-      '((:results . "output replace")
-	(:session . "none")
+      '((:results . "output replace drawer")
+	(:session . t)
 	(:exports . "both")
 	(:cache .   "no")
 	(:noweb . "no")
 	(:hlines . "no")
-	(:tangle . "no")))
+	(:tangle . "no")
+	(:eval . "never-export")))
 
 (defun scimax-install-ipython-lexer ()
   "Install the IPython lexer for Pygments.
@@ -28,6 +29,73 @@ You need this to get syntax highlighting."
 	     (shell-command
 	      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
+
+;; * Commands like the jupyter notebook
+
+(defun org-babel-insert-block (&optional below)
+  "Insert a src block above the current point.
+With prefix arg BELOW, insert it below the current point."
+  (interactive "P")
+  (cond
+   ((and (org-in-src-block-p) below)
+    ;; go to end, and insert block
+    (let* ((src (org-element-context))
+	   (start (org-element-property :begin src))
+	   (end (org-element-property :end src))
+	   location)
+      (goto-char start)
+      (setq location (org-babel-where-is-src-block-result nil nil))
+      (if (not  location)
+	  (goto-char end)
+	(goto-char location)
+	(goto-char (org-element-property :end (org-element-context))))
+      (insert "\n#+BEGIN_SRC ipython
+
+#+END_SRC\n\n")
+      (forward-line -3)))
+
+   ((org-in-src-block-p)
+    ;; goto begining and insert
+    (goto-char (org-element-property :begin (org-element-context)))
+    (insert "\n#+BEGIN_SRC ipython
+
+#+END_SRC\n\n")
+    (forward-line -3))
+
+   (t
+    (beginning-of-line)
+    (insert "\n#+BEGIN_SRC ipython
+
+#+END_SRC\n")
+    (forward-line -2))))
+
+
+(defun org-babel-split-src-block (&optional below)
+  "Split the current src block.
+With a prefix BELOW move point to lower block."
+  (interactive "P")
+  (let* ((el (org-element-context))
+	 (language (org-element-property :language el))
+	 (parameters (org-element-property :parameters el)))
+
+    (beginning-of-line)
+    (insert (format "#+END_SRC
+
+#+BEGIN_SRC %s %s\n" language parameters))
+    (beginning-of-line)
+    (when (not below)
+      (org-babel-previous-src-block))))
+
+(define-key org-mode-map [H--] #'org-babel-split-src-block)
+
+(defun org-babel-execute-to-point ()
+  "Execute all the blocks up to and including the one point is on."
+  (interactive)
+  (let ((p (point)))
+    (save-excursion
+      (goto-char (point-min))
+      (while (and (org-babel-next-src-block) (< (point) p))
+	(org-babel-execute-src-block)))))
 
 ;; * Enhancements to ob-ipython
 
