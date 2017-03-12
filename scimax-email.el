@@ -16,28 +16,32 @@
 	bibfile p1 p2
 	(bib-entries '()))
     (goto-char (region-beginning))
-    (while (org-ref-match-next-cite-link end)
-      (backward-char 2)
-      (setq cite (org-element-context)
-	    keys (s-split "," (org-element-property :path cite)))
-      (loop for key in keys
-	    do
-	    (setq bibfile
-		  (cdr (org-ref-get-bibtex-key-and-file key)))
-	    (with-current-buffer (find-file-noselect bibfile)
-	      (bibtex-search-entry key)
-	      (save-excursion
-		(bibtex-beginning-of-entry)
-		(setq p1 (point))
-		(bibtex-end-of-entry)
-		(setq p2 (point)))
-	      (pushnew (buffer-substring p1 p2) bib-entries))))
+
+    (save-restriction
+      (narrow-to-region start end)
+      (org-element-map (org-element-parse-buffer) 'link
+	(lambda (link)
+	  (when (-contains? org-ref-cite-types (org-element-property :type link))
+	    (setq keys (s-split "," (org-element-property :path link)))
+	    (loop for key in keys
+		  do
+		  (setq bibfile
+			(cdr (org-ref-get-bibtex-key-and-file key)))
+		  (with-current-buffer (find-file-noselect bibfile)
+		    (bibtex-search-entry key)
+		    (save-excursion
+		      (bibtex-beginning-of-entry)
+		      (setq p1 (point))
+		      (bibtex-end-of-entry)
+		      (setq p2 (point)))
+		    (add-to-list 'bib-entries (buffer-substring-no-properties p1 p2))))))))
+    
     (compose-mail)
     (message-goto-body)
     (insert content)
+    (insert "\n\n% Bibtex Entries:\n\n")
     (loop for bib-entry in bib-entries
-	  do
-	  (insert "\n\n% Bibtex Entries:\n\n")
+	  do 
 	  (insert bib-entry))
     (message-goto-to)))
 
