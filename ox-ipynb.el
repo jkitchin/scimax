@@ -135,10 +135,12 @@ This only fixes file links with no description I think."
   (let* ((org-export-filter-latex-fragment-functions '(ox-ipynb-filter-latex-fragment))
 	 (org-export-filter-link-functions '(ox-ipynb-filter-link))
 	 (org-export-filter-keyword-functions '(ox-ipynb-keyword-link))
-	 (md (org-export-string-as
-	      (buffer-substring-no-properties
-	       beg end)
-	      'md t '(:with-toc nil :with-tags nil))))
+	 (md (flet ((org-export-get-relative-level
+		     (headline info)
+		     (org-element-property :level headline)))
+	       (org-export-string-as (buffer-substring-no-properties
+				      beg end)
+				     'md t '(:with-toc nil :with-tags nil)))))
 
     `((cell_type . "markdown")
       (metadata . ,(make-hash-table))
@@ -368,7 +370,8 @@ nil:END:" nil t)
 ;; * export menu
 (defun ox-ipynb-export-to-ipynb-buffer (&optional async subtreep visible-only
 						  body-only info)
-  (let ((ipynb (concat (file-name-base (buffer-file-name)) ".ipynb"))
+  (let ((ipynb (or (when (boundp 'export-file-name) export-file-name)
+		   (concat (file-name-base (buffer-file-name)) ".ipynb")))
 	buf)
     (org-org-export-as-org async subtreep visible-only body-only info)
     (with-current-buffer "*Org ORG Export*"
@@ -384,11 +387,12 @@ nil:END:" nil t)
 
 (defun ox-ipynb-export-to-ipynb-file (&optional async subtreep visible-only body-only info)
   (with-current-buffer (ox-ipynb-export-to-ipynb-buffer async subtreep visible-only body-only info)
-    (let ((efn export-file-name))
+    (let* ((efn export-file-name)
+	   (buf (find-file-noselect efn) ))
       (write-file efn)
-      (with-current-buffer efn
+      (with-current-buffer buf
 	(setq-local export-file-name efn))
-      (kill-buffer efn)
+      (kill-buffer buf)
       efn)))
 
 
