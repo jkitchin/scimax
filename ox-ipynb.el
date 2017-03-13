@@ -130,17 +130,18 @@ This only fixes file links with no description I think."
     text))
 
 
-(defun export-ipynb-markdown-cell (beg end)
-  "Return the markdown cell for the region defined by BEG and END."
+(defun export-ipynb-markdown-cell (s)
+  "Return the markdown cell for the string S."
   (let* ((org-export-filter-latex-fragment-functions '(ox-ipynb-filter-latex-fragment))
 	 (org-export-filter-link-functions '(ox-ipynb-filter-link))
 	 (org-export-filter-keyword-functions '(ox-ipynb-keyword-link))
 	 (md (flet ((org-export-get-relative-level
 		     (headline info)
 		     (org-element-property :level headline)))
-	       (org-export-string-as (buffer-substring-no-properties
-				      beg end)
-				     'md t '(:with-toc nil :with-tags nil)))))
+	       (s-trim
+		(org-export-string-as
+		 s
+		 'md t '(:with-toc nil :with-tags nil))))))
 
     `((cell_type . "markdown")
       (metadata . ,(make-hash-table))
@@ -253,7 +254,9 @@ nil:END:" nil t)
 					(org-element-property :language src))
 			   src))))
 
-    ;; Get a list of (src . results)
+    ;; Get a list of (src . results). These are only source blocks and
+    ;; corresponding results. We assume that before, between and after src
+    ;; blocks there are markdown cells.
     (setq src-results
 	  (loop for src in src-blocks
 		with result=nil
@@ -290,18 +293,26 @@ nil:END:" nil t)
 
     (setq current-source (pop src-results))
 
-    ;; First block before a src is markdown
+    ;; First block before a src is markdown, unless it happens to be empty.
     (if (car current-source)
 	(unless (string= "" (s-trim
 			     (buffer-substring-no-properties
 			      (point-min)
 			      (org-element-property :begin (car current-source)))))
-	  (push (export-ipynb-markdown-cell
-		 (point-min) (org-element-property :begin (car current-source)))
-		cells))
-      (push (export-ipynb-markdown-cell
-	     (point-min) (point-max))
-	    cells))
+	  (let ((text (buffer-substring-no-properties (point-min) (org-element-property :begin (car current-source)))))
+	    (loop for s in (s-slice-at "^\\*" text)
+		  unless (string= "" s)
+		  do
+		  (push (export-ipynb-markdown-cell (s-trim s))
+			cells))))
+      ;; this is a special case where there are no source blocks, and the whole
+      ;; document is a markdown cell.
+      (let ((text (buffer-substring-no-properties (point-min) (point-max))))
+	(loop for s in (s-slice-at "^\\*" text)
+	      unless (string= "" s)
+	      do
+	      (push (export-ipynb-markdown-cell (s-trim s))
+		    cells))))
 
     (while current-source
       ;; add the src cell
@@ -321,13 +332,20 @@ nil:END:" nil t)
 					  end
 					  (org-element-property :begin
 								(car current-source))))))
-	    (push (export-ipynb-markdown-cell
-		   end
-		   (org-element-property :begin
-					 (car current-source)))
-		  cells))
+	    (let ((text (buffer-substring-no-properties end (org-element-property :begin
+										  (car current-source)))))
+	      (loop for s in (s-slice-at "^\\*" text)
+		    unless (string= "" s)
+		    do
+		    (push (export-ipynb-markdown-cell (s-trim s))
+			  cells))))
 	;; on last block so add rest of document
-	(push (export-ipynb-markdown-cell end (point-max)) cells)))
+	(let ((text (buffer-substring-no-properties end (point-max))))
+	  (loop for s in (s-slice-at "^\\*" text)
+		unless (string= "" s)
+		do
+		(push (export-ipynb-markdown-cell (s-trim s))
+		      cells)))))
 
     (setq data (append
 		`((cells . ,(reverse cells)))
@@ -335,6 +353,7 @@ nil:END:" nil t)
 		'((nbformat . 4)
 		  (nbformat_minor . 0))))
 
+    ;; Put the json into a buffer
     (with-current-buffer (get-buffer-create "*ox-ipynb*")
       (erase-buffer)
       (insert (json-encode data)))
@@ -344,21 +363,6 @@ nil:END:" nil t)
     (get-buffer "*ox-ipynb*")))
 
 
-;; I don't think we need these. Leaving them for now.
-
-;; (defun ox-ipynb-export-to-file (&optional fname)
-;;   "Export current buffer to an ipynb file."
-;;   (with-current-buffer (ox-ipynb-export-to-buffer)
-;;     (write-file (or fname export-file-name))
-;;     (or fname export-file-name)))
-
-
-;; (defun ox-ipynb-export-to-file-and-open (&optional fname)
-;;   "Export the current buffer to a notebook and open it."
-;;   (async-shell-command
-;;    (format "jupyter notebook \"%s\""
-;; 	   (expand-file-name
-;; 	    (ox-ipynb-export-to-file fname)))))
 
 
 (defun nbopen (fname)
