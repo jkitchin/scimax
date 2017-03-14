@@ -5,6 +5,18 @@
 ;; #+ox-ipynb-keyword-metadata: key1 key2
 ;; This will use store key:value pairs in
 ;; the notebook metadata section, in an org section.
+;;
+;; You can force a new cell to be created with the org-directive #+ipynb-newcell
+;;
+;; This exporter supports ipython and R Juypter notebooks. Other languages could
+;; be supported, but you need to add a kernelspec to `ox-ipynb-kernelspecs' and
+;; the language info to `ox-ipynb-language-infos'.
+;;
+;; The org-file is parsed into a list of cells. Each cell is either a markdown
+;; cell or a code cell (with results). Headlines are parsed to their own cells
+;; to enable collapsible headings to work nicely.
+;;
+;; You can export an org-file to a buffer, file or file and open.
 
 ;;; Code:
 (require 'ox-md)
@@ -185,6 +197,7 @@ This only fixes file links with no description I think."
 						   (name . "ir")))))
   "kernelspec metadata for different kernels.")
 
+
 (defvar ox-ipynb-language-infos '((ipython . (language_info . ((codemirror_mode . ((name . ipython)
 										   (version . 3)))
 							       (file_extension . ".py")
@@ -198,7 +211,10 @@ This only fixes file links with no description I think."
 							 (mimetype . "text/x-r-source")
 							 (name . "R")
 							 (pygments_lexer . "r")
-							 (version . "3.3.2"))))))
+							 (version . "3.3.2")))))
+  "These get injected into notebook metadata.
+They are reverse-engineered from existing notebooks.")
+
 
 (defun ox-ipynb-get-language ()
   "Get the language for the exporter.
@@ -210,6 +226,26 @@ Python is the default."
 		  (org-element-property :language src))
 		nil t)
 	      "ipython")))
+
+
+(defun ox-ipynb-split-text (s)
+  "Given a string S, split it into substrings.
+Each heading is its own string. Also, split on #+markdown.
+Empty strings are eliminated."
+  (let* ((s1 (s-slice-at org-heading-regexp s))
+	 ;; split headers out
+	 (s2 (loop for string in s1
+		   if (string-match org-heading-regexp string)
+		   append
+		   (let ((si (split-string string "\n" t)))
+		     (list (car si)
+			   (mapconcat 'identity (cdr si) "\n")))))
+	 (s3 (loop for string in s2
+		   append
+		   (split-string string "#\\+ipynb-newcell" t))))
+
+    s3))
+
 
 (defun ox-ipynb-export-to-buffer ()
   "Export the current buffer to ipynb format in a buffer.
@@ -225,7 +261,6 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 :RESULTS:
 nil:END:" nil t)
       (replace-match "")))
-
 
   (let* ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
 	 (ox-ipynb-language (ox-ipynb-get-language))
@@ -305,7 +340,7 @@ nil:END:" nil t)
 	  (let ((text (buffer-substring-no-properties
 		       (point-min)
 		       (org-element-property :begin (car current-source)))))
-	    (loop for s in (s-slice-at "^\\*" text)
+	    (loop for s in (ox-ipynb-split-text text)
 		  unless (string= "" (s-trim s))
 		  do
 		  (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
@@ -313,7 +348,7 @@ nil:END:" nil t)
       ;; this is a special case where there are no source blocks, and the whole
       ;; document is a markdown cell.
       (let ((text (buffer-substring-no-properties (point-min) (point-max))))
-	(loop for s in (s-slice-at "^\\*" text)
+	(loop for s in (ox-ipynb-split-text text)
 	      unless (string= "" (s-trim s))
 	      do
 	      (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
@@ -341,14 +376,14 @@ nil:END:" nil t)
 	    (let ((text (buffer-substring-no-properties
 			 end (org-element-property :begin
 						   (car current-source)))))
-	      (loop for s in (s-slice-at "^\\*" text)
+	      (loop for s in (ox-ipynb-split-text text)
 		    unless (string= "" s)
 		    do
 		    (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
 		      (push md cells)))))
 	;; on last block so add rest of document
 	(let ((text (buffer-substring-no-properties end (point-max))))
-	  (loop for s in (s-slice-at "^\\*" text)
+	  (loop for s in (ox-ipynb-split-text text)
 		unless (string= "" s)
 		do
 		(when-let ((md (export-ipynb-markdown-cell (s-trim s))))
