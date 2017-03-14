@@ -142,11 +142,12 @@ This only fixes file links with no description I think."
 		(org-export-string-as
 		 s
 		 'md t '(:with-toc nil :with-tags nil))))))
-
-    `((cell_type . "markdown")
-      (metadata . ,(make-hash-table))
-      (source . ,(vconcat
-		  (list md))))))
+    (if (not (string= "" md))
+	`((cell_type . "markdown")
+	  (metadata . ,(make-hash-table))
+	  (source . ,(vconcat
+		      (list md))))
+      nil)))
 
 
 (defun export-ipynb-keyword-cell ()
@@ -299,20 +300,22 @@ nil:END:" nil t)
 			     (buffer-substring-no-properties
 			      (point-min)
 			      (org-element-property :begin (car current-source)))))
-	  (let ((text (buffer-substring-no-properties (point-min) (org-element-property :begin (car current-source)))))
+	  (let ((text (buffer-substring-no-properties
+		       (point-min)
+		       (org-element-property :begin (car current-source)))))
 	    (loop for s in (s-slice-at "^\\*" text)
-		  unless (string= "" s)
+		  unless (string= "" (s-trim s))
 		  do
-		  (push (export-ipynb-markdown-cell (s-trim s))
-			cells))))
+		  (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+		    (push md cells)))))
       ;; this is a special case where there are no source blocks, and the whole
       ;; document is a markdown cell.
       (let ((text (buffer-substring-no-properties (point-min) (point-max))))
 	(loop for s in (s-slice-at "^\\*" text)
-	      unless (string= "" s)
+	      unless (string= "" (s-trim s))
 	      do
-	      (push (export-ipynb-markdown-cell (s-trim s))
-		    cells))))
+	      (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+		(push md cells)))))
 
     (while current-source
       ;; add the src cell
@@ -330,22 +333,24 @@ nil:END:" nil t)
       (if current-source
 	  (when (not (string= "" (s-trim (buffer-substring
 					  end
-					  (org-element-property :begin
-								(car current-source))))))
-	    (let ((text (buffer-substring-no-properties end (org-element-property :begin
-										  (car current-source)))))
+					  (org-element-property
+					   :begin
+					   (car current-source))))))
+	    (let ((text (buffer-substring-no-properties
+			 end (org-element-property :begin
+						   (car current-source)))))
 	      (loop for s in (s-slice-at "^\\*" text)
 		    unless (string= "" s)
 		    do
-		    (push (export-ipynb-markdown-cell (s-trim s))
-			  cells))))
+		    (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+		      (push md cells)))))
 	;; on last block so add rest of document
 	(let ((text (buffer-substring-no-properties end (point-max))))
 	  (loop for s in (s-slice-at "^\\*" text)
 		unless (string= "" s)
 		do
-		(push (export-ipynb-markdown-cell (s-trim s))
-		      cells)))))
+		(when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+		  (push md cells))))))
 
     (setq data (append
 		`((cells . ,(reverse cells)))
@@ -361,8 +366,6 @@ nil:END:" nil t)
     (switch-to-buffer "*ox-ipynb*")
     (setq-local export-file-name ipynb)
     (get-buffer "*ox-ipynb*")))
-
-
 
 
 (defun nbopen (fname)
