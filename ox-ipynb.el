@@ -235,11 +235,12 @@ Empty strings are eliminated."
   (let* ((s1 (s-slice-at org-heading-regexp s))
 	 ;; split headers out
 	 (s2 (loop for string in s1
-		   if (string-match org-heading-regexp string)
 		   append
-		   (let ((si (split-string string "\n" t)))
-		     (list (car si)
-			   (mapconcat 'identity (cdr si) "\n")))))
+		   (if (string-match org-heading-regexp string)
+		       (let ((si (split-string string "\n" t)))
+			 (list (car si)
+			       (mapconcat 'identity (cdr si) "\n")))
+		     (list string))))
 	 (s3 (loop for string in s2
 		   append
 		   (split-string string "#\\+ipynb-newcell" t))))
