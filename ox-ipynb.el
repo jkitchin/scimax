@@ -202,12 +202,14 @@ This only fixes file links with no description I think."
 
 (defun ox-ipynb-get-language ()
   "Get the language for the exporter.
-We assume the first code-block contains the language you want."
-  (intern (org-element-map (org-element-parse-buffer)
-	      'src-block
-	    (lambda (src)
-	      (org-element-property :language src))
-	    nil t)))
+We assume the first code-block contains the language you want.
+Python is the default."
+  (intern (or (org-element-map (org-element-parse-buffer)
+		  'src-block
+		(lambda (src)
+		  (org-element-property :language src))
+		nil t)
+	      "ipython")))
 
 (defun ox-ipynb-export-to-buffer ()
   "Export the current buffer to ipynb format in a buffer.
