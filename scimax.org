@@ -939,7 +939,7 @@ While in a project, you may want to try:
 ** Asynchronous Python
 You can run python blocks asynchronously with M-x `org-babel-async-execute:python' with the cursor in a code block. This will allow you to keep typing, and show you a buffer with the progress of your code block. When it is done, the results will be inserted into the buffer where it belongs when the job is done. A temporary hash mark will go in the results. 
 
-** Ipython
+** Jupyter/Ipython
 If you like sessions in Python, the ob-ipython library is better than the default ob-python in org-mode.
 
 Pygments doesn't support ipython out of the box for some reason, which is a problem if you want to export your src block to LaTeX. scimax fixes this for you and automatically installs this if you don't already have it.
@@ -1120,46 +1120,6 @@ scimax provides the jupyter-hy src block to run hylang in src blocks. The requir
 #+RESULTS:
 : hello world
 : Fri Jun 10 10:21:24 2016
-
-*** Jupyter Matlab
-
-If you install the Matlab kernel: https://github.com/Calysto/matlab_kernel, it is possible to run Matlab from Emacs in a moderately reasonable way, e.g. in a session.
-
-You need to add these lines to your init files.
-
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'org-src-lang-modes '("matlab" . matlab))
-
-;; set default headers for convenience
-(setq org-babel-default-header-args:matlab
-      '((:results . "output replace")
-	(:session . "matlab")
-	(:kernel . "matlab")
-	(:exports . "code")
-	(:cache .   "no")
-	(:noweb . "no")
-	(:hlines . "no")
-	(:tangle . "no")))
-
-(defalias 'org-babel-execute:matlab 'org-babel-execute:ipython)
-(defalias 'org-babel-prep-session:matlab 'org-babel-prep-session:ipython)
-(defalias 'org-babel-matlab-initiate-session 'org-babel-ipython-initiate-session)
-#+END_SRC
-
-#+RESULTS:
-: org-babel-matlab-initiate-session
-
-It is not a very rich interface. You have to format some things yourself to get tables, and there are no inline images.
-
-#+BEGIN_SRC matlab :results output org drawer
-x = [1, 2, 3, 4, 5];
-fprintf('|%d', x)
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-| 1 | 2 | 3 | 4 | 5 |
-:END:
 
 
 ** Emacs-lisp
