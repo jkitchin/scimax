@@ -227,6 +227,7 @@ is positive, move after, and if negative, move before."
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((emacs-lisp . t)
+   (latex . t)
    (python . t)
    (shell . t)
    (matlab . t)
@@ -640,6 +641,55 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
   (apply orig-func args))
 
 (advice-add 'org-create-formula-image :around #'org-renumber-environment)
+
+;; * Fragment Editing
+
+(defun org-wrap-latex-fragment ()
+  "Wrap latex fragment in a latex src block"
+  (interactive)
+  (let* ((ele (org-element-context))
+         (beg (org-element-property :begin ele))
+         (end (org-element-property :end ele)))
+    (when (memq (org-element-type ele)
+                '(latex-fragment latex-environment))
+      (save-excursion
+        (goto-char (1- end))
+        (while (looking-at-p "^$")
+          (forward-line -1))
+        (end-of-line)
+        (insert "\n#+END_SRC")
+        (goto-char beg)
+        (insert "#+BEGIN_SRC latex\n")))))
+
+(defun org-unwrap-latex-fragment (&rest args)
+  "Unwrap latex fragment"
+  (interactive)
+  (let* ((ele (org-element-context))
+         (lang (org-element-property :language ele))
+         (beg (org-element-property :begin ele))
+         (end (org-element-property :end ele)))
+    (when (and (eq 'src-block
+                   (org-element-type ele))
+               (string= "latex" lang))
+      (save-excursion
+        (goto-char end)
+        (while (not (looking-at-p "^#\\+end_src"))
+          (forward-line -1))
+        (delete-region (point-at-bol) (1+ (point-at-eol)))
+        (goto-char beg)
+        (while (not (looking-at-p "^#\\+begin_src latex"))
+          (forward-line 1))
+        (delete-region (point-at-bol) (1+ (point-at-eol)))))))
+
+(defun org-wrap-latex-fragment-maybe (&rest args)
+  "Wrap a latex fragment with \"begin_src latex\" and \"end_src\" so that we could edit it like a latex src block. This only works on display math."
+  (when (save-excursion
+          (goto-char (org-element-property :begin (org-element-context)))
+          (looking-at-p "[ \t]*\\\\\\[\\|[ \t]*\\\\begin")) ; display math
+    (et/wrap-org-latex-fragment)))
+
+(advice-add #'org-edit-special :before #'org-wrap-latex-fragment-maybe)
+(advice-add #'org-edit-src-exit :after #'org-unwrap-latex-fragment '((depth . 100)))
 
 
 ;; * Markup commands for org-mode
