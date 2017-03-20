@@ -260,7 +260,8 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
     (goto-char (point-min))
     (while (re-search-forward "#\\+RESULTS:
 :RESULTS:
-nil:END:" nil t)
+nil:END:
+" nil t)
       (replace-match "")))
 
   (let* ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
