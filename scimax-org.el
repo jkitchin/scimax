@@ -687,7 +687,7 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
   (when (save-excursion
           (goto-char (org-element-property :begin (org-element-context)))
           (looking-at-p "[ \t]*\\\\\\[\\|[ \t]*\\\\begin")) ; display math
-    (et/wrap-org-latex-fragment)))
+    (org-wrap-latex-fragment)))
 
 (advice-add #'org-edit-special :before #'org-wrap-latex-fragment-maybe)
 (advice-add #'org-edit-src-exit :after #'org-unwrap-latex-fragment '((depth . 100)))
