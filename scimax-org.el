@@ -1233,6 +1233,18 @@ boundaries."
 			    (list 'org-display-inline-remove-overlay))
 			   (push ov org-inline-image-overlays)))))))))))))))
 
+;; * Enable pdf and eps images in org-mode
+;; Suggested on the org-mode maillist by Julian Burgos
+(add-to-list 'image-file-name-extensions "pdf")
+(add-to-list 'image-file-name-extensions "eps")
+
+(add-to-list 'image-type-file-name-regexps '("\\.eps\\'" . imagemagick))
+(add-to-list 'image-file-name-extensions "eps")
+(add-to-list 'image-type-file-name-regexps '("\\.pdf\\'" . imagemagick))
+(add-to-list 'image-file-name-extensions "pdf")
+
+(setq imagemagick-types-inhibit (remove 'PDF imagemagick-types-inhibit))
+
 ;; * The end
 (provide 'scimax-org)
 
