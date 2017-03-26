@@ -339,6 +339,8 @@
 
 (use-package ov)
 
+(use-package org-edit-latex)
+
 ;; this is a git submodule
 (use-package org-ref
   :ensure nil
