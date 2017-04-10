@@ -411,7 +411,9 @@
 (use-package scimax
   :ensure nil
   :load-path scimax-dir
-  :init (require 'scimax))
+  :init (require 'scimax)
+  :bind
+  ("C-x C-b" . ibuffer))
 
 (use-package scimax-mode
   :ensure nil
