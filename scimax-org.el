@@ -944,11 +944,6 @@ F5 inserts the entity code."
      :store 'org-man-store-link))
 
 
-
-
-
-
-
 ;; * ivy navigation
 (defun ivy-org-jump-to-visible-headline ()
   "Jump to visible headline in the buffer."
@@ -1013,7 +1008,6 @@ F5 inserts the entity code."
 			(outline-show-entry)))))
 
 
-
 (defun ivy-org-jump-to-heading-in-files (files &optional fontify)
   "Jump to org heading in FILES.
 Optional FONTIFY colors the headlines. It might slow things down
@@ -1071,10 +1065,23 @@ for colored headlines."
    (mapcar
     (lambda (f) (expand-file-name f (projectile-project-root)))
     (-filter (lambda (f)
-	       (and 
+	       (and
 		(f-ext? f "org")
 		(not (s-contains? "#" f))))
 	     (projectile-current-project-files)))
+   fontify))
+
+
+(defun ivy-org-jump-to-open-headline (fontify)
+  "Jump to a headline in an open org-file.
+Use a prefix arg FONTIFY for colored headlines."
+  (interactive "P")
+  (ivy-org-jump-to-heading-in-files
+   (mapcar 'buffer-file-name
+	   (-filter (lambda (b)
+		      (when-let (f (buffer-file-name b))
+			(f-ext? f "org")))
+		    (buffer-list)))
    fontify))
 
 
