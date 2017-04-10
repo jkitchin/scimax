@@ -33,6 +33,24 @@
 
 (require 'org-inlinetask)
 
+(defun em-escape-tex (s)
+  "Escape the special characters in S for LaTeX export."
+  (loop for (char . rep) in '(("\\" . "\\\\textbackslash")
+			      ("&" . "\\\\&")
+			      ("%" . "\\\\%")
+			      ("$" . "\\\\$")
+			      ("#" . "\\\\#")
+			      ("_" . "\\\\_")
+			      ("{" . "\\\\{")
+			      ("}" . "\\\\}")
+			      ("~" . "\\\\textasciitilde")
+			      ("^" . "\\\\textasciicircum"))
+	do
+	(setq s (replace-regexp-in-string (regexp-quote char) rep s)))
+  s)
+
+
+
 ;; * The links
 (if (fboundp 'org-link-set-parameters)
     (org-link-set-parameters
@@ -44,8 +62,8 @@
 	       (cond
 		((eq format 'latex)
 		 (format "\\todo[inline]{%s}%s"
-			 path
-			 (if description (format "{%s}" description) "")))))
+			 (em-escape-tex path)
+			 (if description (format "{%s}" (em-escape-tex description)) "")))))
      :face 'em-comment-face)
   (org-add-link-type
    "comment"
@@ -56,8 +74,8 @@
      (cond
       ((eq format 'latex)
        (format "\\todo[inline]{%s}%s"
-	       path
-	       (if description (format "{%s}" description) "")))))))
+	       (em-escape-tex path)
+	       (if description (format "{%s}" (em-escape-tex description)) "")))))))
 
 
 (if (fboundp 'org-link-set-parameters)
@@ -68,7 +86,7 @@
      :export (lambda (path description format)
 	       (cond
 		((eq format 'latex)
-		 (format "\\textcolor{red}{%s}" path))
+		 (format "\\textcolor{red}{%s}" (em-escape-tex path)))
 		((eq format 'html)
 		 (format "<font color=\"red\">%s</font>" path))))
      :face 'em-delete-face) 
@@ -79,7 +97,7 @@
    (lambda (path description format)
      (cond
       ((eq format 'latex)
-       (format "\\textcolor{red}{%s}" path))))))
+       (format "\\textcolor{red}{%s}" (em-escape-tex path)))))))
 
 (if (fboundp 'org-link-set-parameters)
     (org-link-set-parameters
@@ -89,7 +107,7 @@
      :export (lambda (path description format)
 	       (cond
 		((eq format 'latex)
-		 (format "\\textcolor{blue}{%s}" path))
+		 (format "\\textcolor{blue}{%s}" (em-escape-tex path)))
 		((eq format 'html)
 		 (format "<font color=\"blue\">%s</font>" path))))
      :face 'em-insert-face) 
@@ -100,7 +118,7 @@
    (lambda (path description format)
      (cond
       ((eq format 'latex)
-       (format "\\textcolor{blue}{%s}" path))))))
+       (format "\\textcolor{blue}{%s}" (em-escape-tex path)))))))
 
 
 (if (fboundp 'org-link-set-parameters)
@@ -122,7 +140,7 @@
      :export (lambda (path description format)
 	       (cond
 		((eq format 'latex)
-		 (format "\\bold{\\textcolor{red}{%s}}" path))))
+		 (format "\\bold{\\textcolor{red}{%s}}" (em-escape-tex path)))))
      :face 'em-typo-face)
   (org-add-link-type
    "typo"
@@ -142,7 +160,7 @@
    (lambda (path description format)
      (cond
       ((eq format 'latex)
-       (format "\\bold{\\textcolor{red}{%s}}" path))))))
+       (format "\\bold{\\textcolor{red}{%s}}" (em-escape-tex path)))))))
 
 
 ;; ** Link faces and font-lock
