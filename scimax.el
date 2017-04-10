@@ -323,6 +323,7 @@ This enables you to use tab to open and close outlines."
 (global-set-key (kbd "<f12>") 'navy)
 
 
+
 ;; * dired enhancements
 ;; http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html
 (require 'dired )
@@ -364,6 +365,32 @@ Version 2016-12-22"
 
 (define-key dired-mode-map (kbd "_") 'xah-dired-rename-space-to-underscore)
 (define-key dired-mode-map (kbd "-") 'xah-dired-rename-space-to-hyphen)
+
+;; * dubcaps
+(defun dcaps-to-scaps ()
+  "Convert word in DOuble CApitals to Single Capitals."
+  (interactive)
+  (and (= ?w (char-syntax (char-before)))
+       (save-excursion
+         (and (if (called-interactively-p)
+                  (skip-syntax-backward "w")
+                (= -3 (skip-syntax-backward "w")))
+              (let (case-fold-search)
+                (looking-at "\\b[[:upper:]]\\{2\\}[[:lower:]]"))
+              (capitalize-word 1)))))
+
+(add-hook 'post-self-insert-hook #'dcaps-to-scaps nil 'local)
+
+(define-minor-mode dubcaps-mode
+  "Toggle `dubcaps-mode'.  Converts words in DOuble CApitals to
+Single Capitals as you type."
+  :init-value nil
+  :lighter (" DC")
+  (if dubcaps-mode
+      (add-hook 'post-self-insert-hook #'dcaps-to-scaps nil 'local)
+    (remove-hook 'post-self-insert-hook #'dcaps-to-scaps 'local)))
+
+(add-hook 'text-mode-hook #'dubcaps-mode)
 
 ;; * The end
 (provide 'scimax)
