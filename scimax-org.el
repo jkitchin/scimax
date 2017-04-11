@@ -1203,6 +1203,32 @@ boundaries."
 
 (setq imagemagick-types-inhibit (remove 'PDF imagemagick-types-inhibit))
 
+;; * ordinal numbers in org-mode
+
+(defun scimax-org-ordinal-expansion ()
+  "Expand ordinal words to superscripted versions in org-mode.
+1st to 1^{st}.
+2nd to 2^{nd}
+3rd to 3^{rd}
+4th to 4^{th}"
+  (interactive)
+  (when (and (eq major-mode 'org-mode)
+	     (not (org-in-src-block-p))
+	     (looking-back "\\(?3:\\<\\(?1:[0-9]+\\)\\(?2:st\\|nd\\|rd\\|th\\)\\>\\)\\(?:[[:punct:]]\\|[[:space:]]\\)"
+			   (line-beginning-position)))
+    (undo-boundary)
+    (save-excursion
+      (replace-match "\\1^{\\2}" nil nil nil 3))))
+
+
+(define-minor-mode scimax-ordinal-mode
+  "Toggle `ordinal-mode'.  Converts 1st to 1^{st} as you type."
+  :init-value nil
+  :lighter (" om")
+  (if scimax-ordinal-mode
+      (add-hook 'post-self-insert-hook #'scimax-org-ordinal-expansion nil 'local)
+    (remove-hook 'post-self-insert-hook #'scimax-org-ordinal-expansion 'local)))
+
 ;; * The end
 (provide 'scimax-org)
 
