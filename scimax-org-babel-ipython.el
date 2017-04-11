@@ -86,7 +86,7 @@ With a prefix BELOW move point to lower block."
     (when (not below)
       (org-babel-previous-src-block))))
 
-(define-key org-mode-map [H--] #'org-babel-split-src-block)
+(define-key org-mode-map (kbd "H--") #'org-babel-split-src-block)
 
 (defun org-babel-execute-to-point ()
   "Execute all the blocks up to and including the one point is on."
