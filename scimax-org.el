@@ -1203,16 +1203,21 @@ boundaries."
 
 (setq imagemagick-types-inhibit (remove 'PDF imagemagick-types-inhibit))
 
-;; * ordinal numbers in org-mode
+;; * Autoformat mode in org-mode
 
-(defun scimax-org-ordinal-expansion ()
+(defcustom scimax-autoformat-ordinals t
+  "Determines if scimax autoformats ordinal numbers."
+  :group 'scimax)
+
+(defun scimax-org-autoformat-ordinals ()
   "Expand ordinal words to superscripted versions in org-mode.
 1st to 1^{st}.
 2nd to 2^{nd}
 3rd to 3^{rd}
 4th to 4^{th}"
   (interactive)
-  (when (and (eq major-mode 'org-mode)
+  (when (and scimax-autoformat-ordinals
+	     (eq major-mode 'org-mode)
 	     (not (org-in-src-block-p))
 	     (looking-back "\\(?3:\\<\\(?1:[0-9]+\\)\\(?2:st\\|nd\\|rd\\|th\\)\\>\\)\\(?:[[:punct:]]\\|[[:space:]]\\)"
 			   (line-beginning-position)))
@@ -1221,13 +1226,38 @@ boundaries."
       (replace-match "\\1^{\\2}" nil nil nil 3))))
 
 
-(define-minor-mode scimax-ordinal-mode
-  "Toggle `ordinal-mode'.  Converts 1st to 1^{st} as you type."
+(defcustom scimax-autoformat-fractions t
+  "Determines if scimax autoformats fractions."
+  :group 'scimax)
+
+
+(defun scimax-org-autoformat-fractions ()
+  "Expand fractions to take up space."
+  (interactive)
+  (when (and scimax-autoformat-fractions
+	     (eq major-mode 'org-mode)
+	     (not (org-in-src-block-p))
+	     (looking-back "\\(?3:\\<\\(1/4\\|1/2\\|3/4\\)\\>\\)\\(?:[[:punct:]]\\|[[:space:]]\\)"
+			   (line-beginning-position)))
+    (undo-boundary)
+    (save-excursion
+      (replace-match (cdr (assoc (match-string 3) '(("1/4" . "¼")
+						    ("1/2" . "½")
+						    ("3/4" . "¾"))))
+		     nil nil nil 3))))
+
+(defun scimax-org-autoformat ()
+  "Autoformat functions."
+  (scimax-org-autoformat-ordinals)
+  (scimax-org-autoformat-fractions))
+
+(define-minor-mode scimax-autoformat-mode
+  "Toggle `scimax-autoformat-mode'.  Converts 1st to 1^{st} as you type."
   :init-value nil
   :lighter (" om")
   (if scimax-ordinal-mode
-      (add-hook 'post-self-insert-hook #'scimax-org-ordinal-expansion nil 'local)
-    (remove-hook 'post-self-insert-hook #'scimax-org-ordinal-expansion 'local)))
+      (add-hook 'post-self-insert-hook #'scimax-org-autoformat nil 'local)
+    (remove-hook 'post-self-insert-hook #'scimax-org-autoformat 'local)))
 
 ;; * The end
 (provide 'scimax-org)
