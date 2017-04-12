@@ -113,7 +113,8 @@ To make C-c C-c use this, try this.
 	     (string= "python" (nth 0 (org-babel-get-src-block-info))))
     (let* ((current-file (buffer-file-name))
 	   (cb (current-buffer))
-	   (code (org-element-property :value (org-element-context))) 
+	   (code (org-remove-indentation
+            (org-element-property :value (org-element-context))))
 	   (varcmds (org-babel-variable-assignments:python
 		     (nth 2 (org-babel-get-src-block-info))))
 	   (params (nth 2 (org-babel-get-src-block-info)))
