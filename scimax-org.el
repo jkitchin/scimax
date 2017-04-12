@@ -1350,6 +1350,26 @@ them with the full version."
   (define-global-abbrev "wouldn't" "would not")
   (define-global-abbrev "wouldnt" "would not"))
 
+(defcustom scimax-autoformat-transpositions t
+  "Determines if common transpositions should be fixed."
+  :group 'scimax)
+
+(when scimax-autoformat-transpositions
+  (define-global-abbrev "nad" "and")
+  (define-global-abbrev "ahve" "have")
+  (define-global-abbrev "fi" "if")
+  (define-global-abbrev "fo" "of")
+  (define-global-abbrev "nto" "not")
+  (define-global-abbrev "teh" "the")
+  (define-global-abbrev "hte" "the")
+  (define-global-abbrev "htat" "that")
+  (define-global-abbrev "htem" "them")
+  (define-global-abbrev "iwth" "with")
+  (define-global-abbrev "hwat" "what")
+  (define-global-abbrev "waht" "what")
+  (define-global-abbrev "wehn" "when"))
+
+
 ;; * A better return
 
 (defun scimax/org-return (&optional ignore)
