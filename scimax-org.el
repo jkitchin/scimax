@@ -1370,6 +1370,10 @@ them with the full version."
   (define-global-abbrev "wehn" "when"))
 
 
+;; Some common names with umlauts
+(define-global-abbrev "norskov" "Nørskov")
+(define-global-abbrev "schrodinger" "Schrödinger")
+
 ;; I adapted this idea to define abbreviations while spell-checking
 ;; This uses the ivy selection I prefer.
 ;; http://endlessparentheses.com/ispell-and-abbrev-the-perfect-auto-correct.html
