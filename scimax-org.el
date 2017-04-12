@@ -1211,6 +1211,40 @@ boundaries."
 
 ;; * Autoformat mode in org-mode
 
+(defcustom scimax-autoformat-superscripts t
+  "Determines if words ending in a number should be superscripted."
+  :group 'scimax)
+
+
+(defun scimax-org-autoformat-superscripts ()
+  (interactive)
+  (when (and scimax-autoformat-superscripts
+	     (eq major-mode 'org-mode)
+	     (not (org-in-src-block-p))
+	     (let ((case-fold-search nil))
+	       (looking-back "\\(?1:\\<[a-zA-Z]+\\)\\(?2:[0-9]+\\)\\([[:space:]]\\|[[:punct:]]\\)"
+			     (line-beginning-position))))
+    (undo-boundary)
+    (save-excursion
+      (replace-match "\\1^{\\2}"))))
+
+
+(defcustom scimax-autoformat-transposed-caps t
+  "Determines if scimax autoformats transposed caps, .e.g. tHe to The.")
+
+(defun scimax-org-autoformat-transposed-caps ()
+  (interactive)
+  (when (and scimax-autoformat-transposed-caps
+	     (eq major-mode 'org-mode)
+	     (not (org-in-src-block-p))
+	     (let ((case-fold-search nil))
+	       (looking-back "\\<\\(?1:[a-z]\\)\\(?2:[A-Z]\\)[a-z]+"
+			     (line-beginning-position))))
+    (undo-boundary)
+    (save-excursion
+      (replace-match (upcase (match-string 1)) nil nil nil 1)
+      (replace-match (downcase (match-string 2)) nil nil nil 2))))
+
 (defcustom scimax-autoformat-ordinals t
   "Determines if scimax autoformats ordinal numbers."
   :group 'scimax)
@@ -1255,7 +1289,9 @@ boundaries."
 (defun scimax-org-autoformat ()
   "Autoformat functions."
   (scimax-org-autoformat-ordinals)
-  (scimax-org-autoformat-fractions))
+  (scimax-org-autoformat-fractions)
+  (scimax-org-autoformat-transposed-caps)
+  (scimax-org-autoformat-superscripts))
 
 (define-minor-mode scimax-autoformat-mode
   "Toggle `scimax-autoformat-mode'.  Converts 1st to 1^{st} as you type."
