@@ -204,6 +204,12 @@ is positive, move after, and if negative, move before."
 (add-to-list 'org-structure-template-alist
 	     '("n" "#+name: " ""))
 
+(add-to-list 'org-structure-template-alist
+	     '("o" "#+options: " ""))
+
+(add-to-list 'org-structure-template-alist
+	     '("ti" "#+title: " ""))
+
 ;; table expansions
 (loop for i from 1 to 6
       do
