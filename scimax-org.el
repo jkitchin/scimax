@@ -1380,6 +1380,18 @@ them with the full version."
 (define-global-abbrev "norskov" "Nørskov")
 (define-global-abbrev "schrodinger" "Schrödinger")
 
+
+
+
+;; ** Common Chemical Formulas
+(define-abbrev org-mode-abbrev-table "co2" "CO_{2}")
+(define-abbrev org-mode-abbrev-table "n2" "N_{2}")
+(define-abbrev org-mode-abbrev-table "h2o" "H_{2}O")
+(define-abbrev org-mode-abbrev-table "ch4" "CH_{4}")
+(define-abbrev org-mode-abbrev-table "c2h2" "C_{2}H_{2}")
+(define-abbrev org-mode-abbrev-table "c2h4" "C_{2}H_{4}")
+(define-abbrev org-mode-abbrev-table "c2h6" "C_{2}H_{6}")
+
 ;; I adapted this idea to define abbreviations while spell-checking
 ;; This uses the ivy selection I prefer.
 ;; http://endlessparentheses.com/ispell-and-abbrev-the-perfect-auto-correct.html
