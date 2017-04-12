@@ -1291,6 +1291,10 @@ boundaries."
   (define-global-abbrev "saturday" "Saturday")
   (define-global-abbrev "sunday" "Sunday"))
 
+(define-global-abbrev "degC" "°C")
+(define-global-abbrev "degF" "°F")
+(define-global-abbrev "ang" "Å")
+
 (defcustom scimax-autoformat-contractions t
   "Determines if contractions should be expanded.
 We do not use contractions in technical writing so this replaces
