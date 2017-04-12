@@ -71,7 +71,7 @@ function main()
     require dirname
     require readlink
 
-    assert_minimal_emacs_version 24 4
+    assert_minimal_emacs_version 25 1
 
     # always go to the directory where the script is stored
     # readlink finds out the exact path there this shellscript
