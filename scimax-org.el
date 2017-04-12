@@ -1259,6 +1259,38 @@ boundaries."
       (add-hook 'post-self-insert-hook #'scimax-org-autoformat nil 'local)
     (remove-hook 'post-self-insert-hook #'scimax-org-autoformat 'local)))
 
+
+(defcustom scimax-autoformat-months t
+  "Determines if months should be auto-capitalized."
+  :group 'scimax)
+
+(when scimax-autoformat-months
+  (define-global-abbrev "january" "January")
+  (define-global-abbrev "february" "February")
+  (define-global-abbrev "march" "March")
+  (define-global-abbrev "april" "April")
+  (define-global-abbrev "may" "May")
+  (define-global-abbrev "june" "June")
+  (define-global-abbrev "july" "July")
+  (define-global-abbrev "august" "August")
+  (define-global-abbrev "september" "September")
+  (define-global-abbrev "october" "October")
+  (define-global-abbrev "november" "November")
+  (define-global-abbrev "december" "December"))
+
+(defcustom scimax-autoformat-weekdays t
+  "Determines if weekdays should be auto-capitalized."
+  :group 'scimax)
+
+(when scimax-autoformat-weekdays
+  (define-global-abbrev "monday" "Monday")
+  (define-global-abbrev "tuesday" "Tuesday")
+  (define-global-abbrev "wednesday" "Wednesday")
+  (define-global-abbrev "thursday" "Thursday")
+  (define-global-abbrev "friday" "Friday")
+  (define-global-abbrev "saturday" "Saturday")
+  (define-global-abbrev "sunday" "Sunday"))
+
 ;; * A better return
 
 (defun scimax/org-return (&optional ignore)
