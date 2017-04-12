@@ -189,15 +189,14 @@ Scimax will auto-format several things for you.
 
 1. Ordinal numbers, e.g. 1st to 1^{st}.
 2. Fractions: 1/4 to ¼
-3. Auto-capitalization of weekdays and months, e.g. Monday and June.
-4. Contraction expansion: cant to can not and can't  to can not
-5. Commonly transposed letters in words: teh to the
-6. Some convenience symbols: degC to °C and Ang to Å.
-7. Some names like norskov to Nørskov.
+3. Some superscripts, e.g. cm2  to cm^{2}
+4. Transposed cAps, e.g. tHe to The
 
 These are controlled by the following variables you can customize (they default to t):
 - `scimax-autoformat-ordinals'
 - `scimax-autoformat-fractions'
+- `scimax-autoformat-superscript'
+- `scimax-autoformat-transposed-caps'
 
 To get the autoformatting you have to enable `scimax-autoformat-mode'. If you want it on all the time, add something like this to your init files:
 
@@ -205,7 +204,16 @@ To get the autoformatting you have to enable `scimax-autoformat-mode'. If you wa
 (add-hook 'org-mode-hook 'scimax-autoformat-mode)
 #+END_SRC
 
-When these are true they define regular abbreviations that expand.
+scimax also defines some abbreviations
+
+1. Auto-capitalization of weekdays and months, e.g. Monday and June.
+2. Contraction expansion: cant to can not and can't  to can not
+3. Commonly transposed letters in words: teh to the
+4. Some convenience symbols: degC to °C and Ang to Å.
+5. Some names like norskov to Nørskov.
+6. Some common chemicals like co2 to CO_{2}
+7.
+When these variables are true they define regular abbreviations that expand while typing.
 
 - `scimax-autoformat-months'
 - `scimax-autoformat-weekdays'
