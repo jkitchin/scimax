@@ -1291,6 +1291,61 @@ boundaries."
   (define-global-abbrev "saturday" "Saturday")
   (define-global-abbrev "sunday" "Sunday"))
 
+(defcustom scimax-autoformat-contractions t
+  "Determines if contractions should be expanded.
+We do not use contractions in technical writing so this replaces
+them with the full version."
+  :group 'scimax)
+
+(when scimax-autoformat-contractions
+  (define-global-abbrev "arent" "are not")
+  (define-global-abbrev "aren't" "are not")
+
+  (define-global-abbrev "cant" "can not")
+  (define-global-abbrev "can't" "can not")
+
+  (define-global-abbrev "couldnt" "could not")
+  (define-global-abbrev "couldn't" "could not")
+
+  (define-global-abbrev "didnt" "did not")
+  (define-global-abbrev "didn't" "did not")
+
+  (define-global-abbrev "doesnt" "does not")
+  (define-global-abbrev "doesn't" "does not")
+
+  (define-global-abbrev "dont" "do not")
+  (define-global-abbrev "don't" "do not")
+
+  (define-global-abbrev "hadnt" "had not")
+  (define-global-abbrev "hadn't" "had not")
+
+  (define-global-abbrev "hasnt" "has not")
+  (define-global-abbrev "has'nt" "has not")
+
+  (define-global-abbrev "isnt" "is not")
+  (define-global-abbrev "isn't" "is not")
+
+  (define-global-abbrev "shouldnt" "should not")
+  (define-global-abbrev "shouldn't" "should not")
+
+  (define-global-abbrev "thats" "that is")
+  (define-global-abbrev "that's" "that is")
+
+  (define-global-abbrev "wasnt" "was not")
+  (define-global-abbrev "wasn't" "was not")
+
+  (define-global-abbrev "whos" "who is")
+  (define-global-abbrev "who's" "who is")
+
+  (define-global-abbrev "wont" "will not")
+  (define-global-abbrev "won't" "will not")
+
+  (define-global-abbrev "wouldve" "would have")
+  (define-global-abbrev "would've" "would have")
+
+  (define-global-abbrev "wouldn't" "would not")
+  (define-global-abbrev "wouldnt" "would not"))
+
 ;; * A better return
 
 (defun scimax/org-return (&optional ignore)
