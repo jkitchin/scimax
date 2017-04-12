@@ -1286,12 +1286,29 @@ boundaries."
 						    ("3/4" . "¾"))))
 		     nil nil nil 3))))
 
+(defcustom scimax-autoformat-sentence-capitalization t
+  "Determines if first word should be capitalized in a sentence.")
+
+(defun scimax-org-autoformat-sentence-capitalization ()
+  "Auto-capitalize first words of a sentence.
+Either at the beginning of a line, or after a sentence end."
+  (interactive)
+  (when (and scimax-autoformat-sentence-capitalization
+	     (eq major-mode 'org-mode)
+	     (not (org-in-src-block-p))
+	     (or (save-excursion (backward-char) (bolp))
+		 (looking-back (concat (sentence-end) "[a-z]"))))
+    (undo-boundary)
+    (capitalize-word -1)))
+
+
 (defun scimax-org-autoformat ()
   "Autoformat functions."
   (scimax-org-autoformat-ordinals)
   (scimax-org-autoformat-fractions)
   (scimax-org-autoformat-transposed-caps)
-  (scimax-org-autoformat-superscripts))
+  (scimax-org-autoformat-superscripts)
+  (scimax-org-autoformat-sentence-capitalization))
 
 (define-minor-mode scimax-autoformat-mode
   "Toggle `scimax-autoformat-mode'.  Converts 1st to 1^{st} as you type."
