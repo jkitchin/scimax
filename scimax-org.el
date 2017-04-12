@@ -1300,6 +1300,8 @@ boundaries."
 (define-global-abbrev "degC" "°C")
 (define-global-abbrev "degF" "°F")
 (define-global-abbrev "ang" "Å")
+(define-global-abbrev "tm" "™")
+
 
 (defcustom scimax-autoformat-contractions t
   "Determines if contractions should be expanded.
