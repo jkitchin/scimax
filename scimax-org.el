@@ -1255,7 +1255,7 @@ boundaries."
   "Toggle `scimax-autoformat-mode'.  Converts 1st to 1^{st} as you type."
   :init-value nil
   :lighter (" om")
-  (if scimax-ordinal-mode
+  (if scimax-autoformat-mode
       (add-hook 'post-self-insert-hook #'scimax-org-autoformat nil 'local)
     (remove-hook 'post-self-insert-hook #'scimax-org-autoformat 'local)))
 
