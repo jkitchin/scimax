@@ -213,7 +213,11 @@ If candidate is already in, remove it."
       
       ;; add to list
       (setq ivy-marked-candidates
-	    (append ivy-marked-candidates (list cand))))) 
+	    (append ivy-marked-candidates (list cand)))))
+  (beginning-of-line)
+  (kill-line)
+
+  ;; move to the next line
   (ivy-next-line))
 
 
