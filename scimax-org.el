@@ -1370,6 +1370,116 @@ them with the full version."
   (define-global-abbrev "wehn" "when"))
 
 
+;; I adapted this idea to define abbreviations while spell-checking
+;; This uses the ivy selection I prefer.
+;; http://endlessparentheses.com/ispell-and-abbrev-the-perfect-auto-correct.html
+;; I adapted this function in flyspell-correct.el
+
+(defcustom scimax-save-spellcheck-abbrevs t
+  "If t save spellchecks as global-abbrevs.")
+
+(defun flyspell-correct-previous-word-generic (position)
+  "Correct the first misspelled word that occurs before point.
+But don't look beyond what's visible on the screen.
+
+Uses `flyspell-correct-word-generic' function for correction."
+  (interactive "d")
+  (let ((top (window-start))
+        (bot (window-end))
+        (incorrect-word-pos)
+        (position-at-incorrect-word))
+    (save-excursion
+      (save-restriction
+        ;; make sure that word under point is checked first
+        (forward-word)
+
+        ;; narrow the region
+        (narrow-to-region top bot)
+        (overlay-recenter (point))
+
+        (let ((overlay-list (overlays-in (point-min) (+ position 1)))
+              (overlay 'dummy-value))
+
+          (while overlay
+            (setq overlay (car-safe overlay-list))
+            (setq overlay-list (cdr-safe overlay-list))
+            (when (and overlay
+                       (flyspell-overlay-p overlay))
+              (setq position-at-incorrect-word (and (<= (overlay-start overlay) position)
+                                                    (>= (overlay-end overlay) position)))
+              (setq incorrect-word-pos (overlay-start overlay))
+              (setq overlay nil)))
+
+          (when incorrect-word-pos
+            (save-excursion
+              (goto-char incorrect-word-pos)
+	      (let (bef aft)
+		(setq bef (word-at-point))
+		(flyspell-correct-word-generic)
+		(goto-char incorrect-word-pos)
+		(setq aft (word-at-point))
+		(when (and scimax-save-spellcheck-abbrevs
+			   (not (string= bef aft)))
+		  (define-global-abbrev bef aft))))))))
+    (when position-at-incorrect-word
+      (forward-word))))
+
+
+;; ** Abbrev/spell-check
+
+(define-key ctl-x-map "\C-i"
+  #'endless/ispell-word-then-abbrev)
+
+(defun endless/simple-get-word ()
+  (car-safe (save-excursion (ispell-get-word nil))))
+
+(defun endless/ispell-word-then-abbrev (p)
+  "Call `ispell-word', then create an abbrev for it.
+With prefix P, create local abbrev. Otherwise it will
+be global.
+If there's nothing wrong with the word at point, keep
+looking for a typo until the beginning of buffer. You can
+skip typos you don't want to fix with `SPC', and you can
+abort completely with `C-g'."
+  (interactive "P")
+  (let (bef aft)
+    (save-excursion
+      (while (if (setq bef (endless/simple-get-word))
+                 ;; Word was corrected or used quit.
+                 (if (ispell-word nil 'quiet)
+                     nil ; End the loop.
+                   ;; Also end if we reach `bob'.
+                   (not (bobp)))
+               ;; If there's no word at point, keep looking
+               ;; until `bob'.
+               (not (bobp)))
+        (backward-word)
+        (backward-char))
+      (setq aft (endless/simple-get-word)))
+    (if (and aft bef (not (equal aft bef)))
+        (let ((aft (downcase aft))
+              (bef (downcase bef)))
+          (define-abbrev
+            (if p local-abbrev-table global-abbrev-table)
+            bef aft)
+          (message "\"%s\" now expands to \"%s\" %sally"
+                   bef aft (if p "loc" "glob")))
+      (user-error "No typo at or before point"))))
+
+(setq save-abbrevs 'silently)
+(setq-default abbrev-mode t)
+
+
+(defadvice undo-tree-undo (around undo-abbrev-expansion nil activate)
+  "Make undo unexpand an abbrev if it was the second to last thing that was done"
+  (if (and last-abbrev-text
+	   (= (point) (+ last-abbrev-location
+			 (length (symbol-value last-abbrev))
+			 1)))
+      (let ((buffer-undo-list '()))
+	(unexpand-abbrev))
+    ad-do-it))
+
 ;; * A better return
 
 (defun scimax/org-return (&optional ignore)
