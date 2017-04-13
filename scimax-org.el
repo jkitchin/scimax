@@ -1315,7 +1315,12 @@ Either at the beginning of a line, or after a sentence end."
   :init-value nil
   :lighter (" om")
   (if scimax-autoformat-mode
-      (add-hook 'post-self-insert-hook #'scimax-org-autoformat nil 'local)
+      (progn
+	(add-hook 'post-self-insert-hook #'scimax-org-autoformat nil 'local)
+	(setq-local org-pretty-entities nil)
+	(org-toggle-pretty-entities))
+    (setq-local org-pretty-entities t)
+    (org-toggle-pretty-entities)
     (remove-hook 'post-self-insert-hook #'scimax-org-autoformat 'local)))
 
 
