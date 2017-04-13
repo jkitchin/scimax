@@ -12,8 +12,8 @@
 (require 'org-agenda)
 
 ;; * Configuration of org-mode
-;; don't allow invisible regions to be edited
-(setq org-catch-invisible-edits t)
+;; Make editing invisible regions smart
+(setq org-catch-invisible-edits 'smart)
 
 ;; allow lists with letters in them.
 (setq org-list-allow-alphabetical t)
