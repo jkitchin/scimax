@@ -13,3 +13,4 @@ uservar
 test
 .DS_STORE
 ltximg
+*.elc
