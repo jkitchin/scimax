@@ -1574,6 +1574,9 @@ Use a prefix arg to get regular RET. "
      ;; Johansson!
      ((org-inlinetask-in-task-p)
       (org-return))
+     ;; checkboxes too
+     ((org-at-item-checkbox-p)
+      (org-insert-todo-heading nil))
      ;; lists end with two blank lines, so we need to make sure we are also not
      ;; at the beginning of a line to avoid a loop where a new entry gets
      ;; created with only one blank line.
