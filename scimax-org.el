@@ -10,6 +10,7 @@
 (require 'org-mouse)
 (require 'org-ref)
 (require 'org-agenda)
+(require 'dash)
 
 ;; * Configuration of org-mode
 ;; Make editing invisible regions smart
@@ -1036,7 +1037,7 @@ Use a prefix arg FONTIFY for colored headlines."
   (ivy-org-jump-to-heading-in-files
    (mapcar 'buffer-file-name
 	   (-filter (lambda (b)
-		      (when-let (f (buffer-file-name b))
+		      (-when-let (f (buffer-file-name b))
 			(f-ext? f "org")))
 		    (buffer-list)))
    fontify))
