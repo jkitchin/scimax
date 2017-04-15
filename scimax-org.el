@@ -1563,8 +1563,11 @@ Use a prefix arg to get regular RET. "
   (if ignore
       (org-return)
     (cond
-     ;; Open links like usual
-     ((eq 'link (car (org-element-context)))
+     ((eq 'line-break (car (org-element-context)))
+      (org-return-indent))
+     ;; Open links like usual and if at beginning of line, just press enter.
+     ((or (eq 'link (car (org-element-context)))
+	  (bolp))
       (org-return))
      ;; It doesn't make sense to add headings in inline tasks. Thanks Anders
      ;; Johansson!
@@ -1576,7 +1579,7 @@ Use a prefix arg to get regular RET. "
      ;; lists end with two blank lines, so we need to make sure we are also not
      ;; at the beginning of a line to avoid a loop where a new entry gets
      ;; created with only one blank line.
-     ((and (org-in-item-p) (not (bolp)))
+     ((and (org-in-item-p))
       (if (org-element-property :contents-begin (org-element-context))
 	  (org-insert-heading)
 	(beginning-of-line)
@@ -1586,7 +1589,8 @@ Use a prefix arg to get regular RET. "
      ((org-at-heading-p)
       (if (not (string= "" (org-element-property :title (org-element-context))))
 	  (progn (org-end-of-meta-data)
-		 (org-insert-heading))
+		 (org-insert-heading)
+		 (outline-show-entry))
 	(beginning-of-line)
 	(setf (buffer-substring
 	       (line-beginning-position) (line-end-position)) "")))
