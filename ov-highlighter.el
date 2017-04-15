@@ -556,7 +556,11 @@ The list is from first to last."
   (save-excursion
     (goto-char (point-min))
     (when (re-search-forward "#  ov-highlight-data: \\(.*\\)" nil t)
-      (setq ov-highlight-data (match-string 1)))
+      (setq ov-highlight-data (match-string 1))
+      (add-text-properties
+       (match-beginning 1) (match-end 1)
+       '(display "..." invisible 'ov-highlight-data))
+      (add-to-invisibility-spec 'ov-highlight-data))
     (mapc
      (lambda (entry)
        (let ((beg (nth 0 entry))
@@ -582,8 +586,11 @@ The list is from first to last."
 (defun ov-highlight-save ()
   "Save highlight information.
 Data is saved in comment in the document."
-  (let ((data (ov-highlight-get-highlights)))
-
+  (let* ((data (ov-highlight-get-highlights))
+	 (data-b64 (propertize
+		    (base64-encode-string (format "%S" data) t)
+		    'display "..."
+		    'invisible ov-highlight-data)))
     (save-restriction
       (widen)
       (save-excursion
@@ -595,15 +602,19 @@ Data is saved in comment in the document."
 	(if (re-search-forward "#  ov-highlight-data: \\(.*\\)" nil 'mv)
 	    (progn
 	      (setf (buffer-substring (match-beginning 0) (match-end 0)) "")
-	      (insert (format "#  ov-highlight-data: %s" (base64-encode-string (format "%S" data) t))))
+	      (insert (format "#  ov-highlight-data: %s"
+			      data-b64)))
 	  (re-search-backward "Local Variables:")
 	  (goto-char (line-beginning-position))
-	  (insert (format "#  ov-highlight-data: %s\n\n" (base64-encode-string (format "%S" data) t))))))
+	  (insert (format
+		   "#  ov-highlight-data: %s\n\n"
+		   data-b64)))))
     
     (unless data
       ;; cleanup if we have no highlights
       (remove-hook 'before-save-hook 'ov-highlight-save t)
-      (delete-file-local-variable 'ov-highlight-data))))
+      (delete-file-local-variable 'ov-highlight-data))
+    (add-to-invisibility-spec 'ov-highlight-data)))
 
 ;; add the local var we use as safe so we don't get annoyed by permission to run
 ;; it.
