@@ -1341,7 +1341,19 @@ Either at the beginning of a line, or after a sentence end."
   (define-global-abbrev "september" "September")
   (define-global-abbrev "october" "October")
   (define-global-abbrev "november" "November")
-  (define-global-abbrev "december" "December"))
+  (define-global-abbrev "december" "December")
+  ;; abbreviations
+  (define-global-abbrev "jan" "Jan.")
+  (define-global-abbrev "feb" "Feb.")
+  (define-global-abbrev "mar" "Mar.")
+  (define-global-abbrev "apr" "Apr.")
+  (define-global-abbrev "jun" "Jun.")
+  (define-global-abbrev "jul" "Jul.")
+  (define-global-abbrev "aug" "Aug.")
+  (define-global-abbrev "sept" "Sept.")
+  (define-global-abbrev "oct" "Oct.")
+  (define-global-abbrev "nov" "Nov.")
+  (define-global-abbrev "dec" "Dec."))
 
 (defcustom scimax-autoformat-weekdays t
   "Determines if weekdays should be auto-capitalized."
@@ -1354,12 +1366,21 @@ Either at the beginning of a line, or after a sentence end."
   (define-global-abbrev "thursday" "Thursday")
   (define-global-abbrev "friday" "Friday")
   (define-global-abbrev "saturday" "Saturday")
-  (define-global-abbrev "sunday" "Sunday"))
+  (define-global-abbrev "sunday" "Sunday")
+  ;; abbreviations
+  (define-global-abbrev "mon" "Mon.")
+  (define-global-abbrev "tue" "Tue.")
+  (define-global-abbrev "wed" "Wed.")
+  (define-global-abbrev "thur" "Thur.")
+  (define-global-abbrev "fri" "Fri.")
+  (define-global-abbrev "sat" "Sat.")
+  (define-global-abbrev "sun" "Sun."))
 
 (define-global-abbrev "degC" "°C")
 (define-global-abbrev "degF" "°F")
 (define-global-abbrev "ang" "Å")
 (define-global-abbrev "tm" "™")
+
 
 
 (defcustom scimax-autoformat-contractions t
@@ -1370,51 +1391,20 @@ them with the full version."
 
 (when scimax-autoformat-contractions
   (define-global-abbrev "arent" "are not")
-  (define-global-abbrev "aren't" "are not")
-
   (define-global-abbrev "cant" "can not")
-  (define-global-abbrev "can't" "can not")
-
   (define-global-abbrev "couldnt" "could not")
-  (define-global-abbrev "couldn't" "could not")
-
   (define-global-abbrev "didnt" "did not")
-  (define-global-abbrev "didn't" "did not")
-
   (define-global-abbrev "doesnt" "does not")
-  (define-global-abbrev "doesn't" "does not")
-
   (define-global-abbrev "dont" "do not")
-  (define-global-abbrev "don't" "do not")
-
   (define-global-abbrev "hadnt" "had not")
-  (define-global-abbrev "hadn't" "had not")
-
   (define-global-abbrev "hasnt" "has not")
-  (define-global-abbrev "has'nt" "has not")
-
   (define-global-abbrev "isnt" "is not")
-  (define-global-abbrev "isn't" "is not")
-
   (define-global-abbrev "shouldnt" "should not")
-  (define-global-abbrev "shouldn't" "should not")
-
   (define-global-abbrev "thats" "that is")
-  (define-global-abbrev "that's" "that is")
-
   (define-global-abbrev "wasnt" "was not")
-  (define-global-abbrev "wasn't" "was not")
-
   (define-global-abbrev "whos" "who is")
-  (define-global-abbrev "who's" "who is")
-
   (define-global-abbrev "wont" "will not")
-  (define-global-abbrev "won't" "will not")
-
   (define-global-abbrev "wouldve" "would have")
-  (define-global-abbrev "would've" "would have")
-
-  (define-global-abbrev "wouldn't" "would not")
   (define-global-abbrev "wouldnt" "would not"))
 
 (defcustom scimax-autoformat-transpositions t
