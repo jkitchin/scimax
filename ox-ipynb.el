@@ -21,7 +21,6 @@
 ;;; Code:
 (require 'ox-md)
 (require 'ox-org)
-(require 'dash)
 
 (defun export-ipynb-code-cell (src-result)
   "Return a lisp code cell for the org-element SRC-BLOCK."
@@ -346,7 +345,7 @@ nil:END:
 	    (loop for s in (ox-ipynb-split-text text)
 		  unless (string= "" (s-trim s))
 		  do
-		  (-when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+		  (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
 		    (push md cells)))))
       ;; this is a special case where there are no source blocks, and the whole
       ;; document is a markdown cell.
@@ -354,7 +353,7 @@ nil:END:
 	(loop for s in (ox-ipynb-split-text text)
 	      unless (string= "" (s-trim s))
 	      do
-	      (-when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+	      (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
 		(push md cells)))))
 
     (while current-source
@@ -382,14 +381,14 @@ nil:END:
 	      (loop for s in (ox-ipynb-split-text text)
 		    unless (string= "" s)
 		    do
-		    (-when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+		    (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
 		      (push md cells)))))
 	;; on last block so add rest of document
 	(let ((text (buffer-substring-no-properties end (point-max))))
 	  (loop for s in (ox-ipynb-split-text text)
 		unless (string= "" s)
 		do
-		(-when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+		(when-let ((md (export-ipynb-markdown-cell (s-trim s))))
 		  (push md cells))))))
 
     (setq data (append
