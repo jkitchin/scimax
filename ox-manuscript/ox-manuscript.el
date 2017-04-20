@@ -427,9 +427,9 @@ intermediate output steps."
       (goto-char (point-min))
       (setq run-makeglossary-p (re-search-forward "\\\\makeglossaries" nil t))
       (goto-char (point-min))
-      (setq run-bibtex-p (re-search-forward "bibliography" nil t))
+      (setq run-bibtex-p (re-search-forward "bibliography:" nil t))
       (goto-char (point-min))
-      (setq nobibliography-p (re-search-forward "nobibliography" nil t)))
+      (setq nobibliography-p (re-search-forward "nobibliography:" nil t)))
 
     (setq status (catch 'status
 		   ;; run first latex
