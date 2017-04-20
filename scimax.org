@@ -1,6 +1,9 @@
 #+TITLE: Scimax
 #+AUTHOR: John Kitchin
 #+DATE: 2016
+#+options: toc:nil
+
+\maketitle
 
 Scimax is an Emacs starterkit designed for people interested in reproducible research and publishing. Scimax is just Emacs that has been configured extensively to make it act like we need it to for research documentation and publication. The notes below document some features we have built into scimax.
 
@@ -41,6 +44,7 @@ Use  `ivy-insert-org-entity' (s-e) for all accented characters.
 
 The following examples show the shortcuts defined in scimax for expansion. Put your cursor after the shortcut and press tab to expand them.
 
+#+BEGIN_EXAMPLE
 <ip
 #+BEGIN_SRC ipython :session :results output org drawer
 
@@ -75,7 +79,7 @@ The following examples show the shortcuts defined in scimax for expansion. Put y
 #+latex_header:
 
 <lc
-#+latex_class:
+# +latex_class:
 
 <lco
 #+latex_class_options:
@@ -114,6 +118,9 @@ Here are some convenient table expansions.
 
 <tttttt
 |  |   |   |   |   |   |
+
+#+END_EXAMPLE
+
 
 ** LaTeX
 
@@ -364,7 +371,7 @@ We have templates prepared for the following manuscripts, proposals and document
 Bibliographies in scimax are stored in bibtex files. A bibtex file is a plain text file containing bibtex entries. Each entry describes an item. Here is a typical example.
 
 #+BEGIN_EXAMPLE
-@article{kitchin-2015-examp,
+@article{kitchin-2015-examp,f
   author =	 {Kitchin, John R.},
   title =	 {Examples of Effective Data Sharing in Scientific Publishing},
   journal =	 {ACS Catalysis},
@@ -719,11 +726,6 @@ Here are the bibtex entry types and fields you should use. You can add extra fie
 - note
 
 
-
-
-
-
-
 * Email utilities
 
 - `email-buffer' :: email the whole buffer
@@ -776,6 +778,7 @@ C-c / <return>	`google-this-search'
   :PROPERTIES:
   :ID:       2695CB66-23F3-45B9-B75D-1A50206900E0
   :END:
+
 Magit is a front-end for git version control. There is a good manual here: [[info:magit#Top][info:magit#Top]]
 
 ** Basic magit
@@ -857,12 +860,15 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
   In the magit-status window, type "!" to get the popup and choose what you want to do (e.g. where to run the command, etc... You do not need to type "git" in the command. Note you can also run a shell command from this interface.
 
 *** Check the output of the git command
+
   Press "$"
 
 *** Keybindings
   [[info:magit#Keystroke%20Index][info:magit#Keystroke Index]]
+
 ** Intermediate concepts
 *** Checkout an older version of a file
+
   Use M-x magit-checkout-file select the branch, or enter a revision, and then choose a file.
 
  help:magit-checkout-file 
@@ -871,7 +877,9 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
  help:magit-find-file-other-window
 
 *** Search the commit messages for a pattern
- In a magit-status window press "l =g" enter a pattern to grep for, and then press "l".
+
+In a magit-status window press "l =g" enter a pattern to grep for, and then press "l".
+
 *** Revert a commit
  [[info:magit#Reverting][info:magit#Reverting]]
 
@@ -880,6 +888,7 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
   [[info:magit#Tagging][info:magit#Tagging]]
 
   press "t" in the magit-status window. You can then create a tag, annotate it, delete tags, and prune them.
+
 *** Checkout an existing branch.
   [[info:magit#The%20branch%20popup][info:magit#The branch popup]]
 
@@ -891,6 +900,7 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
   [[info:magit#Merging][info:magit#Merging]]
 
   In the magit-status window press "m", then "m" and select the branch to merge into the current one.
+
 *** TODO Resolving conflicts
  [[info:magit#Resolving%20conflicts][info:magit#Resolving conflicts]]
 
@@ -913,7 +923,9 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
  [[info:magit#Stashing][info:magit#Stashing]]
 
  Press "z" in the magit-status window
-*** Git blame
+
+*** TODO Git blame
+
 ** Advanced concepts
 *** Resetting
  [[info:magit#Resetting][info:magit#Resetting]]
@@ -1198,9 +1210,11 @@ In the list of entries you can type:
 
 * Miscellaneous scimax utilities
 ** Open a bash window
+
 `bash' will open an external bash terminal in the current working directory.
 
 ** Open Finder/Explorer
+
 `explorer' and `finder' will open a Windows Explorer or Mac Finder window in the current working directory.
 
 ** Hotspots
@@ -1367,6 +1381,7 @@ I use Hyper-c as a prefix map for a these commands.
 | H-c a | `counsel-ag'           |
 
 ** counsel-find-file
+
 Here are some additional actions we define for `counsel-find-file'.
 
 | a   | attach to email      |
@@ -1413,6 +1428,7 @@ There are some useful bindings in `navy' also.
 `scimax-help' will open this document.
 
 ** Emacs
+
 Emacs is described as "self-documenting", and it provides a lot of introspective ways to access documentation. A classic way to access help is via "info" pages. These are hyperlinked documents containing a lot of detail about Emacs and its libraries. 
 
 Emacs-manual: info:Emacs
@@ -1432,12 +1448,12 @@ org-mode manual: info:org
 
 *** Getting help on Emacs functions
 
-
 To get help on functions use: `counsel-describe-function' and on variables use `counsel-describe-variable'.
 
 If you do not know exactly what you are looking for try: `helm-apropos'. This covers commands, functions, variables, faces, classes, and some other things.
 
 *** Getting help on system commands
+
 If you have man pages installed (Linux/Mac for sure, maybe on windows) you can access them easily via Emacs. I like to read man pages in Emacs with `helm-man-woman' although `man' is also good.
 
 Note while on a man page you can use these keys:
@@ -1474,9 +1490,11 @@ The help functions usually show you if a shortcut is defined for a command.
 
 If you really want to define your own keys, see `define-key' and `global-set-key'. 
 
-Make yourself some notes in org-mode using `emacs-keybinding-command-tooltip-mode'. 
+Make yourself some notes in org-mode using `emacs-keybinding-command-tooltip-mode'.
 
-* Local Variables
+
+* Local Variables                                                  :noexport:
+
 # Local Variables:
 # eval: (progn (require 'emacs-keybinding-command-tooltip-mode) (emacs-keybinding-command-tooltip-mode +1))
 # End:
