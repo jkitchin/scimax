@@ -290,6 +290,7 @@ Loads cache file."
  'ivy-contacts
  'ivy-marked-transformer)
 
+
 ;;;###autoload
 (defun ivy-contacts (arg)
   "Select contacts using ivy."
@@ -339,6 +340,20 @@ Loads cache file."
 			     (goto-char (cdr (assoc "POSITION" contact)))
 			     (outline-show-entry))
 		       "Open contact")
+		      ("m" (lambda (contact)
+			     "Send imessage if there is cellphone number."
+			     (when-let ((cellphone-number (cdr (assoc "CELLPHONE" contact))))
+			       (setq cellphone-number (replace-regexp-in-string "-\\|(\\|)" "" cellphone-number))
+			       (do-applescript
+				(format
+				 "tell application \"Messages\"
+	set targetService to 1st service whose service type = iMessage
+	set targetBuddy to buddy \"%s\" of targetService
+	send \"%s\" to targetBuddy
+end tell"
+				 cellphone-number
+				 (read-input "SMS: "))))
+			     ))
 		      ("e" (lambda (contact)
 			     (compose-mail)
 			     (message-goto-to)
@@ -389,6 +404,7 @@ Loads cache file."
 end tell" (cdr (assoc "PHONE" contact)))))
 		       "Call")
 		      ("g" (lambda (contact)
+			     "Add tag to contact."
 			     (let ((tags (split-string
 					  (read-string "Tag (space separated): ")
 					  " " t)))
