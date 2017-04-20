@@ -135,6 +135,8 @@ sentence in the region."
       (capitalize-word 1))))
 
 
+(global-set-key (kbd "M-<backspace>") 'backward-kill-sentence)
+
 ;; * The end
 (provide 'scimax-utils)
 
