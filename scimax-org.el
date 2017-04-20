@@ -176,6 +176,10 @@ is positive, move after, and if negative, move before."
 	     '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"
 	       "<src lang=\"emacs-lisp\">\n?\n</src>"))
 
+(add-to-list 'org-structure-template-alist
+	     '("ell" "#+BEGIN_SRC emacs-lisp :lexical t\n?\n#+END_SRC"
+	       "<src lang=\"emacs-lisp\">\n?\n</src>"))
+
 ;; add <sh for shell
 (add-to-list 'org-structure-template-alist
 	     '("sh" "#+BEGIN_SRC sh\n?\n#+END_SRC"
@@ -1520,7 +1524,7 @@ abort completely with `C-g'."
       (while (if (setq bef (endless/simple-get-word))
                  ;; Word was corrected or used quit.
                  (if (ispell-word nil 'quiet)
-                     nil ; End the loop.
+                     nil		; End the loop.
                    ;; Also end if we reach `bob'.
                    (not (bobp)))
                ;; If there's no word at point, keep looking
@@ -1563,37 +1567,46 @@ Use a prefix arg to get regular RET. "
   (if ignore
       (org-return)
     (cond
+
      ((eq 'line-break (car (org-element-context)))
       (org-return-indent))
-     ;; Open links like usual and if at beginning of line, just press enter.
-     ((or (eq 'link (car (org-element-context)))
+
+     ;; Open links like usual, unless point is at the end of a line.
+     ;; and if at beginning of line, just press enter.
+     ((or (and (eq 'link (car (org-element-context))) (not (eolp)))
 	  (bolp))
       (org-return))
+
      ;; It doesn't make sense to add headings in inline tasks. Thanks Anders
      ;; Johansson!
      ((org-inlinetask-in-task-p)
       (org-return))
+
      ;; checkboxes too
      ((org-at-item-checkbox-p)
       (org-insert-todo-heading nil))
+
      ;; lists end with two blank lines, so we need to make sure we are also not
      ;; at the beginning of a line to avoid a loop where a new entry gets
      ;; created with only one blank line.
-     ((and (org-in-item-p))
-      (if (org-element-property :contents-begin (org-element-context))
+     ((org-in-item-p)
+      (if (save-excursion (beginning-of-line) (org-element-property :contents-begin (org-element-context)))
 	  (org-insert-heading)
 	(beginning-of-line)
-	(setf (buffer-substring
-	       (line-beginning-position) (line-end-position)) "")
+	(delete-region (line-beginning-position) (line-end-position))
 	(org-return)))
+
+     ;; org-heading
      ((org-at-heading-p)
       (if (not (string= "" (org-element-property :title (org-element-context))))
 	  (progn (org-end-of-meta-data)
-		 (org-insert-heading)
+		 (org-insert-heading-respect-content)
 		 (outline-show-entry))
 	(beginning-of-line)
 	(setf (buffer-substring
 	       (line-beginning-position) (line-end-position)) "")))
+
+     ;; tables
      ((org-at-table-p)
       (if (-any?
 	   (lambda (x) (not (string= "" x)))
@@ -1606,6 +1619,8 @@ Use a prefix arg to get regular RET. "
 	(setf (buffer-substring
 	       (line-beginning-position) (line-end-position)) "")
 	(org-return)))
+
+     ;; fall-through case
      (t
       (org-return)))))
 
