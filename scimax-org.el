@@ -22,6 +22,12 @@
 ;; setup archive location in archive directory in current folder
 (setq org-archive-location "archive/%s_archive::")
 
+(defcustom scimax-use-org-bullets nil
+  "Whether to use org-bullets-mode or not."
+  :group 'scimax)
+
+(when scimax-use-org-bullets
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode))))
 
 ;; * Speed commands
 (setq org-todo-keywords
