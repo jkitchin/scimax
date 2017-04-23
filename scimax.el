@@ -5,6 +5,12 @@
 ;; * Basic settings
 (load-theme 'leuven)
 
+;; Source code pro for the font if it is available
+
+(let ((f "Source Code Pro"))
+  (when (member f (font-family-list))
+    (set-face-attribute 'default nil :font f)))
+
 (setq inhibit-startup-screen t) ;; stop showing startup screen
 (tool-bar-mode 0)           ; remove the icons
 (menu-bar-mode 1)           ; keep the menus
