@@ -17,6 +17,19 @@
 
 ;; https://ericjmritz.wordpress.com/2015/10/14/some-personal-hydras-for-gnu-emacs/
 
+(defgroup scimax-hydra nil
+  "Customization for `scimax-hydra'."
+  :tag "scimax-hydra")
+
+(defcustom scimax-hydra-key "<f12>"
+  "Key to bind `scimax/body' to."
+  :type 'string
+  :group 'scimax-hydra)
+
+(global-set-key (kbd scimax-hydra-key) 'scimax/body)
+
+;; * scimax-hydra utilities
+
 ;; Lexical closure to encapsulate the stack variable.
 (lexical-let ((scimax-hydra-stack '()))
   (defun scimax-hydra-push (expr)
@@ -54,7 +67,7 @@
   ("`" scimax-hydra "show stack")
   ("x" counsel-M-x "M-x")
   ("/" undo-tree-undo "undo" :color red)
-  ("?" undo-tree-redo "redo" :color red)
+  ("\\" undo-tree-redo "redo" :color red)
   ("q" nil "quit"))
 
 ;; * scimax hydra
@@ -64,6 +77,8 @@
   "scimax"
   ("a" (scimax-open-hydra scimax-applications/body) "Applications")
   ("b" (scimax-open-hydra scimax-buffers/body) "Buffers")
+  ;; c for user? compile?
+  ;; d ?
   ("e" (scimax-open-hydra scimax-errors/body) "Edit/Errors")
   ("f" (scimax-open-hydra scimax-files/body) "Files")
   ("g" (scimax-open-hydra scimax-google/body) "Google")
@@ -76,14 +91,18 @@
   ("n" (scimax-open-hydra scimax-navigation/body) "Navigation")
   ("o" (scimax-open-hydra scimax-org/body) "org")
   ("p" (scimax-open-hydra hydra-projectile/body) "Project")
+  ;; q is for quit, don't reassign
   ("r" (scimax-open-hydra scimax-registers/body) "Registers/resume")
   ("s" (scimax-open-hydra scimax-search/body) "Search")
   ("t" (scimax-open-hydra scimax-text/body) "Text")
+  ;; u ?
   ("v" (scimax-open-hydra scimax-version-control/body) "Version control")
   ("w" (scimax-open-hydra scimax-windows/body) "Windows")
-  ("z" (scimax-open-hydra scimax-settings/body) "Settings"))
-
-(global-set-key (kbd "<f12>") 'scimax/body)
+  ;; x is for M-x, don't reassign
+  ;; y ?
+  ("z" (scimax-open-hydra scimax-settings/body) "Customize")
+  ;; Convenience
+  ("<return>" save-buffer "Save"))
 
 ;; ** applications
 
