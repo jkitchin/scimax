@@ -33,6 +33,7 @@
    ("s-<SPC>" . org-mark-ring-goto)
    ("H-." . org-time-stamp-inactive)))
 
+(use-package org-bullets)
 
 ;; * Other packages
 
