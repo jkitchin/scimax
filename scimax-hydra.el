@@ -143,7 +143,7 @@ This is a macro so I don't have to quote the hydra name."
   ("j" (scimax-open-hydra scimax-jump/body) "Jump")
   ("k" (scimax-open-hydra scimax-bookmarks/body) "Bookmarks")
   ("l" (scimax-open-hydra scimax-lisp/body) "Lisp")
-  ("m" (scimax-open-hydra scimax-minor-modes/body) "Minor modes")
+  ("m" (scimax-open-hydra scimax-minor-modes/body) "Minor modes/mark")
   ("n" (scimax-open-hydra scimax-navigation/body) "Navigation")
   ("o" (scimax-open-hydra scimax-org/body) "org")
   ("p" (scimax-open-hydra hydra-projectile/body) "Project")
@@ -183,7 +183,7 @@ This is a macro so I don't have to quote the hydra name."
 applications
 Emacs             Mac            Web
 -----------------------------------------------------
-_c_: contacts     _a_: app       _C_: google calendar
+_n_: contacts     _a_: app       _c_: google calendar
 _d_: dired        _f_: finder    _W_: tweetdeck
 _e_: %12s`mu4e-unread _i_: iChat
 _r_: %s`elfeed-count _o_: Office
@@ -195,8 +195,7 @@ _k_: list packages _m_: compose mail
 ------------------------------------------------------
 "
   ("a" app)
-  ("c" ivy-contacts)
-  ("C" google-calendar)
+  ("c" google-calendar)
   ("d" dired-x)
   ("e" (if (get-buffer "*mu4e-headers*")
 	   (progn
@@ -207,6 +206,7 @@ _k_: list packages _m_: compose mail
   ("i" messages)
   ("k" package-list-packages)
   ("m" compose-mail)
+  ("n" ivy-contacts)
   ("r" elfeed)
   ("s" safari)
   ("t" terminal)
@@ -248,7 +248,7 @@ Switch                  ^Kill                Split        Misc
   ("5" make-frame-command)
   ("4" kill-buffer-and-window)
   ("6" kill-some-buffers)
-  ("a" ace-window)
+  ("a" ace-window :color red)
   ("b" switch-to-buffer)
   ("A" kill-all-buffers)
   ("f" other-frame :color red)
@@ -256,7 +256,7 @@ Switch                  ^Kill                Split        Misc
   ("k" kill-this-buffer :color red)
   ("K" kill-other-buffers)
   ("l" ibuffer)
-  ("m" kill-matching-buffers)
+  ("m" kill-matching-buffers :color red)
   ("n" next-buffer :color red)
   ("o" other-window :color red)
   ("O" switch-to-buffer-other-window :color red)
@@ -436,7 +436,7 @@ _p_: ffap
 
 ;; ** lisp
 
-(defhydra scimax-lisp (:color blue :inherit (scimax-base/heads) :columns 3)
+(defhydra scimax-lisp (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
   "lisp"
   ("c" byte-recompile-file "byte-compile file")
   ("d" byte-recompile-directory "byte-compile dir")
@@ -445,15 +445,41 @@ _p_: ffap
   ("l" load-file "load file")
   ("r" eval-region "region"))
 
-;; ** minor modes
+;; ** mark/minor modes
 
-(defhydra scimax-minor-modes (:color blue :inherit (scimax-base/heads) :columns 3)
-  "minor modes"
-  ("a" aggressive-indent-mode "aggressive indent")
-  ("b" org-bullets-mode "org-bullets")
-  ("e" emacs-keybinding-command-tooltip-mode "keybinding")
-  ("n" nlinum-mode "nlinum")
-  ("r" rainbow-mode "rainbow"))
+(defhydra scimax-minor-modes (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
+  "
+minor modes and marks
+Marks                     minor-modes
+------------------------------------------------------------------
+_w_: mark word            _i_: aggressive indent
+_n_: mark sentence        _b_: org-bullets
+_p_: mark paragraph       _k_: emacs-keybindings
+_g_: mark page            _n_: nlinum
+_s_: mark sexp            _r_: rainbow
+_d_: mark defun
+_a_: mark buffer
+_e_: mark org-element
+_m_: set mark
+_j_: jump to mark
+------------------------------------------------------------------
+"
+  ("i" aggressive-indent-mode)
+  ("b" org-bullets-mode)
+  ("k" emacs-keybinding-command-tooltip-mode)
+  ("n" nlinum-mode)
+  ("r" rainbow-mode)
+
+  ("a" mark-whole-buffer)
+  ("d" mark-defun)
+  ("e" org-mark-element)
+  ("g" mark-page)
+  ("j" pop-to-mark-command)
+  ("m" set-mark-command)
+  ("n" mark-end-of-sentence)
+  ("p" mark-paragraph)
+  ("s" mark-sexp)
+  ("w" mark-word))
 
 
 ;; ** navigation
@@ -550,9 +576,10 @@ _t_: transpose paragraphs
   ("'" org-edit-special "edit")
   ("a" org-agenda "agenda")
   ("b" (scimax-open-hydra scimax-org-block/body) "block")
-  ("c" org-ctrl-c-ctrl-c)
+  ("c" org-ctrl-c-ctrl-c "C-c C-c")
   ("d" (scimax-open-hydra scimax-org-db/body) "database")
-  ("e" (scimax-open-hydra hydra-ox/body) "export")
+  ("e" org-export-dispatch "Export")
+  ("E" (scimax-open-hydra hydra-ox/body) "export")
   ("g" org-babel-tangle "tangle")
   ("h" ivy-org-jump-to-heading)
   ("i" org-clock-in)
@@ -651,6 +678,7 @@ _C-a_ Async export: %`hydra-ox/async-export
   ("C-a" (hydra-ox/async-export) nil)
   ("h" hydra-ox-html/body "Export to HTML" :exit t)
   ("l" hydra-ox-latex/body "Export to LaTeX" :exit t)
+  ("n" ox-ipynb-export-to-ipynb-file-and-open "Jupyter" :exit t)
   ("q" nil "quit"))
 
 
