@@ -217,7 +217,7 @@ file."
     (with-temp-file tex-file (insert (replace-regexp-in-string
                                       (concat "\\(\\includegraphics"
                                               "\\(\[?[^\].*\]?\\)?\\)" ;; match optional [stuff]
-                                              "{\\([^}].*\\)\.\\(png\\|pdf\\|eps\\)}")
+                                              "{\\([^}].*\\)\.\\(png\\|pdf\\|eps\\|jpg\\|jpeg\\)}")
                                       "\\1{\\3}"  tex-contents)))))
 
 
@@ -535,7 +535,7 @@ intermediate output steps."
 ;; We use our function for building the manuscript
 (setq org-latex-pdf-process 'ox-manuscript-latex-pdf-process)
 
-;; 
+;;
 (defun ox-manuscript-build ()
   "Build manuscript.
 This is done manually here for building the submission manuscript
@@ -699,6 +699,8 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 	(let* ((eps-file (concat (match-string 3) ".eps"))
 	       (pdf-file (concat (match-string 3) ".pdf"))
 	       (png-file (concat (match-string 3) ".png"))
+	       (jpg-file (concat (match-string 3) ".jpg"))
+	       (jpeg-file (concat (match-string 3) ".jpeg"))
 	       (fname (file-name-nondirectory (match-string 3))))
 	  ;;  Copy the image to the tex-archive. Priority goes as eps,
 	  ;;  pdf then png
@@ -715,6 +717,14 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 	    (copy-file png-file (expand-file-name
 				 (concat fname ".png") tex-archive)
 		       t))
+     ((file-exists-p jpg-file)
+      (copy-file jpg-file (expand-file-name
+         (concat fname ".jpg") tex-archive)
+           t))
+     ((file-exists-p jpeg-file)
+      (copy-file jpeg-file (expand-file-name
+         (concat fname ".jpeg") tex-archive)
+           t))
 	   (t
 	    (error "No file found: %s (%s %s %s)"
 		   (match-string 3)
@@ -869,7 +879,7 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 					  (plist-get x :template))
 				  x))
 			       candidates)
-	      :action (lambda (entry) 
+	      :action (lambda (entry)
 
 			(if (file-exists-p (plist-get entry :default-filename))
 			    (find-file (plist-get entry :default-filename))
