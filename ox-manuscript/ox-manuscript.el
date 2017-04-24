@@ -722,8 +722,8 @@ The optional FILES keyword is a list of additional files to copy into the archiv
          (concat fname ".jpg") tex-archive)
            t))
      ((file-exists-p jpeg-file)
-      (copy-file jepg-file (expand-file-name
-         (concat fname ".jepg") tex-archive)
+      (copy-file jpeg-file (expand-file-name
+         (concat fname ".jpeg") tex-archive)
            t))
 	   (t
 	    (error "No file found: %s (%s %s %s)"
