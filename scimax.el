@@ -430,7 +430,8 @@ Default to killing the word at point"
 	   (start (car bounds))
 	   (end (cdr bounds)))
       (kill-region start end)))
-
+   ((bolp)
+    (kill-line))
    ;; default to word
    (t
     (let* ((bounds (bounds-of-thing-at-point 'word))
