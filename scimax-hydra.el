@@ -62,6 +62,59 @@ This is a macro so I don't have to quote the hydra name."
      (scimax-hydra-push hydra-curr-body-fn)
      (call-interactively ',hydra)))
 
+(defun scimax-hydra-help ()
+  "Show help buffer for current hydra."
+  (interactive)
+  (with-help-window (help-buffer)
+    (with-current-buffer (help-buffer)
+      (emacs-keybinding-command-tooltip-mode +1))
+    (let ((s (format "Help for %s\n" hydra-curr-body-fn)))
+      (princ s)
+      (princ (make-string (length s) ?-))
+      (princ "\n"))
+
+    (princ (mapconcat
+	    (lambda (head)
+	      (format "%s%s"
+		      ;;  key
+		      (s-pad-right 10 " " (car head))
+		      ;; command
+		      (let* ((hint (if (stringp (nth 2 head))
+				       (concat " " (nth 2 head))
+				     ""))
+			     (cmd (cond
+				   ;; quit
+				   ((null (nth 1 head))
+				    "")
+				   ;; a symbol
+				   ((symbolp (nth 1 head))
+				    (format "`%s'" (nth 1 head)))
+				   ((and (listp (nth 1 head))
+					 (eq 'scimax-open-hydra (car (nth 1 head))))
+				    (format "`%s'" (nth 1 (nth 1 head))))
+				   ((listp (nth 1 head))
+				    (with-temp-buffer
+				      (pp (nth 1 head) (current-buffer))
+				      (let ((fill-prefix (make-string 10 ? )))
+					(indent-code-rigidly
+					 (save-excursion
+					   (goto-char (point-min))
+					   (forward-line)
+					   (point))
+					 (point-max) 10))
+				      (buffer-string)))
+				   (t
+				    (format "%s" (nth 1 head)))))
+			     (l1 (format "%s%s" (s-pad-right 50 " " (car (split-string cmd "\n"))) hint))
+			     (s (s-join "\n" (append (list l1) (cdr (split-string cmd "\n"))))))
+			(s-pad-right 50 " " s))))
+	    (symbol-value
+	     (intern
+	      (replace-regexp-in-string
+	       "/body$" "/heads"
+	       (symbol-name  hydra-curr-body-fn))))
+	    "\n"))))
+
 (defhydra scimax-base (:color blue)
   "base"
   ("," scimax-hydra-pop "back" :color blue)
@@ -70,6 +123,7 @@ This is a macro so I don't have to quote the hydra name."
   ("/" undo-tree-undo "undo" :color red)
   ("\\" undo-tree-redo "redo" :color red)
   ("*" (switch-to-buffer "*scratch*") "*scratch*")
+  ("?" scimax-hydra-help "Menu help")
   ("q" nil "quit"))
 
 ;; * scimax hydra
@@ -387,6 +441,7 @@ _p_: ffap
   ("c" byte-recompile-file "byte-compile file")
   ("d" byte-recompile-directory "byte-compile dir")
   ("e" eval-buffer "buffer")
+  ("i" ielm "ielm")
   ("l" load-file "load file")
   ("r" eval-region "region"))
 
