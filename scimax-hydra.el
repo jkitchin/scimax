@@ -266,15 +266,23 @@ Switch                  ^Kill                Split        Misc
   ("r" rename-buffer)
   ("y" bury-buffer))
 
+;; ** drag
+
+
+(defhydra scimax-drag (color :red :inherit (scimax-base/heads)  :hint nil)
+  ("<left>" drag-stuff-left :color red)
+  ("<right>" drag-stuff-right :color red)
+  ("<up>" drag-stuff-up :color red)
+  ("<down>" drag-stuff-down :color red))
 ;; ** edit/errors
 
 (defhydra scimax-errors (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
   "
 edit/errors
-Edit              Errors
+Edit                Errors
 ------------------------------------------------------------------
-_a_: edit abbrevs _n_: next error
-_c_: copy (dwim)  _p_: prev error
+_a_: edit abbrevs   _n_: next error
+_c_: copy (dwim)    _p_: prev error
 _k_: kill (dwim)
 _v_: paste
 _V_: paste ring
