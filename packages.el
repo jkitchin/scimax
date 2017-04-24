@@ -72,6 +72,7 @@
 (use-package commander
   :disabled t)
 
+(use-package drag-stuff)
 
 (use-package swiper
   :bind
