@@ -122,8 +122,9 @@ This is a macro so I don't have to quote the hydra name."
   ("<return>" save-buffer "Save")
   ("/" undo-tree-undo "undo" :color red)
   ("\\" undo-tree-redo "redo" :color red)
-  ("*" (switch-to-buffer "*scratch*") "*scratch*")
+  ("8" (switch-to-buffer "*scratch*") "*scratch*")
   ("?" scimax-hydra-help "Menu help")
+  ("." scimax-dispatch-mode-hydra "Major mode hydras")
   ("q" nil "quit"))
 
 ;; * scimax hydra
