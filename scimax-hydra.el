@@ -293,8 +293,8 @@ _V_: paste ring
   ("v" yank)
   ("V" counsel-yank-pop)
   ("k" scimax-kill-dwim)
-  ("n" next-error)
-  ("p" previous-error))
+  ("n" next-error :color red)
+  ("p" previous-error :color red))
 
 
 ;; ** files
