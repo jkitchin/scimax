@@ -921,6 +921,34 @@ _z_: Customize scimax   _f_: change font
   ("u" scimax-customize-user)
   ("z" (customize-apropos "scimax")))
 
+
+
+;; * Mode specific hydras
+(defun scimax-dispatch-mode-hydra ()
+  (interactive)
+  (pcase major-mode
+    ('emacs-lisp-mode (scimax-open-hydra scimax-lisp/body))
+    ('elfeed-search-mode (scimax-open-hydra scimax-elfeed/body))
+    ('mu4e-headers-mode (scimax-open-hydra scimax-mu4e/body))
+    ('org-mode (message "org"))
+    (_ (message "no mode-specific hydra found"))))
+
+(global-set-key (kbd "<H-f12>") 'scimax-dispatch-mode-hydra)
+
+(defhydra scimax-mu4e (:color red :hint nil)
+  "
+mu4e
+_u_: Update"
+  ("u" mu4e-update-mail-and-index))
+
+(defhydra scimax-elfeed (:color red :hint nil)
+  "
+elfeed
+_u_: Update"
+  ("u" elfeed-update))
+
+;; * the end
+
 (provide 'scimax-hydra)
 
 ;;; scimax-hydra.el ends here
