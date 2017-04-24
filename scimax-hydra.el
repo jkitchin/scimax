@@ -448,12 +448,17 @@ _p_: ffap
 
 (defhydra scimax-lisp (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
   "lisp"
+  ("a" eval-buffer "eval buffer")
   ("c" byte-recompile-file "byte-compile file")
   ("d" byte-recompile-directory "byte-compile dir")
-  ("e" eval-buffer "buffer")
+  ("e" eval-defun "eval defun")
+  ("g" (eval-defun t) "debug defun")
+  ("h" (eval-region (point-min) (point)))
   ("i" ielm "ielm")
   ("l" load-file "load file")
-  ("r" eval-region "region"))
+  ("r" eval-region "region")
+  ("t" toggle-debug-on-error "toggle debug")
+  ("y" edebug-on-entry "debug on entry"))
 
 ;; ** mark/minor modes
 
