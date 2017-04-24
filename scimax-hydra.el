@@ -368,6 +368,7 @@ _p_: ffap
   ("l" lorem-ipsum-insert-paragraphs "Lorem ipsum" :color red)
   ("p" insert-parentheses "Parentheses")
   ("r" insert-register "Register")
+  ("s" screenshot "org screenshot")
   ("t" org-time-stamp "Timestamp"))
 
 ;; ** jump
