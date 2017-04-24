@@ -398,7 +398,46 @@ Single Capitals as you type."
 
 (add-hook 'text-mode-hook #'dubcaps-mode)
 
-;; * kill-dwim
+;; * copy/kill-dwim
+
+(defun scimax-copy-dwim (arg)
+  "Copy and do what I mean.
+If a region is active copy it.
+If at the beginning of a sentence, copy it.
+If at the beginning of a paragraph copy it.
+Default to copying the word at point"
+  (interactive "P")
+  (cond
+   ((region-active-p)
+    (kill-ring-save (region-beginning) (region-end)))
+   ;; paragraph
+   ((let ((cp (point)))
+      (save-excursion
+	(forward-paragraph)
+	(backward-paragraph)
+	;; if the preceding line is blank we end up on it. this moves us back to
+	;; the beginning of the paragraph.
+	(when (looking-at "^$") (forward-line))
+	(= cp (point))))
+    (kill-ring-save (point) (save-excursion (forward-paragraph) (point))))
+   ;; sentence
+   ((let ((cp (point)))
+      (save-excursion
+	(forward-sentence)
+	(backward-sentence)
+	(= cp (point))))
+    (let* ((bounds (bounds-of-thing-at-point 'sentence))
+	   (start (car bounds))
+	   (end (cdr bounds)))
+      (kill-ring-save start end)))
+   ((bolp)
+    (kill-ring-save (line-beginning-position) (line-end-position)))
+   ;; default to word
+   (t
+    (let* ((bounds (bounds-of-thing-at-point 'word))
+	   (start (car bounds))
+	   (end (cdr bounds)))
+      (kill-ring-save start end)))))
 
 (defun scimax-kill-dwim (arg)
   "Kill and do what I mean.
