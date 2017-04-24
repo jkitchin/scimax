@@ -213,29 +213,48 @@ Switch                  ^Kill                Split        Misc
 
 ;; ** edit/errors
 
-(defhydra scimax-errors (:color blue :inherit (scimax-base/heads) :columns 3)
-  "edit/errors"
-  ("a" edit-abbrevs "Edit abbrevs")
-  ("c" kill-ring-save "Copy")
-  ("v" yank "Paste")
-  ("V" counsel-yank-pop "Paste ring")
-  ("k" scimax-kill-dwim "Cut (dwim)")
-  ("n" next-error "Next error")
-  ("p" previous-error "Previous error"))
+(defhydra scimax-errors (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
+  "
+edit/errors
+Edit              Errors
+------------------------------------------------------------------
+_a_: edit abbrevs _n_: next error
+_c_: copy (dwim)  _p_: prev error
+_k_: kill (dwim)
+_v_: paste
+_V_: paste ring
+------------------------------------------------------------------
+"
+  ("a" edit-abbrevs)
+  ("c" scimax-copy-dwim)
+  ("v" yank)
+  ("V" counsel-yank-pop)
+  ("k" scimax-kill-dwim)
+  ("n" next-error)
+  ("p" previous-error))
+
 
 ;; ** files
-(defhydra scimax-files (:color blue :inherit (scimax-base/heads) :columns 3)
-  "files"
-  ("4" find-file-other-window "Find other window")
-  ("5" find-file-other-frame "Find other frame")
-  ("b" describe-file "Describe file")
-  ("c" kill-this-buffer "Close")
-  ("d" (dired default-directory) "Dired")
-  ("f" find-file "Find-file")
-  ("l" counsel-locate "Locate")
-  ("p" ffap "File at point")
-  ("r" counsel-recentf "Recent")
-  ("w" write-file "Rename"))
+(defhydra scimax-files (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
+  "
+files
+------------------------------------------------------------------
+_f_: find file     _R_: rename  _r_: recentf
+_4_: other window  _k_: close   _l_: locate
+_5_: other frame   _d_: dired
+_p_: ffap
+------------------------------------------------------------------"
+  ("4" find-file-other-window)
+  ("5" find-file-other-frame)
+  ("b" describe-file)
+  ("d" (dired default-directory))
+  ("f" find-file)
+  ("k" kill-this-buffer)
+  ("l" counsel-locate)
+  ("p" ffap)
+  ("r" counsel-recentf)
+  ("R" write-file))
+
 
 ;; ** google
 (defhydra scimax-google (:color blue :inherit (scimax-base/heads) :columns 3)
@@ -265,15 +284,15 @@ Switch                  ^Kill                Split        Misc
   ("k" describe-key "Key")
   ("K" describe-keymap "Keymap")
   ("m" describe-mode "Mode")
-  ("M" describe-man "Man")
   ("o" ore "Org explorer")
   ("p" describe-package "Package")
   ("s" describe-syntax "Syntax")
   ("t" describe-text-properties "Text properties")
   ("T" help-with-tutorial "Emacs tutorial")
   ("v" describe-variable "Variable")
-  ("x" scimax-help "Scimax help")
+  ("S" scimax-help "Scimax help")
   ("w" woman "Woman"))
+
 
 ;; ** insert
 
@@ -299,6 +318,7 @@ Switch                  ^Kill                Split        Misc
   ("e" end-of-line "End of line")
   ("c" (scimax-open-hydra scimax-jump-char/body) "Char")
   ("g" goto-line "Goto line")
+  ("h" org-db-open-heading "org-db-heading")
   ("l" (scimax-open-hydra scimax-jump-line/body) "Line")
   ("k" ace-link "Link")
   ("o" (scimax-open-hydra scimax-jump-org/body) "Org")
@@ -315,11 +335,13 @@ Switch                  ^Kill                Split        Misc
   ("a" avy-goto-char-2-above "Above")
   ("b" avy-goto-char-2-below "Below"))
 
+
 (defhydra scimax-jump-line (:color blue :inherit (scimax-base/heads) :columns 3)
   "line"
   ("a" avy-goto-line-above "Above")
   ("b" avy-goto-line-below "Below")
   ("l" avy-goto-line "Line"))
+
 
 (defhydra scimax-jump-org (:color blue :inherit (scimax-base/heads) :columns 3)
   "org"
@@ -329,6 +351,7 @@ Switch                  ^Kill                Split        Misc
   ("o" ivy-org-jump-to-open-headline "Open heading")
   ("p" ivy-org-jump-to-project-headline "Project heading")
   ("v" ivy-org-jump-to-visible-headline "Visible heading"))
+
 
 (defhydra scimax-jump-word (:color blue :inherit (scimax-base/heads) :columns 3)
   "word"
@@ -341,6 +364,7 @@ Switch                  ^Kill                Split        Misc
   ("o" avy-goto-word-or-subword-1 "word or subword")
   ("s" avy-subword-0 "subword-0")
   ("S" avy-subword-1 "subword-1"))
+
 
 (defhydra scimax-jump-symbol (:color blue :inherit (scimax-base/heads) :columns 3)
   "symbol"
@@ -375,6 +399,7 @@ Switch                  ^Kill                Split        Misc
   ("e" emacs-keybinding-command-tooltip-mode "keybinding")
   ("n" nlinum-mode "nlinum")
   ("r" rainbow-mode "rainbow"))
+
 
 ;; ** navigation
 
@@ -575,6 +600,7 @@ _C-a_ Async export: %`hydra-ox/async-export
 
 
 ;; ** project
+;; https://github.com/abo-abo/hydra/wiki/Projectile
 
 (defhydra hydra-projectile-other-window (:color teal)
   "projectile-other-window"
@@ -639,9 +665,7 @@ _p_: point to register
 _w_: window conf to register
 _f_: frameset to register
 _l_: list registers
-------------------------------------------------------------------
-
-"
+------------------------------------------------------------------"
   ("a" append-to-register)
   ("c" copy-to-register)
   ("f" frameset-to-register)
@@ -698,6 +722,7 @@ _l_: list registers
 (defhydra scimax-kill (:color blue :inherit (scimax-base/heads) :columns 3)
   "kill"
   ("c" kill-comment "comment")
+  ("d" scimax-kill-dwim "kill dwim")
   ("l" kill-whole-line "line")
   ("p" kill-paragraph "paragraph")
   ("r" kill-region "region")
