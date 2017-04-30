@@ -1640,6 +1640,73 @@ Use a prefix arg to get regular RET. "
   (define-key org-mode-map (kbd "RET")
     'scimax/org-return))
 
+;;* org-numbered headings
+(defun scimax-overlay-numbered-headings ()
+  "Put numbered overlays on the headings."
+  (interactive)
+  (loop for (p lv) in (let ((counters (copy-list '(0 0 0 0 0 0 0 0 0 0)))
+			    (current-level 1)
+			    last-level)
+			(mapcar (lambda (x)
+				  (list (car x)
+					;; trim trailing zeros
+					(let ((v (nth 1 x)))
+					  (while (= 0 (car (last v)))
+					    (setq v (butlast v)))
+					  v)))
+				(org-map-entries
+				 (lambda ()
+				   (let* ((hl (org-element-context))
+					  (level (org-element-property :level hl)))
+				     (setq last-level current-level
+					   current-level level)
+				     (cond
+				      ;; no level change or increase, increment level counter
+				      ((or (= last-level current-level)
+					   (> current-level last-level))
+				       (incf (nth current-level counters)))
+
+				      ;; decrease in level
+				      (t
+				       (loop for i from (+ 1 current-level) below (length counters)
+					     do
+					     (setf (nth i counters) 0))
+				       (incf (nth current-level counters))))
+
+				     (list (point) (-slice counters 1)))))))
+	do
+	(let ((ov (make-overlay p p)))
+	  (overlay-put ov 'before-string (concat (mapconcat 'number-to-string lv ".") ". "))
+	  (overlay-put ov 'numbered-heading t))))
+
+
+;; (define-minor-mode scimax-numbered-org-mode
+;;   "Minor mode to number org headings."
+;;   :init-value nil
+;;   (if scimax-numbered-org-mode
+;;       (scimax-overlay-numbered-headings)
+;;     (ov-clear 'numbered-heading)))
+
+
+(define-minor-mode scimax-numbered-org-mode
+  "Minor mode to number org headings."
+  :init-value nil
+  (labels ((fl-noh (limit) (save-restriction
+			     (widen)
+			     (ov-clear 'numbered-heading)
+			     (scimax-overlay-numbered-headings))))
+
+    (if scimax-numbered-org-mode
+	(progn
+	  (font-lock-add-keywords
+	   nil
+	   `((fl-noh 0 nil)))
+	  (font-lock-fontify-buffer))
+      (ov-clear 'numbered-heading)
+      (font-lock-remove-keywords
+       nil
+       `((fl-noh 0 nil))))))
+
 ;; * The end
 (provide 'scimax-org)
 
