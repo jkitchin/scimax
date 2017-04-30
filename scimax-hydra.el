@@ -28,7 +28,7 @@
 
 (global-set-key (kbd scimax-hydra-key) 'scimax/body)
 
-;; * scimax-hydra utilities
+;;* scimax-hydra utilities
 
 ;; Lexical closure to encapsulate the stack variable.
 (lexical-let ((scimax-hydra-stack '()))
@@ -127,7 +127,7 @@ This is a macro so I don't have to quote the hydra name."
   ("." scimax-dispatch-mode-hydra "Major mode hydras")
   ("q" nil "quit"))
 
-;; * scimax hydra
+;;* scimax hydra
 
 (defhydra scimax (:color blue :inherit (scimax-base/heads)
 			 :columns 4 :body-pre (scimax-hydra-reset))
@@ -145,6 +145,7 @@ This is a macro so I don't have to quote the hydra name."
   ("k" (scimax-open-hydra scimax-bookmarks/body) "Bookmarks")
   ("l" (scimax-open-hydra scimax-lisp/body) "Lisp")
   ("m" (scimax-open-hydra scimax-minor-modes/body) "Minor modes/mark")
+  ("s-m" scimax-dispatch-mode-hydra "Major mode hydras")
   ("n" (scimax-open-hydra scimax-navigation/body) "Navigation")
   ("o" (scimax-open-hydra scimax-org/body) "org")
   ("p" (scimax-open-hydra hydra-projectile/body) "Project")
@@ -157,9 +158,10 @@ This is a macro so I don't have to quote the hydra name."
   ("w" (scimax-open-hydra scimax-windows/body) "Windows")
   ;; x is for M-x, don't reassign
   ;; y ?
-  ("z" (scimax-open-hydra scimax-settings/body) "Customize"))
+  ("z" (scimax-open-hydra scimax-customize/body) "Customize"))
 
-;; ** applications
+
+;;** applications
 
 (defun scimax-app-hints ()
   "Calculate some variables for the applications hydra."
@@ -189,7 +191,7 @@ _d_: dired        _f_: finder    _W_: tweetdeck
 _e_: %12s`mu4e-unread _i_: iChat
 _r_: %s`elfeed-count _o_: Office
 _w_: twit         _s_: Safari
-^ ^               _t_: Terminal
+_j_: journal      _t_: Terminal
 ------------------------------------------------------
 commands
 _k_: list packages _m_: compose mail
@@ -205,6 +207,7 @@ _k_: list packages _m_: compose mail
 	 (mu4e)))
   ("f" finder)
   ("i" messages)
+  ("j" journal/body)
   ("k" package-list-packages)
   ("m" compose-mail)
   ("n" ivy-contacts)
@@ -222,9 +225,7 @@ _k_: list packages _m_: compose mail
   ("p" powerpoint "Powerpoint")
   ("w" word "Word"))
 
-;; ** buffers
-
-
+;;** buffers
 
 (defhydra scimax-buffers (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
   "
@@ -266,7 +267,7 @@ Switch                  ^Kill                Split        Misc
   ("r" rename-buffer)
   ("y" bury-buffer))
 
-;; ** drag
+;;** drag
 
 
 (defhydra scimax-drag (color :red :inherit (scimax-base/heads)  :hint nil)
@@ -274,7 +275,9 @@ Switch                  ^Kill                Split        Misc
   ("<right>" drag-stuff-right :color red)
   ("<up>" drag-stuff-up :color red)
   ("<down>" drag-stuff-down :color red))
-;; ** edit/errors
+
+
+;;** edit/errors
 
 (defhydra scimax-errors (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
   "
@@ -297,7 +300,7 @@ _V_: paste ring
   ("p" previous-error :color red))
 
 
-;; ** files
+;;** files
 (defhydra scimax-files (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
   "
 files
@@ -319,7 +322,7 @@ _p_: ffap
   ("R" write-file))
 
 
-;; ** google
+;;** google
 (defhydra scimax-google (:color blue :inherit (scimax-base/heads) :columns 3)
   "google"
   ("e" google-this-error "Error")
@@ -334,7 +337,7 @@ _p_: ffap
   ("w" google-this-word "Word")
   ("y" google-this-symbol "Symbol"))
 
-;; ** help
+;;** help
 
 (defhydra scimax-help (:color blue :inherit (scimax-base/heads) :columns 3)
   "help"
@@ -342,6 +345,7 @@ _p_: ffap
   ("c" describe-command "Command")
   ("e" info-emacs-manual "Emacs manual")
   ("f" describe-function "Function")
+  ("g" view-echo-area-messages "Messages")
   ("h" describe-theme "Theme")
   ("i" info "Info")
   ("k" describe-key "Key")
@@ -357,7 +361,7 @@ _p_: ffap
   ("w" woman "Woman"))
 
 
-;; ** insert
+;;** insert
 
 (defhydra scimax-insert (:color blue :inherit (scimax-base/heads) :columns 3)
   "help"
@@ -371,7 +375,7 @@ _p_: ffap
   ("s" screenshot "org screenshot")
   ("t" org-time-stamp "Timestamp"))
 
-;; ** jump
+;;** jump
 
 (defhydra scimax-jump (:color blue :inherit (scimax-base/heads) :columns 3)
   "jump"
@@ -436,7 +440,7 @@ _p_: ffap
   ("b" avy-goto-symbol-1-below "below")
   ("s" avy-goto-symbol-1 "symbol"))
 
-;; ** bookmarks
+;;** bookmarks
 
 (defhydra scimax-bookmarks (:color blue :inherit (scimax-base/heads) :columns 3)
   "bookmarks"
@@ -444,23 +448,25 @@ _p_: ffap
   ("l" bookmark-bmenu-list "list")
   ("n" bookmark-set "new"))
 
-;; ** lisp
+;;** lisp
 
 (defhydra scimax-lisp (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
   "lisp"
   ("a" eval-buffer "eval buffer")
   ("c" byte-recompile-file "byte-compile file")
-  ("d" byte-recompile-directory "byte-compile dir")
+  ("d" (eval-defun t) "debug defun")
+  ("z" (eval-defun nil) "stop edebug")
   ("e" eval-defun "eval defun")
-  ("g" (eval-defun t) "debug defun")
-  ("h" (eval-region (point-min) (point)))
+  ("v" eval-last-sexp "eval last sexp")
+  ("g" (eval-region (point-min) (point)) "eval region")
+  ("h" (describe-function 'lispy-mode) "lispy help")
   ("i" ielm "ielm")
   ("l" load-file "load file")
   ("r" eval-region "region")
   ("t" toggle-debug-on-error "toggle debug")
   ("y" edebug-on-entry "debug on entry"))
 
-;; ** mark/minor modes
+;;** mark/minor modes
 
 (defhydra scimax-minor-modes (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
   "
@@ -470,9 +476,9 @@ Marks                     minor-modes
 _w_: mark word            _i_: aggressive indent
 _n_: mark sentence        _b_: org-bullets
 _p_: mark paragraph       _k_: emacs-keybindings
-_g_: mark page            _n_: nlinum
+_g_: mark page            _l_: nlinum
 _s_: mark sexp            _r_: rainbow
-_d_: mark defun
+_d_: mark defun           _on_: org-numbered-headings
 _a_: mark buffer
 _e_: mark org-element
 _m_: set mark
@@ -482,7 +488,7 @@ _j_: jump to mark
   ("i" aggressive-indent-mode)
   ("b" org-bullets-mode)
   ("k" emacs-keybinding-command-tooltip-mode)
-  ("n" nlinum-mode)
+  ("l" nlinum-mode)
   ("r" rainbow-mode)
 
   ("a" mark-whole-buffer)
@@ -492,12 +498,13 @@ _j_: jump to mark
   ("j" pop-to-mark-command)
   ("m" set-mark-command)
   ("n" mark-end-of-sentence)
+  ("on" scimax-numbered-org-mode)
   ("p" mark-paragraph)
   ("s" mark-sexp)
   ("w" mark-word))
 
 
-;; ** navigation
+;;** navigation
 
 (defhydra scimax-navigation (:color red :inherit (scimax-base/heads) :columns 4 :hint nil)
   "
@@ -584,7 +591,7 @@ _t_: transpose paragraphs
   ("f" (kill-paragraph nil))
   ("t" transpose-paragraphs))
 
-;; ** org
+;;** org
 
 (defhydra scimax-org (:color blue :inherit (scimax-base/heads) :columns 3)
   "org-mode"
@@ -599,11 +606,15 @@ _t_: transpose paragraphs
   ("h" ivy-org-jump-to-heading)
   ("i" org-clock-in)
   ("o" org-clock-out)
+  ("m" (scimax-open-hydra scimac-email/body :color red))
   ("n" outline-next-heading "next heading" :color red)
   ("p" outline-previous-heading "previous heading" :color red)
   ("r" (scimax-open-hydra scimax-org-ref/body) "org-ref")
   ("t" (scimax-open-hydra scimax-org-toggle/body) "toggle"))
 
+(defhydra scimax-email (:color red :inherit (scimax-base/heads))
+  ("b" )
+  )
 
 (defhydra scimax-org-block (:color blue :inherit (scimax-base/heads) :columns 3)
   "org blocks"
@@ -697,7 +708,7 @@ _C-a_ Async export: %`hydra-ox/async-export
   ("q" nil "quit"))
 
 
-;; ** project
+;;** project
 ;; https://github.com/abo-abo/hydra/wiki/Projectile
 
 (defhydra hydra-projectile-other-window (:color teal)
@@ -747,7 +758,7 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
   ("q"   nil "cancel" :color blue))
 
 
-;; ** registers/resume/replace
+;;** registers/resume/replace
 
 (defhydra scimax-registers (:color blue :inherit (scimax-base/heads) :columns 3)
   "
@@ -779,7 +790,7 @@ _l_: list registers
   ("x" query-replace-regexp))
 
 
-;; ** search
+;;** search
 
 (defhydra scimax-search (:color blue :inherit (scimax-base/heads) :columns 3)
   "search"
@@ -793,7 +804,7 @@ _l_: list registers
   ("t" counsel-pt "pt"))
 
 
-;; ** text
+;;** text
 
 (defhydra scimax-text (:color blue :inherit (scimax-base/heads) :columns 3)
   "text"
@@ -859,7 +870,7 @@ _l_: list registers
   ("w" transpose-words "words"))
 
 
-;; ** version control
+;;** version control
 
 (defhydra scimax-version-control (:color blue :inherit (scimax-base/heads) :columns 4)
   "vc"
@@ -877,7 +888,7 @@ _l_: list registers
   ("v" magit-status "Magit"))
 
 
-;; ** windows
+;;** windows
 
 (defhydra scimax-windows (:color blue :inherit (scimax-base/heads) :columns 4 :hint nil)
   "
@@ -902,9 +913,9 @@ _b_: buffers       _%_: delete frame
   ("y" bury-buffer))
 
 
-;; ** Customize
+;;** Customize
 
-(defhydra scimax-settings (:color blue :inherit (scimax-base/heads) :hint nil :columns 3)
+(defhydra scimax-customize (:color blue :inherit (scimax-base/heads) :hint nil :columns 3)
   "
 Customize               Font
 --------------------------------------------------------------
@@ -928,7 +939,7 @@ _z_: Customize scimax   _f_: change font
 
 
 
-;; * Mode specific hydras
+;;* Mode specific hydras
 (defun scimax-dispatch-mode-hydra ()
   (interactive)
   (pcase major-mode
@@ -952,7 +963,7 @@ elfeed
 _u_: Update"
   ("u" elfeed-update))
 
-;; * the end
+;;* the end
 
 (provide 'scimax-hydra)
 
