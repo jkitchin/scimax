@@ -1402,7 +1402,7 @@ Here are some additional actions we define for `counsel-find-file'.
   :ID:       845FEBB4-A733-4EF2-8329-4B7C2AF2767B
   :END:
 
-`navy' is bound to f12. It opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
+`navy' opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
 
 | j | left  |
 | l | right |
@@ -1422,6 +1422,61 @@ There are some useful bindings in `navy' also.
 | r | counsel-git-grep               |
 | o | helm-org-agenda-files-headings |
 | a | swiper-all                     |
+* scimax-hydras
+
+Scimax uses a central hydra to launch a key-driven menu of commonly used commands.
+
+#+BEGIN_SRC emacs-lisp
+(describe-function 'scimax/body)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+scimax/body is an interactive Lisp closure in `scimax-hydra.el'.
+
+It is bound to <f12>.
+
+(scimax/body)
+
+For more information check the manuals.
+
+Create a hydra with no body and the heads:
+
+"a":    ‘(scimax-open-hydra scimax-applications/body)’,
+"b":    ‘(scimax-open-hydra scimax-buffers/body)’,
+"e":    ‘(scimax-open-hydra scimax-errors/body)’,
+"f":    ‘(scimax-open-hydra scimax-files/body)’,
+"g":    ‘(scimax-open-hydra scimax-google/body)’,
+"h":    ‘(scimax-open-hydra scimax-help/body)’,
+"i":    ‘(scimax-open-hydra scimax-insert/body)’,
+"j":    ‘(scimax-open-hydra scimax-jump/body)’,
+"k":    ‘(scimax-open-hydra scimax-bookmarks/body)’,
+"l":    ‘(scimax-open-hydra scimax-lisp/body)’,
+"m":    ‘(scimax-open-hydra scimax-minor-modes/body)’,
+"n":    ‘(scimax-open-hydra scimax-navigation/body)’,
+"o":    ‘(scimax-open-hydra scimax-org/body)’,
+"p":    ‘(scimax-open-hydra hydra-projectile/body)’,
+"r":    ‘(scimax-open-hydra scimax-registers/body)’,
+"s":    ‘(scimax-open-hydra scimax-search/body)’,
+"t":    ‘(scimax-open-hydra scimax-text/body)’,
+"v":    ‘(scimax-open-hydra scimax-version-control/body)’,
+"w":    ‘(scimax-open-hydra scimax-windows/body)’,
+"z":    ‘(scimax-open-hydra scimax-settings/body)’,
+",":    ‘scimax-hydra-pop’,
+"x":    ‘counsel-M-x’,
+"<return>":    ‘save-buffer’,
+"/":    ‘undo-tree-undo’,
+"\":    ‘undo-tree-redo’,
+"*":    ‘(switch-to-buffer "*scratch*")’,
+"?":    ‘scimax-hydra-help’,
+".":    ‘scimax-dispatch-mode-hydra’,
+"q":    ‘nil’
+
+The body can be accessed via ‘scimax/body’.
+#+end_example
+
+So, instead of C-x C-f to open a file (which still works by the way) you can simply type: f12 ff. Or instead of C-x C-s to save the file, type f12 RET. Each hydra will show you a hint in the minibuffer on which keys do what.
+
 
 * Appendix
 
