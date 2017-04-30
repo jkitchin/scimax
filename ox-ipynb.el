@@ -147,9 +147,11 @@ This only fixes file links with no description I think."
   (let* ((org-export-filter-latex-fragment-functions '(ox-ipynb-filter-latex-fragment))
 	 (org-export-filter-link-functions '(ox-ipynb-filter-link))
 	 (org-export-filter-keyword-functions '(ox-ipynb-keyword-link))
-	 (md (flet ((org-export-get-relative-level
-		     (headline info)
-		     (org-element-property :level headline)))
+	 ;; I overwrite the org function here because it does not give the right
+	 ;; levels otherwise. This one outputs exactly the level that is listed.
+	 (md (cl-flet ((org-export-get-relative-level
+			(headline info)
+			(org-element-property :level headline)))
 	       (s-trim
 		(org-export-string-as
 		 s
