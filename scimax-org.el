@@ -1006,7 +1006,7 @@ function does not open the files."
 			(outline-show-entry)))))
 
 
-(defun ivy-org-jump-to-heading-in-directory (recursive)
+(defun ivy-org-jump-to-heading-in-directory (&optional recursive)
   "Jump to heading in an org file in the current directory.
 Use a prefix arg to make it RECURSIVE.
 Use a double prefix to make it recursive and fontified."
@@ -1024,7 +1024,7 @@ Use a double prefix to make it recursive and fontified."
      fontify)))
 
 
-(defun ivy-org-jump-to-project-headline (fontify)
+(defun ivy-org-jump-to-project-headline (&optional fontify)
   "Jump to a headline in an org-file in the current project.
 The project is defined by projectile. Use a prefix arg FONTIFY
 for colored headlines."
@@ -1040,7 +1040,7 @@ for colored headlines."
    fontify))
 
 
-(defun ivy-org-jump-to-open-headline (fontify)
+(defun ivy-org-jump-to-open-headline (&optional fontify)
   "Jump to a headline in an open org-file.
 Use a prefix arg FONTIFY for colored headlines."
   (interactive "P")
