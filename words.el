@@ -263,7 +263,7 @@ Suggestions: %s
      (thing-at-point 'word))))
 
 ;; * Search functions for Mac
-(defvar words-voice "Vicki"
+(defvar words-voice "Samantha"
   "Mac voice to use for speaking.")
 
 (defun words-speak (&optional text)
@@ -277,11 +277,12 @@ Suggestions: %s
   ;; escape some special applescript chars
   (setq text (replace-regexp-in-string "\\\\" "\\\\\\\\" text))
   (setq text (replace-regexp-in-string "\"" "\\\\\"" text))
-  (do-applescript
-   (format
-    "say \"%s\" using \"%s\""
-    text
-    words-voice)))
+  ;; (do-applescript
+  ;;  (format
+  ;;   "say \"%s\" using \"%s\""
+  ;;   text
+  ;;   words-voice))
+  (shell-command (format "say -v %s \"%s\" -r 200" words-voice text)))
 
 (defvar words-languages
   '()
