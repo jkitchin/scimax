@@ -292,7 +292,7 @@ Loads cache file."
 
 
 ;;;###autoload
-(defun ivy-contacts (arg)
+(defun ivy-contacts (&optional arg)
   "Select contacts using ivy."
   (interactive "P")
   (setq ivy-marked-candidates '())
