@@ -266,9 +266,10 @@ Suggestions: %s
 (defvar words-voice "Samantha"
   "Mac voice to use for speaking.")
 
-(defun words-speak (&optional text)
+(defun words-speak (&optional text speed)
   "Speak word at point or region or TEXT.  Mac only."
   (interactive)
+  (setq speed (number-to-string (or speed 180)))
   (unless text
     (setq text (if (use-region-p)
 		   (buffer-substring
@@ -282,7 +283,9 @@ Suggestions: %s
   ;;   "say \"%s\" using \"%s\""
   ;;   text
   ;;   words-voice))
-  (shell-command (format "say -v %s \"%s\" -r 200" words-voice text)))
+  ;; (start-process "my-thing" "foo" "say" "-v" words-voice text "-r" speed)
+  ;; (call-process "say" nil nil nil (mapconcat 'identity (list "-v" words-voice text "-r" speed) " "))
+  (shell-command (format "say -v %s \"%s\" -r %s" words-voice text speed)))
 
 (defvar words-languages
   '()
