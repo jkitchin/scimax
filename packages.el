@@ -327,6 +327,10 @@
   ("<f5>" . magit-status)
   ("C-c v t" . magit-status))
 
+(use-package magithub
+  :after magit
+  :config (magithub-feature-autoinject t))
+
 ;; Templating system
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
