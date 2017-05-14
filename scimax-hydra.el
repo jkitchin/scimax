@@ -510,7 +510,7 @@ _j_: jump to mark
   "
 navigation
 -----------------------------------------------------------------------------------
-_j_: ← _k_: ↑ _l_: ↓ _;_: →
+_j_: ← _k_: ↑ _l_: ↓ _;_: →  _i_: imenu
 _a_: beginning of line _e_: end of line _<_: beginning of buffer _>_: end of buffer
 
 _H-w_: beginning of word _H-s_: beginning of sentence _H-p_: beginning of paragraph
@@ -525,6 +525,7 @@ _w_: word mode _s_: sentence mode _p_: paragraph mode
   (";" forward-char)
   ("k" previous-line)
   ("l" next-line)
+  ("i" counsel-imenu)
   ("a" beginning-of-line)
   ("e" end-of-line)
   ("f" delete-char :color red)
