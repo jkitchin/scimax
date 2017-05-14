@@ -1,0 +1,9 @@
+
+
+[[delete:some 10% edit marks]]
+
+[[insert:~test]]
+
+typo:test#4
+
+[[comment:try them ~ & % $ # _ { } ^ \]]

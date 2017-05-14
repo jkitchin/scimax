@@ -1,0 +1,12 @@
+#+OPTIONS: ^:nil
+
+Use the pd.read_csv() function to do something.
+
+#+BEGIN_SRC ipython :session :results output drawer
+print(6)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+6
+:END:

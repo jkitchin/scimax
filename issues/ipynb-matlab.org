@@ -1,0 +1,9 @@
+
+
+#+BEGIN_SRC jupyter-matlab :eval never-export
+t = linspace(0,6*pi,100);
+plot(sin(t))
+grid on
+hold on
+plot(cos(t), 'r')
+#+END_SRC

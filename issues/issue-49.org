@@ -1,0 +1,27 @@
+* First heading
+Paragraphs can be collapsed with nbextention.
+Test consecutive newcells, one of which is empty:
+#+ipynb-newcell
+
+#+ipynb-newcell
+This should be a new md cell.
+#+BEGIN_SRC ipython :session
+
+#+END_SRC
+
+But this text after a src block is lost [BUG]
+* Second heading
+And the auto-numbering TOC extension works, too.
+
+** A sub heading
+Doesn't split with
+*bold* anymore.
+
+#+BEGIN_SRC ipython :session
+# there should be a markdown cell below this code block.
+#+END_SRC
+
+This is lost.
+** Another heading
+#+ipynb-newcell
+Behaves as expected.

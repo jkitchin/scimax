@@ -1,0 +1,23 @@
+* Top level heading
+This is a top level heading
+
+** Second level heading
+A 2nd level heading with a src block will appear as second level, but later
+subheadings at or below will be reset.
+
+#+BEGIN_SRC ipython :session :results output drawer
+import sys
+print(sys.version)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+3.6.0 |Anaconda custom (64-bit)| (default, Dec 23 2016, 12:22:00)
+[GCC 4.4.7 20120313 (Red Hat 4.4.7-1)]
+:END:
+
+** Second level heading
+This will revert to first level
+
+*** Third level heading
+    This will revert to a second level.
