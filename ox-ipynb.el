@@ -184,9 +184,8 @@ Apparently one is not enough to make new markdown paragraphs."
 	 ;; I overwrite the org function here because it does not give the right
 	 ;; levels otherwise. This one outputs exactly the level that is listed.
 	 ;; May 15, 2017: cl-flet doesn't work here anymore, but flet does.
-	 (md (flet ((org-export-get-relative-level
-		     (headline info)
-		     (org-element-property :level headline)))
+	 (md (cl-letf (((symbol-function 'org-export-get-relative-level)
+			(lambda (headline info) (org-element-property :level headline))))
 	       (s-trim
 		(org-export-string-as
 		 s
@@ -240,7 +239,7 @@ Python is the default."
 
 (defun ox-ipynb-split-text (s)
   "Given a string S, split it into substrings.
-Each heading is its own string. Also, split on #+markdown.
+Each heading is its own string. Also, split on #+ipynb-newcell.
 Empty strings are eliminated."
   (let* ((s1 (s-slice-at org-heading-regexp s))
 	 ;; split headers out
@@ -270,8 +269,7 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
     (goto-char (point-min))
     (while (re-search-forward "#\\+RESULTS:
 :RESULTS:
-nil:END:
-" nil t)
+nil:END:"  nil t)
       (replace-match "")))
 
   (let* ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
