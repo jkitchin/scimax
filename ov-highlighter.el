@@ -631,8 +631,8 @@ Data is saved in comment in the document."
 ^Highlight^       ^Markup^       ^Font^        ^Edit^       ^List^
 _g_: green        _b_: bold      _[_: decrease  _t_: typo    _l_: list
 _p_: pink         _i_: italic    _]_: increase  _m_: comment _k_: clear
-_y_: yellow       _u_: underline _F_: Change    ^ ^          _K_: clear all
-_c_: choose       _s_: strike
+_y_: yellow       _u_: underline _F_: Change    _d_: delete  _K_: clear all
+_c_: choose       _s_: strike    ^ ^            _n_: insert
 _f_: foreground   _x_: box
 "
   ("g" ov-highlight-green "green")
@@ -640,6 +640,8 @@ _f_: foreground   _x_: box
   ("y" ov-highlight-yellow "yellow")
   ("c" ov-highlight-color "Choose color")
   ("f" ov-highlight-foreground "Foreground")
+  ("d" ov-highlight-delete)
+  ("n" ov-highlight-insert)
 
   ("[" ov-highlight-decrease-font-size "Make size smaller" :color red)
   ("]" ov-highlight-increase-font-size "Make size bigger" :color red)
