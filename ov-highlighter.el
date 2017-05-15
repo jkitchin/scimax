@@ -772,61 +772,6 @@ get lost when you cut overlays."
     (kill-buffer buf)
     (browse-url file)))
 
-;; * Track changes
-(defvar ovh-current-deletion nil
-  "The current deleted selection. (string beg end backspace) We
-need this to reinsert the string for deletions, set the overlay
-positions, and set the cursor in the right place for backspace
-deletions.")
-
-(defun ovh-before-change (beg end)
-  (unless (or undo-in-progress 
-	      (and (= beg (point-min))
-		   (= end (point-max)))) ; this happens on buffer switches
-    (if (= beg end)
-	(progn
-	  (message "Inserting"))
-      ;; when the deletion was done with backspace, point is at end.
-      (setq ovh-current-deletion (list (buffer-substring beg end) beg end (= (point) end))))))
-
-
-(defun ovh-after-change (beg end length)
-  (if (or undo-in-progress
-	  ovh-current-deletion)
-      (progn
-	(message "deleted %s" ovh-current-deletion)
-	(insert (car ovh-current-deletion))
-	;; check for adjacent overlays and extend if possible.
-	(ov-highlight-delete (nth 1 ovh-current-deletion)
-			     (nth 2 ovh-current-deletion))
-	(setq ovh-current-deletion nil))
-    (if (and (ov-at (- (point) 1)) (overlay-get (ov-at (- (point) 1)) 'ov-highlight))
-	(ov-move (ov-at (- (point) 1))
-		 (ov-beg (ov-at (- (point) 1)))
-		 (point))
-      (ov-highlight-insert (- (point) 1) (point)))
-    (message "%s %s %s" beg end length)))
-
-
-(defun ovh-track-changes (&optional arg)
-  "Toggle track changes."
-  (interactive (list (or current-prefix-arg 'toggle)))
-  (let ((enable (if (eq arg 'toggle)
-                    (not (get 'ovh-track-changes 'track-changes))
-                  (> (prefix-numeric-value arg) 0))))
-    (if enable
-        (progn
-	  (add-to-list 'before-change-functions 'ovh-before-change t)
-	  (add-to-list 'after-change-functions 'ovh-after-change)
-	  (setq ovh-current-deletion nil
-		inhibit-modification-hooks nil)
-	  (put 'ovh-track-changes 'track-changes t)
-	  (message "Track changes activated."))
-      (setq before-change-functions (delq 'ovh-before-change before-change-functions))
-      (setq after-change-functions (delq 'ovh-after-change after-change-functions))
-      (put 'ovh-track-changes 'track-changes nil) 
-      (message "Track changes deactivated."))))
-
 
 ;; * The End
 (provide 'ov-highlighter)
