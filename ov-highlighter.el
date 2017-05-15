@@ -386,7 +386,9 @@ With numeric prefix set font to that size."
 (defun ov-highlight-clear ()
   "Clear highlight at point."
   (interactive)
-  (delete-overlay (ov-at))
+  (when-let (ov (ov-at))
+    (delete-overlay ov))
+
   (set-buffer-modified-p t)
   (let ((buf (get-buffer "*ov-highlights*")))
     (when buf
