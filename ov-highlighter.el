@@ -590,7 +590,7 @@ Data is saved in comment in the document."
 	 (data-b64 (propertize
 		    (base64-encode-string (format "%S" data) t)
 		    'display "..."
-		    'invisible ov-highlight-data)))
+		    'invisible 'ov-highlight-data)))
     (save-restriction
       (widen)
       (save-excursion

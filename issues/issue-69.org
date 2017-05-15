@@ -1,0 +1,20 @@
+Test for ov-highligher.
+
+No highlights are saved.
+
+#+BEGIN_SRC emacs-lisp
+(ov-highlight-get-highlights)
+#+END_SRC
+
+#+RESULTS:
+| 13 | 22 | (ov-type typo ov-highlight t help-echo tpyo face (:background PaleVioletRed1)) |
+
+So I can see we have a highlight.
+
+Problem solved, needed to quote a symbol.
+
+#  ov-highlight-data: KCgxMyAyMiAob3YtdHlwZSAidHlwbyIgb3YtaGlnaGxpZ2h0IHQgaGVscC1lY2hvICJ0cHlvIiBmYWNlICg6YmFja2dyb3VuZCAiUGFsZVZpb2xldFJlZDEiKSkpKQ==
+
+# Local Variables:
+# eval: (ov-highlight-load)
+# End:
