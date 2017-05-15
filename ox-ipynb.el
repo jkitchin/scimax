@@ -19,8 +19,36 @@
 ;; You can export an org-file to a buffer, file or file and open.
 
 ;;; Code:
+(require 'cl)
 (require 'ox-md)
 (require 'ox-org)
+
+(defvar ox-ipynb-kernelspecs '((ipython . (kernelspec . ((display_name . "Python 3")
+							 (language . "python")
+							 (name . "python3"))))
+			       (R . (kernelspec . ((display_name . "R")
+						   (language . "R")
+						   (name . "ir")))))
+  "kernelspec metadata for different kernels.")
+
+
+(defvar ox-ipynb-language-infos '((ipython . (language_info . ((codemirror_mode . ((name . ipython)
+										   (version . 3)))
+							       (file_extension . ".py")
+							       (mimetype . "text/x-python")
+							       (name . "python")
+							       (nbconvert_exporter . "python")
+							       (pygments_lexer . "ipython3")
+							       (version . "3.5.2"))))
+				  (R . (language_info . ((codemirror_mode . "r")
+							 (file_extension . ".r")
+							 (mimetype . "text/x-r-source")
+							 (name . "R")
+							 (pygments_lexer . "r")
+							 (version . "3.3.2")))))
+  "These get injected into notebook metadata.
+They are reverse-engineered from existing notebooks.")
+
 
 (defun export-ipynb-code-cell (src-result)
   "Return a lisp code cell for the org-element SRC-BLOCK."
@@ -189,33 +217,6 @@ This only fixes file links with no description I think."
       `((cell_type . "markdown")
 	(metadata . ,(make-hash-table))
 	(source . ,(vconcat keywords))))))
-
-
-(defvar ox-ipynb-kernelspecs '((ipython . (kernelspec . ((display_name . "Python 3")
-							 (language . "python")
-							 (name . "python3"))))
-			       (R . (kernelspec . ((display_name . "R")
-						   (language . "R")
-						   (name . "ir")))))
-  "kernelspec metadata for different kernels.")
-
-
-(defvar ox-ipynb-language-infos '((ipython . (language_info . ((codemirror_mode . ((name . ipython)
-										   (version . 3)))
-							       (file_extension . ".py")
-							       (mimetype . "text/x-python")
-							       (name . "python")
-							       (nbconvert_exporter . "python")
-							       (pygments_lexer . "ipython3")
-							       (version . "3.5.2"))))
-				  (R . (language_info . ((codemirror_mode . "r")
-							 (file_extension . ".r")
-							 (mimetype . "text/x-r-source")
-							 (name . "R")
-							 (pygments_lexer . "r")
-							 (version . "3.3.2")))))
-  "These get injected into notebook metadata.
-They are reverse-engineered from existing notebooks.")
 
 
 (defun ox-ipynb-get-language ()
