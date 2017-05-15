@@ -658,28 +658,6 @@ _f_: foreground   _x_: box
   ("K" ov-highlight-clear-all "Clear all highlights")
   ("q" quit-window "quit"))
 
-;; * markup overlays
-
-(defun ov-bold (beg end)
-  "Bold the selected text
-
-It returns the created overlay."
-  (interactive "r")
-  
-  (flyspell-delete-region-overlays beg end)
-  ;; add a local hook to make sure it gets saved
-  (add-hook 'before-save-hook 'ov-highlight-save nil t)
-  
-  (let ((ov (make-overlay beg end)))
-    (overlay-put ov 'face `(:weight bold))
-    (overlay-put ov 'ov-highlight t)
-    (set-buffer-modified-p t)
-    (let ((p (point)))
-      (when (mark)
-	(deactivate-mark))
-      (goto-char p)) 
-    ov))
-
 
 ;; * Copy, cut and paste
 (defvar ov-highlight-copy-data  '()
