@@ -169,17 +169,24 @@ This only fixes file links with no description I think."
 	(format "[%s](%s)" path path))
     text))
 
+(defun ox-ipynb-filter-paragraph (text back-end info)
+  "Replace single \n with \n\n.
+Apparently one is not enough to make new markdown paragraphs."
+  (replace-regexp-in-string "\n" "\n\n" text))
+
 
 (defun export-ipynb-markdown-cell (s)
   "Return the markdown cell for the string S."
   (let* ((org-export-filter-latex-fragment-functions '(ox-ipynb-filter-latex-fragment))
 	 (org-export-filter-link-functions '(ox-ipynb-filter-link))
+	 (org-export-filter-paragraph-functions '(ox-ipynb-filter-paragraph))
 	 (org-export-filter-keyword-functions '(ox-ipynb-keyword-link))
 	 ;; I overwrite the org function here because it does not give the right
 	 ;; levels otherwise. This one outputs exactly the level that is listed.
-	 (md (cl-flet ((org-export-get-relative-level
-			(headline info)
-			(org-element-property :level headline)))
+	 ;; May 15, 2017: cl-flet doesn't work here anymore, but flet does.
+	 (md (flet ((org-export-get-relative-level
+		     (headline info)
+		     (org-element-property :level headline)))
 	       (s-trim
 		(org-export-string-as
 		 s
