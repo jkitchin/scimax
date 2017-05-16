@@ -179,7 +179,6 @@ This only fixes file links with no description I think."
   "Return the markdown cell for the string S."
   (let* ((org-export-filter-latex-fragment-functions '(ox-ipynb-filter-latex-fragment))
 	 (org-export-filter-link-functions '(ox-ipynb-filter-link))
-	 (org-export-filter-paragraph-functions '(ox-ipynb-filter-paragraph))
 	 (org-export-filter-keyword-functions '(ox-ipynb-keyword-link))
 	 ;; I overwrite the org function here because it does not give the right
 	 ;; levels otherwise. This one outputs exactly the level that is listed.
