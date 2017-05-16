@@ -33,6 +33,9 @@ A line by itself.
 
 After an empty line.
 
+#+ipynb-newcell
+
+and more...
 *** Subsubsection
 Markdown conversion is losing depth in sections.
 
