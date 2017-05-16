@@ -23,6 +23,11 @@
 (require 'ox-md)
 (require 'ox-org)
 
+(defcustom ox-ipynb-paragraph-separate-cells t
+  "If non-nil make each paragraph its own cell."
+  :group 'ox-ipynb)
+
+
 (defvar ox-ipynb-kernelspecs '((ipython . (kernelspec . ((display_name . "Python 3")
 							 (language . "python")
 							 (name . "python3"))))
@@ -169,11 +174,6 @@ This only fixes file links with no description I think."
 	(format "[%s](%s)" path path))
     text))
 
-(defun ox-ipynb-filter-paragraph (text back-end info)
-  "Replace single \n with \n\n.
-Apparently one is not enough to make new markdown paragraphs."
-  (replace-regexp-in-string "\n" "\n\n" text))
-
 
 (defun export-ipynb-markdown-cell (s)
   "Return the markdown cell for the string S."
@@ -183,7 +183,6 @@ Apparently one is not enough to make new markdown paragraphs."
 	 (org-export-filter-keyword-functions '(ox-ipynb-keyword-link))
 	 ;; I overwrite the org function here because it does not give the right
 	 ;; levels otherwise. This one outputs exactly the level that is listed.
-	 ;; May 15, 2017: cl-flet doesn't work here anymore, but flet does.
 	 (md (cl-letf (((symbol-function 'org-export-get-relative-level)
 			(lambda (headline info) (org-element-property :level headline))))
 	       (s-trim
@@ -245,14 +244,16 @@ Empty strings are eliminated."
 	 ;; split headers out
 	 (s2 (loop for string in s1
 		   append
-		   (if (string-match org-heading-regexp string)
-		       (let ((si (split-string string "\n" t)))
-			 (list (car si)
-			       (mapconcat 'identity (cdr si) "\n")))
-		     (list string))))
+		   (if ox-ipynb-paragraph-separate-cells
+		       (split-string string "\n")
+		     (if (string-match org-heading-regexp string)
+			 (let ((si (split-string string "\n")))
+			   (list (car si)
+				 (mapconcat 'identity (cdr si) "\n")))
+		       (list string)))))
 	 (s3 (loop for string in s2
 		   append
-		   (split-string string "#\\+ipynb-newcell" t))))
+		   (split-string string "#\\+ipynb-newcell"))))
 
     s3))
 
@@ -451,10 +452,11 @@ nil:END:"  nil t)
 
 
 (defun ox-ipynb-export-to-ipynb-file-and-open (&optional async subtreep visible-only body-only info)
-  (async-shell-command
-   (format "jupyter notebook \"%s\""
-	   (expand-file-name
-	    (ox-ipynb-export-to-ipynb-file async subtreep visible-only body-only info)))))
+  (let ((async-shell-command-buffer 'confirm-kill-buffer))
+    (async-shell-command
+     (format "jupyter notebook \"%s\""
+	     (expand-file-name
+	      (ox-ipynb-export-to-ipynb-file async subtreep visible-only body-only info))))))
 
 
 (org-export-define-derived-backend 'jupyter-notebook 'org
