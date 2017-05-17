@@ -150,7 +150,7 @@ They are reverse-engineered from existing notebooks.")
 		      (vector)
 		    (vconcat output-cells)))
       (source . ,(vconcat
-		  (list (s-trim (org-element-property :value src-block))))))))
+		  (list (s-trim (car (org-export-unravel-code src-block)))))))))
 
 
 (defun ox-ipynb-filter-latex-fragment (text back-end info)
