@@ -1,0 +1,74 @@
+
+
+#+begin: exercise
+#+ipynb-newcell
+*Exercise 1*
+#+end
+
+
+#+BEGIN_QUOTE
+Computers are good at consuming, producing and processing data. Humans, on the other hand, process the world through narratives.
+
+Thus, in order for data, and the computations that process and
+visualize that data, to be useful for humans, they must be
+embedded into a narrative - a computational  narrative - that tells
+a story for a particular audience and context.
+#+END_QUOTE
+
+-- Perez and Granger
+
+Type the following expressions into code cells and evaluate. Identify the meaning of each operator.
+#+BEGIN_EXAMPLE
+ a. 15 + 2     g. 15e2
+ b. 15 * 2     h. 15e-2 * 2
+ c. 15 / 2     i. 15 % 3.0
+ d. 15 ^ 2     j. 15e2 ** 2
+ e. 15 ** 2    k. 15 + 2 ** 2
+ f. 15 // 2    l. (15 + 2) ** 2
+#+END_EXAMPLE
+
+#+BEGIN_SRC ipython :session :results output drawer
+print(15 + 2)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+17
+:END:
+
+#+begin: exercise
+#+ipynb-newcell
+*Exercise 2*
+#+end
+
+Calculate the average atomic mass of neon using the given data.
+
+| Isotope        | mass /amu | % abundance |
+|----------------+-----------+-------------|
+| \zwnj{}^{20}Ne | 19.992440 |       90.48 |
+| \zwnj{}^{21}Ne | 20.993847 |        0.27 |
+| \zwnj{}^{22}Ne | 21.991386 |        9.25 |
+
+#+BEGIN_SRC ipython :session :results output drawer
+
+#+END_SRC
+
+* code                                                             :noexport:
+
+#+BEGIN_SRC emacs-lisp
+(setq ox-ipynb-paragraph-separate-cells nil)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(defun org-dblock-write:exercise (params)
+  (incf exercise-counter)
+  (insert (concat "#+ipynb-newcell
+*Exercise " (int-to-string exercise-counter) "*")))
+(setf exercise-counter 0)
+(org-update-all-dblocks)
+#+END_SRC
+
+#+RESULTS:
+
+
+Running `org-update-all-dblocks` shows the blocks are updated correctly in the org file, but the ipynb file will give `#+BEGIN: exercisenil` before each exercise cell.

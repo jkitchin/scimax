@@ -23,10 +23,6 @@
 (require 'ox-md)
 (require 'ox-org)
 
-(defcustom ox-ipynb-paragraph-separate-cells t
-  "If non-nil make each paragraph its own cell."
-  :group 'ox-ipynb)
-
 
 (defvar ox-ipynb-kernelspecs '((ipython . (kernelspec . ((display_name . "Python 3")
 							 (language . "python")
@@ -184,11 +180,10 @@ This only fixes file links with no description I think."
 	 ;; levels otherwise. This one outputs exactly the level that is listed.
 	 (md (cl-letf (((symbol-function 'org-export-get-relative-level)
 			(lambda (headline info) (org-element-property :level headline))))
-	       (s-trim
-		(org-export-string-as
-		 s
-		 'md t '(:with-toc nil :with-tags nil))))))
-    (if (not (string= "" md))
+	       (org-export-string-as
+		s
+		'md t '(:with-toc nil :with-tags nil)))))
+    (if (not (string= "" (s-trim md)))
 	`((cell_type . "markdown")
 	  (metadata . ,(make-hash-table))
 	  (source . ,(vconcat
@@ -243,13 +238,11 @@ Empty strings are eliminated."
 	 ;; split headers out
 	 (s2 (loop for string in s1
 		   append
-		   (if ox-ipynb-paragraph-separate-cells
-		       (split-string string "\n")
-		     (if (string-match org-heading-regexp string)
-			 (let ((si (split-string string "\n")))
-			   (list (car si)
-				 (mapconcat 'identity (cdr si) "\n")))
-		       (list string)))))
+		   (if (string-match org-heading-regexp string)
+		       (let ((si (split-string string "\n")))
+			 (list (car si)
+			       (mapconcat 'identity (cdr si) "\n")))
+		     (list string))))
 	 (s3 (loop for string in s2
 		   append
 		   (split-string string "#\\+ipynb-newcell"))))
@@ -272,6 +265,40 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 nil:END:"  nil t)
       (replace-match "")))
 
+  ;; this is a temporary hack to fix a bug in org-mode that puts a nil at the
+  ;; end of exported dynamic blocks. <2017-05-19 Fri>
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "\\(#\\+BEGIN:.*\\)nil"  nil t)
+      (replace-match "\\1")))
+
+
+  ;; preprocess some org-elements that need to be exported to strings prior to
+  ;; the rest. This is not complete. Do these in reverse so the buffer positions
+  ;; don't get changed in the parse tree.
+  (mapc (lambda (elm)
+	  (setf (buffer-substring (org-element-property :begin elm)
+				  (org-element-property :end elm))
+		(org-md-quote-block elm
+				    (buffer-substring
+				     (org-element-property :contents-begin elm)
+				     (org-element-property :contents-end elm))
+				    nil)))
+	(reverse (org-element-map (org-element-parse-buffer) 'quote-block 'identity)))
+
+  (mapc (lambda (elm)
+	  (setf (buffer-substring (org-element-property :begin elm)
+				  (org-element-property :end elm))
+		(org-md-export-block elm
+				     (buffer-substring
+				      (org-element-property :contents-begin elm)
+				      (org-element-property :contents-end elm))
+				     nil)))
+	(reverse (org-element-map (org-element-parse-buffer) 'dynamic-block 'identity)))
+
+
+
+  ;; Now we parse the buffer.
   (let* ((cells (if (export-ipynb-keyword-cell) (list (export-ipynb-keyword-cell)) '()))
 	 (ox-ipynb-language (ox-ipynb-get-language))
 	 (metadata `(metadata . ((org . ,(let* ((all-keywords (org-element-map (org-element-parse-buffer)
@@ -353,7 +380,7 @@ nil:END:"  nil t)
 	    (loop for s in (ox-ipynb-split-text text)
 		  unless (string= "" (s-trim s))
 		  do
-		  (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+		  (when-let ((md (export-ipynb-markdown-cell s)))
 		    (push md cells)))))
       ;; this is a special case where there are no source blocks, and the whole
       ;; document is a markdown cell.
@@ -361,7 +388,7 @@ nil:END:"  nil t)
 	(loop for s in (ox-ipynb-split-text text)
 	      unless (string= "" (s-trim s))
 	      do
-	      (when-let ((md (export-ipynb-markdown-cell (s-trim s))))
+	      (when-let ((md (export-ipynb-markdown-cell s)))
 		(push md cells)))))
 
     (while current-source
