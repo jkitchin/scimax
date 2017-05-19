@@ -111,6 +111,23 @@ Returns an org-link to the file."
     (ob-ipython--write-base64-string tfile b64-string)
     link))
 
+(defun ob-ipython--format-result (result)
+  (format "\n%s"
+          (mapconcat 'identity
+                     (loop for res in result
+                           ;; if (and (eq 'text/plain (car res)) (cdr res))
+                           ;; collect (cdr res)
+                           if (eq 'text/html (car res))
+                           collect (format
+                                    "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
+                                    (cdr res))
+                           if (eq 'text/latex (car res))
+                           collect (format
+                                    "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
+                                    (cdr res))
+                           if (eq 'image/png (car res))
+                           collect (ob-ipython-inline-image (cdr res)))
+                     "\n")))
 
 (defun ob-ipython--async-callback (status &rest args)
   "Callback function for `ob-ipython--execute-request-asynchronously'.
@@ -134,21 +151,7 @@ It replaces the output in the results."
 	    (insert
 	     (concat
 	      (s-trim output)
-	      (format "%s"
-		      (mapconcat
-		       'identity
-		       (loop for res in result
-			     ;; if (and (eq 'text/plain (car res)) (cdr res))
-			     ;; collect (cdr res)
-			     if (eq 'text/html (car res))
-			     collect (format "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
-					     (cdr res))
-			     if (eq 'text/latex (car res))
-			     collect (format "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
-					     (cdr res))
-			     if (eq 'image/png (car res))
-			     collect (ob-ipython-inline-image (cdr res)))
-		       "\n")))))
+              (ob-ipython--format-result result))))
 	   ((string= "value" result-type)
 	    (insert
 	     (cdr (assoc 'text/plain result)))))
@@ -229,43 +232,12 @@ This function is called by `org-babel-execute-src-block'."
 	  (if (eq result-type 'output)
 	      (concat
 	       output
-	       (format "%s"
-		       (mapconcat 'identity
-				  (loop for res in result
-					;; if (and (eq 'text/plain (car res)) (cdr res))
-					;; collect (cdr res)
-					if (eq 'text/html (car res))
-					collect (format
-						 "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
-						 (cdr res))
-					if (eq 'text/latex (car res))
-					collect (format
-						 "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
-						 (cdr res))
-					if (eq 'image/png (car res))
-					collect (ob-ipython-inline-image (cdr res)))
-				  "\n")))
+               (ob-ipython--format-result result))
 	    ;; The result here is a value. We should still get inline images though.
 	    (ob-ipython--create-stdout-buffer output)
 	    (concat
 	     (->> result (assoc 'text/plain) cdr)
-	     (format "\n%s"
-		     (mapconcat 'identity
-				(loop for res in result
-				      ;; if (and (eq 'text/plain (car res)) (cdr res))
-				      ;; collect (cdr res)
-				      if (eq 'text/html (car res))
-				      collect (format
-					       "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
-					       (cdr res))
-				      if (eq 'text/latex (car res))
-				      collect (format
-					       "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
-					       (cdr res))
-				      if (eq 'image/png (car res))
-				      collect (ob-ipython-inline-image (cdr res)))
-				"\n")))))))))
-
+             (ob-ipython--format-result result))))))))
 
 (defun org-babel-execute-async:ipython (&optional arg)
   (interactive)
