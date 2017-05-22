@@ -97,6 +97,18 @@ With a prefix BELOW move point to lower block."
       (while (and (org-babel-next-src-block) (< (point) p))
 	(org-babel-execute-src-block)))))
 
+
+(defun org-babel-execute-ipython-buffer-async ()
+  "Execute all the ipython blocks in the buffer asynchronously."
+  (interactive)
+  (org-block-map
+   (lambda ()
+     (when (string= (first (org-babel-get-src-block-info)) "ipython")
+       (org-babel-execute-async:ipython)))
+   (point-min)
+   (point-max)))
+
+
 ;; * Enhancements to ob-ipython
 
 (defun ob-ipython-inline-image (b64-string)
@@ -112,6 +124,7 @@ Returns an org-link to the file."
     link))
 
 (defun ob-ipython--format-result (result)
+  "Format a RESULT from an ipython cell."
   (format "\n%s"
           (mapconcat 'identity
                      (loop for res in result
@@ -129,34 +142,149 @@ Returns an org-link to the file."
                            collect (ob-ipython-inline-image (cdr res)))
                      "\n")))
 
+
+;;* Asynchronous ipython
+(defvar *org-babel-async-ipython-running-cell* nil
+  "A cons cell (buffer . name) of the current cell.")
+
+
+(defvar *org-babel-async-ipython-queue* '()
+  "Queue of cons cells (buffer . name) for cells to run.")
+
+
+(defun org-babel-get-name-create ()
+  "Get the name of a src block or add a uuid as the name."
+  (if-let (name (fifth (org-babel-get-src-block-info)))
+      name
+    (save-excursion
+      (let ((el (org-element-context))
+	    (id (org-id-uuid)))
+	(goto-char (org-element-property :begin el))
+	(insert (format "#+NAME: %s\n" id))
+	id))))
+
+
+(defun org-babel-get-session ()
+  "Return current session.
+I wrote this because params returns none instead of nil."
+  (let ((session (cdr (assoc :session (third (org-babel-get-src-block-info))))))
+    (if (not (string= "none" session))
+	session
+      "default")))
+
+
+(org-link-set-parameters
+ "async-queued"
+ :follow (lambda (path)
+	   (let* ((f (split-string path " " t))
+		  (name (first f)))
+	     (setq *org-babel-async-ipython-queue*
+		   (remove (rassoc name *org-babel-async-ipython-queue*)
+			   *org-babel-async-ipython-queue*)))
+	   (save-excursion
+	     (org-babel-previous-src-block)
+	     (org-babel-remove-result)))
+ :face '(:foreground "red")
+ :help-echo "Queued")
+
+
+(org-link-set-parameters
+ "async-running"
+ :follow (lambda (path)
+	   (ob-ipython-interrupt-kernel (org-babel-get-session))
+	   (save-excursion
+	     (org-babel-previous-src-block)
+	     (org-babel-remove-result))
+	   ;; clear the blocks in the queue.
+	   (loop for (buffer . name) in *org-babel-async-ipython-queue*
+		 do
+		 (save-window-excursion
+		   (with-current-buffer buffer
+		     (org-babel-goto-named-src-block name)
+		     (org-babel-remove-result))))
+	   (setq *org-babel-async-ipython-queue* nil
+		 *org-babel-async-ipython-running-cell* nil))
+ :face '(:foreground "green4")
+ :help-echo "Running")
+
+
+(defun org-babel-async-ipython-clear-queue ()
+  "Clear the queue and all pending results."
+  (interactive)
+  (loop for (buffer . name) in *org-babel-async-ipython-queue*
+	do
+	(save-window-excursion
+	  (with-current-buffer buffer
+	    (org-babel-goto-named-src-block name)
+	    (org-babel-remove-result))))
+  (setq *org-babel-async-ipython-running-cell* nil
+	*org-babel-async-ipython-queue* '()))
+
+
+(defun org-babel-async-ipython-process-queue ()
+  "Run the next job in the queue."
+  (if-let ((not-running (not *org-babel-async-ipython-running-cell*))
+	   (queue *org-babel-async-ipython-queue*)
+	   ;; It seems we cannot pop queue, which is a local copy.
+	   (cell (pop *org-babel-async-ipython-queue*))
+	   (buffer (car cell))
+	   (name (cdr cell)))
+      (save-window-excursion
+	(with-current-buffer buffer
+	  (org-babel-goto-named-src-block name)
+	  (setq *org-babel-async-ipython-running-cell* cell)
+	  (let ((rep))
+	    (save-excursion
+	      (re-search-forward (format "\\[\\[async-queued: %s \\(output\\|value\\)\\]\\]" name nil t))
+	      (setq rep (format "[[async-running: %s %s]]" name (match-string 1)))
+	      (replace-match rep))
+	    (ob-ipython--execute-request-asynchronously
+	     (org-babel-expand-body:generic
+	      (encode-coding-string (org-element-property :value (org-element-context)) 'utf-8)
+	      (org-babel-variable-assignments:python (third (org-babel-get-src-block-info))))
+	     (ob-ipython--normalize-session
+	      (cdr (assoc :session (third (org-babel-get-src-block-info))))))
+	    rep)))))
+
+
 (defun ob-ipython--async-callback (status &rest args)
   "Callback function for `ob-ipython--execute-request-asynchronously'.
-It replaces the output in the results."
+It replaces the output in the results." 
   (let* ((ret (ob-ipython--eval (if (>= (url-http-parse-response) 400)
 				    (ob-ipython--dump-error (buffer-string))
 				  (goto-char url-http-end-of-headers)
-				  (let ((json-array-type 'list))
-				    (json-read)))))
+				  (let* ((json-array-type 'list)
+					 (json (json-read)))
+				    (when (string= "error" (cdr (assoc 'msg_type (elt json 0))))
+				      (with-current-buffer (car *org-babel-async-ipython-running-cell*)
+					(org-babel-goto-named-src-block (cdr *org-babel-async-ipython-running-cell*))
+					(org-babel-remove-result))
+				      (org-babel-async-ipython-clear-queue)) 
+				    json))))
 	 (result (cdr (assoc :result ret)))
 	 (output (cdr (assoc :output ret)))
+	 (current-cell *org-babel-async-ipython-running-cell*)
+	 (name (cdr current-cell))
 	 result-type)
-    (with-current-buffer *async-ob-ipython*
+    (with-current-buffer (car current-cell)
       (save-excursion
-	(goto-char (point-min))
-	(when (re-search-forward "async-abcd-1234-\\(output\\|value\\)" nil t)
-	  (setq result-type (match-string 1))
-	  (replace-match "")
-	  (cond
-	   ((string= "output" result-type)
-	    (insert
-	     (concat
-	      (s-trim output)
-              (ob-ipython--format-result result))))
-	   ((string= "value" result-type)
-	    (insert
-	     (cdr (assoc 'text/plain result)))))
-	  (org-redisplay-inline-images))))
-    (setq *async-ob-ipython* nil)))
+	(org-babel-goto-named-src-block name)
+	(re-search-forward (format "\\[\\[async-running: %s \\(output\\|value\\)\\]\\]" name))
+	(setq result-type (match-string 1))
+	(replace-match "")
+	(cond
+	 ((string= "output" result-type)
+	  (insert
+	   (concat
+	    (s-trim output)
+	    (ob-ipython--format-result result))))
+	 ((string= "value" result-type)
+	  (insert
+	   (cdr (assoc 'text/plain result)))))
+	(org-redisplay-inline-images)))
+    (setq *org-babel-async-ipython-running-cell* nil)
+    ;; see if there is another thing in the queue.
+    (org-babel-async-ipython-process-queue)))
 
 
 (defun ob-ipython--execute-request-asynchronously (code name)
@@ -173,16 +301,18 @@ A callback function replaces the results."
      'ob-ipython--async-callback)))
 
 
-;; This overwrites the ob-ipython function and adds better inline image support,
-;; and adds async support.
-(defun org-babel-execute:ipython (body params)
-  "Execute a block of IPython code with Babel.
-This function is called by `org-babel-execute-src-block'."
-  (let* ((file (cdr (assoc :file params)))
-         (session (cdr (assoc :session params)))
-	 (async (cdr (assoc :async params)))
-         (result-type (cdr (assoc :result-type params)))
-	 results)
+(defun org-babel-execute-async:ipython (&optional body params)
+  "Execute the block at point asynchronously."
+  (interactive)
+  (when (and (org-in-src-block-p)
+	     (string= "python" (first (org-babel-get-src-block-info)))))
+  (let* ((name (org-babel-get-name-create))
+	 (body (org-element-property :value (org-element-context)))
+	 (params (third (org-babel-get-src-block-info)))
+	 (file (cdr (assoc :file params)))
+	 (session (cdr (assoc :session params)))
+	 (results (cdr (assoc :results params)))
+	 (result-type (cdr (assoc :result-type params))))
     (org-babel-ipython-initiate-session session params)
 
     ;; Check the current results for inline images and delete the files.
@@ -192,123 +322,33 @@ This function is called by `org-babel-execute-src-block'."
 	(save-excursion
 	  (goto-char location)
 	  (when (looking-at (concat org-babel-result-regexp ".*$"))
-	    (setq results (buffer-substring-no-properties
-			   location
-			   (save-excursion
-			     (forward-line 1) (org-babel-result-end)))))))
+	    (setq current-results (buffer-substring-no-properties
+				   location
+				   (save-excursion
+				     (forward-line 1) (org-babel-result-end)))))))
       (with-temp-buffer
-	(insert (or results ""))
+	(insert (or current-results ""))
 	(goto-char (point-min))
 	(while (re-search-forward
 		"\\[\\[file:\\(ipython-inline-images/ob-ipython-.*?\\)\\]\\]" nil t)
 	  (let ((f (match-string 1)))
 	    (when (file-exists-p f)
 	      (delete-file f))))))
-    
-    (if async
-	(progn
-	  ;; this limits us to running one async process at a time. It does not
-	  ;; support multiple sessions in one org-file.
-	  (save-excursion
-	    (goto-char (point-min))
-	    (when (re-search-forward "async-abcd-1234" nil t)
-	      (error "It looks like an async process is already running")))
-	  (setq *async-ob-ipython* (current-buffer))
-	  (ob-ipython--execute-request-asynchronously
-	   (org-babel-expand-body:generic
-	    (encode-coding-string body 'utf-8)
-	    params (org-babel-variable-assignments:python params))
-	   (ob-ipython--normalize-session session))
-	  (format "async-abcd-1234-%s" result-type))
-      
-      (-when-let (ret (ob-ipython--eval
-		       (ob-ipython--execute-request
-			(org-babel-expand-body:generic
-			 (encode-coding-string body 'utf-8)
-			 params (org-babel-variable-assignments:python params))
-			(ob-ipython--normalize-session session))))
-	(let ((result (cdr (assoc :result ret)))
-	      (output (cdr (assoc :output ret))))
-	  (if (eq result-type 'output)
-	      (concat
-	       output
-               (ob-ipython--format-result result))
-	    ;; The result here is a value. We should still get inline images though.
-	    (ob-ipython--create-stdout-buffer output)
-	    (concat
-	     (->> result (assoc 'text/plain) cdr)
-             (ob-ipython--format-result result))))))))
 
-(defun org-babel-execute-async:ipython (&optional arg)
-  (interactive)
-  (let* ((body (org-element-property :value (org-element-context)))
-	 (params (nth 2 (org-babel-get-src-block-info)))
-	 (file (cdr (assoc :file params)))
-         (session (cdr (assoc :session params)))
-	 (async (cdr (assoc :async params)))
-	 (results (cdr (assoc :results params)))
-         (result-type (cdr (assoc :result-type params))))
-    (org-babel-ipython-initiate-session session params)
-    
-    (if (not async)
-	(org-babel-execute:ipython body params)
-      ;; Check the current results for inline images and delete the files.
-      (let ((location (org-babel-where-is-src-block-result))
-	    current-results)
-	(when location
-	  (save-excursion
-	    (goto-char location)
-	    (when (looking-at (concat org-babel-result-regexp ".*$"))
-	      (setq current-results (buffer-substring-no-properties
-				     location
-				     (save-excursion
-				       (forward-line 1) (org-babel-result-end)))))))
-	(with-temp-buffer
-	  (insert (or current-results ""))
-	  (goto-char (point-min))
-	  (while (re-search-forward
-		  "\\[\\[file:\\(ipython-inline-images/ob-ipython-.*?\\)\\]\\]" nil t)
-	    (let ((f (match-string 1)))
-	      (when (file-exists-p f)
-		(delete-file f))))))
-      ;; Now we run the async
-      (save-excursion
-	(goto-char (point-min))
-	(when (re-search-forward "async-abcd-1234" nil t)
-	  (error "It looks like an async process is already running")))
-      
-      (setq *async-ob-ipython* (current-buffer))
-      (org-babel-remove-result)
-      (org-babel-insert-result (format "async-abcd-1234-%s" result-type)
-			       (split-string  results " " t))
-      (save-excursion
-	(re-search-forward (format "async-abcd-1234-%s" result-type))
-	(flyspell-delete-region-overlays (match-beginning 0) (match-end 0))
-	(let ((map (make-sparse-keymap)))
-	  (define-key map [mouse-1]
-	    `(lambda ()
-	       (interactive)
-	       (message "Interrupting the kernel.")
-	       (save-excursion
-		 (org-babel-previous-src-block)
-		 (org-babel-remove-result))
-	       (ob-ipython-interrupt-kernel (cdr (assoc
-						  (or ,session "default")
-						  (ob-ipython--get-kernel-processes))))))
-	  (set-text-properties
-	   (match-beginning 0) (match-end 0)
-	   `(font-lock-face (:foreground "red")
-			    local-map ,map
-			    mouse-face highlight
-			    help-echo "Click to interrupt async process"))))
-      (setq font-lock-extra-managed-props (delq 'local-map font-lock-extra-managed-props))
-      ;; finally call the async command.
-      (message "running async")
-      (ob-ipython--execute-request-asynchronously
-       (org-babel-expand-body:generic
-	(encode-coding-string body 'utf-8)
-	params (org-babel-variable-assignments:python params))
-       (ob-ipython--normalize-session session)))))
+    ;; Now we run the async
+    (org-babel-remove-result)
+    (org-babel-insert-result
+     (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type)
+     (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
+
+    (add-to-list '*org-babel-async-ipython-queue* (cons (current-buffer) name) t)
+
+    ;; It appears that the result of this call is put into the results at this point.
+    (or
+     (org-babel-async-ipython-process-queue)
+     (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type))))
+
+(add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-async:ipython)
 
 (provide 'scimax-org-babel-ipython)
 

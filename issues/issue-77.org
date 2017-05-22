@@ -1,0 +1,76 @@
+This involves a rewrite of the async ipython code. The goals are:
+
+- [X] Use a queue to enable you to run several blocks in a row, e.g. by C-c C-c on blocks, or run blocks to point, or all the blocks in the buffer.
+  - [X] elisp:org-babel-execute-ipython-buffer-async
+- [X] Clear the queue elisp:org-babel-async-ipython-clear-queue
+- [X] If a block has an exception, cancel all subsequent scheduled blocks.
+- [X] Maintain compatibility with inline images.
+- [X] Provide clickable links to cancel a cell.
+
+It seems to work. The following limitations are known.
+1. you cannot use the output of one cell as input to another. For Ipython this does not make sense anyway as it runs in a session and the results are available in memory in the kernel.
+2. You can not use variables in the header. I am not sure why right now.
+3. All the src-blocks need unique names
+4. I have only tested these header args  :session :results output drawer
+
+
+
+#+NAME: 51ca0c6c-af9a-4435-a459-871fb7cd752d
+#+BEGIN_SRC ipython :session :results output drawer
+print('hello')
+#+END_SRC
+
+#+RESULTS: 51ca0c6c-af9a-4435-a459-871fb7cd752d
+:RESULTS:
+hello
+
+:END:
+
+#+NAME: d085aec0-f228-4322-81fc-cf1c275512f8
+#+BEGIN_SRC ipython :session :results org output drawer
+import time
+time.sleep(5)
+print(5)
+#+END_SRC
+
+#+RESULTS: d085aec0-f228-4322-81fc-cf1c275512f8
+:RESULTS:
+5
+
+:END:
+
+
+#+NAME: faf0a071-3708-436a-b1cd-4cf8a2feab93
+#+BEGIN_SRC ipython :session :results output drawer
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+plt.plot([1,2,4,8,16])
+#+END_SRC
+
+#+RESULTS: faf0a071-3708-436a-b1cd-4cf8a2feab93
+:RESULTS:
+
+[[file:ipython-inline-images/ob-ipython-84ecc798c53fec906071673d2598b532.png]]
+:END:
+
+
+
+
+#+NAME: 7436b2db-c37e-4042-bedd-14d8c9e00adf
+#+BEGIN_SRC ipython :session :results output drawer
+try:
+    raise Exception
+except:
+    pass
+#+END_SRC
+
+#+RESULTS: 7436b2db-c37e-4042-bedd-14d8c9e00adf
+:RESULTS:
+
+
+:END:
+
+* Limitations
+
+You cannot use ipython blocks as variables
