@@ -305,48 +305,48 @@ A callback function replaces the results."
   "Execute the block at point asynchronously."
   (interactive)
   (when (and (org-in-src-block-p)
-	     (string= "python" (first (org-babel-get-src-block-info)))))
-  (let* ((name (org-babel-get-name-create))
-	 (body (org-element-property :value (org-element-context)))
-	 (params (third (org-babel-get-src-block-info)))
-	 (file (cdr (assoc :file params)))
-	 (session (cdr (assoc :session params)))
-	 (results (cdr (assoc :results params)))
-	 (result-type (cdr (assoc :result-type params))))
-    (org-babel-ipython-initiate-session session params)
+	     (string= "ipython" (first (org-babel-get-src-block-info))))
+    (let* ((name (org-babel-get-name-create))
+	   (body (org-element-property :value (org-element-context)))
+	   (params (third (org-babel-get-src-block-info)))
+	   (file (cdr (assoc :file params)))
+	   (session (cdr (assoc :session params)))
+	   (results (cdr (assoc :results params)))
+	   (result-type (cdr (assoc :result-type params))))
+      (org-babel-ipython-initiate-session session params)
 
-    ;; Check the current results for inline images and delete the files.
-    (let ((location (org-babel-where-is-src-block-result))
-	  current-results)
-      (when location
-	(save-excursion
-	  (goto-char location)
-	  (when (looking-at (concat org-babel-result-regexp ".*$"))
-	    (setq current-results (buffer-substring-no-properties
-				   location
-				   (save-excursion
-				     (forward-line 1) (org-babel-result-end)))))))
-      (with-temp-buffer
-	(insert (or current-results ""))
-	(goto-char (point-min))
-	(while (re-search-forward
-		"\\[\\[file:\\(ipython-inline-images/ob-ipython-.*?\\)\\]\\]" nil t)
-	  (let ((f (match-string 1)))
-	    (when (file-exists-p f)
-	      (delete-file f))))))
+      ;; Check the current results for inline images and delete the files.
+      (let ((location (org-babel-where-is-src-block-result))
+	    current-results)
+	(when location
+	  (save-excursion
+	    (goto-char location)
+	    (when (looking-at (concat org-babel-result-regexp ".*$"))
+	      (setq current-results (buffer-substring-no-properties
+				     location
+				     (save-excursion
+				       (forward-line 1) (org-babel-result-end)))))))
+	(with-temp-buffer
+	  (insert (or current-results ""))
+	  (goto-char (point-min))
+	  (while (re-search-forward
+		  "\\[\\[file:\\(ipython-inline-images/ob-ipython-.*?\\)\\]\\]" nil t)
+	    (let ((f (match-string 1)))
+	      (when (file-exists-p f)
+		(delete-file f))))))
 
-    ;; Now we run the async
-    (org-babel-remove-result)
-    (org-babel-insert-result
-     (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type)
-     (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
+      ;; Now we run the async
+      (org-babel-remove-result)
+      (org-babel-insert-result
+       (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type)
+       (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
 
-    (add-to-list '*org-babel-async-ipython-queue* (cons (current-buffer) name) t)
+      (add-to-list '*org-babel-async-ipython-queue* (cons (current-buffer) name) t)
 
-    ;; It appears that the result of this call is put into the results at this point.
-    (or
-     (org-babel-async-ipython-process-queue)
-     (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type))))
+      ;; It appears that the result of this call is put into the results at this point.
+      (or
+       (org-babel-async-ipython-process-queue)
+       (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type)))))
 
 (add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-async:ipython)
 
