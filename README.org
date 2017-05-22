@@ -13,37 +13,67 @@ See the [[./scimax.org][manual]] for more details.
 * Installation
 
 ** Windows users
+
 Install git (http://git-scm.com/download/win). Open a git bash terminal. Run this command.
 
 #+BEGIN_SRC sh
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/jkitchin/scimax/master/install-scimax-win.sh)"
 #+END_SRC
 
-There is an emacs binary in this repository for Windows. You should be able to run the scimax.sh command to launch scimax now.
+There is an emacs 25.2 binary in this repository for Windows. You should be able to run the scimax.sh command to launch scimax now.
+
+*** Manual installation
+
+You can use your own emacs if you have one (version 25 or more is recommended). You still have to install Python and LaTeX if you will be using those.
+
+Clone the scimax repo where you want it.
+#+BEGIN_SRC sh
+git clone https://github.com/jkitchin/scimax.git
+#+END_SRC
+
+and launch emacs with:
+
+#+BEGIN_SRC sh
+emacs -q -l path/to/scimax/init.el
+#+END_SRC
+
+Alternatively, add scimax to your load path in your init file and just require what you want.
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "path/to/scimax")
+#+END_SRC
+
 
 ** Mac users
 
-Run the next command in your terminal in the location you want to install scimax. The command will make sure you have [[http://brew.sh][homebrew]], git, and emacs installed, and then will clone scimax and tell you how to use it. It will take some time to install. You need to install your own LaTeX and Python probably.
+Run the next command in your terminal in the location you want to install scimax. The command will make sure you have [[http://brew.sh][homebrew]], git, and emacs installed, and then will clone scimax and tell you how to use it. It will take some time to install. You need to install your own LaTeX and Python.
 
 #+BEGIN_SRC sh
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/jkitchin/scimax/master/install-scimax-mac.sh)"
 #+END_SRC
 
 *** Alternative manual installation of scimax for Mac users
+
 Alternatively, you can install [[http://brew.sh][homebrew]] yourself, install git from http://git-scm.com/download/mac, build your emacs like this:
 
 #+BEGIN_SRC sh
 brew install emacs --with-gnutls --with-imagemagick --with-librsvg --with-x11 --use-git-head --HEAD --with-cocoa
 #+END_SRC
 
+Alternatively, lately I have been using emacs-plus which claims to be faster for magit and has all those options enabled by default.
+
+#+BEGIN_SRC sh
+brew install emacs-plus
+#+END_SRC
+
 This got me:
-#+BEGIN_SRC emacs-lisp :result org drawer
+#+BEGIN_SRC emacs-lisp :result org drawer :export results
 (emacs-version)
 #+END_SRC
 
 #+RESULTS:
-: GNU Emacs 25.0.95.1 (x86_64-apple-darwin13.4.0, NS appkit-1265.21 Version 10.9.5 (Build 13F1603))
-:  of 2016-06-10
+: GNU Emacs 25.2.1 (x86_64-apple-darwin16.5.0, NS appkit-1504.82 Version 10.12.4 (Build 16E195))
+:  of 2017-04-25
 
 These days I am using [[https://www.continuum.io/downloads][Python3 from Continuum IO]] and MacTeX from http://www.tug.org/mactex.
 
