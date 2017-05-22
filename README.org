@@ -7,6 +7,7 @@ See the [[./scimax.org][manual]] for more details.
 
 #+BEGIN_HTML
 <a href="https://travis-ci.org/jkitchin/scimax"><img src="https://travis-ci.org/jkitchin/scimax.svg?branch=master"></a>
+<a href="https://ci.appveyor.com/project/jkitchin/scimax"><img src="https://ci.appveyor.com/api/projects/status/j5bvj8j4le1yvjsx?svg=true"></a>
 <a href='https://coveralls.io/github/jkitchin/scimax?branch=master'><img src='https://coveralls.io/repos/github/jkitchin/scimax/badge.svg?branch=master' alt='Coverage Status' /></a>
 #+END_HTML
 
