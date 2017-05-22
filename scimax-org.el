@@ -1691,10 +1691,10 @@ Use a prefix arg to get regular RET. "
 (define-minor-mode scimax-numbered-org-mode
   "Minor mode to number org headings."
   :init-value nil
-  (labels ((fl-noh (limit) (save-restriction
-			     (widen)
-			     (ov-clear 'numbered-heading)
-			     (scimax-overlay-numbered-headings))))
+  (cl-labels ((fl-noh (limit) (save-restriction
+				(widen)
+				(ov-clear 'numbered-heading)
+				(scimax-overlay-numbered-headings))))
 
     (if scimax-numbered-org-mode
 	(progn
