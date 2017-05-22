@@ -57,32 +57,37 @@
 
 
 ;; * ivy colors
+
+(defun ivy-color-candidates ()
+  "Get a list of candidates for `ivy-colors'."
+  (save-selected-window
+    (list-colors-display))
+  (with-current-buffer (get-buffer "*Colors*")
+    (prog1
+	(loop for line in (s-split "\n" (buffer-string))
+	      collect
+	      (append (list line)
+		      (mapcar 's-trim
+			      (mapcar 'substring-no-properties (s-split "  " line t)))))
+      (kill-buffer "*Colors*"))))
+
 (defun ivy-colors ()
   "List colors in ivy."
   (interactive)
-  (ivy-read "Color: "
-	    (progn
-	      (save-selected-window
-		(list-colors-display))
-	      (prog1
-		  (with-current-buffer (get-buffer "*Colors*")
-		    (mapcar (lambda (line)
-			      (append (list line) (s-split " " line t)))
-			    (s-split "\n" (buffer-string))))
-		(kill-buffer "*Colors*")))
+  (ivy-read "Color: " (ivy-color-candidates)
 	    :action
 	    '(1
-	      ("i" (lambda (line) 
-		     (insert (elt line 1)))
+	      ("i" (lambda (line)
+		     (insert (second line)))
 	       "Insert name")
 	      ("c" (lambda (line)
-		     (kill-new (car line)))
+		     (kill-new (second line)))
 	       "Copy name")
-	      ("h" (lambda (line) 
+	      ("h" (lambda (line)
 		     (insert (car (last line))))
 	       "Insert hex")
 	      ("r" (lambda (line) 
-		     (insert (format "%s" (color-name-to-rgb (elt line 1))))) 
+		     (insert (format "%s" (color-name-to-rgb (second line)))))
 	       "Insert RGB")
 	      
 	      ("m" (lambda (line) (message "%s" (cdr line)))))))
