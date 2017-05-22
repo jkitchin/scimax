@@ -55,6 +55,8 @@
 (let ((default-directory scimax-dir))
   (shell-command "git submodule update --init"))
 
+(set-language-environment "UTF-8")
+
 (require 'bootstrap)
 (require 'packages)
 
