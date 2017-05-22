@@ -1344,7 +1344,7 @@ Either at the beginning of a line, or after a sentence end."
   (define-global-abbrev "february" "February")
   (define-global-abbrev "march" "March")
   (define-global-abbrev "april" "April")
-  (define-global-abbrev "may" "May")
+  ;; (define-global-abbrev "may" "May")
   (define-global-abbrev "june" "June")
   (define-global-abbrev "july" "July")
   (define-global-abbrev "august" "August")
