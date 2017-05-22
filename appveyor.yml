@@ -1,0 +1,6 @@
+install:
+  - git submodule add https://github.com/jkitchin/emacs-win
+  - git submodule add -f https://github.com/jkitchin/scimax-win-elpa elpa
+  - git submodule init
+  - git submodule update
+  - start "" ".\emacs-win\bin\runemacs.exe" -l ".\init.el"
