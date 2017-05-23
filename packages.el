@@ -508,9 +508,9 @@
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-hydra
-  :ensure nil
-  :load-path scimax-dir)
+;; (use-package scimax-hydra
+;;   :ensure nil
+;;   :load-path scimax-dir)
 
 (use-package kitchingroup
   :ensure nil
