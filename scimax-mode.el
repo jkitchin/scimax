@@ -59,7 +59,7 @@ one and open it."
 (define-prefix-command 'scimax-mode-map)
 (easy-menu-define my-menu scimax-mode-map "My own menu"
   '("Scimax"
-    [(format "Update (-%s)" (kg-get-num-incoming-changes)) kg-update t]
+    ;; [(format "Update (-%s)" (kg-get-num-incoming-changes)) kg-update t]
     ("email"
      ["email region" email-region t]
      ["email org-mode heading" email-heading t]
