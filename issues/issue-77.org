@@ -8,16 +8,22 @@ This involves a rewrite of the async ipython code. The goals are:
 - [X] Provide clickable links to cancel a cell.
 
 It seems to work. The following limitations are known.
-1. you cannot use the output of one cell as input to another. For Ipython this does not make sense anyway as it runs in a session and the results are available in memory in the kernel.
-2. You can not use variables in the header. I am not sure why right now.
-3. All the src-blocks need unique names
+1. You should probably not use var headers from other blocks without using :cache yes, and running them first. It seems to freeze otherwise.
+3. All the src-blocks need unique names. This is done automatically for unnamed cells. There is no check for uniqueness.
 4. I have only tested these header args  :session :results output drawer
 
+#+NAME: f26112a9-c544-460e-bacb-19e898dacd2f
+#+BEGIN_SRC sh :cache yes
+sleep 5 & echo "hello"
+#+END_SRC
+
+#+RESULTS[3ffc7bb5eb49377b78f62b3b282bfa9b98224d2f]: f26112a9-c544-460e-bacb-19e898dacd2f
+: hello
 
 
 #+NAME: 51ca0c6c-af9a-4435-a459-871fb7cd752d
-#+BEGIN_SRC ipython :session :results output drawer
-print('hello')
+#+BEGIN_SRC ipython :session :results output drawer :var data=f26112a9-c544-460e-bacb-19e898dacd2f
+print(data)
 #+END_SRC
 
 #+RESULTS: 51ca0c6c-af9a-4435-a459-871fb7cd752d

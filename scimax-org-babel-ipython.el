@@ -166,9 +166,10 @@ Returns an org-link to the file."
 
 (defun org-babel-get-session ()
   "Return current session.
-I wrote this because params returns none instead of nil."
+I wrote this because params returns none instead of nil. But in
+that case the session name appears to be default."
   (let ((session (cdr (assoc :session (third (org-babel-get-src-block-info))))))
-    (if (not (string= "none" session))
+    (if (and session (not (string= "none" session)))
 	session
       "default")))
 
@@ -233,17 +234,29 @@ I wrote this because params returns none instead of nil."
 	(with-current-buffer buffer
 	  (org-babel-goto-named-src-block name)
 	  (setq *org-babel-async-ipython-running-cell* cell)
-	  (let ((rep))
+	  (let* ((rep)
+		 (params (third (org-babel-get-src-block-info)))
+		 (session (org-babel-get-session))
+		 (body (org-babel-expand-body:generic
+			(s-join
+			 "\n"
+			 (append
+			  (org-babel-variable-assignments:python
+			   (third (org-babel-get-src-block-info)))
+			  (list
+			   (encode-coding-string
+			    (org-element-property :value (org-element-context)) 'utf-8))))
+			params)))
+	    (ob-ipython--execute-request-asynchronously
+	     body session)
 	    (save-excursion
-	      (re-search-forward (format "\\[\\[async-queued: %s \\(output\\|value\\)\\]\\]" name nil t))
+	      (re-search-forward (format
+				  "\\[\\[async-queued: %s \\(output\\|value\\)\\]\\]"
+				  name nil t))
 	      (setq rep (format "[[async-running: %s %s]]" name (match-string 1)))
 	      (replace-match rep))
-	    (ob-ipython--execute-request-asynchronously
-	     (org-babel-expand-body:generic
-	      (encode-coding-string (org-element-property :value (org-element-context)) 'utf-8)
-	      (org-babel-variable-assignments:python (third (org-babel-get-src-block-info))))
-	     (ob-ipython--normalize-session
-	      (cdr (assoc :session (third (org-babel-get-src-block-info))))))
+	    (ob-ipython--normalize-session
+	     (cdr (assoc :session (third (org-babel-get-src-block-info)))))
 	    rep)))))
 
 
@@ -301,15 +314,13 @@ A callback function replaces the results."
      'ob-ipython--async-callback)))
 
 
-(defun org-babel-execute-async:ipython (&optional body params)
+(defun org-babel-execute-async:ipython ()
   "Execute the block at point asynchronously."
   (interactive)
   (when (and (org-in-src-block-p)
 	     (string= "ipython" (first (org-babel-get-src-block-info))))
-    (let* ((name (org-babel-get-name-create))
-	   (body (org-element-property :value (org-element-context)))
-	   (params (third (org-babel-get-src-block-info)))
-	   (file (cdr (assoc :file params)))
+    (let* ((name (org-babel-get-name-create)) 
+	   (params (third (org-babel-get-src-block-info))) 
 	   (session (cdr (assoc :session params)))
 	   (results (cdr (assoc :results params)))
 	   (result-type (cdr (assoc :result-type params))))
