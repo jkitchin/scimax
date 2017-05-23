@@ -92,3 +92,39 @@ sqrt(x**2 + y)
 :RESULTS:
 [[file:ipython-inline-images/ob-ipython-b5a252158ecffd27ade3a245b3d4f3d9.png]]
 :END:
+
+
+* Issue	79
+
+#+NAME: 1aae8a15-36ee-495e-b1b8-e8b46319adfb
+#+BEGIN_SRC ipython :session :results output drawer :ob-ipython-results text/plain
+import pandas as pd
+import numpy as np
+import datetime as dt
+
+def makeSim(nHosps, nPatients):
+    df = pd.DataFrame()
+    df['patientid'] = range(nPatients)
+    df['hospid'] = np.random.randint(0, nHosps, nPatients)
+    df['sex'] = np.random.randint(0, 2, nPatients)
+    df['age'] = np.random.normal(65,18, nPatients)
+    df['race'] = np.random.randint(0, 4, nPatients)
+    df['cptCode'] = np.random.randint(1, 100, nPatients)
+    df['rdm30d'] = np.random.uniform(0, 1, nPatients) < 0.1
+    df['mort30d'] = np.random.uniform(0, 1, nPatients) < 0.2
+    df['los'] = np.random.normal(8, 2, nPatients)
+    return df
+
+discharges = makeSim(50, 10000)
+discharges.head()
+#+END_SRC
+
+#+RESULTS: 1aae8a15-36ee-495e-b1b8-e8b46319adfb
+:RESULTS:
+   patientid  hospid  sex        age  race  cptCode rdm30d mort30d        los
+0          0      36    1  83.313252     2        2  False   False   9.306841
+1          1      27    1  47.986305     1       59   True   False   7.620877
+2          2       5    0  58.766973     2       70  False   False   4.488000
+3          3      26    1  87.605188     2        2  False   False  10.660902
+4          4      43    1  63.589897     2        8  False   False   7.844648
+:END:
