@@ -363,6 +363,14 @@
 	bibtex-autokey-titleword-length 5)
   (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
 
+(use-package org-ref-scopus
+  :ensure nil
+  :load-path (lambda () (expand-file-name "org-ref " scimax-dir)))
+
+(use-package org-ref-wos
+  :ensure nil
+  :load-path (lambda () (expand-file-name "org-ref " scimax-dir)))
+
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
