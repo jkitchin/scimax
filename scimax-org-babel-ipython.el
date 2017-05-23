@@ -123,24 +123,43 @@ Returns an org-link to the file."
     (ob-ipython--write-base64-string tfile b64-string)
     link))
 
-(defun ob-ipython--format-result (result)
-  "Format a RESULT from an ipython cell."
-  (format "\n%s"
-          (mapconcat 'identity
-                     (loop for res in result
-                           ;; if (and (eq 'text/plain (car res)) (cdr res))
-                           ;; collect (cdr res)
-                           if (eq 'text/html (car res))
-                           collect (format
-                                    "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
-                                    (cdr res))
-                           if (eq 'text/latex (car res))
-                           collect (format
-                                    "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
-                                    (cdr res))
-                           if (eq 'image/png (car res))
-                           collect (ob-ipython-inline-image (cdr res)))
-                     "\n")))
+
+(defun ob-ipython--format-result (result result-type)
+  "Format a RESULT from an ipython cell.
+Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-results"
+  (if result-type
+      (let ((res (cdr (assoc (intern result-type) result))))
+	(cond
+	 ((string= result-type "text/plain")
+	  res)
+	 ((string= result-type "text/html")
+	  (format
+	   "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
+	   res))
+	 ((string= result-type "text/latex")
+	  (format
+	   "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
+	   res))
+	 ((string= result-type "image/png")
+	  (ob-ipython-inline-image res))
+	 (t res)))
+    ;; no format specified. See what we get. Plain preferred.
+    (format "\n%s"
+	    (mapconcat 'identity
+		       (loop for res in result
+			     if (and (eq 'text/plain (car res)) (cdr res))
+			     collect (cdr res)
+			     if (eq 'text/html (car res))
+			     collect (format
+				      "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
+				      (cdr res))
+			     if (eq 'text/latex (car res))
+			     collect (format
+				      "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
+				      (cdr res))
+			     if (eq 'image/png (car res))
+			     collect (ob-ipython-inline-image (cdr res)))
+		       "\n"))))
 
 
 ;;* Asynchronous ipython
@@ -276,12 +295,14 @@ It replaces the output in the results."
 				    json))))
 	 (result (cdr (assoc :result ret)))
 	 (output (cdr (assoc :output ret)))
+	 params
 	 (current-cell *org-babel-async-ipython-running-cell*)
 	 (name (cdr current-cell))
 	 result-type)
     (with-current-buffer (car current-cell)
       (save-excursion
 	(org-babel-goto-named-src-block name)
+	(setq params (third (org-babel-get-src-block-info)))
 	(re-search-forward (format "\\[\\[async-running: %s \\(output\\|value\\)\\]\\]" name))
 	(setq result-type (match-string 1))
 	(replace-match "")
@@ -290,7 +311,7 @@ It replaces the output in the results."
 	  (insert
 	   (concat
 	    (s-trim output)
-	    (ob-ipython--format-result result))))
+	    (ob-ipython--format-result result (cdr (assoc :ob-ipython-results params))))))
 	 ((string= "value" result-type)
 	  (insert
 	   (cdr (assoc 'text/plain result)))))

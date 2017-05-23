@@ -1,0 +1,94 @@
+Trying sympy in org.
+#+NAME: b40c89ca-9952-43a4-983c-336f01b5d6cb
+#+BEGIN_SRC ipython :session :results output drawer
+from sympy import *
+# commenting out init_printing() results in no output
+init_printing()
+#+END_SRC
+
+#+RESULTS: b40c89ca-9952-43a4-983c-336f01b5d6cb
+:RESULTS:
+
+
+:END:
+
+#+NAME: e631a1a0-3f4d-49d9-9888-f4f53de62884
+#+BEGIN_SRC ipython :session :results output drawer :ob-ipython-results text/plain
+3+2
+#+END_SRC
+
+#+RESULTS: e631a1a0-3f4d-49d9-9888-f4f53de62884
+:RESULTS:
+\[ 5 \]
+:END:
+
+#+NAME: bb292d17-2879-4607-9b48-c2a9f1931f4a
+#+BEGIN_SRC ipython :session :results output drawer :ob-ipython-results text/latex
+3+2
+#+END_SRC
+
+#+RESULTS: bb292d17-2879-4607-9b48-c2a9f1931f4a
+:RESULTS:
+#+BEGIN_EXPORT latex
+$$5$$
+#+END_EXPORT
+
+:END:
+
+
+I am still not sure why this image is so large. A way around this might be with an #_attr_org, but I would like to avoid that if possible.
+
+#+NAME: 69a10fa0-6e4c-4efa-b720-96b7fc86a29b
+#+BEGIN_SRC ipython :session :results output drawer :ob-ipython-results image/png
+3+2
+#+END_SRC
+
+#+RESULTS: 69a10fa0-6e4c-4efa-b720-96b7fc86a29b
+:RESULTS:
+[[file:ipython-inline-images/ob-ipython-7e1abb69fd20d3cc6fa6da490e4c5c00.png]]
+:END:
+
+#+BEGIN_SRC ipython :session :results output drawer
+var('x y')
+x**2 + y
+#+END_SRC
+
+
+Using sympy in org mode.
+
+#+BEGIN_SRC ipython :session :results verbatim drawer
+from sympy import *
+init_printing()
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+:END:
+
+#+NAME: 4583a673-c6a6-4fb2-9497-5c37f8363dde
+#+BEGIN_SRC ipython :session :results verbatim drawer :exports none
+def myprinter(s):
+    return "\[ " + latex(s) + " \]"
+init_printing(pretty_printer=myprinter)
+#+END_SRC
+
+#+RESULTS: 4583a673-c6a6-4fb2-9497-5c37f8363dde
+:RESULTS:
+
+
+:END:
+
+#+RESULTS:
+:RESULTS:
+:END:
+
+#+NAME: a88da84a-0ccd-429f-8084-67c6b16fc2b3
+#+BEGIN_SRC ipython :session :results verbatim drawer :exports both :ob-ipython-results image/png
+var('x y')
+sqrt(x**2 + y)
+#+END_SRC
+
+#+RESULTS: a88da84a-0ccd-429f-8084-67c6b16fc2b3
+:RESULTS:
+[[file:ipython-inline-images/ob-ipython-b5a252158ecffd27ade3a245b3d4f3d9.png]]
+:END:
