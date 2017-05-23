@@ -3,6 +3,7 @@ install:
   - git submodule add -f https://github.com/jkitchin/scimax-win-elpa elpa
   - git submodule init
   - git submodule update
-  - C:\projects\scimax\emacs-win\bin\emacs.exe -batch -l init.el --eval="(message \"Done.\")"
 
-build: off
+
+build:
+  - C:\projects\scimax\emacs-win\bin\emacs.exe -batch -l init.el 
