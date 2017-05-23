@@ -270,7 +270,7 @@ Switch                  ^Kill                Split        Misc
 ;;** drag
 
 
-(defhydra scimax-drag (color :red :inherit (scimax-base/heads)  :hint nil)
+(defhydra scimax-drag (:color red :inherit (scimax-base/heads)  :hint nil)
   ("<left>" drag-stuff-left :color red)
   ("<right>" drag-stuff-right :color red)
   ("<up>" drag-stuff-up :color red)
