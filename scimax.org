@@ -988,18 +988,26 @@ While in a project, you may want to try:
 
 * Programming
 ** Python
-- scimpy is setup with `elpy-mode'.
+- scimax is setup with `elpy-mode'.
 - `pydoc' provides nice, hyperlinked documentation for python.
 
 ** Asynchronous Python
 You can run python blocks asynchronously with M-x `org-babel-async-execute:python' with the cursor in a code block. This will allow you to keep typing, and show you a buffer with the progress of your code block. When it is done, the results will be inserted into the buffer where it belongs when the job is done. A temporary hash mark will go in the results. 
 
+You can make this the default behavior by adding this to your init file:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-async-execute:python)
+#+END_SRC
+
+
 ** Jupyter/Ipython
+
 If you like sessions in Python, the ob-ipython library is better than the default ob-python in org-mode.
 
 Pygments doesn't support ipython out of the box for some reason, which is a problem if you want to export your src block to LaTeX. scimax fixes this for you and automatically installs this if you don't already have it.
 
-Here is a protypical Ipython src block with a line magic.
+ob-ipython allows you to use Ipython magic commands in your src blocks. Here is a protypical Ipython src block with a line magic.
 
 #+BEGIN_SRC ipython :session
 %time print("hello world")
@@ -1018,12 +1026,6 @@ And a block with cell magic.
 7
 #+END_SRC
 
-#+RESULTS:
-: 100000000 loops, best of 3: 13.5 ns per loop
-:RESULTS:
-42
-:END:
-
 - `ob-ipython-inspect' seems to be broken
 
 - `org-babel-switch-to-session' will open the IPython REPL.
@@ -1031,7 +1033,7 @@ And a block with cell magic.
 M-x `ob-ipython-interrupt-kernel'
 M-x `ob-ipython-kill-kernel'
 
-*** Scimax enhancement to ob-ipython
+*** Scimax enhancements to ob-ipython
 
 We have made a few improvements to ob-ipython. Inline images are supported now similar to how they are supported in the Jupyter notebook. You specify the %matplotlib inline magic, and then plots will appear "inline" along with any output from your cell block. The plots are saved in a directory ipython-inline-images in filenames derived from and md5 hash of the image. You can have more than one image, and you also get the output from your block, similar to the way the Jupyter notebook behaves.
 
@@ -1130,8 +1132,9 @@ As with the Jupyter notebook, only the last returned cell is rendered.
 
 **** Asynchronous evaluation
 
- We finally have asynchronous execution of ipython blocks. This allows you to run a block, and keep working in Emacs. A temporary string is inserted into the results which is replaced when the code is done running. To get this behavior, you need to set ":async t" in the header, and then run is: `org-babel-execute-async:ipython'. This command will make a clickable link to interrupt the kernel. The regular C-c C-c also works, but the temporary string is not clickable. I experienced some difficulties with kernel interruptions; after doing it, it seems like I had to kill all the related processes to get working again. I am not sure this is handled cleanly in ob-ipython.
+We finally have asynchronous execution of ipython blocks. This allows you to run a block, and keep working in Emacs. A temporary string is inserted into the results which is replaced when the code is done running. This command will make a clickable link to interrupt the kernel, or cancel the cell running. This will put names on every src block if they are not already named.
 
+#+NAME: bb21dabd-acb3-46bd-b8d8-ab174834fc37
 #+BEGIN_SRC ipython :session :results output drawer 
 import time
 time.sleep(5)
@@ -1150,14 +1153,17 @@ plt.ylabel('y')
 plt.title('Decaying spiral')
 #+END_SRC
 
-#+RESULTS:
+#+RESULTS: bb21dabd-acb3-46bd-b8d8-ab174834fc37
 :RESULTS:
-[[file:ipython-inline-images/ob-ipython-2437ed56a19c7f7a4a6e19616e50e491.png]]
+
+[[file:ipython-inline-images/ob-ipython-f7122a4c0570fc3bf4ef580b97d5c1ae.png]]
 :END:
+
+You can run all the blocks asynchronously with `org-babel-execute-ipython-buffer-async'. You can clear the queue `org-babel-async-ipython-clear-queue'.
 
 
 *** Export org to ipynb
-Finally, we can export org-mode files to Jupyter notebooks with the ox-ipynb library. If you load the library, there is a new export option in the export menu. Or you can use  `ox-ipynb-export-to-ipynb-notebook-and-open'.
+Finally, we can export org-mode files to Jupyter notebooks with the ox-ipynb library. If you load the library, there is a new export option in the export menu with the letter "n". Or you can use  `ox-ipynb-export-to-ipynb-file-and-open'.
 
 
 *** Using other kernels - hy
@@ -1179,6 +1185,7 @@ scimax provides the jupyter-hy src block to run hylang in src blocks. The requir
 
 ** Emacs-lisp
 - `lispy-mode' is just amazing.
+- `scimax-org-eldoc' will generate documentation on elisp libraries in an org-mode format.
 
 * RSS feeds
 
@@ -1217,28 +1224,6 @@ In the list of entries you can type:
 
 `explorer' and `finder' will open a Windows Explorer or Mac Finder window in the current working directory.
 
-** Hotspots
-`hotspots' is a helm command that provides easy access to a variety of locations including user-defined commands, locations, org-agenda files, recent files, and bookmarks.
-
-You customize `scimax-user-hotspot-commands' and `scimax-user-hotspot-locations'.
-
-I bind this to a key like "f9" and set it up to easily open my mail, calendar and other things. For example, here is part of my setup.
-
-#+BEGIN_SRC emacs-lisp
-(setq scimax-user-hotspot-commands
-      '(("Mail" . (lambda ()
-		    (browse-url "https://www.google.com/gmail")))
-	("Calendar" . (lambda ()
-			(browse-url "https://www.google.com/calendar/render")))
-	("Contacts" . ivy-contacts)
-	("RSS" . elfeed)
-	("Twitter" . twit)
-	("Agenda" . (lambda () (org-agenda "" "w"))) 
-	("CV" . (lambda ()
-		  (org-open-file
-		   "/Users/jkitchin/Dropbox/CMU/CV and bios/kitchin_cv.docx" '(16))))))
-#+END_SRC
-
 ** words
 
 Try out `words-hydra/body' on a selection or word. I bound it to \\[words-hydra/body].
@@ -1250,6 +1235,22 @@ This command: `ore' tells you about the org-element your point is on. It gives s
 ** org-show
 
 This is a simple library to make simple presentations in org-mode. See `org-show-help' for an example use.
+
+** org-db
+
+`org-db' is an org-mode database. When it is active every org-mode file you visit will be indexed into a sqlite database. In each file, each headline with its title, tags and properties are stored, and every link in each file is stored.
+
+This becomes useful because you can then search all of your org-files and jump to different locations.
+
+- `org-db-open-heading' :: Jump to a heading
+- `org-db-contacts' :: jump to a heading with an email property
+- `org-db-open-file' :: open a file in the db
+- `org-db-open-recent-file' :: open a list of recent files from the db
+- `org-db-locations' :: open a heading with an address property
+
+You can add a lot of files with `org-db-index'.
+
+When active, every time you save an org-file it will be added to a queue to be indexed during idle time.
 
 * External Packages
 
@@ -1397,31 +1398,6 @@ Here are some additional actions we define for `counsel-find-file'.
 | l   | relative org link    |
 | L   | absolute org link    |
 | r   | rename file          |
-* Navigation - navy
-  :PROPERTIES:
-  :ID:       845FEBB4-A733-4EF2-8329-4B7C2AF2767B
-  :END:
-
-`navy' opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
-
-| j | left  |
-| l | right |
-| i | up    |
-| k | down  |
-
-The default mode is character mode, and you can change the mode with single characters, include a word mode (w), sentence (s), paragraph (p), page (g), line (n) and sexp (x) mode. These modes allow you navigate forward and backward by those elements. They also define binding
-
-I have tried to make the following keys consistent:
-
-| ; | avy-goto-char-2 |
-| ' | avy-goto-line   |
-| < | goto point-min  |
-| > | goto point-max  |
-
-There are some useful bindings in `navy' also.
-| r | counsel-git-grep               |
-| o | helm-org-agenda-files-headings |
-| a | swiper-all                     |
 * scimax-hydras
 
 Scimax uses a central hydra to launch a key-driven menu of commonly used commands.
@@ -1547,6 +1523,56 @@ If you really want to define your own keys, see `define-key' and `global-set-key
 
 Make yourself some notes in org-mode using `emacs-keybinding-command-tooltip-mode'.
 
+
+* Archive
+** Navigation - navy
+   :PROPERTIES:
+   :ID:       845FEBB4-A733-4EF2-8329-4B7C2AF2767B
+   :END:
+
+ `navy' opens a hydra for navigation. The following keys are bound to commands that do something in the following senses
+
+ | j | left  |
+ | l | right |
+ | i | up    |
+ | k | down  |
+
+ The default mode is character mode, and you can change the mode with single characters, include a word mode (w), sentence (s), paragraph (p), page (g), line (n) and sexp (x) mode. These modes allow you navigate forward and backward by those elements. They also define binding
+
+ I have tried to make the following keys consistent:
+
+ | ; | avy-goto-char-2 |
+ | ' | avy-goto-line   |
+ | < | goto point-min  |
+ | > | goto point-max  |
+
+ There are some useful bindings in `navy' also.
+ | r | counsel-git-grep               |
+ | o | helm-org-agenda-files-headings |
+ | a | swiper-all                     |
+
+** Hotspots
+
+`hotspots' is a helm command that provides easy access to a variety of locations including user-defined commands, locations, org-agenda files, recent files, and bookmarks.
+
+You customize `scimax-user-hotspot-commands' and `scimax-user-hotspot-locations'.
+
+I bind this to a key like "f9" and set it up to easily open my mail, calendar and other things. For example, here is part of my setup.
+
+#+BEGIN_SRC emacs-lisp
+(setq scimax-user-hotspot-commands
+      '(("Mail" . (lambda ()
+		    (browse-url "https://www.google.com/gmail")))
+	("Calendar" . (lambda ()
+			(browse-url "https://www.google.com/calendar/render")))
+	("Contacts" . ivy-contacts)
+	("RSS" . elfeed)
+	("Twitter" . twit)
+	("Agenda" . (lambda () (org-agenda "" "w")))
+	("CV" . (lambda ()
+		  (org-open-file
+		   "/Users/jkitchin/Dropbox/CMU/CV and bios/kitchin_cv.docx" '(16))))))
+#+END_SRC
 
 * Local Variables                                                  :noexport:
 
