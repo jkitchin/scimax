@@ -19,39 +19,58 @@ init_printing()
 
 #+RESULTS: e631a1a0-3f4d-49d9-9888-f4f53de62884
 :RESULTS:
-\[ 5 \]
+5
 :END:
 
 #+NAME: bb292d17-2879-4607-9b48-c2a9f1931f4a
-#+BEGIN_SRC ipython :session :results output drawer :ob-ipython-results text/latex
+#+BEGIN_SRC ipython :session :results output drawer :ob-ipython-results image/png
 3+2
 #+END_SRC
 
 #+RESULTS: bb292d17-2879-4607-9b48-c2a9f1931f4a
 :RESULTS:
-#+BEGIN_EXPORT latex
-$$5$$
-#+END_EXPORT
-
+[[file:ipython-inline-images/ob-ipython-7e1abb69fd20d3cc6fa6da490e4c5c00.png]]
 :END:
 
 
-I am still not sure why this image is so large. A way around this might be with an #_attr_org, but I would like to avoid that if possible.
+You need this setting to get normal sized images.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-image-actual-width t)
+#+END_SRC
+
+#+RESULTS:
+: t
 
 #+NAME: 69a10fa0-6e4c-4efa-b720-96b7fc86a29b
 #+BEGIN_SRC ipython :session :results output drawer :ob-ipython-results image/png
-3+2
+3+22
 #+END_SRC
 
 #+RESULTS: 69a10fa0-6e4c-4efa-b720-96b7fc86a29b
 :RESULTS:
-[[file:ipython-inline-images/ob-ipython-7e1abb69fd20d3cc6fa6da490e4c5c00.png]]
+[[file:ipython-inline-images/ob-ipython-d6cd6d978f5c09a4a4dbc158b307bc9a.png]]
 :END:
 
-#+BEGIN_SRC ipython :session :results output drawer
+
+#+BEGIN_SRC emacs-lisp
+(list *org-babel-async-ipython-running-cell* *org-babel-async-ipython-queue*)
+#+END_SRC
+
+#+RESULTS:
+
+
+
+#+NAME: 77b5b6fa-191b-45c0-be5b-d392afcd758a
+#+BEGIN_SRC ipython :session :results output drawer :ob-ipython-results image/png
 var('x y')
 x**2 + y
 #+END_SRC
+
+#+RESULTS: 77b5b6fa-191b-45c0-be5b-d392afcd758a
+:RESULTS:
+[[file:ipython-inline-images/ob-ipython-da6fb3a34919a4f694cfaae45b6f0868.png]]
+:END:
 
 
 Using sympy in org mode.
