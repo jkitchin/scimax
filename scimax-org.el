@@ -309,7 +309,7 @@ is positive, move after, and if negative, move before."
 (setq org-startup-with-inline-images "inlineimages")
 
 ;; default width
-(setq org-image-actual-width '(600))
+(setq org-image-actual-width t)
 
 (add-hook 'org-babel-after-execute-hook
 	  'org-display-inline-images)
@@ -1062,6 +1062,7 @@ Use a prefix arg FONTIFY for colored headlines."
   "Function that takes a filename and resize argument and returns
  a new filename pointing to the resized image.")
 
+
 (defun org-inline-image-resize (fname resize-options)
   "Resize FNAME with RESIZE-OPTIONS.
 RESIZE-OPTIONS are passed to \"mogrify resized-fname -resize resize-options\".
@@ -1092,6 +1093,7 @@ See http://www.imagemagick.org/Usage/resize/#resize for more options."
 	(copy-file fname resized-fname)
 	(shell-command cmd))
       resized-fname)))
+
 
 ;; this is copied and modified from org.el
 (defun org-display-inline-images (&optional include-linked refresh beg end)
@@ -1172,7 +1174,7 @@ boundaries."
 		   (if (and (car-safe old) refresh)
 		       (image-refresh (overlay-get (cdr old) 'display))
 		     
-		     (when org-inline-image-resize-function
+		     (when (and width org-inline-image-resize-function)
 		       (setq file (funcall  org-inline-image-resize-function file width)
 			     width nil))
 		     (let ((image (create-image file
