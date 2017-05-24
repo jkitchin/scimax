@@ -47,8 +47,10 @@
 (use-package avy)
 
 
-(use-package tex
-  :ensure auctex)
+;; May 24, 2017: this seems to be causing emacs 25.2 to be crashing on my linux box.
+(unless (eq system-type 'gnu/linux)
+  (use-package tex
+    :ensure auctex))
 
 
 ;; Make cursor more visible when you move a long distance
