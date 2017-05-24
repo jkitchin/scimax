@@ -445,7 +445,15 @@ A callback function replaces the results."
        (org-babel-async-ipython-process-queue)
        (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type)))))
 
-(add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-async:ipython)
+
+(defun scimax-execute-ipython-block ()
+  (when (and (org-in-src-block-p)
+	     (string= "ipython" (first (org-babel-get-src-block-info))))
+    (if org-babel-async-ipython
+	(org-babel-execute-async:ipython)
+      (org-babel-execute-src-block))))
+
+(add-to-list 'org-ctrl-c-ctrl-c-hook 'scimax-execute-ipython-block)
 
 (provide 'scimax-org-babel-ipython)
 
