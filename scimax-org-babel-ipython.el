@@ -171,8 +171,63 @@ Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-r
 			     collect (ob-ipython-inline-image (cdr res)))
 		       "\n"))))
 
+;; * A better synchronous execute function
+(defun org-babel-execute:ipython (body params)
+  "Execute a block of IPython code with Babel.
+This function is called by `org-babel-execute-src-block'."
+  (let* ((file (cdr (assoc :file params)))
+         (session (cdr (assoc :session params)))
+	 (async (cdr (assoc :async params)))
+         (result-type (cdr (assoc :result-type params)))
+	 results)
+    (org-babel-ipython-initiate-session session params)
+
+    ;; Check the current results for inline images and delete the files.
+    (let ((location (org-babel-where-is-src-block-result))
+	  current-results)
+      (when location
+	(save-excursion
+	  (goto-char location)
+	  (when (looking-at (concat org-babel-result-regexp ".*$"))
+	    (setq results (buffer-substring-no-properties
+			   location
+			   (save-excursion
+			     (forward-line 1) (org-babel-result-end)))))))
+      (with-temp-buffer
+	(insert (or results ""))
+	(goto-char (point-min))
+	(while (re-search-forward
+		"\\[\\[file:\\(ipython-inline-images/ob-ipython-.*?\\)\\]\\]" nil t)
+	  (let ((f (match-string 1)))
+	    (when (file-exists-p f)
+	      (delete-file f))))))
+
+    (-when-let (ret (ob-ipython--eval
+		     (ob-ipython--execute-request
+		      (org-babel-expand-body:generic
+		       (encode-coding-string body 'utf-8)
+		       params (org-babel-variable-assignments:python params))
+		      (ob-ipython--normalize-session session))))
+      (let ((result (cdr (assoc :result ret)))
+	    (output (cdr (assoc :output ret))))
+	(if (eq result-type 'output)
+	    (concat
+	     output
+	     (ob-ipython--format-result result (cdr (assoc :ob-ipython-results params))))
+	  ;; The result here is a value. We should still get inline images though.
+	  (ob-ipython--create-stdout-buffer output)
+	  (concat
+	   (->> result (assoc 'text/plain) cdr)
+	   (ob-ipython--format-result result (cdr (assoc :ob-ipython-results params)))))))))
+
+
+
 
 ;;* Asynchronous ipython
+(defcustom org-babel-async-ipython t
+  "If non-nil run ipython asynchronously.")
+
+
 (defvar *org-babel-async-ipython-running-cell* nil
   "A cons cell (buffer . name) of the current cell.")
 
