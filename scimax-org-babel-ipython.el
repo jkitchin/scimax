@@ -221,6 +221,26 @@ This function is called by `org-babel-execute-src-block'."
 	   (ob-ipython--format-result result (cdr (assoc :ob-ipython-results params)))))))))
 
 
+;; I edited this to get the position relative to the beginning of the block
+(defun ob-ipython--inspect (buffer pos)
+  (let* ((code (with-current-buffer buffer
+                 (buffer-substring-no-properties (point-min) (point-max))))
+         (resp (ob-ipython--inspect-request code (- pos (point-min)) 0))
+         (status (ob-ipython--extract-status resp)))
+    (if (string= "ok" status)
+        (ob-ipython--extract-result resp)
+      (error (ob-ipython--extract-error resp)))))
+
+;; I added the narrow to block. It seems to work ok in the special edit window, and it also seems to work ok if we just narrow the block temporarily.
+(defun ob-ipython-inspect (buffer pos)
+  "Ask a kernel for documentation on the thing at POS in BUFFER."
+  (interactive (list (current-buffer) (point)))
+  (save-restriction
+    (org-narrow-to-block)
+    (-if-let (result (->> (ob-ipython--inspect buffer pos) (assoc 'text/plain) cdr))
+	(ob-ipython--create-inspect-buffer result)
+      (message "No documentation was found."))))
+
 
 
 ;;* Asynchronous ipython
@@ -235,6 +255,65 @@ This function is called by `org-babel-execute-src-block'."
 (defvar *org-babel-async-ipython-queue* '()
   "Queue of cons cells (buffer . name) for cells to run.")
 
+;; adapted from https://github.com/zacharyvoase/humanhash/blob/master/humanhash.py
+(defvar org-babel-src-block-words  '("ack" "alabama" "alanine" "alaska" "alpha" "angel" "apart" "april"
+				     "arizona" "arkansas" "artist" "asparagus" "aspen" "august" "autumn"
+				     "avocado" "bacon" "bakerloo" "batman" "beer" "berlin" "beryllium"
+				     "black" "blossom" "blue" "bluebird" "bravo" "bulldog" "burger"
+				     "butter" "california" "carbon" "cardinal" "carolina" "carpet" "cat"
+				     "ceiling" "charlie" "chicken" "coffee" "cola" "cold" "colorado"
+				     "comet" "connecticut" "crazy" "cup" "dakota" "december" "delaware"
+				     "delta" "diet" "don" "double" "early" "earth" "east" "echo"
+				     "edward" "eight" "eighteen" "eleven" "emma" "enemy" "equal"
+				     "failed" "fanta" "fifteen" "fillet" "finch" "fish" "five" "fix"
+				     "floor" "florida" "football" "four" "fourteen" "foxtrot" "freddie"
+				     "friend" "fruit" "gee" "georgia" "glucose" "golf" "green" "grey"
+				     "hamper" "happy" "harry" "hawaii" "helium" "high" "hot" "hotel"
+				     "hydrogen" "idaho" "illinois" "india" "indigo" "ink" "iowa"
+				     "island" "item" "jersey" "jig" "johnny" "juliet" "july" "jupiter"
+				     "kansas" "kentucky" "kilo" "king" "kitten" "lactose" "lake" "lamp"
+				     "lemon" "leopard" "lima" "lion" "lithium" "london" "louisiana"
+				     "low" "magazine" "magnesium" "maine" "mango" "march" "mars"
+				     "maryland" "massachusetts" "may" "mexico" "michigan" "mike"
+				     "minnesota" "mirror" "mississippi" "missouri" "mobile" "mockingbird"
+				     "monkey" "montana" "moon" "mountain" "muppet" "music" "nebraska"
+				     "neptune" "network" "nevada" "nine" "nineteen" "nitrogen" "north"
+				     "november" "nuts" "october" "ohio" "oklahoma" "one" "orange"
+				     "oranges" "oregon" "oscar" "oven" "oxygen" "papa" "paris" "pasta"
+				     "pennsylvania" "pip" "pizza" "pluto" "potato" "princess" "purple"
+				     "quebec" "queen" "quiet" "red" "river" "robert" "robin" "romeo"
+				     "rugby" "sad" "salami" "saturn" "september" "seven" "seventeen"
+				     "shade" "sierra" "single" "sink" "six" "sixteen" "skylark" "snake"
+				     "social" "sodium" "solar" "south" "spaghetti" "speaker" "spring"
+				     "stairway" "steak" "stream" "summer" "sweet" "table" "tango" "ten"
+				     "tennessee" "tennis" "texas" "thirteen" "three" "timing" "triple"
+				     "twelve" "twenty" "two" "uncle" "under" "uniform" "uranus" "utah"
+				     "vegan" "venus" "vermont" "victor" "video" "violet" "virginia"
+				     "washington" "west" "whiskey" "white" "william" "winner" "winter"
+				     "wisconsin" "wolfram" "wyoming" "xray" "yankee" "yellow" "zebra"
+				     "zulu")
+  "List of words to make readable names from.")
+
+
+(defcustom org-babel-ipython-name-length 4
+  "Number of words to use in generating a name.")
+
+
+(defun generate-human-readable-name ()
+  "Generate a human readable name for a src block."
+  (random t)
+  (let ((N (length org-babel-src-block-words)))
+    (s-join "-" (loop for i from 0 below org-babel-ipython-name-length  collect
+		      (elt org-babel-src-block-words (random N))))))
+
+
+(defvar org-babel-ipython-name-generator 'generate-human-readable-name
+  "Function to generate a name for a src block.
+The default is the human-readable name generator
+`generate-human-readable-name'. This will not be universally
+unique for all time, but is nicer looking in a single document.
+You might also like `org-id-uuid'.")
+
 
 (defun org-babel-get-name-create ()
   "Get the name of a src block or add a uuid as the name."
@@ -242,7 +321,7 @@ This function is called by `org-babel-execute-src-block'."
       name
     (save-excursion
       (let ((el (org-element-context))
-	    (id (org-id-uuid)))
+	    (id (funcall org-babel-ipython-name-generator)))
 	(goto-char (org-element-property :begin el))
 	(insert (format "#+NAME: %s\n" id))
 	id))))
