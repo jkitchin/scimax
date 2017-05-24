@@ -44,12 +44,12 @@ You need this setting to get normal sized images.
 
 #+NAME: 69a10fa0-6e4c-4efa-b720-96b7fc86a29b
 #+BEGIN_SRC ipython :session :results output drawer :ob-ipython-results image/png
-3+22
+3+2
 #+END_SRC
 
 #+RESULTS: 69a10fa0-6e4c-4efa-b720-96b7fc86a29b
 :RESULTS:
-[[file:ipython-inline-images/ob-ipython-d6cd6d978f5c09a4a4dbc158b307bc9a.png]]
+[[file:ipython-inline-images/ob-ipython-7e1abb69fd20d3cc6fa6da490e4c5c00.png]]
 :END:
 
 
