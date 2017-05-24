@@ -98,6 +98,16 @@ With a prefix BELOW move point to lower block."
 	(org-babel-execute-src-block)))))
 
 
+(defun org-babel-execute-ipython-buffer-to-point-async ()
+  "Execute all the ipython blocks in the buffer up to point asynchronously."
+  (interactive)
+  (org-block-map
+   (lambda ()
+     (when (string= (first (org-babel-get-src-block-info)) "ipython")
+       (org-babel-execute-async:ipython)))
+   (point-min)
+   (point)))
+
 (defun org-babel-execute-ipython-buffer-async ()
   "Execute all the ipython blocks in the buffer asynchronously."
   (interactive)
