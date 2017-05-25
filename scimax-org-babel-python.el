@@ -41,13 +41,6 @@
 
 (make-variable-buffer-local 'number-line-overlays)
 
-(defun number-line-clear ()
-  "Clear the numbered lines in a code block."
-  (mapc 'delete-overlay number-line-overlays)
-  (setq number-line-overlays '())
-  (remove-hook 'post-command-hook 'number-line-clear))
-
-
 (defun number-line-src-block ()
   "Add line numbers to an org src-block."
   (interactive)
