@@ -51,24 +51,55 @@
                         "\n"
                         (org-element-property :value src-block)))
                       1)))
-      (goto-char (org-element-property :begin src-block))
-      (re-search-forward (regexp-quote (org-element-property :value src-block)))
-      (goto-char (match-beginning 0))
+      ;; clear any existing overlays
+      (when number-line-overlays
+	(mapc 'delete-overlay
+	      number-line-overlays)
+	(setq number-line-overlays '()))
 
+      (goto-char (org-element-property :begin src-block))
+      ;; the beginning may be header, so we move forward to get the #+BEGIN
+      ;; line. Then jump one more to get in the code block
+      (while (not (looking-at "#\\+BEGIN"))
+	(forward-line))
+      (forward-line)
       (loop for i from 1 to nlines
             do
             (beginning-of-line)
             (let (ov)
-              (setq ov (make-overlay (point) (point)))
+              (setq ov (make-overlay (point)(point)))
               (overlay-put
 	       ov
 	       'before-string (propertize
 			       (format "%03s:" (number-to-string i))
-			       'font-lock-face '(:foreground "black" :background "gray80")))
+			       'font-lock-face '(:foreground "black" :background "gray80")
+			       'local-map (let ((map (make-sparse-keymap)))
+					    (define-key map [mouse-1]
+					      (lambda ()
+						(interactive)
+						(mapc 'delete-overlay
+						      number-line-overlays)
+						(setq number-line-overlays '())))
+					    map)))
+	      (overlay-put ov 'mouse-face 'highlight)
+	      (overlay-put ov 'help-echo "Click to remove")
+	      (overlay-put ov 'local-map (let ((map (make-sparse-keymap)))
+					   (define-key map [mouse-1]
+					     (lambda ()
+					       (interactive)
+					       (mapc 'delete-overlay
+						     number-line-overlays)
+					       (setq number-line-overlays '())))
+					   map))
               (add-to-list 'number-line-overlays ov))
-            (next-line))))
+            (next-line)))))
 
-  (add-hook 'post-command-hook 'number-line-clear))
+(add-hook 'org-ctrl-c-ctrl-c-hook (lambda ()
+				    (interactive)
+				    (when number-line-overlays
+				      (mapc 'delete-overlay
+					    number-line-overlays)
+				      (setq number-line-overlays '()))))
 
 
 ;; * Asynchronous python
