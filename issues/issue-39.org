@@ -168,3 +168,88 @@ f.diff(x)
 $$2 x \cos{\left (x^{2} + y \sqrt{z} \right )}$$
 #+END_EXPORT
 :END:
+
+
+#+BEGIN_SRC ipython :session :output verbatim drawer :ob-ipython-results text/html
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+df = pd.DataFrame(np.random.randn(6,4),index=pd.date_range('1/1/2000',periods=6, freq='1h'))
+df
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+BEGIN_EXPORT HTML
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2000-01-01 00:00:00</th>
+      <td>0.001790</td>
+      <td>-1.056677</td>
+      <td>-1.214705</td>
+      <td>0.396495</td>
+    </tr>
+    <tr>
+      <th>2000-01-01 01:00:00</th>
+      <td>0.073688</td>
+      <td>-0.629659</td>
+      <td>-0.724991</td>
+      <td>1.696606</td>
+    </tr>
+    <tr>
+      <th>2000-01-01 02:00:00</th>
+      <td>-0.191440</td>
+      <td>-1.042789</td>
+      <td>0.003063</td>
+      <td>0.153374</td>
+    </tr>
+    <tr>
+      <th>2000-01-01 03:00:00</th>
+      <td>-0.337717</td>
+      <td>-0.048725</td>
+      <td>-0.093275</td>
+      <td>-0.769789</td>
+    </tr>
+    <tr>
+      <th>2000-01-01 04:00:00</th>
+      <td>0.764575</td>
+      <td>-0.871875</td>
+      <td>-1.239146</td>
+      <td>-0.544874</td>
+    </tr>
+    <tr>
+      <th>2000-01-01 05:00:00</th>
+      <td>-0.037133</td>
+      <td>-0.480411</td>
+      <td>0.408816</td>
+      <td>0.209566</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+#+END_EXPORT
+:END:
+
+#+BEGIN_SRC ipython :session :results verbatim drawer :ob-ipython-result text/png
+df.plot(subplots=True, layout=(2,2), figsize=(10,10));
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+
+<matplotlib.figure.Figure at 0x1156654e0>
+[[file:ipython-inline-images/ob-ipython-514ae259bd3fb9791a1b7154f2449a08.png]]
+:END:
