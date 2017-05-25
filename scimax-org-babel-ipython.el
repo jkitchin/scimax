@@ -30,7 +30,7 @@ You need this to get syntax highlighting."
 	      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
-;; * Commands like the jupyter notebook
+;;* Commands like the jupyter notebook
 
 (defun org-babel-insert-block (&optional below)
   "Insert a src block above the current point.
@@ -89,7 +89,23 @@ With a prefix BELOW move point to lower block."
 (define-key org-mode-map (kbd "H--") #'org-babel-split-src-block)
 
 
-;; * Enhancements to ob-ipython
+;;* Enhancements to ob-ipython
+;; This allows unicode chars to be sent to the kernel
+;; https://github.com/jkitchin/scimax/issues/67
+(defun ob-ipython--execute-request (code name)
+  (let ((url-request-data (encode-coding-string code 'utf-8))
+        (url-request-method "POST"))
+    (with-current-buffer (url-retrieve-synchronously
+                          (format "http://%s:%d/execute/%s"
+                                  ob-ipython-driver-hostname
+                                  ob-ipython-driver-port
+                                  name))
+      (if (>= (url-http-parse-response) 400)
+          (ob-ipython--dump-error (buffer-string))
+        (goto-char url-http-end-of-headers)
+        (let ((json-array-type 'list))
+          (json-read))))))
+
 
 (defun ob-ipython-inline-image (b64-string)
   "Write the B64-STRING to a file.
@@ -141,7 +157,37 @@ Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-r
 			     collect (ob-ipython-inline-image (cdr res)))
 		       "\n"))))
 
-;; * A better synchronous execute function
+;;* A better synchronous execute function
+
+;; modified function to get better error feedback
+(defun ob-ipython--create-traceback-buffer (traceback)
+  (let* ((src (org-element-context))
+	 (buf (get-buffer-create "*ob-ipython-traceback*"))
+	 (curwin (current-window-configuration))
+	 N)
+    (with-current-buffer buf
+      (special-mode)
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (-each traceback
+          (lambda (line) (insert (format "%s\n" line))))
+        (ansi-color-apply-on-region (point-min) (point-max)))
+      (goto-char (point-min))
+      (re-search-forward "----> \\([0-9]+\\)")
+      (setq N (string-to-number (match-string 1)))
+      (local-set-key "q" `(lambda ()
+			    (interactive)
+			    (if (string= (buffer-name) "*ob-ipython-traceback*")
+				(progn
+				  (bury-buffer)
+				  (set-window-configuration ,curwin)
+				  (goto-char ,(org-element-property :begin src))
+				  (while (not (looking-at "#\\+BEGIN"))
+				    (forward-line))
+				  (forward-line ,N)
+				  (number-line-src-block))
+			      (bury-buffer)))))
+    (pop-to-buffer buf)))
 
 (defun org-babel-execute:ipython (body params)
   "Execute a block of IPython code with Babel.
@@ -189,10 +235,8 @@ This function is called by `org-babel-execute-src-block'."
 	      (cdr (assoc :ob-ipython-results params))))
 	  ;; The result here is a value. We should still get inline images though.
 	  (ob-ipython--create-stdout-buffer output)
-	  (concat
-	   (->> result (assoc 'text/plain) cdr)
-	   (ob-ipython--format-result
-	    result (cdr (assoc :ob-ipython-results params)))))))))
+	  (ob-ipython--format-result
+	   result (cdr (assoc :ob-ipython-results params))))))))
 
 
 (defun org-babel-execute-to-point ()
@@ -227,7 +271,7 @@ This function is called by `org-babel-execute-src-block'."
 	(ob-ipython--create-inspect-buffer result)
       (message "No documentation was found."))))
 
-(define-key org-mode-map (kbd "H-/") #'ob-ipython-inspect)
+(define-key org-mode-map (kbd "M-.") #'ob-ipython-inspect)
 
 
 ;;* Asynchronous ipython
@@ -556,7 +600,7 @@ A callback function replaces the results."
    (point-min)
    (point-max)))
 
-
+;;* The end
 (provide 'scimax-org-babel-ipython)
 
 ;;; scimax-org-babel-ipython.el ends here
