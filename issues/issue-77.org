@@ -79,4 +79,32 @@ except:
 
 * Limitations
 
-You cannot use ipython blocks as variables
+
+
+
+* some tests
+
+
+#+BEGIN_SRC emacs-lisp
+(setq org-babel-async-ipython t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+
+#+NAME: a6811557-72f3-4bef-b1f0-01fd734df509
+#+BEGIN_SRC ipython :session :results output drawer
+print(59)
+#+END_SRC
+
+#+RESULTS: a6811557-72f3-4bef-b1f0-01fd734df509
+:RESULTS:
+59
+
+:END:
+
+#+RESULTS:
+:RESULTS:
+59
+:END:

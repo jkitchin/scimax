@@ -147,3 +147,24 @@ discharges.head()
 3          3      26    1  87.605188     2        2  False   False  10.660902
 4          4      43    1  63.589897     2        8  False   False   7.844648
 :END:
+
+* More issue 39
+
+#+BEGIN_SRC ipython :session :results value verbatim drawer
+from sympy import *
+init_printing()
+var('x y z')
+f = sin(x**2 + y * sqrt(z))
+f.diff(x)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+
+       ⎛ 2       ⎞
+2⋅x⋅cos⎝x  + y⋅√z⎠
+[[file:ipython-inline-images/ob-ipython-6bcd3836ac1d16df501678604842cfa0.png]]
+#+BEGIN_EXPORT latex
+$$2 x \cos{\left (x^{2} + y \sqrt{z} \right )}$$
+#+END_EXPORT
+:END:
