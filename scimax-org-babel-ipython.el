@@ -498,64 +498,30 @@ that case the process that ipython uses appears to be default."
 			params)))
 	    (ob-ipython--execute-request-asynchronously
 	     body session)
-	    (save-excursion
-	      (re-search-forward (format
-				  "\\[\\[async-queued: %s \\(output\\|value\\)\\]\\]"
-				  name nil t))
-	      (setq rep (format "[[async-running: %s %s]]" name (match-string 1)))
-	      (replace-match rep))
+
+	    (org-babel-remove-result)
+	    (org-babel-insert-result
+	     running-link
+	     (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
 	    (ob-ipython--normalize-session
 	     (cdr (assoc :session (third (org-babel-get-src-block-info)))))
-	    rep)))))
+	    running-link)))
+    (ob-ipython-log "Cannot process a queue.
+    Running: %s
+    Queue: %s" *org-babel-async-ipython-running-cell* *org-babel-async-ipython-queue*)
+    nil))
 
 
-(defun ob-ipython--async-callback (status &rest args)
-  "Callback function for `ob-ipython--execute-request-asynchronously'.
-It replaces the output in the results." 
-  (let* ((ret (ob-ipython--eval (if (>= (url-http-parse-response) 400)
-				    (ob-ipython--dump-error (buffer-string))
-				  (goto-char url-http-end-of-headers)
-				  (let* ((json-array-type 'list)
-					 (json (json-read)))
-				    (when (string= "error" (cdr (assoc 'msg_type (elt json 0))))
-				      (with-current-buffer (car *org-babel-async-ipython-running-cell*)
-					(org-babel-goto-named-src-block (cdr *org-babel-async-ipython-running-cell*))
-					(org-babel-remove-result))
-				      (org-babel-async-ipython-clear-queue)) 
-				    json))))
-	 (result (cdr (assoc :result ret)))
-	 (output (cdr (assoc :output ret)))
-	 params
-	 (current-cell *org-babel-async-ipython-running-cell*)
-	 (name (cdr current-cell))
-	 result-type)
-    (with-current-buffer (car current-cell)
-      (save-excursion
-	(org-babel-goto-named-src-block name)
-	(setq params (third (org-babel-get-src-block-info)))
-	(re-search-forward (format "\\[\\[async-running: %s \\(output\\|value\\)\\]\\]" name))
-	(setq result-type (match-string 1))
-	(replace-match "")
-	(cond
-	 ((string= "output" result-type)
-	  (insert
-	   (concat
-	    (s-trim output)
-	    (ob-ipython--format-result result (cdr (assoc :ob-ipython-results params))))))
-	 ((string= "value" result-type)
-	  (insert
-	   (cdr (assoc 'text/plain result)))))
-	(org-redisplay-inline-images)))
-    (setq *org-babel-async-ipython-running-cell* nil)
-    ;; see if there is another thing in the queue.
-    (org-babel-async-ipython-process-queue)))
-
+;;** async execute functions
 
 (defun ob-ipython--execute-request-asynchronously (code name)
   "This function makes an asynchronous request.
+CODE is a string containing the code to execute.
+NAME is the name of the kernel, usually \"default\".
 A callback function replaces the results."
   (let ((url-request-data code)
         (url-request-method "POST"))
+    (ob-ipython-log "Running %S\non kernel %s" code name)
     (url-retrieve
      (format "http://%s:%d/execute/%s"
 	     ob-ipython-driver-hostname
@@ -565,16 +531,73 @@ A callback function replaces the results."
      'ob-ipython--async-callback)))
 
 
+(defun ob-ipython--async-callback (status &rest args)
+  "Callback function for `ob-ipython--execute-request-asynchronously'.
+It replaces the output in the results."
+  (ob-ipython-log "Entering callback for %s" *org-babel-async-ipython-running-cell*)
+  (let* ((ret (ob-ipython--eval (if (>= (url-http-parse-response) 400)
+				    (ob-ipython--dump-error (buffer-string))
+				  (goto-char url-http-end-of-headers)
+				  (let* ((json-array-type 'list)
+					 (json (json-read)))
+				    (when (string= "error"
+						   (cdr
+						    (assoc 'msg_type (elt json 0))))
+				      (with-current-buffer
+					  (car *org-babel-async-ipython-running-cell*)
+					(org-babel-goto-named-src-block
+					 (cdr *org-babel-async-ipython-running-cell*))
+					(org-babel-remove-result))
+				      (org-babel-async-ipython-clear-queue))
+				    json))))
+	 (result (cdr (assoc :result ret)))
+	 (output (cdr (assoc :output ret)))
+	 params
+	 (current-cell *org-babel-async-ipython-running-cell*)
+	 (name (cdr current-cell))
+	 (result-type))
+    (with-current-buffer (car current-cell)
+      (save-excursion
+	(org-babel-goto-named-src-block name)
+	(setq result-type (org-babel-src-block-get-property 'org-babel-ipython-result-type))
+	(org-babel-src-block-put-property 'org-babel-ipython-executed  t)
+	(ob-ipython-log "Got a result-type of %s\n return from the kernel:  %S" result-type ret)
+	(setq params (third (org-babel-get-src-block-info)))
+	(org-babel-remove-result)
+	(cond
+	 ((string= "output" result-type)
+	  (let ((res (concat
+		      output
+		      (ob-ipython--format-result
+		       result (cdr (assoc :ob-ipython-results params))))))
+	    (if (not (string= "" (s-trim res)))
+		(org-babel-insert-result
+		 (s-trim res)
+		 (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
+	      (message "No results to return")
+	      (org-babel-previous-src-block)
+	      (org-babel-remove-result))))
+	 ((string= "value" result-type)
+	  (org-babel-insert-result
+	   (cdr (assoc 'text/plain result))
+	   (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))))
+	(org-redisplay-inline-images)))
+    (setq *org-babel-async-ipython-running-cell* nil)
+    ;; see if there is another thing in the queue.
+    (org-babel-async-ipython-process-queue)))
+
+
 (defun org-babel-execute-async:ipython ()
   "Execute the block at point asynchronously."
   (interactive)
   (when (and (org-in-src-block-p)
 	     (string= "ipython" (first (org-babel-get-src-block-info))))
-    (let* ((name (org-babel-get-name-create)) 
-	   (params (third (org-babel-get-src-block-info))) 
+    (let* ((name (org-babel-get-name-create))
+	   (params (third (org-babel-get-src-block-info)))
 	   (session (cdr (assoc :session params)))
 	   (results (cdr (assoc :results params)))
-	   (result-type (cdr (assoc :result-type params))))
+	   (result-type (cdr (assoc :result-type params)))
+	   (queue-link (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type)))
       (org-babel-ipython-initiate-session session params)
 
       ;; Check the current results for inline images and delete the files.
