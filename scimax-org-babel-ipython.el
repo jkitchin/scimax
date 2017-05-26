@@ -1,7 +1,7 @@
 ;;; scimax-org-babel-ipython.el --- Scimax enhancements to ob-ipython
 
 ;;; Commentary:
-;; 
+;;
 
 (require 'ob-ipython)
 
@@ -300,6 +300,7 @@ This function is called by `org-babel-execute-src-block'."
 (defvar *org-babel-async-ipython-queue* '()
   "Queue of cons cells (buffer . name) for cells to run.")
 
+
 ;; adapted from https://github.com/zacharyvoase/humanhash/blob/master/humanhash.py
 (defvar org-babel-src-block-words
   '("ack" "alabama" "alanine" "alaska" "alpha" "angel" "apart" "april"
@@ -459,6 +460,7 @@ that case the session name appears to be default."
 	do
 	(save-window-excursion
 	  (with-current-buffer buffer
+	    (ob-ipython-log "Clearing %s in %s" name buffer)
 	    (org-babel-goto-named-src-block name)
 	    (org-babel-remove-result))))
   (setq *org-babel-async-ipython-running-cell* nil
