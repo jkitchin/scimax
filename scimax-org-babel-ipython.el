@@ -389,12 +389,13 @@ You might also like `org-id-uuid'.")
 (defun org-babel-get-session ()
   "Return current session.
 I wrote this because params returns none instead of nil. But in
-that case the session name appears to be default."
+that case the process that ipython uses appears to be default."
   (let ((session (cdr (assoc :session (third (org-babel-get-src-block-info))))))
     (if (and session (not (string= "none" session)))
 	session
       "default")))
 
+;;** async links
 
 (org-link-set-parameters
  "async-queued"
