@@ -433,6 +433,24 @@ that case the session name appears to be default."
  :face '(:foreground "green4")
  :help-echo "Running")
 
+;;** src block text properties
+
+(defun org-babel-src-block-get-property (property)
+  "Return the PROPERTY associated with the src block."
+  (save-excursion
+    (goto-char (org-element-property :begin (org-element-context)))
+    (ob-ipython-log "Text properties: %S" (text-properties-at (point)))
+    (get-text-property (point) property)))
+
+
+(defun org-babel-src-block-put-property (property value)
+  "Add a text property to the src-block"
+  (save-excursion
+    (goto-char (org-element-property :begin (org-element-context)))
+    (put-text-property (line-beginning-position) (line-end-position) property value)))
+
+
+;;** async queue functions
 
 (defun org-babel-async-ipython-clear-queue ()
   "Clear the queue and all pending results."
