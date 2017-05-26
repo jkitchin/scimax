@@ -374,6 +374,8 @@
   :load-path (lambda () (expand-file-name "org-ref " scimax-dir)))
 
 
+(use-package pdf-tools)
+
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
   :init (setq projectile-cache-file
