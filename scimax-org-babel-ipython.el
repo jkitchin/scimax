@@ -597,29 +597,45 @@ A callback function replaces the results."
 	      (when (file-exists-p f)
 		(delete-file f))))))
 
-      ;; Now we run the async
+      ;; Now we run the async. First remove the old results and insert a link.
       (org-babel-remove-result)
+
+      ;; Set text properties
+      (org-babel-src-block-put-property 'org-babel-ipython-result-type result-type)
+      (org-babel-src-block-put-property 'org-babel-ipython-name name)
+      (org-babel-src-block-put-property 'org-babel-ipython-executed nil)
+
       (org-babel-insert-result
-       (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type)
+       queue-link
        (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
 
       (add-to-list '*org-babel-async-ipython-queue* (cons (current-buffer) name) t)
-
-      ;; It appears that the result of this call is put into the results at this point.
+      (ob-ipython-log "Added %s to the queue.
+    The current running cell is %s.
+    The queue contains %S."
+		      name
+		      *org-babel-async-ipython-running-cell*
+		      *org-babel-async-ipython-queue*)
+      ;; It appears that the result of this function is put into the results at this point.
       (or
        (org-babel-async-ipython-process-queue)
-       (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type)))))
+       queue-link))))
 
 
 (defun scimax-execute-ipython-block ()
+  "Execute the block at point.
+If the variable `org-babel-async-ipython' is non-nil, execute it asynchronously.
+This function is used in a C-c C-c hook to make it work like other org src blocks."
   (when (and (org-in-src-block-p)
 	     (string= "ipython" (first (org-babel-get-src-block-info))))
+    (ob-ipython-log "Running %s" (org-babel-get-name-create))
     (if org-babel-async-ipython
 	(org-babel-execute-async:ipython)
       (org-babel-execute-src-block))))
 
 (add-to-list 'org-ctrl-c-ctrl-c-hook 'scimax-execute-ipython-block)
 
+;;** buffer functions
 
 (defun org-babel-execute-ipython-buffer-to-point-async ()
   "Execute all the ipython blocks in the buffer up to point asynchronously."
