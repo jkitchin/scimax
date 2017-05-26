@@ -266,7 +266,7 @@ This function is called by `org-babel-execute-src-block'."
 (defun ob-ipython--inspect (buffer pos)
   (let* ((code (with-current-buffer buffer
                  (buffer-substring-no-properties (point-min) (point-max))))
-         (resp (ob-ipython--inspect-request code (- pos (point-min)) 0))
+         (resp (ob-ipython--inspect-request code pos 0))
          (status (ob-ipython--extract-status resp)))
     (if (string= "ok" status)
         (ob-ipython--extract-result resp)
@@ -279,7 +279,9 @@ This function is called by `org-babel-execute-src-block'."
   (interactive (list (current-buffer) (point)))
   (save-restriction
     (when (org-in-src-block-p) (org-narrow-to-block))
-    (-if-let (result (->> (ob-ipython--inspect buffer pos) (assoc 'text/plain) cdr))
+    (-if-let (result (->> (ob-ipython--inspect buffer
+					       (- pos (point-min)))
+			  (assoc 'text/plain) cdr))
 	(ob-ipython--create-inspect-buffer result)
       (message "No documentation was found."))))
 
