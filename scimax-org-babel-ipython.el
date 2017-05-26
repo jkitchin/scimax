@@ -413,7 +413,11 @@ that case the session name appears to be default."
 (org-link-set-parameters
  "async-running"
  :follow (lambda (path)
-	   (ob-ipython-interrupt-kernel (org-babel-get-session))
+	   (ob-ipython-kill-kernel
+	    (cdr
+	     (assoc
+	      (org-babel-get-session)
+	      (ob-ipython--get-kernel-processes))))
 	   (save-excursion
 	     (org-babel-previous-src-block)
 	     (org-babel-remove-result))
