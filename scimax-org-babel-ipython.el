@@ -479,7 +479,10 @@ that case the session name appears to be default."
 	(with-current-buffer buffer
 	  (org-babel-goto-named-src-block name)
 	  (setq *org-babel-async-ipython-running-cell* cell)
-	  (let* ((rep)
+	  (ob-ipython-log "Setting up %S to run." cell)
+	  (let* ((running-link (format "[[async-running: %s %s]]"
+				       (org-babel-src-block-get-property 'org-babel-ipython-name)
+				       (org-babel-src-block-get-property 'org-babel-ipython-result-type)))
 		 (params (third (org-babel-get-src-block-info)))
 		 (session (org-babel-get-session))
 		 (body (org-babel-expand-body:generic
