@@ -30,6 +30,18 @@ You need this to get syntax highlighting."
 	      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
+;;* Logging
+
+(defcustom org-babel-ipython-debug nil
+  "If non-nil, log messages.")
+
+
+(defun ob-ipython-log (msg &optional &rest args)
+  (when org-babel-ipython-debug
+    (message "\n%s\n"
+	     (apply 'format msg args))))
+
+
 ;;* Commands like the jupyter notebook
 
 (defun org-babel-insert-block (&optional below)
