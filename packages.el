@@ -349,6 +349,8 @@
 
 (use-package org-edit-latex)
 
+(use-package pdf-tools)
+
 ;; this is a git submodule
 (use-package org-ref
   :ensure nil
@@ -373,8 +375,6 @@
   :ensure nil
   :load-path (lambda () (expand-file-name "org-ref " scimax-dir)))
 
-
-(use-package pdf-tools)
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
