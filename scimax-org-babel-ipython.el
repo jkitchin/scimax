@@ -170,9 +170,14 @@ Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-r
 		       "\n"))))
 
 ;;* A better synchronous execute function
+(defcustom ob-ipython-number-on-exception t
+  "If non-nil add line numbers to src-blocks when there is an exception.")
+
 
 ;; modified function to get better error feedback
 (defun ob-ipython--create-traceback-buffer (traceback)
+  "Creates a traceback error when an exception occurs.
+Sets up a local key to jump back to the Exception."
   (let* ((src (org-element-context))
 	 (buf (get-buffer-create "*ob-ipython-traceback*"))
 	 (curwin (current-window-configuration))
@@ -187,18 +192,23 @@ Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-r
       (goto-char (point-min))
       (re-search-forward "----> \\([0-9]+\\)")
       (setq N (string-to-number (match-string 1)))
+      (use-local-map (copy-keymap special-mode-map))
       (local-set-key "q" `(lambda ()
 			    (interactive)
-			    (if (string= (buffer-name) "*ob-ipython-traceback*")
-				(progn
-				  (bury-buffer)
-				  (set-window-configuration ,curwin)
-				  (goto-char ,(org-element-property :begin src))
-				  (while (not (looking-at "#\\+BEGIN"))
-				    (forward-line))
-				  (forward-line ,N)
-				  (number-line-src-block))
-			      (bury-buffer)))))
+			    (bury-buffer)
+			    (set-window-configuration ,curwin)
+			    (if (not org-babel-async-ipython)
+				(goto-char ,(org-element-property :begin src))
+			      ;; on an async cell
+			      (switch-to-buffer (car *org-babel-async-ipython-running-cell*))
+			      (org-babel-goto-named-src-block (cdr *org-babel-async-ipython-running-cell*))
+			      (org-babel-remove-result)
+			      (org-babel-async-ipython-clear-queue))
+			    (while (not (looking-at "#\\+BEGIN"))
+			      (forward-line))
+			    (forward-line ,N)
+			    (when ob-ipython-number-on-exception
+			      (number-line-src-block)))))
     (pop-to-buffer buf)))
 
 (defun org-babel-execute:ipython (body params)
@@ -651,7 +661,6 @@ If the variable `org-babel-async-ipython' is non-nil, execute it asynchronously.
 This function is used in a C-c C-c hook to make it work like other org src blocks."
   (when (and (org-in-src-block-p)
 	     (string= "ipython" (first (org-babel-get-src-block-info))))
-    (ob-ipython-log "Running %s" (org-babel-get-name-create))
     (if org-babel-async-ipython
 	(org-babel-execute-async:ipython)
       (org-babel-execute-src-block))))
