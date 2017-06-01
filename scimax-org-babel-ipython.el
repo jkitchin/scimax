@@ -135,39 +135,24 @@ Returns an org-link to the file."
 (defun ob-ipython--format-result (result result-type)
   "Format a RESULT from an ipython cell.
 Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-results"
-  (if result-type
-      (let ((res (cdr (assoc (intern result-type) result))))
-	(cond
-	 ((string= result-type "text/plain")
-	  res)
-	 ((string= result-type "text/html")
-	  (format
-	   "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
-	   res))
-	 ((string= result-type "text/latex")
-	  (format
-	   "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
-	   res))
-	 ((string= result-type "image/png")
-	  (ob-ipython-inline-image res))
-	 (t res)))
-    ;; no format specified. See what we get. Plain preferred.
-    (format "\n%s"
-	    (mapconcat 'identity
-		       (loop for res in result
-			     if (and (eq 'text/plain (car res)) (cdr res))
-			     collect (cdr res)
-			     if (eq 'text/html (car res))
-			     collect (format
-				      "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
-				      (cdr res))
-			     if (eq 'text/latex (car res))
-			     collect (format
-				      "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
-				      (cdr res))
-			     if (eq 'image/png (car res))
-			     collect (ob-ipython-inline-image (cdr res)))
-		       "\n"))))
+  (flet ((format-result (type value)
+          (case type
+            ('text/plain (concat value "\n"))
+            ('text/html (format
+                         "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
+                         value))
+            ('text/latex (format
+                          "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
+                          values))
+            ('image/png (concat (ob-ipython-inline-image value) "\n"))))
+         (select-result-type (type result)
+            (if type
+                (--filter (eq (car it) (intern type)) result)
+              result)))
+    (->> result
+         (select-result-type result-type)
+         (-map (lambda (r) (format-result (car r) (cdr r))))
+         (apply #'concat "\n"))))
 
 ;;* A better synchronous execute function
 (defcustom ob-ipython-number-on-exception t
