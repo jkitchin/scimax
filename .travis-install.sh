@@ -1,6 +1,5 @@
 #!/bin/bash
 # Adapted from https://docs.travis-ci.com/user/multi-os/
-pwd
 
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     ./install-scimax-mac.sh
