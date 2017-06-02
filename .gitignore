@@ -10,7 +10,6 @@ el-get
 /ac-comphist.dat
 auto-save-list/
 uservar
-test
 .DS_STORE
 ltximg
 *.elc

@@ -7,7 +7,7 @@ SOURCES =   ${EL_SOURCES}
 INIT = init.el
 
 test: clean
-	${CASK_EXEC} ert-runner
+	${CASK_EXEC} ert-runner --reporter ert -l test/test.el
 
 build:
 	${CASK_EXEC} ${emacs} -batch -l ${INIT}
