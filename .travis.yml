@@ -1,10 +1,6 @@
 language: generic
 sudo: false
 
-os:
-  - linux
-  - osx
-
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cwd; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./jkitchin/scimax/install-scimax-mac.sh; fi
