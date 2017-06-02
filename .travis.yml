@@ -12,6 +12,7 @@ before_install:
 matrix:
   allow_failures:
     - env: EVM_EMACS=emacs-git-snapshot-travis
+    - env: OSX=true
 
   include:
     - os: linux
@@ -22,6 +23,7 @@ matrix:
       env: EVM_EMACS=emacs-git-snapshot-travis
     - os: osx
       sudo: false
+      env: OSX=true
 
 install:
   - pwd
