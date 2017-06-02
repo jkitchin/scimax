@@ -1,16 +1,27 @@
 language: generic
 sudo: false
+
+os:
+  - linux
+  - osx
+
 before_install:
-  - curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > x.sh && source ./x.sh
-  - evm install $EVM_EMACS --use --skip
-  - cask
-env:
-  - EVM_EMACS=emacs-25.1-travis
-  - EVM_EMACS=emacs-git-snapshot-travis
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then install-scimax-mac.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > x.sh && source ./x.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then evm install $EVM_EMACS --use --skip; if
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cask; fi
 
 matrix:
   allow_failures:
     - env: EVM_EMACS=emacs-git-snapshot-travis
+
+  include:
+    - os: linux
+      sudo: false
+      env: EVM_EMACS=emacs-25.1-travis
+    - os: linux
+      sudo: false
+      env: EVM_EMACS=emacs-git-snapshot-travis
     
 script:
   - emacs --version -l init.el
