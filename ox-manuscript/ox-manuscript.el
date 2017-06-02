@@ -60,6 +60,11 @@ show the user a window of the results of each build step, and ask
 if you should continue to the next step."
   :group 'ox-manuscript)
 
+(defcustom ox-manuscript-user-template-dir
+  (file-name-as-directory (expand-file-name "ox-manuscript-templates" scimax-user-dir))
+  "Directory for user-defined ox-manuscript templates."
+  :group 'ox-manuscript)
+
 ;; * Journal templates
 ;; Bare-bones template
 (add-to-list 'org-latex-classes
@@ -535,7 +540,7 @@ intermediate output steps."
 ;; We use our function for building the manuscript
 (setq org-latex-pdf-process 'ox-manuscript-latex-pdf-process)
 
-;;
+
 (defun ox-manuscript-build ()
   "Build manuscript.
 This is done manually here for building the submission manuscript
@@ -790,6 +795,7 @@ put the packages in the org file.
       (insert "\\usepackage[colorinlistoftodos]{todonotes}")))
   (org-open-file  (ox-manuscript-build)))
 
+
 ;; * The backend options
 (org-export-define-derived-backend 'cmu-manuscript 'latex
   :menu-entry
@@ -859,17 +865,26 @@ The templates are just org-files that can be inserted into a
   "Return a cons list of manuscript candidate templates
 These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 '((name . data))."
-  (loop for template-file in (f-entries ox-manuscript-templates-dir
-					(lambda (f)
-					  (f-ext? f "org")))
-	with data = nil
-	do (setq data (ox-manuscript-parse-template-file template-file))
-	collect data))
+  (append
+   (loop for template-file in (f-entries ox-manuscript-templates-dir
+					 (lambda (f)
+					   (f-ext? f "org")))
+	 with data = nil
+	 do (setq data (ox-manuscript-parse-template-file template-file))
+	 collect data)
+   (loop for template-file in (f-entries ox-manuscript-user-template-dir
+					 (lambda (f)
+					   (f-ext? f "org")))
+	 with data = nil
+	 do (setq data (ox-manuscript-parse-template-file template-file))
+	 collect data)))
 
 
 ;;;###autoload
 (defun ox-manuscript-new-ivy ()
-  "Create a new manuscript from a template in `ox-manuscript-templates-dir'"
+  "Create a new manuscript from a template in
+`ox-manuscript-templates-dir' or
+`ox-manuscript-user-template-dir'."
   (interactive)
   (let ((candidates (ox-manuscript-candidates)))
     (ivy-read "type: " (mapcar (lambda (x)
@@ -880,7 +895,7 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 				  x))
 			       candidates)
 	      :action (lambda (entry)
-
+			(setq entry (cdr entry))
 			(if (file-exists-p (plist-get entry :default-filename))
 			    (find-file (plist-get entry :default-filename))
 			  (find-file (plist-get entry :default-filename))
