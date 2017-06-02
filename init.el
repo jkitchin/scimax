@@ -19,10 +19,10 @@
 (defconst scimax-dir (file-name-directory (or load-file-name (buffer-file-name)))
   "Directory where the scimax is installed.")
 
-(defvar user-dir (expand-file-name "user" scimax-dir)
+(defvar scimax-user-dir (expand-file-name "user" scimax-dir)
   "User directory for personal code.")
 
-(setq user-emacs-directory user-dir)
+(setq user-emacs-directory scimax-user-dir)
 
 (setq package-user-dir (expand-file-name "elpa"  scimax-dir))
 
@@ -50,7 +50,7 @@
  t)
 
 (add-to-list 'load-path scimax-dir)
-(add-to-list 'load-path user-dir)
+(add-to-list 'load-path scimax-user-dir)
 
 (let ((default-directory scimax-dir))
   (shell-command "git submodule update --init"))

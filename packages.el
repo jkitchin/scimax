@@ -527,8 +527,8 @@
 
 (when (and
        scimax-load-user-dir
-       (file-exists-p (expand-file-name "user.el" user-dir)))
-  (load (expand-file-name "user.el" user-dir)))
+       (file-exists-p (expand-file-name "user.el" scimax-user-dir)))
+  (load (expand-file-name "user.el" scimax-user-dir)))
 
 ;; * The end
 (provide 'packages)
