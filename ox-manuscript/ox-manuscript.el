@@ -65,6 +65,9 @@ if you should continue to the next step."
   "Directory for user-defined ox-manuscript templates."
   :group 'ox-manuscript)
 
+(unless (file-directory-p ox-manuscript-user-template-dir)
+  (make-directory ox-manuscript-user-template-dir t))
+
 ;; * Journal templates
 ;; Bare-bones template
 (add-to-list 'org-latex-classes
@@ -926,6 +929,7 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
       (goto-char (point-min))
       (font-lock-fontify-buffer))))
 
+
 ;;;###autoload
 (defun ox-manuscript-texcount ()
   "Use texcount to estimate words in an org-file if it exists.
@@ -940,6 +944,7 @@ Fall back to `tex-count-words'"
 		 (shell-quote-argument f))))
     (message (concat "Warning: texcount not found. Word estimate does not exclude cite/ref commands. "
 		     (tex-count-words (region-beginning) (region-end))))))
+
 
 ;; * Sync-mode
 (define-minor-mode ox-manuscript-sync-mode
