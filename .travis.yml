@@ -4,7 +4,7 @@ sudo: false
 before_install:
   - bash -c 'echo `pwd`'
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pwd; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./scimax/install-scimax-mac.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./install-scimax-mac.sh; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > x.sh && source ./x.sh; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then evm install $EVM_EMACS --use --skip; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cask; fi
