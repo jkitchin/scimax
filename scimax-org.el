@@ -1620,7 +1620,7 @@ Use a prefix arg to get regular RET. "
 	   (lambda (x) (not (string= "" x)))
 	   (nth
 	    (- (org-table-current-dline) 1)
-	    (org-table-to-lisp)))
+	    (remove 'hline (org-table-to-lisp))))
 	  (org-return)
 	;; empty row
 	(beginning-of-line)
