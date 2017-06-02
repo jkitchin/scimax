@@ -52,6 +52,8 @@ command -v emacs >/dev/null 2>&1 || { echo >&2 "You need emacs but it's not inst
 command -v cask >/dev/null 2>&1 || { echo >&2 "You need cask but it's not installed.  Installing it now.";
 				     brew install cask; }
 
+cask install
+
 # Now clone scimax if needed
 # are we already inside .git?
 # then we assume this is already the scimax repo
