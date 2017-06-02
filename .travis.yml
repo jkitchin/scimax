@@ -24,7 +24,7 @@ matrix:
       sudo: false
 
 install:
-  - ./.travis/.travis-install.sh
+  - ls -al
     
 script:
   - emacs --version -l init.el
