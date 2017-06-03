@@ -5,6 +5,14 @@
 
 (require 'ob-ipython)
 
+(defcustom scimax-ipython-command "jupyter"
+  "Command to launch the jupyter kernel.")
+
+;; overwrites the ob-python function to get jupyter instead of hard-coded
+;; ipython.
+(defun ob-ipython--kernel-repl-cmd (name)
+  (list scimax-ipython-command "console" "--existing" (format "emacs-%s.json" name)))
+
 ;;; Code:
 
 (add-to-list 'org-structure-template-alist
