@@ -602,7 +602,8 @@ It replaces the output in the results."
 	   (session (cdr (assoc :session params)))
 	   (results (cdr (assoc :results params)))
 	   (result-type (cdr (assoc :result-type params)))
-	   (queue-link (format "[[async-queued: %s %s]]" (org-babel-get-name-create) result-type)))
+	   (queue-link (format "[[async-queued: %s %s]]"
+			       (org-babel-get-name-create) result-type)))
       (org-babel-ipython-initiate-session session params)
 
       ;; Check the current results for inline images and delete the files.
