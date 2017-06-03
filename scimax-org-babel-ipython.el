@@ -182,7 +182,7 @@ Sets up a local key to jump back to the Exception."
           (lambda (line) (insert (format "%s\n" line))))
         (ansi-color-apply-on-region (point-min) (point-max)))
       (goto-char (point-min))
-      (re-search-forward "----> \\([0-9]+\\)")
+      (re-search-forward "-+> \\([0-9]+\\)")
       (setq N (string-to-number (match-string 1)))
       (use-local-map (copy-keymap special-mode-map))
       (local-set-key "q" `(lambda ()
