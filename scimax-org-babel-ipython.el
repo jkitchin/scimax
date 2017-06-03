@@ -192,10 +192,13 @@ Sets up a local key to jump back to the Exception."
 			    (if (not org-babel-async-ipython)
 				(goto-char ,(org-element-property :begin src))
 			      ;; on an async cell
-			      (switch-to-buffer (car *org-babel-async-ipython-running-cell*))
-			      (org-babel-goto-named-src-block (cdr *org-babel-async-ipython-running-cell*))
-			      (org-babel-remove-result)
-			      (org-babel-async-ipython-clear-queue))
+			      (let ((cell *org-babel-async-ipython-running-cell*))
+				(message "%s" cell)
+				(org-babel-async-ipython-clear-queue)
+				(switch-to-buffer
+				 ,(car *org-babel-async-ipython-running-cell*))
+				(org-babel-goto-named-src-block
+				 ,(cdr *org-babel-async-ipython-running-cell*))))
 			    (while (not (looking-at "#\\+BEGIN"))
 			      (forward-line))
 			    (forward-line ,N)
@@ -542,6 +545,7 @@ It replaces the output in the results."
 				  (goto-char url-http-end-of-headers)
 				  (let* ((json-array-type 'list)
 					 (json (json-read)))
+				    ;; This means there was an exception.
 				    (when (string= "error"
 						   (cdr
 						    (assoc 'msg_type (elt json 0))))
@@ -549,8 +553,7 @@ It replaces the output in the results."
 					  (car *org-babel-async-ipython-running-cell*)
 					(org-babel-goto-named-src-block
 					 (cdr *org-babel-async-ipython-running-cell*))
-					(org-babel-remove-result))
-				      (org-babel-async-ipython-clear-queue))
+					(org-babel-remove-result)))
 				    json))))
 	 (result (cdr (assoc :result ret)))
 	 (output (cdr (assoc :output ret)))
