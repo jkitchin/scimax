@@ -578,13 +578,10 @@ It replaces the output in the results."
 		      output
 		      (ob-ipython--format-result
 		       result (cdr (assoc :ob-ipython-results params))))))
-	    (if (not (string= "" (s-trim res)))
-		(org-babel-insert-result
-		 (s-trim res)
-		 (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
-	      (message "No results to return")
-	      (org-babel-previous-src-block)
-	      (org-babel-remove-result))))
+	    (when (not (string= "" (s-trim res)))
+	      (org-babel-insert-result
+	       (s-trim res)
+	       (cdr (assoc :result-params (third (org-babel-get-src-block-info))))))))
 	 ((string= "value" result-type)
 	  (org-babel-insert-result
 	   (cdr (assoc 'text/plain result))
