@@ -524,7 +524,7 @@ that case the process that ipython uses appears to be default."
 CODE is a string containing the code to execute.
 NAME is the name of the kernel, usually \"default\".
 A callback function replaces the results."
-  (let ((url-request-data code)
+  (let ((url-request-data (encode-coding-string code 'utf-8))
         (url-request-method "POST"))
     (ob-ipython-log "Running %S\non kernel %s" code name)
     (url-retrieve
