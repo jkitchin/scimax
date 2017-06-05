@@ -38,6 +38,7 @@ You need this to get syntax highlighting."
 	      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
+
 ;;* Logging
 
 (defcustom org-babel-ipython-debug nil
@@ -206,6 +207,7 @@ Sets up a local key to jump back to the Exception."
 			      (number-line-src-block)))))
     (pop-to-buffer buf)))
 
+
 (defun org-babel-execute:ipython (body params)
   "Execute a block of IPython code with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -294,6 +296,7 @@ This function is called by `org-babel-execute-src-block'."
 
 
 ;;* Asynchronous ipython
+
 (defcustom org-babel-async-ipython t
   "If non-nil run ipython asynchronously.")
 
@@ -374,13 +377,13 @@ The name should be unique to the buffer."
 (defvar org-babel-ipython-name-generator 'generate-human-readable-name
   "Function to generate a name for a src block.
 The default is the human-readable name generator
-`generate-human-readable-name'. This will not be universally
-unique for all time, but is nicer looking in a single document.
-You might also like `org-id-uuid'.")
+`generate-human-readable-name'. The function should generate a
+name that is unique within the document. You might also like
+`org-id-uuid'.")
 
 
 (defun org-babel-get-name-create ()
-  "Get the name of a src block or add a uuid as the name."
+  "Get the name of a src block or add a name."
   (if-let (name (fifth (org-babel-get-src-block-info)))
       name
     (save-excursion
