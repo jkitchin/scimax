@@ -736,6 +736,40 @@ This function is used in a C-c C-c hook to make it work like other org src block
    (point-min)
    (point-max)))
 
+
+(defun nuke-ipython ()
+  "Kill everything."
+  (interactive)
+  (loop for buf in (buffer-list)
+	do
+	(when (or (s-starts-with? "*ob-ipython" (buffer-name buf))
+		  (s-starts-with? "*Python" (buffer-name buf)))
+	  (message "killing %s" buf)
+	  (kill-buffer buf)))
+  (org-babel-async-ipython-clear-queue))
+
+(defun debug-ipython ()
+  (interactive)
+  (kill-buffer (get-buffer-create "*ob-ipython-debug*"))
+  (switch-to-buffer-other-window (get-buffer-create "*ob-ipython-debug*"))
+  (read-only-mode -1)
+  (erase-buffer)
+  (org-mode)
+  (insert "[[elisp:nuke-ipython]]\n\n")
+  (insert "[[elisp:org-babel-async-ipython-clear-queue]]\n\n")
+  (insert (format "Running: %s\n" *org-babel-async-ipython-running-cell*))
+  (insert (format "Queue: %S\n\n" *org-babel-async-ipython-queue*))
+  (loop for buf in (buffer-list)
+	do
+	(when (and (not (string= (buffer-name buf) "*ob-ipython-debug*"))
+		   (or (s-starts-with? "*ob-ipython" (buffer-name buf))
+		       (s-starts-with? "*Python" (buffer-name buf))))
+
+	  (insert (format "* %s\n\n%s\n"
+			  (buffer-name buf)
+			  (with-current-buffer buf (buffer-string))))))
+  (goto-char (point-min)))
+
 ;;* The end
 (provide 'scimax-org-babel-ipython)
 
