@@ -16,8 +16,9 @@
 ;;; Code:
 
 (add-to-list 'org-structure-template-alist
-	     '("ip" "#+BEGIN_SRC ipython :session :results output drawer\n?\n#+END_SRC"
+	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
 	       "<src lang=\"python\">\n?\n</src>"))
+
 
 (setq org-babel-default-header-args:ipython
       '((:results . "output replace drawer")
@@ -28,6 +29,7 @@
 	(:hlines . "no")
 	(:tangle . "no")
 	(:eval . "never-export")))
+
 
 (defun scimax-install-ipython-lexer ()
   "Install the IPython lexer for Pygments.
