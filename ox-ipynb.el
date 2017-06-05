@@ -478,11 +478,13 @@ nil:END:"  nil t)
 
 
 (defun ox-ipynb-export-to-ipynb-file-and-open (&optional async subtreep visible-only body-only info)
-  (let ((async-shell-command-buffer 'confirm-kill-buffer))
+  (let* ((async-shell-command-buffer 'confirm-kill-buffer)
+	 (fname (expand-file-name
+		 (ox-ipynb-export-to-ipynb-file async subtreep visible-only body-only info))))
+    ;; close the .ipynb buffer.
+    (kill-buffer (find-file-noselect fname))
     (async-shell-command
-     (format "jupyter notebook \"%s\""
-	     (expand-file-name
-	      (ox-ipynb-export-to-ipynb-file async subtreep visible-only body-only info))))))
+     (format "jupyter notebook \"%s\"" fname))))
 
 
 (org-export-define-derived-backend 'jupyter-notebook 'org
