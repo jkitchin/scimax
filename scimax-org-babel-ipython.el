@@ -168,6 +168,7 @@ Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-r
          (apply #'concat "\n"))))
 
 ;;* A better synchronous execute function
+
 (defcustom ob-ipython-number-on-exception t
   "If non-nil add line numbers to src-blocks when there is an exception.")
 
@@ -273,6 +274,21 @@ This function is called by `org-babel-execute-src-block'."
 	(org-babel-execute-src-block)))))
 
 ;;** fixing ob-ipython-inspect
+(defun ob-ipython--inspect-request (code &optional pos detail)
+  (let ((url-request-data (json-encode `((code . ,code)
+                                         (pos . ,(or pos (length code)))
+                                         (detail . ,(or detail 0)))))
+        (url-request-method "POST"))
+    (with-current-buffer (url-retrieve-synchronously
+                          (format "http://%s:%d/inspect/%s"
+				  ob-ipython-driver-hostname
+				  ob-ipython-driver-port
+				  (org-babel-get-session)))
+      (if (>= (url-http-parse-response) 400)
+          (ob-ipython--dump-error (buffer-string))
+        (goto-char url-http-end-of-headers)
+        (let ((json-array-type 'list))
+          (json-read))))))
 
 ;; I edited this to get the position relative to the beginning of the block
 (defun ob-ipython--inspect (buffer pos)
@@ -743,6 +759,7 @@ This function is used in a C-c C-c hook to make it work like other org src block
   (loop for buf in (buffer-list)
 	do
 	(when (or (s-starts-with? "*ob-ipython" (buffer-name buf))
+		  (s-starts-with? "*org-babel-ipython-debug*" (buffer-name buf))
 		  (s-starts-with? "*Python" (buffer-name buf)))
 	  (message "killing %s" buf)
 	  (kill-buffer buf)))
@@ -750,8 +767,7 @@ This function is used in a C-c C-c hook to make it work like other org src block
 
 (defun debug-ipython ()
   (interactive)
-  (kill-buffer (get-buffer-create "*ob-ipython-debug*"))
-  (switch-to-buffer-other-window (get-buffer-create "*ob-ipython-debug*"))
+  (switch-to-buffer-other-window (get-buffer-create "*org-babel-ipython-debug*"))
   (read-only-mode -1)
   (erase-buffer)
   (org-mode)
