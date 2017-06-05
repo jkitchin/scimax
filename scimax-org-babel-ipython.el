@@ -393,6 +393,8 @@ name that is unique within the document. You might also like
 	(insert (format "#+NAME: %s\n" id))
 	id))))
 
+(defcustom ob-ipython-buffer-unique-kernel t
+  "If non-nil use a unique kernel for each buffer.")
 
 (defun org-babel-get-session ()
   "Return current session.
@@ -651,12 +653,52 @@ It replaces the output in the results."
        queue-link))))
 
 
+(defun scimax-ob-ipython-close ()
+  "Cleanup function for when buffer closes."
+  ;; first we kill the kernel
+  (let ((bf (format "*ob-ipython-kernel-%s*"
+		    (org-babel-get-session))))
+    (when (get-buffer bf)
+      (kill-buffer bf)))
+  ;; now if there are no active kernels we clean up the buffers
+  (unless (ob-ipython--get-kernel-processes)
+    (loop for buf in '("*ob-ipython-client-driver*"
+		       "*ob-ipython-traceback*"
+		       "*ob-ipython-stdout*"
+		       "*ob-ipython-debug*"
+		       "*ob-ipython-inspect*"
+		       "*Python*")
+	  do
+	  (when (get-buffer buf)
+	    (kill-buffer buf)))))
+
+
 (defun scimax-execute-ipython-block ()
   "Execute the block at point.
 If the variable `org-babel-async-ipython' is non-nil, execute it asynchronously.
 This function is used in a C-c C-c hook to make it work like other org src blocks."
   (when (and (org-in-src-block-p)
 	     (string= "ipython" (first (org-babel-get-src-block-info))))
+
+    (when ob-ipython-buffer-unique-kernel
+      ;; Use buffer local variables for this.
+      (make-local-variable 'org-babel-default-header-args:ipython)
+
+      ;; remove the old session info
+      (setq org-babel-default-header-args:ipython
+	    (remove (assoc :session org-babel-default-header-args:ipython)
+		    org-babel-default-header-args:ipython))
+
+      ;; add the new session info
+      (let ((session-name (if-let (bf (buffer-file-name))
+			      (md5 (expand-file-name bf))
+			    (org-id-uuid))))
+	(add-to-list 'org-babel-default-header-args:ipython
+		     (cons :session session-name))
+	(ob-ipython-log "running kernel %s" session-name))
+
+      (add-hook 'kill-buffer-hook #'scimax-ob-ipython-close t t))
+
     (if org-babel-async-ipython
 	(org-babel-execute-async:ipython)
       (org-babel-execute-src-block))))
