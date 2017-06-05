@@ -47,11 +47,13 @@ You need this to get syntax highlighting."
 
 (defun ob-ipython-log (msg &optional &rest args)
   (when org-babel-ipython-debug
-    (message "\n%s\n"
-	     (apply 'format msg args))))
+    (with-current-buffer (get-buffer-create "*ob-ipython-log*")
+      (org-mode)
+      (insert (format "ob-ipython: \n%s\n\n"
+		      (apply 'format msg args))))))
 
 
-;;* Commands like the jupyter notebook
+;;* Commands like the jupyter notebook has
 
 (defun org-babel-insert-block (&optional below)
   "Insert a src block above the current point.
@@ -271,6 +273,7 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; I edited this to get the position relative to the beginning of the block
 (defun ob-ipython--inspect (buffer pos)
+  "Get the request result for an inspect of POS in BUFFER."
   (let* ((code (with-current-buffer buffer
                  (buffer-substring-no-properties (point-min) (point-max))))
          (resp (ob-ipython--inspect-request code pos 0))
@@ -285,6 +288,8 @@ This function is called by `org-babel-execute-src-block'."
   "Ask a kernel for documentation on the thing at POS in BUFFER."
   (interactive (list (current-buffer) (point)))
   (save-restriction
+    ;; Note you may be in a special edit buffer in which case it is not
+    ;; necessary to narrow.
     (when (org-in-src-block-p) (org-narrow-to-block))
     (-if-let (result (->> (ob-ipython--inspect buffer
 					       (- pos (point-min)))
