@@ -29,6 +29,8 @@
 (when scimax-use-org-bullets
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode))))
 
+(setq org-src-tab-acts-natively t)
+
 ;; * Speed commands
 (setq org-todo-keywords
       '((sequence "TODO(t)" "|" "DONE(d)")))
