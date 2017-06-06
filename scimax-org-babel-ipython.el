@@ -22,7 +22,7 @@
 
 (setq org-babel-default-header-args:ipython
       '((:results . "output replace drawer")
-	(:session . t)
+	(:session . "ipython")
 	(:exports . "both")
 	(:cache .   "no")
 	(:noweb . "no")
@@ -425,7 +425,7 @@ name that is unique within the document. You might also like
 I wrote this because params returns none instead of nil. But in
 that case the process that ipython uses appears to be default."
   (let ((session (cdr (assoc :session (third (org-babel-get-src-block-info))))))
-    (if (and session (not (string= "none" session)))
+    (if (and session (stringp session) (not (string= "none" session)))
 	session
       "default")))
 
