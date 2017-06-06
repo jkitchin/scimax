@@ -779,9 +779,8 @@ This function is used in a C-c C-c hook to make it work like other org src block
   (insert (format "Queue: %S\n\n" *org-babel-async-ipython-queue*))
   (loop for buf in (buffer-list)
 	do
-	(when (and (not (string= (buffer-name buf) "*ob-ipython-debug*"))
-		   (or (s-starts-with? "*ob-ipython" (buffer-name buf))
-		       (s-starts-with? "*Python" (buffer-name buf))))
+	(when (or (s-starts-with? "*ob-ipython" (buffer-name buf))
+		  (s-starts-with? "*Python" (buffer-name buf)))
 
 	  (insert (format "* %s\n\n%s\n"
 			  (buffer-name buf)
