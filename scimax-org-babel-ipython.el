@@ -528,7 +528,8 @@ that case the process that ipython uses appears to be default."
 			   (third (org-babel-get-src-block-info)))
 			  (list
 			   (encode-coding-string
-			    (org-element-property :value (org-element-context)) 'utf-8))))
+			    (org-remove-indentation
+           (org-element-property :value (org-element-context))) 'utf-8))))
 			params)))
 	    (ob-ipython--execute-request-asynchronously
 	     body session)
