@@ -16,7 +16,7 @@
 (defun ox-export-via-latex-pandoc-to-docx-and-open (&optional async subtreep visible-only body-only options)
   "Export the current org file as a docx via LaTeX."
   (interactive)
-  (let* ((bibfile (expand-file-name (car (org-ref-find-bibliography))))
+  (let* ((bibfiles (mapcar 'expand-file-name (org-ref-find-bibliography)))
 	 (temp-bib)
 	 (bibtex-entries)
 	 biboption
@@ -32,7 +32,7 @@
     ;; I make a temp bibfile because my big one causes pandoc to choke. This
     ;; should only create a file with the required entries.
     (when bibfile
-      (setq bibtex-entries (let* ((bibtex-files (org-ref-find-bibliography))
+      (setq bibtex-entries (let* ((bibtex-files bibfiles)
 				  (keys (reverse (org-ref-get-bibtex-keys)))
 				  (bibtex-entry-kill-ring-max (length keys))
 				  (bibtex-entry-kill-ring '()))
