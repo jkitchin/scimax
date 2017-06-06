@@ -542,7 +542,9 @@ that case the process that ipython uses appears to be default."
 	    running-link)))
     (ob-ipython-log "Cannot process a queue.
     Running: %s
-    Queue: %s" *org-babel-async-ipython-running-cell* *org-babel-async-ipython-queue*)
+    Queue: %s"
+		    *org-babel-async-ipython-running-cell*
+		    *org-babel-async-ipython-queue*)
     nil))
 
 
