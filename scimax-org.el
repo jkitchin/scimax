@@ -323,8 +323,7 @@ is positive, move after, and if negative, move before."
       (unless (org-before-first-heading-p) (org-narrow-to-subtree))
       (org-element-map (org-element-parse-buffer) 'table
 	(lambda (tbl)
-	  (goto-char (org-element-property :begin tbl))
-	  (while (not (looking-at "|")) (forward-line))
+	  (goto-char (org-element-property :post-affiliated tbl))
 	  (org-table-align))))))
 
 (add-hook 'org-babel-after-execute-hook
