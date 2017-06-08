@@ -768,7 +768,11 @@ This function is used in a C-c C-c hook to make it work like other org src block
 		  (s-starts-with? "*Python" (buffer-name buf)))
 	  (message "killing %s" buf)
 	  (kill-buffer buf)))
-  (org-babel-async-ipython-clear-queue))
+  (org-babel-async-ipython-clear-queue)
+  (save-excursion
+    (let ((el (org-element-context)))
+      (goto-char (org-element-property :begin el))
+      (delete-region (point) (1+ (point-at-eol))))))
 
 (defun debug-ipython ()
   (interactive)
