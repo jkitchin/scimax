@@ -47,7 +47,7 @@ You need this to get syntax highlighting."
   "If non-nil, log messages.")
 
 
-(defun ob-ipython-log (msg &optional &rest args)
+(defun ob-ipython-log (msg &rest args)
   (when org-babel-ipython-debug
     (with-current-buffer (get-buffer-create "*ob-ipython-log*")
       (org-mode)
