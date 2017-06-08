@@ -766,6 +766,13 @@ This function is used in a C-c C-c hook to make it work like other org src block
 		  (s-starts-with? "*Python" (buffer-name buf)))
 	  (message "killing %s" buf)
 	  (kill-buffer buf)))
+  (loop for proc in `("localhost"
+		      "client-driver"
+		      ,(format "kernel-%s" (org-babel-get-session)))
+	do
+	(when (get-process proc)
+	  (ob-ipython-log "Killing proc: %s" proc)
+	  (delete-process proc)))
   (org-babel-async-ipython-clear-queue))
 
 (defun debug-ipython ()
