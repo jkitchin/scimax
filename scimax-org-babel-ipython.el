@@ -321,6 +321,85 @@ This function is called by `org-babel-execute-src-block'."
 
 (define-key org-mode-map (kbd "M-.") #'ob-ipython-inspect)
 
+;;* Eldoc integration
+
+;; I had in mind to integrate this into eldoc, but it for now a standalone
+;; function to get a minibuffer message.
+;; Note you need my fork of ob-ipython for this to work.
+
+(defun ob-ipython-signature-function (buffer pos)
+  "Show a signature of the function at point in the minibuffer."
+  (interactive (list (current-buffer) (point)))
+  (save-restriction
+    ;; Note you may be in a special edit buffer in which case it is not
+    ;; necessary to narrow.
+    (when (org-in-src-block-p) (org-narrow-to-block))
+    (-if-let (result (->> (ob-ipython--inspect buffer
+					       (- pos (point-min)))
+			  (assoc 'text/plain)
+			  cdr
+			  ansi-color-apply))
+	(cond
+	 ((s-starts-with? "Signature:" result)
+	  (message (car (split-string result "\n"))))
+	 ((s-starts-with? "Docstring:" result)
+	  (message (s-join "\n" (-slice (split-string result "\n") 0 2))))
+	 (t
+	  (message (car (split-string result "\n"))))))))
+
+(define-key org-mode-map (kbd "C-1") #'ob-ipython-signature-function)
+
+;;* Completion
+
+;; This allows you to get completion from the ipython kernel.
+(defun ob-ipython--complete-request (code &optional pos)
+  (let ((url-request-data (json-encode `((code . ,code)
+                                         (cursor_pos . ,(or pos (length code))))))
+        (url-request-method "POST"))
+    (with-current-buffer (url-retrieve-synchronously
+                          (format "http://%s:%d/complete/%s"
+				  ob-ipython-driver-hostname
+				  ob-ipython-driver-port
+				  (org-babel-get-session)))
+      (if (>= (url-http-parse-response) 400)
+          (ob-ipython--dump-error (buffer-string))
+        (goto-char url-http-end-of-headers)
+        (let ((json-array-type 'list))
+          (json-read))))))
+
+
+(defun ob-ipython-complete ()
+  "Get completion candidates for the thing at point."
+  (save-restriction
+    (when (org-in-src-block-p) (org-narrow-to-block))
+    (-if-let (result (->> (ob-ipython--complete-request
+			   (buffer-substring-no-properties (point-min) (point-max))
+			   (- (point) (point-min)))
+			  car
+			  (assoc 'content)
+			  (assoc 'matches)
+			  cdr))
+	result)))
+
+
+;; This is a company backend to get completion while typing in org-mode.
+(defun ob-ipython-company-backend (command &optional arg &rest ignored)
+  (interactive (list 'interactive))
+  (pcase command
+    (`interactive
+     (company-begin-backend 'ob-ipython-company-backend))
+    (`prefix (save-excursion
+	       (let ((p (point)))
+		 (re-search-backward " \\|[[({]\\|^")
+		 (s-trim (buffer-substring-no-properties p (point))))))
+    (`candidates (ob-ipython-complete))
+    ;; sorted => t if the list is already sorted
+    (`sorted t)
+    ;; duplicates => t if there could be duplicates
+    (`duplicates nil)
+    (`require-match 'never)))
+
+(define-key org-mode-map (kbd "s-.") #'ob-ipython-company-backend)
 
 ;;* Asynchronous ipython
 
@@ -729,9 +808,15 @@ This function is used in a C-c C-c hook to make it work like other org src block
 
       (add-hook 'kill-buffer-hook #'scimax-ob-ipython-close t t))
 
-    (if org-babel-async-ipython
-	(org-babel-execute-async:ipython)
-      (org-babel-execute-src-block))))
+    (add-to-list 'company-backends 'ob-ipython-company-backend)
+    (company-mode +1)
+
+    (save-excursion
+      (when (s-contains? "-" (org-babel-get-session))
+	(user-error "The :session name (%s) cannot contain a -." (org-babel-get-session)))
+      (if org-babel-async-ipython
+	  (org-babel-execute-async:ipython)
+	(org-babel-execute-src-block)))))
 
 (add-to-list 'org-ctrl-c-ctrl-c-hook 'scimax-execute-ipython-block)
 
