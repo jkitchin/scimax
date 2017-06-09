@@ -2,6 +2,9 @@
 
 ;;; Commentary:
 ;;
+;; This library expands the ob-ipython library a lot. Many functions are just
+;; redefined in here, and many new functions are defined. Most notably this
+;; provides asynchronous execution, inspection and completion. It also provides better support for inline figures
 
 (require 'ob-ipython)
 
