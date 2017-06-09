@@ -742,12 +742,12 @@ This function is used in a C-c C-c hook to make it work like other org src block
   (interactive)
   (let ((session (org-babel-get-session)))
     (org-block-map
-    (lambda ()
-      (when (and (string= (first (org-babel-get-src-block-info)) "ipython")
-                 (string= (org-babel-get-session) session))
-        (org-babel-execute-async:ipython)))
-    (point-min)
-    (point))))
+     (lambda ()
+       (when (and (string= (first (org-babel-get-src-block-info)) "ipython")
+		  (string= (org-babel-get-session) session))
+	 (org-babel-execute-async:ipython)))
+     (point-min)
+     (point))))
 
 
 (defun org-babel-execute-ipython-buffer-async ()
