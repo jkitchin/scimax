@@ -780,6 +780,7 @@ This function is used in a C-c C-c hook to make it work like other org src block
 	  (delete-process proc)))
   (org-babel-async-ipython-clear-queue))
 
+
 (defun debug-ipython ()
   (interactive)
   (switch-to-buffer-other-window (get-buffer-create "*org-babel-ipython-debug*"))
