@@ -4,17 +4,109 @@
 ;;
 ;; This library expands the ob-ipython library a lot. Many functions are just
 ;; redefined in here, and many new functions are defined. Most notably this
-;; provides asynchronous execution, inspection and completion. It also provides better support for inline figures
+;; provides asynchronous execution, inspection and completion. It also provides
+;; better support for inline figures and the rich output of jupyter.
+;;
+;; Known limitations:
+;; 1. You should not use session names that have a - in them.
+;;
+;; 2. There is only one queue. This is not likely to work with multiple kernels
+;; running at the same time.
+;;
+;; 3. Sometimes you have to `nuke-ipython' to restart.
+;;
+;; Customization variables
+;;
+;; If `org-babel-async-ipython' is non-nil the src blocks will be run
+;; asynchrounously allowing you to work in emacs while the code runs. This mode
+;; will create names for each code-block if they don't already have a name,
+;; defaulting to a human readable name. The number of words in the name is
+;; defined by `org-babel-ipython-name-length'. The function used to generate the
+;; name is defined in `org-babel-ipython-name-generator'.
+;;
+;; I prefer a single kernel per org-buffer to prevent cross-talk between them.
+;; You can turn this off using the variable `ob-ipython-buffer-unique-kernel'.
+;;
+;; Set `org-babel-ipython-debug ' to non-nil to get better debugging information
+;; in the buffer *ob-ipython-log*.
+
+;; Set `ob-ipython-number-on-exception' to non-nil to get line-number overlays
+;; in src blocks when exceptions occur.
+;;
+;; Convenience commands:
+;;
+;; `org-babel-insert-block' will insert a new src block above the current point,
+;; or below it with a prefix arg.
+;;
+;; `org-babel-split-src-block' will split the current block leaving point in the
+;; upper block, or with a prefix arg in the lower block.
+;;
+;; `org-babel-execute-to-point' will execute all blocks up to the current point.
+;; See also `org-babel-execute-ipython-buffer-to-point-async'
+;; `org-babel-execute-ipython-buffer-async'
+
+;; `ob-ipython-inspect' will open a buffer with documentation about the thing at point.
+;;
+;; `ob-ipython-signature-function' will show a message in the minibuffer about
+;; the signature function.
+;;
+;; You should get completion of python code in the org buffer.
+;;
+;; While a cell is running or queued, there will be a link in the results
+;; section that you can click on to halt the execution or remove the cell from
+;; the queue.
+;;
+;; To clear the queue use M-x `org-babel-async-ipython-clear-queue'.
+
+;;
+;; If you have difficulties try running `debug-ipython'.
+
 
 (require 'ob-ipython)
 
-(defcustom scimax-ipython-command "jupyter"
-  "Command to launch the jupyter kernel.")
 
-;; overwrites the ob-python function to get jupyter instead of hard-coded
-;; ipython.
-(defun ob-ipython--kernel-repl-cmd (name)
-  (list scimax-ipython-command "console" "--existing" (format "emacs-%s.json" name)))
+(defcustom scimax-ipython-command "jupyter"
+  "Command to launch the jupyter kernel."
+  :group 'ob-ipython)
+
+
+(defcustom ob-ipython-buffer-unique-kernel t
+  "If non-nil use a unique kernel for each buffer."
+  :group 'ob-ipython)
+
+
+(defcustom org-babel-ipython-debug nil
+  "If non-nil, log messages."
+  :group 'ob-ipython)
+
+
+(defcustom ob-ipython-number-on-exception t
+  "If non-nil add line numbers to src-blocks when there is an exception."
+  :group 'ob-ipython)
+
+
+(defcustom org-babel-async-ipython t
+  "If non-nil run ipython asynchronously."
+  :group 'ob-ipython)
+
+
+(defcustom org-babel-ipython-completion t
+  "If non-nil enable completion in org-mode."
+  :group 'ob-ipython)
+
+
+(defcustom org-babel-ipython-name-length 4
+  "Number of words to use in generating a name."
+  :group 'ob-ipython)
+
+
+(defcustom org-babel-ipython-name-generator 'generate-human-readable-name
+  "Function to generate a name for a src block.
+The default is the human-readable name generator
+`generate-human-readable-name'. The function should generate a
+name that is unique within the document. You might also like
+`org-id-uuid'."
+  :group 'ob-ipython)
 
 ;;; Code:
 
@@ -45,9 +137,6 @@ You need this to get syntax highlighting."
 
 
 ;;* Logging
-
-(defcustom org-babel-ipython-debug nil
-  "If non-nil, log messages.")
 
 
 (defun ob-ipython-log (msg &rest args)
@@ -118,6 +207,13 @@ With a prefix BELOW move point to lower block."
 
 
 ;;* Enhancements to ob-ipython
+
+;; overwrites the ob-python function to get jupyter instead of hard-coded
+;; ipython.
+(defun ob-ipython--kernel-repl-cmd (name)
+  (list scimax-ipython-command "console" "--existing" (format "emacs-%s.json" name)))
+
+
 ;; This allows unicode chars to be sent to the kernel
 ;; https://github.com/jkitchin/scimax/issues/67
 (defun ob-ipython--execute-request (code name)
@@ -171,10 +267,6 @@ Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-r
          (apply #'concat "\n"))))
 
 ;;* A better synchronous execute function
-
-(defcustom ob-ipython-number-on-exception t
-  "If non-nil add line numbers to src-blocks when there is an exception.")
-
 
 ;; modified function to get better error feedback
 (defun ob-ipython--create-traceback-buffer (traceback)
@@ -403,9 +495,6 @@ This function is called by `org-babel-execute-src-block'."
 
 ;;* Asynchronous ipython
 
-(defcustom org-babel-async-ipython t
-  "If non-nil run ipython asynchronously.")
-
 
 (defvar *org-babel-async-ipython-running-cell* nil
   "A cons cell (buffer . name) of the current cell.")
@@ -456,10 +545,6 @@ This function is called by `org-babel-execute-src-block'."
   "List of words to make readable names from.")
 
 
-(defcustom org-babel-ipython-name-length 4
-  "Number of words to use in generating a name.")
-
-
 (defun generate-human-readable-name ()
   "Generate a human readable name for a src block.
 The name should be unique to the buffer."
@@ -480,14 +565,6 @@ The name should be unique to the buffer."
 	  (throw 'name result))))))
 
 
-(defvar org-babel-ipython-name-generator 'generate-human-readable-name
-  "Function to generate a name for a src block.
-The default is the human-readable name generator
-`generate-human-readable-name'. The function should generate a
-name that is unique within the document. You might also like
-`org-id-uuid'.")
-
-
 (defun org-babel-get-name-create ()
   "Get the name of a src block or add a name."
   (if-let (name (fifth (org-babel-get-src-block-info)))
@@ -499,8 +576,6 @@ name that is unique within the document. You might also like
 	(insert (format "#+NAME: %s\n" id))
 	id))))
 
-(defcustom ob-ipython-buffer-unique-kernel t
-  "If non-nil use a unique kernel for each buffer.")
 
 (defun org-babel-get-session ()
   "Return current session.
