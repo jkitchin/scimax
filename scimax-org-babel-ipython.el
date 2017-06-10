@@ -429,17 +429,21 @@ This function is called by `org-babel-execute-src-block'."
     (-if-let (result (->> (ob-ipython--inspect buffer
 					       (- pos (point-min)))
 			  (assoc 'text/plain)
-			  cdr
-			  ansi-color-apply))
-	(cond
-	 ((s-starts-with? "Signature:" result)
-	  (message (car (split-string result "\n"))))
-	 ((s-starts-with? "Docstring:" result)
-	  (message (s-join "\n" (-slice (split-string result "\n") 0 2))))
-	 (t
-	  (message (car (split-string result "\n"))))))))
+			  cdr))
+	(progn
+	  (when (stringp result)
+	    (setq result (ansi-color-apply result)))
+	  (cond
+	   ((s-starts-with? "Signature:" result)
+	    (message (car (split-string result "\n"))))
+	   ((s-starts-with? "Docstring:" result)
+	    (message (s-join "\n" (-slice (split-string result "\n") 0 2))))
+	   (t
+	    (message (car (split-string result "\n"))))))
+      (message "Nothing found"))))
 
 (define-key org-mode-map (kbd "C-1") #'ob-ipython-signature-function)
+
 
 ;;* Completion
 
