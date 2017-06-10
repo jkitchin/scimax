@@ -887,8 +887,9 @@ This function is used in a C-c C-c hook to make it work like other org src block
 
       (add-hook 'kill-buffer-hook #'scimax-ob-ipython-close t t))
 
-    (add-to-list 'company-backends 'ob-ipython-company-backend)
-    (company-mode +1)
+    (when org-babel-ipython-completion
+      (add-to-list 'company-backends 'ob-ipython-company-backend)
+      (company-mode +1))
 
     (save-excursion
       (when (s-contains? "-" (org-babel-get-session))
