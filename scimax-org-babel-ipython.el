@@ -867,6 +867,7 @@ This function is used in a C-c C-c hook to make it work like other org src block
 
 
 (defun debug-ipython ()
+  "Open a buffer showing debug information."
   (interactive)
   (switch-to-buffer-other-window (get-buffer-create "*org-babel-ipython-debug*"))
   (read-only-mode -1)
