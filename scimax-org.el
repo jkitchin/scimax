@@ -1710,6 +1710,90 @@ Use a prefix arg to get regular RET. "
        nil
        `((fl-noh 0 nil))))))
 
+
+;;* Keymaps on src blocks
+
+(defcustom scimax-src-block-keymaps
+  '()
+  "alist of custom keymaps for src blocks.")
+
+(setq scimax-src-block-keymaps
+      `(("ipython" . ,(let ((map (make-composed-keymap
+				  `(,elpy-mode-map ,python-mode-map ,pyvenv-mode-map)
+				  org-mode-map)))
+			;; In org-mode I define RET so we f
+			(define-key map (kbd "<return>") 'newline)
+			(define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+			map))
+	("python" . ,(let ((map (make-composed-keymap
+				 `(,elpy-mode-map ,python-mode-map ,pyvenv-mode-map)
+				 org-mode-map)))
+		       ;; In org-mode I define RET so we f
+		       (define-key map (kbd "<return>") 'newline)
+		       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+		       map))
+	("emacs-lisp" . ,(let ((map (make-composed-keymap `(,lispy-mode-map
+							    ,emacs-lisp-mode-map
+							    ,outline-minor-mode-map)
+							  org-mode-map)))
+			   (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+			   map))))
+
+(defun scimax-add-keymap-to-src-blocks (limit)
+  "Add keymaps to src-blocks defined in `scimax-src-block-keymaps'."
+  (save-match-data
+    (let ((case-fold-search t))
+      (when (re-search-forward
+	     "^\\([ \t]*#\\(\\(\\+[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
+	     limit t)
+	(let ((beg (match-beginning 0))
+	      (lang (match-string 7))
+	      (dc3 (downcase (match-string 3)))
+	      end)
+	  (cond
+	   ((and (match-end 4) (equal dc3 "+begin"))
+	    (when (re-search-forward
+		   (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
+		   nil t) ;; on purpose, we look further than LIMIT
+	      (setq end (min (point-max) (match-end 0)))
+	      (add-text-properties
+	       beg end '(font-lock-fontified t font-lock-multiline t))
+
+	      ;; Add keymap
+	      (when (assoc (org-no-properties lang) scimax-src-block-keymaps)
+		(add-text-properties
+		 beg end `(local-map ,(cdr (assoc
+					    (org-no-properties lang)
+					    scimax-src-block-keymaps)))))
+	      t))))))))
+
+
+(defun scimax-spoof-mode (orig-func &rest args)
+  "Advice function to spoof commands in org-mode src blocks.
+It is for commands that depend on the major mode. One example is
+`lispy--eval'."
+  (if (org-in-src-block-p)
+      (let ((major-mode (intern (format "%s-mode" (first (org-babel-get-src-block-info))))))
+	(apply orig-func args))
+    (apply orig-func args)))
+
+
+(define-minor-mode scimax-src-keymap-mode
+  "Minor mode to add mode keymaps to src-blocks."
+  :init-value nil
+  (if scimax-src-keymap-mode
+      (progn
+	(add-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks t)
+	(add-to-list 'font-lock-extra-managed-props 'local-map)
+	(advice-add 'lispy--eval :around 'scimax-spoof-mode)
+	(message "enabled"))
+    (remove-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks)
+    (advice-remove 'lispy--eval 'scimax-spoof-mode))
+  (font-lock-fontify-buffer))
+
+(add-hook 'org-mode-hook (lambda ()
+			   (scimax-src-keymap-mode +1)))
+
 ;; * The end
 (provide 'scimax-org)
 
