@@ -372,6 +372,7 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
 	 '(font-lock-fontified t fontified t font-lock-multiline t))
 	(set-buffer-modified-p modified)))))
 
+
 (defun org-fontify-meta-lines-and-blocks-1 (limit)
   "Fontify #+ lines and blocks."
   (let ((case-fold-search t))
@@ -461,7 +462,6 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
 	    (add-text-properties beg (match-end 0)
 				 '(font-lock-fontified t face org-meta-line))
 	    t))))))
-
 
 
 (defface org-block-emacs-lisp
@@ -1741,31 +1741,23 @@ Use a prefix arg to get regular RET. "
 
 (defun scimax-add-keymap-to-src-blocks (limit)
   "Add keymaps to src-blocks defined in `scimax-src-block-keymaps'."
-  (save-match-data
-    (let ((case-fold-search t))
-      (when (re-search-forward
-	     "^\\([ \t]*#\\(\\(\\+[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
-	     limit t)
-	(let ((beg (match-beginning 0))
-	      (lang (match-string 7))
-	      (dc3 (downcase (match-string 3)))
-	      end)
-	  (cond
-	   ((and (match-end 4) (equal dc3 "+begin"))
-	    (when (re-search-forward
-		   (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
-		   nil t) ;; on purpose, we look further than LIMIT
-	      (setq end (min (point-max) (match-end 0)))
+  (let ((case-fold-search t)
+	lang)
+    (while (re-search-forward org-babel-src-block-regexp limit t)
+      (let ((lang (match-string 2))
+	    (beg (match-beginning 0))
+	    (end (match-end 0)))
+	(if (assoc (org-no-properties lang) scimax-src-block-keymaps)
+	    (progn
 	      (add-text-properties
-	       beg end '(font-lock-fontified t font-lock-multiline t))
-
-	      ;; Add keymap
-	      (when (assoc (org-no-properties lang) scimax-src-block-keymaps)
-		(add-text-properties
-		 beg end `(local-map ,(cdr (assoc
-					    (org-no-properties lang)
-					    scimax-src-block-keymaps)))))
-	      t))))))))
+	       beg end `(local-map ,(cdr (assoc
+					  (org-no-properties lang)
+					  scimax-src-block-keymaps))))
+	      (add-text-properties
+	       beg end `(cursor-sensor-functions
+			 ((lambda (win prev-pos sym)
+			    ;; This simulates a mouse click and makes a menu change
+			    (org-mouse-down-mouse nil)))))))))))
 
 
 (defun scimax-spoof-mode (orig-func &rest args)
@@ -1785,10 +1777,13 @@ It is for commands that depend on the major mode. One example is
       (progn
 	(add-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks t)
 	(add-to-list 'font-lock-extra-managed-props 'local-map)
+	(add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
 	(advice-add 'lispy--eval :around 'scimax-spoof-mode)
+	(cursor-sensor-mode +1)
 	(message "enabled"))
     (remove-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks)
-    (advice-remove 'lispy--eval 'scimax-spoof-mode))
+    (advice-remove 'lispy--eval 'scimax-spoof-mode)
+    (cursor-sensor-mode -1))
   (font-lock-fontify-buffer))
 
 (add-hook 'org-mode-hook (lambda ()
