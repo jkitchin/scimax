@@ -50,7 +50,8 @@
 ;; `ob-ipython-signature-function' will show a message in the minibuffer about
 ;; the signature function.
 ;;
-;; You should get completion of python code in the org buffer.
+;; You should get completion of python code in the org buffer if
+;; `org-babel-ipython-completion ' is set to non-nil.
 ;;
 ;; While a cell is running or queued, there will be a link in the results
 ;; section that you can click on to halt the execution or remove the cell from
@@ -472,30 +473,52 @@ This function is called by `org-babel-execute-src-block'."
 			   (buffer-substring-no-properties (point-min) (point-max))
 			   (- (point) (point-min)))
 			  car
-			  (assoc 'content)
-			  (assoc 'matches)
-			  cdr))
-	result)))
+			  (assoc 'content)))
+	(list
+	 (cdr (assoc 'matches result))
+	 (cdr (assoc 'cursor_start result))
+	 (cdr (assoc 'cursor_end result))))))
+
+
+(defun ob-ipython-complete-ivy ()
+  "Use ivy to complete the thing at point."
+  (interactive)
+  (let* ((result (ob-ipython-complete))
+	 (candidates (first result))
+	 (origin (save-restriction
+		   (org-narrow-to-block)
+		   (point-min)))
+	 (beg (+ origin (second result)))
+	 (end (+ origin (third result))))
+    (ivy-read "Complete: " candidates
+	      :action (lambda (candidate)
+			(with-ivy-window
+			  (setf (buffer-substring beg end) candidate)
+			  (forward-char (length candidate)))))))
+
+
+(define-key org-mode-map (kbd "s-.") #'ob-ipython-complete-ivy)
 
 
 ;; This is a company backend to get completion while typing in org-mode.
 (defun ob-ipython-company-backend (command &optional arg &rest ignored)
   (interactive (list 'interactive))
-  (pcase command
-    (`interactive
-     (company-begin-backend 'ob-ipython-company-backend))
-    (`prefix (save-excursion
-	       (let ((p (point)))
-		 (re-search-backward " \\|[[({]\\|^")
-		 (s-trim (buffer-substring-no-properties p (point))))))
-    (`candidates (ob-ipython-complete))
-    ;; sorted => t if the list is already sorted
-    (`sorted t)
-    ;; duplicates => t if there could be duplicates
-    (`duplicates nil)
-    (`require-match 'never)))
+  (if (org-in-src-block-p)
+      (pcase command
+	(`interactive
+	 (company-begin-backend 'ob-ipython-company-backend))
+	(`prefix (save-excursion
+		   (let ((p (point)))
+		     (re-search-backward " \\|[[({]\\|^")
+		     (s-trim (buffer-substring-no-properties p (point))))))
+	(`candidates (first (ob-ipython-complete)))
+	;; sorted => t if the list is already sorted
+	(`sorted t)
+	;; duplicates => t if there could be duplicates
+	(`duplicates nil)
+	(`require-match 'never))
+    nil))
 
-(define-key org-mode-map (kbd "s-.") #'ob-ipython-company-backend)
 
 ;;* Asynchronous ipython
 
