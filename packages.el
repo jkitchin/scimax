@@ -38,7 +38,7 @@
 ;; * Other packages
 
 (use-package aggressive-indent
-  :config (aggressive-indent-global-mode 1))
+  :config (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode))
 
 (use-package auto-complete
   :diminish auto-complete-mode
