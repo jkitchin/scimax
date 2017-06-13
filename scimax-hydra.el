@@ -607,15 +607,11 @@ _t_: transpose paragraphs
   ("h" ivy-org-jump-to-heading)
   ("i" org-clock-in)
   ("o" org-clock-out)
-  ("m" (scimax-open-hydra scimac-email/body :color red))
   ("n" outline-next-heading "next heading" :color red)
   ("p" outline-previous-heading "previous heading" :color red)
   ("r" (scimax-open-hydra scimax-org-ref/body) "org-ref")
   ("t" (scimax-open-hydra scimax-org-toggle/body) "toggle"))
 
-(defhydra scimax-email (:color red :inherit (scimax-base/heads))
-  ("b" )
-  )
 
 (defhydra scimax-org-block (:color blue :inherit (scimax-base/heads) :columns 3)
   "org blocks"
