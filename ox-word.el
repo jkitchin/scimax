@@ -31,7 +31,7 @@
 
     ;; I make a temp bibfile because my big one causes pandoc to choke. This
     ;; should only create a file with the required entries.
-    (when bibfile
+    (when bibfiles
       (setq bibtex-entries (let* ((bibtex-files bibfiles)
 				  (keys (reverse (org-ref-get-bibtex-keys)))
 				  (bibtex-entry-kill-ring-max (length keys))
@@ -64,7 +64,7 @@
 
     (when (file-exists-p docx-file) (delete-file docx-file))
     (shell-command (format
-		    "pandoc -s -S %s%s%s -o %s"
+		    "pandoc -s -S %s%s\"%s\" -o \"%s\""
 		    biboption
 		    csl
 		    tex-file
