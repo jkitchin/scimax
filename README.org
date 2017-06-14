@@ -23,30 +23,6 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jkitchin/scimax/master/i
 
 There is an emacs 25.2 binary in this repository for Windows. You should be able to run the scimax.sh command to launch scimax now.
 
-*** Manual installation
-
-You can use your own emacs if you have one (version 25 or more is recommended). You still have to install Python and LaTeX if you will be using those.
-
-Clone the scimax repo where you want it.
-
-#+BEGIN_SRC sh
-git clone https://github.com/jkitchin/scimax.git
-#+END_SRC
-
-and launch emacs with:
-
-#+BEGIN_SRC sh
-emacs -q -l path/to/scimax/init.el
-#+END_SRC
-
-Alternatively, add scimax to your load path in your init file and just require what you want.
-
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'load-path "path/to/scimax")
-#+END_SRC
-
-It is not uncommon to have to restart emacs a few times while all the packages from MELPA are installed. Windows seems to be like that.
-
 ** Mac users
 
 Run the next command in your terminal in the location you want to install scimax. The command will make sure you have [[http://brew.sh][homebrew]], git, and emacs installed, and then will clone scimax and tell you how to use it. It will take some time to install. You need to install your own Python and LaTeX. These days I am using [[https://www.continuum.io/downloads][Python3 from Continuum IO]] and MacTeX from http://www.tug.org/mactex.
@@ -98,3 +74,28 @@ Run this command. It checks for a git and emacs, but does not install them. You 
 #+BEGIN_SRC sh
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/jkitchin/scimax/master/install-scimax-linux.sh)"
 #+END_SRC
+
+** Manual installation
+
+You can use your own emacs if you have one (version 25 or more is recommended). You still have to install Python and LaTeX if you will be using those.
+
+Clone the scimax repo where you want it.
+
+#+BEGIN_SRC sh
+git clone https://github.com/jkitchin/scimax.git
+#+END_SRC
+
+and launch emacs with:
+
+#+BEGIN_SRC sh
+emacs -q -l path/to/scimax/init.el
+#+END_SRC
+
+Alternatively, add scimax to your load path in your init file and just require what you want.
+
+#+BEGIN_SRC emacs-lisp
+(setq scimax-dir "path/to/scimax")
+(add-to-list 'load-path "path/to/scimax")
+#+END_SRC
+
+It is not uncommon to have to restart emacs a few times while all the packages from MELPA are installed. Windows seems to be like that.
