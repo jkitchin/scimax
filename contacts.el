@@ -204,8 +204,7 @@ e.g. on a person name, email, etc..."
   "Add current candidate to `ivy-marked-candidates'.
 If candidate is already in, remove it."
   (interactive) 
-  (let ((cand (or (assoc ivy--current (ivy-state-collection ivy-last))
-		  ivy--current)))
+  (let ((cand (nth ivy--index (ivy-state-collection ivy-last))))
     (if (-contains? ivy-marked-candidates cand)
 	;; remove it from the marked list
 	(setq ivy-marked-candidates
@@ -214,8 +213,7 @@ If candidate is already in, remove it."
       ;; add to list
       (setq ivy-marked-candidates
 	    (append ivy-marked-candidates (list cand)))))
-  (beginning-of-line)
-  (kill-line)
+  (ivy-kill-line)
 
   ;; move to the next line
   (ivy-next-line))
@@ -226,7 +224,7 @@ If candidate is already in, remove it."
   (interactive)
   (when ivy-marked-candidates
     (setf (ivy-state-collection ivy-last) ivy-marked-candidates)
-    (setf (ivy-state-preselect ivy-last) ivy--current)
+    ;; (setf (ivy-state-preselect ivy-last) ivy--current)
     (ivy--reset-state ivy-last)))
 
 
