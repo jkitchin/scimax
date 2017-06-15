@@ -145,6 +145,7 @@ This is a macro so I don't have to quote the hydra name."
   ("k" (scimax-open-hydra scimax-bookmarks/body) "Bookmarks")
   ("l" (scimax-open-hydra scimax-lisp/body) "Lisp")
   ("m" (scimax-open-hydra scimax-minor-modes/body) "Minor modes/mark")
+  ("M" (scimax-open-hydra scimax-smerge/body) "smerge")
   ("s-m" scimax-dispatch-mode-hydra "Major mode hydras")
   ("n" (scimax-open-hydra scimax-navigation/body) "Navigation")
   ("o" (scimax-open-hydra scimax-org/body) "org")
@@ -934,9 +935,42 @@ _z_: Customize scimax   _f_: change font
   ("u" scimax-customize-user)
   ("z" (customize-apropos "scimax")))
 
+;;** smerge
+;; https://emacs.stackexchange.com/questions/16469/how-to-merge-git-conflicts-in-emacs
+(defun my-enable-smerge-maybe ()
+  (when (and buffer-file-name (vc-backend buffer-file-name))
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "^<<<<<<< " nil t)
+        (smerge-mode +1)))))
+
+(add-hook 'buffer-list-update-hook #'my-enable-smerge-maybe)
+
+(defhydra scimax-smerge (:color red :inherit (scimax-base/heads) :hint nil)
+  "
+Navigate       Keep          other
+----------------------------------------
+_p_: previous  _c_: current    _e_: ediff
+_n_: next      _m_: mine       _u_: undo
+_j_: up        _o_: other      _r_: refine
+_k_: down      _a_: combine
+               _b_: base
+"
+  ("n" smerge-next)
+  ("p" smerge-prev)
+  ("c" smerge-keep-current)
+  ("m" smerge-keep-mine)
+  ("o" smerge-keep-other)
+  ("b" smerge-keep-base)
+  ("a" smerge-keep-all)
+  ("e" smerge-ediff)
+  ("j" previous-line)
+  ("k" forward-line)
+  ("r" smerge-refine))
 
 
 ;;* Mode specific hydras
+
 (defun scimax-dispatch-mode-hydra ()
   (interactive)
   (pcase major-mode
