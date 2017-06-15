@@ -937,23 +937,14 @@ _z_: Customize scimax   _f_: change font
 
 ;;** smerge
 ;; https://emacs.stackexchange.com/questions/16469/how-to-merge-git-conflicts-in-emacs
-(defun my-enable-smerge-maybe ()
-  (when (and buffer-file-name (vc-backend buffer-file-name))
-    (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward "^<<<<<<< " nil t)
-        (smerge-mode +1)))))
-
-(add-hook 'find-file-hook #'my-enable-smerge-maybe)
-(add-hook 'buffer-list-update-hook #'my-enable-smerge-maybe)
 
 (defhydra scimax-smerge (:color red :inherit (scimax-base/heads) :hint nil)
   "
-Navigate       Keep          other
+Navigate       Keep               other
 ----------------------------------------
-_p_: previous  _c_: current    _e_: ediff
-_n_: next      _m_: mine       _u_: undo
-_j_: up        _o_: other      _r_: refine
+_p_: previous  _c_: current       _e_: ediff
+_n_: next      _m_: mine  <<      _u_: undo
+_j_: up        _o_: other >>      _r_: refine
 _k_: down      _a_: combine
                _b_: base
 "
@@ -968,6 +959,18 @@ _k_: down      _a_: combine
   ("j" previous-line)
   ("k" forward-line)
   ("r" smerge-refine))
+
+(defun my-enable-smerge-maybe ()
+  (when (and buffer-file-name (vc-backend buffer-file-name))
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "^<<<<<<< " nil t)
+        (smerge-mode +1)
+	(scimax-smerge/body)))))
+
+(add-hook 'find-file-hook #'my-enable-smerge-maybe)
+(add-hook 'buffer-list-update-hook #'my-enable-smerge-maybe)
+
 
 
 ;;* Mode specific hydras
