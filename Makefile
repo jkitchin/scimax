@@ -18,6 +18,9 @@ compile:
 clean:
 	rm -f *.elc
 
+nouser:
+	${CASK_EXEC} ${emacs} -Q --eval="(setq scimax-load-user-dir nil)" -l ${INIT}
+
 travis:
 	open https://travis-ci.org/jkitchin/scimax
 
