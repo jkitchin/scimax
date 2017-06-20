@@ -211,22 +211,18 @@ To get the autoformatting you have to enable `scimax-autoformat-mode'. If you wa
 (add-hook 'org-mode-hook 'scimax-autoformat-mode)
 #+END_SRC
 
-scimax also defines some abbreviations
+scimax also defines some abbreviations that you can toggle on and off.
 
 1. Auto-capitalization of weekdays and months, e.g. Monday and June.
+   1. `scimax-toggle-month-abbrevs'
+   2. `scimax-toggle-weekday-abbrevs'
 2. Contraction expansion: cant to can not and can't  to can not
+   1. `scimax-toggle-contraction-abbrevs'
 3. Commonly transposed letters in words: teh to the
-4. Some convenience symbols: degC to °C and Ang to Å.
-5. Some names like norskov to Nørskov.
-6. Some common chemicals like co2 to CO_{2}
-7.
-When these variables are true they define regular abbreviations that expand while typing.
-
-- `scimax-autoformat-months'
-- `scimax-autoformat-weekdays'
-- `scimax-autoformat-contractions'
-- `scimax-autoformat-transpositions'
-
+   1. `scimax-toggle-transposition-abbrevs'
+4. Some common chemicals like co2 to CO_{2}, Some convenience symbols: degC to
+   °C and Ang to Å, Some names like norskov to Nørskov.
+   1. `scimax-toggle-chemical-formula-abbrevs'
 
 You should be able to undo any expansion with C-/. Alternatively you can prevent the expansion by typing C-q after the abbreviation.
 

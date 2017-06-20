@@ -1338,123 +1338,177 @@ Either at the beginning of a line, or after a sentence end."
     (remove-hook 'post-self-insert-hook #'scimax-org-autoformat 'local)))
 
 
-(defcustom scimax-autoformat-months t
-  "Determines if months should be auto-capitalized."
+(defcustom scimax-autoformat-months
+  '(( "january" "January")
+    ( "february" "February")
+    ( "march" "March")
+    ( "april" "April")
+    ;; ( "may" "May")
+    ( "june" "June")
+    ( "july" "July")
+    ( "august" "August")
+    ( "september" "September")
+    ( "october" "October")
+    ( "november" "November")
+    ( "december" "December")
+    ;; abbreviations
+    ( "jan" "Jan.")
+    ( "feb" "Feb.")
+    ( "mar" "Mar.")
+    ( "apr" "Apr.")
+    ( "jun" "Jun.")
+    ( "jul" "Jul.")
+    ( "aug" "Aug.")
+    ( "sept" "Sept.")
+    ( "oct" "Oct.")
+    ( "nov" "Nov.")
+    ( "dec" "Dec."))
+  "Months should be auto-capitalized."
   :group 'scimax)
 
-(when scimax-autoformat-months
-  (define-global-abbrev "january" "January")
-  (define-global-abbrev "february" "February")
-  (define-global-abbrev "march" "March")
-  (define-global-abbrev "april" "April")
-  ;; (define-global-abbrev "may" "May")
-  (define-global-abbrev "june" "June")
-  (define-global-abbrev "july" "July")
-  (define-global-abbrev "august" "August")
-  (define-global-abbrev "september" "September")
-  (define-global-abbrev "october" "October")
-  (define-global-abbrev "november" "November")
-  (define-global-abbrev "december" "December")
-  ;; abbreviations
-  (define-global-abbrev "jan" "Jan.")
-  (define-global-abbrev "feb" "Feb.")
-  (define-global-abbrev "mar" "Mar.")
-  (define-global-abbrev "apr" "Apr.")
-  (define-global-abbrev "jun" "Jun.")
-  (define-global-abbrev "jul" "Jul.")
-  (define-global-abbrev "aug" "Aug.")
-  (define-global-abbrev "sept" "Sept.")
-  (define-global-abbrev "oct" "Oct.")
-  (define-global-abbrev "nov" "Nov.")
-  (define-global-abbrev "dec" "Dec."))
 
-(defcustom scimax-autoformat-weekdays t
-  "Determines if weekdays should be auto-capitalized."
+(let ((enabled nil))
+  (defun scimax-toggle-month-abbrevs ()
+    "Toggle transposition abbreviations."
+    (interactive)
+    (loop for (abbrev expansion) in scimax-autoformat-months
+	  do
+	  (define-abbrev org-mode-abbrev-table abbrev (if enabled
+							  nil
+							expansion)))
+    (setq enabled (not enabled))
+    (message (if enabled "enabled" "disabled"))))
+
+(defcustom scimax-autoformat-weekdays
+  '(("monday" "Monday")
+    ("tuesday" "Tuesday")
+    ("wednesday" "Wednesday")
+    ("thursday" "Thursday")
+    ("friday" "Friday")
+    ("saturday" "Saturday")
+    ("sunday" "Sunday")
+    ;; abbreviations
+    ("mon" "Mon.")
+    ("tue" "Tue.")
+    ("wed" "Wed.")
+    ("thur" "Thur.")
+    ("fri" "Fri.")
+    ("sat" "Sat.")
+    ("sun" "Sun."))
+  "Weekdays that should be auto-capitalized."
   :group 'scimax)
 
-(when scimax-autoformat-weekdays
-  (define-global-abbrev "monday" "Monday")
-  (define-global-abbrev "tuesday" "Tuesday")
-  (define-global-abbrev "wednesday" "Wednesday")
-  (define-global-abbrev "thursday" "Thursday")
-  (define-global-abbrev "friday" "Friday")
-  (define-global-abbrev "saturday" "Saturday")
-  (define-global-abbrev "sunday" "Sunday")
-  ;; abbreviations
-  (define-global-abbrev "mon" "Mon.")
-  (define-global-abbrev "tue" "Tue.")
-  (define-global-abbrev "wed" "Wed.")
-  (define-global-abbrev "thur" "Thur.")
-  (define-global-abbrev "fri" "Fri.")
-  (define-global-abbrev "sat" "Sat.")
-  (define-global-abbrev "sun" "Sun."))
 
-(define-global-abbrev "degC" "°C")
-(define-global-abbrev "degF" "°F")
-(define-global-abbrev "ang" "Å")
-(define-global-abbrev "tm" "™")
+(let ((enabled nil))
+  (defun scimax-toggle-weekday-abbrevs ()
+    "Toggle transposition abbreviations."
+    (interactive)
+    (loop for (abbrev expansion) in scimax-autoformat-weekdays
+	  do
+	  (define-abbrev org-mode-abbrev-table abbrev (if enabled
+							  nil
+							expansion)))
+    (setq enabled (not enabled))
+    (message (if enabled "enabled" "disabled"))))
 
 
-
-(defcustom scimax-autoformat-contractions t
-  "Determines if contractions should be expanded.
+(defcustom scimax-autoformat-contractions
+  '(("arent" "are not")
+    ("cant" "can not")
+    ("couldnt" "could not")
+    ("didnt" "did not")
+    ("doesnt" "does not")
+    ("dont" "do not")
+    ("hadnt" "had not")
+    ("hasnt" "has not")
+    ("isnt" "is not")
+    ("shouldnt" "should not")
+    ("thats" "that is")
+    ("wasnt" "was not")
+    ("whos" "who is")
+    ("wont" "will not")
+    ("wouldve" "would have")
+    ("wouldnt" "would not"))
+  "List of (name expansion) to replace in abbrev-mode.
 We do not use contractions in technical writing so this replaces
 them with the full version."
   :group 'scimax)
 
-(when scimax-autoformat-contractions
-  (define-global-abbrev "arent" "are not")
-  (define-global-abbrev "cant" "can not")
-  (define-global-abbrev "couldnt" "could not")
-  (define-global-abbrev "didnt" "did not")
-  (define-global-abbrev "doesnt" "does not")
-  (define-global-abbrev "dont" "do not")
-  (define-global-abbrev "hadnt" "had not")
-  (define-global-abbrev "hasnt" "has not")
-  (define-global-abbrev "isnt" "is not")
-  (define-global-abbrev "shouldnt" "should not")
-  (define-global-abbrev "thats" "that is")
-  (define-global-abbrev "wasnt" "was not")
-  (define-global-abbrev "whos" "who is")
-  (define-global-abbrev "wont" "will not")
-  (define-global-abbrev "wouldve" "would have")
-  (define-global-abbrev "wouldnt" "would not"))
 
-(defcustom scimax-autoformat-transpositions t
-  "Determines if common transpositions should be fixed."
+(let ((enabled nil))
+  (defun scimax-toggle-contraction-abbrevs ()
+    "Toggle transposition abbreviations."
+    (interactive)
+    (loop for (abbrev expansion) in scimax-autoformat-contractions
+	  do
+	  (define-abbrev org-mode-abbrev-table abbrev (if enabled
+							  nil
+							expansion)))
+    (setq enabled (not enabled))
+    (message (if enabled "enabled" "disabled"))))
+
+
+(defcustom scimax-autoformat-transpositions
+  '(("and")
+    ("ahve" "have")
+    ("fi" "if")
+    ("fo" "of")
+    ("nto" "not")
+    ("teh" "the")
+    ("hte" "the")
+    ("htat" "that")
+    ("htem" "them")
+    ("iwth" "with")
+    ("hwat" "what")
+    ("waht" "what")
+    ("wehn" "when"))
+  "Common transpositions that should be fixed."
   :group 'scimax)
 
-(when scimax-autoformat-transpositions
-  (define-global-abbrev "nad" "and")
-  (define-global-abbrev "ahve" "have")
-  (define-global-abbrev "fi" "if")
-  (define-global-abbrev "fo" "of")
-  (define-global-abbrev "nto" "not")
-  (define-global-abbrev "teh" "the")
-  (define-global-abbrev "hte" "the")
-  (define-global-abbrev "htat" "that")
-  (define-global-abbrev "htem" "them")
-  (define-global-abbrev "iwth" "with")
-  (define-global-abbrev "hwat" "what")
-  (define-global-abbrev "waht" "what")
-  (define-global-abbrev "wehn" "when"))
-
-
-;; Some common names with umlauts
-(define-global-abbrev "norskov" "Nørskov")
-(define-global-abbrev "schrodinger" "Schrödinger")
-
-
+;; lexical closure to enable toggling these abbreviations
+(let ((enabled nil))
+  (defun scimax-toggle-transposition-abbrevs ()
+    "Toggle transposition abbreviations."
+    (interactive)
+    (loop for (abbrev expansion) in scimax-autoformat-transpositions
+	  do
+	  (define-abbrev org-mode-abbrev-table abbrev (if enabled
+							  nil
+							expansion)))
+    (setq enabled (not enabled))
+    (message (if enabled "enabled" "disabled"))))
 
 
 ;; ** Common Chemical Formulas
-(define-abbrev org-mode-abbrev-table "co2" "CO_{2}")
-(define-abbrev org-mode-abbrev-table "n2" "N_{2}")
-(define-abbrev org-mode-abbrev-table "h2o" "H_{2}O")
-(define-abbrev org-mode-abbrev-table "ch4" "CH_{4}")
-(define-abbrev org-mode-abbrev-table "c2h2" "C_{2}H_{2}")
-(define-abbrev org-mode-abbrev-table "c2h4" "C_{2}H_{4}")
-(define-abbrev org-mode-abbrev-table "c2h6" "C_{2}H_{6}")
+
+(defcustom scimax-chemical-formula-abbrevs
+  '(("co2" "CO_{2}")
+    ("n2" "N_{2}")
+    ("h2o" "H_{2}O")
+    ("ch4" "CH_{4}")
+    ("c2h2" "C_{2}H_{2}")
+    ("c2h4" "C_{2}H_{4}")
+    ("c2h6" "C_{2}H_{6}")
+    ("degC" "°C")
+    ("degF" "°F")
+    ("ang" "Å")
+    ("tm" "™")
+    ;; Some common names with umlauts/accents/slashed letters
+    ("norskov" "Nørskov")
+    ("schrodinger" "Schrödinger"))
+  "List of (abbrev expansion) for defining abbreviations.")
+
+;; lexical closure to enable toggling these abbreviations
+(let ((enabled nil))
+  (defun scimax-toggle-chemical-formula-abbrevs ()
+    "Toggle the chemical formula abbrevs."
+    (interactive)
+    (loop for (abbrev expansion) in scimax-chemical-formula-abbrevs
+	  do
+	  (define-abbrev org-mode-abbrev-table abbrev (and (not enabled)
+							   expansion)))
+    (setq enabled (not enabled))))
+
 
 ;; I adapted this idea to define abbreviations while spell-checking
 ;; This uses the ivy selection I prefer.
