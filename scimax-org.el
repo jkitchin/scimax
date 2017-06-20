@@ -1,4 +1,4 @@
-;;; scimax-org.el --- org-mode configuration for scimax
+;;; scimax-org.el --- org-mode configuration for scimax	-*- lexical-binding:t ; -*-
 
 ;;; Commentary:
 
