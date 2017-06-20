@@ -958,7 +958,8 @@ _k_: down      _a_: combine
   ("e" smerge-ediff)
   ("j" previous-line)
   ("k" forward-line)
-  ("r" smerge-refine))
+  ("r" smerge-refine)
+  ("u" undo))
 
 (defun my-enable-smerge-maybe ()
   (when (and buffer-file-name (vc-backend buffer-file-name))
@@ -969,7 +970,7 @@ _k_: down      _a_: combine
 	(scimax-smerge/body)))))
 
 (add-hook 'find-file-hook #'my-enable-smerge-maybe)
-(add-hook 'buffer-list-update-hook #'my-enable-smerge-maybe)
+;; (add-hook 'buffer-list-update-hook #'my-enable-smerge-maybe)
 
 
 
