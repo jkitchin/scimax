@@ -148,6 +148,7 @@
 	(describe-keymap ivy-minibuffer-map)))
 
     (define-key ivy-minibuffer-map (kbd "<left>") 'ivy-backward-delete-char)
+    (define-key ivy-minibuffer-map (kbd "<right>") 'ivy-alt-done)
     (define-key ivy-minibuffer-map (kbd "C-d") 'ivy-backward-delete-char)))
 
 ;; Provides functions for working on lists
