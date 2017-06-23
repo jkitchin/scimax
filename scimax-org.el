@@ -1437,14 +1437,14 @@ It is for commands that depend on the major mode. One example is
 	(add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
 	(advice-add 'lispy--eval :around 'scimax-spoof-mode)
 	(cursor-sensor-mode +1)
-	(message "enabled"))
+	(message "scimax-src-keymap-mode enabled"))
     (remove-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks)
     (advice-remove 'lispy--eval 'scimax-spoof-mode)
     (cursor-sensor-mode -1))
   (font-lock-fontify-buffer))
 
-(add-hook 'org-mode-hook (lambda ()
-			   (scimax-src-keymap-mode +1)))
+;; (add-hook 'org-mode-hook (lambda ()
+;; 			   (scimax-src-keymap-mode +1)))
 
 ;; * The end
 (provide 'scimax-org)
