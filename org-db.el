@@ -642,11 +642,12 @@ Use a prefix arg to force updates."
 (defun org-db-open-recent-file ()
   "Open a recent file in org-db with completion."
   (interactive)
-  (find-file (ivy-read "File: " (mapcar (lambda (x)
-					  (list (format "%s %s" (cdr x) (car x)) (car x)))
-					(emacsql org-db [:select [filename last-updated]
-								 :from files
-								 :order :by last-updated :desc])))))
+  (let ((candidates (mapcar (lambda (x)
+			      (cons (format "%s %s" (cdr x) (car x)) (car x)))
+			    (emacsql org-db [:select [filename last-updated]
+						     :from files
+						     :order :by last-updated :desc]))))
+    (find-file (cdr (assoc (ivy-read "File: " candidates) candidates)))))
 
 ;; * org-db-links
 (defun org-db-open-link-in-file ()
