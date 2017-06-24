@@ -288,6 +288,27 @@ Sets up a local key to jump back to the Exception."
       (re-search-forward "-+> \\([0-9]+\\)")
       (setq N (string-to-number (match-string 1)))
       (use-local-map (copy-keymap special-mode-map))
+      (setq header-line-format "Press j to jump to src block. q to bury this buffer.")
+      (local-set-key "j" `(lambda ()
+			    (interactive)
+			    (if (not org-babel-async-ipython)
+				(goto-char ,(org-element-property :begin src))
+			      ;; on an async cell
+			      (let ((cell *org-babel-async-ipython-running-cell*))
+				(message "%s" cell)
+				(org-babel-async-ipython-clear-queue)
+				(pop-to-buffer
+				 ,(car *org-babel-async-ipython-running-cell*))
+				(ob-ipython-log "In buffer %s looking for %s"
+						(current-buffer)
+						,(cdr *org-babel-async-ipython-running-cell*))
+				(org-babel-goto-named-src-block
+				 ,(cdr *org-babel-async-ipython-running-cell*))))
+			    (while (not (looking-at "#\\+BEGIN"))
+			      (forward-line))
+			    (forward-line ,N)
+			    (when ob-ipython-number-on-exception
+			      (number-line-src-block))))
       (local-set-key "q" `(lambda ()
 			    (interactive)
 			    (bury-buffer)
@@ -307,6 +328,8 @@ Sets up a local key to jump back to the Exception."
 			    (forward-line ,N)
 			    (when ob-ipython-number-on-exception
 			      (number-line-src-block)))))
+    ;; This makes the traceback the current buffer
+    (ob-ipython-log "Popping to %s" buf)
     (pop-to-buffer buf)))
 
 
@@ -801,6 +824,8 @@ It replaces the output in the results."
 	   (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))))
 	(org-redisplay-inline-images)))
     (setq *org-babel-async-ipython-running-cell* nil)
+    (let ((traceback (get-buffer "*ob-ipython-traceback*")))
+      (when traceback (kill-buffer traceback)))
     ;; see if there is another thing in the queue.
     (org-babel-async-ipython-process-queue)))
 
