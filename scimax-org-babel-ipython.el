@@ -10,10 +10,7 @@
 ;; Known limitations:
 ;; 1. You should not use session names that have a - in them.
 ;;
-;; 2. There is only one queue. This is not likely to work with multiple kernels
-;; running at the same time.
-;;
-;; 3. Sometimes you have to `nuke-ipython' to restart.
+;; 2. Sometimes you have to `nuke-ipython' to restart.
 ;;
 ;; Customization variables
 ;;
@@ -89,6 +86,10 @@
 (defcustom org-babel-async-ipython t
   "If non-nil run ipython asynchronously."
   :group 'ob-ipython)
+
+
+(defcustom ob-ipython-exception-results t
+  "If non-nil put the contents of the traceback buffer as results.")
 
 
 (defcustom org-babel-ipython-completion t
@@ -269,6 +270,15 @@ Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-r
 
 ;;* A better synchronous execute function
 
+(defun ob-ipython-jump (buffer src-name N)
+  "Jump to BUFFER then the src-block with SRC-NAME to line N."
+  (pop-to-buffer buffer)
+  (org-babel-goto-named-src-block src-name)
+  (while (not (looking-at "#\\+BEGIN"))
+    (forward-line))
+  (forward-line N))
+
+
 ;; modified function to get better error feedback
 (defun ob-ipython--create-traceback-buffer (traceback)
   "Creates a traceback error when an exception occurs.
@@ -276,6 +286,7 @@ Sets up a local key to jump back to the Exception."
   (let* ((src (org-element-context))
 	 (buf (get-buffer-create "*ob-ipython-traceback*"))
 	 (curwin (current-window-configuration))
+	 (exc-buffer *org-babel-ipython-exception-buffer*)
 	 N)
     (with-current-buffer buf
       (special-mode)
@@ -288,49 +299,90 @@ Sets up a local key to jump back to the Exception."
       (re-search-forward "-+> \\([0-9]+\\)")
       (setq N (string-to-number (match-string 1)))
       (use-local-map (copy-keymap special-mode-map))
-      (setq header-line-format "Press j to jump to src block. q to bury this buffer.")
+      (setq header-line-format "Press j to jump to src block. q to bury this buffer. i to insert the traceback as results in the src block.")
       (local-set-key "j" `(lambda ()
+			    "Jump to the line in the src block that caused the exception."
 			    (interactive)
 			    (if (not org-babel-async-ipython)
 				(goto-char ,(org-element-property :begin src))
 			      ;; on an async cell
-			      (let ((cell *org-babel-async-ipython-running-cell*))
-				(message "%s" cell)
-				(org-babel-async-ipython-clear-queue)
-				(pop-to-buffer
-				 ,(car *org-babel-async-ipython-running-cell*))
-				(ob-ipython-log "In buffer %s looking for %s"
-						(current-buffer)
-						,(cdr *org-babel-async-ipython-running-cell*))
-				(org-babel-goto-named-src-block
-				 ,(cdr *org-babel-async-ipython-running-cell*))))
-			    (while (not (looking-at "#\\+BEGIN"))
-			      (forward-line))
-			    (forward-line ,N)
+			      (ob-ipython-jump
+			       *org-babel-ipython-exception-buffer*
+			       (with-current-buffer *org-babel-ipython-exception-buffer*
+				 (cdr (ob-ipython-get-running)))
+			       ,N))
+			    (org-babel-async-ipython-clear-queue)
 			    (when ob-ipython-number-on-exception
 			      (number-line-src-block))))
       (local-set-key "q" `(lambda ()
-			    (interactive)
-			    (bury-buffer)
-			    (set-window-configuration ,curwin)
+			    "Bury traceback buffer and jump to the line in the src block that caused the exception."
+      			    (interactive)
+      			    (bury-buffer)
+			    ;; (set-window-configuration ,curwin)
 			    (if (not org-babel-async-ipython)
 				(goto-char ,(org-element-property :begin src))
 			      ;; on an async cell
-			      (let ((cell *org-babel-async-ipython-running-cell*))
-				(message "%s" cell)
+			      (ob-ipython-jump
+			       *org-babel-ipython-exception-buffer*
+			       (with-current-buffer *org-babel-ipython-exception-buffer*
+				 (cdr (ob-ipython-get-running)))
+			       ,N))
+			    (org-babel-async-ipython-clear-queue)
+      			    (when ob-ipython-number-on-exception
+      			      (number-line-src-block))))
+      (local-set-key "i" `(lambda ()
+			    "Insert the traceback as results in the src block that caused the exception."
+			    (interactive)
+			    (if (not org-babel-async-ipython)
+				(goto-char ,(org-element-property :begin src))
+			      ;; on an async cell
+			      (let ((contents (buffer-string))
+				    (buf (pop-to-buffer *org-babel-ipython-exception-buffer*))
+				    (cell (ob-ipython-get-running)))
 				(org-babel-async-ipython-clear-queue)
-				(switch-to-buffer
-				 ,(car *org-babel-async-ipython-running-cell*))
-				(org-babel-goto-named-src-block
-				 ,(cdr *org-babel-async-ipython-running-cell*))))
-			    (while (not (looking-at "#\\+BEGIN"))
-			      (forward-line))
-			    (forward-line ,N)
-			    (when ob-ipython-number-on-exception
-			      (number-line-src-block)))))
-    ;; This makes the traceback the current buffer
-    (ob-ipython-log "Popping to %s" buf)
-    (pop-to-buffer buf)))
+				(ob-ipython-jump buf (cdr cell) 1)
+
+				;; We linkify the exception lines
+				(org-babel-insert-result
+				 (with-temp-buffer
+				   (insert contents)
+				   (goto-char (point-min))
+				   (while (re-search-forward "-+> \\([0-9]+\\).*" nil t)
+				     (replace-match
+				      (format "[[elisp:(ob-ipython-jump \"%s\" \"%s\" %s)][%s]]"
+					      (car cell)
+					      (cdr cell)
+					      (match-string 1)
+					      (match-string 0))))
+				   (buffer-string))
+				 (assoc :result-params
+					(third (org-babel-get-src-block-info)))))))))
+    ;; insert results or pop to the traceback buffer
+    (if ob-ipython-exception-results
+	(let ((contents (with-current-buffer buf (buffer-string)))
+	      (buf (pop-to-buffer *org-babel-ipython-exception-buffer*))
+	      (cell (ob-ipython-get-running)))
+	  (ob-ipython-jump buf (cdr cell) 1)
+	  (org-babel-async-ipython-clear-queue)
+	  (org-babel-insert-result
+	   (with-temp-buffer
+	     (insert contents)
+	     (goto-char (point-min))
+	     (while (re-search-forward "-+> \\([0-9]+\\).*" nil t)
+	       (replace-match
+		(format "[[elisp:(ob-ipython-jump \"%s\" \"%s\" %s)][%s]]"
+			(car cell)
+			(cdr cell)
+			(match-string 1)
+			(match-string 0))))
+	     (buffer-string))
+	   (assoc :result-params
+		  (third (org-babel-get-src-block-info)))))
+
+      ;; We are not capturing results so this makes the traceback the current
+      ;; buffer
+      (ob-ipython-log "Popping to %s" buf)
+      (pop-to-buffer buf))))
 
 
 (defun org-babel-execute:ipython (body params)
@@ -545,13 +597,61 @@ This function is called by `org-babel-execute-src-block'."
 
 ;;* Asynchronous ipython
 
+(defun ob-ipython-get-kernel-name ()
+  "Get the kernel name for the current buffer."
+  (if-let (bf (buffer-file-name))
+      (md5 (expand-file-name bf))
+    "scratch"))
 
-(defvar *org-babel-async-ipython-running-cell* nil
-  "A cons cell (buffer . name) of the current cell.")
+
+(defvar *org-babel-async-ipython-running-cell* (make-hash-table :test 'equal)
+  "A hash table of (kernel . (buffer . name)) of the current cell for each kernel.")
 
 
-(defvar *org-babel-async-ipython-queue* '()
-  "Queue of cons cells (buffer . name) for cells to run.")
+(defun ob-ipython-get-running ()
+  "Get current running cell."
+  (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-running-cell*))
+
+
+(defun ob-ipython-set-running-cell (cell)
+  "Set the current running CELL for this buffer."
+  (setf (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-running-cell*)
+	cell))
+
+
+(defvar *org-babel-async-ipython-queue* (make-hash-table :test 'equal)
+  "A hash table (kernel . (list (buffer . name))) for cells to run.")
+
+
+(defun ob-ipython-queue ()
+  "Return current queue for buffer."
+  (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*))
+
+
+(gv-define-setter ob-ipython-queue (val x)
+  `(setf (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*)
+	 ,val))
+
+
+(defun ob-ipython-queue-cell (cell)
+  "Add CELL to the buffer queue."
+  (setf (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*)
+	(append
+	 (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*)
+	 (list cell))))
+
+
+(defun ob-ipython-remove-cell (cell)
+  "Remove CELL from this buffer queue."
+  (setf (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*)
+	(remove
+	 cell
+	 (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*))))
+
+
+(defun ob-ipython-pop-queue ()
+  "Return the next item in the queue for this buffer."
+  (pop (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*)))
 
 
 ;; adapted from https://github.com/zacharyvoase/humanhash/blob/master/humanhash.py
@@ -616,7 +716,7 @@ The name should be unique to the buffer."
 
 
 (defun org-babel-get-name-create ()
-  "Get the name of a src block or add a name."
+  "Get the name of a src block or add a name to the src block at point."
   (if-let (name (fifth (org-babel-get-src-block-info)))
       name
     (save-excursion
@@ -643,9 +743,7 @@ that case the process that ipython uses appears to be default."
  :follow (lambda (path)
 	   (let* ((f (split-string path " " t))
 		  (name (first f)))
-	     (setq *org-babel-async-ipython-queue*
-		   (remove (rassoc name *org-babel-async-ipython-queue*)
-			   *org-babel-async-ipython-queue*)))
+	     (ob-ipython-remove-cell (cons (current-buffer) name)))
 	   (save-excursion
 	     (org-babel-previous-src-block)
 	     (org-babel-remove-result)))
@@ -665,14 +763,16 @@ that case the process that ipython uses appears to be default."
 	     (org-babel-previous-src-block)
 	     (org-babel-remove-result))
 	   ;; clear the blocks in the queue.
-	   (loop for (buffer . name) in *org-babel-async-ipython-queue*
+	   (loop for (buffer . name)
+		 in (ob-ipython-queue)
 		 do
 		 (save-window-excursion
 		   (with-current-buffer buffer
 		     (org-babel-goto-named-src-block name)
 		     (org-babel-remove-result))))
-	   (setq *org-babel-async-ipython-queue* nil
-		 *org-babel-async-ipython-running-cell* nil))
+
+	   (ob-ipython-set-running-cell nil)
+	   (setf (ob-ipython-queue) nil))
  :face '(:foreground "green4")
  :help-echo "Running")
 
@@ -698,33 +798,32 @@ that case the process that ipython uses appears to be default."
 (defun org-babel-async-ipython-clear-queue ()
   "Clear the queue and all pending results."
   (interactive)
-  (loop for (buffer . name) in *org-babel-async-ipython-queue*
+  (loop for (buffer . name) in (ob-ipython-queue)
 	do
 	(save-window-excursion
 	  (with-current-buffer buffer
 	    (ob-ipython-log "Clearing %s in %s" name buffer)
 	    (org-babel-goto-named-src-block name)
 	    (org-babel-remove-result))))
-  (setq *org-babel-async-ipython-running-cell* nil
-	*org-babel-async-ipython-queue* '()))
+  (ob-ipython-set-running-cell nil)
+  (setf (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*) nil))
 
 
 (defun org-babel-async-ipython-process-queue ()
   "Run the next job in the queue."
-  (if-let ((not-running (not *org-babel-async-ipython-running-cell*))
-	   (queue *org-babel-async-ipython-queue*)
-	   ;; It seems we cannot pop queue, which is a local copy.
-	   (cell (pop *org-babel-async-ipython-queue*))
+  (if-let ((not-running (not (ob-ipython-get-running)))
+	   (cell (ob-ipython-pop-queue))
 	   (buffer (car cell))
 	   (name (cdr cell)))
       (save-window-excursion
 	(with-current-buffer buffer
 	  (org-babel-goto-named-src-block name)
-	  (setq *org-babel-async-ipython-running-cell* cell)
+	  (ob-ipython-set-running-cell cell)
 	  (ob-ipython-log "Setting up %S to run." cell)
-	  (let* ((running-link (format "[[async-running: %s %s]]"
-				       (org-babel-src-block-get-property 'org-babel-ipython-name)
-				       (org-babel-src-block-get-property 'org-babel-ipython-result-type)))
+	  (let* ((running-link (format
+				"[[async-running: %s %s]]"
+				(org-babel-src-block-get-property 'org-babel-ipython-name)
+				(org-babel-src-block-get-property 'org-babel-ipython-result-type)))
 		 (params (third (org-babel-get-src-block-info)))
 		 (session (org-babel-get-session))
 		 (body (org-babel-expand-body:generic
@@ -736,7 +835,7 @@ that case the process that ipython uses appears to be default."
 			  (list
 			   (encode-coding-string
 			    (org-remove-indentation
-           (org-element-property :value (org-element-context))) 'utf-8))))
+			     (org-element-property :value (org-element-context))) 'utf-8))))
 			params)))
 	    (ob-ipython--execute-request-asynchronously
 	     body session)
@@ -751,12 +850,16 @@ that case the process that ipython uses appears to be default."
     (ob-ipython-log "Cannot process a queue.
     Running: %s
     Queue: %s"
-		    *org-babel-async-ipython-running-cell*
-		    *org-babel-async-ipython-queue*)
+		    (ob-ipython-get-running)
+		    (ob-ipython-queue))
     nil))
 
 
 ;;** async execute functions
+
+(defvar *org-babel-ipython-exception-buffer* nil
+  "Global var to store buffer an exception came from.")
+
 
 (defun ob-ipython--execute-request-asynchronously (code name)
   "This function makes an asynchronous request.
@@ -764,15 +867,19 @@ CODE is a string containing the code to execute.
 NAME is the name of the kernel, usually \"default\".
 A callback function replaces the results."
   (let ((url-request-data (encode-coding-string code 'utf-8))
-        (url-request-method "POST"))
+        (url-request-method "POST")
+	(curbuf (current-buffer)))
     (ob-ipython-log "Running %S\non kernel %s" code name)
+    (setq *org-babel-ipython-exception-buffer* nil)
     (url-retrieve
      (format "http://%s:%d/execute/%s"
 	     ob-ipython-driver-hostname
 	     ob-ipython-driver-port
 	     name)
      ;; the callback function
-     'ob-ipython--async-callback)))
+     'ob-ipython--async-callback
+     ;; current buffer this was called from
+     (list curbuf))))
 
 
 (defun ob-ipython--async-callback (status &rest args)
@@ -784,23 +891,26 @@ It replaces the output in the results."
 				  (goto-char url-http-end-of-headers)
 				  (let* ((json-array-type 'list)
 					 (json (json-read)))
+				    ;; we will need this in the traceback buffer
+				    (setq *org-babel-ipython-exception-buffer* (car args))
 				    ;; This means there was an exception.
 				    (when (string= "error"
 						   (cdr
 						    (assoc 'msg_type (elt json 0))))
-				      (with-current-buffer
-					  (car *org-babel-async-ipython-running-cell*)
+				      (with-current-buffer (car args)
 					(org-babel-goto-named-src-block
-					 (cdr *org-babel-async-ipython-running-cell*))
+					 (cdr (ob-ipython-get-running)))
 					(org-babel-remove-result)))
 				    json))))
 	 (result (cdr (assoc :result ret)))
 	 (output (cdr (assoc :output ret)))
 	 params
-	 (current-cell *org-babel-async-ipython-running-cell*)
-	 (name (cdr current-cell))
+	 current-cell name
 	 (result-type))
-    (with-current-buffer (car current-cell)
+
+    (with-current-buffer (car args)
+      (setq current-cell (ob-ipython-get-running)
+	    name (cdr current-cell))
       (save-excursion
 	(org-babel-goto-named-src-block name)
 	(setq result-type (org-babel-src-block-get-property 'org-babel-ipython-result-type))
@@ -822,8 +932,9 @@ It replaces the output in the results."
 	  (org-babel-insert-result
 	   (cdr (assoc 'text/plain result))
 	   (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))))
-	(org-redisplay-inline-images)))
-    (setq *org-babel-async-ipython-running-cell* nil)
+	(org-redisplay-inline-images))
+      (ob-ipython-set-running-cell nil))
+
     (let ((traceback (get-buffer "*ob-ipython-traceback*")))
       (when traceback (kill-buffer traceback)))
     ;; see if there is another thing in the queue.
@@ -876,13 +987,13 @@ It replaces the output in the results."
        queue-link
        (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
 
-      (add-to-list '*org-babel-async-ipython-queue* (cons (current-buffer) name) t)
+      (ob-ipython-queue-cell (cons (current-buffer) name))
       (ob-ipython-log "Added %s to the queue.
     The current running cell is %s.
     The queue contains %S."
 		      name
-		      *org-babel-async-ipython-running-cell*
-		      *org-babel-async-ipython-queue*)
+		      (ob-ipython-get-running)
+		      (ob-ipython-queue))
       ;; It appears that the result of this function is put into the results at this point.
       (or
        (org-babel-async-ipython-process-queue)
@@ -928,7 +1039,7 @@ This function is used in a C-c C-c hook to make it work like other org src block
       ;; add the new session info
       (let ((session-name (if-let (bf (buffer-file-name))
 			      (md5 (expand-file-name bf))
-			    (org-id-uuid))))
+			    "scratch")))
 	(add-to-list 'org-babel-default-header-args:ipython
 		     (cons :session session-name))
 	(ob-ipython-log "running kernel %s" session-name))
@@ -1003,8 +1114,16 @@ This function is used in a C-c C-c hook to make it work like other org src block
   (org-mode)
   (insert "[[elisp:nuke-ipython]]\n\n")
   (insert "[[elisp:org-babel-async-ipython-clear-queue]]\n\n")
-  (insert (format "Running: %s\n" *org-babel-async-ipython-running-cell*))
-  (insert (format "Queue: %S\n\n" *org-babel-async-ipython-queue*))
+  (insert (format "Running in this buffer: %s\n" (ob-ipython-get-running)))
+  (insert (format "Queue in this buffer: %S\n\n" (ob-ipython-queue)))
+  (insert "Overall running:\n")
+  (ht-map (lambda (key value)
+	    (insert (format "  %s: %s\n" key value)))
+	  *org-babel-async-ipython-running-cell*)
+  (insert "Overall queue:\n")
+  (ht-map (lambda (key value)
+	    (insert (format "  %s: %s\n" key value)))
+	  *org-babel-async-ipython-queue*)
   (loop for buf in (buffer-list)
 	do
 	(when (or (s-starts-with? "*ob-ipython" (buffer-name buf))
