@@ -447,19 +447,19 @@ This function is called by `org-babel-execute-src-block'."
 ;;** fixing ob-ipython-inspect
 (defun ob-ipython--inspect-request (code &optional pos detail)
   (let ((url-request-data (json-encode `((code . ,code)
-                                         (pos . ,(or pos (length code)))
-                                         (detail . ,(or detail 0)))))
-        (url-request-method "POST"))
+					 (pos . ,(or pos (length code)))
+					 (detail . ,(or detail 0)))))
+	(url-request-method "POST"))
     (with-current-buffer (url-retrieve-synchronously
-                          (format "http://%s:%d/inspect/%s"
+			  (format "http://%s:%d/inspect/%s"
 				  ob-ipython-driver-hostname
 				  ob-ipython-driver-port
 				  (org-babel-get-session)))
       (if (>= (url-http-parse-response) 400)
-          (ob-ipython--dump-error (buffer-string))
-        (goto-char url-http-end-of-headers)
-        (let ((json-array-type 'list))
-          (json-read))))))
+	  (ob-ipython--dump-error (buffer-string))
+	(goto-char url-http-end-of-headers)
+	(let ((json-array-type 'list))
+	  (json-read))))))
 
 ;; I edited this to get the position relative to the beginning of the block
 (defun ob-ipython--inspect (buffer pos)
@@ -481,11 +481,14 @@ This function is called by `org-babel-execute-src-block'."
     ;; Note you may be in a special edit buffer in which case it is not
     ;; necessary to narrow.
     (when (org-in-src-block-p) (org-narrow-to-block))
-    (-if-let (result (->> (ob-ipython--inspect buffer
-					       (- pos (point-min)))
-			  (assoc 'text/plain) cdr))
-	(ob-ipython--create-inspect-buffer result)
-      (message "No documentation was found."))))
+    (if (ob-ipython-get-running)
+	(message "The kernel is busy running %s. Try later." (cdr (ob-ipython-get-running)))
+      
+      (-if-let (result (->> (ob-ipython--inspect buffer
+						 (- pos (point-min)))
+			    (assoc 'text/plain) cdr))
+	  (ob-ipython--create-inspect-buffer result)
+	(message "No documentation was found.")))))
 
 (define-key org-mode-map (kbd "M-.") #'ob-ipython-inspect)
 
@@ -542,17 +545,19 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun ob-ipython-complete ()
   "Get completion candidates for the thing at point."
-  (save-restriction
-    (when (org-in-src-block-p) (org-narrow-to-block))
-    (-if-let (result (->> (ob-ipython--complete-request
-			   (buffer-substring-no-properties (point-min) (point-max))
-			   (- (point) (point-min)))
-			  car
-			  (assoc 'content)))
-	(list
-	 (cdr (assoc 'matches result))
-	 (cdr (assoc 'cursor_start result))
-	 (cdr (assoc 'cursor_end result))))))
+  (if (ob-ipython-get-running)
+      (message "The kernel is busy running %s." (cdr (ob-ipython-get-running)))
+    (save-restriction
+      (when (org-in-src-block-p) (org-narrow-to-block))
+      (-if-let (result (->> (ob-ipython--complete-request
+			     (buffer-substring-no-properties (point-min) (point-max))
+			     (- (point) (point-min)))
+			    car
+			    (assoc 'content)))
+	  (list
+	   (cdr (assoc 'matches result))
+	   (cdr (assoc 'cursor_start result))
+	   (cdr (assoc 'cursor_end result)))))))
 
 
 (defun ob-ipython-complete-ivy ()
@@ -578,7 +583,10 @@ This function is called by `org-babel-execute-src-block'."
 ;; This is a company backend to get completion while typing in org-mode.
 (defun ob-ipython-company-backend (command &optional arg &rest ignored)
   (interactive (list 'interactive))
-  (if (org-in-src-block-p)
+  (if (and
+       (not (ob-ipython-get-running))
+       (org-in-src-block-p)
+       (member (first (org-babel-get-src-block-info)) '("python" "ipython")))
       (pcase command
 	(`interactive
 	 (company-begin-backend 'ob-ipython-company-backend))
