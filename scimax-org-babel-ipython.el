@@ -362,6 +362,7 @@ Sets up a local key to jump back to the Exception."
 	(let ((contents (with-current-buffer buf (buffer-string)))
 	      (buf (pop-to-buffer *org-babel-ipython-exception-buffer*))
 	      (cell (ob-ipython-get-running)))
+	  (setq header-line-format (format "%s had an exception." (cdr cell)))
 	  (ob-ipython-jump buf (cdr cell) 1)
 	  (org-babel-async-ipython-clear-queue)
 	  (org-babel-insert-result
@@ -382,7 +383,8 @@ Sets up a local key to jump back to the Exception."
       ;; We are not capturing results so this makes the traceback the current
       ;; buffer
       (ob-ipython-log "Popping to %s" buf)
-      (pop-to-buffer buf))))
+      (pop-to-buffer buf)
+      (setq header-line-format (format "%s had an exception." (cdr cell))))))
 
 
 (defun org-babel-execute:ipython (body params)
@@ -869,7 +871,7 @@ that case the process that ipython uses appears to be default."
   "Global var to store buffer an exception came from.")
 
 
-(defun ob-ipython--execute-request-asynchronously (code name)
+(defun ob-ipython--execute-request-asynchronously (code kernel-name)
   "This function makes an asynchronous request.
 CODE is a string containing the code to execute.
 NAME is the name of the kernel, usually \"default\".
@@ -877,13 +879,14 @@ A callback function replaces the results."
   (let ((url-request-data (encode-coding-string code 'utf-8))
         (url-request-method "POST")
 	(curbuf (current-buffer)))
-    (ob-ipython-log "Running %S\non kernel %s" code name)
+    (ob-ipython-log "Running %S\non kernel %s" code kernel-name)
     (setq *org-babel-ipython-exception-buffer* nil)
+    (setq header-line-format (format "%s is running on %s" (cdr (ob-ipython-get-running)) kernel-name))
     (url-retrieve
      (format "http://%s:%d/execute/%s"
 	     ob-ipython-driver-hostname
 	     ob-ipython-driver-port
-	     name)
+	     kernel-name)
      ;; the callback function
      'ob-ipython--async-callback
      ;; current buffer this was called from
@@ -941,7 +944,8 @@ It replaces the output in the results."
 	   (cdr (assoc 'text/plain result))
 	   (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))))
 	(org-redisplay-inline-images))
-      (ob-ipython-set-running-cell nil))
+      (ob-ipython-set-running-cell nil)
+      (setq header-line-format (format "The kernel is %s" (ob-ipython-get-kernel-name))))
 
     (let ((traceback (get-buffer "*ob-ipython-traceback*")))
       (when traceback (kill-buffer traceback)))
@@ -1110,7 +1114,8 @@ This function is used in a C-c C-c hook to make it work like other org src block
 	(when (get-process proc)
 	  (ob-ipython-log "Killing proc: %s" proc)
 	  (delete-process proc)))
-  (org-babel-async-ipython-clear-queue))
+  (org-babel-async-ipython-clear-queue)
+  (setq header-line-format nil))
 
 
 (defun debug-ipython ()
