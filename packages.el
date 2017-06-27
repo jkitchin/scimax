@@ -423,8 +423,11 @@
   :diminish undo-tree-mode
   :config (global-undo-tree-mode))
 
-(use-package ws-butler
-  :config (ws-butler-global-mode))
+;; Jun 26, 2017, Commenting out. It is causing an issue with org-ref
+;; where you cannot type a space after a ref link without getting a
+;; new line.
+;; (use-package ws-butler
+;;   :config (ws-butler-global-mode))
 
 
 ;; * Scimax packages
