@@ -58,8 +58,7 @@
 					   (org-element-property :value key)))))))
     (if csl (setq csl (format " --csl=%s " csl))
       (setq csl " "))
-
-
+    
     (org-latex-export-to-latex async subtreep visible-only body-only options)
 
     (when (file-exists-p docx-file) (delete-file docx-file))
@@ -69,7 +68,8 @@
 		    csl
 		    tex-file
 		    docx-file))
-    (delete-file temp-bib)
+    (when (file-exists-p temp-bib)
+      (delete-file temp-bib))
     (org-open-file docx-file '(16))))
 
 (defun ox-export-via-latex-pandoc-to-html-and-open (&optional async subtreep visible-only body-only options)
@@ -128,7 +128,8 @@
 		    csl
 		    tex-file
 		    html-file))
-    (delete-file temp-bib)
+    (when (file-exists-p temp-bib)
+      (delete-file temp-bib)) 
     (browse-url html-file)))
 
 
