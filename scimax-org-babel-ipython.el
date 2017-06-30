@@ -638,7 +638,7 @@ This function is called by `org-babel-execute-src-block'."
   (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*))
 
 
-(gv-define-setter ob-ipython-queue (val x)
+(gv-define-setter ob-ipython-queue (val)
   `(setf (gethash (ob-ipython-get-kernel-name) *org-babel-async-ipython-queue*)
 	 ,val))
 
