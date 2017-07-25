@@ -98,10 +98,10 @@
 (add-hook 'org-ctrl-c-ctrl-c-hook (lambda ()
 				    (interactive)
 				    (when number-line-overlays
+				      (remove-hook 'post-command-hook 'number-line-src-block 'local)
 				      (mapc 'delete-overlay
 					    number-line-overlays)
-				      (setq number-line-overlays '()))
-				    (remove-hook 'post-command-hook 'number-line-src-block 'local)))
+				      (setq number-line-overlays '()))))
 
 
 ;; * Asynchronous python
