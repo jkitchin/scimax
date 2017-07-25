@@ -95,14 +95,6 @@
             (next-line))))
   (add-hook 'post-command-hook 'number-line-src-block nil 'local))
 
-(add-hook 'org-ctrl-c-ctrl-c-hook (lambda ()
-				    (interactive)
-				    (when number-line-overlays
-				      (remove-hook 'post-command-hook 'number-line-src-block 'local)
-				      (mapc 'delete-overlay
-					    number-line-overlays)
-				      (setq number-line-overlays '()))))
-
 
 ;; * Asynchronous python
 
@@ -140,7 +132,7 @@ To make C-c C-c use this, try this.
     (let* ((current-file (buffer-file-name))
 	   (cb (current-buffer))
 	   (code (org-remove-indentation
-            (org-element-property :value (org-element-context))))
+		  (org-element-property :value (org-element-context))))
 	   (varcmds (org-babel-variable-assignments:python
 		     (nth 2 (org-babel-get-src-block-info))))
 	   (params (nth 2 (org-babel-get-src-block-info)))
@@ -176,6 +168,15 @@ To make C-c C-c use this, try this.
 		(interrupt-process (format "*py-%s*" md5-hash))
 	      (when (get-buffer (format "*py-%s*" md5-hash))
 		(kill-buffer (format "*py-%s*" md5-hash)))))))
+
+      ;; If there are numbered lines, we remove them, and the hook that was
+      ;; updating them.
+      (when number-line-overlays 
+	(mapc 'delete-overlay
+	      number-line-overlays)
+	(setq number-line-overlays '())
+	(remove-hook 'post-command-hook 'number-line-src-block 'local)
+	nil)
       
       ;; Get the md5 for the current block
       (with-temp-buffer
