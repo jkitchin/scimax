@@ -282,12 +282,12 @@ Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-r
 ;; modified function to get better error feedback
 (defun ob-ipython--create-traceback-buffer (traceback)
   "Creates a traceback error when an exception occurs.
-Sets up a local key to jump back to the Exception."
+Sets up a local key to jump back to the Exception in the traceback buffer."
   (let* ((src (org-element-context))
          (buf (get-buffer-create "*ob-ipython-traceback*"))
          (curwin (current-window-configuration))
          (exc-buffer *org-babel-ipython-exception-buffer*)
-         N)
+         N pos syntax-error-p)
     (with-current-buffer buf
       (special-mode)
       (let ((inhibit-read-only t))
@@ -295,97 +295,141 @@ Sets up a local key to jump back to the Exception."
         (-each traceback
           (lambda (line) (insert (format "%s\n" line))))
         (ansi-color-apply-on-region (point-min) (point-max)))
+
       (goto-char (point-min))
+      ;; try to find a regular exception line number
       (if (re-search-forward "-+> \\([0-9]+\\)" nil t)
           (setq N (string-to-number (match-string 1)))
         (setq N 0))
-      (use-local-map (copy-keymap special-mode-map))
-      (setq header-line-format "Press j to jump to src block. q to bury this buffer. i to insert the traceback as results in the src block.")
-      (local-set-key "j" `(lambda ()
-                            "Jump to the line in the src block that caused the exception."
-                            (interactive)
-                            (if (not org-babel-async-ipython)
-                                (goto-char ,(org-element-property :begin src))
-                              ;; on an async cell
-                              (ob-ipython-jump
-                               *org-babel-ipython-exception-buffer*
-                               (with-current-buffer *org-babel-ipython-exception-buffer*
-                                 (cdr (ob-ipython-get-running)))
-                               ,N))
-                            (org-babel-async-ipython-clear-queue)
-                            (when ob-ipython-number-on-exception
-                              (number-line-src-block))))
-      (local-set-key "q" `(lambda ()
-                            "Bury traceback buffer and jump to the line in the src block that caused the exception."
-                            (interactive)
-                            (bury-buffer)
-                            ;; (set-window-configuration ,curwin)
-                            (if (not org-babel-async-ipython)
-                                (goto-char ,(org-element-property :begin src))
-                              ;; on an async cell
-                              (ob-ipython-jump
-                               *org-babel-ipython-exception-buffer*
-                               (with-current-buffer *org-babel-ipython-exception-buffer*
-                                 (cdr (ob-ipython-get-running)))
-                               ,N))
-                            (org-babel-async-ipython-clear-queue)
-                            (when ob-ipython-number-on-exception
-                              (number-line-src-block))))
-      (local-set-key "i" `(lambda ()
-                            "Insert the traceback as results in the src block that caused the exception."
-                            (interactive)
-                            (if (not org-babel-async-ipython)
-                                (goto-char ,(org-element-property :begin src))
-                              ;; on an async cell
-                              (let ((contents (buffer-string))
-                                    (buf (pop-to-buffer *org-babel-ipython-exception-buffer*))
-                                    (cell (ob-ipython-get-running)))
-                                (org-babel-async-ipython-clear-queue)
-                                (ob-ipython-jump buf (cdr cell) 1)
+      ;; We may have had a SyntaxError. Let's check.
+      (goto-char (point-min))
+      (when (re-search-forward "SyntaxError:" nil t)
+        (setq syntax-error-p t)
+        (goto-char (point-min))
+        ;; get the line number
+        (when (re-search-forward "File.*, line \\([0-9]+\\)" nil t)
+          (setq N (string-to-number (match-string 1)))
+          (when (re-search-forward "\\( +\\)^" nil t)
+            ;; move point to be on the error
+            (backward-char)
+            ;; It appears the line is indented 4 spaces, so we cop that off
+            (setq pos (- (length (match-string 1)) 4))))
 
-                                ;; We linkify the exception lines
-                                (org-babel-insert-result
-                                 (with-temp-buffer
-                                   (insert contents)
-                                   (goto-char (point-min))
-                                   (while (re-search-forward "-+> \\([0-9]+\\).*" nil t)
-                                     (replace-match
-                                      (format "[[elisp:(ob-ipython-jump \"%s\" \"%s\" %s)][%s]]"
-                                              (car cell)
-                                              (cdr cell)
-                                              (match-string 1)
-                                              (match-string 0))))
-                                   (buffer-string))
-                                 (assoc :result-params
-                                        (third (org-babel-get-src-block-info)))))))))
-    ;; insert results or pop to the traceback buffer
-    (if ob-ipython-exception-results
-        (let ((contents (with-current-buffer buf (buffer-string)))
-              (buf (pop-to-buffer *org-babel-ipython-exception-buffer*))
-              (cell (ob-ipython-get-running)))
-          (setq header-line-format (format "%s had an exception." (cdr cell)))
-          (ob-ipython-jump buf (cdr cell) 1)
-          (org-babel-async-ipython-clear-queue)
-          (org-babel-insert-result
-           (with-temp-buffer
-             (insert contents)
-             (goto-char (point-min))
-             (while (re-search-forward "-+> \\([0-9]+\\).*" nil t)
-               (replace-match
-                (format "[[elisp:(ob-ipython-jump \"%s\" \"%s\" %s)][%s]]"
-                        (car cell)
-                        (cdr cell)
-                        (match-string 1)
-                        (match-string 0))))
-             (buffer-string))
-           (assoc :result-params
-                  (third (org-babel-get-src-block-info)))))
 
-      ;; We are not capturing results so this makes the traceback the current
-      ;; buffer
-      (ob-ipython-log "Popping to %s" buf)
-      (pop-to-buffer buf)
-      (setq header-line-format (format "%s had an exception." (cdr cell))))))
+        (use-local-map (copy-keymap special-mode-map))
+        (setq header-line-format "Press j to jump to src block. q to bury this buffer. i to insert the traceback as results in the src block.")
+        (local-set-key "j" `(lambda ()
+                              "Jump to the line in the src block that caused the exception."
+                              (interactive)
+                              (if (not org-babel-async-ipython)
+                                  (goto-char ,(org-element-property :begin src))
+                                ;; on an async cell
+                                (ob-ipython-jump
+                                 *org-babel-ipython-exception-buffer*
+                                 (with-current-buffer *org-babel-ipython-exception-buffer*
+                                   (cdr (ob-ipython-get-running)))
+                                 ,N))
+                              (when ,syntax-error-p (forward-char ,pos))
+                              (org-babel-async-ipython-clear-queue)
+                              (when ob-ipython-number-on-exception
+                                (number-line-src-block))))
+        (local-set-key "q" `(lambda ()
+                              "Bury traceback buffer and jump to the line in the src block that caused the exception."
+                              (interactive)
+                              (bury-buffer)
+                              ;; (set-window-configuration ,curwin)
+                              (if (not org-babel-async-ipython)
+                                  (goto-char ,(org-element-property :begin src))
+                                ;; on an async cell
+                                (ob-ipython-jump
+                                 *org-babel-ipython-exception-buffer*
+                                 (with-current-buffer *org-babel-ipython-exception-buffer*
+                                   (cdr (ob-ipython-get-running)))
+                                 ,N))
+                              (when ,syntax-error-p (forward-char ,pos))
+                              (org-babel-async-ipython-clear-queue)
+                              (when ob-ipython-number-on-exception
+                                (number-line-src-block))))
+        (local-set-key "i" `(lambda ()
+                              "Insert the traceback as results in the src block that caused the exception."
+                              (interactive)
+                              (if (not org-babel-async-ipython)
+                                  (goto-char ,(org-element-property :begin src))
+                                ;; on an async cell
+                                (let ((contents (buffer-string))
+                                      (buf (pop-to-buffer *org-babel-ipython-exception-buffer*))
+                                      (cell (ob-ipython-get-running)))
+                                  (org-babel-async-ipython-clear-queue)
+                                  (ob-ipython-jump buf (cdr cell) 1)
+
+                                  ;; We linkify the exception lines
+                                  (org-babel-insert-result
+                                   (with-temp-buffer
+                                     (insert contents)
+                                     (goto-char (point-min))
+                                     (while (re-search-forward "-+> \\([0-9]+\\).*" nil t)
+                                       (replace-match
+                                        (format "[[elisp:(ob-ipython-jump \"%s\" \"%s\" %s)][%s]]"
+                                                (car cell)
+                                                (cdr cell)
+                                                (match-string 1)
+                                                (match-string 0))))
+                                     (buffer-string))
+                                   (assoc :result-params
+                                          (third (org-babel-get-src-block-info)))))))))
+      ;; insert results or pop to the traceback buffer
+      (if ob-ipython-exception-results
+          ;; Here we are inserting the traceback in the org-buffer
+          (let ((contents (with-current-buffer buf (buffer-string)))
+                (buf (pop-to-buffer *org-babel-ipython-exception-buffer*))
+                (cell (ob-ipython-get-running))
+                line pos)
+            (setq header-line-format (format "%s had an exception." (cdr cell)))
+            (ob-ipython-jump buf (cdr cell) 1)
+            (org-babel-async-ipython-clear-queue)
+            (org-babel-insert-result
+             (with-temp-buffer
+               (insert contents)
+               (goto-char (point-min))
+               (while (re-search-forward "-+> \\([0-9]+\\).*" nil t)
+                 (replace-match
+                  (format "[[elisp:(ob-ipython-jump \"%s\" \"%s\" %s)][%s]]"
+                          (car cell)
+                          (cdr cell)
+                          (match-string 1)
+                          (match-string 0))))
+               ;; linkify a SyntaxError
+               (goto-char (point-min))
+               (when (re-search-forward "SyntaxError:" nil t)
+                 (goto-char (point-min))
+                 ;; get the line number
+                 (when (re-search-forward "File.*, line \\([0-9]+\\)" nil t)
+                   (setq line (match-string 1))
+                   (when (re-search-forward "\\( +\\)^" nil t)
+                     ;; It appears the line is indented 4 spaces, so we cop that off
+                     (setq pos (- (length (match-string 1)) 4)))
+                   ;; I think we can just link the first line. I tried the code
+                   ;; line, but sometimes it has a bracket in it which can break
+                   ;; the link syntax.
+                   (goto-char (point-min))
+                   (setf (buffer-substring (line-beginning-position) (line-end-position))
+                         (format
+                          "[[elisp:(progn (ob-ipython-jump \"%s\" \"%s\" %s)(forward-char %s))][%s]]"
+                          (car cell)
+                          (cdr cell)
+                          line
+                          pos
+                          (buffer-substring (line-beginning-position) (line-end-position))))))
+               (buffer-string))
+             ;; these are the headers for the results of the block
+             (assoc :result-params
+                    (third (org-babel-get-src-block-info)))))
+
+        ;; We are not capturing results so this makes the traceback the current
+        ;; buffer
+        (ob-ipython-log "Popping to %s" buf)
+        (pop-to-buffer buf)
+        (setq header-line-format (format "%s had an exception." (cdr (ob-ipython-get-running))))))))
 
 
 (defun org-babel-execute:ipython (body params)
@@ -449,20 +493,22 @@ This function is called by `org-babel-execute-src-block'."
 
 ;;** fixing ob-ipython-inspect
 (defun ob-ipython--inspect-request (code &optional pos detail)
+  "This function is used to inspect code at a position.
+This can provide information about the type, etc."
   (let ((url-request-data (json-encode `((code . ,code)
-					 (pos . ,(or pos (length code)))
-					 (detail . ,(or detail 0)))))
-	(url-request-method "POST"))
+                                         (pos . ,(or pos (length code)))
+                                         (detail . ,(or detail 0)))))
+        (url-request-method "POST"))
     (with-current-buffer (url-retrieve-synchronously
-			  (format "http://%s:%d/inspect/%s"
-				  ob-ipython-driver-hostname
-				  ob-ipython-driver-port
-				  (org-babel-get-session)))
+                          (format "http://%s:%d/inspect/%s"
+                                  ob-ipython-driver-hostname
+                                  ob-ipython-driver-port
+                                  (org-babel-get-session)))
       (if (>= (url-http-parse-response) 400)
-	  (ob-ipython--dump-error (buffer-string))
-	(goto-char url-http-end-of-headers)
-	(let ((json-array-type 'list))
-	  (json-read))))))
+          (ob-ipython--dump-error (buffer-string))
+        (goto-char url-http-end-of-headers)
+        (let ((json-array-type 'list))
+          (json-read))))))
 
 ;; I edited this to get the position relative to the beginning of the block
 (defun ob-ipython--inspect (buffer pos)
@@ -531,14 +577,15 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; This allows you to get completion from the ipython kernel.
 (defun ob-ipython--complete-request (code &optional pos)
+  "Get completion candidates for the thing at POS from the kernel."
   (let ((url-request-data (json-encode `((code . ,code)
                                          (cursor_pos . ,(or pos (length code))))))
         (url-request-method "POST"))
     (with-current-buffer (url-retrieve-synchronously
                           (format "http://%s:%d/complete/%s"
-				  ob-ipython-driver-hostname
-				  ob-ipython-driver-port
-				  (org-babel-get-session)))
+                                  ob-ipython-driver-hostname
+                                  ob-ipython-driver-port
+                                  (org-babel-get-session)))
       (if (>= (url-http-parse-response) 400)
           (ob-ipython--dump-error (buffer-string))
         (goto-char url-http-end-of-headers)
@@ -899,52 +946,54 @@ A callback function replaces the results."
 It replaces the output in the results."
   (ob-ipython-log "Entering callback for %s" *org-babel-async-ipython-running-cell*)
   (let* ((ret (ob-ipython--eval (if (>= (url-http-parse-response) 400)
-				    (ob-ipython--dump-error (buffer-string))
-				  (goto-char url-http-end-of-headers)
-				  (let* ((json-array-type 'list)
-					 (json (json-read)))
-				    ;; we will need this in the traceback buffer
-				    (setq *org-babel-ipython-exception-buffer* (car args))
-				    ;; This means there was an exception.
-				    (when (string= "error"
-						   (cdr
-						    (assoc 'msg_type (elt json 0))))
-				      (with-current-buffer (car args)
-					(org-babel-goto-named-src-block
-					 (cdr (ob-ipython-get-running)))
-					(org-babel-remove-result)))
-				    json))))
-	 (result (cdr (assoc :result ret)))
-	 (output (cdr (assoc :output ret)))
-	 params
-	 current-cell name
-	 (result-type))
+                                    (ob-ipython--dump-error (buffer-string))
+                                  (goto-char url-http-end-of-headers)
+                                  (ob-ipython-log "http request: %s"
+                                                  (buffer-substring (point-min) (point-max)))
+                                  (let* ((json-array-type 'list)
+                                         (json (json-read)))
+                                    ;; we will need this in the traceback buffer
+                                    (setq *org-babel-ipython-exception-buffer* (car args))
+                                    ;; This means there was an exception.
+                                    (when (string= "error"
+                                                   (cdr
+                                                    (assoc 'msg_type (elt json 0))))
+                                      (with-current-buffer (car args)
+                                        (org-babel-goto-named-src-block
+                                         (cdr (ob-ipython-get-running)))
+                                        (org-babel-remove-result)))
+                                    json))))
+         (result (cdr (assoc :result ret)))
+         (output (cdr (assoc :output ret)))
+         params
+         current-cell name
+         (result-type))
 
     (with-current-buffer (car args)
       (setq current-cell (ob-ipython-get-running)
-	    name (cdr current-cell))
+            name (cdr current-cell))
       (save-excursion
-	(org-babel-goto-named-src-block name)
-	(setq result-type (org-babel-src-block-get-property 'org-babel-ipython-result-type))
-	(org-babel-src-block-put-property 'org-babel-ipython-executed  t)
-	(ob-ipython-log "Got a result-type of %s\n return from the kernel:  %S" result-type ret)
-	(setq params (third (org-babel-get-src-block-info)))
-	(org-babel-remove-result)
-	(cond
-	 ((string= "output" result-type)
-	  (let ((res (concat
-		      output
-		      (ob-ipython--format-result
-		       result (cdr (assoc :ob-ipython-results params))))))
-	    (when (not (string= "" (s-trim res)))
-	      (org-babel-insert-result
-	       (s-trim res)
-	       (cdr (assoc :result-params (third (org-babel-get-src-block-info))))))))
-	 ((string= "value" result-type)
-	  (org-babel-insert-result
-	   (cdr (assoc 'text/plain result))
-	   (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))))
-	(org-redisplay-inline-images))
+        (org-babel-goto-named-src-block name)
+        (setq result-type (org-babel-src-block-get-property 'org-babel-ipython-result-type))
+        (org-babel-src-block-put-property 'org-babel-ipython-executed  t)
+        (ob-ipython-log "Got a result-type of %s\n return from the kernel:  %S" result-type ret)
+        (setq params (third (org-babel-get-src-block-info)))
+        (org-babel-remove-result)
+        (cond
+         ((string= "output" result-type)
+          (let ((res (concat
+                      output
+                      (ob-ipython--format-result
+                       result (cdr (assoc :ob-ipython-results params))))))
+            (when (not (string= "" (s-trim res)))
+              (org-babel-insert-result
+               (s-trim res)
+               (cdr (assoc :result-params (third (org-babel-get-src-block-info))))))))
+         ((string= "value" result-type)
+          (org-babel-insert-result
+           (cdr (assoc 'text/plain result))
+           (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))))
+        (org-redisplay-inline-images))
       (ob-ipython-set-running-cell nil)
       (setq header-line-format (format "The kernel is %s" (ob-ipython-get-kernel-name))))
 
