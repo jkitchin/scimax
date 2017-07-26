@@ -206,15 +206,14 @@ If candidate is already in, remove it."
   (interactive) 
   (let ((cand (nth ivy--index (ivy-state-collection ivy-last))))
     (if (-contains? ivy-marked-candidates cand)
-	;; remove it from the marked list
-	(setq ivy-marked-candidates
-	      (-remove-item cand ivy-marked-candidates))
+        ;; remove it from the marked list
+        (setq ivy-marked-candidates
+              (-remove-item cand ivy-marked-candidates))
       
       ;; add to list
       (setq ivy-marked-candidates
-	    (append ivy-marked-candidates (list cand)))))
-  (ivy-kill-line)
-
+            (append ivy-marked-candidates (list cand)))))
+  
   ;; move to the next line
   (ivy-next-line))
 
@@ -267,10 +266,10 @@ Loads cache file."
     (define-key map (kbd "C-.") 'ivy-contacts-show-all) 
     (define-key map (kbd "C-<return>")
       (lambda ()
-	"Apply action and move to next/previous candidate."
-	(interactive)
-	(ivy-call)
-	(ivy-next-line)))
+        "Apply action and move to next/previous candidate."
+        (interactive)
+        (ivy-call)
+        (ivy-next-line)))
     map))
 
 (defun ivy-marked-transformer (s)
@@ -647,7 +646,7 @@ end tell" (cdr (assoc "PHONE" contact))))))
 (defun org-speed-contacts (keys)
   "Find the command to run for KEYS."
   (when (or (and (bolp) (looking-at org-outline-regexp)
-		 (not (null (org-entry-get (point) "EMAIL")))))
+                 (not (null (org-entry-get (point) "EMAIL")))))
     (cdr (assoc keys org-speed-commands-contacts))))
 
 (setq org-speed-commands-contacts
