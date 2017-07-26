@@ -530,115 +530,111 @@ end tell" (cdr (assoc "PHONE" contact)))))
   "Copy \"name\" <email> for selectected contacts, separated by ;."
   (kill-new
    (mapconcat 'identity (loop for contact in (helm-marked-candidates)
-			      collect
-			      (if helm-current-prefix-arg
-				  (cdr (assoc "EMAIL" contact))
-				(format "\"%s\" <%s>"
-					(cdr (assoc "NAME" contact))
-					(cdr (assoc "EMAIL" contact)))))
-	      "; ")))
+                              collect
+                              (if helm-current-prefix-arg
+                                  (cdr (assoc "EMAIL" contact))
+                                (format "\"%s\" <%s>"
+                                        (cdr (assoc "NAME" contact))
+                                        (cdr (assoc "EMAIL" contact)))))
+              "; ")))
 
-(defun helm-contacts ()
-  (interactive)
-  (helm :sources `(((name . "contacts")
-		    (candidates . ,(ivy-contacts-candidates))
-		    (action . (("Insert email(s)" . contact-insert-email)
-			       ("Open contact" . (lambda (contact)
-						   (find-file (cdr (assoc "FILE" contact)))
-						   (goto-char (cdr (assoc "POSITION" contact)))
-						   (outline-show-entry))) 
-			       ("Insert \"name\" <email>" . contact-insert-name-email)
-			       ("Copy \"name\" <email>" . contact-copy-name-email)
-			       ("Send email" . (lambda (contact)
-						 (compose-mail)
-						 (message-goto-to) 
-						 (insert
-						  (mapconcat
-						   'identity
-						   (loop for contact in (helm-marked-candidates)
-							 collect
-							 (cdr (assoc "EMAIL" contact)))
-						   ","))
-						 (message-goto-subject)))
 
-			       ("Find emails to contact" . (lambda (contact)
-							     (org-open-link-from-string
-							      (format "[[mu4e:query:to:%s]]"
-								      (cdr (assoc "EMAIL" contact))))))
-			       ("Find emails from contact" . (lambda (contact)
-							       (org-open-link-from-string
-								(format "[[mu4e:query:from:%s]]"
-									(cdr (assoc "EMAIL" contact)))))) 
-			       ("Call" . (lambda (contact)
-					   (do-applescript
-					    (format "tell application \"Cisco Jabber\"
+(defvar helm-contacts-source
+  (helm-build-sync-source "contacts"
+    :candidates (ivy-contacts-candidates)
+    :fuzzy-match t
+    :action '(("Insert email(s)" . contact-insert-email)
+              ("Open contact" . (lambda (contact)
+                                  (find-file (cdr (assoc "FILE" contact)))
+                                  (goto-char (cdr (assoc "POSITION" contact)))
+                                  (outline-show-entry))) 
+              ("Insert \"name\" <email>" . contact-insert-name-email)
+              ("Copy \"name\" <email>" . contact-copy-name-email)
+              ("Send email" . (lambda (contact)
+                                (compose-mail)
+                                (message-goto-to) 
+                                (insert
+                                 (mapconcat
+                                  'identity
+                                  (loop for contact in (helm-marked-candidates)
+                                        collect
+                                        (cdr (assoc "EMAIL" contact)))
+                                  ","))
+                                (message-goto-subject)))
+
+              ("Find emails to contact" . (lambda (contact)
+                                            (org-open-link-from-string
+                                             (format "[[mu4e:query:to:%s]]"
+                                                     (cdr (assoc "EMAIL" contact))))))
+              ("Find emails from contact" . (lambda (contact)
+                                              (org-open-link-from-string
+                                               (format "[[mu4e:query:from:%s]]"
+                                                       (cdr (assoc "EMAIL" contact)))))) 
+              ("Call" . (lambda (contact)
+                          (do-applescript
+                           (format "tell application \"Cisco Jabber\"
 	activate
 	tell application \"System Events\" to keystroke \"n\" using {shift down, command down}
 	tell application \"System Events\" to keystroke \"%s\"
 	tell application \"System Events\" to key code 36 #return
 end tell" (cdr (assoc "PHONE" contact))))))
-			       ("Open URL" . (lambda (contact)
-					       (let ((url (cdr (assoc "URL" contact))))
-						 (if url
-						     (browse-url url)
-						   (message "No URL found for %s." (cdr (assoc "NAME" contact)))))))
-			       ("Insert link" . (lambda (contact)
-						  "Insert an org link for CONTACT or helm-marked-candidates."
-						  (insert (mapconcat 'identity (loop for contact in (helm-marked-candidates)
-										     collect
-										     (format
-										      "[[contact:%s][%s]]"
-										      (or (cdr (assoc "ID" contact))
-											  (with-current-buffer (find-file-noselect (cdr (assoc "FILE" contact)))
-											    (save-excursion
-											      (goto-char (cdr (assoc "POSITION" contact)))
-											      (prog1
-												  (org-id-get-create)
-												(save-buffer)
-												(contacts-update-cache)))))
-										      (cdr (assoc "NAME" contact))))
-								     ", "))))
-			       ("Add tag(s)" . (lambda (contact)
-						 (let ((tags (helm :sources `((name . "Tags")
-									      (candidates . ,(org-global-tags-completion-table contacts-files))
-									      (action . (lambda (tag)
-											  (helm-marked-candidates)))))))
-						   (loop for contact in (helm-marked-candidates)
-							 do
-							 (save-window-excursion
-							   (find-file (cdr (assoc "FILE" contact)))
-							   (goto-char (cdr (assoc "POSITION" contact)))
-							   (org-set-tags-to
-							    (-uniq (append (org-get-tags-at) tags)))
-							   (save-buffer)
-							   (contacts-update-cache))))))
-			       ("Find contact in open buffers" . (lambda (contact)
-								   (multi-occur
-								    (buffer-list)
-								    (concat
-								     (or (cdr (assoc "ID" contact)) "")
-								     "\\|"
-								     (cdr (assoc "NAME" contact))))))
-			       ;; this needs some more work. you can use it to customize on the fly what is done to the selected
-			       ;; Maybe it should just take property names instead of a sexp input. Or an s-format string.
-			       ("Apply and insert" . (lambda (contact) 
-						       (eval
-							`(insert (mapconcat
-								  (lambda (it)
-								    ,(read (read-string "Body (it):")))
-								  (helm-marked-candidates) 
-								  ,(if (> (length (helm-marked-candidates)) 1)
-								       (read-string "Separator:" nil nil ", ")
-								     ""))))))
-			       
+              ("Open URL" . (lambda (contact)
+                              (let ((url (cdr (assoc "URL" contact))))
+                                (if url
+                                    (browse-url url)
+                                  (message "No URL found for %s." (cdr (assoc "NAME" contact)))))))
+              ("Insert link" . (lambda (contact)
+                                 "Insert an org link for CONTACT or helm-marked-candidates."
+                                 (insert (mapconcat 'identity (loop for contact in (helm-marked-candidates)
+                                                                    collect
+                                                                    (format
+                                                                     "[[contact:%s][%s]]"
+                                                                     (or (cdr (assoc "ID" contact))
+                                                                         (with-current-buffer (find-file-noselect (cdr (assoc "FILE" contact)))
+                                                                           (save-excursion
+                                                                             (goto-char (cdr (assoc "POSITION" contact)))
+                                                                             (prog1
+                                                                                 (org-id-get-create)
+                                                                               (save-buffer)
+                                                                               (contacts-update-cache)))))
+                                                                     (cdr (assoc "NAME" contact))))
+                                                    ", "))))
+              ("Add tag(s)" . (lambda (contact)
+                                (let ((tags (helm :sources `((name . "Tags")
+                                                             (candidates . ,(org-global-tags-completion-table contacts-files))
+                                                             (action . (lambda (tag)
+                                                                         (helm-marked-candidates)))))))
+                                  (loop for contact in (helm-marked-candidates)
+                                        do
+                                        (save-window-excursion
+                                          (find-file (cdr (assoc "FILE" contact)))
+                                          (goto-char (cdr (assoc "POSITION" contact)))
+                                          (org-set-tags-to
+                                           (-uniq (append (org-get-tags-at) tags)))
+                                          (save-buffer)
+                                          (contacts-update-cache))))))
+              ("Find contact in open buffers" . (lambda (contact)
+                                                  (multi-occur
+                                                   (buffer-list)
+                                                   (concat
+                                                    (or (cdr (assoc "ID" contact)) "")
+                                                    "\\|"
+                                                    (cdr (assoc "NAME" contact))))))
+              ;; this needs some more work. you can use it to customize on the fly what is done to the selected
+              ;; Maybe it should just take property names instead of a sexp input. Or an s-format string.
+              ("Apply and insert" . (lambda (contact) 
+                                      (eval
+                                       `(insert (mapconcat
+                                                 (lambda (it)
+                                                   ,(read (read-string "Body (it):")))
+                                                 (helm-marked-candidates) 
+                                                 ,(if (> (length (helm-marked-candidates)) 1)
+                                                      (read-string "Separator:" nil nil ", ")
+                                                    ""))))))))) 
 
-			       )))
-		   ((name . "New contact")
-		    (dummy)
-		    (action . (lambda (pattern)
-				(find-file (completing-read "Contact file: " contacts-files))
-				(goto-char (point-max))
-				(insert (format "\n* %s\n" input))))))))
+(defun helm-contacts ()
+  (interactive)
+  (helm :sources helm-contacts-source))
 
 
 ;; * Speed keys
