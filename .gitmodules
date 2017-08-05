@@ -7,3 +7,6 @@
 [submodule "techela"]
 	path = techela
 	url = https://github.com/jkitchin/techela
+[submodule "ox-clip"]
+	path = ox-clip
+	url = http://github.com/jkitchin/ox-clip
