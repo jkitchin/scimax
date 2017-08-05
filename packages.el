@@ -461,7 +461,7 @@
 
 (use-package ox-clip
   :ensure nil
-  :load-path scimax-dir
+  :load-path (expand-file-name "ox-clip" scimax-dir)
   :bind ("H-k" . ox-clip-formatted-copy))
 
 (use-package scimax-email
