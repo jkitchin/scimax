@@ -10,3 +10,6 @@
 [submodule "ox-clip"]
 	path = ox-clip
 	url = http://github.com/jkitchin/ox-clip
+[submodule "ox-ipynb"]
+	path = ox-ipynb
+	url = git@github.com:jkitchin/ox-ipynb.git
