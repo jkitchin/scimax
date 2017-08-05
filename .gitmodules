@@ -9,7 +9,7 @@
 	url = https://github.com/jkitchin/techela
 [submodule "ox-clip"]
 	path = ox-clip
-	url = http://github.com/jkitchin/ox-clip
+	url = https://github.com/jkitchin/ox-clip
 [submodule "ox-ipynb"]
 	path = ox-ipynb
-	url = git@github.com:jkitchin/ox-ipynb.git
+	url = https://github.com/jkitchin/ox-ipynb
