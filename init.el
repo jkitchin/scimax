@@ -60,6 +60,11 @@
 (require 'bootstrap)
 (require 'packages)
 
+;; it appears this help library is not loaded fully in the emacs-win
+;; directory. See issue #119. This appears to fix that.
+(when (file-directory-p (expand-file-name "emacs-win" scimax-dir))
+  (load-library "help"))
+
 (provide 'init)
 
 ;;; init.el ends here
