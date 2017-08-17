@@ -789,10 +789,15 @@ The name should be unique to the buffer."
   "Return current session.
 I wrote this because params returns none instead of nil. But in
 that case the process that ipython uses appears to be default."
-  (let ((session (cdr (assoc :session (third (org-babel-get-src-block-info))))))
-    (if (and session (stringp session) (not (string= "none" session)))
-	session
-      "default")))
+  (if-let (info (org-babel-get-src-block-info))
+      (let* ((args (third info))
+             (session (cdr (assoc :session args))))
+        (if (and session
+                 (stringp session)
+                 (not (string= "none" session)))
+            session
+          "default"))
+    (error "Not on a src block")))
 
 ;;** async links
 
@@ -1123,17 +1128,20 @@ This function is used in a C-c C-c hook to make it work like other org src block
 
 ;;** buffer functions
 
-(defun org-babel-execute-ipython-buffer-to-point-async ()
-  "Execute all the ipython blocks in the buffer up to point asynchronously."
+(defun org-babel-execute-ipython-buffer-to-point ()
+  "Execute all the ipython blocks in the buffer up to point."
   (interactive)
-  (let ((session (org-babel-get-session)))
-    (org-block-map
-     (lambda ()
-       (when (and (string= (first (org-babel-get-src-block-info)) "ipython")
-		  (string= (org-babel-get-session) session))
-	 (org-babel-execute-async:ipython)))
-     (point-min)
-     (point))))
+  (let ((s (org-babel-get-session))
+        (p (point)))
+    (save-excursion
+      (goto-char (point-min))
+      (while (and (org-babel-next-src-block)
+                  (<= (point) p))
+        (and (string= (first (org-babel-get-src-block-info)) "ipython")
+             (string= (org-babel-get-session) s)
+             (if org-babel-async-ipython
+                 (org-babel-execute-async:ipython)
+               (org-babel-execute-src-block)))))))
 
 
 (defun org-babel-execute-ipython-buffer-async ()

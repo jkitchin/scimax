@@ -13,3 +13,9 @@
 [submodule "ox-ipynb"]
 	path = ox-ipynb
 	url = https://github.com/jkitchin/ox-ipynb
+[submodule "emacs-win"]
+	path = emacs-win
+	url = https://github.com/jkitchin/emacs-win
+[submodule "elpa"]
+	path = elpa
+	url = https://github.com/jkitchin/scimax-win-elpa
