@@ -643,7 +643,9 @@ This can provide information about the type, etc."
 	(`prefix (save-excursion
 		   (let ((p (point)))
 		     (re-search-backward " \\|[[,({]\\|^")
-		     (s-trim (buffer-substring-no-properties p (+ 1 (point)))))))
+		     (s-trim (buffer-substring-no-properties p (if (bolp)
+                                                       (point)
+                                                     (1+ (point))))))))
 	(`candidates (first (ob-ipython-complete)))
 	;; sorted => t if the list is already sorted
 	(`sorted t)
