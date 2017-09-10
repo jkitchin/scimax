@@ -642,7 +642,7 @@ This can provide information about the type, etc."
 	 (company-begin-backend 'ob-ipython-company-backend))
 	(`prefix (save-excursion
 		   (let ((p (point)))
-		     (re-search-backward " \\|[[,({]\\|^")
+		     (re-search-backward " \\|[[,({'=]\\|^")
 		     (s-trim (buffer-substring-no-properties p (if (bolp)
                                                        (point)
                                                      (1+ (point))))))))
