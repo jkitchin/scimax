@@ -200,7 +200,7 @@ With a prefix BELOW move point to lower block."
     (beginning-of-line)
     (insert (format "#+END_SRC
 
-#+BEGIN_SRC %s %s\n" language parameters))
+#+BEGIN_SRC %s %s\n" language (or parameters "")))
     (beginning-of-line)
     (when (not below)
       (org-babel-previous-src-block))))
