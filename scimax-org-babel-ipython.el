@@ -1134,16 +1134,20 @@ This function is used in a C-c C-c hook to make it work like other org src block
   "Execute all the ipython blocks in the buffer up to point."
   (interactive)
   (let ((s (org-babel-get-session))
-        (p (point)))
+        (l (- (point-max) (point))))
     (save-excursion
       (goto-char (point-min))
       (while (and (org-babel-next-src-block)
-                  (<= (point) p))
-        (and (string= (first (org-babel-get-src-block-info)) "ipython")
-             (string= (org-babel-get-session) s)
-             (if org-babel-async-ipython
-                 (org-babel-execute-async:ipython)
-               (org-babel-execute-src-block)))))))
+                  (<= (point) (- (point-max) l)))
+        (when (and (string= (first (org-babel-get-src-block-info)) "ipython")
+                   (string= (org-babel-get-session) s))
+          (if org-babel-async-ipython
+              (progn
+                ;; wait until last cell is finished
+                (while (ob-ipython-get-running)
+                  (sleep-for 0.05))
+                (org-babel-execute-async:ipython))
+            (org-babel-execute-src-block)))))))
 
 
 (defun org-babel-execute-ipython-buffer-async ()
