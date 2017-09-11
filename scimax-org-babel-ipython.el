@@ -1151,14 +1151,19 @@ This function is used in a C-c C-c hook to make it work like other org src block
 
 
 (defun org-babel-execute-ipython-buffer-async ()
-  "Execute all the ipython blocks in the buffer asynchronously."
+  "Execute source code blocks in a buffer.
+Call `org-babel-execute-async:ipython' on every ipython source
+block in the current buffer."
   (interactive)
-  (org-block-map
-   (lambda ()
-     (when (string= (first (org-babel-get-src-block-info)) "ipython")
-       (org-babel-execute-async:ipython)))
-   (point-min)
-   (point-max)))
+  (org-save-outline-visibility t
+    (org-babel-map-executables nil
+      (when (string= (first (org-babel-get-src-block-info)) "ipython")
+        ;; wait until current cell is finished
+        ;; check the status every 0.05 second
+        (while (ob-ipython-get-running)
+          (sleep-for 0.05))
+        (org-babel-execute-async:ipython)))))
+
 
 
 (defun nuke-ipython ()
