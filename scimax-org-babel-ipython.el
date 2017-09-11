@@ -1165,6 +1165,17 @@ block in the current buffer."
         (org-babel-execute-async:ipython)))))
 
 
+(defun org-babel-execute-ipython-subtree-async ()
+  "Execute source code blocks in a subtree.
+Call `org-babel-execute-async:ipython' on every ipython source
+block in the current subtree."
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (org-narrow-to-subtree)
+      (org-babel-execute-ipython-buffer-async)
+      (widen))))
+
 
 (defun nuke-ipython ()
   "Kill everything."
