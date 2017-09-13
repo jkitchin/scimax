@@ -1187,9 +1187,29 @@ This function is used in a C-c C-c hook to make it work like other org src block
   (org-mode)
   (insert "[[elisp:nuke-ipython]]\n\n")
   (insert "[[elisp:org-babel-async-ipython-clear-queue]]\n\n")
+  (insert (format "\n* Variables
+
+- scimax-ipython-command :: %s
+- ob-ipython-buffer-unique-kernel :: %s
+- org-babel-ipython-debug :: %s
+- ob-ipython-number-on-exception :: %s
+- org-babel-async-ipython :: %s
+- ob-ipython-exception-results :: %s
+- org-babel-ipython-completion :: %s
+
+* Kernel
+"
+		  scimax-ipython-command
+		  ob-ipython-buffer-unique-kernel
+		  org-babel-ipython-debug
+		  ob-ipython-number-on-exception
+		  org-babel-async-ipython
+		  ob-ipython-exception-results
+		  org-babel-ipython-completion))
   (insert (format "Running in this buffer: %s\n" (ob-ipython-get-running)))
   (insert (format "Queue in this buffer: %S\n\n" (ob-ipython-queue)))
-  (insert "Overall running:\n")
+  (insert "Overall running in all kernels:
+  kernel: cell running\n")
   (ht-map (lambda (key value)
 	    (insert (format "  %s: %s\n" key value)))
 	  *org-babel-async-ipython-running-cell*)
