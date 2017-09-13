@@ -130,7 +130,8 @@ This is a macro so I don't have to quote the hydra name."
 ;;* scimax hydra
 
 (defhydra scimax (:color blue :inherit (scimax-base/heads)
-			 :columns 4 :body-pre (scimax-hydra-reset))
+                         :columns 4 :body-pre (scimax-hydra-reset)
+                         :idle 0.5)
   "scimax"
   ("a" (scimax-open-hydra scimax-applications/body) "Applications")
   ("b" (scimax-open-hydra scimax-buffers/body) "Buffers")
