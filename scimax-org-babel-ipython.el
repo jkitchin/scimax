@@ -642,7 +642,7 @@ This can provide information about the type, etc."
 	 (company-begin-backend 'ob-ipython-company-backend))
 	(`prefix (save-excursion
 		   (let ((p (point)))
-		     (re-search-backward " \\|[[,({]\\|^")
+		     (re-search-backward " \\|[[,({'=]\\|^")
 		     (s-trim (buffer-substring-no-properties p (if (bolp)
                                                        (point)
                                                      (1+ (point))))))))
@@ -1134,27 +1134,47 @@ This function is used in a C-c C-c hook to make it work like other org src block
   "Execute all the ipython blocks in the buffer up to point."
   (interactive)
   (let ((s (org-babel-get-session))
-        (p (point)))
+        (l (- (point-max) (point))))
     (save-excursion
       (goto-char (point-min))
       (while (and (org-babel-next-src-block)
-                  (<= (point) p))
-        (and (string= (first (org-babel-get-src-block-info)) "ipython")
-             (string= (org-babel-get-session) s)
-             (if org-babel-async-ipython
-                 (org-babel-execute-async:ipython)
-               (org-babel-execute-src-block)))))))
+                  (<= (point) (- (point-max) l)))
+        (when (and (string= (first (org-babel-get-src-block-info)) "ipython")
+                   (string= (org-babel-get-session) s))
+          (if org-babel-async-ipython
+              (progn
+                ;; wait until last cell is finished
+                (while (ob-ipython-get-running)
+                  (sleep-for 0.05))
+                (org-babel-execute-async:ipython))
+            (org-babel-execute-src-block)))))))
 
 
 (defun org-babel-execute-ipython-buffer-async ()
-  "Execute all the ipython blocks in the buffer asynchronously."
+  "Execute source code blocks in a buffer.
+Call `org-babel-execute-async:ipython' on every ipython source
+block in the current buffer."
   (interactive)
-  (org-block-map
-   (lambda ()
-     (when (string= (first (org-babel-get-src-block-info)) "ipython")
-       (org-babel-execute-async:ipython)))
-   (point-min)
-   (point-max)))
+  (org-save-outline-visibility t
+    (org-babel-map-executables nil
+      (when (string= (first (org-babel-get-src-block-info)) "ipython")
+        ;; wait until current cell is finished
+        ;; check the status every 0.05 second
+        (while (ob-ipython-get-running)
+          (sleep-for 0.05))
+        (org-babel-execute-async:ipython)))))
+
+
+(defun org-babel-execute-ipython-subtree-async ()
+  "Execute source code blocks in a subtree.
+Call `org-babel-execute-async:ipython' on every ipython source
+block in the current subtree."
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (org-narrow-to-subtree)
+      (org-babel-execute-ipython-buffer-async)
+      (widen))))
 
 
 (defun nuke-ipython ()
