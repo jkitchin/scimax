@@ -15,16 +15,12 @@ matrix:
 
   include:
     - os: linux
-      sudo: false
       env: EVM_EMACS=emacs-25.1-travis
     - os: linux
-      sudo: false
       env: EVM_EMACS=emacs-25.2-travis      
     - os: linux
-      sudo: false
       env: EVM_EMACS=emacs-git-snapshot-travis
     - os: osx
-      sudo: false
       env: OSX=true
 
 install:
@@ -33,6 +29,6 @@ install:
   - ./.travis-install.sh
     
 script:
-  - `evm bin` --version -l init.el
+  - EMACS=`evm bin` EMACS --version -l init.el
   - EMACS=`evm bin` make build
   - EMACS=`evm bin` make test
