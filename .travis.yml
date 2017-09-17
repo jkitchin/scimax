@@ -6,7 +6,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./install-scimax-mac.sh; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > x.sh && source ./x.sh; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then evm install $EVM_EMACS --use --skip; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cask; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then EMACS=`evm bin` cask; fi
 
 matrix:
   allow_failures:
@@ -31,5 +31,5 @@ install:
     
 script:
   - emacs --version -l init.el
-  - make build
-  - make test
+  - EMACS=`evm bin` make build
+  - EMACS=`evm bin` make test
