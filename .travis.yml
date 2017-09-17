@@ -19,6 +19,9 @@ matrix:
       env: EVM_EMACS=emacs-25.1-travis
     - os: linux
       sudo: false
+      env: EVM_EMACS=emacs-25.2-travis      
+    - os: linux
+      sudo: false
       env: EVM_EMACS=emacs-git-snapshot-travis
     - os: osx
       sudo: false
