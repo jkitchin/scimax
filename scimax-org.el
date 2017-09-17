@@ -1250,7 +1250,10 @@ Use a prefix arg to get regular RET. "
 
      ;; checkboxes too
      ((org-at-item-checkbox-p)
-      (org-insert-todo-heading nil))
+      (if (not (looking-back "^- \\[ \\] " (- (point) (line-beginning-position))))
+	  (org-insert-todo-heading nil)
+	(setf (buffer-substring (line-beginning-position) (point)) "")
+	(org-return)))
 
      ;; lists end with two blank lines, so we need to make sure we are also not
      ;; at the beginning of a line to avoid a loop where a new entry gets
