@@ -33,6 +33,6 @@ install:
   - ./.travis-install.sh
     
 script:
-  - emacs --version -l init.el
+  - `evm bin` --version -l init.el
   - EMACS=`evm bin` make build
   - EMACS=`evm bin` make test
