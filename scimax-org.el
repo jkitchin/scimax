@@ -678,25 +678,53 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 			(upcase (symbol-name type)))
 	       (interactive)
 	       (cond
+		;; We have an active region we want to make bold
 		((region-active-p)
-		 (goto-char (region-end))
-		 (insert ,end-marker)
-		 (goto-char (region-beginning))
-		 (insert ,beginning-marker)
-		 (re-search-forward (regexp-quote ,end-marker))
-		 (goto-char (match-end 0)))
+		 (let* ((bounds (list (region-beginning) (region-end))) 
+			(start (apply 'min bounds))
+			(end (apply 'max bounds))
+			(lines))
+
+		   ;; this makes sure we don't do something silly like bold part
+		   ;; of a word, and moves the boundaries to be inclusive of the
+		   ;; part before start and after end if we are not looking at a
+		   ;; space or start/end of a word
+		   (save-excursion
+		     (goto-char start)
+		     (unless (looking-at " \\|\\<")
+		       (backward-word)
+		       (setq start (point)))
+		     (goto-char end)
+		     (unless (looking-at " \\|\>")
+		       (forward-word)
+		       (setq end (point))))
+
+		   (setq lines
+			 (s-join "\n" (mapcar
+				       (lambda (s)
+					 (if (not (string= (s-trim s) ""))
+					     (concat ,beginning-marker
+						     (s-trim s)
+						     ,end-marker)
+					   s))
+				       (split-string (buffer-substring start end) "\n"))))
+		   (setf (buffer-substring start end) lines)
+		   (forward-char (length lines))))
+		;; We are on a word so mark it up
 		((thing-at-point 'word)
 		 (cond
+		  ;; beginning of a word
 		  ((looking-back " " 1)
 		   (insert ,beginning-marker)
 		   (re-search-forward "\\>")
 		   (insert ,end-marker))
+		  ;; in a word
 		  (t
 		   (re-search-backward "\\<")
 		   (insert ,beginning-marker)
 		   (re-search-forward "\\>")
 		   (insert ,end-marker))))
-
+		;; not at a word, insert markers and put point between them.
 		(t
 		 (insert ,(concat beginning-marker end-marker))
 		 (backward-char ,(length end-marker)))))))
