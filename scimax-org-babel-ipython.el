@@ -1177,23 +1177,36 @@ block in the current subtree."
       (widen))))
 
 
-(defun nuke-ipython ()
-  "Kill everything."
-  (interactive)
-  (loop for buf in (buffer-list)
+(defun nuke-ipython (everything)
+  "Kill everything associated with the current buffer.
+With prefix arg, kill everything."
+  (interactive "p")
+  (loop for bufname in (list "*org-babel-ipython-debug*"
+			     (format "*ob-ipython-kernel-%s" (if-let (bf (buffer-file-name))
+								 (md5 (expand-file-name bf))
+							       "scratch")))
 	do
-	(when (or (s-starts-with? "*ob-ipython" (buffer-name buf))
-		  (s-starts-with? "*org-babel-ipython-debug*" (buffer-name buf))
-		  (s-starts-with? "*Python" (buffer-name buf)))
-	  (message "killing %s" buf)
-	  (kill-buffer buf)))
-  (loop for proc in `("localhost"
-		      "client-driver"
-		      ,(format "kernel-%s" (org-babel-get-session)))
+	(when-let (buf (get-buffer bufname)) (kill-buffer buf)))
+  (loop for proc in (list (format "kernel-%s" (if-let (bf (buffer-file-name))
+						  (md5 (expand-file-name bf))
+						"scratch")))
 	do
 	(when (get-process proc)
 	  (ob-ipython-log "Killing proc: %s" proc)
 	  (delete-process proc)))
+  ;; this is a little more aggressive at clearing out buffers and processes
+  (when everything
+    (loop for bufname in (list "*ob-ipython-client-driver*")
+	  do
+	  (when-let (buf (get-buffer bufname)) (kill-buffer buf)))
+
+    (loop for proc in '("localhost"
+			"client-driver")
+	  do
+	  (when (get-process proc)
+	    (ob-ipython-log "Killing proc: %s" proc)
+	    (delete-process proc))))
+  
   (org-babel-async-ipython-clear-queue)
   (setq header-line-format nil))
 
