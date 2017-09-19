@@ -948,7 +948,9 @@ Fall back to `tex-count-words'"
 
 ;; * Sync-mode
 (define-minor-mode ox-manuscript-sync-mode
-  "Minor mode for synchronizing an org-file and pdf."
+  "Minor mode for synchronizing an org-file and pdf.
+See http://pragmaticemacs.com/emacs/speed-up-pdf-export-from-org-mode-with-latexmk/
+for a recipe to use for the export."
   :init-value nil
   :lighter " sync"
   ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Minor-Mode-Conventions.html
