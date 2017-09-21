@@ -128,6 +128,9 @@ evaluated. The function takes no arguments."
 				    val)))
 	   (overlay-put ov 'ov-highlight t)
 	   (overlay-put ov 'ov-type ,label)
+	   ;; This allows you to undo the insertion.
+	   (add-to-list 'buffer-undo-list
+			`(apply delete-overlay ,ov))
 	   (set-buffer-modified-p t)
 	   (let ((p (point)))
 	     (when (mark)
