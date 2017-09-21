@@ -387,11 +387,21 @@ With numeric prefix set font to that size."
 
 
 ;;* Clearing highlights
+
+(defun ov-undo-delete (props)
+  "Function for undoing the deletion of an overlay."
+  (let ((ov (make-overlay (first props) (second props))))
+    (apply 'ov-put ov (third props))))
+
 ;;;###autoload
 (defun ov-highlight-clear ()
   "Clear highlight at point."
   (interactive)
   (when-let (ov (ov-at))
+    (add-to-list 'buffer-undo-list
+		 `(apply ov-undo-delete ,(list (overlay-start ov)
+					       (overlay-end ov)
+					       (overlay-properties ov))))
     (delete-overlay ov))
   (set-buffer-modified-p t)
   (let ((buf (get-buffer "*ov-highlights*")))
