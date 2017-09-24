@@ -257,7 +257,7 @@ Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-r
 					  value))
 			     ('text/latex (format
 					   "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
-					   values))
+					   value))
 			     ('image/png (concat (ob-ipython-inline-image value) "\n"))))
             (select-result-type (type result)
 				(if type
