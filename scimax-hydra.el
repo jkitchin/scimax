@@ -392,8 +392,10 @@ _p_: ffap
   ("l" (scimax-open-hydra scimax-jump-line/body) "Line")
   ("k" ace-link "Link")
   ("o" (scimax-open-hydra scimax-jump-org/body) "Org")
-  ("s" (scimax-open-hydra scimax-jump-symbol/body) "Symbol" )
-  ("w" (scimax-open-hydra scimax-jump-word/body) "Word"))
+  ("p" avy-jump-to-paragraph "Paragraph")
+  ("s" avy-jump-to-sentence "Sentence")
+  ("w" (scimax-open-hydra scimax-jump-word/body) "Word")
+  ("y" (scimax-open-hydra scimax-jump-symbol/body) "Symbol" ))
 
 
 (defhydra scimax-jump-char (:color blue :inherit (scimax-base/heads) :columns 3)

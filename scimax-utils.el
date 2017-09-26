@@ -137,6 +137,42 @@ sentence in the region."
 
 (global-set-key (kbd "M-<backspace>") 'backward-kill-sentence)
 
+
+(defun avy-jump-to-sentence ()
+  "Jump to a sentence with avy."
+  (interactive)
+  (avy-with my-jumper
+    (avy--process
+     (let (p
+	   (e (window-end)))
+       (save-excursion
+	 (goto-char (window-start))
+	 (push (point) p)
+	 (while (< (point) e)
+	   (forward-sentence)
+	   (save-excursion
+	     (backward-sentence)
+	     (push (point) p)))
+	 (reverse p)))
+     (avy--style-fn avy-style))))
+
+(defun avy-jump-to-paragraph ()
+  "Jump to a paragraph with avy."
+  (interactive)
+  (avy-with my-jumper
+    (avy--process
+     (let (p
+	   (e (window-end)))
+       (save-excursion
+	 (goto-char (window-start))
+	 (push (point) p)
+	 (while (< (point) e)
+	   (forward-paragraph)
+	   (push (point) p))
+	 (reverse p)))
+     (avy--style-fn avy-style))))
+
+
 ;; * The end
 (provide 'scimax-utils)
 
