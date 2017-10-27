@@ -173,6 +173,13 @@ sentence in the region."
      (avy--style-fn avy-style))))
 
 
+;; * profile me
+(require 'esup)
+
+(defun scimax-profile ()
+  "Run `esup' on the scimax init file to profile it."
+  (esup (expand-file-name "init.el" scimax-dir)))
+
 ;; * The end
 (provide 'scimax-utils)
 
