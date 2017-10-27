@@ -364,8 +364,11 @@
 	bibtex-autokey-titleword-separator "-"
 	bibtex-autokey-titlewords 2
 	bibtex-autokey-titlewords-stretch 1
-	bibtex-autokey-titleword-length 5)
-  (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body))
+	bibtex-autokey-titleword-length 5
+	org-ref-bibtex-hydra-key-binding (kbd "H-b"))
+  ;; (define-key bibtex-mode-map org-ref-bibtex-hydra-key-binding 'org-ref-bibtex-hydra/body)
+  ;; (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body)
+  )
 
 (use-package org-ref-scopus
   :ensure nil
@@ -494,12 +497,6 @@
   :load-path scimax-dir
   :bind ("H-w" . words-hydra/body))
 
-(use-package ov-highlighter
-  :ensure nil
-  :load-path scimax-dir
-  :bind ("H-h" . ov-highlighter/body)
-  :init (require 'ov-highlighter))
-
 (use-package ore
   :ensure nil
   :load-path scimax-dir
@@ -524,6 +521,14 @@
 (use-package kitchingroup
   :ensure nil
   :load-path scimax-dir)
+
+(use-package ov-highlight
+  :ensure nil
+  :load-path (lambda () (expand-file-name "ov-highlight" scimax-dir))
+  :bind ("H-h" . ov-highlight/body)
+  :init
+  (add-to-list 'load-path
+	       (expand-file-name "ov-highlight" scimax-dir)))
 
 
 ;; * User packages
