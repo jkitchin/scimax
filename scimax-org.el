@@ -819,18 +819,20 @@ F5 inserts the entity code."
 			     when (not (stringp element))
 			     collect
 			     (cons 
-			      (format "%10s | %s | %s | %s"
-				      (car element) ;name
-				      (nth 1 element) ; latex
-				      (nth 3 element) ; html
-				      (nth 6 element)) ;utf-8
+			      (format "%20s | %20s | %20s | %s"
+				      (first element) ;name
+				      (second element) ; latex
+				      (fourth element) ; html
+				      (seventh element)) ;utf-8
 			      element))
 	    :require-match t
-	    :action '(1
-		      ("u" (lambda (element) (insert (nth 6 (cdr element)))) "utf-8")
-		      ("o" (lambda (element) (insert "\\" (cadr element))) "org-entity")
-		      ("l" (lambda (element) (insert (nth 1 (cdr element)))) "latex")
-		      ("h" (lambda (element) (insert (nth 3 (cdr element)))) "html"))))
+	    :action '(1 
+		      ("u" (lambda (candidate) (insert (seventh (cdr candidate)))) "utf-8")
+		      ("o" (lambda (candidate) (insert "\\" (first (cdr candidate)))) "org-entity")
+		      ("l" (lambda (candidate) (insert (second (cdr candidate)))) "latex")
+		      ("h" (lambda (candidate) (insert (fourth (cdr candidate)))) "html")
+		      ("a" (lambda (candidate) (insert (fifth (cdr candidate)))) "ascii")
+		      ("L" (lambda (candidate) (insert (sixth (cdr candidate))) "Latin-1")))))
 
 
 ;; * Font-lock
