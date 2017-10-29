@@ -533,7 +533,7 @@ This can provide information about the type, etc."
   (save-restriction
     ;; Note you may be in a special edit buffer in which case it is not
     ;; necessary to narrow.
-    (when (org-in-src-block-p) (org-narrow-to-block))
+    (when (org-in-ipython-block-p) (org-narrow-to-block))
     (if (ob-ipython-get-running)
 	(message "The kernel is busy running %s. Try later." (cdr (ob-ipython-get-running)))
       
@@ -557,7 +557,7 @@ This can provide information about the type, etc."
   (save-restriction
     ;; Note you may be in a special edit buffer in which case it is not
     ;; necessary to narrow.
-    (when (org-in-src-block-p) (org-narrow-to-block))
+    (when (org-in-ipython-block-p) (org-narrow-to-block))
     (-if-let (result (->> (ob-ipython--inspect buffer
 					       (- pos (point-min)))
 			  (assoc 'text/plain)
@@ -602,7 +602,7 @@ This can provide information about the type, etc."
   (if (ob-ipython-get-running)
       (message "The kernel is busy running %s." (cdr (ob-ipython-get-running)))
     (save-restriction
-      (when (org-in-src-block-p) (org-narrow-to-block))
+      (when (org-in-ipython-block-p) (org-narrow-to-block))
       (-if-let (result (->> (ob-ipython--complete-request
 			     (buffer-substring-no-properties (point-min) (point-max))
 			     (- (point) (point-min)))
@@ -1017,36 +1017,35 @@ It replaces the output in the results."
 (defun org-babel-execute-async:ipython ()
   "Execute the block at point asynchronously."
   (interactive)
-  (when (and (org-in-src-block-p)
-	     (string= "ipython" (first (org-babel-get-src-block-info))))
+  (when (org-in-ipython-block-p)
     (let* ((name (org-babel-get-name-create))
-	   (params (third (org-babel-get-src-block-info)))
-	   (session (cdr (assoc :session params)))
-	   (results (cdr (assoc :results params)))
-	   (result-type (cdr (assoc :result-type params)))
-	   (queue-link (format "[[async-queued: %s %s]]"
-			       (org-babel-get-name-create) result-type)))
+           (params (third (org-babel-get-src-block-info)))
+           (session (cdr (assoc :session params)))
+           (results (cdr (assoc :results params)))
+           (result-type (cdr (assoc :result-type params)))
+           (queue-link (format "[[async-queued: %s %s]]"
+                               (org-babel-get-name-create) result-type)))
       (org-babel-ipython-initiate-session session params)
 
       ;; Check the current results for inline images and delete the files.
       (let ((location (org-babel-where-is-src-block-result))
-	    current-results)
-	(when location
-	  (save-excursion
-	    (goto-char location)
-	    (when (looking-at (concat org-babel-result-regexp ".*$"))
-	      (setq current-results (buffer-substring-no-properties
-				     location
-				     (save-excursion
-				       (forward-line 1) (org-babel-result-end)))))))
-	(with-temp-buffer
-	  (insert (or current-results ""))
-	  (goto-char (point-min))
-	  (while (re-search-forward
-		  "\\[\\[file:\\(ipython-inline-images/ob-ipython-.*?\\)\\]\\]" nil t)
-	    (let ((f (match-string 1)))
-	      (when (file-exists-p f)
-		(delete-file f))))))
+            current-results)
+        (when location
+          (save-excursion
+            (goto-char location)
+            (when (looking-at (concat org-babel-result-regexp ".*$"))
+              (setq current-results (buffer-substring-no-properties
+                                     location
+                                     (save-excursion
+                                       (forward-line 1) (org-babel-result-end)))))))
+        (with-temp-buffer
+          (insert (or current-results ""))
+          (goto-char (point-min))
+          (while (re-search-forward
+                  "\\[\\[file:\\(ipython-inline-images/ob-ipython-.*?\\)\\]\\]" nil t)
+            (let ((f (match-string 1)))
+              (when (file-exists-p f)
+                (delete-file f))))))
 
       ;; Now we run the async. First remove the old results and insert a link.
       (org-babel-remove-result)
@@ -1092,13 +1091,22 @@ It replaces the output in the results."
 	  (when (get-buffer buf)
 	    (kill-buffer buf)))))
 
+(defun org-in-ipython-block-p (&optional inside)
+  "Whether point is in a code source block.
+When INSIDE is non-nil, don't consider we are within a src block
+when point is at #+BEGIN_SRC or #+END_SRC."
+  (let ((case-fold-search t))
+    (or (and (equal (get-char-property (point) 'lang) "ipython"))
+        (and (not inside)
+             (save-excursion
+               (beginning-of-line)
+               (looking-at-p ".*#\\+\\(begin\\|end\\)_src ipython"))))))
 
 (defun scimax-execute-ipython-block ()
   "Execute the block at point.
 If the variable `org-babel-async-ipython' is non-nil, execute it asynchronously.
 This function is used in a C-c C-c hook to make it work like other org src blocks."
-  (when (and (org-in-src-block-p)
-	     (string= "ipython" (first (org-babel-get-src-block-info))))
+  (when (org-in-ipython-block-p)
 
     (when ob-ipython-buffer-unique-kernel
       ;; Use buffer local variables for this.
@@ -1161,9 +1169,7 @@ block in the current buffer."
   (interactive)
   (org-save-outline-visibility t
     (org-babel-map-executables nil
-      (when (string= (first (org-babel-get-src-block-info)) "ipython")
-        ;; wait until current cell is finished
-        ;; check the status every 0.05 second
+      (when (org-in-ipython-block-p)
         (while (ob-ipython-get-running)
           (sleep-for 0.05))
         (org-babel-execute-async:ipython)))))

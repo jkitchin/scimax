@@ -412,7 +412,7 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
 	      (cond
 	       ((and lang (not (string= lang "")) org-src-fontify-natively)
 		(org-src-font-lock-fontify-block lang block-start block-end)
-		(add-text-properties beg1 block-end '(src-block t)))
+		(add-text-properties beg1 block-end (list 'src-block t 'lang (substring-no-properties lang))))
 	       (quoting
 		(add-text-properties beg1 (min (point-max) (1+ end1))
 				     (let ((face-name (intern (format "org-block-%s" lang))))
