@@ -110,6 +110,10 @@ name that is unique within the document. You might also like
 `org-id-uuid'."
   :group 'ob-ipython)
 
+(defcustom org-babel-ipython-inline-image-dir "ipython-inline-images"
+  "Directory to store ipython generated images."
+  :group 'ob-ipython)
+
 ;;; Code:
 
 (add-to-list 'org-structure-template-alist
@@ -237,7 +241,7 @@ With a prefix BELOW move point to lower block."
   "Write the B64-STRING to a file.
 Returns an org-link to the file."
   (let* ((f (md5 b64-string))
-	 (d "ipython-inline-images")
+	 (d org-babel-ipython-inline-image-dir)
 	 (tfile (concat d "/ob-ipython-" f ".png"))
 	 (link (format "[[file:%s]]" tfile)))
     (unless (file-directory-p d)
