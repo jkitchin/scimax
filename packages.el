@@ -162,6 +162,8 @@
   :config
   (elpy-enable))
 
+(use-package esup)
+
 ;; Provides functions for working with files
 (use-package f)
 
