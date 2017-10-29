@@ -633,29 +633,31 @@ This can provide information about the type, etc."
 
 (define-key org-mode-map (kbd "s-.") #'ob-ipython-complete-ivy)
 
+(defvar ob-ipython-syntax-table
+  (make-syntax-table org-mode-syntax-table))
+
+(modify-syntax-entry ?. "_." ob-ipython-syntax-table)
+(modify-syntax-entry ?= ".=" ob-ipython-syntax-table)
+(modify-syntax-entry ?' "|'" ob-ipython-syntax-table)
 
 ;; This is a company backend to get completion while typing in org-mode.
 (defun ob-ipython-company-backend (command &optional arg &rest ignored)
   (interactive (list 'interactive))
-  (if (and
-       (not (ob-ipython-get-running))
-       (org-in-src-block-p)
-       (member (first (org-babel-get-src-block-info)) '("python" "ipython")))
-      (pcase command
-	(`interactive
-	 (company-begin-backend 'ob-ipython-company-backend))
-	(`prefix (save-excursion
-		   (let ((p (point)))
-		     (re-search-backward " \\|[[,({'=]\\|^")
-		     (s-trim (buffer-substring-no-properties p (if (bolp)
-                                                       (point)
-                                                     (1+ (point))))))))
-	(`candidates (first (ob-ipython-complete)))
-	;; sorted => t if the list is already sorted
-	(`sorted t)
-	;; duplicates => t if there could be duplicates
-	(`duplicates nil)
-	(`require-match 'never))
+  (if (and (not (ob-ipython-get-running))
+           (member (get-char-property (point) 'lang)
+                   '("ipython" "python")))
+      (cl-case command
+        (interactive (company-begin-backend 'ob-ipython-company-backend))
+        (prefix (with-syntax-table ob-ipython-syntax-table
+                  (when (looking-back "\\_<[a-zA-Z][a-zA-Z0-9._]*"
+                                      (line-beginning-position))
+                    (match-string 0))))
+        (candidates (car (ob-ipython-complete)))
+        ;; sorted => t if the list is already sorted
+        (sorted t)
+        ;; duplicates => t if there could be duplicates
+        (duplicates nil)
+        (require-match 'never))
     nil))
 
 
