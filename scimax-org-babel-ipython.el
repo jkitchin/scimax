@@ -783,21 +783,22 @@ The name should be unique to the buffer."
 
 (defun org-babel-get-name-create ()
   "Get the name of a src block or add a name to the src block at point."
-  (if-let (name (fifth (org-babel-get-src-block-info)))
-      name
-    (save-excursion
-      (let ((el (org-element-context))
-	    (id (funcall org-babel-ipython-name-generator)))
-	(goto-char (org-element-property :begin el))
-	(insert (format "#+NAME: %s\n" id))
-	id))))
+  (let* ((elem (org-element-at-point))
+         (name (org-element-property :name elem)))
+    (or name
+        (let ((beg (org-element-property :begin elem))
+              (id (funcall org-babel-ipython-name-generator)))
+          (save-excursion
+            (goto-char beg)
+            (insert (format "#+NAME: %s\n" id)))
+          id))))
 
 
 (defun org-babel-get-session ()
   "Return current session.
 I wrote this because params returns none instead of nil. But in
 that case the process that ipython uses appears to be default."
-  (if-let (info (org-babel-get-src-block-info))
+  (if-let (info (org-babel-get-src-block-info 'light))
       (let* ((args (third info))
              (session (cdr (assoc :session args))))
         (if (and session
