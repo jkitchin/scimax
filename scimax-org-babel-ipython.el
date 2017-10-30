@@ -255,13 +255,12 @@ Returns an org-link to the file."
 Return RESULT-TYPE if specified. This comes from a header argument :ob-ipython-results"
   (cl-flet ((format-result (type value)
 			   (case type
+           ('text/org (concat value "\n"))
 			     ('text/plain (concat value "\n"))
 			     ('text/html (format
 					  "#+BEGIN_EXPORT HTML\n%s\n#+END_EXPORT\n"
 					  value))
-			     ('text/latex (format
-					   "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT\n"
-					   value))
+			     ('text/latex (concat value "\n"))
 			     ('image/png (concat (ob-ipython-inline-image value) "\n"))))
             (select-result-type (type result)
 				(if type
@@ -884,46 +883,49 @@ that case the process that ipython uses appears to be default."
 (defun org-babel-async-ipython-process-queue ()
   "Run the next job in the queue."
   (if-let ((not-running (not (ob-ipython-get-running)))
-	   (cell (ob-ipython-pop-queue))
-	   (buffer (car cell))
-	   (name (cdr cell)))
+           (cell (ob-ipython-pop-queue))
+           (buffer (car cell))
+           (name (cdr cell)))
       (save-window-excursion
-	(with-current-buffer buffer
-	  (org-babel-goto-named-src-block name)
-	  (ob-ipython-set-running-cell cell)
-	  (ob-ipython-log "Setting up %S to run." cell)
-	  (let* ((running-link (format
-				"[[async-running: %s %s]]"
-				(org-babel-src-block-get-property 'org-babel-ipython-name)
-				(org-babel-src-block-get-property 'org-babel-ipython-result-type)))
-		 (params (third (org-babel-get-src-block-info)))
-		 (session (org-babel-get-session))
-		 (body (org-babel-expand-body:generic
-			(s-join
-			 "\n"
-			 (append
-			  (org-babel-variable-assignments:python
-			   (third (org-babel-get-src-block-info)))
-			  (list
-			   (encode-coding-string
-			    (org-remove-indentation
-			     (org-element-property :value (org-element-context))) 'utf-8))))
-			params)))
-	    (ob-ipython--execute-request-asynchronously
-	     body session)
+        (with-current-buffer buffer
+          (org-babel-goto-named-src-block name)
+          (ob-ipython-set-running-cell cell)
+          (ob-ipython-log "Setting up %S to run." cell)
+          (let* ((running-link (format
+                                "[[async-running: %s %s]]"
+                                (org-babel-src-block-get-property 'org-babel-ipython-name)
+                                (org-babel-src-block-get-property 'org-babel-ipython-result-type)))
+                 (info (org-babel-get-src-block-info))
+                 (params (third info))
+                 (body
+                  (let ((coderef (nth 6 info))
+                        (expand
+                         (if (org-babel-noweb-p params :eval)
+                             (org-babel-expand-noweb-references info)
+                           (nth 1 info))))
+                    (if (not coderef) expand
+                      (replace-regexp-in-string
+                       (org-src-coderef-regexp coderef) "" expand nil nil 1))))
+                 (result-params (cdr (assoc :result-params params)))
+                 (session (--when-let (cdr (assoc :session params))
+                            (or (and (not (equal it "none")) it)
+                                "default")))
+                 (var-lines (org-babel-variable-assignments:python params))
+                 (body (encode-coding-string
+                        (org-babel-expand-body:generic
+                         (org-remove-indentation body) params var-lines)
+                        'utf-8)))
+            (ob-ipython--execute-request-asynchronously body session)
 
-	    (org-babel-remove-result)
-	    (org-babel-insert-result
-	     running-link
-	     (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
-	    (ob-ipython--normalize-session
-	     (cdr (assoc :session (third (org-babel-get-src-block-info)))))
-	    running-link)))
+            (org-babel-remove-result)
+            (org-babel-insert-result running-link result-params)
+            (ob-ipython--normalize-session session)
+            running-link)))
     (ob-ipython-log "Cannot process a queue.
     Running: %s
     Queue: %s"
-		    (ob-ipython-get-running)
-		    (ob-ipython-queue))
+                    (ob-ipython-get-running)
+                    (ob-ipython-queue))
     nil))
 
 
@@ -979,7 +981,7 @@ It replaces the output in the results."
                                     json))))
          (result (cdr (assoc :result ret)))
          (output (cdr (assoc :output ret)))
-         params
+         info params result-params result-mime-type
          current-cell name
          (result-type))
 
@@ -991,23 +993,39 @@ It replaces the output in the results."
         (setq result-type (org-babel-src-block-get-property 'org-babel-ipython-result-type))
         (org-babel-src-block-put-property 'org-babel-ipython-executed  t)
         (ob-ipython-log "Got a result-type of %s\n return from the kernel:  %S" result-type ret)
-        (setq params (third (org-babel-get-src-block-info)))
+        (setq info (org-babel-get-src-block-info))
+        (setq params (third info))
+        (setq result-params (cdr (assoc :result-params params)))
+        (setq result-mime-type (cdr (assoc :ob-ipython-results params)))
         (org-babel-remove-result)
         (cond
          ((string= "output" result-type)
-          (let ((res (concat
-                      output
-                      (ob-ipython--format-result
-                       result (cdr (assoc :ob-ipython-results params))))))
-            (when (not (string= "" (s-trim res)))
-              (org-babel-insert-result
-               (s-trim res)
-               (cdr (assoc :result-params (third (org-babel-get-src-block-info))))))))
+          (let (image-p)
+            (-when-let (res (or (when (not (s-blank-str? output))
+                                  (format "#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE\n" output))
+                                (-when-let (vals (-filter (lambda (e) (eq (car e) 'text/org)) result))
+                                  (mapconcat #'cdr vals "\n\n"))
+                                (-when-let* ((vals (-filter (lambda (e) (eq (car e) 'text/plain)) result))
+                                             (joined (mapconcat #'cdr vals "\n"))
+                                             (not-plot-p (not (s-contains? "<matplotlib.figure.Figure" joined))))
+                                  (format "#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE\n" joined))
+                                (-when-let (vals (-filter (lambda (e) (eq (car e) 'image/png)) result))
+                                  (setq image-p t)
+                                  (mapconcat (lambda (e) (ob-ipython-inline-image (cdr e))) vals "\n"))
+                                (-when-let (vals (-filter (lambda (e) (eq (car e) 'text/latex)) result))
+                                  (format "#+BEGIN_LATEX\n%s\n#+END_LATEX\n" (mapconcat #'cdr vals "\n")))
+                                (-when-let (vals (-filter (lambda (e) (eq (car e) 'text/html)) result))
+                                  (mapconcat #'cdr vals "\n"))))
+              (org-babel-insert-result res result-params))
+            (when image-p (org-redisplay-inline-images))))
          ((string= "value" result-type)
-          (org-babel-insert-result
-           (cdr (assoc 'text/plain result))
-           (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))))
-        (org-redisplay-inline-images))
+          (let ((res (ob-ipython--format-result
+                      result result-mime-type)))
+            (when (not (s-blank-str? res))
+              (org-babel-insert-result (s-chomp (s-chop-prefix "\n" res)) result-params info))
+            ;; If result contains image, redisplay the images
+            (when (s-contains? "[[file:" res)
+              (org-redisplay-inline-images))))))
       (ob-ipython-set-running-cell nil)
       (setq header-line-format (format "The kernel is %s" (ob-ipython-get-kernel-name))))
 
@@ -1060,15 +1078,15 @@ It replaces the output in the results."
 
       (org-babel-insert-result
        queue-link
-       (cdr (assoc :result-params (third (org-babel-get-src-block-info)))))
+       (cdr (assoc :result-params params)))
 
       (ob-ipython-queue-cell (cons (current-buffer) name))
       (ob-ipython-log "Added %s to the queue.
     The current running cell is %s.
     The queue contains %S."
-		      name
-		      (ob-ipython-get-running)
-		      (ob-ipython-queue))
+                      name
+                      (ob-ipython-get-running)
+                      (ob-ipython-queue))
       ;; It appears that the result of this function is put into the results at this point.
       (or
        (org-babel-async-ipython-process-queue)
