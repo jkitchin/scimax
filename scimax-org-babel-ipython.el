@@ -113,6 +113,7 @@ name that is unique within the document. You might also like
 (defcustom org-babel-ipython-inline-image-dir "ipython-inline-images"
   "Directory to store ipython generated images."
   :group 'ob-ipython)
+(make-variable-buffer-local 'org-babel-ipython-inline-image-dir)
 
 ;;; Code:
 
