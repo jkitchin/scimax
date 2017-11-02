@@ -343,7 +343,7 @@ define the definitions."
 	     '(scimax-month-abbreviations
 	       scimax-weekday-abbreviations
 	       scimax-contraction-abbreviations
-	       scimax-transpositions-abbreviations
+	       scimax-transposition-abbreviations
 	       scimax-chemical-formula-abbreviations
 	       scimax-misc-abbreviations)))
     current-prefix-arg))
