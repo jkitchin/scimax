@@ -61,6 +61,7 @@
 
 
 (require 'ob-ipython)
+(require 'scimax-org)
 
 
 (defcustom scimax-ipython-command "jupyter"
