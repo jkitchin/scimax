@@ -61,8 +61,6 @@
 
 
 (require 'ob-ipython)
-(require 'scimax-org)
-
 
 (defcustom scimax-ipython-command "jupyter"
   "Command to launch the jupyter kernel."
