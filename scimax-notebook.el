@@ -2,6 +2,14 @@
 ;;; Header:
 
 ;;; Commentary:
+;; This is an experiment in using scimax and org-mode for scientific notebook
+;; purposes. The idea is you have a "project" that is a set of org and other
+;; files under version control (git). You can use `projectile' to switch between
+;; projects easily, or search/find files within a project.
+;;
+;; This code sets up a notebook agenda command `nb-agenda` to see the TODO items
+;; within a project, or do other org-agenda things within the scope of the
+;; project, e.g. search by tag/property.
 
 ;;; Code:
 ;; * Setup
@@ -14,7 +22,7 @@
   (make-directory nb-notebook-directory t))
 
 (defvar nb-master-file "README.org"
-  "Name of the master file in each project")
+  "Name of the master file in each project.")
 
 ;;;###autoload
 (defun nb-open ()
