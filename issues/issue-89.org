@@ -1,0 +1,11 @@
+
+
+#+NAME: missouri-six-river-red
+#+begin_src ipython :session new
+print('test')
+#+end_src
+
+#+RESULTS: missouri-six-river-red
+:RESULTS:
+test
+:END:

@@ -1,0 +1,45 @@
+#+NAME: sodium-quiet-wyoming-one
+#+BEGIN_SRC ipython :ob-ipython-results image/png :exports results
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+x = np.random.randn(1000) * 40 + 1000
+
+
+print('#+NAME: fig-2')
+print('#+CAPTION: My Second Histogram', end='')
+plt.hist(x)
+#+END_SRC
+
+#+RESULTS: sodium-quiet-wyoming-one
+:RESULTS:
+#+NAME: fig-2
+#+CAPTION: My Second Histogram
+[[file:ipython-inline-images/ob-ipython-d13240e3b72ec5ae4cb07d7143f6c613.png]]
+:END:
+
+(org-activate-links (point-max))
+see Fig ref:fig-2
+
+cite:kitf
+
+cite:2006-acs-style-guide
+
+#+BEGIN_SRC emacs-lisp
+(org-ref-ref-face-fn "fig-2")
+(org-ref-get-labels)
+(member "fig-2" (org-ref-get-labels))
+(org-ref-get-names)
+#+END_SRC
+
+#+RESULTS:
+| fig-2 | sodium-quiet-wyoming-one |
+
+
+#+BEGIN_SRC emacs-lisp
+(setq font-lock-support-mode nil)
+(jit-lock-debug-mode 1)
+#+END_SRC
+
+#+RESULTS:

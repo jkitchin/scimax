@@ -1,0 +1,23 @@
+Simple plot
+
+#+NAME: oranges-cold-lithium-mirror
+#+BEGIN_SRC ipython :session :file test2.png  :exports both
+import matplotlib.pyplot as plt
+import numpy as np
+%matplotlib inline
+t = np.arange(0.0, 2.0, 0.01)
+s = 1 + np.sin(2*np.pi*t)
+# with plt.rc_context({'axes.edgecolor':'orange', 'xtick.color':'red', 'ytick.color':'green',  'figure.facecolor':'white'}):
+with plt.rc_context({'figure.facecolor':'white'}):
+   plt.plot(t, s)
+   plt.xlabel('time (s)')
+   plt.ylabel('voltage (mV)')
+   plt.title('About as simple as it gets, folks')
+   plt.grid(True)
+   plt.savefig("test2.png")
+#  plt.show()
+#+END_SRC
+
+#+RESULTS: oranges-cold-lithium-mirror
+[[file:<matplotlib.figure.Figure at 0x110719dd8>
+[[file:ipython-inline-images/ob-ipython-0efa38c16b35d07d4a29bc363c8aa66a.png]]]]

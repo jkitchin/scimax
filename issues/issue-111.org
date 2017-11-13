@@ -1,0 +1,50 @@
+* Testing tracebacks with ipython async mode off
+#+BEGIN_SRC elisp
+(setq org-babel-async-ipython nil)
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC ipython
+import matplotlib.pyplot as plt
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+
+:END:
+
+#+BEGIN_SRC ipython
+print('no problems yet')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+no problems yet
+
+:END:
+
+#+BEGIN_SRC ipython
+# this will hang; C-g results in split frame loaded with a previous buffer
+# *Messages* buffer shows
+# source-code block ‘nil’ not found in this buffer
+# bar across top of frame: "nil had an exception"
+plt.polt
+#+END_SRC
+
+#+BEGIN_SRC ipython
+# *Messages*: save-current-buffer: Search failed: "-+> \\([0-9]+\\)"
+print(
+#+END_SRC
+
+#+BEGIN_SRC ipython
+# works as expected
+print('ok')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+ok
+
+:END:
+

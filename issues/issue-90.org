@@ -1,0 +1,22 @@
+
+#+BEGIN_SRC emacs-lisp
+(setf (cdr (assoc :results org-babel-default-header-args:ipython))
+      "output replace")
+#+END_SRC
+
+
+#+NAME: bluebird-colorado-maryland-floor
+#+BEGIN_SRC ipython :session :results output replace :exports both
+print(1)
+#+END_SRC
+
+#+RESULTS: bluebird-colorado-maryland-floor
+: 1
+
+
+#+BEGIN_SRC python :results output
+print(1)
+#+END_SRC
+
+#+RESULTS:
+: 1
