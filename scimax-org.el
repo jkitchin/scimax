@@ -1289,7 +1289,8 @@ Use a prefix arg to get regular RET. "
      ;; at the beginning of a line to avoid a loop where a new entry gets
      ;; created with only one blank line.
      ((org-in-item-p)
-      (if (save-excursion (beginning-of-line) (org-element-property :contents-begin (org-element-context)))
+      (if (save-excursion
+	    (beginning-of-line) (org-element-property :contents-begin (org-element-context)))
 	  (org-insert-heading)
 	(beginning-of-line)
 	(delete-region (line-beginning-position) (line-end-position))
@@ -1298,9 +1299,12 @@ Use a prefix arg to get regular RET. "
      ;; org-heading
      ((org-at-heading-p)
       (if (not (string= "" (org-element-property :title (org-element-context))))
-	  (progn (org-end-of-meta-data)
-		 (org-insert-heading-respect-content)
-		 (outline-show-entry))
+	  (progn
+	    ;; Go to end of subtree suggested by Pablo GG on Disqus post.
+	    (org-end-of-subtree)
+	    (org-insert-heading-respect-content)
+	    (outline-show-entry))
+	;; The heading was empty, so we delete it 
 	(beginning-of-line)
 	(setf (buffer-substring
 	       (line-beginning-position) (line-end-position)) "")))
