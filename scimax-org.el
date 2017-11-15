@@ -1280,8 +1280,11 @@ Use a prefix arg to get regular RET. "
 
      ;; checkboxes too
      ((org-at-item-checkbox-p)
-      (if (not (looking-back "^- \\[ \\] " (- (point) (line-beginning-position))))
+      (if (org-element-property :contents-begin
+				(org-element-context))
+	  ;; we have content so add a new checkbox
 	  (org-insert-todo-heading nil)
+	;; no content so delete it
 	(setf (buffer-substring (line-beginning-position) (point)) "")
 	(org-return)))
 
