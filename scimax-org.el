@@ -1294,7 +1294,7 @@ Use a prefix arg to get regular RET. "
      ((org-in-item-p)
       (if (save-excursion
 	    (beginning-of-line) (org-element-property :contents-begin (org-element-context)))
-	  (org-insert-heading)
+	  (org-insert-item)
 	(beginning-of-line)
 	(delete-region (line-beginning-position) (line-end-position))
 	(org-return)))
