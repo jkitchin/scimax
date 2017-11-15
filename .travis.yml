@@ -1,34 +1,35 @@
-language: generic
+language: emacs-lisp
 sudo: false
-
-before_install:
-  - bash -c 'echo `pwd`'
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./install-scimax-mac.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > x.sh && source ./x.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then evm install $EVM_EMACS --use --skip; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cask; fi
-
+cache:
+  - directories:
+      # Cache stable Emacs binaries (saves 1min per job)
+      - "$HOME/emacs/"
+# Allow Emacs snapshot builds to fail and don’t wait for these as they can take
+# a looooong time
 matrix:
+  fast_finish: true
   allow_failures:
-    - env: EVM_EMACS=emacs-git-snapshot-travis
-    - env: OSX=true
-
-  include:
-    - os: linux
-      env: EVM_EMACS=emacs-25.1-travis
-    - os: linux
-      env: EVM_EMACS=emacs-25.2-travis      
-    - os: linux
-      env: EVM_EMACS=emacs-git-snapshot-travis
-    - os: osx
-      env: OSX=true
-
+    - env: EMACS_VERSION=snapshot
+env:
+  - EMACS_VERSION=24.3
+  - EMACS_VERSION=24.5
+  - EMACS_VERSION=25.1
+  - EMACS_VERSION=25.2
+  - EMACS_VERSION=snapshot
+before_install:
+  # Configure $PATH: Executables are installed to $HOME/bin
+  - export PATH="$HOME/bin:$PATH"
+  # Download the makefile to emacs-travis.mk
+  - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
+  # Install Emacs (according to $EMACS_VERSION) and Cask
+  - make -f emacs-travis.mk install_emacs
+  - make -f emacs-travis.mk install_cask
+  # Install Texinfo, if you need to build info manuals for your project
+  - make -f emacs-travis.mk install_texinfo
 install:
-  - pwd
-  - ls -al
-  - ./.travis-install.sh
-    
+  # Install your dependencies
+  - cask install
 script:
-  - EMACS=`evm bin` EMACS --version -l init.el
-  - EMACS=`evm bin` make build
-  - EMACS=`evm bin` make test
+  # Run your tests
+  - make build
+  - make test
