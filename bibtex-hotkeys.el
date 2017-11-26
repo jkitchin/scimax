@@ -68,7 +68,7 @@
 (bibtex-hotkey "l" "Clean entry" (org-ref-clean-bibtex-entry))
 
 
-(bibtex-hotkey "I" "Inspect" (message "%s" (bibtex-parse-entry t)))
+(bibtex-hotkey "I" "Inspect" (message "%s" (save-excursion (bibtex-parse-entry t))))
 
 
 (bibtex-hotkey "n" "Jump to next entry" (org-ref-bibtex-next-entry))
