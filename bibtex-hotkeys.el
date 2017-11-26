@@ -44,28 +44,38 @@
       (and (> e p)
 	   (< b p)))))
 
+
 (bibtex-hotkey "b" "Open in browser" (org-ref-open-in-browser))
+
 
 (bibtex-hotkey "c" "Copy entry"
 	       (bibtex-kill-entry t)
 	       (message (substitute-command-keys "\\[bibtex-yank] to paste.")))
 
+
 (bibtex-hotkey "e" "Email entry" (org-ref-email-bibtex-entry))
+
 
 (bibtex-hotkey "f" "Copy formatted"
 	       (kill-new
 		(org-ref-format-entry
 		 (cdr (assoc "=key=" (bibtex-parse-entry t))))))
 
+
 (bibtex-hotkey "k" "Kill the entry" (bibtex-kill-entry))
+
 
 (bibtex-hotkey "l" "Clean entry" (org-ref-clean-bibtex-entry))
 
+
 (bibtex-hotkey "I" "Inspect" (message "%s" (bibtex-parse-entry t)))
+
 
 (bibtex-hotkey "n" "Jump to next entry" (org-ref-bibtex-next-entry))
 
+
 (bibtex-hotkey "p" "Jump to previous entry" (org-ref-bibtex-previous-entry))
+
 
 (bibtex-hotkey "?" "Show hotkeys"
 	       (message "%s"
@@ -95,6 +105,7 @@
 	       (bibtex-yank)
 	       (bibtex-beginning-of-entry))
 
+
 (bibtex-hotkey "S" "Sentence-case title"
 	       (org-ref-sentence-case))
 
@@ -110,6 +121,7 @@
 	       (bibtex-beginning-of-entry)
 	       (save-excursion
 		 (bibtex-yank)))
+
 
 (bibtex-hotkey "y" "Paste last entry" (bibtex-yank))
 
