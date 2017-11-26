@@ -13,16 +13,21 @@
 
 ;;; Code:
 ;; * Setup
+(projectile-mode +1)
+
 
 (defvar nb-notebook-directory
   "~/vc/projects/"
   "Directory where projects are stored.")
 
+
 (unless (file-directory-p nb-notebook-directory)
   (make-directory nb-notebook-directory t))
 
+
 (defvar nb-master-file "README.org"
   "Name of the master file in each project.")
+
 
 ;;;###autoload
 (defun nb-open ()
@@ -31,6 +36,7 @@
   (let ((projectile-switch-project-action (lambda ()
 					    (find-file nb-master-file)))) 
     (projectile-switch-project)))
+
 
 ;;;###autoload
 (defun nb-new (name)
@@ -41,8 +47,9 @@
       (make-directory dir t)
       (let ((default-directory dir))
 	(shell-command "git init")))
-    (find-file (expand-file-name nb-master-file dir))
-    (projectile-mode)))
+    (projectile-add-known-project dir)
+    (projectile-save-known-projects)
+    (find-file (expand-file-name nb-master-file dir))))
 
 
 
