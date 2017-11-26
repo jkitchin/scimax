@@ -59,6 +59,8 @@
 
 (bibtex-hotkey "k" "Kill the entry" (bibtex-kill-entry))
 
+(bibtex-hotkey "l" "Clean entry" (org-ref-clean-bibtex-entry))
+
 (bibtex-hotkey "I" "Inspect" (message "%s" (bibtex-parse-entry t)))
 
 (bibtex-hotkey "n" "Jump to next entry" (org-ref-bibtex-next-entry))
@@ -92,6 +94,13 @@
 	       (insert "\n")
 	       (bibtex-yank)
 	       (bibtex-beginning-of-entry))
+
+(bibtex-hotkey "S" "Sentence-case title"
+	       (org-ref-sentence-case))
+
+
+(bibtex-hotkey "T" "Title-case article"
+	       (org-ref-title-case))
 
 
 (bibtex-hotkey "w"
