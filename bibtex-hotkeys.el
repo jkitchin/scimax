@@ -78,13 +78,18 @@
 
 
 (bibtex-hotkey "?" "Show hotkeys"
-	       (message "%s"
-			(mapconcat
-			 (lambda (c)
-			   (format "%s %s" (car c) (cdr c)))
-			 (sort (copy-list bibtex-hotkeys) (lambda (c1 c2)
-							    (string< (car c1) (car c2))))
-			 "\n")))
+	       (let* ((s (mapcar
+			  (lambda (c)
+			    (format "%3s %30s" (car c) (cdr c)))
+			  (sort (copy-list bibtex-hotkeys)
+				(lambda (c1 c2)
+				  (string< (car c1) (car c2))))))
+		      (n (length s))
+		      (m (floor (/ n 3)))) 
+		 (message "%s" (loop for i to m concat
+				     (s-join " | "
+					     (append (-slice s (* i 3) (* 3 (+ i 1)))
+						     '("\n")))))))
 
 (bibtex-hotkey "F" "Jump to field with avy"
 	       (let* ((beg (point))
