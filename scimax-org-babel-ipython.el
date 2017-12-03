@@ -979,7 +979,9 @@ It replaces the output in the results."
                                          (cdr (ob-ipython-get-running)))
                                         (org-babel-remove-result)))
                                     json))))
+	 ;; If there are images, they will be in result
          (result (cdr (assoc :result ret)))
+	 ;; If there is printed output, it will be in output
          (output (cdr (assoc :output ret)))
          info params result-params result-mime-type
          current-cell name
@@ -1000,32 +1002,35 @@ It replaces the output in the results."
         (org-babel-remove-result)
         (cond
          ((string= "output" result-type)
-          (let (image-p)
-            (-when-let (res (or (when (not (s-blank-str? output))
-                                  (format "#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE\n" output))
-                                (-when-let (vals (-filter (lambda (e) (eq (car e) 'text/org)) result))
-                                  (mapconcat #'cdr vals "\n\n"))
-                                (-when-let* ((vals (-filter (lambda (e) (eq (car e) 'text/plain)) result))
-                                             (joined (mapconcat #'cdr vals "\n"))
-                                             (not-plot-p (not (s-contains? "<matplotlib.figure.Figure" joined))))
-                                  (format "#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE\n" joined))
-                                (-when-let (vals (-filter (lambda (e) (eq (car e) 'image/png)) result))
-                                  (setq image-p t)
-                                  (mapconcat (lambda (e) (ob-ipython-inline-image (cdr e))) vals "\n"))
-                                (-when-let (vals (-filter (lambda (e) (eq (car e) 'text/latex)) result))
-                                  (format "#+BEGIN_LATEX\n%s\n#+END_LATEX\n" (mapconcat #'cdr vals "\n")))
-                                (-when-let (vals (-filter (lambda (e) (eq (car e) 'text/html)) result))
-                                  (mapconcat #'cdr vals "\n"))))
-              (org-babel-insert-result res result-params))
-            (when image-p (org-redisplay-inline-images))))
-         ((string= "value" result-type)
-          (let ((res (ob-ipython--format-result
-                      result result-mime-type)))
-            (when (not (s-blank-str? res))
-              (org-babel-insert-result (s-chomp (s-chop-prefix "\n" res)) result-params info))
-            ;; If result contains image, redisplay the images
-            (when (s-contains? "[[file:" res)
-              (org-redisplay-inline-images))))))
+	  (let ((res (mapconcat
+		      'identity
+		      (list
+		       (when (not (s-blank? output))
+			 (format "#+BEGIN_EXAMPLE\n%s#+END_EXAMPLE\n" output))
+		       (-when-let (vals (-filter (lambda (e) (eq (car e) 'text/org)) result))
+			 (mapconcat #'cdr vals "\n\n"))
+		       (-when-let* ((vals (-filter (lambda (e) (eq (car e) 'text/plain)) result))
+				    (joined (mapconcat #'cdr vals "\n"))
+				    (not-plot-p (not (s-contains? "<matplotlib.figure.Figure" joined))))
+			 (format "#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE\n" joined))
+		       (-when-let (vals (-filter (lambda (e) (eq (car e) 'image/png)) result))
+			 (setq image-p t)
+			 (mapconcat (lambda (e) (ob-ipython-inline-image (cdr e))) vals "\n"))
+		       (-when-let (vals (-filter (lambda (e) (eq (car e) 'text/latex)) result))
+			 (format "#+BEGIN_LATEX\n%s\n#+END_LATEX\n" (mapconcat #'cdr vals "\n")))
+		       (-when-let (vals (-filter (lambda (e) (eq (car e) 'text/html)) result))
+			 (mapconcat #'cdr vals "\n")))
+		      "\n")))
+	    (org-babel-insert-result res result-params)
+	    (when image-p (org-redisplay-inline-images))))
+	 ((string= "value" result-type)
+	  (let ((res (ob-ipython--format-result
+		      result result-mime-type)))
+	    (when (not (s-blank-str? res))
+	      (org-babel-insert-result (s-chomp (s-chop-prefix "\n" res)) result-params info))
+	    ;; If result contains image, redisplay the images
+	    (when (s-contains? "[[file:" res)
+	      (org-redisplay-inline-images))))))
       (ob-ipython-set-running-cell nil)
       (setq header-line-format (format "The kernel is %s" (ob-ipython-get-kernel-name))))
 
