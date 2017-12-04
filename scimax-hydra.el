@@ -201,7 +201,7 @@ _k_: list packages _m_: compose mail
 "
   ("a" app)
   ("c" google-calendar)
-  ("d" dired-x)
+  ("d" dired)
   ("e" (if (get-buffer "*mu4e-headers*")
 	   (progn
 	     (switch-to-buffer "*mu4e-headers*")
