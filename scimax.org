@@ -731,6 +731,32 @@ Here are the bibtex entry types and fields you should use. You can add extra fie
 - year
 - note
 
+** Bibtex hotkeys
+   
+Scimax provides hotkeys for when your cursor is on the @ at the beginning of an entry. Here are the currently defined hotkeys.
+
+#+BEGIN_SRC emacs-lisp
+(require 'bibtex-hotkeys)
+(loop for (key . desc) in bibtex-hotkeys collect (list key desc))
+#+END_SRC
+
+#+RESULTS:
+| y | Paste last entry       |
+| w | Move entry down        |
+| T | Title-case article     |
+| S | Sentence-case title    |
+| s | Move entry up          |
+| F | Jump to field with avy |
+| ? | Show hotkeys           |
+| p | Jump to previous entry |
+| n | Jump to next entry     |
+| I | Inspect                |
+| l | Clean entry            |
+| k | Kill the entry         |
+| f | Copy formatted         |
+| e | Email entry            |
+| c | Copy entry             |
+| b | Open in browser        |
 
 * Email utilities
 
