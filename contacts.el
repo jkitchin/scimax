@@ -204,7 +204,8 @@ e.g. on a person name, email, etc..."
   "Add current candidate to `ivy-marked-candidates'.
 If candidate is already in, remove it."
   (interactive) 
-  (let ((cand (nth ivy--index (ivy-state-collection ivy-last))))
+  (let ((cand (or (assoc (org-ref-ivy-current) (ivy-state-collection ivy-last))
+		  (org-ref-ivy-current))))
     (if (-contains? ivy-marked-candidates cand)
         ;; remove it from the marked list
         (setq ivy-marked-candidates
