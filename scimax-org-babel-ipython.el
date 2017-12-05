@@ -973,6 +973,7 @@ It replaces the output in the results."
          (output (cdr (assoc :output ret)))
          info params result-params result-mime-type
          current-cell name
+	 (image-p nil)
          (result-type))
 
     (with-current-buffer (car args)
