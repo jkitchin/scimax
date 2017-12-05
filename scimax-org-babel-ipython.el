@@ -1107,6 +1107,7 @@ It replaces the output in the results."
 	  (when (get-buffer buf)
 	    (kill-buffer buf)))))
 
+
 (defun org-in-ipython-block-p (&optional inside)
   "Whether point is in a code source block.
 When INSIDE is non-nil, don't consider we are within a src block
@@ -1117,6 +1118,7 @@ when point is at #+BEGIN_SRC or #+END_SRC."
              (save-excursion
                (beginning-of-line)
                (looking-at-p ".*#\\+\\(begin\\|end\\)_src ipython"))))))
+
 
 (defun scimax-execute-ipython-block ()
   "Execute the block at point.
