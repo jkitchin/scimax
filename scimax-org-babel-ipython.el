@@ -825,27 +825,15 @@ that case the process that ipython uses appears to be default."
 (org-link-set-parameters
  "async-running"
  :follow (lambda (path)
-	   (ob-ipython-kill-kernel
-	    (cdr
-	     (assoc
-	      (org-babel-get-session)
-	      (ob-ipython--get-kernel-processes))))
+	   (org-babel-goto-named-src-block path)
+	   (nuke-ipython) 
 	   (save-excursion
 	     (org-babel-previous-src-block)
 	     (org-babel-remove-result))
-	   ;; clear the blocks in the queue.
-	   (loop for (buffer . name)
-		 in (ob-ipython-queue)
-		 do
-		 (save-window-excursion
-		   (with-current-buffer buffer
-		     (org-babel-goto-named-src-block name)
-		     (org-babel-remove-result))))
-
 	   (ob-ipython-set-running-cell nil)
 	   (setf (ob-ipython-queue) nil))
  :face '(:foreground "green4")
- :help-echo "Running")
+ :help-echo "Click to kill kernel")
 
 ;;** src block text properties
 
