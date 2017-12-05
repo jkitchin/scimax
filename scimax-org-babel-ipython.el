@@ -880,9 +880,8 @@ that case the process that ipython uses appears to be default."
           (ob-ipython-set-running-cell cell)
           (ob-ipython-log "Setting up %S to run." cell)
           (let* ((running-link (format
-                                "[[async-running: %s %s]]"
-                                (org-babel-src-block-get-property 'org-babel-ipython-name)
-                                (org-babel-src-block-get-property 'org-babel-ipython-result-type)))
+                                "[[async-running: %s]]"
+                                (org-babel-src-block-get-property 'org-babel-ipython-name)))
                  (info (org-babel-get-src-block-info))
                  (params (third info))
                  (body
