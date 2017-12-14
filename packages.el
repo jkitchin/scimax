@@ -39,6 +39,7 @@
   :init (org-edna-load))
 
 ;; * Other packages
+(use-package diminish)
 
 (use-package aggressive-indent
   :config (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode))
@@ -76,8 +77,6 @@
 ;; Potential for commandline scripts using emacs
 (use-package commander
   :disabled t)
-
-(use-package diminish)
 
 (use-package drag-stuff)
 
