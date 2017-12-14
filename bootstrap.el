@@ -8,6 +8,10 @@
 
 (package-initialize)
 
+(unless (package-installed-p 'diminish)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
