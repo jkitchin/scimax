@@ -77,6 +77,8 @@
 (use-package commander
   :disabled t)
 
+(use-package diminish)
+
 (use-package drag-stuff)
 
 (use-package swiper
