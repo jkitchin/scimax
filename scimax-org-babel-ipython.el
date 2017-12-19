@@ -987,6 +987,8 @@ It replaces the output in the results."
         (setq params (third info))
         (setq result-params (cdr (assoc :result-params params)))
         (setq result-mime-type (cdr (assoc :ob-ipython-results params)))
+	(when result-mime-type
+	  (setq result (-filter (lambda (e) (eq (car e) (intern result-mime-type))) result)))
         (org-babel-remove-result)
         (cond
          ((string= "output" result-type)
