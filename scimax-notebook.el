@@ -100,20 +100,32 @@ uncommitted changes, you will be prompted to continue."
 
 (defun update-scimax-projects-menu ()
   (easy-menu-change
-   '("Scimax" "notebook") "Projects" 
-   (sort (mapcar (lambda (x)
-		   (vector
-		    ;; entry
-		    (file-name-nondirectory (substring x 0 -1))
-		    ;; action
-		    `(lambda ()
-		       (interactive)
-		       (projectile-switch-project-by-name
-			,x))
-		    ;; visibility
-		    t))
-		 projectile-known-projects)
-	 (lambda (a b) (string< (elt a 0) (elt b 0))))
+   '("Scimax" "notebook") "Projects"
+   (mapcar (lambda (x)
+	     (vector
+	      ;; entry
+	      (file-name-nondirectory (substring x 0 -1))
+	      ;; action
+	      `(lambda ()
+		 (interactive)
+		 (projectile-switch-project-by-name
+		  ,x))
+	      ;; visibility
+	      t))
+	   projectile-known-projects)
+   ;; (sort (mapcar (lambda (x)
+   ;; 		   (vector
+   ;; 		    ;; entry
+   ;; 		    (file-name-nondirectory (substring x 0 -1))
+   ;; 		    ;; action
+   ;; 		    `(lambda ()
+   ;; 		       (interactive)
+   ;; 		       (projectile-switch-project-by-name
+   ;; 			,x))
+   ;; 		    ;; visibility
+   ;; 		    t))
+   ;; 		 projectile-known-projects)
+   ;; 	 (lambda (a b) (string< (elt a 0) (elt b 0))))
    "words"))
 
 (add-hook 'menu-bar-update-hook 'update-scimax-projects-menu)
