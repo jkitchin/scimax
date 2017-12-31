@@ -45,11 +45,19 @@ recent files and bookmarks. You can set a bookmark also."
 
 ;;;###autoload
 (defun scimax-help ()
-  "Open the ‘scimax’ manual."
+  "Open the ‘scimax’ manual in org-mode."
   (interactive)
   (find-file (expand-file-name
               "scimax.org"
 	      scimax-dir)))
+
+
+;;;###autoload
+(defun scimax-info ()
+  "Open the info manual."
+  (info "(scimax)"))
+
+
 
 ;; * utilities
 ;;;###autoload

@@ -10,6 +10,8 @@
 
 ;;; Code:
 
+(add-to-list 'Info-directory-list scimax-dir)
+
 (setq use-package-always-ensure t)
 
 

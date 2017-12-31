@@ -1,5 +1,4 @@
-
-#+TITLE: Scimax
+#+TITLE: Scimax - The manual
 #+AUTHOR: John Kitchin
 #+DATE: 2016
 #+options: toc:nil
@@ -1609,6 +1608,16 @@ I bind this to a key like "f9" and set it up to easily open my mail, calendar an
 		  (org-open-file
 		   "/Users/jkitchin/Dropbox/CMU/CV and bios/kitchin_cv.docx" '(16))))))
 #+END_SRC
+
+* Export the info manual                                           :noexport:
+
+#+BEGIN_SRC emacs-lisp
+(require 'ox-texinfo)
+(org-texinfo-export-to-info)
+#+END_SRC
+
+#+RESULTS:
+: /Users/jkitchin/vc/jkitchin-github/scimax/scimax.info
 
 * Local Variables                                                  :noexport:
 
