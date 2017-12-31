@@ -1,3 +1,4 @@
+
 #+TITLE: Scimax
 #+AUTHOR: John Kitchin
 #+DATE: 2016
@@ -1374,8 +1375,11 @@ scimax defines these additional key bindings:
 | C-x v p | git push |
 | C-x v P | git pull |
 
-** TODO archive the notebook with git
+** Archive the notebook with git
 
+Sometimes you may want a zip file of your notebook. You can use the `nb-archive' command to create a zip file of the current state of your notebook. This can be useful to back up versions of your project, send copies to collaborators who don't use git, or to create archives for data sharing and supporting information. 
+
+Note that only files under version control are archived, and only the current committed state is archived. So, uncommitted files and changes will not be included.
 
 * ivy/counsel
 
