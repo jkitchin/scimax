@@ -83,6 +83,7 @@
 (use-package swiper
   :bind
   ("C-s" . counsel-grep-or-swiper)
+  ("H-s" . swiper-all)
   :diminish ivy-mode
   :config
   (ivy-mode))
@@ -102,11 +103,13 @@
   (("M-x" . counsel-M-x)
    ("C-x b" . ivy-switch-buffer)
    ("C-x C-f" . counsel-find-file)
+   ("C-x l" . counsel-locate)
    ("C-h f" . counsel-describe-function)
    ("C-h v" . counsel-describe-variable)
    ("C-h i" . counsel-info-lookup-symbol)
    ("H-c r" . ivy-resume)
    ("H-c l" . counsel-load-library)
+   ("H-c f" . counsel-git)
    ("H-c g" . counsel-git-grep)
    ("H-c a" . counsel-ag)
    ("H-c p" . counsel-pt))
@@ -114,7 +117,7 @@
   :config
   (progn
     (counsel-mode)
-
+    (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
     (define-key ivy-minibuffer-map (kbd "M-<SPC>") 'ivy-dispatching-done)
 
     ;; C-RET call and go to next
@@ -146,6 +149,7 @@
 	(ivy-exit-with-action
 	 (lambda (x) nil))))
 
+    ;; Show keys
     (define-key ivy-minibuffer-map (kbd "?")
       (lambda ()
 	(interactive)
