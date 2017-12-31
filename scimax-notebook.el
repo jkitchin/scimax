@@ -67,6 +67,26 @@
 				    (projectile-current-project-files)))))
     (org-agenda)))
 
+;; * Archive a notebook
+;;;###autoload
+(defun nb-archive ()
+  "Create an archive of the current notebook.
+This uses git archive to create an archive of the current state
+of the notebook. The zip file will be timestamped in the root
+project directory. If your repo contains untracked files or
+uncommitted changes, you will be prompted to continue."
+  (let ((output (shell-command-to-string "git status --porcelain")))
+    (unless (string= "" output)
+      (when
+	  (y-or-n-p
+	   (format
+	    "Your notebook contains uncommitted changes or files:\n%s\n Continue?" output))
+	(shell-command
+	 (format
+	  "git archive --format zip HEAD -o \"%s-%s.zip\""
+	  (f-join (projectile-project-root)
+		  (car (last (f-split (projectile-project-root)))))
+	  (format-time-string "%Y-%m-%d-%H:%m%p")))))))
 
 ;; * Add a menu to scimax
 
