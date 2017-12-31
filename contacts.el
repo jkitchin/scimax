@@ -224,7 +224,6 @@ If candidate is already in, remove it."
   (interactive)
   (when ivy-marked-candidates
     (setf (ivy-state-collection ivy-last) ivy-marked-candidates)
-    ;; (setf (ivy-state-preselect ivy-last) ivy--current)
     (ivy--reset-state ivy-last)))
 
 
