@@ -7,6 +7,8 @@
 
 Scimax is an Emacs starterkit designed for people interested in reproducible research and publishing. Scimax is just Emacs that has been configured extensively to make it act like we need it to for research documentation and publication. The notes below document some features we have built into scimax.
 
+Note: The org-mode version of this manual is the preferred version for reading; it is the most functional version, and the most up to date. The info:scimax version is also useful though, and you might prefer that one.
+
 * Org-mode
 scimax provides a lot of customization of org-mode. Here are some of the more important ones.
 
@@ -1333,7 +1335,6 @@ There are a few undo features:
 | C-/   | undo the last action          |
 | C-x u | use the undo-tree (q to quit) |
 
-
 * Scientific notebook
 
 scimax provides a scientific notebook capability. Each "notebook" is actually collection of org-files in a "project". A project is the set of files in a directory that is under git version control. Each project should have a master file (the default is README.org, but you can customize `nb-master-file' to change this). The master file contains what ever you want, but typically it links to other documents in the project and provides an overview of the project.
@@ -1488,7 +1489,6 @@ The body can be accessed via ‘scimax/body’.
 
 So, instead of C-x C-f to open a file (which still works by the way) you can simply type: f12 ff. Or instead of C-x C-s to save the file, type f12 RET. Each hydra will show you a hint in the minibuffer on which keys do what.
 
-
 * Appendix
 
 `scimax-help' will open this document.
@@ -1557,7 +1557,6 @@ The help functions usually show you if a shortcut is defined for a command.
 If you really want to define your own keys, see `define-key' and `global-set-key'. 
 
 Make yourself some notes in org-mode using `emacs-keybinding-command-tooltip-mode'.
-
 
 * Archive
 ** Navigation - navy
