@@ -67,6 +67,8 @@ This is a macro so I don't have to quote the hydra name."
   (interactive)
   (with-help-window (help-buffer)
     (with-current-buffer (help-buffer)
+      (unless (featurep 'emacs-keybinding-command-tooltip-mode)
+	(require 'emacs-keybinding-command-tooltip-mode))
       (emacs-keybinding-command-tooltip-mode +1))
     (let ((s (format "Help for %s\n" hydra-curr-body-fn)))
       (princ s)
