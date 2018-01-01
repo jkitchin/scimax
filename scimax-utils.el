@@ -55,7 +55,9 @@ recent files and bookmarks. You can set a bookmark also."
 ;;;###autoload
 (defun scimax-info ()
   "Open the info manual."
-  (info "(scimax)"))
+  (info "(scimax)")
+  (require 'emacs-keybinding-command-tooltip-mode)
+  (emacs-keybinding-command-tooltip-mode +1))
 
 
 
