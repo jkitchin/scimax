@@ -355,6 +355,18 @@ Opens an org-buffer with links to results.  Mac only."
       "\n"))
     (org-mode)))
 
+(defun words-swiper-all ()
+  "Run swiper-all on the word at point or region."
+  (interactive)
+  (let ((query (if (use-region-p)
+		   (buffer-substring
+		    (region-beginning)
+		    (region-end))
+		 (thing-at-point 'word))))
+    (let ((ivy-initial-inputs-alist `((swiper-multi . ,query))))
+      (swiper-all))))
+
+
 
 (defun words-finder ()
   "Open Mac Finder with search of word at point or selection."
@@ -387,23 +399,35 @@ end tell")))
 
 ;; https://github.com/abo-abo/hydra
 
-(defhydra words-hydra (:color blue)
-  "words"
+(defhydra words-hydra (:color blue :hint nil)
+  "
+words
+_d_: Dictionary  _g_: Google           _T_: Twitter _b_: Bibtex      _k_: Speak
+_t_: Thesaurus   _G_: Google Scholar   ^ ^          _f_: Mac finder  _r_: Translate
+_s_: Spell       _c_: Crossref         ^ ^          _w_: swiper-all
+^ ^              _S_: Scopus           ^ ^          _M_: Mac mdfind
+^ ^              _W_: Web Of Science
+^ ^              _p_: Pubmed
+^ ^              _a_: Arxiv
+^ ^              _o_: Semantic Scholar
+_q_: quit
+"
   ("d" words-dictionary "dictionary")
   ("t" words-thesaurus "thesaurus")
-  ("S" words-atd "spell/grammar")
+  ("s" words-atd "spell/grammar")
   ("g" words-google "google")
   ("T" words-twitter "Twitter")
-  ("w" words-wos "Web of Science")
+  ("W" words-wos "Web of Science")
   ("G" words-google-scholar "Google scholar")
   ("c" words-crossref "CrossRef")
-  ("s" words-scopus "Scopus")
+  ("S" words-scopus "Scopus") 
   ("o" words-semantic-scholar "Semantic Scholar")
   ("p" words-pubmed "Pubmed")
   ("a" words-arxiv "Arxiv")
   ("b" words-bibtex "bibtex")
   ("f" words-finder "Mac Finder")
-  ("m" words-mdfind "mdfind")
+  ("w" words-swiper-all "swiper-all")
+  ("M" words-mdfind "mdfind")
   ("k" words-speak "Speak")
   ("r" words-translate "Translate")
   ("q" nil "cancel"))
