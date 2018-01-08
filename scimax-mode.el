@@ -126,6 +126,7 @@ one and open it."
      ["Lookup in Arxiv" words-arxiv]
      ["Lookup in Dictionary" words-dictionary t]
      ["Lookup in Thesaurus" words-thesaurus t])
+    ["Update scimax" scimax-update t]
     ["Help with scimax" scimax-help t]
     ["Customize user.el" scimax-customize-user t]))
 
