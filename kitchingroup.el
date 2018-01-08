@@ -37,7 +37,14 @@ report is for the previous week."
     (let ((default-directory (expand-file-name dir)))
       (ox-manuscript-new-helm "weekly-progress-report"))))
 
+
 (defalias 'kitchinhub-weekly-report 'kitchingroup-weekly-report)
+
+
+(defun kitchingroup-calendar ()
+  "Open the Kitchin Group Google calendar."
+  (interactive)
+  (browse-url "https://calendar.google.com/calendar?cid=NXE3aHRwMDZxazk3djltcHBzdHVwdmpkczRAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"))
 
 (provide 'kitchingroup)
 
