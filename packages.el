@@ -386,11 +386,11 @@
 
 (use-package org-ref-scopus
   :ensure nil
-  :load-path (lambda () (expand-file-name "org-ref " scimax-dir)))
+  :load-path (lambda () (expand-file-name "org-ref" scimax-dir)))
 
 (use-package org-ref-wos
   :ensure nil
-  :load-path (lambda () (expand-file-name "org-ref " scimax-dir)))
+  :load-path (lambda () (expand-file-name "org-ref" scimax-dir)))
 
 
 ;; https://github.com/bbatsov/projectile
