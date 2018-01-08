@@ -368,7 +368,7 @@
 ;; this is a git submodule
 (use-package org-ref
   :ensure nil
-  :load-path (lambda () (expand-file-name "org-ref " scimax-dir))
+  :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
   :init
   (add-to-list 'load-path
 	       (expand-file-name "org-ref" scimax-dir))
