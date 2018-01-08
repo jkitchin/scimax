@@ -263,6 +263,8 @@
 (use-package git-messenger
   :bind ("C-x v o" . git-messenger:popup-message))
 
+(use-package google-this)
+
 (use-package helm
   :init (setq helm-command-prefix-key "C-c h")
   :bind
