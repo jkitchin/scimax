@@ -252,7 +252,8 @@ Loads cache file."
 		  (split-string (shell-command-to-string "mu cfind --format=mutt-ab") "\n" t)
 		  collect
 		  (let ((tup (split-string  entry "\t")))
-		    (format "\"%s\" <%s>" (nth 1 tup) (nth 0 tup)))))))
+		    (format "\"%s\" <%s>" (nth 1 tup) (nth 0 tup))))))
+  contacts)
 
 (defvar ivy-contacts-keymap
   (let ((map (make-sparse-keymap)))
