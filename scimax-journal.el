@@ -1,4 +1,11 @@
+;;; scimax-journal.el --- Journal commands for orgmode
 ;; * Journal
+
+;;; Commentary:
+;; 
+
+;;; Code:
+
 (defvar journal-root-dir "~/vc/journal"
   "Directory for journal entries.")
 
@@ -53,6 +60,8 @@ Add new day if necessary, otherwise, add to current day."
 
 
 (defun journal-grep (regex)
+  "Run grep on the files in the journal.
+Argument REGEX the pattern to grep for."
   (interactive "sPattern: ")
   (rg regex "*.org" journal-root-dir))
 
@@ -71,3 +80,7 @@ Add new day if necessary, otherwise, add to current day."
   ("n" (journal-new-entry) "New entry")
   ("g" journal-grep "grep journal")
   ("h" journal-open-heading "Open to heading"))
+
+(provide 'scimax-journal)
+
+;;; scimax-journal.el ends here
