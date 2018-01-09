@@ -91,7 +91,7 @@
 					     (append (-slice s (* i 3) (* 3 (+ i 1)))
 						     '("\n")))))))
 
-(bibtex-hotkey "F" "Jump to field with avy"
+(bibtex-hotkey "q" "Jump to field with avy"
 	       (let* ((beg (point))
 		      (e (save-excursion (bibtex-parse-entry)))
 		      (end (save-excursion (bibtex-end-of-entry) (point)))
@@ -126,6 +126,10 @@
 	       (bibtex-beginning-of-entry)
 	       (save-excursion
 		 (bibtex-yank)))
+
+(bibtex-hotkey "U"
+	       "Update entry"
+	       (doi-utils-update-bibtex-entry-from-doi (bibtex-autokey-get-field "doi")))
 
 
 (bibtex-hotkey "y" "Paste last entry" (bibtex-yank))
