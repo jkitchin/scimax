@@ -246,18 +246,13 @@ Loads cache file."
   (unless (and (featurep 'mu4e) (boundp 'mu4e~contacts))
     (mu4e t))
 
-  (append contacts
-
-	  (loop for entry in 
-		(split-string (shell-command-to-string "mu cfind --format=mutt-ab") "\n" t)
-		collect
-		(let ((tup (split-string  entry "\t")))
-		  (format "\"%s\" <%s>" (nth 1 tup) (nth 0 tup)))))
-  ;; 1/12/2017 this stopped working. I think in an update I did for mu4e
-  ;; (append contacts
-  ;; 	  (loop for contact being the hash-key of mu4e~contacts
-  ;; 		collect (list contact (cons "EMAIL" contact))))
-  )
+  (when (featurep 'mu4e)
+    (append contacts
+	    (loop for entry in 
+		  (split-string (shell-command-to-string "mu cfind --format=mutt-ab") "\n" t)
+		  collect
+		  (let ((tup (split-string  entry "\t")))
+		    (format "\"%s\" <%s>" (nth 1 tup) (nth 0 tup)))))))
 
 (defvar ivy-contacts-keymap
   (let ((map (make-sparse-keymap)))
@@ -433,8 +428,9 @@ end tell" (cdr (assoc "PHONE" contact)))))
 		       "Insert link")
 		      
 		      ("q" nil "Quit"))))
+(when (featurep 'mu4e)
+  (define-key mu4e-compose-mode-map "\C-c]" 'ivy-contacts))
 
-(define-key mu4e-compose-mode-map "\C-c]" 'ivy-contacts)
 (define-key message-mode-map "\C-c]" 'ivy-contacts)
 
 (defalias 'ic 'ivy-contacts)
