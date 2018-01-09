@@ -243,7 +243,7 @@ Loads cache file."
   (contacts-update-cache)
   
   ;; Add mu4e contacts if we have them
-  (unless (and (featurep 'mu4e) (boundp 'mu4e~contacts))
+  (when (and (featurep 'mu4e) (not (boundp 'mu4e~contacts)))
     (mu4e t))
 
   (when (featurep 'mu4e)
