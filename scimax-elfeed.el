@@ -1,12 +1,20 @@
-;; * elfeed
+;;; scimax-elfeed.el --- scimax configuration for elfeed
+
+;;; Commentary:
+;; This just sets up elfeed for scimax. It sets some default feeds and
+;; categories, and some new org-mode integration and keybindings.
+
 (require 'elfeed)
 
-(setq elfeed-feeds
-      '((("http://planetpython.org/rss20.xml" python)
-	 ("http://planet.scipy.org/rss20.xml" python)
-	 ("http://planet.emacsen.org/atom.xml" emacs) 
-	 ;; Stackoverflow questions on emacs
-	 ("http://emacs.stackexchange.com/feeds" emacs)))
+;;; Code:
+(loop for feed in '(("http://planetpython.org/rss20.xml" python)
+		    ("http://planet.scipy.org/rss20.xml" python)
+		    ("http://planet.emacsen.org/atom.xml" emacs)
+		    ;; Stackoverflow questions on emacs
+		    ("http://emacs.stackexchange.com/feeds" emacs))
+      do
+      (add-to-list 'elfeed-feeds feed t))
+
 
 (defface python-elfeed-entry
   '((t :background "Darkseagreen1"))
@@ -152,6 +160,7 @@
 ;; * store links to elfeed entries
 ;; These are copied from org-elfeed
 (defun org-elfeed-open (path)
+  "Open an elfeed link to PATH."
   (cond
    ((string-match "^entry-id:\\(.+\\)" path)
     (let* ((entry-id-str (substring-no-properties (match-string 1 path)))
@@ -164,7 +173,7 @@
    (t (error "%s %s" "elfeed: Unrecognised link type - " path))))
 
 (defun org-elfeed-store-link ()
-  "Store a link to an elfeed entry"
+  "Store a link to an elfeed entry."
   (interactive)
   (cond
    ((eq major-mode 'elfeed-show-mode)
@@ -190,3 +199,7 @@
  "elfeed"
  :follow 'org-elfeed-open
  :store 'org-elfeed-store-link)
+
+(provide 'scimax-elfeed)
+
+;;; scimax-elfeed.el ends here
