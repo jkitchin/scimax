@@ -17,7 +17,8 @@
 ;; `journal-git-grep' search the journal using `counsel-git-grep
 ;; 
 ;;; Code:
-(require 'rg)
+(when (featurep 'rg)
+  (require 'rg))
 (require 'scimax-org)
 
 (defvar journal-root-dir "~/vc/journal"
