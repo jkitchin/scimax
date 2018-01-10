@@ -1,10 +1,24 @@
 ;;; scimax-journal.el --- Journal commands for orgmode
-;; * Journal
 
 ;;; Commentary:
+;; This is a set of functions to make journaling in org-mode easier. The main
+;; entry point is a hydra menu bound to `journal/body'. I suggest you bind this
+;; to a convenient key of your choice, perhaps H-j.
+;;
+;; The hydra menu provides easy access to the following functions:
 ;; 
-
+;; `journal-new-entry' which creates a new entry for the day, or opens the current day.
+;; 
+;; `journal-open' which just opens the journal in the main root directory
+;; defined by `journal-root-dir'.
+;;
+;; `journal-open-heading' to open a heading in the journal
+;;
+;; `journal-git-grep' search the journal using `counsel-git-grep
+;; 
 ;;; Code:
+(require 'rg)
+(require 'scimax-org)
 
 (defvar journal-root-dir "~/vc/journal"
   "Directory for journal entries.")
@@ -12,7 +26,8 @@
 (unless (file-directory-p journal-root-dir)
   (let ((dir (file-name-as-directory journal-root-dir)))
     (unless (file-directory-p dir)
-      (make-directory dir t)
+      (make-directory dir t))
+    (unless (file-directory-p (file-name-as-directory (expand-file-name ".git" dir)))
       (let ((default-directory dir))
 	(shell-command "git init")))
     (projectile-add-known-project dir)
@@ -59,18 +74,23 @@ Add new day if necessary, otherwise, add to current day."
     (ivy-org-jump-to-heading-in-directory t)))
 
 
-(defun journal-grep (regex)
+(defun journal-git-grep (regex)
   "Run grep on the files in the journal.
 Argument REGEX the pattern to grep for."
+  (let ((default-directory journal-root-dir)) 
+    (counsel-git-grep)))
+
+
+(defun journal-grep (regex)
+  "Run grep on the files in the journal.
+ Argument REGEX the pattern to grep for."
   (interactive "sPattern: ")
-  (rg regex "*.org" journal-root-dir))
-
-
-(defun journal-heading ()
-  "Jump to a heading in the journal."
-  (interactive)
   (let ((default-directory journal-root-dir))
-    (ivy-org-jump-to-heading-in-directory t)))
+    (cond
+     ((featurep 'rg)
+      (rg regex "*.org" journal-root-dir))
+     (t
+      (projectile-grep regex)))))
 
 
 (defhydra journal (:color blue)
