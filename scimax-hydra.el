@@ -211,7 +211,7 @@ _k_: list packages _m_: compose mail
 	 (mu4e)))
   ("f" finder)
   ("i" messages)
-  ("j" journal/body)
+  ("j" scimax-journal/body)
   ("k" package-list-packages)
   ("m" compose-mail)
   ("n" ivy-contacts)
