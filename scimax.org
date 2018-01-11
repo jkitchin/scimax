@@ -188,9 +188,11 @@ The best way to see other speed commands is to put your cursor at the beginning 
 * Writing tools
 ** Spell-checking
 
-scimax is configured with flyspell and flycheck on. When you mispell a word it will be underlined in red, and you will see a message in the minibuffer that tells you how to fix it (C-;). Type that, and you will be able to fix the word spelling without losing your place! Not only that, but the correction will be saved as an abbreviation so it will auto correct every time you make the mistake again! Note this only works for single word corrections (i.e. the correction cannot be a two word correction).
+scimax is configured with flyspell and flycheck on. When you misspell a word it will be underlined in red, and you will see a message in the minibuffer that tells you how to fix it (C-;). Type that, and you will be able to fix the word spelling without losing your place! Not only that, but the correction will be saved as an abbreviation so it will auto correct every time you make the mistake again! Note this only works for single word corrections (i.e. the correction cannot be a two word correction).
 
 If the word is correct, you can type M-o s to save the word in your dictionary so you will not see it as misspelled again.
+
+Note: you need to have hunspell installed for this to work. On Windows, this should get installed into the scimax root directory in the emacs-win directory. For Mac and Linux, you need to install it using your package manager.
 
 ** Autoformat
 
