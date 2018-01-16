@@ -311,7 +311,7 @@ is positive, move after, and if negative, move before."
 (setq org-startup-with-inline-images "inlineimages")
 
 ;; default width
-(setq org-image-actual-width t)
+(setq org-image-actual-width nil)
 
 (add-hook 'org-babel-after-execute-hook
 	  'org-display-inline-images)

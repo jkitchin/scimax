@@ -150,6 +150,13 @@ where resize-option is one of:
 | xN   | to set the height, keeping the aspect ratio constant.   |
 | NxM! | to set the width and height, ignoring the aspect ratio. |
 
+Note that you have to have a line like this in your init file for this to work. This is the default in scimax, and if you set it to t, then scaling will not work (since this variable when set to t says to use the actual image width).
+
+#+BEGIN_SRC emacs-lisp
+(setq org-image-actual-width nil)
+#+END_SRC
+
+
 Here are some examples.
 
 #+CAPTION: An unscaled image.
