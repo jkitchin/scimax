@@ -181,7 +181,7 @@
 ;; pip install proselint
 (use-package flycheck
   ;; Jun 28 - I like this idea, but sometimes this is too slow.
-  :config 
+  :config
   (add-hook 'text-mode-hook #'flycheck-mode)
   (add-hook 'org-mode-hook #'flycheck-mode)
   (define-key flycheck-mode-map (kbd "s-;") 'flycheck-previous-error))
@@ -251,7 +251,7 @@
 	    (lambda ()
 	      (flyspell-mode +1)
 	      (flycheck-mode +1)))
-  
+
   :after flyspell
   :config
   (progn
@@ -309,7 +309,8 @@
 
 (use-package helm-projectile)
 
-(use-package help-fns+)
+(use-package help-fns+
+  :load-path scimax-dir)
 
 ;; Functions for working with hash tables
 (use-package ht)
