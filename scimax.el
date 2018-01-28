@@ -325,10 +325,6 @@ This enables you to use tab to open and close outlines."
 	navy-semicolon 'avy-goto-char)
   (navy/body))
 
-;;  I mapped Capslock to f12
-(global-set-key (kbd "<f12>") 'navy)
-
-
 
 ;; * dired enhancements
 ;; http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html
