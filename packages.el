@@ -539,7 +539,7 @@
 (use-package scimax-hydra
   :ensure nil
   :load-path scimax-dir
-  :bind ("<f12>" . scopus-hydra/body))
+  :bind ("<f12>" . scimax/body))
 
 (use-package kitchingroup
   :ensure nil
