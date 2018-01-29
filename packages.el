@@ -388,6 +388,10 @@
   ;; (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body)
   )
 
+(use-package org-ref-arxiv
+  :ensure nil
+  :load-path (lambda () (expand-file-name "org-ref" scimax-dir)))
+
 (use-package org-ref-scopus
   :ensure nil
   :load-path (lambda () (expand-file-name "org-ref" scimax-dir)))
