@@ -26,7 +26,8 @@
 
 (defcustom cm-wdiff-cmd
   "wdiff -w {-- -x --} -y {++ -z ++} "
-  "Command to run wdiff with.")
+  "Command to run wdiff with."
+  :group cm-mods)
 
 (defvar *cm-wdiff-git-source* nil
   "Global var to hold filename for cm-wdiff-git.")
