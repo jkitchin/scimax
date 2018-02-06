@@ -66,24 +66,28 @@
 
 (defcustom scimax-autoformat-superscripts t
   "Determines if words ending in a number should be superscripted."
-  :group 'scimax)
+  :group 'scimax-autoformat
+  :type boolean)
 
 (defcustom scimax-autoformat-transposed-caps t
   "Determines if scimax autoformats transposed caps, .e.g. tHe to The."
-  :group 'scimax)
-
+  :group 'scimax-autoformat
+  :type boolean)
 
 (defcustom scimax-autoformat-ordinals t
   "Determines if scimax autoformats ordinal numbers."
-  :group 'scimax)
-
+  :group 'scimax-autoformat
+  :type boolean)
 
 (defcustom scimax-autoformat-fractions t
   "Determines if scimax autoformats fractions."
-  :group 'scimax)
+  :group 'scimax-autoformat
+  :type boolean)
 
 (defcustom scimax-autoformat-sentence-capitalization t
-  "Determines if first word should be capitalized in a sentence.")
+  "Determines if first word should be capitalized in a sentence."
+  :group 'scimax-autoformat
+  :type boolean)
 
 (defcustom scimax-org-autoformat-functions
   '(scimax-org-autoformat-ordinals
@@ -133,7 +137,8 @@ abbreviation should be expanded at the current point."
     ("nov" "Nov.")
     ("dec" "Dec."))
   "Months should be expanded as abbrevs."
-  :group 'scimax)
+  :group 'scimax-autoformat
+  :type boolean)
 
 ;;** Weekdays
 
@@ -154,7 +159,8 @@ abbreviation should be expanded at the current point."
     ("sat" "Sat.")
     ("sun" "Sun."))
   "Weekdays that should be expanded."
-  :group 'scimax)
+  :group 'scimax-autoformat
+  :type boolean)
 
 
 ;;** Contractions
@@ -179,7 +185,8 @@ abbreviation should be expanded at the current point."
   "List of (name expansion) to replace in abbrev-mode.
 We do not use contractions in technical writing so this replaces
 them with the full version."
-  :group 'scimax)
+  :group 'scimax-autoformat
+  :type boolean)
 
 
 ;;** transposed letter words
@@ -199,7 +206,8 @@ them with the full version."
     ("waht" "what")
     ("wehn" "when"))
   "Common transpositions that should be fixed."
-  :group 'scimax)
+  :group 'scimax-autoformat
+  :type boolean)
 
 
 ;;** Common Chemical Formulas
@@ -213,7 +221,8 @@ them with the full version."
     ("c2h4" "C_{2}H_{4}")
     ("c2h6" "C_{2}H_{6}"))
   "List of (abbrev expansion) for defining abbreviations."
-  :group 'scimax)
+  :group 'scimax-autoformat
+  :type boolean)
 
 
 ;;** Misc. abbreviations
@@ -226,7 +235,9 @@ them with the full version."
     ;; Some common names with umlauts/accents/slashed letters
     ("norskov" "Nørskov")
     ("schrodinger" "Schrödinger"))
-  "Miscellaneous abbreviations")
+  "Miscellaneous abbreviations"
+  :group 'scimax-autoformat
+  :type boolean)
 
 
 
