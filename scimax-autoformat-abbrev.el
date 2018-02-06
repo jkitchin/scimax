@@ -67,27 +67,27 @@
 (defcustom scimax-autoformat-superscripts t
   "Determines if words ending in a number should be superscripted."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 (defcustom scimax-autoformat-transposed-caps t
   "Determines if scimax autoformats transposed caps, .e.g. tHe to The."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 (defcustom scimax-autoformat-ordinals t
   "Determines if scimax autoformats ordinal numbers."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 (defcustom scimax-autoformat-fractions t
   "Determines if scimax autoformats fractions."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 (defcustom scimax-autoformat-sentence-capitalization t
   "Determines if first word should be capitalized in a sentence."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 (defcustom scimax-org-autoformat-functions
   '(scimax-org-autoformat-ordinals
@@ -138,7 +138,7 @@ abbreviation should be expanded at the current point."
     ("dec" "Dec."))
   "Months should be expanded as abbrevs."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 ;;** Weekdays
 
@@ -160,7 +160,7 @@ abbreviation should be expanded at the current point."
     ("sun" "Sun."))
   "Weekdays that should be expanded."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 
 ;;** Contractions
@@ -186,7 +186,7 @@ abbreviation should be expanded at the current point."
 We do not use contractions in technical writing so this replaces
 them with the full version."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 
 ;;** transposed letter words
@@ -207,7 +207,7 @@ them with the full version."
     ("wehn" "when"))
   "Common transpositions that should be fixed."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 
 ;;** Common Chemical Formulas
@@ -222,7 +222,7 @@ them with the full version."
     ("c2h6" "C_{2}H_{6}"))
   "List of (abbrev expansion) for defining abbreviations."
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 
 ;;** Misc. abbreviations
@@ -237,7 +237,7 @@ them with the full version."
     ("schrodinger" "Schrödinger"))
   "Miscellaneous abbreviations"
   :group 'scimax-autoformat
-  :type boolean)
+  :type 'boolean)
 
 
 
