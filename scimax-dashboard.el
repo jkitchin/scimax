@@ -1,7 +1,22 @@
 ;;; scimax-dashboard.el --- Dashboard for scimax
 
 ;;; Commentary:
-;; This module creates a dashboard splash screen for scimax.
+;; This module creates a dashboard splash screen for scimax.  It
+;; builds off of https://github.com/rakanalh/emacs-dashboard to
+;; provide a starting point for you when you first open emacs.
+;;
+;; `scimax-dashboard' will open the dashboard any time.
+;;
+;; Most sections are customized to be more functional than default.
+;;
+;; These key bindings are different than those provided by `dashboard':
+;; a - jump to any button and open it
+;; i - previous line
+;; s-i  previous section
+;; k - next line
+;; s-k  next section
+;; o - open the button at point
+;; ? - show the keymap
 
 ;;; Code:
 
@@ -19,16 +34,16 @@
 (use-package dashboard
   :ensure t
   :diminish dashboard-mode
-  :bind-keymap
-  (("a" . scimax-dashboard-jump-to-button)
-   ("i" . previous-line)
-   ("k" . forward-line)
-   ("s-i" . dashboard-previous-section)
-   ("s-k" . dashboard-next-section)
-   ("o" . widget-button-click)
-   ("?" . (lambda ()
-	    (interactive)
-	    (describe-keymap dashboard-mode-map))))
+  :bind (:map dashboard-mode-map
+	      ("a" . scimax-dashboard-jump-to-button)
+	      ("i" . previous-line)
+	      ("k" . forward-line)
+	      ("s-i" . dashboard-previous-section)
+	      ("j" . dashboard-previous-section)
+	      ("s-k" . dashboard-next-section)
+	      ("l" . dashboard-next-section)
+	      ("o" . widget-button-click)
+	      ("?" . scimax-dashboard-describe-keys))
   :config
   (setq dashboard-banner-logo-title "Awesome editing for scientists and engineers")
   (setq dashboard-startup-banner (expand-file-name "scimax.png" scimax-dir))
@@ -40,21 +55,11 @@
   (dashboard-setup-startup-hook))
 
 
-;; (define-key dashboard-mode-map (kbd "n") #'forward-line)
-;; (define-key dashboard-mode-map (kbd "k") #'forward-line)
-;; (define-key dashboard-mode-map (kbd "p") #'previous-line)
-;; (define-key dashboard-mode-map (kbd "i") #'previous-line)
+(defun scimax-dashboard-describe-keys ()
+  "Show the keybindings in the dashboard."
+  (interactive)
+  (describe-keymap dashboard-mode-map))
 
-;; (define-key dashboard-mode-map (kbd "o") #'widget-button-click)
-;; (define-key dashboard-mode-map (kbd "]") #'dashboard-next-section)
-;; (define-key dashboard-mode-map (kbd "l") #'dashboard-next-section)
-;; (define-key dashboard-mode-map (kbd "s-k") #'dashboard-next-section)
-
-;; (define-key dashboard-mode-map (kbd "[") #'dashboard-previous-section)
-;; (define-key dashboard-mode-map (kbd "j") #'dashboard-previous-section)
-;; (define-key dashboard-mode-map (kbd "s-i") #'dashboard-previous-section)
-;; (define-key dashboard-mode-map (kbd "a") #'scimax-dashboard-jump-to-button)
-;; (define-key dashboard-mode-map (kbd "?") #')
 
 (defun scimax-dashboard ()
   "Open the scimax dashboard."
@@ -76,8 +81,7 @@
     (avy-with scimax-dashboard-link
       (avy--process
        (reverse marks)
-       (avy--style-fn avy-style)))
-    (widget-button-press (point))))
+       (avy--style-fn avy-style)))))
 
 
 (defun scimax-internet-p ()
@@ -98,6 +102,7 @@
       (message "You have no ping executable! I cannot check for internet connectivity.")
       nil)))
 
+;; * scimax section
 
 (defun scimax-dashboard-scimax-section (&rest args)
   "Create the scimax dashboard section."
@@ -107,7 +112,9 @@
 		 :action `(lambda (&rest ignore)
 			    (scimax-help))
 		 :mouse-face 'highlight
-		 :help-echo "Open the scimax manual."
+		 :help-echo (substitute-command-keys
+			     (format "\\[%s]\n"
+				     "scimax-help"))
 		 :follow-link "\C-m"
 		 :button-prefix ""
 		 :button-suffix ""
@@ -119,7 +126,9 @@
 		 :action `(lambda (&rest ignore)
 			    (scimax/body))
 		 :mouse-face 'highlight
-		 :help-echo "The scimax hydra menu."
+		 :help-echo (substitute-command-keys
+			     (format "\\[%s]\n"
+				     "scimax/body"))
 		 :follow-link "\C-m"
 		 :button-prefix ""
 		 :button-suffix ""
@@ -138,6 +147,32 @@
    :button-suffix ""
    :format "%[%t%]"
    "scimax (Github)")
+
+  (insert "    ")
+  (widget-create
+   'push-button
+   :action `(lambda (&rest ignore)
+	      (scimax-customize-user))
+   :mouse-face 'highlight
+   :help-echo "Click to open user.el"
+   :follow-link "\C-m"
+   :button-prefix ""
+   :button-suffix ""
+   :format "%[%t%]"
+   "Customize user.el")
+
+  (insert "    ")
+  (widget-create
+   'push-button
+   :action `(lambda (&rest ignore)
+	      (customize-apropos "scimax"))
+   :mouse-face 'highlight
+   :help-echo "Click to customize scimax related variables."
+   :follow-link "\C-m"
+   :button-prefix ""
+   :button-suffix ""
+   :format "%[%t%]"
+   "Customize scimax")
 
   ;; Check if there are updates available
   (when (and scimax-dashboard-check-git-updates (scimax-internet-p))
@@ -161,6 +196,8 @@
 	 "  update scimax")))))
 
 (add-to-list 'dashboard-item-generators  '(scimax . scimax-dashboard-scimax-section))
+
+;; * Agenda
 
 (defun scimax-dashboard-agenda (&rest args)
   "Create our version of recent"
@@ -170,6 +207,7 @@
 		 :action `(lambda (&rest ignore)
 			    (org-agenda nil "a"))
 		 :mouse-face 'highlight
+		 :button-face '(:background "Lightgray" :underline t)
 		 :help-echo "Agenda"
 		 :follow-link "\C-m"
 		 :button-prefix ""
@@ -181,6 +219,7 @@
 		 :action `(lambda (&rest ignore)
 			    (org-agenda nil "t"))
 		 :mouse-face 'highlight
+		 :button-face '(:background "Lightgray" :underline t)
 		 :help-echo "Agenda"
 		 :follow-link "\C-m"
 		 :button-prefix ""
@@ -193,6 +232,7 @@
 		 :action `(lambda (&rest ignore)
 			    (org-agenda nil "m"))
 		 :mouse-face 'highlight
+		 :button-face '(:background "Lightgray" :underline t)
 		 :help-echo "Search by tag/property"
 		 :follow-link "\C-m"
 		 :button-prefix ""
@@ -204,6 +244,7 @@
 		 :action `(lambda (&rest ignore)
 			    (org-agenda nil "s"))
 		 :mouse-face 'highlight
+		 :button-face '(:background "Lightgray" :underline t)
 		 :help-echo "Search for keywords"
 		 :follow-link "\C-m"
 		 :button-prefix ""
@@ -215,6 +256,7 @@
 		 :action `(lambda (&rest ignore)
 			    (org-agenda nil "/"))
 		 :mouse-face 'highlight
+		 :button-face '(:background "Lightgray" :underline t)
 		 :help-echo "moccur"
 		 :follow-link "\C-m"
 		 :button-prefix ""
@@ -223,7 +265,7 @@
 		 "moccur"))
 
 (add-to-list 'dashboard-item-generators  '(scimax-agenda . scimax-dashboard-agenda))
-
+
 ;; * recentf
 (defun scimax-dashboard-recentf (&rest args)
   "Create our version of recent"
@@ -233,6 +275,7 @@
 		 :action `(lambda (&rest ignore)
 			    (counsel-recentf))
 		 :mouse-face 'highlight
+		 :button-face '(:background "Lightgray" :underline t)
 		 :help-echo "counsel-recentf"
 		 :follow-link "\C-m"
 		 :button-prefix ""
@@ -241,16 +284,17 @@
 		 "Open another recent file"))
 
 (add-to-list 'dashboard-item-generators  '(scimax-recentf . scimax-dashboard-recentf))
-
+
 ;; * bookmarks
 (defun scimax-dashboard-bookmarks (&rest args)
   "Create our version of bookmarks"
-  (dashboard-insert-projects (cdr (assoc 'scimax-bookmarks dashboard-items)))
+  (dashboard-insert-bookmarks (cdr (assoc 'scimax-bookmarks dashboard-items)))
   (insert "\n    ")
   (widget-create 'push-button
 		 :action `(lambda (&rest ignore)
 			    (counsel-bookmark))
 		 :mouse-face 'highlight
+		 :button-face '(:background "Lightgray" :underline t)
 		 :help-echo "Open another bookmark."
 		 :follow-link "\C-m"
 		 :button-prefix ""
@@ -269,6 +313,7 @@
 		 :action `(lambda (&rest ignore)
 			    (projectile-switch-project))
 		 :mouse-face 'highlight
+		 :button-face '(:background "Lightgray" :underline t)
 		 :help-echo "Open another project."
 		 :follow-link "\C-m"
 		 :button-prefix ""
