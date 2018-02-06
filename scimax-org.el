@@ -1412,7 +1412,8 @@ Use a prefix arg to get regular RET. "
 
 (defcustom scimax-src-block-keymaps
   '()
-  "alist of custom keymaps for src blocks.")
+  "alist of custom keymaps for src blocks."
+  :group :scimax)
 
 (setq scimax-src-block-keymaps
       `(("ipython" . ,(let ((map (make-composed-keymap
