@@ -9,13 +9,15 @@
 (defcustom scimax-user-hotspot-commands '()
   "A-list of hotspots to jump to in `hotspots'.
 These are shortcut to commands.
-\(\"label\" . command)")
+\(\"label\" . command)"
+  :group 'scimax)
 
 (defcustom scimax-user-hotspot-locations '()
   "A-list of hotspot locations to jump to in  `hotspots'.
 \(\"label\" . \"Path to file\").
 
-These are like bookmarks.")
+These are like bookmarks."
+  :group 'scimax)
 
 
 ;;;###autoload
