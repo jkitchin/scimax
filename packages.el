@@ -355,13 +355,23 @@
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
+(use-package scimax-ob
+  :ensure nil
+  :load-path scimax-dir
+  :bind ("H--" . org-babel-split-src-block))
+
 ;; this is a git submodule
 (use-package ob-ipython
   :ensure nil
-  :load-path (lambda () (expand-file-name "ob-ipython" scimax-dir))
-  :init
-  (add-to-list 'load-path
-	       (expand-file-name "ob-ipython" scimax-dir)))
+  :load-path (lambda () (expand-file-name "ob-ipython-upstream" scimax-dir))
+  :bind (:map org-mode-map
+	      ("s-/" . ob-ipython-inspect))
+  :init (add-to-list 'load-path (expand-file-name "ob-ipython-upstream" scimax-dir))
+  (require 'ob-ipython))
+
+(use-package scimax-org-babel-ipython-upstream
+  :ensure nil
+  :load-path scimax-dir)
 
 (use-package ov)
 

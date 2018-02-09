@@ -278,7 +278,7 @@ is positive, move after, and if negative, move before."
 
 ;; ** jupyter ipython blocks
 
-(require 'scimax-org-babel-ipython)
+(require 'scimax-org-babel-ipython-upstream)
 
 ;; ** jupyter-hy blocks
 ;; make src blocks open in the right mode
