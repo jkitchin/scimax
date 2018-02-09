@@ -72,6 +72,15 @@ With a prefix BELOW move point to lower block."
       (scimax-insert-src-block t))))
 
 
+(defun scimax-execute-to-point ()
+  "Execute all the src blocks up to and including the one point
+is on."
+  (interactive)
+  (let ((p (point)))
+    (save-excursion
+      (goto-char (point-min))
+      (while (and (org-babel-next-src-block) (< (point) p))
+	(org-babel-execute-src-block)))))
 
 
 ;; * Src block keymaps
