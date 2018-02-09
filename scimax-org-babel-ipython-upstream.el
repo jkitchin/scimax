@@ -63,6 +63,13 @@ You need this to get syntax highlighting."
 			      map)))
 
 
+(defun scimax-restart-ipython-and-execute-to-point ()
+  "Kill the kernel and run src-blocks to point."
+  (interactive)
+  (call-interactively 'ob-ipython-kill-kernel)
+  (scimax-execute-to-point))
+
+
 ;; * Modifications of ob-ipython
 
 ;; Modified to make buffer unique kernels automatically
@@ -83,11 +90,9 @@ This function is called by `org-babel-execute-src-block'."
     (let ((session-name (if-let (bf (buffer-file-name))
 			    (md5 (expand-file-name bf))
 			  "scratch")))
+      (setq header-line-format (format "Ipython session: %s" session-name))
       (add-to-list 'org-babel-default-header-args:ipython
-		   (cons :session session-name)))
-
-    ;; (add-hook 'kill-buffer-hook #'ob-ipython-kill-kernel t t)
-    )
+		   (cons :session session-name))))
 
   (ob-ipython--clear-output-buffer)
   (if (assoc :async params)
