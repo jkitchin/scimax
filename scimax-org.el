@@ -289,7 +289,7 @@ is positive, move after, and if negative, move before."
 (setq org-babel-default-header-args:jupyter-hy
       '((:results . "output replace")
 	(:session . "hy")
-	(:kernel . "hy")
+	(:kernel . "calysto_hy")
 	(:exports . "both")
 	(:eval . "never-export")
 	(:cache .   "no")
