@@ -13,3 +13,4 @@ uservar
 .DS_STORE
 ltximg
 *.elc
+/scimax.texi
