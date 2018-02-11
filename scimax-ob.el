@@ -16,8 +16,8 @@ If point is in a block, copy the header to the new block"
 	     (start (org-element-property :begin src))
 	     (end (org-element-property :end src))
 	     (lang (org-element-property :language src))
-	     (switches (org-element-property :switches src))
-	     (parameters (org-element-property :parameters src))
+	     (switches (or (org-element-property :switches src) ""))
+	     (parameters (or (org-element-property :parameters src) ""))
 	     location)
 	(if below
 	    (progn
@@ -28,28 +28,27 @@ If point is in a block, copy the header to the new block"
 		(goto-char location)
 		(goto-char (org-element-property :end (org-element-context))))
 	      (insert (format "\n#+BEGIN_SRC %s %s %s
-
 #+END_SRC\n\n" lang switches parameters))
-	      (forward-line -3))
+	      (forward-line -2))
 	  ;; after current block
 	  (goto-char (org-element-property :begin (org-element-context)))
 	  (insert (format "\n#+BEGIN_SRC %s %s %s
 
 #+END_SRC\n\n" lang switches parameters))
 	  (forward-line -3)))
-    ;; Not in a src block
+    ;; Not in a src block, just insert a block
     (beginning-of-line)
-    (insert (format "\n#+BEGIN_SRC %s %s %s
-
+    (insert (format "\n#+BEGIN_SRC %s
 #+END_SRC\n" (completing-read "Language: " (mapcar 'car org-babel-load-languages))))
-    (forward-line -2)))
+    (forward-line -1)))
 
 
 (defun scimax-split-src-block (&optional below)
-  "Split the current src block.
+  "Split the current src block with point in upper block.
 With a prefix BELOW move point to lower block."
   (interactive "P")
   (let* ((el (org-element-context))
+	 (p (point))
 	 (language (org-element-property :language el))
 	 (parameters (org-element-property :parameters el)))
 
@@ -57,24 +56,25 @@ With a prefix BELOW move point to lower block."
     (insert (format "#+END_SRC
 
 #+BEGIN_SRC %s %s\n" language (or parameters "")))
-    (beginning-of-line)
-    (when (not below)
-      (org-babel-previous-src-block))))
+    (unless below
+      (beginning-of-line)
+      (forward-line -3)
+      (forward-char -1))))
 
 
 (defun scimax-execute-and-next-block ()
   "Execute this block and either jump to the next one, or add a new one."
   (interactive)
   (org-babel-execute-src-block)
-  (let ((next-block (save-excursion (re-search-forward org-babel-src-block-regexp nil t))))
+  (let ((next-block (save-excursion (org-babel-next-src-block))))
     (if next-block
 	(goto-char (match-beginning 0))
-      (scimax-insert-src-block t))))
+      (scimax-insert-src-block t)))
+  (recenter 10))
 
 
 (defun scimax-execute-to-point ()
-  "Execute all the src blocks up to and including the one point
-is on."
+  "Execute all the src blocks that start before point."
   (interactive)
   (let ((p (point)))
     (save-excursion
@@ -83,61 +83,51 @@ is on."
 	(org-babel-execute-src-block)))))
 
 
-;; * Src block keymaps
-(defcustom scimax-src-block-keymaps
-  "alist of keymaps for different languages."
-  '()
-  :group 'scimax)
+(defun scimax-jump-to-block (&optional N)
+  "Jump to a block in the buffer.
+If narrowing is in effect, only a block in the narrowed region.
+Use a numeric prefix to specify how many lines of context to use.
+Defaults to 3."
+  (interactive "p")
+  (let ((p '()))
+    (when (= 1 N) (setq N 3))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward org-babel-src-block-regexp nil t)
+	(push (list (format "line %s:\n%s"
+			    (line-number-at-pos (match-beginning 0))
+			    (save-excursion
+			      (goto-char (match-beginning 0))
+			      (let ((s (point)))
+				(forward-line N)
+				(buffer-substring s (point)))))
+		    (line-number-at-pos (match-beginning 0)))
+	      p)))
+    (ivy-read "block: " (reverse p)
+	      :action (lambda (candidate)
+			(goto-char (point-min))
+			(forward-line (1- (second candidate)))
+			(outline-show-entry)
+			(recenter)))))
 
-(defun scimax-add-keymap-to-src-blocks (limit)
-  "Add keymaps to src-blocks defined in `scimax-src-block-keymaps'."
-  (let ((case-fold-search t)
-        lang)
-    (while (re-search-forward org-babel-src-block-regexp limit t)
-      (let ((lang (match-string 2))
-            (beg (match-beginning 0))
-            (end (match-end 0)))
-        (if (assoc (org-no-properties lang) scimax-src-block-keymaps)
-            (progn
-              (add-text-properties
-               beg end `(local-map ,(cdr (assoc
-                                          (org-no-properties lang)
-                                          scimax-src-block-keymaps))))
-              (add-text-properties
-               beg end `(cursor-sensor-functions
-                         ((lambda (win prev-pos sym)
-                            ;; This simulates a mouse click and makes a menu change
-                            (org-mouse-down-mouse nil)))))))))))
+;; * src keys
 
-
-(defun scimax-spoof-mode (orig-func &rest args)
-  "Advice function to spoof commands in org-mode src blocks.
-It is for commands that depend on the major mode. One example is
-`lispy--eval'."
-  (if (org-in-src-block-p)
-      (let ((major-mode (intern (format "%s-mode" (first (org-babel-get-src-block-info))))))
-        (apply orig-func args))
-    (apply orig-func args)))
-
-
-(define-minor-mode scimax-src-keymap-mode
-  "Minor mode to add mode keymaps to src-blocks."
-  :init-value nil
-  (if scimax-src-keymap-mode
-      (progn
-        (add-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks t)
-        (add-to-list 'font-lock-extra-managed-props 'local-map)
-        (add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
-        (advice-add 'lispy--eval :around 'scimax-spoof-mode)
-        (cursor-sensor-mode +1))
-    (remove-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks)
-    (advice-remove 'lispy--eval 'scimax-spoof-mode)
-    (cursor-sensor-mode -1))
-  (font-lock-fontify-buffer))
-
-(add-hook 'org-mode-hook (lambda ()
-                           (scimax-src-keymap-mode +1)))
-
+(defmacro scimax-define-src-key (language key def)
+  "For LANGUAGE (symbol) src blocks, define key sequence KEY as DEF.
+This is like `define-key', except the definition only applies in
+src blocks for a specific LANGUAGE. Adapted from
+http://endlessparentheses.com/define-context-aware-keys-in-emacs.html"
+  (declare (indent 3)
+           (debug (form form form &rest sexp)))
+  `(define-key org-mode-map ,key
+     '(menu-item
+       ,(format "maybe-%s" (or (car (cdr-safe def)) def))
+       nil
+       :filter (lambda (&optional _)
+                 (when (and (org-in-src-block-p)
+			    (string= ,(symbol-name language)
+				     (car (org-babel-get-src-block-info t))))
+		   ,def)))))
 
 
 (provide 'scimax-ob)
