@@ -9,6 +9,10 @@
   "If non-nil use a unique kernel for each buffer."
   :group 'ob-ipython)
 
+(defcustom ob-ipython-show-mime-types t
+  "If non-nil show mime-types in output."
+  :group 'ob-ipython)
+
 (defcustom ob-ipython-exception-results t
   "If non-nil put the contents of the traceback buffer as results."
   :group 'ob-ipython)
@@ -46,21 +50,178 @@ You need this to get syntax highlighting."
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
 
+(scimax-define-src-key ipython (kbd "C-<return>") #'org-ctrl-c-ctrl-c)
+(scimax-define-src-key ipython (kbd "S-<return>") #'scimax-execute-and-next-block)
+(scimax-define-src-key ipython (kbd "M-<return>") #'scimax-execute-to-point)
+(scimax-define-src-key ipython (kbd "s-<return>")
+		       (lambda ()
+			 "Restart kernel and execute block"
+			 (interactive)
+			 (ob-ipython-kill-kernel
+			  (cdr (assoc (if-let (bf (buffer-file-name))
+					  (md5 (expand-file-name bf))
+					"scratch")
+				      (ob-ipython--get-kernel-processes))))
+			 (org-babel-execute-src-block-maybe)))
+(scimax-define-src-key ipython (kbd "M-s-<return>") #'scimax-restart-ipython-and-execute-to-point)
+(scimax-define-src-key ipython (kbd "H-<return>")
+		       (lambda ()
+			 "Restart kernel and execute buffer"
+			 (interactive)
+			 (ob-ipython-kill-kernel
+			  (cdr (assoc (if-let (bf (buffer-file-name))
+					  (md5 (expand-file-name bf))
+					"scratch")
+				      (ob-ipython--get-kernel-processes))))
+			 (org-babel-execute-buffer)))
 
 
-(add-to-list 'scimax-src-block-keymaps
-	     `("ipython" . ,(let ((map (make-composed-keymap
-					'()
-					org-mode-map)))
-			      ;; In org-mode I define RET so we redefine them here
-			      (define-key map (kbd "<return>") 'newline)
-			      (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
-			      ;; Make C-enter execute block like jupyter to execute block
-			      (define-key map (kbd "C-<return>") 'org-ctrl-c-ctrl-c)
-			      (define-key map (kbd "S-<return>") 'scimax-execute-and-add-new-block)
-			      (define-key map (kbd "H-=") 'scimax-insert-src-block)
-			      (define-key map (kbd "H-/") 'ob-ipython-inspect)
-			      map)))
+(scimax-define-src-key ipython (kbd "H-=") #'scimax-insert-src-block)
+(scimax-define-src-key ipython (kbd "H--") #'scimax-split-src-block)
+(scimax-define-src-key ipython (kbd "H-/") #'ob-ipython-inspect)
+(scimax-define-src-key ipython (kbd "H-r") #'org-babel-switch-to-session)
+
+(scimax-define-src-key ipython (kbd "H-k")
+		       (lambda ()
+			 (interactive)
+			 (when (y-or-n-p "Kill kernel?")
+			   (ob-ipython-kill-kernel
+			    (cdr (assoc (if-let (bf (buffer-file-name))
+					    (md5 (expand-file-name bf))
+					  "scratch")
+					(ob-ipython--get-kernel-processes))))
+			   (setq header-line-format nil)
+			   (redisplay))))
+
+
+;; navigation in block
+(scimax-define-src-key ipython (kbd "s-i") #'org-babel-previous-src-block)
+(scimax-define-src-key ipython (kbd "s-k") #'org-babel-next-src-block)
+(scimax-define-src-key ipython (kbd "H-q") #'scimax-jump-to-visible-block)
+(scimax-define-src-key ipython (kbd "H-s-q") #'scimax-jump-to-block)
+
+;; copy block
+(scimax-define-src-key ipython (kbd "H-n")
+		       (lambda ()
+			 "Copy the block and its results."
+			 (interactive)
+			 (let ((src (org-element-context))
+			       (result-start (org-babel-where-is-src-block-result))
+			       end)
+			   (if result-start
+			       (save-excursion
+				 (goto-char result-start)
+				 (setq end (org-babel-result-end)))
+			     (setq end (org-element-property :end src)))
+
+			   (kill-new
+			    (buffer-substring
+			     (org-element-property :begin src)
+			     end)))))
+
+;; kill block
+(scimax-define-src-key ipython (kbd "H-w")
+		       (lambda ()
+			 "Kill the block and its results."
+			 (interactive)
+			 (let ((src (org-element-context))
+			       (result-start (org-babel-where-is-src-block-result))
+			       end)
+			   (if result-start
+			       (save-excursion
+				 (goto-char result-start)
+				 (setq end (org-babel-result-end)))
+			     (setq end (org-element-property :end src)))
+			   (kill-region
+			    (org-element-property :begin src)
+			    end))))
+
+
+;; clone block
+(scimax-define-src-key ipython (kbd "H-c")
+		       (lambda (&optional below)
+			 "Clone the block."
+			 (interactive "P")
+			 (let* ((src (org-element-context))
+				(code (org-element-property :value src)))
+			   (scimax-insert-src-block (not below))
+			   (insert code)
+			   ;; jump back to start of new block
+			   (org-babel-previous-src-block)
+			   (org-babel-next-src-block))))
+
+;; move blocks
+(scimax-define-src-key ipython (kbd "s-w")
+		       (lambda ()
+			 "Move block before previous one."
+			 (interactive)
+			 (let ((src (org-element-context)))
+			   (kill-region
+			    (org-element-property :begin src)
+			    (org-element-property :end src)))
+			 (org-babel-previous-src-block)
+			 (org-yank)))
+
+(scimax-define-src-key ipython (kbd "s-s")
+		       (lambda ()
+			 "Move block after next one."
+			 (interactive)
+			 (let ((src (org-element-context)))
+			   (kill-region
+			    (org-element-property :begin src)
+			    (org-element-property :end src)))
+			 (org-babel-next-src-block)
+			 (goto-char (org-element-property :end (org-element-context)))
+			 (forward-line)
+			 (org-yank)))
+
+(scimax-define-src-key ipython (kbd "H-l") #'org-babel-remove-result)
+(scimax-define-src-key ipython (kbd "H-s-l")
+		       (lambda ()
+			 (interactive)
+			 (save-excursion
+			   (goto-char (point-min))
+			   (while (org-babel-next-src-block)
+			     (org-babel-remove-result)))))
+
+
+(defun scimax-merge-ipython-blocks (r1 r2)
+  "Merge blocks in the current region (R1 R2).
+This deletes the results from each block, and concatenates the
+code into a single block in the position of the first block.
+Currently no switches/parameters are preserved. It isn't clear
+what the right thing to do for those is, e.g. dealing with
+variables, etc."
+  (interactive "r")
+  (save-restriction
+    (let* ((blocks (org-element-map (org-element-parse-buffer) 'src-block
+		     (lambda (src)
+		       (when (string= "ipython" (org-element-property :language src))
+			 src))))
+	   (first-start (org-element-property :begin (car blocks)))
+	   (merged-code (s-join "\n" (loop for src in blocks
+					   collect
+					   (org-element-property :value src)))))
+      ;; Remove blocks
+      (loop for src in (reverse blocks)
+	    do
+	    (goto-char (org-element-property :begin src))
+	    (org-babel-remove-result)
+	    (setf (buffer-substring (org-element-property :begin src)
+				    (org-element-property :end src))
+		  ""))
+      (goto-char first-start)
+      (insert (format "#+BEGIN_SRC ipython
+%s
+#+END_SRC" (s-trim merged-code))))))
+
+(scimax-define-src-key ipython (kbd "H-m") #'scimax-merge-ipython-blocks)
+
+(defun scimax-jump-to-visible-block ()
+  "Jump to a visible src block with avy."
+  (interactive)
+  (avy-with scimax-jump-to-block
+    (avy--generic-jump "#\\+BEGIN_SRC ipython"  nil avy-style (point-min) (point-max))))
 
 
 (defun scimax-restart-ipython-and-execute-to-point ()
@@ -95,6 +256,19 @@ This function is called by `org-babel-execute-src-block'."
 		   (cons :session session-name))))
 
   (ob-ipython--clear-output-buffer)
+  ;; scimax feature to restart
+  (when (assoc :restart params)
+    (let ((session (if-let (bf (buffer-file-name))
+		       (md5 (expand-file-name bf))
+		     "scratch")))
+      (ob-ipython-kill-kernel
+       (cdr (assoc session
+		   (ob-ipython--get-kernel-processes))))
+      (cl-loop for buf in (list (format "*Python:%s*" session)
+				(format "*ob-ipython-kernel-%s*" session))
+	       do
+	       (when (get-buffer buf)
+		 (kill-buffer buf)))))
   (if (assoc :async params)
       (ob-ipython--execute-async body params)
     (ob-ipython--execute-sync body params)))
@@ -111,23 +285,24 @@ This function is called by `org-babel-execute-src-block'."
 	 ;; similar to :display in the results from jupyter. This is to specify
 	 ;; what you want to see.
 	 (display-params (cdr (assoc :display params)))
-	 (display (when display-params (mapcar 'intern-soft (list display-params)))))
+	 (display (when display-params (mapcar 'intern-soft
+					       (s-split " " display-params t)))))
     (ob-ipython--create-kernel (ob-ipython--normalize-session session)
                                (cdr (assoc :kernel params)))
     (ob-ipython--execute-request-async
      (org-babel-expand-body:generic (encode-coding-string body 'utf-8)
                                     params (org-babel-variable-assignments:python params))
      (ob-ipython--normalize-session session)
-     
-     `(lambda (ret sentinel buffer file result-type) 
+
+     `(lambda (ret sentinel buffer file result-type)
 	(when ,display-params
 	  (setf (cdr (assoc :display (assoc :result ret)))
 		(-filter (lambda (el) (memq (car el) ',display))
 			 (cdr (assoc :display (assoc :result ret)))))
 	  (setf (cdr (assoc :value (assoc :result ret)))
 		(-filter (lambda (el) (memq (car el) ',display))
-			 (cdr (assoc :value (assoc :result ret)))))) 
-	(let* ((replacement (ob-ipython--process-response ret file result-type))) 
+			 (cdr (assoc :value (assoc :result ret))))))
+	(let* ((replacement (ob-ipython--process-response ret file result-type)))
 	  (ipython--async-replace-sentinel sentinel buffer replacement)))
 
      (list sentinel (current-buffer) file result-type))
@@ -141,7 +316,8 @@ This function is called by `org-babel-execute-src-block'."
 	 ;; similar to :display in the results from jupyter. This is to specify
 	 ;; what you want to see.
 	 (display-params (cdr (assoc :display params)))
-	 (display (when display-params (mapcar 'intern-soft (list display-params)))))
+	 (display (when display-params (mapcar 'intern-soft
+					       (s-split " " display-params t)))))
     (ob-ipython--create-kernel (ob-ipython--normalize-session session)
                                (cdr (assoc :kernel params)))
     (-when-let (ret (ob-ipython--eval
@@ -169,7 +345,8 @@ This function is called by `org-babel-execute-src-block'."
 	 (display (cdr (assoc :display result))))
     (s-concat
      (format "# Out[%d]:\n" (cdr (assoc :exec-count ret)))
-     output
+     (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
+     (when (not (string= "" output)) output)
      (s-join "\n\n" (loop for (type . value) in (append value display)
 			  do
 			  (message "Rendering %s" (cons type (cond
@@ -184,19 +361,26 @@ This function is called by `org-babel-execute-src-block'."
 (defun ob-ipython--render (file-or-nil values)
   (let ((org (lambda (value)
 	       "org is verbtatim"
-	       value))
+	       (s-join "\n" (list "# text/org" value))))
         (png (lambda (value)
                (let ((file (or file-or-nil (ob-ipython--generate-file-name ".png"))))
                  (ob-ipython--write-base64-string file value)
-                 (format "[[file:%s]]" file))))
+		 (s-join "\n" (list
+			       (if ob-ipython-show-mime-types "# image/png" "")
+			       (format "[[file:%s]]" file))))))
         (svg (lambda (value)
                (let ((file (or file-or-nil (ob-ipython--generate-file-name ".svg"))))
                  (ob-ipython--write-string-to-file file value)
-                 (format "[[file:%s]]" file))))
+                 (s-join "\n"
+			 (list
+			  (if ob-ipython-show-mime-types "# image/svg" "")
+			  (format "[[file:%s]]" file))))))
         (html (lambda (value)
 		(format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value)))
 	(latex (lambda (value)
-		 (format "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT" value)))
+		 (s-join "\n"
+			 (list (if ob-ipython-show-mime-types "# text/latex" "")
+			       (format "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT" value)))))
         (txt (lambda (value)
                (let ((lines (s-lines value)))
                  (if (cdr lines)
@@ -204,8 +388,12 @@ This function is called by `org-babel-execute-src-block'."
                           (-map 's-trim)
                           (s-join "\n  ")
                           (s-concat "  ")
-                          (format "#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE"))
-                   (s-concat ": " (car lines)))))))
+                          (format "%s#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE"
+				  (if ob-ipython-show-mime-types "# text/plain\n" "")))
+		   (s-concat
+		    (if ob-ipython-show-mime-types "\n# text/plain\n: "
+		      ": ")
+		    (car lines)))))))
     (or (-when-let (val (cdr (assoc 'text/org values))) (funcall org val))
         (-when-let (val (cdr (assoc 'image/png values))) (funcall png val))
         (-when-let (val (cdr (assoc 'image/svg+xml values))) (funcall svg val))
@@ -238,6 +426,8 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; I also want q to go to the offending line
 (defun ob-ipython--create-traceback-buffer (traceback)
+  "Create a traceback buffer.
+Note, this does not work if you run the block async."
   (let ((current-buffer (current-buffer))
 	(src (org-element-context))
 	(buf (get-buffer-create "*ob-ipython-traceback*")))
@@ -258,7 +448,7 @@ This function is called by `org-babel-execute-src-block'."
 			      (quit-restore-window nil 'bury)
 			      (pop-to-buffer ,current-buffer)
 			      (goto-char ,(org-element-property :begin src))
-			      (forward-line ,(+ 1 line-number))))))))
+			      (forward-line ,line-number)))))))
 
 ;; ** inspect from an org buffer
 ;; This makes inspect work from an org-buffer.
