@@ -23,7 +23,7 @@ a + 5
 
 #+RESULTS:
 :RESULTS:
-# Out[1]:
+# Out[7]:
 # output
 5
 
@@ -46,8 +46,11 @@ a
 
 #+RESULTS:
 :RESULTS:
-# Out[41]:
+# Out[8]:
+# output
 5
+
+# text/plain
 : 55
 :END:
 
@@ -79,23 +82,23 @@ print('x .dot. y = {}'.format(x @ y))
 
 #+RESULTS:
 :RESULTS:
-# Out[2]:
+# Out[9]:
 # output
 Length of t = 350
 x .dot. y = 1.3598389888491538
 
 # text/plain
-: <matplotlib.figure.Figure at 0x105ee34a8>
+: <matplotlib.figure.Figure at 0x10a041748>
 
 # image/png
-[[file:./obipy-resources/60547xIW.png]]
+[[file:./obipy-resources/74518C0e.png]]
 
 
 # text/plain
-: <matplotlib.figure.Figure at 0x105ee34e0>
+: <matplotlib.figure.Figure at 0x10da459e8>
 
 # image/png
-[[file:./obipy-resources/60547-Sc.png]]
+[[file:./obipy-resources/74518P-k.png]]
 :END:
 
 ** Fine tune the output
@@ -112,7 +115,7 @@ Integral(sqrt(1/x), x)
 
 #+RESULTS:
 :RESULTS:
-# Out[4]:
+# Out[10]:
 # text/plain
 #+BEGIN_EXAMPLE
   ⌠
@@ -124,7 +127,7 @@ Integral(sqrt(1/x), x)
 #+END_EXAMPLE
 
 # image/png
-[[file:./obipy-resources/60547nIZ.png]]
+[[file:./obipy-resources/74518cIr.png]]
 
 # text/latex
 #+BEGIN_EXPORT latex
@@ -140,9 +143,9 @@ Integral(sqrt(1/x), x)
 
 #+RESULTS:
 :RESULTS:
-# Out[6]:
+# Out[11]:
 # image/png
-[[file:./obipy-resources/60547Bdl.png]]
+[[file:./obipy-resources/74518pSx.png]]
 :END:
 
 I have not added an exclude feature, but it would not be hard to. Unfortunately, it is not yet possible to control the order these come out in, or to do things like add captions or size information to the images.
@@ -157,11 +160,11 @@ print(1 / 0)
 
 #+RESULTS:
 :RESULTS:
-# Out[7]:
+# Out[12]:
 # output
 
 ZeroDivisionErrorTraceback (most recent call last)
-<ipython-input-7-4cf46dc0014a> in <module>()
+<ipython-input-12-3ec96714f820> in <module>()
 ----> 1 print(1 / 0)
 
 ZeroDivisionError: division by zero
@@ -198,7 +201,7 @@ print('done')
 
 #+RESULTS:
 :RESULTS:
-# Out[7]:
+# Out[13]:
 # output
 0
 1
@@ -277,7 +280,7 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[1]:
+# Out[14]:
 
 # text/plain
 : Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
@@ -314,7 +317,7 @@ latex_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[2]:
+# Out[15]:
 :END:
 
 #+BEGIN_SRC ipython
@@ -323,7 +326,7 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[3]:
+# Out[16]:
 
 # text/plain
 : Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
@@ -363,7 +366,7 @@ png_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[4]:
+# Out[17]:
 :END:
 
 Now, we can easily see the formula and shape of this polynomial in a graphical form.
@@ -374,9 +377,9 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[5]:
+# Out[18]:
 # image/png
-[[file:./obipy-resources/60547N7A.png]]
+[[file:./obipy-resources/74518bcA.png]]
 :END:
 
 Most likely you would not put all this code into a document like this, but would instead put it in a Python library you import. The point here is to show what can be done with that, and once it is done, you get easy visualization of objects.
@@ -408,7 +411,7 @@ svg_f.for_type_by_name('tensorflow.python.framework.ops',
 
   #+RESULTS:
   :RESULTS:
-  # Out[2]:
+  # Out[19]:
   :END:
 
   #+BEGIN_SRC ipython
@@ -426,13 +429,13 @@ g
 
   #+RESULTS:
   :RESULTS:
-  # Out[3]:
+  # Out[20]:
 
   # text/plain
-  : <tensorflow.python.framework.ops.Graph at 0x105d44710>
+  : <tensorflow.python.framework.ops.Graph at 0x114dbf0f0>
 
   # image/svg
-  [[file:./obipy-resources/70515MQp.svg]]
+  [[file:./obipy-resources/74518omG.svg]]
   :END:
 
 Now we have a record of what the graph looks like. Ez peezy.
@@ -553,12 +556,12 @@ p
 
  #+RESULTS:
  :RESULTS:
- # Out[5]:
+ # Out[21]:
  # image/png
- [[file:./obipy-resources/70515mk1.png]]
+ [[file:./obipy-resources/745181wM.png]]
 
  # text/org
- [[/var/folders/5q/lllv2yf95hg_n6h6kjttbmdw0000gn/T/tmpz0xbtc7k.html]]
+ [[/var/folders/5q/lllv2yf95hg_n6h6kjttbmdw0000gn/T/tmpdyk61brt.html]]
  :END:
 
 *** text/org output
@@ -600,7 +603,7 @@ class Heading(object):
 
  #+RESULTS:
  :RESULTS:
- # Out[17]:
+ # Out[22]:
  :END:
 
  Now, you can construct headings in iPython, and get different outputs that might be suitable for different purposes.
@@ -611,7 +614,7 @@ Heading('A level 4 headline', level=4, tags=['example'])
 
 #+RESULTS:
 :RESULTS:
-# Out[20]:
+# Out[24]:
 #+BEGIN_EXPORT html
 <h4>A level 4 headline</h4>
 #+END_EXPORT
@@ -621,8 +624,9 @@ Heading('A level 4 headline', level=4, tags=['example'])
 
 
 # text/plain
-: <__main__.Heading at 0x1817a03550>
+: <__main__.Heading at 0x113e49a90>
 :END:
+
 
 Now you can probably see the possibilities for building up documents with Python code that can be converted to org-mode, html, etc...
 
@@ -649,7 +653,7 @@ Now we can use it in scimax. This is already pre-configured in scimax. For fun, 
 #+END_SRC
 
 #+RESULTS:
-: # Out[10]:
+: # Out[1]:
 : # output
 : 5
 
