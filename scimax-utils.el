@@ -186,11 +186,13 @@ sentence in the region."
 
 
 ;; * profile me
-(require 'esup)
+(unless (memq system-type '(windows-nt ms-dos))
+  
+  (require 'esup)
 
-(defun scimax-profile ()
-  "Run `esup' on the scimax init file to profile it."
-  (esup (expand-file-name "init.el" scimax-dir)))
+  (defun scimax-profile ()
+    "Run `esup' on the scimax init file to profile it."
+    (esup (expand-file-name "init.el" scimax-dir))))
 
 ;; * The end
 (provide 'scimax-utils)
