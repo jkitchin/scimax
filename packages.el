@@ -379,7 +379,8 @@
 
 (use-package org-edit-latex)
 
-(use-package pdf-tools)
+(unless (memq system-type '(windows-nt ms-dos)) 
+  (use-package pdf-tools))
 
 ;; this is a git submodule
 (use-package org-ref
