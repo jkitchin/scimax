@@ -174,7 +174,8 @@
   :config
   (elpy-enable))
 
-(use-package esup)
+(unless (memq system-type '(windows-nt ms-dos)) 
+  (use-package esup))
 
 ;; Provides functions for working with files
 (use-package f)
