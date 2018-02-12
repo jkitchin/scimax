@@ -562,7 +562,8 @@
   :bind ("H-h" . ov-highlight/body)
   :init
   (add-to-list 'load-path
-	       (expand-file-name "ov-highlight" scimax-dir)))
+	       (expand-file-name "ov-highlight" scimax-dir))
+  (require 'ov-highlight))
 
 
 ;; * User packages
