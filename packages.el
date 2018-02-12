@@ -358,7 +358,8 @@
 
 ;; Templating system
 ;; https://github.com/Wilfred/mustache.el
-(use-package mustache)
+(unless (memq system-type '(windows-nt ms-dos)) 
+  (use-package mustache))
 
 (use-package scimax-ob
   :ensure nil
