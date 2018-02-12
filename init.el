@@ -70,14 +70,6 @@
 (when (file-directory-p (expand-file-name "emacs-win" scimax-dir))
   (load-library "help"))
 
-(when (memq system-type '(windows-nt ms-dos))
-  (message "==================================================================
-system-type: %s
-package-archives: %s
-=================================================================="
-	   system-type
-	   package-archives))
-
 (provide 'init)
 
 ;;; init.el ends here
