@@ -37,8 +37,10 @@
 
 (use-package org-bullets)
 
-(use-package org-edna
-  :init (org-edna-load))
+(unless (memq system-type '(windows-nt ms-dos))
+  (use-package org-edna
+    :init (org-edna-load)))
+
 
 ;; * Other packages
 (use-package diminish)
