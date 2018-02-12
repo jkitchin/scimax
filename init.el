@@ -39,14 +39,20 @@
 
 (require 'package)
 
-(add-to-list
- 'package-archives
- '("melpa" . "http://melpa.org/packages/")
- t)
+;; replace the old http path with https.
+(setf (cdr (assoc "gnu" package-archives)) "https://elpa.gnu.org/packages")
 
 (add-to-list
  'package-archives
  '("org"         . "https://orgmode.org/elpa/"))
+
+;; According to https://melpa.org/#/getting-started there may be issues with https on Windows
+(add-to-list
+ 'package-archives
+ `("melpa" . ,(if (memq system-type '(windows-nt ms-dos)
+			"http://melpa.org/packages/"
+			"https://melpa.org/packages/")))
+ t)
 
 (add-to-list 'load-path scimax-dir)
 (add-to-list 'load-path scimax-user-dir)
