@@ -667,4 +667,92 @@ This kernel is a little quieter on exceptions than I would like, but still it co
 
 ** Remote kernels
 
-In theory this should be possible, but I don't have a system to test it on.
+According to a comment in [[https://github.com/jkitchin/scimax/issues/114#issuecomment-364891125][issue 114]] this finally works. I don't have a remote server to test it on, but I did test it locally. Here are the steps to follow, adapted from https://vxlabs.com/2017/11/30/run-code-on-remote-ipython-kernels-with-emacs-and-orgmode/.
+
+On the remote server, find out where your runtime directory is like this:
+
+#+BEGIN_SRC sh
+jupyter --runtime-dir
+#+END_SRC
+
+#+RESULTS:
+: /run/user/497345/jupyter
+
+Start a kernel on the remote server like this. It will create a json file that you will need to copy to your local machine jupyter runtime directory.
+
+#+BEGIN_SRC sh
+ipython kernel
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+NOTE: When using the `ipython kernel` entry point, Ctrl-C will not work.
+
+To exit, you will have to explicitly quit this process, by either sending
+"quit" from a client, or using Ctrl-\ in UNIX-like environments.
+
+To read more about this, see https://github.com/ipython/ipython/issues/2049
+
+
+To connect another client to this kernel, use:
+    --existing kernel-223460.json
+#+END_EXAMPLE
+
+You can see the connection file is indeed in the runtime directory:
+
+#+BEGIN_SRC sh
+ls `jupyter --runtime-dir`
+#+END_SRC
+
+#+RESULTS:
+| emacs-ba25f77e84b464e48b4a0c4bebd94bdb.json      |
+| emacs-hy.json                                    |
+| emacs-ipython.json                               |
+| kernel-223460.json                               |
+| kernel-96418c43-ef0a-4b11-b13b-6c5bfbcd9cf6.json |
+| nbserver-182457.json                             |
+| notebook_cookie_secret                           |
+
+On a real remote machine, you would have to copy this file to your local machine runtime directory. There is nothing too mysterious in this file, it just has some information about the IP address and ports used. 
+
+#+BEGIN_SRC sh
+cat `jupyter --runtime-dir`/kernel-223460.json
+#+END_SRC
+
+#+RESULTS:
+| {                |                                   |
+| shell_port       | 41304,                            |
+| iopub_port       | 38207,                            |
+| stdin_port       | 32952,                            |
+| control_port     | 36226,                            |
+| hb_port          | 34935,                            |
+| ip               | 127.0.0.1                         |
+| key              | 044c52eb-e49cd8e078a283a224352f9b |
+| transport        | tcp                               |
+| signature_scheme | hmac-sha256                       |
+| kernel_name      |                                   |
+| }                |                                   |
+
+Now, on your local machine, connect to the remote kernel like this, obviously with your own username and hostname.
+
+#+BEGIN_SRC sh
+jupyter console --existing kernel-223460.json kitchin@localhost
+#+END_SRC
+
+This opens a local Ipython terminal. In that terminal, I typed a = 5.
+
+Then, you specify the kernel connection file as the :session argument in an ipython block.
+
+#+BEGIN_SRC ipython :session kernel-223460.json
+print(a)
+
+b = 6
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[3]:
+# output
+5
+:END:
+
+You can see from  the output that we successfully connected to the kernel and that indeed a=5. Furthermore, in the block above we assigned b=6, and in the terminal I can type "b" and see that it is equal to 6.
