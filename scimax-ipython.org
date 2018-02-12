@@ -292,7 +292,7 @@ p
 : Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
 :END:
 
-Let's change this to get a LaTeX representation (adapted from https://github.com/jupyter/ngcm-tutorial/blob/master/Part-1/IPython%20Kernel/Custom%20Display%20Logic.ipynb).
+Let's change this to get a LaTeX representation (adapted from https://github.com/jupyter/ngcm-tutorial/blob/master/Part-1/IPython%20Kernel/Custom%20Display%20Logic.ipynb). We will do this on the Ipython side of output customization where we register a formatting function for a specific type in IPython.
 
 #+BEGIN_SRC ipython :display text/latex
 def poly_to_latex(p):
@@ -392,7 +392,7 @@ Most likely you would not put all this code into a document like this, but would
 
 *** Tensorflow visualizations
 
-In Tensorflow, we are always making computation graphs. These are usually visualized in Tensorboard. We can leverage Jupyter to show us a graphical representation instead.
+In Tensorflow, we are always making computation graphs. These are usually visualized in Tensorboard. We can leverage Jupyter to show us a graphical representation instead. This is another example of registering a type in Ipython.
 
   #+BEGIN_SRC ipython
 from graphviz import Digraph
@@ -448,7 +448,7 @@ Now we have a record of what the graph looks like. Ez peezy.
 
 *** Bokeh
 
- The Jupyter notebook does really shine for JavaScript driven interactive data exploration. For now, the only option for Emacs is to open external programs for this, e.g. a matplotlib figure, or a browser. [[https://bokeh.pydata.org/en/latest/][Bokeh]] is a really interesting interactive plotting library you can use in Python, but it makes interactive html documents for viewing in a browser. Here we will adapt the outputs to show us a thumbnail and org-link to open the html file.
+ The Jupyter notebook does really shine for JavaScript driven interactive data exploration. For now, the only option for Emacs is to open external programs for this, e.g. a matplotlib figure, or a browser. [[https://bokeh.pydata.org/en/latest/][Bokeh]] is a really interesting interactive plotting library you can use in Python, but it makes interactive html documents for viewing in a browser. Here we will adapt the outputs to show us a thumbnail and org-link to open the html file. This is yet another example of registering a type in Ipython.
 
  Here we modify the plain text output so that it saves an html file, and returns a link to it.
 
@@ -570,9 +570,80 @@ p
  [[/var/folders/5q/lllv2yf95hg_n6h6kjttbmdw0000gn/T/tmpdyk61brt.html]]
  :END:
 
-*** text/org output
+*** Customizing a class output with _repr_*_ methods
+    
+Adapted from http://nbviewer.jupyter.org/github/ipython/ipython/blob/6.x/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb#Custom-Mimetypes-with-_repr_mimebundle
 
- We can define custom outputs for our own objects too. Here we define org and html representations of a heading object. We have to define a _repr_mimebundle_ method to get 'text/org' output as it is not a predefined type in Jupyter. Alternatively, we could use the methods earlier to define formatters for these
+The canonical way to make rich outputs on your own classes is to add _repr_X_ methods. Here is the example from the Jupyter tutorial listed above.
+
+#+BEGIN_SRC ipython
+import numpy as np
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+from IPython.core.pylabtools import print_figure
+from IPython.display import Image, SVG, Math
+
+class Gaussian(object):
+    """A simple object holding data sampled from a Gaussian distribution.
+    """
+    def __init__(self, mean=0.0, std=1, size=1000):
+        self.data = np.random.normal(mean, std, size)
+        self.mean = mean
+        self.std = std
+        self.size = size
+        # For caching plots that may be expensive to compute
+        self._png_data = None
+        
+    def _figure_data(self, format):
+        fig, ax = plt.subplots()
+        ax.hist(self.data, bins=50)
+        ax.set_title(self._repr_latex_())
+        ax.set_xlim(-10.0,10.0)
+        data = print_figure(fig, format)
+        # We MUST close the figure, otherwise IPython's display machinery
+        # will pick it up and send it as output, resulting in a double display
+        plt.close(fig)
+        return data
+        
+    def _repr_png_(self):
+        if self._png_data is None:
+            self._png_data = self._figure_data('png')
+        return self._png_data
+    
+    def _repr_latex_(self):
+        return r'$\mathcal{N}(\mu=%.2g, \sigma=%.2g),\ N=%d$' % (self.mean,
+                                                                 self.std, self.size)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[9]:
+:END:
+
+#+BEGIN_SRC ipython
+Gaussian()
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[10]:
+
+# text/plain
+: <__main__.Gaussian at 0x7fcaccb56940>
+
+# image/png
+[[file:./obipy-resources/222653SnX.png]]
+
+# text/latex
+#+BEGIN_EXPORT latex
+$\mathcal{N}(\mu=0, \sigma=1),\ N=1000$
+#+END_EXPORT
+:END:
+
+*** text/org output with _repr_mimebundle_
+
+ We can define custom outputs for our own objects too. Here we define org and html representations of a heading object within the class. We have to define a _repr_mimebundle_ method to get 'text/org' output as it is not a predefined type in Jupyter. Alternatively, we could use the methods earlier to define formatters for these types.
 
  See http://nbviewer.jupyter.org/github/ipython/ipython/blob/6.x/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb#Custom-Mimetypes-with-_repr_mimebundle_ for more details.
 
@@ -635,6 +706,59 @@ Heading('A level 4 headline', level=4, tags=['example'])
 
 
 Now you can probably see the possibilities for building up documents with Python code that can be converted to org-mode, html, etc...
+
+*** More complex display with _ipython_display_
+    
+This example is also from http://nbviewer.jupyter.org/github/ipython/ipython/blob/6.x/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb#More-complex-display-with-_ipython_display_, and shows how to override the IPython output all together.
+
+#+BEGIN_SRC ipython :display 
+import json
+import uuid
+from IPython.display import display_javascript, display_html, display
+
+class FlotPlot(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.uuid = str(uuid.uuid4())
+    
+    def _ipython_display_(self):
+        json_data = json.dumps(list(zip(self.x, self.y)))
+        display_html('<div id="{}" style="height: 300px; width:80%;"></div>'.format(self.uuid),
+            raw=True
+        )
+        display_javascript("""
+        require(["//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"], function() {
+          var line = JSON.parse("%s");
+          console.log(line);
+          $.plot("#%s", [line]);
+        });
+        """ % (json_data, self.uuid), raw=True)
+
+x = np.linspace(0,10)
+y = np.sin(x)
+FlotPlot(x, np.sin(x))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[23]:
+#+BEGIN_EXPORT html
+<div id="f5b1e514-f3f3-48bb-a813-ef031f2ee21c" style="height: 300px; width:80%;"></div>
+#+END_EXPORT
+
+# application/javascript
+#+BEGIN_SRC javascript
+
+        require(["//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"], function() {
+          var line = JSON.parse("[[0.0, 0.0], [0.20408163265306123, 0.20266793654820095], [0.40816326530612246, 0.39692414892492234], [0.6122448979591837, 0.5747060412161792], [0.8163265306122449, 0.7286347834693504], [1.0204081632653061, 0.8523215697196184], [1.2244897959183674, 0.9406327851124867], [1.4285714285714286, 0.9899030763721239], [1.6326530612244898, 0.9980874821347183], [1.836734693877551, 0.9648463089837632], [2.0408163265306123, 0.8915592304110037], [2.2448979591836737, 0.7812680235262638], [2.4489795918367347, 0.6385503202266021], [2.6530612244897958, 0.469329612777201], [2.857142857142857, 0.28062939951435684], [3.0612244897959187, 0.0802816748428135], [3.2653061224489797, -0.12339813736217871], [3.4693877551020407, -0.3219563150726187], [3.673469387755102, -0.5071517094845144], [3.8775510204081636, -0.6712977935519321], [4.081632653061225, -0.8075816909683363], [4.285714285714286, -0.9103469443107828], [4.4897959183673475, -0.9753282860670456], [4.6938775510204085, -0.9998286683840896], [4.8979591836734695, -0.9828312039256306], [5.1020408163265305, -0.9250413717382029], [5.3061224489795915, -0.8288577363730427], [5.510204081632653, -0.6982723955653996], [5.714285714285714, -0.5387052883861563], [5.918367346938775, -0.3567792408989381], [6.122448979591837, -0.16004508604325057], [6.326530612244898, 0.04333173336868346], [6.530612244897959, 0.2449100710119793], [6.73469387755102, 0.4363234264718193], [6.938775510204081, 0.6096271964908323], [7.142857142857143, 0.7576284153927202], [7.346938775510204, 0.8741842988197335], [7.551020408163265, 0.9544571997387519], [7.755102040816327, 0.9951153947776636], [7.959183673469388, 0.9944713672636168], [8.16326530612245, 0.9525518475314604], [8.36734693877551, 0.8710967034823207], [8.571428571428571, 0.7534867274396376], [8.775510204081632, 0.6046033165061543], [8.979591836734695, 0.4306258703827373], [9.183673469387756, 0.23877531564403087], [9.387755102040817, 0.03701440148506237], [9.591836734693878, -0.1662827938487564], [9.795918367346939, -0.3626784288265488], [10.0, -0.5440211108893698]]");
+          console.log(line);
+          $.plot("#f5b1e514-f3f3-48bb-a813-ef031f2ee21c", [line]);
+        });
+        
+#+END_SRC
+:END:
+
 
 ** Other languages
 

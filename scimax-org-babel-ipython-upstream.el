@@ -368,6 +368,10 @@ This function is called by `org-babel-execute-src-block'."
 		 (s-join "\n"
 			 (list (if ob-ipython-show-mime-types "# text/latex" "")
 			       (format "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT" value)))))
+	(javascript (lambda (value)
+		      (format "%s#+BEGIN_SRC javascript\n%s\n#+END_SRC"
+			      (if ob-ipython-show-mime-types "# application/javascript\n" "")
+			      value)))
         (txt (lambda (value)
                (let ((lines (s-lines value)))
                  (if (cdr lines)
@@ -386,7 +390,13 @@ This function is called by `org-babel-execute-src-block'."
         (-when-let (val (cdr (assoc 'image/svg+xml values))) (funcall svg val))
 	(-when-let (val (cdr (assoc 'text/html values))) (funcall html val))
 	(-when-let (val (cdr (assoc 'text/latex values))) (funcall latex val))
-        (-when-let (val (cdr (assoc 'text/plain values))) (funcall txt val)))))
+        (-when-let (val (cdr (assoc 'text/plain values))) (funcall txt val))
+	(-when-let (val (cdr (assoc 'application/javascript values))) (funcall javascript val))
+	;; Fall-through case
+	(format "%s%s" (if ob-ipython-show-mime-types
+			   (format "\n# %s\n: " (caar values))
+			 ": ")
+		(cdar values)))))
 
 ;; I want an option to get exceptions in the buffer
 (defun ob-ipython--eval (service-response)
