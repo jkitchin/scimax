@@ -37,9 +37,8 @@
 
 (use-package org-bullets)
 
-(unless (memq system-type '(windows-nt ms-dos))
-  (use-package org-edna
-    :init (org-edna-load)))
+(use-package org-edna
+  :init (org-edna-load))
 
 
 ;; * Other packages
@@ -174,8 +173,7 @@
   :config
   (elpy-enable))
 
-(unless (memq system-type '(windows-nt ms-dos)) 
-  (use-package esup))
+(use-package esup)
 
 ;; Provides functions for working with files
 (use-package f)
