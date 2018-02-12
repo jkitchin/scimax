@@ -70,6 +70,14 @@
 (when (file-directory-p (expand-file-name "emacs-win" scimax-dir))
   (load-library "help"))
 
+(print (format "==================================================================
+system-type: %s 
+package-archives: %s
+=================================================================="
+	       system-type
+	       package-archives)
+       #'external-debugging-output)
+
 (provide 'init)
 
 ;;; init.el ends here
