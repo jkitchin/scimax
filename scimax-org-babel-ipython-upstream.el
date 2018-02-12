@@ -111,8 +111,8 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   ("K" scimax-ob-ipython-kill-kernel)
   ("r" org-babel-switch-to-session)
 
-  ("i" org-babel-previous-src-block)
-  ("k" org-babel-next-src-block)
+  ("i" org-babel-previous-src-block :color red)
+  ("k" org-babel-next-src-block :color red)
   ("q" scimax-jump-to-visible-block)
   ("Q" scimax-jump-to-block)
 

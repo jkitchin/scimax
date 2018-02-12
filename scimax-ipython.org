@@ -245,7 +245,7 @@ Note you can put :restart in the src block header and ipython will restart every
 
 #+caption: Commands to navigate blocks
 | s-i   | Jump to previous block                 |
-| s-j   | Jump to next block                     |
+| s-k   | Jump to next block                     |
 | H-q   | Jump to a visible block with avy       |
 | H-s-q | Jump to a block in the buffer with ivy |
 
@@ -808,6 +808,8 @@ Start a kernel on the remote server like this. It will create a json file that y
 ipython kernel
 #+END_SRC
 
+You should see some text like this one.
+
 #+BEGIN_EXAMPLE
 NOTE: When using the `ipython kernel` entry point, Ctrl-C will not work.
 
@@ -818,7 +820,7 @@ To read more about this, see https://github.com/ipython/ipython/issues/2049
 
 
 To connect another client to this kernel, use:
-    --existing kernel-226309.json
+    --existing kernel-16577.json
 #+END_EXAMPLE
 
 You can see the connection file is indeed in the runtime directory:
@@ -828,14 +830,20 @@ ls `jupyter --runtime-dir`
 #+END_SRC
 
 #+RESULTS:
+| emacs-8f516355ee6cee60cbbb1e018eee2db1.json      |
 | emacs-ba25f77e84b464e48b4a0c4bebd94bdb.json      |
 | emacs-hy.json                                    |
 | emacs-ipython.json                               |
+| kernel-0b58a36f-ab14-476e-a74b-ca232074aa0a.json |
+| kernel-16577.json                                |
 | kernel-223460.json                               |
 | kernel-223460-ssh.json                           |
 | kernel-226309.json                               |
+| kernel-226309-ssh.json                           |
+| kernel-410a54a4-adb7-4c74-9c9f-7100c19b0dee.json |
 | kernel-96418c43-ef0a-4b11-b13b-6c5bfbcd9cf6.json |
 | nbserver-182457.json                             |
+| nbserver-261088.json                             |
 | notebook_cookie_secret                           |
 
 On a real remote machine, you would have to copy this file to your local machine runtime directory. There is nothing too mysterious in this file, it just has some information about the IP address and ports used. 
@@ -864,11 +872,26 @@ Now, on your local machine, connect to the remote kernel like this, obviously wi
 jupyter console --existing kernel-226309.json --ssh username@hostname
 #+END_SRC
 
-This opens a local Ipython terminal. In that terminal, I typed a = 7.
+You should get some output like:
+
+#+BEGIN_EXAMPLE
+[ZMQTerminalIPythonApp] Forwarding connections to 127.0.0.1 via kitchin@kitchin.mtv.corp.google.com
+[ZMQTerminalIPythonApp] To connect another client via this tunnel, use:
+[ZMQTerminalIPythonApp] --existing kernel-16577-ssh.json
+Jupyter console 5.2.0
+
+Python 3.6.3 |Anaconda, Inc.| (default, Oct 13 2017, 12:02:49) 
+Type 'copyright', 'credits' or 'license' for more information
+IPython 6.1.0 -- An enhanced Interactive Python. Type '?' for help.
+#+END_EXAMPLE
+
+The critical text to note here is =--existing kernel-16577-ssh.json=. You need to specify that kernel file as the :session in the header of the src block.
+
+The command above  opens a local Ipython terminal. In that terminal, I typed a = 7.
 
 Then, you specify the kernel connection file as the :session argument in an ipython block.
 
-#+BEGIN_SRC ipython :session kernel-226309.json
+#+BEGIN_SRC ipython :session kernel-16577-ssh.json
 print(a)
 
 b = 6
@@ -876,7 +899,7 @@ b = 6
 
 #+RESULTS:
 :RESULTS:
-# Out[6]:
+# Out[2]:
 # output
 7
 :END:

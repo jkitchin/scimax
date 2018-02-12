@@ -70,11 +70,10 @@ With a prefix BELOW move point to lower block."
   "Execute this block and either jump to the next one, or add a new one."
   (interactive)
   (org-babel-execute-src-block)
-  (let ((next-block (save-excursion (org-babel-next-src-block))))
+  (let ((next-block (ignore-errors (save-excursion (org-babel-next-src-block)))))
     (if next-block
 	(goto-char (match-beginning 0))
-      (scimax-insert-src-block t)))
-  (recenter 10))
+      (scimax-insert-src-block t))))
 
 
 (defun scimax-execute-to-point ()
@@ -174,13 +173,13 @@ Defaults to 3."
   (let* ((src (org-element-context))
 	 (code (org-element-property :value src)))
     (scimax-insert-src-block (not below))
+    (delete-char 1)
     (insert code)
     ;; jump back to start of new block
     (org-babel-previous-src-block)
     (org-babel-next-src-block)))
 
 ;; Move blocks
-;; move blocks
 (defun scimax-ob-move-block-up ()
   "Move block before previous one."
   (interactive)
