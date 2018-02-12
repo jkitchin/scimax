@@ -39,20 +39,33 @@
 
 (require 'package)
 
-;; replace the old http path with https.
-(setf (cdr (assoc "gnu" package-archives)) "https://elpa.gnu.org/packages")
+(if (file-directory-p (expand-file-name "emacs-win" scimax-dir))
+    ;; Windows archives.
+    (progn
+      (add-to-list
+       'package-archives
+       '("org"         . "https://orgmode.org/elpa/"))
 
-(add-to-list
- 'package-archives
- '("org"         . "https://orgmode.org/elpa/"))
+      ;; According to https://melpa.org/#/getting-started there may be issues with https on Windows
+      (add-to-list
+       'package-archives
+       `("melpa" . "http://melpa.org/packages/")
+       t))
+  
 
-;; According to https://melpa.org/#/getting-started there may be issues with https on Windows
-(add-to-list
- 'package-archives
- `("melpa" . ,(if (memq system-type '(windows-nt ms-dos))
-		  "http://melpa.org/packages/"
-		"https://melpa.org/packages/"))
- t)
+  ;; For non-windows
+  ;; replace the old http path with https.
+  (setf (cdr (assoc "gnu" package-archives)) "https://elpa.gnu.org/packages")
+
+  (add-to-list
+   'package-archives
+   '("org"         . "https://orgmode.org/elpa/"))
+
+  ;; According to https://melpa.org/#/getting-started there may be issues with https on Windows
+  (add-to-list
+   'package-archives
+   `("melpa" . "https://melpa.org/packages/")
+   t))
 
 (add-to-list 'load-path scimax-dir)
 (add-to-list 'load-path scimax-user-dir)
@@ -69,14 +82,6 @@
 ;; directory. See issue #119. This appears to fix that.
 (when (file-directory-p (expand-file-name "emacs-win" scimax-dir))
   (load-library "help"))
-
-(print (format "==================================================================
-system-type: %s 
-package-archives: %s
-=================================================================="
-	       system-type
-	       package-archives)
-       #'external-debugging-output)
 
 (provide 'init)
 
