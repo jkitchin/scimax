@@ -39,33 +39,49 @@
 
 (require 'package)
 
-(if (file-directory-p (expand-file-name "emacs-win" scimax-dir))
-    ;; Windows archives.
-    (progn
-      (add-to-list
-       'package-archives
-       '("org"         . "https://orgmode.org/elpa/"))
-
-      ;; According to https://melpa.org/#/getting-started there may be issues with https on Windows
-      (add-to-list
-       'package-archives
-       `("melpa" . "http://melpa.org/packages/")
-       t))
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+		    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+  (add-to-list
+   'package-archives
+   (cons "org" (concat proto "://orgmode.org/elpa/")))
   
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
 
-  ;; For non-windows
-  ;; replace the old http path with https.
-  (setf (cdr (assoc "gnu" package-archives)) "https://elpa.gnu.org/packages")
 
-  (add-to-list
-   'package-archives
-   '("org"         . "https://orgmode.org/elpa/"))
 
-  ;; According to https://melpa.org/#/getting-started there may be issues with https on Windows
-  (add-to-list
-   'package-archives
-   `("melpa" . "https://melpa.org/packages/")
-   t))
+;; (if (file-directory-p (expand-file-name "emacs-win" scimax-dir))
+;;     ;; Windows archives.
+;;     (progn
+;;       (add-to-list
+;;        'package-archives
+;;        '("org"         . "https://orgmode.org/elpa/"))
+
+;;       ;; According to https://melpa.org/#/getting-started there may be issues with https on Windows
+;;       (add-to-list
+;;        'package-archives
+;;        `("melpa" . "http://melpa.org/packages/")
+;;        t))
+
+
+;;   ;; For non-windows
+;;   ;; replace the old http path with https.
+;;   (setf (cdr (assoc "gnu" package-archives)) "https://elpa.gnu.org/packages")
+
+;;   (add-to-list
+;;    'package-archives
+;;    '("org"         . "https://orgmode.org/elpa/"))
+
+;;   ;; According to https://melpa.org/#/getting-started there may be issues with https on Windows
+;;   (add-to-list
+;;    'package-archives
+;;    `("melpa" . "https://melpa.org/packages/")
+;;    t))
 
 (add-to-list 'load-path scimax-dir)
 (add-to-list 'load-path scimax-user-dir)
