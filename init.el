@@ -44,12 +44,13 @@
        (proto (if no-ssl "http" "https")))
   ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
   (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+
   (add-to-list
    'package-archives
    (cons "org" (concat proto "://orgmode.org/elpa/")))
 
-  (when no-ssl
+  (when no-ssl 
+    (setq package-check-signature nil) 
     (setq tls-program
 	  ;; Defaults:
 	  '("gnutls-cli --insecure -p %p %h"
