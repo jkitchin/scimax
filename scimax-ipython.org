@@ -694,7 +694,7 @@ To read more about this, see https://github.com/ipython/ipython/issues/2049
 
 
 To connect another client to this kernel, use:
-    --existing kernel-223460.json
+    --existing kernel-226309.json
 #+END_EXAMPLE
 
 You can see the connection file is indeed in the runtime directory:
@@ -708,6 +708,8 @@ ls `jupyter --runtime-dir`
 | emacs-hy.json                                    |
 | emacs-ipython.json                               |
 | kernel-223460.json                               |
+| kernel-223460-ssh.json                           |
+| kernel-226309.json                               |
 | kernel-96418c43-ef0a-4b11-b13b-6c5bfbcd9cf6.json |
 | nbserver-182457.json                             |
 | notebook_cookie_secret                           |
@@ -715,18 +717,18 @@ ls `jupyter --runtime-dir`
 On a real remote machine, you would have to copy this file to your local machine runtime directory. There is nothing too mysterious in this file, it just has some information about the IP address and ports used. 
 
 #+BEGIN_SRC sh
-cat `jupyter --runtime-dir`/kernel-223460.json
+cat `jupyter --runtime-dir`/kernel-226309.json
 #+END_SRC
 
 #+RESULTS:
 | {                |                                   |
-| shell_port       | 41304,                            |
-| iopub_port       | 38207,                            |
-| stdin_port       | 32952,                            |
-| control_port     | 36226,                            |
-| hb_port          | 34935,                            |
+| shell_port       | 40091,                            |
+| iopub_port       | 36509,                            |
+| stdin_port       | 37052,                            |
+| control_port     | 41799,                            |
+| hb_port          | 60629,                            |
 | ip               | 127.0.0.1                         |
-| key              | 044c52eb-e49cd8e078a283a224352f9b |
+| key              | c7040996-146b42c3c0ef6eb234cc9707 |
 | transport        | tcp                               |
 | signature_scheme | hmac-sha256                       |
 | kernel_name      |                                   |
@@ -735,14 +737,14 @@ cat `jupyter --runtime-dir`/kernel-223460.json
 Now, on your local machine, connect to the remote kernel like this, obviously with your own username and hostname.
 
 #+BEGIN_SRC sh
-jupyter console --existing kernel-223460.json kitchin@localhost
+jupyter console --existing kernel-226309.json --ssh username@hostname
 #+END_SRC
 
-This opens a local Ipython terminal. In that terminal, I typed a = 5.
+This opens a local Ipython terminal. In that terminal, I typed a = 7.
 
 Then, you specify the kernel connection file as the :session argument in an ipython block.
 
-#+BEGIN_SRC ipython :session kernel-223460.json
+#+BEGIN_SRC ipython :session kernel-226309.json
 print(a)
 
 b = 6
@@ -750,9 +752,9 @@ b = 6
 
 #+RESULTS:
 :RESULTS:
-# Out[3]:
+# Out[6]:
 # output
-5
+7
 :END:
 
-You can see from  the output that we successfully connected to the kernel and that indeed a=5. Furthermore, in the block above we assigned b=6, and in the terminal I can type "b" and see that it is equal to 6.
+You can see from  the output that we successfully connected to the kernel and that indeed a=7. Furthermore, in the block above we assigned b=6, and in the terminal I can type "b" and see that it is equal to 6.
