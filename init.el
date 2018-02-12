@@ -46,8 +46,7 @@
 
 (add-to-list
  'package-archives
- '("org"         . "https://orgmode.org/elpa/")
- t)
+ '("org"         . "https://orgmode.org/elpa/"))
 
 (add-to-list 'load-path scimax-dir)
 (add-to-list 'load-path scimax-user-dir)
