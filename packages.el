@@ -384,23 +384,24 @@
   (use-package pdf-tools))
 
 ;; this is a git submodule
-(use-package org-ref
-  :ensure nil
-  :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
-  :init
-  (add-to-list 'load-path
-	       (expand-file-name "org-ref" scimax-dir))
-  (setq bibtex-autokey-year-length 4
-	bibtex-autokey-name-year-separator "-"
-	bibtex-autokey-year-title-separator "-"
-	bibtex-autokey-titleword-separator "-"
-	bibtex-autokey-titlewords 2
-	bibtex-autokey-titlewords-stretch 1
-	bibtex-autokey-titleword-length 5
-	org-ref-bibtex-hydra-key-binding (kbd "H-b"))
-  ;; (define-key bibtex-mode-map org-ref-bibtex-hydra-key-binding 'org-ref-bibtex-hydra/body)
-  ;; (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body)
-  )
+(ignore-errors
+  (use-package org-ref
+    :ensure nil
+    :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
+    :init
+    (add-to-list 'load-path
+		 (expand-file-name "org-ref" scimax-dir))
+    (setq bibtex-autokey-year-length 4
+	  bibtex-autokey-name-year-separator "-"
+	  bibtex-autokey-year-title-separator "-"
+	  bibtex-autokey-titleword-separator "-"
+	  bibtex-autokey-titlewords 2
+	  bibtex-autokey-titlewords-stretch 1
+	  bibtex-autokey-titleword-length 5
+	  org-ref-bibtex-hydra-key-binding (kbd "H-b"))
+    ;; (define-key bibtex-mode-map org-ref-bibtex-hydra-key-binding 'org-ref-bibtex-hydra/body)
+    ;; (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body)
+    ))
 
 (use-package org-ref-arxiv
   :ensure nil
