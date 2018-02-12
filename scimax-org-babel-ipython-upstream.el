@@ -118,7 +118,7 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
 
   ("w" scimax-ob-move-src-block-up)
   ("s" scimax-ob-move-src-block-down)
-  ("k" scimax-ob-kill-block-and-results)
+  ("x" scimax-ob-kill-block-and-results)
   ("n" scimax-ob-copy-block-and-results)
   ("c" scimax-ob-clone-block)
   ("m" scimax-merge-ipython-blocks)
