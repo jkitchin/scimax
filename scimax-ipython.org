@@ -233,6 +233,7 @@ Note you can put :restart in the src block header and ipython will restart every
 | C-u H--     | split current block at point, point in lower block |
 
 #+caption: Commands to manipulate blocks
+| H-e   | Edit the src block header in the minibuffer                      |
 | H-w   | Kill the current block                                           |
 | H-n   | Copy the current block                                           |
 | H-c   | Clone the current block (make a copy of it below the current one |
@@ -253,7 +254,12 @@ Note you can put :restart in the src block header and ipython will restart every
 | H-r | switch to session REPL                             |
 | H-k | Kill the kernel                                    |
 
+I should note that ob-ipython-inspect works in the org-buffer! Completion does not work in org yet, you have to be in the special edit buffer.
+
 I am not 100% committed to all these bindings. I need to use them a while to see what works.
+
+Can't remember all these bindings? Me neither. Checkout M-x scimax-obi/body (bound to H-s) for a nice hydra. The hydra key-bindings don't match the ones in the tables above; I am not sure that makes sense. It would add keystrokes, but it would also be a good reminder of the bindings.
+
 
 ** Unique kernel per org file is default
 
