@@ -12,7 +12,8 @@
 
 (add-to-list 'Info-directory-list scimax-dir)
 
-(setq use-package-always-ensure t)
+(unless (memq system-type '(windows-nt ms-dos)) 
+  (setq use-package-always-ensure t))
 
 
 ;; * org-mode
@@ -267,9 +268,10 @@
   :bind ("C-x v o" . git-messenger:popup-message))
 
 ;; google-this
-(use-package google-this
-  :config
-  (google-this-mode 1))
+(unless (memq system-type '(windows-nt ms-dos)) 
+  (use-package google-this
+    :config
+    (google-this-mode 1)))
 
 (use-package helm
   :init (setq helm-command-prefix-key "C-c h")
