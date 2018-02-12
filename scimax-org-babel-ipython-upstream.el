@@ -50,139 +50,121 @@ You need this to get syntax highlighting."
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
 
-(scimax-define-src-key ipython (kbd "C-<return>") #'org-ctrl-c-ctrl-c)
-(scimax-define-src-key ipython (kbd "S-<return>") #'scimax-execute-and-next-block)
-(scimax-define-src-key ipython (kbd "M-<return>") #'scimax-execute-to-point)
-(scimax-define-src-key ipython (kbd "s-<return>")
-		       (lambda ()
-			 "Restart kernel and execute block"
-			 (interactive)
-			 (ob-ipython-kill-kernel
-			  (cdr (assoc (if-let (bf (buffer-file-name))
-					  (md5 (expand-file-name bf))
-					"scratch")
-				      (ob-ipython--get-kernel-processes))))
-			 (org-babel-execute-src-block-maybe)))
-(scimax-define-src-key ipython (kbd "M-s-<return>") #'scimax-restart-ipython-and-execute-to-point)
-(scimax-define-src-key ipython (kbd "H-<return>")
-		       (lambda ()
-			 "Restart kernel and execute buffer"
-			 (interactive)
-			 (ob-ipython-kill-kernel
-			  (cdr (assoc (if-let (bf (buffer-file-name))
-					  (md5 (expand-file-name bf))
-					"scratch")
-				      (ob-ipython--get-kernel-processes))))
-			 (org-babel-execute-buffer)))
+(scimax-define-src-key ipython "C-<return>" #'org-ctrl-c-ctrl-c)
+(scimax-define-src-key ipython "S-<return>" #'scimax-execute-and-next-block)
+(scimax-define-src-key ipython "M-<return>" #'scimax-execute-to-point)
 
+(scimax-define-src-key ipython "s-<return>" #'scimax-ob-ipython-restart-kernel-execute-block)
+(scimax-define-src-key ipython "M-s-<return>" #'scimax-restart-ipython-and-execute-to-point)
+(scimax-define-src-key ipython "H-<return>" #'scimax-ob-ipython-restart-kernel-execute-buffer)
 
-(scimax-define-src-key ipython (kbd "H-=") #'scimax-insert-src-block)
-(scimax-define-src-key ipython (kbd "H--") #'scimax-split-src-block)
-(scimax-define-src-key ipython (kbd "H-/") #'ob-ipython-inspect)
-(scimax-define-src-key ipython (kbd "H-r") #'org-babel-switch-to-session)
-
-(scimax-define-src-key ipython (kbd "H-k")
-		       (lambda ()
-			 (interactive)
-			 (when (y-or-n-p "Kill kernel?")
-			   (ob-ipython-kill-kernel
-			    (cdr (assoc (if-let (bf (buffer-file-name))
-					    (md5 (expand-file-name bf))
-					  "scratch")
-					(ob-ipython--get-kernel-processes))))
-			   (setq header-line-format nil)
-			   (redisplay))))
+(scimax-define-src-key ipython "H-=" #'scimax-insert-src-block)
+(scimax-define-src-key ipython "H--" #'scimax-split-src-block)
+(scimax-define-src-key ipython "H-/" #'ob-ipython-inspect)
+(scimax-define-src-key ipython "H-r" #'org-babel-switch-to-session)
+(scimax-define-src-key ipython "H-e" #'scimax-ob-edit-header)
+(scimax-define-src-key ipython "H-k" #'scimax-ob-ipython-kill-kernel)
 
 
 ;; navigation in block
-(scimax-define-src-key ipython (kbd "s-i") #'org-babel-previous-src-block)
-(scimax-define-src-key ipython (kbd "s-k") #'org-babel-next-src-block)
-(scimax-define-src-key ipython (kbd "H-q") #'scimax-jump-to-visible-block)
-(scimax-define-src-key ipython (kbd "H-s-q") #'scimax-jump-to-block)
-
-;; copy block
-(scimax-define-src-key ipython (kbd "H-n")
-		       (lambda ()
-			 "Copy the block and its results."
-			 (interactive)
-			 (let ((src (org-element-context))
-			       (result-start (org-babel-where-is-src-block-result))
-			       end)
-			   (if result-start
-			       (save-excursion
-				 (goto-char result-start)
-				 (setq end (org-babel-result-end)))
-			     (setq end (org-element-property :end src)))
-
-			   (kill-new
-			    (buffer-substring
-			     (org-element-property :begin src)
-			     end)))))
-
-;; kill block
-(scimax-define-src-key ipython (kbd "H-w")
-		       (lambda ()
-			 "Kill the block and its results."
-			 (interactive)
-			 (let ((src (org-element-context))
-			       (result-start (org-babel-where-is-src-block-result))
-			       end)
-			   (if result-start
-			       (save-excursion
-				 (goto-char result-start)
-				 (setq end (org-babel-result-end)))
-			     (setq end (org-element-property :end src)))
-			   (kill-region
-			    (org-element-property :begin src)
-			    end))))
+(scimax-define-src-key ipython "s-i" #'org-babel-previous-src-block)
+(scimax-define-src-key ipython "s-k" #'org-babel-next-src-block)
+(scimax-define-src-key ipython "H-q" #'scimax-jump-to-visible-block)
+(scimax-define-src-key ipython "H-s-q" #'scimax-jump-to-block)
 
 
-;; clone block
-(scimax-define-src-key ipython (kbd "H-c")
-		       (lambda (&optional below)
-			 "Clone the block."
-			 (interactive "P")
-			 (let* ((src (org-element-context))
-				(code (org-element-property :value src)))
-			   (scimax-insert-src-block (not below))
-			   (insert code)
-			   ;; jump back to start of new block
-			   (org-babel-previous-src-block)
-			   (org-babel-next-src-block))))
+(scimax-define-src-key ipython "H-n" #'scimax-ob-copy-block-and-results)
+(scimax-define-src-key ipython "H-w" #'scimax-ob-kill-block-and-results)
+(scimax-define-src-key ipython "H-c" #'scimax-ob-clone-block)
 
-;; move blocks
-(scimax-define-src-key ipython (kbd "s-w")
-		       (lambda ()
-			 "Move block before previous one."
-			 (interactive)
-			 (let ((src (org-element-context)))
-			   (kill-region
-			    (org-element-property :begin src)
-			    (org-element-property :end src)))
-			 (org-babel-previous-src-block)
-			 (org-yank)))
+(scimax-define-src-key ipython "s-w" #'scimax-ob-move-src-block-up)
+(scimax-define-src-key ipython "s-s" #'scimax-ob-move-src-block-down)
 
-(scimax-define-src-key ipython (kbd "s-s")
-		       (lambda ()
-			 "Move block after next one."
-			 (interactive)
-			 (let ((src (org-element-context)))
-			   (kill-region
-			    (org-element-property :begin src)
-			    (org-element-property :end src)))
-			 (org-babel-next-src-block)
-			 (goto-char (org-element-property :end (org-element-context)))
-			 (forward-line)
-			 (org-yank)))
+(scimax-define-src-key ipython "H-l" #'org-babel-remove-result)
+(scimax-define-src-key ipython "H-s-l" #'scimax-ob-clear-all-results)
 
-(scimax-define-src-key ipython (kbd "H-l") #'org-babel-remove-result)
-(scimax-define-src-key ipython (kbd "H-s-l")
-		       (lambda ()
-			 (interactive)
-			 (save-excursion
-			   (goto-char (point-min))
-			   (while (org-babel-next-src-block)
-			     (org-babel-remove-result)))))
+(scimax-define-src-key ipython "H-m" #'scimax-merge-ipython-blocks)
+(scimax-define-src-key ipython "H-s" #'scimax-obi/body)
+
+;; A hydra
+
+(defhydra scimax-obi (:color blue :hint nil)
+  "
+        Execute                   Navigate     Edit             Misc
+----------------------------------------------------------------------
+    _<return>_: current           _i_: previous  _w_: move up     _/_: inspect
+  _C-<return>_: current to next   _k_: next      _s_: move down   _l_: clear result
+  _M-<return>_: to point          _q_: visible   _x_: kill        _L_: clear all
+  _s-<return>_: Restart/block     _Q_: any       _n_: copy
+_M-s-<return>_: Restart/to point  ^ ^            _c_: clone
+  _H-<return>_: Restart/buffer    ^ ^            _m_: merge
+           _K_: kill kernel       ^ ^            _-_: split
+           _r_: Goto repl         ^ ^            _+_: insert above
+           ^ ^                    ^ ^            _=_: insert below
+           ^ ^                    ^ ^            _h_: header"
+  ("<return>" org-ctrl-c-ctrl-c)
+  ("C-<return>" scimax-execute-and-next-block)
+  ("M-<return>" scimax-execute-to-point)
+  ("s-<return>" scimax-ob-ipython-restart-kernel-execute-block)
+  ("M-s-<return>" scimax-restart-ipython-and-execute-to-point)
+  ("H-<return>" scimax-ob-ipython-restart-kernel-execute-buffer)
+  ("K" scimax-ob-ipython-kill-kernel)
+  ("r" org-babel-switch-to-session)
+
+  ("i" org-babel-previous-src-block)
+  ("k" org-babel-next-src-block)
+  ("q" scimax-jump-to-visible-block)
+  ("Q" scimax-jump-to-block)
+
+  ("w" scimax-ob-move-src-block-up)
+  ("s" scimax-ob-move-src-block-down)
+  ("k" scimax-ob-kill-block-and-results)
+  ("n" scimax-ob-copy-block-and-results)
+  ("c" scimax-ob-clone-block)
+  ("m" scimax-merge-ipython-blocks)
+  ("-" scimax-split-src-block)
+  ("+" scimax-insert-src-block)
+  ("=" (scimax-insert-src-block t))
+  ("l" org-babel-remove-result)
+  ("L" scimax-ob-clear-all-results)
+  ("h" scimax-ob-edit-header)
+
+  ("/" ob-ipython-inspect))
+
+
+(defun scimax-ob-ipython-restart-kernel-execute-block ()
+  "Restart kernel and execute block"
+  (interactive)
+  (ob-ipython-kill-kernel
+   (cdr (assoc (if-let (bf (buffer-file-name))
+		   (md5 (expand-file-name bf))
+		 "scratch")
+	       (ob-ipython--get-kernel-processes))))
+  (org-babel-execute-src-block-maybe))
+
+
+(defun scimax-ob-ipython-restart-kernel-execute-buffer ()
+  "Restart kernel and execute buffer"
+  (interactive)
+  (ob-ipython-kill-kernel
+   (cdr (assoc (if-let (bf (buffer-file-name))
+		   (md5 (expand-file-name bf))
+		 "scratch")
+	       (ob-ipython--get-kernel-processes))))
+  (org-babel-execute-buffer))
+
+
+(defun scimax-ob-ipython-kill-kernel ()
+  "Kill the active kernel."
+  (interactive)
+  (when (y-or-n-p "Kill kernel?")
+    (ob-ipython-kill-kernel
+     (cdr (assoc (if-let (bf (buffer-file-name))
+		     (md5 (expand-file-name bf))
+		   "scratch")
+		 (ob-ipython--get-kernel-processes))))
+    (setq header-line-format nil)
+    (redisplay)))
 
 
 (defun scimax-merge-ipython-blocks (r1 r2)
@@ -193,35 +175,40 @@ Currently no switches/parameters are preserved. It isn't clear
 what the right thing to do for those is, e.g. dealing with
 variables, etc."
   (interactive "r")
-  (save-restriction
-    (let* ((blocks (org-element-map (org-element-parse-buffer) 'src-block
-		     (lambda (src)
-		       (when (string= "ipython" (org-element-property :language src))
-			 src))))
-	   (first-start (org-element-property :begin (car blocks)))
-	   (merged-code (s-join "\n" (loop for src in blocks
-					   collect
-					   (org-element-property :value src)))))
-      ;; Remove blocks
-      (loop for src in (reverse blocks)
-	    do
-	    (goto-char (org-element-property :begin src))
-	    (org-babel-remove-result)
-	    (setf (buffer-substring (org-element-property :begin src)
-				    (org-element-property :end src))
-		  ""))
-      (goto-char first-start)
-      (insert (format "#+BEGIN_SRC ipython
+  ;; Expand the region to encompass the src blocks that the points might be in.
+  (let* ((R1 (save-excursion
+	       (goto-char r1)
+	       (if (org-in-src-block-p)
+		   (org-element-property :begin (org-element-context))
+		 r1)))
+	 (R2 (save-excursion
+	       (goto-char r2)
+	       (if (org-in-src-block-p)
+		   (org-element-property :end (org-element-context))
+		 r2))))
+    (save-restriction
+      (narrow-to-region R1 R2)
+      (let* ((blocks (org-element-map (org-element-parse-buffer) 'src-block
+		       (lambda (src)
+			 (when (string= "ipython" (org-element-property :language src))
+			   src))))
+	     (first-start (org-element-property :begin (car blocks)))
+	     (merged-code (s-join "\n" (loop for src in blocks
+					     collect
+					     (org-element-property :value src)))))
+	;; Remove blocks
+	(loop for src in (reverse blocks)
+	      do
+	      (goto-char (org-element-property :begin src))
+	      (org-babel-remove-result)
+	      (setf (buffer-substring (org-element-property :begin src)
+				      (org-element-property :end src))
+		    ""))
+	;; Now create the new big block.
+	(goto-char first-start)
+	(insert (format "#+BEGIN_SRC ipython
 %s
-#+END_SRC" (s-trim merged-code))))))
-
-(scimax-define-src-key ipython (kbd "H-m") #'scimax-merge-ipython-blocks)
-
-(defun scimax-jump-to-visible-block ()
-  "Jump to a visible src block with avy."
-  (interactive)
-  (avy-with scimax-jump-to-block
-    (avy--generic-jump "#\\+BEGIN_SRC ipython"  nil avy-style (point-min) (point-max))))
+#+END_SRC\n\n" (s-trim merged-code)))))))
 
 
 (defun scimax-restart-ipython-and-execute-to-point ()
@@ -472,7 +459,6 @@ Note, this does not work if you run the block async."
       (with-current-buffer "*ob-ipython-src-edit-inspect*"
 	(org-edit-src-exit)))
     (when inspect-buffer (pop-to-buffer inspect-buffer))))
-
 
 
 
