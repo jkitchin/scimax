@@ -266,6 +266,44 @@ I am not 100% committed to all these bindings. I need to use them a while to see
 
 Can't remember all these bindings? Me neither. Checkout M-x scimax-obi/body (bound to H-s) for a nice hydra. The hydra key-bindings don't match the ones in the tables above; I am not sure that makes sense. It would add keystrokes, but it would also be a good reminder of the bindings.
 
+These keybindings are relatively easy to customize. The are stored as cons cells in
+
+#+BEGIN_SRC emacs-lisp
+ob-ipython-key-bindings
+#+END_SRC
+
+#+RESULTS:
+| C-<return>   | function | org-ctrl-c-ctrl-c                               |
+| S-<return>   | function | scimax-execute-and-next-block                   |
+| M-<return>   | function | scimax-execute-to-point                         |
+| s-<return>   | function | scimax-ob-ipython-restart-kernel-execute-block  |
+| M-s-<return> | function | scimax-restart-ipython-and-execute-to-point     |
+| H-<return>   | function | scimax-ob-ipython-restart-kernel-execute-buffer |
+| H-k          | function | scimax-ob-ipython-kill-kernel                   |
+| H-r          | function | org-babel-switch-to-session                     |
+| s-i          | function | org-babel-previous-src-block                    |
+| s-k          | function | org-babel-next-src-block                        |
+| H-q          | function | scimax-jump-to-visible-block                    |
+| H-s-q        | function | scimax-jump-to-block                            |
+| H-=          | function | scimax-insert-src-block                         |
+| H--          | function | scimax-split-src-block                          |
+| H-n          | function | scimax-ob-copy-block-and-results                |
+| H-w          | function | scimax-ob-kill-block-and-results                |
+| H-c          | function | scimax-ob-clone-block                           |
+| s-w          | function | scimax-ob-move-src-block-up                     |
+| s-s          | function | scimax-ob-move-src-block-down                   |
+| H-l          | function | org-babel-remove-result                         |
+| H-s-l        | function | scimax-ob-clear-all-results                     |
+| H-m          | function | scimax-merge-ipython-blocks                     |
+| H-e          | function | scimax-ob-edit-header                           |
+| H-/          | function | ob-ipython-inspect                              |
+| H-s          | function | scimax-obi/body                                 |
+
+You can define/change any binding you want like this. They are only active in ipython src blocks.
+
+#+BEGIN_SRC emacs-lisp
+(scimax-define-src-key ipython "H-/" #'some-command)
+#+END_SRC
 
 ** Unique kernel per org file is default
 
