@@ -885,7 +885,7 @@ Type 'copyright', 'credits' or 'license' for more information
 IPython 6.1.0 -- An enhanced Interactive Python. Type '?' for help.
 #+END_EXAMPLE
 
-The critical text to note here is =--existing kernel-16577-ssh.json=. You need to specify that kernel file as the :session in the header of the src block.
+The critical text to note here is =--existing kernel-16577-ssh.json=. You need to specify that kernel file (note the -ssh in it) as the :session in the header of the src block.
 
 The command above  opens a local Ipython terminal. In that terminal, I typed a = 7.
 
