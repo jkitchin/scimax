@@ -316,7 +316,16 @@ By default, each org file gets a unique kernel. I am sure there is a use case fo
 
 ** Customizing outputs
 
-ipython/org-mode really shines when you start leveraging rich outputs from Ipython.
+ipython/org-mode really shines when you start leveraging rich outputs from Ipython. A new feature I have added is that you can write your own functions to customize the output.
+
+This variable maps mime-types to formatting functions. You can add new mime-types to this, or redefine the formatting functions if you don't like the way the work.
+
+#+BEGIN_SRC emacs-lisp
+ob-ipython-mime-formatters
+#+END_SRC
+
+#+RESULTS:
+: ((text/plain . ob-ipython-format-text/plain) (text/html . ob-ipython-format-text/html) (text/latex . ob-ipython-format-text/latex) (text/org . ob-ipython-format-text/org) (image/png . ob-ipython-format-image/png) (image/svg+xml . ob-ipython-format-image/svg+xml) (application/javascript . ob-ipython-format-application/javascript))
 
 *** Better representations of Polynomial objects
 
@@ -330,7 +339,7 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[14]:
+# Out[3]:
 
 # text/plain
 : Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
@@ -367,7 +376,7 @@ latex_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[15]:
+# Out[4]:
 :END:
 
 #+BEGIN_SRC ipython
@@ -376,7 +385,7 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[16]:
+# Out[6]:
 
 # text/plain
 : Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
@@ -416,7 +425,7 @@ png_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[17]:
+# Out[7]:
 :END:
 
 Now, we can easily see the formula and shape of this polynomial in a graphical form.
@@ -427,9 +436,9 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[18]:
+# Out[8]:
 # image/png
-[[file:./obipy-resources/74518bcA.png]]
+[[file:./obipy-resources/2217954rM.png]]
 :END:
 
 Most likely you would not put all this code into a document like this, but would instead put it in a Python library you import. The point here is to show what can be done with that, and once it is done, you get easy visualization of objects.
@@ -803,6 +812,71 @@ FlotPlot(x, np.sin(x))
 #+END_SRC
 :END:
 
+*** Pandas in org-mode
+    
+Just for fun, here is a way to get Pandas dataframes to be displayed as org-mode tables using tabulate (https://pypi.python.org/pypi/tabulate). This is adapted from https://github.com/gregsexton/ob-ipython. tabulate has a built-in org formatter, so no reason to reinvent that!
+
+#+BEGIN_SRC ipython :display text/org
+import IPython
+import tabulate
+
+class OrgFormatter(IPython.core.formatters.BaseFormatter):
+    format_type = IPython.core.formatters.Unicode('text/org')
+    print_method = IPython.core.formatters.ObjectName('_repr_org_')
+
+def pd_dataframe_to_org(df):
+    return tabulate.tabulate(df, headers='keys', tablefmt='orgtbl', showindex='always')
+
+ip = get_ipython()
+ip.display_formatter.formatters['text/org'] = OrgFormatter()
+
+f = ip.display_formatter.formatters['text/org']
+f.for_type_by_name('pandas.core.frame', 'DataFrame', pd_dataframe_to_org)
+
+import pandas as pd
+df = pd.DataFrame([1, 2], columns=['widecolumn'])
+df.index.name = 'indexname'
+df
+#+END_SRC
+
+
+#+RESULTS:
+:RESULTS:
+# Out[3]:
+# text/plain
+#+BEGIN_EXAMPLE
+             widecolumn
+  indexname            
+  0                   1
+  1                   2
+#+END_EXAMPLE
+
+# text/org
+| indexname | widecolumn |
+|-----------+------------|
+|         0 |          1 |
+|         1 |          2 |
+:END:
+
+#+BEGIN_SRC ipython :display text/org
+import numpy as np
+df2 = pd.DataFrame(np.random.randint(low=0, high=10, size=(5, 5)), 
+                   columns=['a', 'b', 'c', 'd', 'e'])
+df2
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[4]:
+# text/org
+|   | a | b | c | d | e |
+|---+---+---+---+---+---|
+| 0 | 7 | 3 | 2 | 5 | 5 |
+| 1 | 5 | 1 | 2 | 7 | 4 |
+| 2 | 1 | 9 | 3 | 7 | 4 |
+| 3 | 8 | 3 | 5 | 3 | 9 |
+| 4 | 9 | 0 | 8 | 3 | 1 |
+:END:
 
 ** Other languages
 
@@ -836,6 +910,8 @@ This kernel is a little quieter on exceptions than I would like, but still it co
 ** Remote kernels
 
 According to a comment in [[https://github.com/jkitchin/scimax/issues/114#issuecomment-364891125][issue 114]] this finally works. I don't have a remote server to test it on, but I did test it locally. Here are the steps to follow, adapted from https://vxlabs.com/2017/11/30/run-code-on-remote-ipython-kernels-with-emacs-and-orgmode/.
+
+Note: This [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365219262][comment]] reports some flakiness with the method below, and suggests an alternative approach that they find more robust.
 
 On the remote server, find out where your runtime directory is like this:
 
@@ -950,8 +1026,104 @@ b = 6
 
 You can see from  the output that we successfully connected to the kernel and that indeed a=7. Furthermore, in the block above we assigned b=6, and in the terminal I can type "b" and see that it is equal to 6.
 
-If you have a lot of blocks in your buffer, you can use a file property like this to specify the header for every block in the buffer.
+If you have a lot of blocks in your buffer, you can use a file property like this to specify the header for every block in the buffer. See [[id:74f0669a-6322-4511-8b6f-fbeea6bd7821][Multiple sessions in one org file]] for an example of using heading properties instead.
 
 #+BEGIN_EXAMPLE
 ,#+PROPERTY: header-args:ipython :session kernel-16577-ssh.json
 #+END_EXAMPLE
+
+* Multiple sessions in one org file
+  :PROPERTIES:
+  :ID:       74f0669a-6322-4511-8b6f-fbeea6bd7821
+  :END:
+
+See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions. Here we use a properties drawer in two different headlines to have different sessions open in the same org file. Of course, you can manually define the :session in src blocks, but using a header like this:
+
+#+BEGIN_EXAMPLE
+   :PROPERTIES:
+   :header-args:ipython: :session session-1
+   :END:
+#+END_EXAMPLE
+
+means that you don't have to type that on every block. That is helpful, since if you forget the block will use the default buffer kernel. This shows I am currently running four kernels.
+
+#+BEGIN_SRC emacs-lisp
+(ob-ipython--get-kernel-processes)
+#+END_SRC
+
+#+RESULTS:
+: ((session-2 . kernel-session-2) (session-1 . kernel-session-1) (8f516355ee6cee60cbbb1e018eee2db1 . kernel-8f516355ee6cee60cbbb1e018eee2db1) (ipython . kernel-ipython))
+
+** Session 1
+   :PROPERTIES:
+   :header-args:ipython: :session session-1
+   :END:
+
+Every block under this header will use the kernel associated with session-1. Here we just look at what ports are being used.
+
+ #+BEGIN_SRC ipython
+%connect_info
+ #+END_SRC
+
+ #+RESULTS:
+ :RESULTS:
+ # Out[6]:
+ # output
+ {
+   "shell_port": 57257,
+   "iopub_port": 60990,
+   "stdin_port": 37898,
+   "control_port": 42607,
+   "hb_port": 55863,
+   "ip": "127.0.0.1",
+   "key": "26515aec-de8fd6f55cf49bf8b1f38f3c",
+   "transport": "tcp",
+   "signature_scheme": "hmac-sha256",
+   "kernel_name": ""
+ }
+
+ Paste the above JSON into a file, and connect with:
+     $> jupyter <app> --existing <file>
+ or, if you are local, you can connect with just:
+     $> jupyter <app> --existing emacs-session-1.json
+ or even just:
+     $> jupyter <app> --existing
+ if this is the most recent Jupyter kernel you have started.
+ :END:
+
+** Session 2
+   :PROPERTIES:
+   :header-args:ipython: :session session-2
+   :END:
+
+Every block in this heading will use the kernel associated with session-2. You can see here it uses different ports than session-1 does. They are both running at the same time though.
+
+ #+BEGIN_SRC ipython
+%connect_info
+ #+END_SRC
+
+ #+RESULTS:
+ :RESULTS:
+ # Out[1]:
+ # output
+ {
+   "shell_port": 46039,
+   "iopub_port": 41366,
+   "stdin_port": 46391,
+   "control_port": 42453,
+   "hb_port": 54666,
+   "ip": "127.0.0.1",
+   "key": "580f8b50-4b846ca056cbe83b8027ddbe",
+   "transport": "tcp",
+   "signature_scheme": "hmac-sha256",
+   "kernel_name": ""
+ }
+
+ Paste the above JSON into a file, and connect with:
+     $> jupyter <app> --existing <file>
+ or, if you are local, you can connect with just:
+     $> jupyter <app> --existing emacs-session-2.json
+ or even just:
+     $> jupyter <app> --existing
+ if this is the most recent Jupyter kernel you have started.
+ :END:
