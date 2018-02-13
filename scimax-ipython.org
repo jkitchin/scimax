@@ -905,3 +905,9 @@ b = 6
 :END:
 
 You can see from  the output that we successfully connected to the kernel and that indeed a=7. Furthermore, in the block above we assigned b=6, and in the terminal I can type "b" and see that it is equal to 6.
+
+If you have a lot of blocks in your buffer, you can use a file property like this to specify the header for every block in the buffer.
+
+#+BEGIN_EXAMPLE
+,#+PROPERTY: header-args:ipython :session kernel-16577-ssh.json
+#+END_EXAMPLE
