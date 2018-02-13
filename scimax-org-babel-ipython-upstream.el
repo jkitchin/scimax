@@ -1,9 +1,12 @@
 ;;; scimax-org-babel-ipython-upstream.el --- Modifications to the upstream ob-ipython module
 
 ;;; Commentary:
-;;
+;; This file contains monkey patches and enhancements to the upstream ob-ipython
+;; module. Several new customizations are now possible.
 
 (require 'scimax-ob)
+
+;; * Customizations
 
 (defcustom ob-ipython-buffer-unique-kernel t
   "If non-nil use a unique kernel for each buffer."
@@ -19,6 +22,19 @@
 
 (defcustom ob-ipython-suppress-execution-count nil
   "If non-nil do not show the execution count in output."
+  :group 'ob-ipython)
+
+(defcustom ob-ipython-mime-formatters
+  '((text/plain . ob-ipython-format-text/plain)
+    (text/html . ob-ipython-format-text/html)
+    (text/latex . ob-ipython-format-text/latex)
+    (text/org . ob-ipython-format-text/org)
+    (image/png . ob-ipython-format-image/png)
+    (image/svg+xml . ob-ipython-format-image/svg+xml)
+    (application/javascript . ob-ipython-format-application/javascript))
+  "An alist of (mime-type . format-func) for mime-types.
+Each function takes two arguments, which is file-or-nil and a
+string to be formatted."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-key-bindings
@@ -63,6 +79,9 @@
 	 do
 	 (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell))))
 
+
+;; * org templates and default header args
+
 (add-to-list 'org-structure-template-alist
 	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
 	       "<src lang=\"python\">\n?\n</src>"))
@@ -95,8 +114,8 @@ You need this to get syntax highlighting."
 	      "python -c \"import pygments.lexers; pygments.lexers.get_lexer_by_name('ipython')\""))
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
-
-;; A hydra for ob-ipython
+
+;; * A hydra for ob-ipython blocks
 
 (defhydra scimax-obi (:color blue :hint nil)
   "
@@ -141,6 +160,8 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
 
   ("/" ob-ipython-inspect))
 
+
+;; * Execution functions
 
 (defun scimax-ob-ipython-restart-kernel-execute-block ()
   "Restart kernel and execute block"
@@ -164,6 +185,13 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   (org-babel-execute-buffer))
 
 
+(defun scimax-restart-ipython-and-execute-to-point ()
+  "Kill the kernel and run src-blocks to point."
+  (interactive)
+  (call-interactively 'ob-ipython-kill-kernel)
+  (scimax-execute-to-point))
+
+
 (defun scimax-ob-ipython-kill-kernel ()
   "Kill the active kernel."
   (interactive)
@@ -176,7 +204,8 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
     (setq header-line-format nil)
     (redisplay)))
 
-
+
+;; * block editing functions
 (defun scimax-merge-ipython-blocks (r1 r2)
   "Merge blocks in the current region (R1 R2).
 This deletes the results from each block, and concatenates the
@@ -221,13 +250,7 @@ variables, etc."
 #+END_SRC\n\n" (s-trim merged-code)))))))
 
 
-(defun scimax-restart-ipython-and-execute-to-point ()
-  "Kill the kernel and run src-blocks to point."
-  (interactive)
-  (call-interactively 'ob-ipython-kill-kernel)
-  (scimax-execute-to-point))
-
-
+
 ;; * Modifications of ob-ipython
 
 ;; Modified to make buffer unique kernels automatically
@@ -270,9 +293,10 @@ This function is called by `org-babel-execute-src-block'."
       (ob-ipython--execute-async body params)
     (ob-ipython--execute-sync body params)))
 
-
+
 ;; ** Fine tune the output of blocks
-;; It was necessary to redefine these to get selective outputs via :ob-ipython-results
+;; It was necessary to redefine these to get selective outputs via :display
+
 (defun ob-ipython--execute-async (body params)
   (let* ((file (cdr (assoc :ipyfile params)))
          (session (cdr (assoc :session params)))
@@ -305,6 +329,7 @@ This function is called by `org-babel-execute-src-block'."
      (list sentinel (current-buffer) file result-type))
     (format "%s - %s" (length ob-ipython--async-queue) sentinel)))
 
+
 (defun ob-ipython--execute-sync (body params)
   (let* ((file (cdr (assoc :ipyfile params)))
          (session (cdr (assoc :session params)))
@@ -319,8 +344,9 @@ This function is called by `org-babel-execute-src-block'."
                                (cdr (assoc :kernel params)))
     (-when-let (ret (ob-ipython--eval
                      (ob-ipython--execute-request
-                      (org-babel-expand-body:generic (encode-coding-string body 'utf-8)
-                                                     params (org-babel-variable-assignments:python params))
+                      (org-babel-expand-body:generic
+		       (encode-coding-string body 'utf-8)
+		       params (org-babel-variable-assignments:python params))
                       (ob-ipython--normalize-session session))))
       ;; Now I want to filter out things not in the display we want. Default is everything.
       (when display-params
@@ -334,7 +360,8 @@ This function is called by `org-babel-execute-src-block'."
 
 
 
-;; This gives me the output I want.
+;; This gives me the output I want. Note I changed this to process one result at
+;; a time instead of passing all the results to `ob-ipython--render.
 (defun ob-ipython--process-response (ret file result-type)
   (let* ((result (cdr (assoc :result ret)))
 	 (output (cdr (assoc :output ret)))
@@ -355,60 +382,95 @@ This function is called by `org-babel-execute-src-block'."
 			  collect
 			  (ob-ipython--render file (list (cons type value))))))))
 
+
+;; ** Formatters for output
 
-;; I added html and latex to this
+(defun ob-ipython-format-text/plain (file-or-nil value)
+  "Format VALUE for text/plain mime-types.
+FILE-OR-NIL is not used in this function."
+  (let ((lines (s-lines value)))
+    ;; multiline output
+    (if (cdr lines)
+	(->> lines
+	     (s-join "\n  ")
+	     (s-concat "  ")
+	     (format "%s#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE"
+		     (if ob-ipython-show-mime-types "# text/plain\n" "")))
+      ;; single line output
+      (s-concat
+       (if ob-ipython-show-mime-types "\n# text/plain\n: "
+	 ": ")
+       (car lines)))))
+
+(defun ob-ipython-format-text/html (file-or-nil value)
+  "Format VALUE for text/html mime-types.
+FILE-OR-NIL is not used in this function."
+  (format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value))
+
+
+(defun ob-ipython-format-text/latex (file-or-nil value)
+  "Format VALUE for text/latex mime-types.
+FILE-OR-NIL is not used in this function."
+  (s-join "\n"
+	  (list (if ob-ipython-show-mime-types "# text/latex" "")
+		(format "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT" value))))
+
+
+(defun ob-ipython-format-text/org (file-or-nil value)
+  "Format VALUE for text/org mime-types.
+FILE-OR-NIL is not used in this function."
+  (s-join "\n" (list "# text/org" value)))
+
+
+(defun ob-ipython-format-image/png (file-or-nil value)
+  "Format VALUE for image/png mime-types.
+FILE-OR-NIL if non-nil is the file to save the image in. If nil,
+a filename is generated."
+  (let ((file (or file-or-nil (ob-ipython--generate-file-name ".png"))))
+    (ob-ipython--write-base64-string file value)
+    (s-join "\n" (list
+		  (if ob-ipython-show-mime-types "# image/png" "")
+		  (format "[[file:%s]]" file)))))
+
+
+(defun ob-ipython-format-image/svg+xml (file-or-nil value)
+  "Format VALUE for image/svg+xml mime-types.
+FILE-OR-NIL if non-nil is the file to save the image in. If nil,
+a filename is generated."
+  (let ((file (or file-or-nil (ob-ipython--generate-file-name ".svg"))))
+    (ob-ipython--write-string-to-file file value)
+    (s-join "\n"
+	    (list
+	     (if ob-ipython-show-mime-types "# image/svg" "")
+	     (format "[[file:%s]]" file)))))
+
+
+(defun ob-ipython-format-application/javascript (file-or-nil value)
+  "Format VALUE for application/javascript mime-types.
+FILE-OR-NIL is not used in this function."
+  (format "%s#+BEGIN_SRC javascript\n%s\n#+END_SRC"
+	  (if ob-ipython-show-mime-types "# application/javascript\n" "")
+	  value))
+
+
 (defun ob-ipython--render (file-or-nil values)
-  (let ((org (lambda (value)
-	       "org is verbtatim"
-	       (s-join "\n" (list "# text/org" value))))
-        (png (lambda (value)
-               (let ((file (or file-or-nil (ob-ipython--generate-file-name ".png"))))
-                 (ob-ipython--write-base64-string file value)
-		 (s-join "\n" (list
-			       (if ob-ipython-show-mime-types "# image/png" "")
-			       (format "[[file:%s]]" file))))))
-        (svg (lambda (value)
-               (let ((file (or file-or-nil (ob-ipython--generate-file-name ".svg"))))
-                 (ob-ipython--write-string-to-file file value)
-                 (s-join "\n"
-			 (list
-			  (if ob-ipython-show-mime-types "# image/svg" "")
-			  (format "[[file:%s]]" file))))))
-        (html (lambda (value)
-		(format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value)))
-	(latex (lambda (value)
-		 (s-join "\n"
-			 (list (if ob-ipython-show-mime-types "# text/latex" "")
-			       (format "#+BEGIN_EXPORT latex\n%s\n#+END_EXPORT" value)))))
-	(javascript (lambda (value)
-		      (format "%s#+BEGIN_SRC javascript\n%s\n#+END_SRC"
-			      (if ob-ipython-show-mime-types "# application/javascript\n" "")
-			      value)))
-        (txt (lambda (value)
-               (let ((lines (s-lines value)))
-                 (if (cdr lines)
-                     (->> lines
-                          (s-join "\n  ")
-                          (s-concat "  ")
-                          (format "%s#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE"
-				  (if ob-ipython-show-mime-types "# text/plain\n" "")))
-		   (s-concat
-		    (if ob-ipython-show-mime-types "\n# text/plain\n: "
-		      ": ")
-		    (car lines)))))))
-    (or (-when-let (val (cdr (assoc 'text/org values))) (funcall org val))
-        (-when-let (val (cdr (assoc 'image/png values))) (funcall png val))
-        (-when-let (val (cdr (assoc 'image/svg+xml values))) (funcall svg val))
-	(-when-let (val (cdr (assoc 'text/html values))) (funcall html val))
-	(-when-let (val (cdr (assoc 'text/latex values))) (funcall latex val))
-        (-when-let (val (cdr (assoc 'text/plain values))) (funcall txt val))
-	(-when-let (val (cdr (assoc 'application/javascript values))) (funcall javascript val))
-	;; Fall-through case
-	(format "%s%s" (if ob-ipython-show-mime-types
-			   (format "\n# %s\n: " (caar values))
-			 ": ")
-		(cdar values)))))
+  "VALUES is a list of (mime-type . value).
+FILE-OR-NIL comes from a :ipyfile header value or is nil. It is
+used for saving graphic outputs to files of your choice. It
+doesn't make sense to me, since you can only save one file this
+way, but I have left it in for compatibility."
+  (let* ((mime-type (caar values))
+	 (format-func (cdr (assoc mime-type ob-ipython-mime-formatters))))
+    (if format-func
+	(funcall format-func file-or-nil (cdar values))
+      ;; fall-through
+      (format "%s%s" (if ob-ipython-show-mime-types
+			 (format "\n# %s\n: " (caar values))
+		       ": ")
+	      (cdar values)))))
 
+
+;; ** Better exceptions
 ;; I want an option to get exceptions in the buffer
 (defun ob-ipython--eval (service-response)
   (let ((status (ob-ipython--extract-status service-response)))
@@ -432,7 +494,8 @@ This function is called by `org-babel-execute-src-block'."
 		   (:exec-count . ,(ob-ipython--extract-execution-count service-response))))
 	     (error (ob-ipython--extract-error service-response)))))))
 
-;; I also want q to go to the offending line
+
+;; I also want q to go to the offending line from a traceback buffer
 (defun ob-ipython--create-traceback-buffer (traceback)
   "Create a traceback buffer.
 Note, this does not work if you run the block async."
@@ -458,6 +521,7 @@ Note, this does not work if you run the block async."
 			      (goto-char ,(org-element-property :begin src))
 			      (forward-line ,line-number)))))))
 
+
 ;; ** inspect from an org buffer
 ;; This makes inspect work from an org-buffer.
 
