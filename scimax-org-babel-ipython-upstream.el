@@ -388,7 +388,6 @@ This function is called by `org-babel-execute-src-block'."
                (let ((lines (s-lines value)))
                  (if (cdr lines)
                      (->> lines
-                          (-map 's-trim)
                           (s-join "\n  ")
                           (s-concat "  ")
                           (format "%s#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE"
