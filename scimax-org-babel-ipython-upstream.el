@@ -17,6 +17,52 @@
   "If non-nil put the contents of the traceback buffer as results."
   :group 'ob-ipython)
 
+(defcustom ob-ipython-suppress-execution-count nil
+  "If non-nil do not show the execution count in output."
+  :group 'ob-ipython)
+
+(defcustom ob-ipython-key-bindings
+  '(("C-<return>" . #'org-ctrl-c-ctrl-c)
+    ("S-<return>" . #'scimax-execute-and-next-block)
+    ("M-<return>" . #'scimax-execute-to-point)
+    ("s-<return>" . #'scimax-ob-ipython-restart-kernel-execute-block)
+    ("M-s-<return>" . #'scimax-restart-ipython-and-execute-to-point)
+    ("H-<return>" . #'scimax-ob-ipython-restart-kernel-execute-buffer)
+    ("H-k" . #'scimax-ob-ipython-kill-kernel)
+    ("H-r" . #'org-babel-switch-to-session)
+
+    ;; navigation commands
+    ("s-i" . #'org-babel-previous-src-block)
+    ("s-k" . #'org-babel-next-src-block)
+    ("H-q" . #'scimax-jump-to-visible-block)
+    ("H-s-q" . #'scimax-jump-to-block)
+
+    ;; editing commands
+    ("H-=" . #'scimax-insert-src-block)
+    ("H--" . #'scimax-split-src-block)
+    ("H-n" . #'scimax-ob-copy-block-and-results)
+    ("H-w" . #'scimax-ob-kill-block-and-results)
+    ("H-c" . #'scimax-ob-clone-block)
+    ("s-w" . #'scimax-ob-move-src-block-up)
+    ("s-s" . #'scimax-ob-move-src-block-down)
+    ("H-l" . #'org-babel-remove-result)
+    ("H-s-l" . #'scimax-ob-clear-all-results)
+    ("H-m" . #'scimax-merge-ipython-blocks)
+    ("H-e" . #'scimax-ob-edit-header)
+
+    ;; Miscellaneous
+    ("H-/" . #'ob-ipython-inspect)
+
+    ;; The hydra
+    ("H-s" . #'scimax-obi/body))
+  "An alist of key bindings and commands."
+  :group 'ob-ipython)
+
+
+(cl-loop for cell in ob-ipython-key-bindings
+	 do
+	 (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell))))
+
 (add-to-list 'org-structure-template-alist
 	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
 	       "<src lang=\"python\">\n?\n</src>"))
@@ -50,43 +96,7 @@ You need this to get syntax highlighting."
     (shell-command "pip install git+git://github.com/sanguineturtle/pygments-ipython-console")))
 
 
-(scimax-define-src-key ipython "C-<return>" #'org-ctrl-c-ctrl-c)
-(scimax-define-src-key ipython "S-<return>" #'scimax-execute-and-next-block)
-(scimax-define-src-key ipython "M-<return>" #'scimax-execute-to-point)
-
-(scimax-define-src-key ipython "s-<return>" #'scimax-ob-ipython-restart-kernel-execute-block)
-(scimax-define-src-key ipython "M-s-<return>" #'scimax-restart-ipython-and-execute-to-point)
-(scimax-define-src-key ipython "H-<return>" #'scimax-ob-ipython-restart-kernel-execute-buffer)
-
-(scimax-define-src-key ipython "H-=" #'scimax-insert-src-block)
-(scimax-define-src-key ipython "H--" #'scimax-split-src-block)
-(scimax-define-src-key ipython "H-/" #'ob-ipython-inspect)
-(scimax-define-src-key ipython "H-r" #'org-babel-switch-to-session)
-(scimax-define-src-key ipython "H-e" #'scimax-ob-edit-header)
-(scimax-define-src-key ipython "H-k" #'scimax-ob-ipython-kill-kernel)
-
-
-;; navigation in block
-(scimax-define-src-key ipython "s-i" #'org-babel-previous-src-block)
-(scimax-define-src-key ipython "s-k" #'org-babel-next-src-block)
-(scimax-define-src-key ipython "H-q" #'scimax-jump-to-visible-block)
-(scimax-define-src-key ipython "H-s-q" #'scimax-jump-to-block)
-
-
-(scimax-define-src-key ipython "H-n" #'scimax-ob-copy-block-and-results)
-(scimax-define-src-key ipython "H-w" #'scimax-ob-kill-block-and-results)
-(scimax-define-src-key ipython "H-c" #'scimax-ob-clone-block)
-
-(scimax-define-src-key ipython "s-w" #'scimax-ob-move-src-block-up)
-(scimax-define-src-key ipython "s-s" #'scimax-ob-move-src-block-down)
-
-(scimax-define-src-key ipython "H-l" #'org-babel-remove-result)
-(scimax-define-src-key ipython "H-s-l" #'scimax-ob-clear-all-results)
-
-(scimax-define-src-key ipython "H-m" #'scimax-merge-ipython-blocks)
-(scimax-define-src-key ipython "H-s" #'scimax-obi/body)
-
-;; A hydra
+;; A hydra for ob-ipython
 
 (defhydra scimax-obi (:color blue :hint nil)
   "
@@ -102,8 +112,8 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
            _r_: Goto repl         ^ ^            _+_: insert above
            ^ ^                    ^ ^            _=_: insert below
            ^ ^                    ^ ^            _h_: header"
-  ("<return>" org-ctrl-c-ctrl-c)
-  ("C-<return>" scimax-execute-and-next-block)
+  ("<return>" org-ctrl-c-ctrl-c :color red)
+  ("C-<return>" scimax-execute-and-next-block :color red)
   ("M-<return>" scimax-execute-to-point)
   ("s-<return>" scimax-ob-ipython-restart-kernel-execute-block)
   ("M-s-<return>" scimax-restart-ipython-and-execute-to-point)
@@ -116,8 +126,8 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   ("q" scimax-jump-to-visible-block)
   ("Q" scimax-jump-to-block)
 
-  ("w" scimax-ob-move-src-block-up)
-  ("s" scimax-ob-move-src-block-down)
+  ("w" scimax-ob-move-src-block-up :color red)
+  ("s" scimax-ob-move-src-block-down :color red)
   ("x" scimax-ob-kill-block-and-results)
   ("n" scimax-ob-copy-block-and-results)
   ("c" scimax-ob-clone-block)
@@ -331,7 +341,9 @@ This function is called by `org-babel-execute-src-block'."
 	 (value (cdr (assoc :value result)))
 	 (display (cdr (assoc :display result))))
     (s-concat
-     (format "# Out[%d]:\n" (cdr (assoc :exec-count ret)))
+     (if ob-ipython-suppress-execution-count
+	 ""
+       (format "# Out[%d]:\n" (cdr (assoc :exec-count ret))))
      (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
      (when (not (string= "" output)) output)
      (s-join "\n\n" (loop for (type . value) in (append value display)

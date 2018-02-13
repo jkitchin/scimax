@@ -13,7 +13,13 @@ I am anticipating deprecating the old ob-ipython fork, but I have no idea how ma
 
 ** Basic output
 
-Source blocks usually differentiate between results that are output and value. This has rarely made sense for how I use org-mode. I usually print things and want outputs. A new feature for scimax users is the execution count, which shows you the counter for when the cell was executed. This shows as comment, so it won't appear in exported content. Anything you print will show in the results, and the last value will also show. Printed output comes first.
+Source blocks usually differentiate between results that are output and value. This has rarely made sense for how I use org-mode. I usually print things and want outputs. A new feature for scimax users is the execution count, which shows you the counter for when the cell was executed. This shows as comment, so it won't appear in exported content. If you don't like the count, you can turn it off with
+
+#+BEGIN_SRC emacs-lisp
+(setq ob-ipython-suppress-execution-count nil)
+#+END_SRC
+
+Anything you print will show in the results, and the last value will also show. Printed output comes first.
 
 #+BEGIN_SRC ipython
 a = 55
@@ -23,7 +29,7 @@ a + 5
 
 #+RESULTS:
 :RESULTS:
-# Out[7]:
+# Out[1]:
 # output
 5
 
@@ -571,7 +577,7 @@ p
  :END:
 
 *** Customizing a class output with _repr_*_ methods
-    
+
 Adapted from http://nbviewer.jupyter.org/github/ipython/ipython/blob/6.x/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb#Custom-Mimetypes-with-_repr_mimebundle
 
 The canonical way to make rich outputs on your own classes is to add _repr_X_ methods. Here is the example from the Jupyter tutorial listed above.
@@ -594,7 +600,7 @@ class Gaussian(object):
         self.size = size
         # For caching plots that may be expensive to compute
         self._png_data = None
-        
+
     def _figure_data(self, format):
         fig, ax = plt.subplots()
         ax.hist(self.data, bins=50)
@@ -605,12 +611,12 @@ class Gaussian(object):
         # will pick it up and send it as output, resulting in a double display
         plt.close(fig)
         return data
-        
+
     def _repr_png_(self):
         if self._png_data is None:
             self._png_data = self._figure_data('png')
         return self._png_data
-    
+
     def _repr_latex_(self):
         return r'$\mathcal{N}(\mu=%.2g, \sigma=%.2g),\ N=%d$' % (self.mean,
                                                                  self.std, self.size)
@@ -708,10 +714,10 @@ Heading('A level 4 headline', level=4, tags=['example'])
 Now you can probably see the possibilities for building up documents with Python code that can be converted to org-mode, html, etc...
 
 *** More complex display with _ipython_display_
-    
+
 This example is also from http://nbviewer.jupyter.org/github/ipython/ipython/blob/6.x/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb#More-complex-display-with-_ipython_display_, and shows how to override the IPython output all together.
 
-#+BEGIN_SRC ipython :display 
+#+BEGIN_SRC ipython :display
 import json
 import uuid
 from IPython.display import display_javascript, display_html, display
@@ -721,7 +727,7 @@ class FlotPlot(object):
         self.x = x
         self.y = y
         self.uuid = str(uuid.uuid4())
-    
+
     def _ipython_display_(self):
         json_data = json.dumps(list(zip(self.x, self.y)))
         display_html('<div id="{}" style="height: 300px; width:80%;"></div>'.format(self.uuid),
@@ -755,7 +761,7 @@ FlotPlot(x, np.sin(x))
           console.log(line);
           $.plot("#f5b1e514-f3f3-48bb-a813-ef031f2ee21c", [line]);
         });
-        
+
 #+END_SRC
 :END:
 
@@ -846,7 +852,7 @@ ls `jupyter --runtime-dir`
 | nbserver-261088.json                             |
 | notebook_cookie_secret                           |
 
-On a real remote machine, you would have to copy this file to your local machine runtime directory. There is nothing too mysterious in this file, it just has some information about the IP address and ports used. 
+On a real remote machine, you would have to copy this file to your local machine runtime directory. There is nothing too mysterious in this file, it just has some information about the IP address and ports used.
 
 #+BEGIN_SRC sh
 cat `jupyter --runtime-dir`/kernel-226309.json
@@ -880,7 +886,7 @@ You should get some output like:
 [ZMQTerminalIPythonApp] --existing kernel-16577-ssh.json
 Jupyter console 5.2.0
 
-Python 3.6.3 |Anaconda, Inc.| (default, Oct 13 2017, 12:02:49) 
+Python 3.6.3 |Anaconda, Inc.| (default, Oct 13 2017, 12:02:49)
 Type 'copyright', 'credits' or 'license' for more information
 IPython 6.1.0 -- An enhanced Interactive Python. Type '?' for help.
 #+END_EXAMPLE
