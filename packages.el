@@ -12,9 +12,7 @@
 
 (add-to-list 'Info-directory-list scimax-dir)
 
-(unless (memq system-type '(windows-nt ms-dos)) 
-  (setq use-package-always-ensure t))
-
+(setq use-package-always-ensure t)
 
 ;; * org-mode
 ;; load this first before anything else to avoid mixed installations
@@ -38,9 +36,8 @@
 
 (use-package org-bullets)
 
-(unless (memq system-type '(windows-nt ms-dos))
-  (use-package org-edna
-    :init (org-edna-load)))
+(use-package org-edna
+  :init (org-edna-load))
 
 
 ;; * Other packages
@@ -175,8 +172,7 @@
   :config
   (elpy-enable))
 
-(unless (memq system-type '(windows-nt ms-dos)) 
-  (use-package esup))
+(use-package esup)
 
 ;; Provides functions for working with files
 (use-package f)
@@ -268,10 +264,9 @@
   :bind ("C-x v o" . git-messenger:popup-message))
 
 ;; google-this
-(unless (memq system-type '(windows-nt ms-dos)) 
-  (use-package google-this
-    :config
-    (google-this-mode 1)))
+(use-package google-this
+  :config
+  (google-this-mode 1))
 
 (use-package helm
   :init (setq helm-command-prefix-key "C-c h")
@@ -358,8 +353,7 @@
 
 ;; Templating system
 ;; https://github.com/Wilfred/mustache.el
-(unless (memq system-type '(windows-nt ms-dos)) 
-  (use-package mustache))
+(use-package mustache)
 
 (use-package scimax-ob
   :ensure nil
@@ -380,28 +374,26 @@
 
 (use-package org-edit-latex)
 
-(unless (memq system-type '(windows-nt ms-dos)) 
-  (use-package pdf-tools))
+(use-package pdf-tools)
 
 ;; this is a git submodule
-(ignore-errors
-  (use-package org-ref
-    :ensure nil
-    :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
-    :init
-    (add-to-list 'load-path
-		 (expand-file-name "org-ref" scimax-dir))
-    (setq bibtex-autokey-year-length 4
-	  bibtex-autokey-name-year-separator "-"
-	  bibtex-autokey-year-title-separator "-"
-	  bibtex-autokey-titleword-separator "-"
-	  bibtex-autokey-titlewords 2
-	  bibtex-autokey-titlewords-stretch 1
-	  bibtex-autokey-titleword-length 5
-	  org-ref-bibtex-hydra-key-binding (kbd "H-b"))
-    ;; (define-key bibtex-mode-map org-ref-bibtex-hydra-key-binding 'org-ref-bibtex-hydra/body)
-    ;; (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body)
-    ))
+(use-package org-ref
+  :ensure nil
+  :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
+  :init
+  (add-to-list 'load-path
+	       (expand-file-name "org-ref" scimax-dir))
+  (setq bibtex-autokey-year-length 4
+	bibtex-autokey-name-year-separator "-"
+	bibtex-autokey-year-title-separator "-"
+	bibtex-autokey-titleword-separator "-"
+	bibtex-autokey-titlewords 2
+	bibtex-autokey-titlewords-stretch 1
+	bibtex-autokey-titleword-length 5
+	org-ref-bibtex-hydra-key-binding (kbd "H-b"))
+  ;; (define-key bibtex-mode-map org-ref-bibtex-hydra-key-binding 'org-ref-bibtex-hydra/body)
+  ;; (global-set-key (kbd "H-b") 'org-ref-bibtex-hydra/body)
+  )
 
 (use-package org-ref-arxiv
   :ensure nil
