@@ -103,6 +103,8 @@ recent files and bookmarks. You can set a bookmark also."
   "Open Finder or Windows Explorer in the current directory."
   (interactive)
   (cond
+   ((string= system-type "gnu/linux")
+    (shell-command "nautilus"))
    ((string= system-type "darwin")
     (shell-command (format "open -b com.apple.finder %s"
 			   (if (buffer-file-name)
@@ -123,6 +125,8 @@ recent files and bookmarks. You can set a bookmark also."
   "Open a bash window."
   (interactive)
   (cond
+   ((string= system-type "gnu/linux")
+    (shell-command "gnome-terminal"))
    ((string= system-type "darwin")
     (shell-command
      (format "open -b com.apple.terminal \"%s\""
