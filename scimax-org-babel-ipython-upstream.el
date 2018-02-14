@@ -3,6 +3,12 @@
 ;;; Commentary:
 ;; This file contains monkey patches and enhancements to the upstream ob-ipython
 ;; module. Several new customizations are now possible.
+;;
+;; Some new header arguments:
+;;
+;; :display can be used to specify which mime-types are displayed. The default is all of them.
+;; :restart can be used to restart the kernel before executing the cell
+;; :async is not new, but it works by itself now, and causes an asynchronous evaluation of the cell
 
 (require 'scimax-ob)
 
@@ -37,6 +43,16 @@
   "An alist of (mime-type . format-func) for mime-types.
 Each function takes two arguments, which is file-or-nil and a
 string to be formatted."
+  :group 'ob-ipython)
+
+(defcustom ob-ipython-plain-text-filter-regexps
+  '(
+					;this is what boring python objects look like. I never need to see these, so
+					;we strip them out. That might be a strong opinion though, and might
+					;surprise people who like to or are used to seeing them.
+    "^<.*at 0x.*>"
+    )
+  "A list of regular expressions to filter out of text/plain results."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-key-bindings
@@ -124,7 +140,7 @@ You need this to get syntax highlighting."
         Execute                   Navigate     Edit             Misc
 ----------------------------------------------------------------------
     _<return>_: current           _i_: previous  _w_: move up     _/_: inspect
-  _C-<return>_: current to next   _k_: next      _s_: move down   _l_: clear result
+  _S-<return>_: current to next   _k_: next      _s_: move down   _l_: clear result
   _M-<return>_: to point          _q_: visible   _x_: kill        _L_: clear all
   _s-<return>_: Restart/block     _Q_: any       _n_: copy
 _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
@@ -134,7 +150,7 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
            ^ ^                    ^ ^            _=_: insert below
            ^ ^                    ^ ^            _h_: header"
   ("<return>" org-ctrl-c-ctrl-c :color red)
-  ("C-<return>" scimax-execute-and-next-block :color red)
+  ("S-<return>" scimax-execute-and-next-block :color red)
   ("M-<return>" scimax-execute-to-point)
   ("s-<return>" scimax-ob-ipython-restart-kernel-execute-block)
   ("M-s-<return>" scimax-restart-ipython-and-execute-to-point)
@@ -397,18 +413,19 @@ compatibility with the other formatters."
   "Format VALUE for text/plain mime-types.
 FILE-OR-NIL is not used in this function."
   (let ((lines (s-lines value)))
-    ;; multiline output
-    (if (cdr lines)
-	(->> lines
-	     (s-join "\n  ")
-	     (s-concat "  ")
-	     (format "%s#+BEGIN_EXAMPLE\n%s\n#+END_EXAMPLE"
-		     (if ob-ipython-show-mime-types "# text/plain\n" "")))
-      ;; single line output
-      (s-concat
-       (if ob-ipython-show-mime-types "\n# text/plain\n: "
-	 ": ")
-       (car lines)))))
+    ;; filter out uninteresting lines.
+    (setq lines (-filter (lambda (line)
+			   (not (-any (lambda (regex)
+					(s-matches? regex line))
+				      ob-ipython-plain-text-filter-regexps)))
+			 lines))
+    (when lines
+      ;; Add verbatim start string
+      (setq lines (mapcar (lambda (s) (s-concat ": " s)) lines))
+      (when ob-ipython-show-mime-types
+	(setq lines (append '("# text/plain") lines)))
+      (s-join "\n" lines))))
+
 
 (defun ob-ipython-format-text/html (file-or-nil value)
   "Format VALUE for text/html mime-types.
@@ -428,6 +445,19 @@ FILE-OR-NIL is not used in this function."
   "Format VALUE for text/org mime-types.
 FILE-OR-NIL is not used in this function."
   (s-join "\n" (list "# text/org" value)))
+
+
+(defun ob-ipython--generate-file-name (suffix)
+  "Generate a file name to store an image in.
+I added an md5-hash of the buffer name so you can tell what file
+the names belong to. This is useful later to delete files that
+are no longer used."
+  (s-concat (make-temp-name
+	     (concat (f-join ob-ipython-resources-dir (if-let (bf (buffer-file-name))
+							  (md5 (expand-file-name bf))
+							"scratch"))
+		     "-"))
+	    suffix))
 
 
 (defun ob-ipython-format-image/png (file-or-nil value)
@@ -459,6 +489,7 @@ FILE-OR-NIL is not used in this function."
   (format "%s#+BEGIN_SRC javascript\n%s\n#+END_SRC"
 	  (if ob-ipython-show-mime-types "# application/javascript\n" "")
 	  value))
+
 
 (defun ob-ipython-format-default (file-or-nil value)
   "Default formatter to format VALUE.
@@ -562,6 +593,29 @@ Note, this does not work if you run the block async."
     (when inspect-buffer (pop-to-buffer inspect-buffer))))
 
 
+
+;; * redefine org-show-entry
+
+;; This function closes drawers. I redefine it here to avoid that. Maybe we will
+;; find a fix for it one day.
+
+(defun org-show-entry ()
+  "Show the body directly following this heading.
+Show the heading too, if it is currently invisible."
+  (interactive)
+  (save-excursion
+    (ignore-errors
+      (org-back-to-heading t)
+      (outline-flag-region
+       (max (point-min) (1- (point)))
+       (save-excursion
+	 (if (re-search-forward
+	      (concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
+	     (match-beginning 1)
+	   (point-max)))
+       nil)
+      ;; (org-cycle-hide-drawers 'children)
+      )))
 
 (provide 'scimax-org-babel-ipython-upstream)
 

@@ -31,8 +31,7 @@ a + 5
 :RESULTS:
 # Out[1]:
 # output
-: 5
-# text/plain
+: 5# text/plain
 : 60
 :END:
 
@@ -51,14 +50,11 @@ a
 
 #+RESULTS:
 :RESULTS:
-# Out[8]:
+# Out[1]:
 # output
-5
-
-# text/plain
+: 5# text/plain
 : 55
 :END:
-
 
 ** Multiple inline figures and output
 
@@ -90,19 +86,15 @@ print('x .dot. y = {}'.format(x @ y))
 # Out[2]:
 # output
 : Length of t = 350
-: x .dot. y = 1.3598389888491538
-# text/plain
-: <matplotlib.figure.Figure at 0x10453c048>
+: x .dot. y = 1.3598389888491542
 
 # image/png
-[[file:./obipy-resources/94020sJV.png]]
+[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896qI1.png]]
 
 
-# text/plain
-: <matplotlib.figure.Figure at 0x102166828>
 
 # image/png
-[[file:./obipy-resources/940205Tb.png]]
+[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896cSE.png]]
 :END:
 
 ** Fine tune the output
@@ -121,17 +113,15 @@ Integral(sqrt(1 / x), x)
 :RESULTS:
 # Out[3]:
 # text/plain
-#+BEGIN_EXAMPLE
-  ⌠
-  ⎮     ___
-  ⎮    ╱ 1
-  ⎮   ╱  ─  dx
-  ⎮ ╲╱   x
-  ⌡
-#+END_EXAMPLE
+: ⌠           
+: ⎮     ___   
+: ⎮    ╱ 1    
+: ⎮   ╱  ─  dx
+: ⎮ ╲╱   x    
+: ⌡           
 
 # image/png
-[[file:./obipy-resources/94020Geh.png]]
+[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896pcK.png]]
 
 # text/latex
 #+BEGIN_EXPORT latex
@@ -149,7 +139,7 @@ Integral(sqrt(1/x), x)
 :RESULTS:
 # Out[4]:
 # image/png
-[[file:./obipy-resources/94020Ton.png]]
+[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-1318962mQ.png]]
 :END:
 
 I have not added an exclude feature, but it would not be hard to. Unfortunately, it is not yet possible to control the order these come out in, or to do things like add captions or size information to the images.
@@ -195,7 +185,7 @@ import time
 
 for i in range(4):
     print(i)
-    time.sleep(4)
+    time.sleep(2)
 
 # keep on working!
 print('done')
@@ -344,28 +334,27 @@ Here we use a properties drawer in two different headlines to have different ses
 
   #+RESULTS:
   :RESULTS:
-  # Out[6]:
+  # Out[1]:
   # output
-  {
-    "shell_port": 57257,
-    "iopub_port": 60990,
-    "stdin_port": 37898,
-    "control_port": 42607,
-    "hb_port": 55863,
-    "ip": "127.0.0.1",
-    "key": "26515aec-de8fd6f55cf49bf8b1f38f3c",
-    "transport": "tcp",
-    "signature_scheme": "hmac-sha256",
-    "kernel_name": ""
-  }
-
-  Paste the above JSON into a file, and connect with:
-      $> jupyter <app> --existing <file>
-  or, if you are local, you can connect with just:
-      $> jupyter <app> --existing emacs-session-1.json
-  or even just:
-      $> jupyter <app> --existing
-  if this is the most recent Jupyter kernel you have started.
+  : {
+  :   "shell_port": 57257,
+  :   "iopub_port": 60990,
+  :   "stdin_port": 37898,
+  :   "control_port": 39142,
+  :   "hb_port": 55863,
+  :   "ip": "127.0.0.1",
+  :   "key": "26515aec-de8fd6f55cf49bf8b1f38f3c",
+  :   "transport": "tcp",
+  :   "signature_scheme": "hmac-sha256",
+  :   "kernel_name": ""
+  : }
+  : Paste the above JSON into a file, and connect with:
+  :     $> jupyter <app> --existing <file>
+  : or, if you are local, you can connect with just:
+  :     $> jupyter <app> --existing emacs-session-1.json
+  : or even just:
+  :     $> jupyter <app> --existing
+  : if this is the most recent Jupyter kernel you have started.
   :END:
 
 *** Session 2
@@ -383,28 +372,26 @@ Here we use a properties drawer in two different headlines to have different ses
   :RESULTS:
   # Out[1]:
   # output
-  {
-    "shell_port": 46039,
-    "iopub_port": 41366,
-    "stdin_port": 46391,
-    "control_port": 42453,
-    "hb_port": 54666,
-    "ip": "127.0.0.1",
-    "key": "580f8b50-4b846ca056cbe83b8027ddbe",
-    "transport": "tcp",
-    "signature_scheme": "hmac-sha256",
-    "kernel_name": ""
-  }
-
-  Paste the above JSON into a file, and connect with:
-      $> jupyter <app> --existing <file>
-  or, if you are local, you can connect with just:
-      $> jupyter <app> --existing emacs-session-2.json
-  or even just:
-      $> jupyter <app> --existing
-  if this is the most recent Jupyter kernel you have started.
+  : {
+  :   "shell_port": 46039,
+  :   "iopub_port": 41366,
+  :   "stdin_port": 46391,
+  :   "control_port": 52731,
+  :   "hb_port": 54666,
+  :   "ip": "127.0.0.1",
+  :   "key": "580f8b50-4b846ca056cbe83b8027ddbe",
+  :   "transport": "tcp",
+  :   "signature_scheme": "hmac-sha256",
+  :   "kernel_name": ""
+  : }
+  : Paste the above JSON into a file, and connect with:
+  :     $> jupyter <app> --existing <file>
+  : or, if you are local, you can connect with just:
+  :     $> jupyter <app> --existing emacs-session-2.json
+  : or even just:
+  :     $> jupyter <app> --existing
+  : if this is the most recent Jupyter kernel you have started.
   :END:
-
 
 ** Customizing outputs
 
@@ -447,9 +434,8 @@ p
 #+RESULTS:
 :RESULTS:
 # Out[7]:
-
 # text/plain
-: Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
+: Polynomial([1., 2., 3.], domain=[-1,  1], window=[-1,  1])
 :END:
 
 Let's change this to get a LaTeX representation (adapted from https://github.com/jupyter/ngcm-tutorial/blob/master/Part-1/IPython%20Kernel/Custom%20Display%20Logic.ipynb). We will do this on the Ipython side of output customization where we register a formatting function for a specific type in IPython.
@@ -493,9 +479,8 @@ p
 #+RESULTS:
 :RESULTS:
 # Out[9]:
-
 # text/plain
-: Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
+: Polynomial([1., 2., 3.], domain=[-1,  1], window=[-1,  1])
 
 # text/latex
 #+BEGIN_EXPORT latex
@@ -545,7 +530,7 @@ p
 :RESULTS:
 # Out[11]:
 # image/png
-[[file:./obipy-resources/94020gyt.png]]
+[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896DxW.png]]
 :END:
 
 Most likely you would not put all this code into a document like this, but would instead put it in a Python library you import. The point here is to show what can be done with that, and once it is done, you get easy visualization of objects.
@@ -597,11 +582,9 @@ g
   :RESULTS:
   # Out[13]:
 
-  # text/plain
-  : <tensorflow.python.framework.ops.Graph at 0x10f300828>
 
   # image/svg
-  [[file:./obipy-resources/94020t8z.svg]]
+  [[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896Q7c.svg]]
   :END:
 
 Now we have a record of what the graph looks like. Ez peezy.
@@ -612,38 +595,47 @@ Now we have a record of what the graph looks like. Ez peezy.
 
  Here we modify the plain text output so that it saves an html file, and returns a link to it.
 
-#+BEGIN_SRC ipython  :display text/org image/png :async
-import IPython
+Note you need to install bokeh, selenium, pillow with conda, and install a modern phantomjs in your OS for this to work (I build one from https://github.com/eisnerd/phantomjs).
 
-class OrgFormatter(IPython.core.formatters.BaseFormatter):
-    format_type = IPython.core.formatters.Unicode('text/org')
-    print_method = IPython.core.formatters.ObjectName('_repr_org_')
-
-
-ip = get_ipython()
-ip.display_formatter.formatters['text/org'] = OrgFormatter()
-
-from bokeh.io.saving import save
-def bokeh_to_org(plt):
-    fname = save(plt)
-    return '[[{}]]'.format(fname)
-
-f = ip.display_formatter.formatters['text/org']
-f.for_type_by_name('bokeh.plotting.figure', 'Figure', bokeh_to_org)
-
-from bokeh.io import export_png
-
-def bokeh_to_png(p):
-    png_filename = export_png(p)
-    with open(png_filename, 'rb') as f:
-        return f.read()
-
-png_f = ip.display_formatter.formatters['image/png']
-png_f.for_type_by_name('bokeh.plotting.figure', 'Figure', bokeh_to_png)
-
+#+BEGIN_SRC ipython :restart
+import tempfile
 import warnings
 warnings.filterwarnings("ignore")
 
+import IPython
+from bokeh.io import export_png
+from bokeh.io.saving import save
+
+class OrgFormatter(IPython.core.formatters.BaseFormatter):
+  format_type = IPython.core.formatters.Unicode("text/org")
+  print_method = IPython.core.formatters.ObjectName("_repr_org_")
+
+ip = get_ipython()
+ip.display_formatter.formatters["text/org"] = OrgFormatter()
+
+def bokeh_to_org(plt):
+  fh, tmp = tempfile.mkstemp(suffix=".html", prefix="bokeh-", 
+                             dir="obipy-resources")
+  fname = save(plt, tmp)
+  os.close(fh)
+  return "[[{}]]".format(fname)
+
+
+f = ip.display_formatter.formatters["text/org"]
+f.for_type_by_name("bokeh.plotting.figure", "Figure", bokeh_to_org)
+
+def bokeh_to_png(p):
+  png_filename = export_png(p)
+  with open(png_filename, "rb") as f:
+    return f.read()
+
+png_f = ip.display_formatter.formatters["image/png"]
+png_f.for_type_by_name("bokeh.plotting.figure", "Figure", bokeh_to_png)
+#+END_SRC
+
+Now we are setup to make an interactive figure.
+
+#+BEGIN_SRC ipython :display text/org image/png 
 from bokeh.io import output_file, show
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
@@ -656,57 +648,85 @@ groups = [str(x) for x in range(1, 19)]
 df = elements.copy()
 df["atomic mass"] = df["atomic mass"].astype(str)
 df["group"] = df["group"].astype(str)
-df["period"] = [periods[x-1] for x in df.period]
+df["period"] = [periods[x - 1] for x in df.period]
 df = df[df.group != "-"]
 df = df[df.symbol != "Lr"]
 df = df[df.symbol != "Lu"]
 
 cmap = {
-    "alkali metal"         : "#a6cee3",
-    "alkaline earth metal" : "#1f78b4",
-    "metal"                : "#d93b43",
-    "halogen"              : "#999d9a",
-    "metalloid"            : "#e08d49",
-    "noble gas"            : "#eaeaea",
-    "nonmetal"             : "#f1d4Af",
-    "transition metal"     : "#599d7A",
+    "alkali metal": "#a6cee3",
+    "alkaline earth metal": "#1f78b4",
+    "metal": "#d93b43",
+    "halogen": "#999d9a",
+    "metalloid": "#e08d49",
+    "noble gas": "#eaeaea",
+    "nonmetal": "#f1d4Af",
+    "transition metal": "#599d7A",
 }
 
 source = ColumnDataSource(df)
 
-p = figure(title="Periodic Table (omitting LA and AC Series)", plot_width=1000, plot_height=450,
-           tools="", toolbar_location=None,
-           x_range=groups, y_range=list(reversed(periods)))
+p = figure(
+    title="Periodic Table (omitting LA and AC Series)",
+    plot_width=1000,
+    plot_height=450,
+    tools="",
+    toolbar_location=None,
+    x_range=groups,
+    y_range=list(reversed(periods)))
 
-p.rect("group", "period", 0.95, 0.95, source=source, fill_alpha=0.6, legend="metal",
-       color=factor_cmap('metal', palette=list(cmap.values()), factors=list(cmap.keys())))
+p.rect(
+    "group",
+    "period",
+    0.95,
+    0.95,
+    source=source,
+    fill_alpha=0.6,
+    legend="metal",
+    color=factor_cmap(
+        "metal", palette=list(cmap.values()), factors=list(cmap.keys())))
 
 text_props = {"source": source, "text_align": "left", "text_baseline": "middle"}
 
 x = dodge("group", -0.4, range=p.x_range)
 
 r = p.text(x=x, y="period", text="symbol", **text_props)
-r.glyph.text_font_style="bold"
+r.glyph.text_font_style = "bold"
 
-r = p.text(x=x, y=dodge("period", 0.3, range=p.y_range), text="atomic number", **text_props)
-r.glyph.text_font_size="8pt"
+r = p.text(
+    x=x,
+    y=dodge("period", 0.3, range=p.y_range),
+    text="atomic number",
+    ,**text_props)
+r.glyph.text_font_size = "8pt"
 
-r = p.text(x=x, y=dodge("period", -0.35, range=p.y_range), text="name", **text_props)
-r.glyph.text_font_size="5pt"
+r = p.text(
+    x=x, y=dodge("period", -0.35, range=p.y_range), text="name", **text_props)
+r.glyph.text_font_size = "5pt"
 
-r = p.text(x=x, y=dodge("period", -0.2, range=p.y_range), text="atomic mass", **text_props)
-r.glyph.text_font_size="5pt"
+r = p.text(
+    x=x,
+    y=dodge("period", -0.2, range=p.y_range),
+    text="atomic mass",
+    ,**text_props)
+r.glyph.text_font_size = "5pt"
 
-p.text(x=["3", "3"], y=["VI", "VII"], text=["LA", "AC"], text_align="center", text_baseline="middle")
+p.text(
+    x=["3", "3"],
+    y=["VI", "VII"],
+    text=["LA", "AC"],
+    text_align="center",
+    text_baseline="middle")
 
-p.add_tools(HoverTool(tooltips = [
-    ("Name", "@name"),
-    ("Atomic number", "@{atomic number}"),
-    ("Atomic mass", "@{atomic mass}"),
-    ("Type", "@metal"),
-    ("CPK color", "$color[hex, swatch]:CPK"),
-    ("Electronic configuration", "@{electronic configuration}"),
-]))
+p.add_tools(
+    HoverTool(tooltips=[
+        ("Name", "@name"),
+        ("Atomic number", "@{atomic number}"),
+        ("Atomic mass", "@{atomic mass}"),
+        ("Type", "@metal"),
+        ("CPK color", "$color[hex, swatch]:CPK"),
+        ("Electronic configuration", "@{electronic configuration}"),
+    ]))
 
 p.outline_line_color = None
 p.grid.grid_line_color = None
@@ -714,20 +734,22 @@ p.axis.axis_line_color = None
 p.axis.major_tick_line_color = None
 p.axis.major_label_standoff = 0
 p.legend.orientation = "horizontal"
-p.legend.location ="top_center"
+p.legend.location = "top_center"
 
 p
  #+END_SRC
 
  #+RESULTS:
  :RESULTS:
- # Out[14]:
+ # Out[10]:
  # image/png
- [[file:./obipy-resources/94020fGD.png]]
+ [[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-1318964vS.png]]
 
  # text/org
- [[/var/folders/5q/lllv2yf95hg_n6h6kjttbmdw0000gn/T/tmppcwe873d.html]]
+ [[/usr/local/google/home/kitchin/scimax/obipy-resources/bokeh-1vuy2xw6.html]]
  :END:
+
+Now if you click on the link above, it will open an interactive html file in your browser. It is just a tempfile, so some work might be necessary to get it to a persistent place, like the images are.
 
 *** Customizing a class output with _repr_*_ methods
 
@@ -777,7 +799,7 @@ class Gaussian(object):
 
 #+RESULTS:
 :RESULTS:
-# Out[15]:
+# Out[5]:
 :END:
 
 #+BEGIN_SRC ipython
@@ -786,13 +808,11 @@ Gaussian()
 
 #+RESULTS:
 :RESULTS:
-# Out[16]:
+# Out[6]:
 
-# text/plain
-: <__main__.Gaussian at 0x181e2ae940>
 
 # image/png
-[[file:./obipy-resources/94020sQJ.png]]
+[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896e_1.png]]
 
 # text/latex
 #+BEGIN_EXPORT latex
@@ -839,7 +859,7 @@ class Heading(object):
 
  #+RESULTS:
  :RESULTS:
- # Out[17]:
+ # Out[7]:
  :END:
 
  Now, you can construct headings in iPython, and get different outputs that might be suitable for different purposes.
@@ -850,7 +870,7 @@ Heading('A level 4 headline', level=4, tags=['example'])
 
 #+RESULTS:
 :RESULTS:
-# Out[24]:
+# Out[8]:
 #+BEGIN_EXPORT html
 <h4>A level 4 headline</h4>
 #+END_EXPORT
@@ -858,10 +878,8 @@ Heading('A level 4 headline', level=4, tags=['example'])
 # text/org
 **** A level 4 headline  :example:
 
-
-# text/plain
-: <__main__.Heading at 0x113e49a90>
 :END:
+
 
 
 Now you can probably see the possibilities for building up documents with Python code that can be converted to org-mode, html, etc...
@@ -901,20 +919,20 @@ FlotPlot(x, np.sin(x))
 
 #+RESULTS:
 :RESULTS:
-# Out[18]:
+# Out[9]:
 #+BEGIN_EXPORT html
-<div id="602c25be-b0ce-4a00-836c-1332b50f5e65" style="height: 300px; width:80%;"></div>
+<div id="ae2fe59a-87ea-4502-9a03-83ee85c6a8b3" style="height: 300px; width:80%;"></div>
 #+END_EXPORT
 
 # application/javascript
 #+BEGIN_SRC javascript
 
         require(["//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"], function() {
-          var line = JSON.parse("[[0.0, 0.0], [0.20408163265306123, 0.20266793654820095], [0.40816326530612246, 0.39692414892492234], [0.6122448979591837, 0.5747060412161791], [0.8163265306122449, 0.7286347834693503], [1.0204081632653061, 0.8523215697196184], [1.2244897959183674, 0.9406327851124867], [1.4285714285714286, 0.9899030763721239], [1.6326530612244898, 0.9980874821347183], [1.836734693877551, 0.9648463089837632], [2.0408163265306123, 0.8915592304110037], [2.2448979591836737, 0.7812680235262639], [2.4489795918367347, 0.6385503202266021], [2.6530612244897958, 0.469329612777201], [2.857142857142857, 0.28062939951435684], [3.0612244897959187, 0.0802816748428135], [3.2653061224489797, -0.12339813736217871], [3.4693877551020407, -0.3219563150726187], [3.673469387755102, -0.5071517094845144], [3.8775510204081636, -0.6712977935519321], [4.081632653061225, -0.8075816909683364], [4.285714285714286, -0.9103469443107828], [4.4897959183673475, -0.9753282860670456], [4.6938775510204085, -0.9998286683840896], [4.8979591836734695, -0.9828312039256306], [5.1020408163265305, -0.9250413717382029], [5.3061224489795915, -0.8288577363730427], [5.510204081632653, -0.6982723955653996], [5.714285714285714, -0.5387052883861563], [5.918367346938775, -0.35677924089893803], [6.122448979591837, -0.16004508604325057], [6.326530612244898, 0.04333173336868346], [6.530612244897959, 0.2449100710119793], [6.73469387755102, 0.4363234264718193], [6.938775510204081, 0.6096271964908323], [7.142857142857143, 0.7576284153927202], [7.346938775510204, 0.8741842988197335], [7.551020408163265, 0.9544571997387519], [7.755102040816327, 0.9951153947776636], [7.959183673469388, 0.9944713672636168], [8.16326530612245, 0.9525518475314604], [8.36734693877551, 0.8710967034823207], [8.571428571428571, 0.7534867274396376], [8.775510204081632, 0.6046033165061543], [8.979591836734695, 0.43062587038273736], [9.183673469387756, 0.23877531564403087], [9.387755102040817, 0.03701440148506237], [9.591836734693878, -0.1662827938487564], [9.795918367346939, -0.3626784288265488], [10.0, -0.5440211108893699]]");
+          var line = JSON.parse("[[0.0, 0.0], [0.20408163265306123, 0.20266793654820095], [0.40816326530612246, 0.39692414892492234], [0.6122448979591837, 0.5747060412161792], [0.8163265306122449, 0.7286347834693504], [1.0204081632653061, 0.8523215697196184], [1.2244897959183674, 0.9406327851124867], [1.4285714285714286, 0.9899030763721239], [1.6326530612244898, 0.9980874821347183], [1.836734693877551, 0.9648463089837632], [2.0408163265306123, 0.8915592304110037], [2.2448979591836737, 0.7812680235262638], [2.4489795918367347, 0.6385503202266021], [2.6530612244897958, 0.469329612777201], [2.857142857142857, 0.28062939951435684], [3.0612244897959187, 0.0802816748428135], [3.2653061224489797, -0.12339813736217871], [3.4693877551020407, -0.3219563150726187], [3.673469387755102, -0.5071517094845144], [3.8775510204081636, -0.6712977935519321], [4.081632653061225, -0.8075816909683363], [4.285714285714286, -0.9103469443107828], [4.4897959183673475, -0.9753282860670456], [4.6938775510204085, -0.9998286683840896], [4.8979591836734695, -0.9828312039256306], [5.1020408163265305, -0.9250413717382029], [5.3061224489795915, -0.8288577363730427], [5.510204081632653, -0.6982723955653996], [5.714285714285714, -0.5387052883861563], [5.918367346938775, -0.3567792408989381], [6.122448979591837, -0.16004508604325057], [6.326530612244898, 0.04333173336868346], [6.530612244897959, 0.2449100710119793], [6.73469387755102, 0.4363234264718193], [6.938775510204081, 0.6096271964908323], [7.142857142857143, 0.7576284153927202], [7.346938775510204, 0.8741842988197335], [7.551020408163265, 0.9544571997387519], [7.755102040816327, 0.9951153947776636], [7.959183673469388, 0.9944713672636168], [8.16326530612245, 0.9525518475314604], [8.36734693877551, 0.8710967034823207], [8.571428571428571, 0.7534867274396376], [8.775510204081632, 0.6046033165061543], [8.979591836734695, 0.4306258703827373], [9.183673469387756, 0.23877531564403087], [9.387755102040817, 0.03701440148506237], [9.591836734693878, -0.1662827938487564], [9.795918367346939, -0.3626784288265488], [10.0, -0.5440211108893698]]");
           console.log(line);
-          $.plot("#602c25be-b0ce-4a00-836c-1332b50f5e65", [line]);
+          $.plot("#ae2fe59a-87ea-4502-9a03-83ee85c6a8b3", [line]);
         });
-
+        
 #+END_SRC
 :END:
 
@@ -948,7 +966,7 @@ df
 
 #+RESULTS:
 :RESULTS:
-# Out[19]:
+# Out[10]:
 # text/org
 | indexname | widecolumn |
 |-----------+------------|
@@ -965,15 +983,15 @@ df2
 
 #+RESULTS:
 :RESULTS:
-# Out[20]:
+# Out[11]:
 # text/org
 |   | a | b | c | d | e |
 |---+---+---+---+---+---|
-| 0 | 8 | 5 | 5 | 3 | 5 |
-| 1 | 4 | 7 | 7 | 7 | 7 |
-| 2 | 6 | 6 | 7 | 1 | 5 |
-| 3 | 9 | 1 | 9 | 8 | 5 |
-| 4 | 9 | 2 | 9 | 5 | 3 |
+| 0 | 3 | 8 | 9 | 8 | 3 |
+| 1 | 6 | 3 | 5 | 8 | 6 |
+| 2 | 4 | 5 | 3 | 1 | 3 |
+| 3 | 3 | 5 | 0 | 6 | 1 |
+| 4 | 4 | 0 | 6 | 8 | 4 |
 :END:
 
 ** Other languages
@@ -999,9 +1017,11 @@ Now we can use it in scimax. This is already pre-configured in scimax. For fun, 
 #+END_SRC
 
 #+RESULTS:
-: # Out[1]:
+: # Out[2]:
 : # output
 : : 5
+
+There is a little issue with the double colon on output, but otherwise it looks like it works.
 
 This kernel is a little quieter on exceptions than I would like, but still it could be useful if you want to play around with hylang and document your work.
 

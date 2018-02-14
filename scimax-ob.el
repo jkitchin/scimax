@@ -67,10 +67,16 @@ With a prefix BELOW move point to lower block."
 
 
 (defun scimax-execute-and-next-block ()
-  "Execute this block and either jump to the next one, or add a new one."
+  "Execute this block and either jump to the next ipython block, or add a new one."
   (interactive)
   (org-babel-execute-src-block)
-  (let ((next-block (ignore-errors (save-excursion (org-babel-next-src-block)))))
+  ;; we ignore-errors here because when there is no next block it is a
+  ;; user-error, not nil.
+  (let ((next-block (ignore-errors (save-excursion
+				     (catch 'block
+				       (while (setq next-block (org-babel-next-src-block))
+					 (when (string= "ipython" (org-element-property :language (org-element-context)))
+					   (throw 'block next-block))))))))
     (if next-block
 	(goto-char (match-beginning 0))
       (scimax-insert-src-block t))))
