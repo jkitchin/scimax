@@ -31,7 +31,9 @@
     (text/org . ob-ipython-format-text/org)
     (image/png . ob-ipython-format-image/png)
     (image/svg+xml . ob-ipython-format-image/svg+xml)
-    (application/javascript . ob-ipython-format-application/javascript))
+    (application/javascript . ob-ipython-format-application/javascript)
+    (default . ob-ipython-format-default)
+    (output . ob-ipython-format-output))
   "An alist of (mime-type . format-func) for mime-types.
 Each function takes two arguments, which is file-or-nil and a
 string to be formatted."
@@ -258,6 +260,7 @@ variables, etc."
   "Execute a block of IPython code with Babel.
 This function is called by `org-babel-execute-src-block'."
 
+  ;; TODO: how to deal with user named sessions and unique?
   (when ob-ipython-buffer-unique-kernel
     ;; Use buffer local variables for this.
     (make-local-variable 'org-babel-default-header-args:ipython)
@@ -278,9 +281,7 @@ This function is called by `org-babel-execute-src-block'."
   (ob-ipython--clear-output-buffer)
   ;; scimax feature to restart
   (when (assoc :restart params)
-    (let ((session (if-let (bf (buffer-file-name))
-		       (md5 (expand-file-name bf))
-		     "scratch")))
+    (let ((session (cdr (assoc :session (third (org-babel-get-src-block-info))))))
       (ob-ipython-kill-kernel
        (cdr (assoc session
 		   (ob-ipython--get-kernel-processes))))
@@ -359,6 +360,17 @@ This function is called by `org-babel-execute-src-block'."
       (ob-ipython--process-response ret file result-type))))
 
 
+(defun ob-ipython-format-output (file-or-nil output)
+  "Format OUTPUT as a result.
+This adds : to the beginning so the output will export as
+verbatim text. FILE-OR-NIL is not used, and is here for
+compatibility with the other formatters."
+  (when (not (string= "" output))
+    (s-join "\n"
+  	    (mapcar (lambda (s)
+  		      (s-concat ": " s))
+  		    (s-split "\n" output t)))))
+
 
 ;; This gives me the output I want. Note I changed this to process one result at
 ;; a time instead of passing all the results to `ob-ipython--render.
@@ -372,13 +384,9 @@ This function is called by `org-babel-execute-src-block'."
 	 ""
        (format "# Out[%d]:\n" (cdr (assoc :exec-count ret))))
      (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
-     (when (not (string= "" output)) output)
+     (ob-ipython-format-output nil output)
+     ;; I process the outputs one at a time here.
      (s-join "\n\n" (loop for (type . value) in (append value display)
-			  do
-			  (message "Rendering %s" (cons type (cond
-							      ((eq type 'image/png)
-							       "<img data>")
-							      (t value))))
 			  collect
 			  (ob-ipython--render file (list (cons type value))))))))
 
@@ -452,6 +460,15 @@ FILE-OR-NIL is not used in this function."
 	  (if ob-ipython-show-mime-types "# application/javascript\n" "")
 	  value))
 
+(defun ob-ipython-format-default (file-or-nil value)
+  "Default formatter to format VALUE.
+This is used for mime-types that don't have a formatter already
+defined. FILE-OR-NIL is not used in this function."
+  (format "%s%s" (if ob-ipython-show-mime-types
+		     (format "\n# %s\n: " (caar values))
+		   ": ")
+	  (cdar values)))
+
 
 (defun ob-ipython--render (file-or-nil values)
   "VALUES is a list of (mime-type . value).
@@ -464,10 +481,9 @@ way, but I have left it in for compatibility."
     (if format-func
 	(funcall format-func file-or-nil (cdar values))
       ;; fall-through
-      (format "%s%s" (if ob-ipython-show-mime-types
-			 (format "\n# %s\n: " (caar values))
-		       ": ")
-	      (cdar values)))))
+      (funcall
+       (cdr (assoc 'default ob-ipython-mime-formatters))
+       (cdar values)))))
 
 
 ;; ** Better exceptions

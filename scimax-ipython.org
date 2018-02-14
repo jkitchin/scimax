@@ -31,8 +31,7 @@ a + 5
 :RESULTS:
 # Out[1]:
 # output
-5
-
+: 5
 # text/plain
 : 60
 :END:
@@ -88,23 +87,22 @@ print('x .dot. y = {}'.format(x @ y))
 
 #+RESULTS:
 :RESULTS:
-# Out[9]:
+# Out[2]:
 # output
-Length of t = 350
-x .dot. y = 1.3598389888491538
-
+: Length of t = 350
+: x .dot. y = 1.3598389888491538
 # text/plain
-: <matplotlib.figure.Figure at 0x10a041748>
+: <matplotlib.figure.Figure at 0x10453c048>
 
 # image/png
-[[file:./obipy-resources/74518C0e.png]]
+[[file:./obipy-resources/94020sJV.png]]
 
 
 # text/plain
-: <matplotlib.figure.Figure at 0x10da459e8>
+: <matplotlib.figure.Figure at 0x102166828>
 
 # image/png
-[[file:./obipy-resources/74518P-k.png]]
+[[file:./obipy-resources/940205Tb.png]]
 :END:
 
 ** Fine tune the output
@@ -116,12 +114,12 @@ from sympy import *
 init_printing()
 x, y, z = symbols('x y z')
 
-Integral(sqrt(1/x), x)
+Integral(sqrt(1 / x), x)
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-# Out[10]:
+# Out[3]:
 # text/plain
 #+BEGIN_EXAMPLE
   ⌠
@@ -133,7 +131,7 @@ Integral(sqrt(1/x), x)
 #+END_EXAMPLE
 
 # image/png
-[[file:./obipy-resources/74518cIr.png]]
+[[file:./obipy-resources/94020Geh.png]]
 
 # text/latex
 #+BEGIN_EXPORT latex
@@ -149,9 +147,9 @@ Integral(sqrt(1/x), x)
 
 #+RESULTS:
 :RESULTS:
-# Out[11]:
+# Out[4]:
 # image/png
-[[file:./obipy-resources/74518pSx.png]]
+[[file:./obipy-resources/94020Ton.png]]
 :END:
 
 I have not added an exclude feature, but it would not be hard to. Unfortunately, it is not yet possible to control the order these come out in, or to do things like add captions or size information to the images.
@@ -166,14 +164,12 @@ print(1 / 0)
 
 #+RESULTS:
 :RESULTS:
-# Out[12]:
+# Out[5]:
 # output
-
-ZeroDivisionErrorTraceback (most recent call last)
-<ipython-input-12-3ec96714f820> in <module>()
-----> 1 print(1 / 0)
-
-ZeroDivisionError: division by zero
+: ZeroDivisionErrorTraceback (most recent call last)
+: <ipython-input-5-3ec96714f820> in <module>()
+: ----> 1 print(1 / 0)
+: ZeroDivisionError: division by zero
 :END:
 
 If you like an exception buffer, set this variable like this:
@@ -207,13 +203,13 @@ print('done')
 
 #+RESULTS:
 :RESULTS:
-# Out[13]:
+# Out[6]:
 # output
-0
-1
-2
-3
-done
+: 0
+: 1
+: 2
+: 3
+: done
 :END:
 
 You will see another buffer pop up with intermediate results, and they will be put back in the results when it is done.
@@ -321,11 +317,26 @@ ipython/org-mode really shines when you start leveraging rich outputs from Ipyth
 This variable maps mime-types to formatting functions. You can add new mime-types to this, or redefine the formatting functions if you don't like the way the work.
 
 #+BEGIN_SRC emacs-lisp
-ob-ipython-mime-formatters
+(append '(("mime-type" "formatting function"))
+	'(hline)
+	(loop for (mime-type . func) in ob-ipython-mime-formatters
+	      collect (list mime-type func)))
 #+END_SRC
 
 #+RESULTS:
-: ((text/plain . ob-ipython-format-text/plain) (text/html . ob-ipython-format-text/html) (text/latex . ob-ipython-format-text/latex) (text/org . ob-ipython-format-text/org) (image/png . ob-ipython-format-image/png) (image/svg+xml . ob-ipython-format-image/svg+xml) (application/javascript . ob-ipython-format-application/javascript))
+| mime-type              | formatting function                      |
+|------------------------+------------------------------------------|
+| text/plain             | ob-ipython-format-text/plain             |
+| text/html              | ob-ipython-format-text/html              |
+| text/latex             | ob-ipython-format-text/latex             |
+| text/org               | ob-ipython-format-text/org               |
+| image/png              | ob-ipython-format-image/png              |
+| image/svg+xml          | ob-ipython-format-image/svg+xml          |
+| application/javascript | ob-ipython-format-application/javascript |
+| default                | ob-ipython-format-default                |
+| output                 | ob-ipython-format-output                 |
+
+You can set these to whatever you want, and add new ones for new mimetypes.
 
 *** Better representations of Polynomial objects
 
@@ -339,7 +350,7 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[3]:
+# Out[7]:
 
 # text/plain
 : Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
@@ -376,7 +387,7 @@ latex_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[4]:
+# Out[8]:
 :END:
 
 #+BEGIN_SRC ipython
@@ -385,7 +396,7 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[6]:
+# Out[9]:
 
 # text/plain
 : Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
@@ -425,7 +436,7 @@ png_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[7]:
+# Out[10]:
 :END:
 
 Now, we can easily see the formula and shape of this polynomial in a graphical form.
@@ -436,9 +447,9 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[8]:
+# Out[11]:
 # image/png
-[[file:./obipy-resources/2217954rM.png]]
+[[file:./obipy-resources/94020gyt.png]]
 :END:
 
 Most likely you would not put all this code into a document like this, but would instead put it in a Python library you import. The point here is to show what can be done with that, and once it is done, you get easy visualization of objects.
@@ -470,7 +481,7 @@ svg_f.for_type_by_name('tensorflow.python.framework.ops',
 
   #+RESULTS:
   :RESULTS:
-  # Out[19]:
+  # Out[12]:
   :END:
 
   #+BEGIN_SRC ipython
@@ -488,13 +499,13 @@ g
 
   #+RESULTS:
   :RESULTS:
-  # Out[20]:
+  # Out[13]:
 
   # text/plain
-  : <tensorflow.python.framework.ops.Graph at 0x114dbf0f0>
+  : <tensorflow.python.framework.ops.Graph at 0x10f300828>
 
   # image/svg
-  [[file:./obipy-resources/74518omG.svg]]
+  [[file:./obipy-resources/94020t8z.svg]]
   :END:
 
 Now we have a record of what the graph looks like. Ez peezy.
@@ -504,7 +515,6 @@ Now we have a record of what the graph looks like. Ez peezy.
  The Jupyter notebook does really shine for JavaScript driven interactive data exploration. For now, the only option for Emacs is to open external programs for this, e.g. a matplotlib figure, or a browser. [[https://bokeh.pydata.org/en/latest/][Bokeh]] is a really interesting interactive plotting library you can use in Python, but it makes interactive html documents for viewing in a browser. Here we will adapt the outputs to show us a thumbnail and org-link to open the html file. This is yet another example of registering a type in Ipython.
 
  Here we modify the plain text output so that it saves an html file, and returns a link to it.
-
 
 #+BEGIN_SRC ipython  :display text/org image/png :async
 import IPython
@@ -615,12 +625,12 @@ p
 
  #+RESULTS:
  :RESULTS:
- # Out[21]:
+ # Out[14]:
  # image/png
- [[file:./obipy-resources/745181wM.png]]
+ [[file:./obipy-resources/94020fGD.png]]
 
  # text/org
- [[/var/folders/5q/lllv2yf95hg_n6h6kjttbmdw0000gn/T/tmpdyk61brt.html]]
+ [[/var/folders/5q/lllv2yf95hg_n6h6kjttbmdw0000gn/T/tmppcwe873d.html]]
  :END:
 
 *** Customizing a class output with _repr_*_ methods
@@ -671,7 +681,7 @@ class Gaussian(object):
 
 #+RESULTS:
 :RESULTS:
-# Out[9]:
+# Out[15]:
 :END:
 
 #+BEGIN_SRC ipython
@@ -680,13 +690,13 @@ Gaussian()
 
 #+RESULTS:
 :RESULTS:
-# Out[10]:
+# Out[16]:
 
 # text/plain
-: <__main__.Gaussian at 0x7fcaccb56940>
+: <__main__.Gaussian at 0x181e2ae940>
 
 # image/png
-[[file:./obipy-resources/222653SnX.png]]
+[[file:./obipy-resources/94020sQJ.png]]
 
 # text/latex
 #+BEGIN_EXPORT latex
@@ -733,7 +743,7 @@ class Heading(object):
 
  #+RESULTS:
  :RESULTS:
- # Out[22]:
+ # Out[17]:
  :END:
 
  Now, you can construct headings in iPython, and get different outputs that might be suitable for different purposes.
@@ -795,25 +805,25 @@ FlotPlot(x, np.sin(x))
 
 #+RESULTS:
 :RESULTS:
-# Out[23]:
+# Out[18]:
 #+BEGIN_EXPORT html
-<div id="f5b1e514-f3f3-48bb-a813-ef031f2ee21c" style="height: 300px; width:80%;"></div>
+<div id="602c25be-b0ce-4a00-836c-1332b50f5e65" style="height: 300px; width:80%;"></div>
 #+END_EXPORT
 
 # application/javascript
 #+BEGIN_SRC javascript
 
         require(["//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"], function() {
-          var line = JSON.parse("[[0.0, 0.0], [0.20408163265306123, 0.20266793654820095], [0.40816326530612246, 0.39692414892492234], [0.6122448979591837, 0.5747060412161792], [0.8163265306122449, 0.7286347834693504], [1.0204081632653061, 0.8523215697196184], [1.2244897959183674, 0.9406327851124867], [1.4285714285714286, 0.9899030763721239], [1.6326530612244898, 0.9980874821347183], [1.836734693877551, 0.9648463089837632], [2.0408163265306123, 0.8915592304110037], [2.2448979591836737, 0.7812680235262638], [2.4489795918367347, 0.6385503202266021], [2.6530612244897958, 0.469329612777201], [2.857142857142857, 0.28062939951435684], [3.0612244897959187, 0.0802816748428135], [3.2653061224489797, -0.12339813736217871], [3.4693877551020407, -0.3219563150726187], [3.673469387755102, -0.5071517094845144], [3.8775510204081636, -0.6712977935519321], [4.081632653061225, -0.8075816909683363], [4.285714285714286, -0.9103469443107828], [4.4897959183673475, -0.9753282860670456], [4.6938775510204085, -0.9998286683840896], [4.8979591836734695, -0.9828312039256306], [5.1020408163265305, -0.9250413717382029], [5.3061224489795915, -0.8288577363730427], [5.510204081632653, -0.6982723955653996], [5.714285714285714, -0.5387052883861563], [5.918367346938775, -0.3567792408989381], [6.122448979591837, -0.16004508604325057], [6.326530612244898, 0.04333173336868346], [6.530612244897959, 0.2449100710119793], [6.73469387755102, 0.4363234264718193], [6.938775510204081, 0.6096271964908323], [7.142857142857143, 0.7576284153927202], [7.346938775510204, 0.8741842988197335], [7.551020408163265, 0.9544571997387519], [7.755102040816327, 0.9951153947776636], [7.959183673469388, 0.9944713672636168], [8.16326530612245, 0.9525518475314604], [8.36734693877551, 0.8710967034823207], [8.571428571428571, 0.7534867274396376], [8.775510204081632, 0.6046033165061543], [8.979591836734695, 0.4306258703827373], [9.183673469387756, 0.23877531564403087], [9.387755102040817, 0.03701440148506237], [9.591836734693878, -0.1662827938487564], [9.795918367346939, -0.3626784288265488], [10.0, -0.5440211108893698]]");
+          var line = JSON.parse("[[0.0, 0.0], [0.20408163265306123, 0.20266793654820095], [0.40816326530612246, 0.39692414892492234], [0.6122448979591837, 0.5747060412161791], [0.8163265306122449, 0.7286347834693503], [1.0204081632653061, 0.8523215697196184], [1.2244897959183674, 0.9406327851124867], [1.4285714285714286, 0.9899030763721239], [1.6326530612244898, 0.9980874821347183], [1.836734693877551, 0.9648463089837632], [2.0408163265306123, 0.8915592304110037], [2.2448979591836737, 0.7812680235262639], [2.4489795918367347, 0.6385503202266021], [2.6530612244897958, 0.469329612777201], [2.857142857142857, 0.28062939951435684], [3.0612244897959187, 0.0802816748428135], [3.2653061224489797, -0.12339813736217871], [3.4693877551020407, -0.3219563150726187], [3.673469387755102, -0.5071517094845144], [3.8775510204081636, -0.6712977935519321], [4.081632653061225, -0.8075816909683364], [4.285714285714286, -0.9103469443107828], [4.4897959183673475, -0.9753282860670456], [4.6938775510204085, -0.9998286683840896], [4.8979591836734695, -0.9828312039256306], [5.1020408163265305, -0.9250413717382029], [5.3061224489795915, -0.8288577363730427], [5.510204081632653, -0.6982723955653996], [5.714285714285714, -0.5387052883861563], [5.918367346938775, -0.35677924089893803], [6.122448979591837, -0.16004508604325057], [6.326530612244898, 0.04333173336868346], [6.530612244897959, 0.2449100710119793], [6.73469387755102, 0.4363234264718193], [6.938775510204081, 0.6096271964908323], [7.142857142857143, 0.7576284153927202], [7.346938775510204, 0.8741842988197335], [7.551020408163265, 0.9544571997387519], [7.755102040816327, 0.9951153947776636], [7.959183673469388, 0.9944713672636168], [8.16326530612245, 0.9525518475314604], [8.36734693877551, 0.8710967034823207], [8.571428571428571, 0.7534867274396376], [8.775510204081632, 0.6046033165061543], [8.979591836734695, 0.43062587038273736], [9.183673469387756, 0.23877531564403087], [9.387755102040817, 0.03701440148506237], [9.591836734693878, -0.1662827938487564], [9.795918367346939, -0.3626784288265488], [10.0, -0.5440211108893699]]");
           console.log(line);
-          $.plot("#f5b1e514-f3f3-48bb-a813-ef031f2ee21c", [line]);
+          $.plot("#602c25be-b0ce-4a00-836c-1332b50f5e65", [line]);
         });
 
 #+END_SRC
 :END:
 
 *** Pandas in org-mode
-    
+
 Just for fun, here is a way to get Pandas dataframes to be displayed as org-mode tables using tabulate (https://pypi.python.org/pypi/tabulate). This is adapted from https://github.com/gregsexton/ob-ipython. tabulate has a built-in org formatter, so no reason to reinvent that!
 
 #+BEGIN_SRC ipython :display text/org
@@ -842,15 +852,7 @@ df
 
 #+RESULTS:
 :RESULTS:
-# Out[3]:
-# text/plain
-#+BEGIN_EXAMPLE
-             widecolumn
-  indexname            
-  0                   1
-  1                   2
-#+END_EXAMPLE
-
+# Out[19]:
 # text/org
 | indexname | widecolumn |
 |-----------+------------|
@@ -860,22 +862,22 @@ df
 
 #+BEGIN_SRC ipython :display text/org
 import numpy as np
-df2 = pd.DataFrame(np.random.randint(low=0, high=10, size=(5, 5)), 
+df2 = pd.DataFrame(np.random.randint(low=0, high=10, size=(5, 5)),
                    columns=['a', 'b', 'c', 'd', 'e'])
 df2
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-# Out[4]:
+# Out[20]:
 # text/org
 |   | a | b | c | d | e |
 |---+---+---+---+---+---|
-| 0 | 7 | 3 | 2 | 5 | 5 |
-| 1 | 5 | 1 | 2 | 7 | 4 |
-| 2 | 1 | 9 | 3 | 7 | 4 |
-| 3 | 8 | 3 | 5 | 3 | 9 |
-| 4 | 9 | 0 | 8 | 3 | 1 |
+| 0 | 8 | 5 | 5 | 3 | 5 |
+| 1 | 4 | 7 | 7 | 7 | 7 |
+| 2 | 6 | 6 | 7 | 1 | 5 |
+| 3 | 9 | 1 | 9 | 8 | 5 |
+| 4 | 9 | 2 | 9 | 5 | 3 |
 :END:
 
 ** Other languages
@@ -888,7 +890,7 @@ python -m calysto_hy install --user
 #+END_SRC
 
 
-Now we can use it in scimax. This is already pre-configured in scimax. For fun, we use
+Now we can use it in scimax. This is already pre-configured in scimax. For fun, we use hylang here.
 
 #+BEGIN_SRC jupyter-hy
 (import [tensorflow :as tf])
@@ -903,7 +905,7 @@ Now we can use it in scimax. This is already pre-configured in scimax. For fun, 
 #+RESULTS:
 : # Out[1]:
 : # output
-: 5
+: : 5
 
 This kernel is a little quieter on exceptions than I would like, but still it could be useful if you want to play around with hylang and document your work.
 
@@ -1021,7 +1023,7 @@ b = 6
 :RESULTS:
 # Out[2]:
 # output
-7
+: 7
 :END:
 
 You can see from  the output that we successfully connected to the kernel and that indeed a=7. Furthermore, in the block above we assigned b=6, and in the terminal I can type "b" and see that it is equal to 6.
@@ -1067,28 +1069,27 @@ If you have a lot of blocks in your buffer, you can use a file property like thi
 
   #+RESULTS:
   :RESULTS:
-  # Out[6]:
+  # Out[1]:
   # output
-  {
-    "shell_port": 57257,
-    "iopub_port": 60990,
-    "stdin_port": 37898,
-    "control_port": 42607,
-    "hb_port": 55863,
-    "ip": "127.0.0.1",
-    "key": "26515aec-de8fd6f55cf49bf8b1f38f3c",
-    "transport": "tcp",
-    "signature_scheme": "hmac-sha256",
-    "kernel_name": ""
-  }
-
-  Paste the above JSON into a file, and connect with:
-      $> jupyter <app> --existing <file>
-  or, if you are local, you can connect with just:
-      $> jupyter <app> --existing emacs-session-1.json
-  or even just:
-      $> jupyter <app> --existing
-  if this is the most recent Jupyter kernel you have started.
+  : {
+  :   "shell_port": 53176,
+  :   "iopub_port": 53177,
+  :   "stdin_port": 53178,
+  :   "control_port": 53179,
+  :   "hb_port": 53180,
+  :   "ip": "127.0.0.1",
+  :   "key": "9ca2bee6-d376cb996e2e9daa86d0bb56",
+  :   "transport": "tcp",
+  :   "signature_scheme": "hmac-sha256",
+  :   "kernel_name": ""
+  : }
+  : Paste the above JSON into a file, and connect with:
+  :     $> jupyter <app> --existing <file>
+  : or, if you are local, you can connect with just:
+  :     $> jupyter <app> --existing emacs-session-1.json
+  : or even just:
+  :     $> jupyter <app> --existing
+  : if this is the most recent Jupyter kernel you have started.
   :END:
 
 *** Session 2
@@ -1098,7 +1099,7 @@ If you have a lot of blocks in your buffer, you can use a file property like thi
 
  Every block in this heading will use the kernel associated with session-2. You can see here it uses different ports than session-1 does. They are both running at the same time though.
 
-  #+BEGIN_SRC ipython
+  #+BEGIN_SRC ipython :restart
 %connect_info
   #+END_SRC
 
@@ -1106,24 +1107,23 @@ If you have a lot of blocks in your buffer, you can use a file property like thi
   :RESULTS:
   # Out[1]:
   # output
-  {
-    "shell_port": 46039,
-    "iopub_port": 41366,
-    "stdin_port": 46391,
-    "control_port": 42453,
-    "hb_port": 54666,
-    "ip": "127.0.0.1",
-    "key": "580f8b50-4b846ca056cbe83b8027ddbe",
-    "transport": "tcp",
-    "signature_scheme": "hmac-sha256",
-    "kernel_name": ""
-  }
-
-  Paste the above JSON into a file, and connect with:
-      $> jupyter <app> --existing <file>
-  or, if you are local, you can connect with just:
-      $> jupyter <app> --existing emacs-session-2.json
-  or even just:
-      $> jupyter <app> --existing
-  if this is the most recent Jupyter kernel you have started.
+  : {
+  :   "shell_port": 53250,
+  :   "iopub_port": 53251,
+  :   "stdin_port": 53252,
+  :   "control_port": 53367,
+  :   "hb_port": 53254,
+  :   "ip": "127.0.0.1",
+  :   "key": "69967886-eb9ef7c6584aafbfd8ca5ffc",
+  :   "transport": "tcp",
+  :   "signature_scheme": "hmac-sha256",
+  :   "kernel_name": ""
+  : }
+  : Paste the above JSON into a file, and connect with:
+  :     $> jupyter <app> --existing <file>
+  : or, if you are local, you can connect with just:
+  :     $> jupyter <app> --existing emacs-session-2.json
+  : or even just:
+  :     $> jupyter <app> --existing
+  : if this is the most recent Jupyter kernel you have started.
   :END:
