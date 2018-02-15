@@ -366,15 +366,16 @@ This function is called by `org-babel-execute-src-block'."
 	  (files '())
 	  ;; This matches automatic file generation
 	  (fregex "\\[\\[file:\\(./obipy-resources/.*\\)\\]\\]"))
-      (with-temp-buffer
-	(insert result-string)
-	(goto-char (point-min))
-	(while (re-search-forward fregex nil t)
-	  (push (match-string 1) files)))
-      (mapc (lambda (f)
-	      (when (f-exists? f)
-		(f-delete f)))
-	    files)))
+      (when result-string
+	(with-temp-buffer
+	  (insert result-string)
+	  (goto-char (point-min))
+	  (while (re-search-forward fregex nil t)
+	    (push (match-string 1) files)))
+	(mapc (lambda (f)
+		(when (f-exists? f)
+		  (f-delete f)))
+	      files))))
   (org-babel-remove-result)
 
   ;; scimax feature to restart
