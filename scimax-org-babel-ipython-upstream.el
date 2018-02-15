@@ -231,7 +231,7 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   "Run the command selected from `ob-ipython-menu'."
   (interactive "e")
   (call-interactively
-   (or (car (x-popup-menu t ob-ipython-menu))
+   (or (popup-menu ob-ipython-menu)
        'ignore)))
 
 ;; * Execution functions
