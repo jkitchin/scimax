@@ -230,10 +230,10 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
 (add-hook 'org-mode-hook 'ob-ipython-org-menu)
 
 (defun scimax-ob-ipython-popup-command (event)
-  "Run the command selected from `ob-ipython-menu'."
+  "Popu a menu of actions for src blocks."
   (interactive "e")
   (call-interactively
-   (or (popup-menu ob-ipython-menu)
+   (or (popup-menu (append '("ob-ipython") ob-ipython-menu-items))
        'ignore)))
 
 ;; * Execution functions
