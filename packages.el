@@ -75,6 +75,7 @@
   ;; I am not currently using this, and it loads a bunch of files on startup.
   :disabled t)
 
+(use-package button-lock)
 
 ;; Potential for commandline scripts using emacs
 (use-package commander
