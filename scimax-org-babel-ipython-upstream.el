@@ -1,4 +1,4 @@
-;;; scimax-org-babel-ipython-upstream.el --- Modifications to the upstream ob-ipython module
+;;; scimax-org-babel-ipython-upstream.el --- Modifications to the upstream ob-ipython module -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; This file contains monkey patches and enhancements to the upstream ob-ipython
