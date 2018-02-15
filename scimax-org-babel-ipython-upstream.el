@@ -91,8 +91,9 @@ string to be formatted."
     ;; Miscellaneous
     ("H-/" . #'ob-ipython-inspect)
 
-    ;; The hydra
-    ("H-s" . #'scimax-obi/body))
+    ;; The hydra/popup menu
+    ("H-s" . #'scimax-obi/body)
+    ("<mouse-3>" . #'scimax-ob-ipython-popup-command))
   "An alist of key bindings and commands."
   :group 'ob-ipython)
 
@@ -100,6 +101,35 @@ string to be formatted."
 (cl-loop for cell in ob-ipython-key-bindings
 	 do
 	 (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell))))
+
+(defcustom ob-ipython-menu-items
+  '(("Execute"
+     ["Current block" org-ctrl-c-ctrl-c t]
+     ["Current and next" scimax-execute-and-next-block t]
+     ["To point" scimax-execute-to-point t]
+     ["Restart/block" scimax-ob-ipython-restart-kernel-execute-block t]
+     ["Restart/to point" scimax-restart-ipython-and-execute-to-point t]
+     ["Restart/buffer" scimax-ob-ipython-restart-kernel-execute-buffer t])
+    ("Edit"
+     ["Move block up" scimax-ob-move-src-block-up t]
+     ["Move block down" scimax-ob-move-src-block-down t]
+     ["Kill block" scimax-ob-kill-block-and-results t]
+     ["Copy block" scimax-ob-copy-block-and-results t]
+     ["Clone block" scimax-ob-clone-block t]
+     ["Split block" scimax-split-src-block t]
+     ["Clear result" org-babel-remove-result t]
+     ["Edit header" scimax-ob-edit-header t]
+     )
+    ("Navigate"
+     ["Previous block" org-babel-previous-src-block t]
+     ["Next block" org-babel-next-src-block t]
+     ["Jump to visible block" scimax-jump-to-visible-block t]
+     ["Jump to block" scimax-jump-to-block t])
+    ["Inspect" ob-ipython-inspect t]
+    ["Kill kernel" scimax-ob-ipython-kill-kernel t]
+    ["Switch to repl" org-babel-switch-to-session t])
+  "Items for the menu bar and popup menu."
+  :group 'ob-ipython)
 
 
 ;; * org templates and default header args
@@ -183,6 +213,27 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   ("/" ob-ipython-inspect))
 
 
+;; * A context menu
+
+(define-prefix-command 'scimax-ob-ipython-mode-map)
+
+(easy-menu-define ob-ipython-menu scimax-ob-ipython-mode-map "ob-ipython menu"
+  ob-ipython-menu-items)
+
+(defun ob-ipython-org-menu ()
+  "Add the ob-ipython menu to the Org menu."
+  (easy-menu-change '("Org") "ob-ipython" ob-ipython-menu-items "Show/Hide")
+  (easy-menu-change '("Org") "--" nil "Show/Hide"))
+
+(add-hook 'org-mode-hook 'ob-ipython-org-menu)
+
+(defun scimax-ob-ipython-popup-command (event)
+  "Run the command selected from `ob-ipython-menu'."
+  (interactive "e")
+  (call-interactively
+   (or (car (x-popup-menu t ob-ipython-menu))
+       'ignore)))
+
 ;; * Execution functions
 
 (defun scimax-ob-ipython-restart-kernel-execute-block ()
