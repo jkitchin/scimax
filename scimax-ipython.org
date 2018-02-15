@@ -291,6 +291,22 @@ You can define/change any binding you want like this. They are only active in ip
 (scimax-define-src-key ipython "H-/" #'some-command)
 #+END_SRC
 
+** Clickable buttons in src blocks
+   
+Jupyter has some nice features like buttons to click on to run a block. We have something like that. The text in angle brackets in the comment below is clickable!
+
+#+BEGIN_SRC ipython
+# <run>  <restart and run>  <repl>
+6 * 2
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[1]:
+# text/plain
+: 12
+:END:
+
 ** Unique kernel per org file is default
 
 By default, each org file gets a unique kernel. I am sure there is a use case for every buffer sharing one kernel, but it is too confusing for me, and too prone to errors where one buffer changes a variable that affects others. So, if you want src blocks in different buffers to share kernels, you have to manually specify the kernel in the header, or use this for the original behavior.
