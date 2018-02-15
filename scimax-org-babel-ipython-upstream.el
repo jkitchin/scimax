@@ -681,6 +681,37 @@ Note, this does not work if you run the block async."
     (when inspect-buffer (pop-to-buffer inspect-buffer))))
 
 
+;; * clickable text buttons
+
+;; This is an experiment to provide clickable buttons. The idea is you put them
+;; in a comment line in the block and you can click on them. 
+
+(require 'button-lock)
+(global-button-lock-mode +1)
+
+(defun ob-ipython-activate-buttons ()
+  "Activate buttons."
+  (button-lock-set-button
+   "<run>"
+   'org-ctrl-c-ctrl-c
+   :face (list 'link)
+   :help-echo "click to run")
+
+  (button-lock-set-button
+   "<restart and run>"
+   'scimax-ob-ipython-restart-kernel-execute-block
+   :face (list 'link)
+   :help-echo "click to restart kernel and run")
+
+  (button-lock-set-button
+   "<repl>"
+   'org-babel-switch-to-session
+   :face (list 'link)
+   :help-echo "click to open repl"))
+
+(add-hook 'org-mode-hook 'ob-ipython-activate-buttons t)
+
+
 
 ;; * redefine org-show-entry
 
