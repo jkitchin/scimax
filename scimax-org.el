@@ -815,24 +815,30 @@ F5 inserts the entity code."
 (defun ivy-insert-org-entity ()
   "Insert an org-entity using ivy."
   (interactive)
-  (ivy-read "Entity: " (loop for element in (append org-entities org-entities-user)
-			     when (not (stringp element))
-			     collect
-			     (cons 
-			      (format "%20s | %20s | %20s | %s"
-				      (first element) ;name
-				      (second element) ; latex
-				      (fourth element) ; html
-				      (seventh element)) ;utf-8
-			      element))
+  (ivy-read "Entity: " (cl-loop for element in (append org-entities org-entities-user)
+				when (not (stringp element))
+				collect
+				(cons
+				 (format "%20s | %20s | %20s | %s"
+					 (cl-first element) ;name
+					 (cl-second element) ; latex
+					 (cl-fourth element) ; html
+					 (cl-seventh element)) ;utf-8
+				 element))
 	    :require-match t
-	    :action '(1 
-		      ("u" (lambda (candidate) (insert (seventh (cdr candidate)))) "utf-8")
-		      ("o" (lambda (candidate) (insert "\\" (first (cdr candidate)))) "org-entity")
-		      ("l" (lambda (candidate) (insert (second (cdr candidate)))) "latex")
-		      ("h" (lambda (candidate) (insert (fourth (cdr candidate)))) "html")
-		      ("a" (lambda (candidate) (insert (fifth (cdr candidate)))) "ascii")
-		      ("L" (lambda (candidate) (insert (sixth (cdr candidate))) "Latin-1")))))
+	    :action '(1
+		      ("u" (lambda (candidate)
+			     (insert (cl-seventh (cdr candidate)))) "utf-8")
+		      ("o" (lambda (candidate)
+			     (insert "\\" (cl-first (cdr candidate)))) "org-entity")
+		      ("l" (lambda (candidate)
+			     (insert (cl-second (cdr candidate)))) "latex")
+		      ("h" (lambda (candidate)
+			     (insert (cl-fourth (cdr candidate)))) "html")
+		      ("a" (lambda (candidate)
+			     (insert (cl-fifth (cdr candidate)))) "ascii")
+		      ("L" (lambda (candidate)
+			     (insert (cl-sixth (cdr candidate))) "Latin-1")))))
 
 
 ;; * Font-lock
