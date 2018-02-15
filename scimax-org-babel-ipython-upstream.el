@@ -136,10 +136,11 @@ string to be formatted."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-buttons
-  '(("<run>"  'org-ctrl-c-ctrl-c "Click to run")
-    ("<restart and run>"  'scimax-ob-ipython-restart-kernel-execute-block "click to restart and run")
-    ("<repl>"  'org-babel-switch-to-session "Click to open repl")
-    ("<delete block>"  'scimax-ob-kill-block-and-results "kill block"))
+  '(("<run>"  org-ctrl-c-ctrl-c "Click to run")
+    ("<restart and run>"  scimax-ob-ipython-restart-kernel-execute-block "click to restart and run")
+    ("<repl>"  org-babel-switch-to-session "Click to open repl")
+    ("<interrupt>"  ob-ipython-interrupt-kernel "Click to interrupt")
+    ("<delete block>"  scimax-ob-kill-block-and-results "kill block"))
   "A list of (text cmd help) to make buttons.
 text is regexp/string that will become a button.
 cmd is run when you click on the button.
