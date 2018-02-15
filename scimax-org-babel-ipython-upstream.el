@@ -97,10 +97,12 @@ string to be formatted."
   "An alist of key bindings and commands."
   :group 'ob-ipython)
 
+(defun ob-ipython-key-bindings ()
+  (cl-loop for cell in ob-ipython-key-bindings
+	   do
+	   (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell)))))
 
-(cl-loop for cell in ob-ipython-key-bindings
-	 do
-	 (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell))))
+(add-hook 'org-mode-hook 'ob-ipython-key-bindings t)
 
 (defcustom ob-ipython-menu-items
   '(("Execute"
