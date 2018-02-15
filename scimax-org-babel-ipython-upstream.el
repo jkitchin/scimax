@@ -30,6 +30,10 @@
   "If non-nil do not show the execution count in output."
   :group 'ob-ipython)
 
+(defcustom ob-ipython-delete-stale-images t
+  "If non-nil remove images that will be replaced."
+  :group 'ob-ipython)
+
 (defcustom ob-ipython-mime-formatters
   '((text/plain . ob-ipython-format-text/plain)
     (text/html . ob-ipython-format-text/html)
@@ -295,6 +299,33 @@ This function is called by `org-babel-execute-src-block'."
 		   (cons :session session-name))))
 
   (ob-ipython--clear-output-buffer)
+
+  ;; delete any figures that will be replaced and clear results here.
+  (when ob-ipython-delete-stale-images
+    (let ((result-string (let ((location (org-babel-where-is-src-block-result)))
+			   (when location
+			     (save-excursion
+			       (goto-char location)
+			       (when (looking-at (concat org-babel-result-regexp ".*$"))
+				 (buffer-substring-no-properties
+				  (save-excursion
+				    (skip-chars-backward " \r\t\n")
+				    (line-beginning-position 2))
+				  (progn (forward-line) (org-babel-result-end))))))))
+	  (files '())
+	  ;; This matches automatic file generation
+	  (fregex "\\[\\[file:\\(./obipy-resources/.*\\)\\]\\]"))
+      (with-temp-buffer
+	(insert result-string)
+	(goto-char (point-min))
+	(while (re-search-forward fregex nil t)
+	  (push (match-string 1) files)))
+      (mapc (lambda (f)
+	      (when (f-exists? f)
+		(f-delete f)))
+	    files)))
+  (org-babel-remove-result)
+
   ;; scimax feature to restart
   (when (assoc :restart params)
     (let ((session (cdr (assoc :session (third (org-babel-get-src-block-info))))))
@@ -306,6 +337,8 @@ This function is called by `org-babel-execute-src-block'."
 	       do
 	       (when (get-buffer buf)
 		 (kill-buffer buf)))))
+  ;; I think this returns the results that get inserted by
+  ;; `org-babel-execute-src-block'.
   (if (assoc :async params)
       (ob-ipython--execute-async body params)
     (ob-ipython--execute-sync body params)))
@@ -348,6 +381,7 @@ This function is called by `org-babel-execute-src-block'."
 
 
 (defun ob-ipython--execute-sync (body params)
+  "Execute BODY with PARAMS synchronously."
   (let* ((file (cdr (assoc :ipyfile params)))
          (session (cdr (assoc :session params)))
          (result-type (cdr (assoc :result-type params)))
