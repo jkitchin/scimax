@@ -304,7 +304,7 @@ By default, each org file gets a unique kernel. I am sure there is a use case fo
    :ID:       74f0669a-6322-4511-8b6f-fbeea6bd7821
    :END:
 
-Here we use a properties drawer in two different headlines to have different sessions open in the same org file. Of course, you can manually define the :session in src blocks, but using a header like this:
+See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions, and [[id:f7b80c4b-fd88-4c25-baca-2910e57aa5f1][Remote kernels]] about remote kernels.  Here we use a properties drawer in two different headlines to have different sessions open in the same org file. Of course, you can manually define the :session in src blocks, but using a header like this:
 
  #+BEGIN_EXAMPLE
    :PROPERTIES:
@@ -1026,6 +1026,9 @@ There is a little issue with the double colon on output, but otherwise it looks 
 This kernel is a little quieter on exceptions than I would like, but still it could be useful if you want to play around with hylang and document your work.
 
 ** Remote kernels
+   :PROPERTIES:
+   :ID:       f7b80c4b-fd88-4c25-baca-2910e57aa5f1
+   :END:
 
 According to a comment in [[https://github.com/jkitchin/scimax/issues/114#issuecomment-364891125][issue 114]] this finally works. I don't have a remote server to test it on, but I did test it locally. Here are the steps to follow, adapted from https://vxlabs.com/2017/11/30/run-code-on-remote-ipython-kernels-with-emacs-and-orgmode/.
 
@@ -1150,96 +1153,3 @@ If you have a lot of blocks in your buffer, you can use a file property like thi
 ,#+PROPERTY: header-args:ipython :session kernel-16577-ssh.json
 #+END_EXAMPLE
 
-** Multiple sessions in one org file
-   :PROPERTIES:
-   :ID:       74f0669a-6322-4511-8b6f-fbeea6bd7821
-   :END:
-
- See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions. Here we use a properties drawer in two different headlines to have different sessions open in the same org file. Of course, you can manually define the :session in src blocks, but using a header like this:
-
- #+BEGIN_EXAMPLE
-   :PROPERTIES:
-   :header-args:ipython: :session session-1
-   :END:
- #+END_EXAMPLE
-
- means that you don't have to type that on every block. That is helpful, since if you forget the block will use the default buffer kernel. This shows I am currently running four kernels.
-
- #+BEGIN_SRC emacs-lisp
-(ob-ipython--get-kernel-processes)
- #+END_SRC
-
- #+RESULTS:
- : ((session-2 . kernel-session-2) (session-1 . kernel-session-1) (8f516355ee6cee60cbbb1e018eee2db1 . kernel-8f516355ee6cee60cbbb1e018eee2db1) (ipython . kernel-ipython))
-
-*** Session 1
-    :PROPERTIES:
-    :header-args:ipython: :session session-1
-    :END:
-
- Every block under this header will use the kernel associated with session-1. Here we just look at what ports are being used.
-
-  #+BEGIN_SRC ipython
-%connect_info
-  #+END_SRC
-
-  #+RESULTS:
-  :RESULTS:
-  # Out[1]:
-  # output
-  : {
-  :   "shell_port": 53176,
-  :   "iopub_port": 53177,
-  :   "stdin_port": 53178,
-  :   "control_port": 53179,
-  :   "hb_port": 53180,
-  :   "ip": "127.0.0.1",
-  :   "key": "9ca2bee6-d376cb996e2e9daa86d0bb56",
-  :   "transport": "tcp",
-  :   "signature_scheme": "hmac-sha256",
-  :   "kernel_name": ""
-  : }
-  : Paste the above JSON into a file, and connect with:
-  :     $> jupyter <app> --existing <file>
-  : or, if you are local, you can connect with just:
-  :     $> jupyter <app> --existing emacs-session-1.json
-  : or even just:
-  :     $> jupyter <app> --existing
-  : if this is the most recent Jupyter kernel you have started.
-  :END:
-
-*** Session 2
-    :PROPERTIES:
-    :header-args:ipython: :session session-2
-    :END:
-
- Every block in this heading will use the kernel associated with session-2. You can see here it uses different ports than session-1 does. They are both running at the same time though.
-
-  #+BEGIN_SRC ipython :restart
-%connect_info
-  #+END_SRC
-
-  #+RESULTS:
-  :RESULTS:
-  # Out[1]:
-  # output
-  : {
-  :   "shell_port": 53250,
-  :   "iopub_port": 53251,
-  :   "stdin_port": 53252,
-  :   "control_port": 53367,
-  :   "hb_port": 53254,
-  :   "ip": "127.0.0.1",
-  :   "key": "69967886-eb9ef7c6584aafbfd8ca5ffc",
-  :   "transport": "tcp",
-  :   "signature_scheme": "hmac-sha256",
-  :   "kernel_name": ""
-  : }
-  : Paste the above JSON into a file, and connect with:
-  :     $> jupyter <app> --existing <file>
-  : or, if you are local, you can connect with just:
-  :     $> jupyter <app> --existing emacs-session-2.json
-  : or even just:
-  :     $> jupyter <app> --existing
-  : if this is the most recent Jupyter kernel you have started.
-  :END:
