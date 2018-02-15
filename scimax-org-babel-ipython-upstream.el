@@ -11,6 +11,8 @@
 ;; :async is not new, but it works by itself now, and causes an asynchronous evaluation of the cell
 
 (require 'scimax-ob)
+(require 'button-lock)
+(global-button-lock-mode +1)
 
 ;; * Customizations
 
@@ -131,6 +133,17 @@ string to be formatted."
     ["Kill kernel" scimax-ob-ipython-kill-kernel t]
     ["Switch to repl" org-babel-switch-to-session t])
   "Items for the menu bar and popup menu."
+  :group 'ob-ipython)
+
+(defcustom ob-ipython-buttons
+  '(("<run>"  'org-ctrl-c-ctrl-c "Click to run")
+    ("<restart and run>"  'scimax-ob-ipython-restart-kernel-execute-block "click to restart and run")
+    ("<repl>"  'org-babel-switch-to-session "Click to open repl")
+    ("<delete block>"  'scimax-ob-kill-block-and-results "kill block"))
+  "A list of (text cmd help) to make buttons.
+text is regexp/string that will become a button.
+cmd is run when you click on the button.
+help is a string for a tooltip."
   :group 'ob-ipython)
 
 
@@ -686,28 +699,15 @@ Note, this does not work if you run the block async."
 ;; This is an experiment to provide clickable buttons. The idea is you put them
 ;; in a comment line in the block and you can click on them. 
 
-(require 'button-lock)
-(global-button-lock-mode +1)
-
 (defun ob-ipython-activate-buttons ()
   "Activate buttons."
-  (button-lock-set-button
-   "<run>"
-   'org-ctrl-c-ctrl-c
-   :face (list 'link)
-   :help-echo "click to run")
-
-  (button-lock-set-button
-   "<restart and run>"
-   'scimax-ob-ipython-restart-kernel-execute-block
-   :face (list 'link)
-   :help-echo "click to restart kernel and run")
-
-  (button-lock-set-button
-   "<repl>"
-   'org-babel-switch-to-session
-   :face (list 'link)
-   :help-echo "click to open repl"))
+  (loop for (text cmd help-echo) in ob-ipython-buttons
+	do
+	(button-lock-set-button
+	 text
+	 cmd
+	 :face (list 'link)
+	 :help-echo help-echo)))
 
 (add-hook 'org-mode-hook 'ob-ipython-activate-buttons t)
 
