@@ -63,8 +63,9 @@ string to be formatted."
 
 (defcustom ob-ipython-key-bindings
   '(("C-<return>" . #'org-ctrl-c-ctrl-c)
+    ("M-<return>" . #'scimax-execute-and-next-block)
     ("S-<return>" . #'scimax-execute-and-next-block)
-    ("M-<return>" . #'scimax-execute-to-point)
+    ("M-S-<return>" . #'scimax-execute-to-point)
     ("s-<return>" . #'scimax-ob-ipython-restart-kernel-execute-block)
     ("M-s-<return>" . #'scimax-restart-ipython-and-execute-to-point)
     ("H-<return>" . #'scimax-ob-ipython-restart-kernel-execute-buffer)
