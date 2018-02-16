@@ -233,6 +233,165 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
 
   ("/" ob-ipython-inspect))
 
+;; * A command-mode hydra
+;;
+(defun ob-ipython-convert-block-to (type)
+  "Convert current block to TYPE.
+TYPE is usually one of ipython, markdown, org
+Note: you will lose header arguments from this.
+"
+  (interactive (list (completing-read "Type: " '(ipython markdown org))))
+  (let* ((src-info (org-babel-get-src-block-info 'light))
+	 (header-start (sixth src-info))
+	 (header-end (save-excursion (goto-char header-start)
+				     (line-end-position))))
+    (setf (buffer-substring header-start header-end)
+	  (format "#+BEGIN_SRC %s" type))))
+
+
+(defun ob-ipython-markdown-headings (N)
+  "Convert block to markdown and set first line to heading level N."
+  (interactive "nLevel: ")
+  (ob-ipython-convert-block-to "markdown")
+  (save-restriction
+    (org-narrow-to-block)
+    (goto-char (point-min))
+    (forward-line)
+    (delete-trailing-whitespace)
+    (while (looking-at "^$") (delete-char 1))
+    (insert (make-string N ?#))
+    (insert " ")))
+
+
+(defun ob-ipython-toggle-output ()
+  "Toggle folded state of results if there are some."
+  (interactive)
+  (let ((loc (org-babel-where-is-src-block-result)))
+    (when loc
+      (save-excursion
+	(goto-char loc)
+	(org-cycle)))))
+
+;; https://www.cheatography.com/weidadeyue/cheat-sheets/jupyter-notebook/
+(defhydra scimax-jupyter-edit-mode (:color blue)
+  "Edit mode"
+  ("[" (lambda () (interactive) (python-indent-line t)) "dedent" :color red)
+  ("]" (lambda () (interactive) (python-indent-line)) "indent" :color red)
+  ("a" (lambda () (interactive)
+	 (org-edit-special)
+	 (let ((p0 (point-min))
+	       (p1 (point-max)))
+	   (goto-char p0)
+	   (org-edit-src-exit)
+	   (set-mark (point))
+	   (goto-char (+ (point) (- p1 2))))) "select all")
+  ("z" undo-tree-redo "undo")
+  ("y" undo-tree-redo "redo")
+  ("<home>" (progn
+	      (org-edit-special)
+	      (goto-char (point-min))
+	      (org-edit-src-exit)) "goto cell start")
+  ("C-<up>" (progn
+	      (org-edit-special)
+	      (goto-char (point-min))
+	      (org-edit-src-exit)) "goto cell start")
+  ("C-<end>" (progn
+	       (org-edit-special)
+	       (goto-char (point-max))
+	       (org-edit-src-exit)) "goto cell end")
+  ("C-<down>" (progn
+		(org-edit-special)
+		(goto-char (point-max))
+		(org-edit-src-exit))  "goto cell end")
+  ("C-<left>" left-word "one word left")
+  ("C-<right>" right-word "one word right")
+  ("backspace" (backward-kill-word 1) "delete word before")
+  ("delete" (backward-kill-word -1) "delete word after")
+
+  ;; We can't use esc for command mode
+  ("c" scimax-jupyter-commmand-mode/body "command mode")
+
+  ("C-<return>" org-ctrl-c-ctrl-c "run cell" :color red)
+  ("S-<return>" scimax-execute-and-next-block "run cell, select below" :color red)
+  ("M-<return>" scimax-execute-and-next-block "run cell, insert below" :color red)
+  ("-" scimax-split-src-block"split cell")
+
+  ;; These need some special logic to act like jupyter. the cursor moves up or
+  ;; down until you hit a cell boundary. When going up, you first go to the
+  ;; start, then to the previous block, and when going down, you first go to the
+  ;; last line, then the end, and then to the next block.
+  ;; For now we just move simply.
+  ("<up>" (next-line -1) "move cursor up or previous cell" :color red)
+  ("<down>" (next-line 1) "move cursor down or next cell" :color red)
+
+  ("/" org-comment-dwim "toggle comment on current or selected lines" :color red))
+
+;; https://www.cheatography.com/weidadeyue/cheat-sheets/jupyter-notebook/
+(defhydra scimax-jupyter-commmand-mode (:color blue)
+  "Command mode"
+  ("<return>" scimax-jupyter-edit-mode/body "Enter edit mode")
+  ("C-<return>" org-ctrl-c-ctrl-c "run cell" :color red)
+  ("S-<return>" scimax-execute-and-next-block "run cell, select below" :color red)
+  ("M-<return>" scimax-execute-and-next-block "run cell, insert below" :color red)
+
+  ;; These don't really have great analogs in org-mode, but maybe it makes sense
+  ;; to be able to do this.
+  ("y" (ob-ipython-convert-block-to "ipython") "to code")
+  ("m" (ob-ipython-convert-block-to "markdown") "to markdown")
+  ("r" (ob-ipython-convert-block-to "org") "to raw")
+
+  ;; These change to markdown block and trim blank lines off the top and add #
+  ;; to beginning
+  ("1" (ob-ipython-markdown-headings 1) "to heading 1")
+  ("2" (ob-ipython-markdown-headings 1) "to heading 2")
+  ("3" (ob-ipython-markdown-headings 1) "to heading 3")
+  ("4" (ob-ipython-markdown-headings 1) "to heading 4")
+  ("5" (ob-ipython-markdown-headings 1) "to heading 5")
+  ("6" (ob-ipython-markdown-headings 1) "to heading 6")
+
+  ;; navigation
+  ("<up>" org-babel-previous-src-block "select cell above" :color red)
+  ("k" org-babel-previous-src-block "select cell above" :color red)
+  ("<down>" org-babel-next-src-block "select cell below" :colr red)
+  ("j" org-babel-next-src-block "select cell below" :colr red)
+
+  ("a" scimax-insert-src-block "insert cell above")
+  ("b" (scimax-insert-src-block t) "insert cell below")
+
+  ("x" scimax-ob-kill-block-and-results "cut cell")
+  ("V" (scimax-ob-clone-block t) "paste cell above")
+  ("v" scimax-ob-clone-block "paste cell below")
+  ("z" undo "undo last cell deletion" :color red)
+
+  ("dd" scimax-ob-kill-block-and-results "delete cell")
+
+  ;; need a new function to select region from point to next one.
+  ("M" "merge cell below")
+
+  ;; I am not sure we can do this with a kernel
+  ;; ("C-s" "save and checkpoint")
+  ("s" save-buffer "Save buffer")
+
+  ("l" scimax-ob-toggle-line-numbers "toggle line numbers" :color red)
+  ;; this folds output
+  ("o" ob-ipython-toggle-output "toggle output" :color red)
+
+  ;; for large ouputs, puts results in a window you can scroll in. Not sure if
+  ;; that is possible in emacs. May be no analog.
+  ;; ( ;; "S-o" "toggle output scrolling"
+  ;;  )
+  ;; Maybe no analog?
+  ;; ("esc" "close pager")
+
+  ;; ("h" "Show keyboard help")
+  ("ii" ob-ipython-interrupt-kernel "Interrupt kernel")
+  ;; 00 is not a good hydra command
+  ("0" (when (y-or-n-p "Restart kernel?")
+	 (call-interactively 'ob-ipython-kill-kernel)) "restart kernel")
+  ;; Emacs has the opposite scroll convention as a browser
+  ("<space>" scroll-up-command "scroll down" :color red)
+  ("S-<space>" scroll-down-command "scroll up" :color red))
+
 
 ;; * A context menu
 
