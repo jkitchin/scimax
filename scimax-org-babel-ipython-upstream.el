@@ -144,7 +144,8 @@ Usually called in a hook function."
     ("<restart and run>"  scimax-ob-ipython-restart-kernel-execute-block "click to restart and run")
     ("<repl>"  org-babel-switch-to-session "Click to open repl")
     ("<interrupt>"  ob-ipython-interrupt-kernel "Click to interrupt")
-    ("<delete block>"  scimax-ob-kill-block-and-results "kill block"))
+    ("<delete block>"  scimax-ob-kill-block-and-results "kill block")
+    ("<menu>" scimax-ob-ipython-popup-command "Popup menu"))
   "A list of (text cmd help) to make buttons.
 text is regexp/string that will become a button.
 cmd is run when you click on the button.
@@ -702,7 +703,7 @@ Note, this does not work if you run the block async."
 ;; * clickable text buttons
 
 ;; This is an experiment to provide clickable buttons. The idea is you put them
-;; in a comment line in the block and you can click on them. 
+;; in a comment line in the block and you can click on them.
 
 (defun ob-ipython-activate-buttons ()
   "Activate buttons."
