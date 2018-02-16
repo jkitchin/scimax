@@ -261,6 +261,60 @@ http://endlessparentheses.com/define-context-aware-keys-in-emacs.html"
 					'("\n")))))))
 
 
+;; * line numbers
+(defvar scimax-ob-number-line-overlays '()
+  "List of overlays for line numbers.")
+
+(make-variable-buffer-local 'scimax-ob-number-line-overlays)
+
+(defun scimax-ob-toggle-line-numbers ()
+  (interactive)
+  (if scimax-ob-number-line-overlays
+      (scimax-ob-remove-line-numbers)
+    (scimax-ob-add-line-numbers)))
+
+(defun scimax-ob-remove-line-numbers ()
+  "Remove line numbers from "
+  (interactive)
+  (mapc 'delete-overlay
+	scimax-ob-number-line-overlays)
+  (setq-local scimax-ob-number-line-overlays '()) 
+  (remove-hook 'post-command-hook 'scimax-ob-add-line-numbers t))
+
+
+(defun scimax-ob-add-line-numbers ()
+  "Add line numbers to an org src-block."
+  (interactive)
+  (save-excursion
+    (let* ((src-block (org-element-context))
+	   (nlines (- (length
+		       (s-split
+			"\n"
+			(org-element-property :value src-block)))
+		      1)))
+      ;; clear any existing overlays
+      (scimax-ob-remove-line-numbers)
+      
+      (goto-char (org-element-property :begin src-block))
+      ;; the beginning may be header, so we move forward to get the #+BEGIN
+      ;; line. Then jump one more to get in the code block
+      (while (not (looking-at "#\\+BEGIN"))
+	(forward-line))
+      (forward-line)
+      (loop for i from 1 to nlines
+	    do
+	    (beginning-of-line)
+	    (let (ov)
+	      (setq ov (make-overlay (point)(point)))
+	      (overlay-put
+	       ov
+	       'before-string (propertize
+			       (format "%03s " (number-to-string i))
+			       'font-lock-face '(:foreground "black" :background "gray80"))) 
+	      (push ov scimax-ob-number-line-overlays))
+	    (next-line))))
+  ;; This allows you to update the numbers if you change the block, e.g. add/remove lines
+  (add-hook 'post-command-hook 'scimax-ob-add-line-numbers nil 'local))
 
 (provide 'scimax-ob)
 
