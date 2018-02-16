@@ -196,7 +196,7 @@ You need this to get syntax highlighting."
 ----------------------------------------------------------------------
     _<return>_: current           _i_: previous  _w_: move up     _/_: inspect
   _S-<return>_: current to next   _k_: next      _s_: move down   _l_: clear result
-  _M-<return>_: to point          _q_: visible   _x_: kill        _L_: clear all
+_S-M-<return>_: to point          _q_: visible   _x_: kill        _L_: clear all
   _s-<return>_: Restart/block     _Q_: any       _n_: copy
 _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   _H-<return>_: Restart/buffer    ^ ^            _m_: merge
@@ -206,7 +206,7 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
            ^ ^                    ^ ^            _h_: header"
   ("<return>" org-ctrl-c-ctrl-c :color red)
   ("S-<return>" scimax-execute-and-next-block :color red)
-  ("M-<return>" scimax-execute-to-point)
+  ("S-M-<return>" scimax-execute-to-point)
   ("s-<return>" scimax-ob-ipython-restart-kernel-execute-block)
   ("M-s-<return>" scimax-restart-ipython-and-execute-to-point)
   ("H-<return>" scimax-ob-ipython-restart-kernel-execute-buffer)
