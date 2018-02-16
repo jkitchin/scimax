@@ -15,6 +15,11 @@ git submodule add https://github.com/jkitchin/emacs-win
 git submodule init
 git submodule update
 
+# The hunspell stuff seems to be crashing emacs. This might take it out.
+cd emacs-win
+git checkout 34a7ec32f8aaa0828fd3db04f258b7555115e281
+cd ..
+
 git add emacs-win
 git commit emacs-win -m "add windows emacs"
 git add .gitmodules
