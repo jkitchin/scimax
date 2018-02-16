@@ -90,6 +90,7 @@ string to be formatted."
     ("H-s-l" . #'scimax-ob-clear-all-results)
     ("H-m" . #'scimax-merge-ipython-blocks)
     ("H-e" . #'scimax-ob-edit-header)
+    ("H-M-l" . #'scimax-ob-toggle-line-numbers)
 
     ;; Miscellaneous
     ("H-/" . #'ob-ipython-inspect)
@@ -101,6 +102,8 @@ string to be formatted."
   :group 'ob-ipython)
 
 (defun ob-ipython-key-bindings ()
+  "Function to define key-bindings.
+Usually called in a hook function."
   (cl-loop for cell in ob-ipython-key-bindings
 	   do
 	   (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell)))))
@@ -124,7 +127,7 @@ string to be formatted."
      ["Split block" scimax-split-src-block t]
      ["Clear result" org-babel-remove-result t]
      ["Edit header" scimax-ob-edit-header t]
-     )
+     ["Toggle line numbers" scimax-ob-toggle-line-numbers t])
     ("Navigate"
      ["Previous block" org-babel-previous-src-block t]
      ["Next block" org-babel-next-src-block t]
