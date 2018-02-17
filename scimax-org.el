@@ -1493,8 +1493,56 @@ It is for commands that depend on the major mode. One example is
 ;; (add-hook 'org-mode-hook (lambda ()
 ;; 			   (scimax-src-keymap-mode +1)))
 
+;; * radio checkboxes
+(defun scimax-radio-check-box-hook-fn ()
+  "When a checkbox list has an org attribute of :radio, only one
+can be checked a time. Checking one will uncheck the others.
+#+attr_org: :radio
+- [ ] one
+- [X] two
+- [ ] three
+"
+  (when (-contains? (org-element-property
+                     :attr_org
+                     (org-element-property :parent (org-element-context)))
+                    ":radio")
+    (save-excursion
+      (loop for el in (org-element-property :structure (org-element-context))
+            do
+            (goto-char (car el))
+            (when (re-search-forward "\\[X\\]" (line-end-position) t)
+              (replace-match "[ ]"))))
+    (forward-char)
+    (insert "X")
+    (delete-char 1)))
+
+(add-hook 'org-checkbox-statistics-hook 'scimax-radio-check-box-hook-fn)
+
+(defun org-get-plain-list (name)
+  "Get the org-element representation of a plain-list named NAME."
+  (catch 'found
+    (org-element-map
+        (org-element-parse-buffer)
+        'plain-list
+      (lambda (plain-list)
+        (when
+            (string= name (org-element-property :name plain-list))
+          (throw 'found plain-list))))))
+
+(defun get-radio-list-value (name)
+  "Return the value of the checked item in a radio list named NAME."
+  (save-excursion
+    (loop for el in (org-element-property
+                     :structure
+                     (org-get-plain-list name))
+          if (string= (nth 4 el) "[X]")
+          return (progn
+                   (let ((item (buffer-substring (car el) (car (last el)))))
+                     (string-match "\\[X\\]\\(.*\\)$" item)
+                     (match-string-no-properties 1 item))))))
+
+
 ;; * The end
 (provide 'scimax-org)
 
 ;;; scimax-org.el ends here
-
