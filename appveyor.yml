@@ -1,7 +1,7 @@
 install:
   - git submodule add https://github.com/jkitchin/emacs-win
   - cd emacs-win
-  - git checkout 34a7ec32f8aaa0828fd3db04f258b7555115e281
+  - git checkout 36332b115be918b7f9433b755209545ff1121601
   - git status
   - cd ..
   - git submodule add -f https://github.com/jkitchin/scimax-win-elpa elpa
