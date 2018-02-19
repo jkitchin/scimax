@@ -29,9 +29,10 @@ a + 5
 
 #+RESULTS:
 :RESULTS:
-# Out[1]:
+# Out[3]:
 # output
-: 5# text/plain
+: 5
+# text/plain
 : 60
 :END:
 
