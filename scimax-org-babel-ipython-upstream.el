@@ -301,6 +301,15 @@ Note: you will lose header arguments from this.
     (set-mark (point))
     (goto-char (+ (point) (- p1 2)))))
 
+
+(defun ob-ipython-merge-next-cell ()
+  "Merge current cell with next one."
+  (interactive)
+  (let ((r1 (point))
+	(r2 (save-excursion (org-babel-next-src-block) (point))))
+    (scimax-merge-ipython-blocks r1 r2)))
+
+
 ;; https://www.cheatography.com/weidadeyue/cheat-sheets/jupyter-notebook/
 (defhydra scimax-jupyter-edit-mode (:color blue :hint nil)
   "
@@ -309,9 +318,9 @@ Note: you will lose header arguments from this.
 _C-<return>_: run cell           _[_: dedent            _C-<up>_: goto start           _<up>_:
 _S-<return>_: run cell and next  _]_: indent          _C-<down>_: goto end    _<left>_:        _<right>_:
 _M-<return>_: run cell and next  _-_: split cell      _C-<left>_: word left          _<down>_:
-^ ^                              _/_: toggle comment _C-<right>_: word right
-^ ^                              _a_: select all
-
+^ ^                              _M_: merge next     _C-<right>_: word right
+^ ^                              _/_: toggle comment
+^ ^                              _a_: select cell
 _c_: command mode   _z_: undo   _y_: redo
 "
   ("[" (python-indent-line t) "dedent" :color red)
@@ -446,7 +455,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   ("dd" scimax-ob-kill-block-and-results "delete cell")
 
   ;; need a new function to select region from point to next one.
-  ;; ("M" "merge cell below")
+  ("M" ob-ipython-merge-next-cell "merge cell below")
 
   ;; I am not sure we can do this with a kernel
   ;; ("C-s" "save and checkpoint")
