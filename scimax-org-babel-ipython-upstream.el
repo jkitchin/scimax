@@ -965,7 +965,8 @@ Note, this does not work if you run the block async."
 	 :face (list 'link)
 	 :help-echo help-echo)))
 
-(add-hook 'org-mode-hook 'ob-ipython-activate-buttons t)
+;; Huh. This makes the repl read-only. Commenting it out for now.
+;; (add-hook 'org-mode-hook 'ob-ipython-activate-buttons t)
 
 
 
