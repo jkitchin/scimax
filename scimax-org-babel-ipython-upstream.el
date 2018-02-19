@@ -738,10 +738,11 @@ This adds : to the beginning so the output will export as
 verbatim text. FILE-OR-NIL is not used, and is here for
 compatibility with the other formatters."
   (when (not (string= "" output))
-    (s-join "\n"
-  	    (mapcar (lambda (s)
-  		      (s-concat ": " s))
-  		    (s-split "\n" output t)))))
+    (concat (s-join "\n"
+		    (mapcar (lambda (s)
+			      (s-concat ": " s))
+			    (s-split "\n" output t)))
+	    "\n")))
 
 
 ;; This gives me the output I want. Note I changed this to process one result at
