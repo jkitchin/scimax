@@ -505,13 +505,19 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 
 ;; * Execution functions
 
+(defun scimax-ob-ipython-default-session ()
+  "Returns the default name of the session for a src block."
+  (concat (car (org-babel-get-src-block-info t))
+	  "-"
+	  (if-let (bf (buffer-file-name))
+	      (md5 (expand-file-name bf))
+	    "scratch")))
+
 (defun scimax-ob-ipython-restart-kernel-execute-block ()
   "Restart kernel and execute block"
   (interactive)
   (ob-ipython-kill-kernel
-   (cdr (assoc (if-let (bf (buffer-file-name))
-		   (md5 (expand-file-name bf))
-		 "scratch")
+   (cdr (assoc (scimax-ob-ipython-default-session )
 	       (ob-ipython--get-kernel-processes))))
   (org-babel-execute-src-block-maybe))
 
@@ -520,9 +526,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   "Restart kernel and execute buffer"
   (interactive)
   (ob-ipython-kill-kernel
-   (cdr (assoc (if-let (bf (buffer-file-name))
-		   (md5 (expand-file-name bf))
-		 "scratch")
+   (cdr (assoc (scimax-ob-ipython-default-session)
 	       (ob-ipython--get-kernel-processes))))
   (org-babel-execute-buffer))
 
@@ -539,9 +543,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   (interactive)
   (when (y-or-n-p "Kill kernel?")
     (ob-ipython-kill-kernel
-     (cdr (assoc (if-let (bf (buffer-file-name))
-		     (md5 (expand-file-name bf))
-		   "scratch")
+     (cdr (assoc (scimax-ob-ipython-default-session)
 		 (ob-ipython--get-kernel-processes))))
     (setq header-line-format nil)
     (redisplay)))
@@ -611,10 +613,8 @@ This function is called by `org-babel-execute-src-block'."
 		  org-babel-default-header-args:ipython))
 
     ;; add the new session info
-    (let ((session-name (if-let (bf (buffer-file-name))
-			    (md5 (expand-file-name bf))
-			  "scratch")))
-      (setq header-line-format (format "Ipython session: %s" session-name))
+    (let ((session-name (scimax-ob-ipython-default-session)))
+      (setq header-line-format (format "IPython session: %s" session-name))
       (add-to-list 'org-babel-default-header-args:ipython
 		   (cons :session session-name))
       (setf (cdr (assoc :session params)) session-name)))
