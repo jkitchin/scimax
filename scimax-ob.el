@@ -67,16 +67,19 @@ With a prefix BELOW move point to lower block."
 
 
 (defun scimax-execute-and-next-block ()
-  "Execute this block and either jump to the next ipython block, or add a new one."
+  "Execute this block and either jump to the next block with the
+same language, or add a new one."
   (interactive)
   (org-babel-execute-src-block)
   ;; we ignore-errors here because when there is no next block it is a
   ;; user-error, not nil.
-  (let ((next-block (ignore-errors (save-excursion
-				     (catch 'block
-				       (while (setq next-block (org-babel-next-src-block))
-					 (when (string= "ipython" (org-element-property :language (org-element-context)))
-					   (throw 'block next-block))))))))
+  (let* ((lang (car (org-babel-get-src-block-info t)))
+	 (next-block (ignore-errors
+		       (save-excursion
+			 (catch 'block
+			   (while (setq next-block (org-babel-next-src-block))
+			     (when (string= lang (org-element-property :language (org-element-context)))
+			       (throw 'block next-block))))))))
     (if next-block
 	(goto-char (match-beginning 0))
       (scimax-insert-src-block t))))
@@ -91,11 +94,12 @@ With a prefix BELOW move point to lower block."
       (while (and (org-babel-next-src-block) (< (point) p))
 	(org-babel-execute-src-block)))))
 
+
 (defun scimax-jump-to-visible-block ()
   "Jump to a visible src block with avy."
   (interactive)
   (avy-with scimax-jump-to-block
-    (avy--generic-jump "#\\+BEGIN_SRC ipython"  nil avy-style (point-min) (point-max))))
+    (avy--generic-jump "#\\+BEGIN_SRC"  nil avy-style (point-min) (point-max))))
 
 
 (defun scimax-jump-to-block (&optional N)
