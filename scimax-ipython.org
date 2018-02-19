@@ -51,9 +51,10 @@ a
 
 #+RESULTS:
 :RESULTS:
-# Out[1]:
+# Out[4]:
 # output
-: 5# text/plain
+: 5
+# text/plain
 : 55
 :END:
 
@@ -84,18 +85,19 @@ print('x .dot. y = {}'.format(x @ y))
 
 #+RESULTS:
 :RESULTS:
-# Out[2]:
+# Out[5]:
 # output
 : Length of t = 350
-: x .dot. y = 1.3598389888491542
-
-# image/png
-[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896qI1.png]]
-
+: x .dot. y = 1.3598389888491538
 
 
 # image/png
-[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896cSE.png]]
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-50592vMO.png]]
+
+
+
+# image/png
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-505928WU.png]]
 :END:
 
 ** Fine tune the output
@@ -112,17 +114,17 @@ Integral(sqrt(1 / x), x)
 
 #+RESULTS:
 :RESULTS:
-# Out[3]:
+# Out[6]:
 # text/plain
-: ⌠           
-: ⎮     ___   
-: ⎮    ╱ 1    
+: ⌠
+: ⎮     ___
+: ⎮    ╱ 1
 : ⎮   ╱  ─  dx
-: ⎮ ╲╱   x    
-: ⌡           
+: ⎮ ╲╱   x
+: ⌡
 
 # image/png
-[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896pcK.png]]
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-50592Jha.png]]
 
 # text/latex
 #+BEGIN_EXPORT latex
@@ -138,9 +140,9 @@ Integral(sqrt(1/x), x)
 
 #+RESULTS:
 :RESULTS:
-# Out[4]:
+# Out[7]:
 # image/png
-[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-1318962mQ.png]]
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-50592Wrg.png]]
 :END:
 
 I have not added an exclude feature, but it would not be hard to. Unfortunately, it is not yet possible to control the order these come out in, or to do things like add captions or size information to the images.
@@ -155,10 +157,10 @@ print(1 / 0)
 
 #+RESULTS:
 :RESULTS:
-# Out[5]:
+# Out[8]:
 # output
 : ZeroDivisionErrorTraceback (most recent call last)
-: <ipython-input-5-3ec96714f820> in <module>()
+: <ipython-input-8-3ec96714f820> in <module>()
 : ----> 1 print(1 / 0)
 : ZeroDivisionError: division by zero
 :END:
@@ -194,7 +196,7 @@ print('done')
 
 #+RESULTS:
 :RESULTS:
-# Out[6]:
+# Out[9]:
 # output
 : 0
 : 1
@@ -261,8 +263,9 @@ ob-ipython-key-bindings
 
 #+RESULTS:
 | C-<return>   | function | org-ctrl-c-ctrl-c                               |
+| M-<return>   | function | scimax-execute-and-next-block                   |
 | S-<return>   | function | scimax-execute-and-next-block                   |
-| M-<return>   | function | scimax-execute-to-point                         |
+| M-S-<return> | function | scimax-execute-to-point                         |
 | s-<return>   | function | scimax-ob-ipython-restart-kernel-execute-block  |
 | M-s-<return> | function | scimax-restart-ipython-and-execute-to-point     |
 | H-<return>   | function | scimax-ob-ipython-restart-kernel-execute-buffer |
@@ -283,8 +286,10 @@ ob-ipython-key-bindings
 | H-s-l        | function | scimax-ob-clear-all-results                     |
 | H-m          | function | scimax-merge-ipython-blocks                     |
 | H-e          | function | scimax-ob-edit-header                           |
+| H-M-l        | function | scimax-ob-toggle-line-numbers                   |
 | H-/          | function | ob-ipython-inspect                              |
 | H-s          | function | scimax-obi/body                                 |
+| <mouse-3>    | function | scimax-ob-ipython-popup-command                 |
 
 You can define/change any binding you want like this. They are only active in ipython src blocks.
 
@@ -293,11 +298,11 @@ You can define/change any binding you want like this. They are only active in ip
 #+END_SRC
 
 ** Clickable buttons in src blocks
-   
+
 Jupyter has some nice features like buttons to click on to run a block. We have something like that. The text in angle brackets in the comment below is clickable!
 
 #+BEGIN_SRC ipython
-# <run>  <restart and run>  <repl>
+# <run>  <restart and run>  <repl> <delete block> <menu>
 6 * 2
 #+END_SRC
 
@@ -329,7 +334,7 @@ See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473]
    :END:
  #+END_EXAMPLE
 
- means that you don't have to type that on every block. That is helpful, since if you forget the block will use the default buffer kernel. This shows I am currently running four kernels. See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions. 
+ means that you don't have to type that on every block. That is helpful, since if you forget the block will use the default buffer kernel. This shows I am currently running four kernels. See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions.
 
  #+BEGIN_SRC emacs-lisp
 (ob-ipython--get-kernel-processes)
@@ -450,9 +455,9 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[7]:
+# Out[2]:
 # text/plain
-: Polynomial([1., 2., 3.], domain=[-1,  1], window=[-1,  1])
+: Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
 :END:
 
 Let's change this to get a LaTeX representation (adapted from https://github.com/jupyter/ngcm-tutorial/blob/master/Part-1/IPython%20Kernel/Custom%20Display%20Logic.ipynb). We will do this on the Ipython side of output customization where we register a formatting function for a specific type in IPython.
@@ -486,7 +491,7 @@ latex_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[8]:
+# Out[3]:
 :END:
 
 #+BEGIN_SRC ipython
@@ -495,9 +500,9 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[9]:
+# Out[4]:
 # text/plain
-: Polynomial([1., 2., 3.], domain=[-1,  1], window=[-1,  1])
+: Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
 
 # text/latex
 #+BEGIN_EXPORT latex
@@ -534,7 +539,7 @@ png_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[10]:
+# Out[5]:
 :END:
 
 Now, we can easily see the formula and shape of this polynomial in a graphical form.
@@ -545,9 +550,9 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[11]:
+# Out[6]:
 # image/png
-[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896DxW.png]]
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-50592w_s.png]]
 :END:
 
 Most likely you would not put all this code into a document like this, but would instead put it in a Python library you import. The point here is to show what can be done with that, and once it is done, you get easy visualization of objects.
@@ -579,7 +584,7 @@ svg_f.for_type_by_name('tensorflow.python.framework.ops',
 
   #+RESULTS:
   :RESULTS:
-  # Out[12]:
+  # Out[7]:
   :END:
 
   #+BEGIN_SRC ipython
@@ -597,11 +602,11 @@ g
 
   #+RESULTS:
   :RESULTS:
-  # Out[13]:
+  # Out[8]:
 
 
   # image/svg
-  [[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896Q7c.svg]]
+  [[file:obipy-resources/19a94859c854121de1c305426d09b77e-505929Jz.svg]]
   :END:
 
 Now we have a record of what the graph looks like. Ez peezy.
@@ -631,12 +636,11 @@ ip = get_ipython()
 ip.display_formatter.formatters["text/org"] = OrgFormatter()
 
 def bokeh_to_org(plt):
-  fh, tmp = tempfile.mkstemp(suffix=".html", prefix="bokeh-", 
+  fh, tmp = tempfile.mkstemp(suffix=".html", prefix="bokeh-",
                              dir="obipy-resources")
   fname = save(plt, tmp)
   os.close(fh)
   return "[[{}]]".format(fname)
-
 
 f = ip.display_formatter.formatters["text/org"]
 f.for_type_by_name("bokeh.plotting.figure", "Figure", bokeh_to_org)
@@ -650,9 +654,14 @@ png_f = ip.display_formatter.formatters["image/png"]
 png_f.for_type_by_name("bokeh.plotting.figure", "Figure", bokeh_to_png)
 #+END_SRC
 
+#+RESULTS:
+:RESULTS:
+# Out[1]:
+:END:
+
 Now we are setup to make an interactive figure.
 
-#+BEGIN_SRC ipython :display text/org image/png 
+#+BEGIN_SRC ipython :display image/png text/org
 from bokeh.io import output_file, show
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
@@ -758,15 +767,17 @@ p
 
  #+RESULTS:
  :RESULTS:
- # Out[10]:
+ # Out[2]:
  # image/png
- [[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-1318964vS.png]]
-
- # text/org
- [[/usr/local/google/home/kitchin/scimax/obipy-resources/bokeh-1vuy2xw6.html]]
+ [[file:obipy-resources/19a94859c854121de1c305426d09b77e-50592WyU.png]]
  :END:
 
+
 Now if you click on the link above, it will open an interactive html file in your browser. It is just a tempfile, so some work might be necessary to get it to a persistent place, like the images are.
+
+*************** TODO this is not acting right on my Mac
+It used to reliably output the text/org, but it is not doing it now. It seems to be making the html files though.
+*************** END
 
 *** Customizing a class output with _repr_*_ methods
 
@@ -816,7 +827,7 @@ class Gaussian(object):
 
 #+RESULTS:
 :RESULTS:
-# Out[5]:
+# Out[3]:
 :END:
 
 #+BEGIN_SRC ipython
@@ -825,11 +836,11 @@ Gaussian()
 
 #+RESULTS:
 :RESULTS:
-# Out[6]:
+# Out[4]:
 
 
 # image/png
-[[file:obipy-resources/8f516355ee6cee60cbbb1e018eee2db1-131896e_1.png]]
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-50592j8a.png]]
 
 # text/latex
 #+BEGIN_EXPORT latex
@@ -874,10 +885,10 @@ class Heading(object):
         return data
 #+END_SRC
 
- #+RESULTS:
- :RESULTS:
- # Out[7]:
- :END:
+#+RESULTS:
+:RESULTS:
+# Out[6]:
+:END:
 
  Now, you can construct headings in iPython, and get different outputs that might be suitable for different purposes.
 
@@ -887,7 +898,7 @@ Heading('A level 4 headline', level=4, tags=['example'])
 
 #+RESULTS:
 :RESULTS:
-# Out[8]:
+# Out[7]:
 #+BEGIN_EXPORT html
 <h4>A level 4 headline</h4>
 #+END_EXPORT
@@ -896,10 +907,6 @@ Heading('A level 4 headline', level=4, tags=['example'])
 **** A level 4 headline  :example:
 
 :END:
-
-
-
-Now you can probably see the possibilities for building up documents with Python code that can be converted to org-mode, html, etc...
 
 *** More complex display with _ipython_display_
 
@@ -936,20 +943,20 @@ FlotPlot(x, np.sin(x))
 
 #+RESULTS:
 :RESULTS:
-# Out[9]:
+# Out[8]:
 #+BEGIN_EXPORT html
-<div id="ae2fe59a-87ea-4502-9a03-83ee85c6a8b3" style="height: 300px; width:80%;"></div>
+<div id="9a839146-f9a3-4512-b6b5-8d11a4d42e3e" style="height: 300px; width:80%;"></div>
 #+END_EXPORT
 
 # application/javascript
 #+BEGIN_SRC javascript
 
         require(["//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"], function() {
-          var line = JSON.parse("[[0.0, 0.0], [0.20408163265306123, 0.20266793654820095], [0.40816326530612246, 0.39692414892492234], [0.6122448979591837, 0.5747060412161792], [0.8163265306122449, 0.7286347834693504], [1.0204081632653061, 0.8523215697196184], [1.2244897959183674, 0.9406327851124867], [1.4285714285714286, 0.9899030763721239], [1.6326530612244898, 0.9980874821347183], [1.836734693877551, 0.9648463089837632], [2.0408163265306123, 0.8915592304110037], [2.2448979591836737, 0.7812680235262638], [2.4489795918367347, 0.6385503202266021], [2.6530612244897958, 0.469329612777201], [2.857142857142857, 0.28062939951435684], [3.0612244897959187, 0.0802816748428135], [3.2653061224489797, -0.12339813736217871], [3.4693877551020407, -0.3219563150726187], [3.673469387755102, -0.5071517094845144], [3.8775510204081636, -0.6712977935519321], [4.081632653061225, -0.8075816909683363], [4.285714285714286, -0.9103469443107828], [4.4897959183673475, -0.9753282860670456], [4.6938775510204085, -0.9998286683840896], [4.8979591836734695, -0.9828312039256306], [5.1020408163265305, -0.9250413717382029], [5.3061224489795915, -0.8288577363730427], [5.510204081632653, -0.6982723955653996], [5.714285714285714, -0.5387052883861563], [5.918367346938775, -0.3567792408989381], [6.122448979591837, -0.16004508604325057], [6.326530612244898, 0.04333173336868346], [6.530612244897959, 0.2449100710119793], [6.73469387755102, 0.4363234264718193], [6.938775510204081, 0.6096271964908323], [7.142857142857143, 0.7576284153927202], [7.346938775510204, 0.8741842988197335], [7.551020408163265, 0.9544571997387519], [7.755102040816327, 0.9951153947776636], [7.959183673469388, 0.9944713672636168], [8.16326530612245, 0.9525518475314604], [8.36734693877551, 0.8710967034823207], [8.571428571428571, 0.7534867274396376], [8.775510204081632, 0.6046033165061543], [8.979591836734695, 0.4306258703827373], [9.183673469387756, 0.23877531564403087], [9.387755102040817, 0.03701440148506237], [9.591836734693878, -0.1662827938487564], [9.795918367346939, -0.3626784288265488], [10.0, -0.5440211108893698]]");
+          var line = JSON.parse("[[0.0, 0.0], [0.20408163265306123, 0.20266793654820095], [0.40816326530612246, 0.39692414892492234], [0.6122448979591837, 0.5747060412161791], [0.8163265306122449, 0.7286347834693503], [1.0204081632653061, 0.8523215697196184], [1.2244897959183674, 0.9406327851124867], [1.4285714285714286, 0.9899030763721239], [1.6326530612244898, 0.9980874821347183], [1.836734693877551, 0.9648463089837632], [2.0408163265306123, 0.8915592304110037], [2.2448979591836737, 0.7812680235262639], [2.4489795918367347, 0.6385503202266021], [2.6530612244897958, 0.469329612777201], [2.857142857142857, 0.28062939951435684], [3.0612244897959187, 0.0802816748428135], [3.2653061224489797, -0.12339813736217871], [3.4693877551020407, -0.3219563150726187], [3.673469387755102, -0.5071517094845144], [3.8775510204081636, -0.6712977935519321], [4.081632653061225, -0.8075816909683364], [4.285714285714286, -0.9103469443107828], [4.4897959183673475, -0.9753282860670456], [4.6938775510204085, -0.9998286683840896], [4.8979591836734695, -0.9828312039256306], [5.1020408163265305, -0.9250413717382029], [5.3061224489795915, -0.8288577363730427], [5.510204081632653, -0.6982723955653996], [5.714285714285714, -0.5387052883861563], [5.918367346938775, -0.35677924089893803], [6.122448979591837, -0.16004508604325057], [6.326530612244898, 0.04333173336868346], [6.530612244897959, 0.2449100710119793], [6.73469387755102, 0.4363234264718193], [6.938775510204081, 0.6096271964908323], [7.142857142857143, 0.7576284153927202], [7.346938775510204, 0.8741842988197335], [7.551020408163265, 0.9544571997387519], [7.755102040816327, 0.9951153947776636], [7.959183673469388, 0.9944713672636168], [8.16326530612245, 0.9525518475314604], [8.36734693877551, 0.8710967034823207], [8.571428571428571, 0.7534867274396376], [8.775510204081632, 0.6046033165061543], [8.979591836734695, 0.43062587038273736], [9.183673469387756, 0.23877531564403087], [9.387755102040817, 0.03701440148506237], [9.591836734693878, -0.1662827938487564], [9.795918367346939, -0.3626784288265488], [10.0, -0.5440211108893699]]");
           console.log(line);
-          $.plot("#ae2fe59a-87ea-4502-9a03-83ee85c6a8b3", [line]);
+          $.plot("#9a839146-f9a3-4512-b6b5-8d11a4d42e3e", [line]);
         });
-        
+
 #+END_SRC
 :END:
 
@@ -980,16 +987,17 @@ df.index.name = 'indexname'
 df
 #+END_SRC
 
-
 #+RESULTS:
 :RESULTS:
-# Out[10]:
+# Out[9]:
 # text/org
 | indexname | widecolumn |
 |-----------+------------|
 |         0 |          1 |
 |         1 |          2 |
 :END:
+
+Here is a bigger example.
 
 #+BEGIN_SRC ipython :display text/org
 import numpy as np
@@ -1000,15 +1008,15 @@ df2
 
 #+RESULTS:
 :RESULTS:
-# Out[11]:
+# Out[10]:
 # text/org
 |   | a | b | c | d | e |
 |---+---+---+---+---+---|
-| 0 | 3 | 8 | 9 | 8 | 3 |
-| 1 | 6 | 3 | 5 | 8 | 6 |
-| 2 | 4 | 5 | 3 | 1 | 3 |
-| 3 | 3 | 5 | 0 | 6 | 1 |
-| 4 | 4 | 0 | 6 | 8 | 4 |
+| 0 | 2 | 8 | 2 | 2 | 5 |
+| 1 | 7 | 1 | 1 | 1 | 4 |
+| 2 | 3 | 2 | 8 | 3 | 2 |
+| 3 | 8 | 9 | 2 | 7 | 1 |
+| 4 | 2 | 8 | 7 | 0 | 2 |
 :END:
 
 ** Other languages
@@ -1020,10 +1028,9 @@ pip install git+https://github.com/Calysto/calysto_hy.git --user
 python -m calysto_hy install --user
 #+END_SRC
 
-
 Now we can use it in scimax. This is already pre-configured in scimax. For fun, we use hylang here.
 
-#+BEGIN_SRC jupyter-hy
+#+BEGIN_SRC jupyter-hy :session hylang
 (import [tensorflow :as tf])
 
 (setv a (tf.constant 3)
@@ -1034,7 +1041,7 @@ Now we can use it in scimax. This is already pre-configured in scimax. For fun, 
 #+END_SRC
 
 #+RESULTS:
-: # Out[2]:
+: # Out[1]:
 : # output
 : : 5
 
@@ -1169,4 +1176,3 @@ If you have a lot of blocks in your buffer, you can use a file property like thi
 #+BEGIN_EXAMPLE
 ,#+PROPERTY: header-args:ipython :session kernel-16577-ssh.json
 #+END_EXAMPLE
-
