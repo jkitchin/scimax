@@ -616,7 +616,8 @@ This function is called by `org-babel-execute-src-block'."
 			  "scratch")))
       (setq header-line-format (format "Ipython session: %s" session-name))
       (add-to-list 'org-babel-default-header-args:ipython
-		   (cons :session session-name))))
+		   (cons :session session-name))
+      (setf (cdr (assoc :session params)) session-name)))
 
   (ob-ipython--clear-output-buffer)
 
