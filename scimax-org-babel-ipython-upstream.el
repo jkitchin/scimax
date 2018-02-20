@@ -63,7 +63,7 @@ string to be formatted."
 
 (defcustom ob-ipython-key-bindings
   '(("C-<return>" . #'org-ctrl-c-ctrl-c)
-    ("M-<return>" . #'scimax-execute-and-next-block)
+    ("M-<return>" . (lambda () (interactive) (scimax-execute-and-next-block t)))
     ("S-<return>" . #'scimax-execute-and-next-block)
     ("M-S-<return>" . #'scimax-execute-to-point)
     ("s-<return>" . #'scimax-ob-ipython-restart-kernel-execute-block)
@@ -317,7 +317,7 @@ Note: you will lose header arguments from this.
 -----------------------------------------------------------------------------------------
 _C-<return>_: run cell           _[_: dedent            _C-<up>_: goto start           _<up>_:
 _S-<return>_: run cell and next  _]_: indent          _C-<down>_: goto end    _<left>_:        _<right>_:
-_M-<return>_: run cell and next  _-_: split cell      _C-<left>_: word left          _<down>_:
+_M-<return>_: run cell and new   _-_: split cell      _C-<left>_: word left          _<down>_:
 ^ ^                              _/_: toggle comment _C-<right>_: word right
 ^ ^                              _a_: select cell
 
@@ -347,7 +347,7 @@ _c_: command mode   _z_: undo   _y_: redo
 
   ("C-<return>" org-ctrl-c-ctrl-c "run cell" :color red)
   ("S-<return>" scimax-execute-and-next-block "run cell, select below" :color red)
-  ("M-<return>" scimax-execute-and-next-block "run cell, insert below" :color red)
+  ("M-<return>" (scimax-execute-and-next-block t) "run cell, insert new" :color red)
 
   ("-" scimax-split-src-block"split cell")
 
@@ -421,8 +421,8 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 "
   ("<return>" scimax-jupyter-edit-mode/body "Enter edit mode")
   ("C-<return>" org-ctrl-c-ctrl-c "run cell" :color red)
-  ("S-<return>" scimax-execute-and-next-block "run cell, select below" :color red)
-  ("M-<return>" scimax-execute-and-next-block "run cell, insert below" :color red)
+  ("S-<return>" scimax-execute-and-next-block "run cell, select next" :color red)
+  ("M-<return>" (scimax-execute-and-next-block t) "run cell, insert new" :color red)
 
   ;; These don't really have great analogs in org-mode, but maybe it makes sense
   ;; to be able to do this.
