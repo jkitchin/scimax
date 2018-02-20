@@ -474,7 +474,7 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
 
 (defface org-block-ipython
   `((t (:background "thistle1")))
-  "Face for python blocks") 
+  "Face for python blocks")
 
 (defface org-block-jupyter-hy
   `((t (:background "light goldenrod yellow")))
@@ -620,11 +620,11 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 ;; ** numbering latex equations
 (defun org-renumber-environment (orig-func &rest args)
   "A function to inject numbers in LaTeX fragment previews."
-  (let ((results '()) 
+  (let ((results '())
 	(counter -1)
 	(numberp))
 
-    (setq results (loop for (begin .  env) in 
+    (setq results (loop for (begin .  env) in
 			(org-element-map (org-element-parse-buffer) 'latex-environment
 			  (lambda (env)
 			    (cons
@@ -639,7 +639,7 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 			 ((string-match "\\\\begin{align}" env)
 			  (prog2
 			      (incf counter)
-			      (cons begin counter)			    
+			      (cons begin counter)
 			    (with-temp-buffer
 			      (insert env)
 			      (goto-char (point-min))
@@ -656,7 +656,7 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 	    (concat
 	     (format "\\setcounter{equation}{%s}\n" numberp)
 	     (car args)))))
-  
+
   (apply orig-func args))
 
 (advice-add 'org-create-formula-image :around #'org-renumber-environment)
@@ -678,27 +678,22 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 			(upcase (symbol-name type)))
 	       (interactive)
 	       (cond
-		;; We have an active region we want to make bold
+		;; We have an active region we want to apply
 		((region-active-p)
-		 (let* ((bounds (list (region-beginning) (region-end))) 
+		 (let* ((bounds (list (region-beginning) (region-end)))
 			(start (apply 'min bounds))
 			(end (apply 'max bounds))
 			(lines))
-
-		   ;; this makes sure we don't do something silly like bold part
-		   ;; of a word, and moves the boundaries to be inclusive of the
-		   ;; part before start and after end if we are not looking at a
-		   ;; space or start/end of a word
-		   (save-excursion
-		     (goto-char start)
-		     (unless (looking-at " \\|\\<")
-		       (backward-word)
-		       (setq start (point)))
-		     (goto-char end)
-		     (unless (looking-at " \\|\>")
-		       (forward-word)
-		       (setq end (point))))
-
+		   (unless (memq ',type '(subscript superscript))
+		     (save-excursion
+		       (goto-char start)
+		       (unless (looking-at " \\|\\<")
+			 (backward-word)
+			 (setq start (point)))
+		       (goto-char end)
+		       (unless (looking-at " \\|\>")
+			 (forward-word)
+			 (setq end (point)))))
 		   (setq lines
 			 (s-join "\n" (mapcar
 				       (lambda (s)
@@ -707,10 +702,11 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 						     (s-trim s)
 						     ,end-marker)
 					   s))
-				       (split-string (buffer-substring start end) "\n"))))
+				       (split-string
+					(buffer-substring start end) "\n"))))
 		   (setf (buffer-substring start end) lines)
 		   (forward-char (length lines))))
-		;; We are on a word so mark it up
+		;; We are on a word with no region selected
 		((thing-at-point 'word)
 		 (cond
 		  ;; beginning of a word
@@ -718,13 +714,20 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 		   (insert ,beginning-marker)
 		   (re-search-forward "\\>")
 		   (insert ,end-marker))
-		  ;; in a word
+		  ;; not at start, so we just sub/sup the character at point
+		  ((memq ',type '(subscript superscript))
+		   (insert ,beginning-marker)
+		   (forward-char ,(- (length beginning-marker) 1))
+		   (insert ,end-marker))
+		  ;; somewhere else in a word, and handled sub/sup. mark up the
+		  ;; whole word.
 		  (t
 		   (re-search-backward "\\<")
 		   (insert ,beginning-marker)
 		   (re-search-forward "\\>")
 		   (insert ,end-marker))))
-		;; not at a word, insert markers and put point between them.
+		;; not at a word or region, insert markers and put point between
+		;; them.
 		(t
 		 (insert ,(concat beginning-marker end-marker))
 		 (backward-char ,(length end-marker)))))))
@@ -869,8 +872,8 @@ F5 inserts the entity code."
 			     (format
 			      "https://www.google.com/#safe=off&q=%s"
 			      path))))
-		 
-		 
+
+
 		 (cond
 		  ((eq format 'md)
 		   (format "[%s](%s)" (or desc path) url))))))
@@ -889,7 +892,7 @@ F5 inserts the entity code."
 		((eq format 'latex)
 		 ;; write out the latex command
 		 (format "\\attachfile{%s}" keyword)))))
-  
+
   (org-add-link-type
    "attachfile"
    (lambda (link-string) (org-open-file link-string))
@@ -910,10 +913,10 @@ F5 inserts the entity code."
 	       (cond
 		((eq format 'html)
 		 (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
-<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword)) 
+<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword))
 		((eq format 'latex)
 		 ""))))
-  
+
   (org-add-link-type
    "altmetric"
    (lambda (doi)
@@ -922,7 +925,7 @@ F5 inserts the entity code."
      (cond
       ((eq format 'html)
        (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
-<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword)) 
+<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword))
       ((eq format 'latex)
        "")))))
 
@@ -1018,9 +1021,9 @@ F5 inserts the entity code."
 Optional FONTIFY colors the headlines. It might slow things down
 a lot with large numbers of org-files or long org-files. This
 function does not open the files."
-  (let ((headlines '())) 
+  (let ((headlines '()))
     (loop for file in files do
-	  (with-temp-buffer 
+	  (with-temp-buffer
 	    (insert-file-contents file)
 	    (when fontify
 	      (org-mode)
@@ -1054,7 +1057,7 @@ Use a double prefix to make it recursive and fontified."
     (ivy-org-jump-to-heading-in-files
      (f-entries "."
 		(lambda (f)
-		  (and 
+		  (and
 		   (f-ext? f "org")
 		   (not (s-contains? "#" f))))
 		recursive)
@@ -1207,10 +1210,10 @@ boundaries."
 			  org-image-actual-width)))
 		       (old (get-char-property-and-overlay
 			     (org-element-property :begin link)
-			     'org-image-overlay))) 
+			     'org-image-overlay)))
 		   (if (and (car-safe old) refresh)
 		       (image-refresh (overlay-get (cdr old) 'display))
-		     
+
 		     (when (and width org-inline-image-resize-function)
 		       (setq file (funcall  org-inline-image-resize-function file width)
 			     width nil))
@@ -1218,7 +1221,7 @@ boundaries."
 						(cond
 						 ((image-type-available-p 'imagemagick)
 						  (and width 'imagemagick))
-						 (t nil)) 
+						 (t nil))
 						nil
 						:width width)))
 		       (when image
@@ -1313,7 +1316,7 @@ Use a prefix arg to get regular RET. "
 	    (org-end-of-subtree)
 	    (org-insert-heading-respect-content)
 	    (outline-show-entry))
-	;; The heading was empty, so we delete it 
+	;; The heading was empty, so we delete it
 	(beginning-of-line)
 	(setf (buffer-substring
 	       (line-beginning-position) (line-end-position)) "")))
