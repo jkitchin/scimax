@@ -318,9 +318,9 @@ Note: you will lose header arguments from this.
 _C-<return>_: run cell           _[_: dedent            _C-<up>_: goto start           _<up>_:
 _S-<return>_: run cell and next  _]_: indent          _C-<down>_: goto end    _<left>_:        _<right>_:
 _M-<return>_: run cell and next  _-_: split cell      _C-<left>_: word left          _<down>_:
-^ ^                              _M_: merge next     _C-<right>_: word right
-^ ^                              _/_: toggle comment
+^ ^                              _/_: toggle comment _C-<right>_: word right
 ^ ^                              _a_: select cell
+
 _c_: command mode   _z_: undo   _y_: redo
 "
   ("[" (python-indent-line t) "dedent" :color red)
@@ -409,6 +409,7 @@ _<down>_: next cell       _M-<return>_: run cell/next   _x_: cut cell           
      _j_: next cell       ^ ^                           _V_: copy above           _0_: restart kernel
      ^ ^                  ^ ^                           _v_: copy below     _<SPC>_: scroll down
      ^ ^                  ^ ^                          _dd_: delete cell  _S-<SPC>_: scroll up
+     ^ ^                  ^ ^                           _M_: merge next
 Convert
 ------------------------------------------------------------------
 _y_: to code
