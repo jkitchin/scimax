@@ -101,15 +101,6 @@ string to be formatted."
   "An alist of key bindings and commands."
   :group 'ob-ipython)
 
-(defun ob-ipython-key-bindings ()
-  "Function to define key-bindings.
-Usually called in a hook function."
-  (cl-loop for cell in ob-ipython-key-bindings
-	   do
-	   (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell)))))
-
-(add-hook 'org-mode-hook 'ob-ipython-key-bindings t)
-
 (defcustom ob-ipython-menu-items
   '(("Execute"
      ["Current block" org-ctrl-c-ctrl-c t]
@@ -151,6 +142,15 @@ text is regexp/string that will become a button.
 cmd is run when you click on the button.
 help is a string for a tooltip."
   :group 'ob-ipython)
+
+(defun ob-ipython-key-bindings ()
+  "Function to define key-bindings.
+Usually called in a hook function."
+  (cl-loop for cell in ob-ipython-key-bindings
+	   do
+	   (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell)))))
+
+(add-hook 'org-mode-hook 'ob-ipython-key-bindings t)
 
 
 ;; * org templates and default header args
@@ -713,6 +713,7 @@ This function is called by `org-babel-execute-src-block'."
   "Execute BODY with PARAMS synchronously."
   (let* ((file (cdr (assoc :ipyfile params)))
          (session (cdr (assoc :session params)))
+	 (result-params (cdr (assoc :result-params params)))
          (result-type (cdr (assoc :result-type params)))
 	 ;; I added this. It is like the command in jupyter, but unfortunately
 	 ;; similar to :display in the results from jupyter. This is to specify
@@ -736,20 +737,8 @@ This function is called by `org-babel-execute-src-block'."
 	(setf (cdr (assoc :value (assoc :result ret)))
 	      (-filter (lambda (el) (memq (car el) display))
 		       (cdr (assoc :value (assoc :result ret))))))
-      (ob-ipython--process-response ret file result-type))))
-
-
-(defun ob-ipython-format-output (file-or-nil output)
-  "Format OUTPUT as a result.
-This adds : to the beginning so the output will export as
-verbatim text. FILE-OR-NIL is not used, and is here for
-compatibility with the other formatters."
-  (when (not (string= "" output))
-    (concat (s-join "\n"
-		    (mapcar (lambda (s)
-			      (s-concat ": " s))
-			    (s-split "\n" output t)))
-	    "\n")))
+      (let ((*ob-ipython-output-results-prefix* (if (-contains? result-params "raw") "" ": ")))
+	(ob-ipython--process-response ret file result-type)))))
 
 
 ;; This gives me the output I want. Note I changed this to process one result at
@@ -772,6 +761,23 @@ compatibility with the other formatters."
 
 
 ;; ** Formatters for output
+(defvar *ob-ipython-output-results-prefix* ": "
+  "Prefix string for output.
+The default is to put a colon in front, making the results verbatim.")
+
+
+(defun ob-ipython-format-output (file-or-nil output)
+  "Format OUTPUT as a result.
+This adds : to the beginning so the output will export as
+verbatim text. FILE-OR-NIL is not used, and is here for
+compatibility with the other formatters."
+  (when (not (string= "" output))
+    (concat (s-join "\n"
+		    (mapcar (lambda (s)
+			      (s-concat *ob-ipython-output-results-prefix* s))
+			    (s-split "\n" output t)))
+	    "\n")))
+
 
 (defun ob-ipython-format-text/plain (file-or-nil value)
   "Format VALUE for text/plain mime-types.
