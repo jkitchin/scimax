@@ -775,8 +775,7 @@ compatibility with the other formatters."
     (concat (s-join "\n"
 		    (mapcar (lambda (s)
 			      (s-concat *ob-ipython-output-results-prefix* s))
-			    (s-split "\n" output t)))
-	    "\n")))
+			    (s-split "\n" output t))))))
 
 
 (defun ob-ipython-format-text/plain (file-or-nil value)
@@ -800,7 +799,9 @@ FILE-OR-NIL is not used in this function."
 (defun ob-ipython-format-text/html (file-or-nil value)
   "Format VALUE for text/html mime-types.
 FILE-OR-NIL is not used in this function."
-  (format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value))
+  (s-join "\n"
+	  (list (if ob-ipython-show-mime-types "# text/html" "")
+		(format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value))))
 
 
 (defun ob-ipython-format-text/latex (file-or-nil value)
@@ -814,7 +815,8 @@ FILE-OR-NIL is not used in this function."
 (defun ob-ipython-format-text/org (file-or-nil value)
   "Format VALUE for text/org mime-types.
 FILE-OR-NIL is not used in this function."
-  (s-join "\n" (list "# text/org" value)))
+  (s-join "\n" (list (if ob-ipython-show-mime-types "# text/org" "")
+		     value)))
 
 
 (defun ob-ipython--generate-file-name (suffix)
