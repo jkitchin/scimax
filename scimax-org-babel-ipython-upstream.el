@@ -602,10 +602,15 @@ variables, etc."
 (defun org-babel-execute:ipython (body params)
   "Execute a block of IPython code with Babel.
 This function is called by `org-babel-execute-src-block'."
-
-  ;; TODO: how to deal with user named sessions and unique?
-  (when ob-ipython-buffer-unique-kernel
-    ;; Use buffer local variables for this.
+  (when (and
+	 ;; if these are equal, we use default, if not user defined session
+	 ;; unless they just used :session
+	 (not (null (cdr (assoc :session
+				(third (org-babel-get-src-block-info t))))))
+	 (eq (assoc :session org-babel-default-header-args:ipython)
+	     (assoc :session (third (org-babel-get-src-block-info t))))
+	 ;; we want unique kernels
+	 ob-ipython-buffer-unique-kernel)
     (make-local-variable 'org-babel-default-header-args:ipython)
 
     ;; remove the old session info
@@ -619,6 +624,7 @@ This function is called by `org-babel-execute-src-block'."
       (add-to-list 'org-babel-default-header-args:ipython
 		   (cons :session session-name))
       (setf (cdr (assoc :session params)) session-name)))
+
 
   (ob-ipython--clear-output-buffer)
 
