@@ -66,10 +66,11 @@ With a prefix BELOW move point to lower block."
       (forward-char -1))))
 
 
-(defun scimax-execute-and-next-block ()
+(defun scimax-execute-and-next-block (&optional new)
   "Execute this block and either jump to the next block with the
-same language, or add a new one."
-  (interactive)
+same language, or add a new one.
+With prefix arg NEW, always insert new cell."
+  (interactive "P")
   (org-babel-execute-src-block)
   ;; we ignore-errors here because when there is no next block it is a
   ;; user-error, not nil.
@@ -80,9 +81,9 @@ same language, or add a new one."
 			   (while (setq next-block (org-babel-next-src-block))
 			     (when (string= lang (org-element-property :language (org-element-context)))
 			       (throw 'block next-block))))))))
-    (if next-block
-	(goto-char (match-beginning 0))
-      (scimax-insert-src-block t))))
+    (if (or new (not next-block))
+	(scimax-insert-src-block t)
+      (goto-char (match-beginning 0)))))
 
 
 (defun scimax-execute-to-point ()

@@ -63,7 +63,7 @@ string to be formatted."
 
 (defcustom ob-ipython-key-bindings
   '(("C-<return>" . #'org-ctrl-c-ctrl-c)
-    ("M-<return>" . #'scimax-execute-and-next-block)
+    ("M-<return>" . (lambda () (interactive) (scimax-execute-and-next-block t)))
     ("S-<return>" . #'scimax-execute-and-next-block)
     ("M-S-<return>" . #'scimax-execute-to-point)
     ("s-<return>" . #'scimax-ob-ipython-restart-kernel-execute-block)
@@ -100,15 +100,6 @@ string to be formatted."
     ("<mouse-3>" . #'scimax-ob-ipython-popup-command))
   "An alist of key bindings and commands."
   :group 'ob-ipython)
-
-(defun ob-ipython-key-bindings ()
-  "Function to define key-bindings.
-Usually called in a hook function."
-  (cl-loop for cell in ob-ipython-key-bindings
-	   do
-	   (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell)))))
-
-(add-hook 'org-mode-hook 'ob-ipython-key-bindings t)
 
 (defcustom ob-ipython-menu-items
   '(("Execute"
@@ -151,6 +142,15 @@ text is regexp/string that will become a button.
 cmd is run when you click on the button.
 help is a string for a tooltip."
   :group 'ob-ipython)
+
+(defun ob-ipython-key-bindings ()
+  "Function to define key-bindings.
+Usually called in a hook function."
+  (cl-loop for cell in ob-ipython-key-bindings
+	   do
+	   (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell)))))
+
+(add-hook 'org-mode-hook 'ob-ipython-key-bindings t)
 
 
 ;; * org templates and default header args
@@ -317,7 +317,7 @@ Note: you will lose header arguments from this.
 -----------------------------------------------------------------------------------------
 _C-<return>_: run cell           _[_: dedent            _C-<up>_: goto start           _<up>_:
 _S-<return>_: run cell and next  _]_: indent          _C-<down>_: goto end    _<left>_:        _<right>_:
-_M-<return>_: run cell and next  _-_: split cell      _C-<left>_: word left          _<down>_:
+_M-<return>_: run cell and new   _-_: split cell      _C-<left>_: word left          _<down>_:
 ^ ^                              _/_: toggle comment _C-<right>_: word right
 ^ ^                              _a_: select cell
 
@@ -347,7 +347,7 @@ _c_: command mode   _z_: undo   _y_: redo
 
   ("C-<return>" org-ctrl-c-ctrl-c "run cell" :color red)
   ("S-<return>" scimax-execute-and-next-block "run cell, select below" :color red)
-  ("M-<return>" scimax-execute-and-next-block "run cell, insert below" :color red)
+  ("M-<return>" (scimax-execute-and-next-block t) "run cell, insert new" :color red)
 
   ("-" scimax-split-src-block"split cell")
 
@@ -421,8 +421,8 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 "
   ("<return>" scimax-jupyter-edit-mode/body "Enter edit mode")
   ("C-<return>" org-ctrl-c-ctrl-c "run cell" :color red)
-  ("S-<return>" scimax-execute-and-next-block "run cell, select below" :color red)
-  ("M-<return>" scimax-execute-and-next-block "run cell, insert below" :color red)
+  ("S-<return>" scimax-execute-and-next-block "run cell, select next" :color red)
+  ("M-<return>" (scimax-execute-and-next-block t) "run cell, insert new" :color red)
 
   ;; These don't really have great analogs in org-mode, but maybe it makes sense
   ;; to be able to do this.
@@ -713,6 +713,7 @@ This function is called by `org-babel-execute-src-block'."
   "Execute BODY with PARAMS synchronously."
   (let* ((file (cdr (assoc :ipyfile params)))
          (session (cdr (assoc :session params)))
+	 (result-params (cdr (assoc :result-params params)))
          (result-type (cdr (assoc :result-type params)))
 	 ;; I added this. It is like the command in jupyter, but unfortunately
 	 ;; similar to :display in the results from jupyter. This is to specify
@@ -736,20 +737,8 @@ This function is called by `org-babel-execute-src-block'."
 	(setf (cdr (assoc :value (assoc :result ret)))
 	      (-filter (lambda (el) (memq (car el) display))
 		       (cdr (assoc :value (assoc :result ret))))))
-      (ob-ipython--process-response ret file result-type))))
-
-
-(defun ob-ipython-format-output (file-or-nil output)
-  "Format OUTPUT as a result.
-This adds : to the beginning so the output will export as
-verbatim text. FILE-OR-NIL is not used, and is here for
-compatibility with the other formatters."
-  (when (not (string= "" output))
-    (concat (s-join "\n"
-		    (mapcar (lambda (s)
-			      (s-concat ": " s))
-			    (s-split "\n" output t)))
-	    "\n")))
+      (let ((*ob-ipython-output-results-prefix* (if (-contains? result-params "raw") "" ": ")))
+	(ob-ipython--process-response ret file result-type)))))
 
 
 ;; This gives me the output I want. Note I changed this to process one result at
@@ -772,6 +761,22 @@ compatibility with the other formatters."
 
 
 ;; ** Formatters for output
+(defvar *ob-ipython-output-results-prefix* ": "
+  "Prefix string for output.
+The default is to put a colon in front, making the results verbatim.")
+
+
+(defun ob-ipython-format-output (file-or-nil output)
+  "Format OUTPUT as a result.
+This adds : to the beginning so the output will export as
+verbatim text. FILE-OR-NIL is not used, and is here for
+compatibility with the other formatters."
+  (when (not (string= "" output))
+    (concat (s-join "\n"
+		    (mapcar (lambda (s)
+			      (s-concat *ob-ipython-output-results-prefix* s))
+			    (s-split "\n" output t))))))
+
 
 (defun ob-ipython-format-text/plain (file-or-nil value)
   "Format VALUE for text/plain mime-types.
@@ -794,7 +799,9 @@ FILE-OR-NIL is not used in this function."
 (defun ob-ipython-format-text/html (file-or-nil value)
   "Format VALUE for text/html mime-types.
 FILE-OR-NIL is not used in this function."
-  (format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value))
+  (s-join "\n"
+	  (list (if ob-ipython-show-mime-types "# text/html" "")
+		(format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value))))
 
 
 (defun ob-ipython-format-text/latex (file-or-nil value)
@@ -808,7 +815,8 @@ FILE-OR-NIL is not used in this function."
 (defun ob-ipython-format-text/org (file-or-nil value)
   "Format VALUE for text/org mime-types.
 FILE-OR-NIL is not used in this function."
-  (s-join "\n" (list "# text/org" value)))
+  (s-join "\n" (list (if ob-ipython-show-mime-types "# text/org" "")
+		     value)))
 
 
 (defun ob-ipython--generate-file-name (suffix)
