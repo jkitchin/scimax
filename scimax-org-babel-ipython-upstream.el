@@ -32,6 +32,10 @@
   "If non-nil do not show the execution count in output."
   :group 'ob-ipython)
 
+(defcustom ob-ipython-kill-kernel-on-exit t
+  "If non-nil, prompt user to kill kernel when killing a buffer."
+  :group 'ob-ipython)
+
 (defcustom ob-ipython-delete-stale-images t
   "If non-nil remove images that will be replaced."
   :group 'ob-ipython)
@@ -551,6 +555,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
     (setq header-line-format nil)
     (redisplay)))
 
+
 
 ;; * block editing functions
 (defun scimax-merge-ipython-blocks (r1 r2)
@@ -624,6 +629,11 @@ a new kernel will be started."
 (defun org-babel-execute:ipython (body params)
   "Execute a block of IPython code with Babel.
 This function is called by `org-babel-execute-src-block'."
+
+  ;; make sure we get prompted to kill the
+  (when ob-ipython-kill-kernel-on-exit
+    (add-hook 'kill-buffer-hook 'scimax-ob-ipython-kill-kernel nil t))
+
   (when (and
 	 ;; if these are equal, we use default, if not user defined session
 	 ;; unless they just used :session
