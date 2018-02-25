@@ -1291,15 +1291,21 @@ Use a prefix arg to get regular RET. "
      ((org-inlinetask-in-task-p)
       (org-return))
 
-     ;; checkboxes too
+     ;; checkboxes - add new or delete empty
      ((org-at-item-checkbox-p)
-      (if (org-element-property :contents-begin
-				(org-element-context))
-	  ;; we have content so add a new checkbox
-	  (org-insert-todo-heading nil)
-	;; no content so delete it
-	(setf (buffer-substring (line-beginning-position) (point)) "")
-	(org-return)))
+      (cond
+       ;; at the end of a line.
+       ((and (eolp)
+	     (not (eq 'item (car (org-element-context)))))
+	(org-insert-todo-heading nil))
+       ;; no content, delete
+       ((and (eolp) (eq 'item (car (org-element-context))))
+	(setf (buffer-substring (line-beginning-position) (point)) ""))
+       ((eq 'paragraph (car (org-element-context)))
+	(goto-char (org-element-property :end (org-element-context)))
+	(org-insert-todo-heading nil))
+       (t
+	(org-return))))
 
      ;; lists end with two blank lines, so we need to make sure we are also not
      ;; at the beginning of a line to avoid a loop where a new entry gets
