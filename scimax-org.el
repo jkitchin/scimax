@@ -1501,29 +1501,63 @@ It is for commands that depend on the major mode. One example is
 ;; 			   (scimax-src-keymap-mode +1)))
 
 ;; * radio checkboxes
-(defun scimax-radio-check-box-hook-fn ()
-  "When a checkbox list has an org attribute of :radio, only one
-can be checked a time. Checking one will uncheck the others.
-#+attr_org: :radio
-- [ ] one
-- [X] two
-- [ ] three
-"
-  (when (-contains? (org-element-property
-                     :attr_org
-                     (org-element-property :parent (org-element-context)))
-                    ":radio")
-    (save-excursion
-      (loop for el in (org-element-property :structure (org-element-context))
-            do
-            (goto-char (car el))
-            (when (re-search-forward "\\[X\\]" (line-end-position) t)
-              (replace-match "[ ]"))))
-    (forward-char)
-    (insert "X")
-    (delete-char 1)))
+(defun scimax-in-radio-list-p ()
+  "Returns radio list if in one, else nil."
+  (interactive)
+  (let* ((element (org-element-context))
+	 (radio-list (cond
+		      ;; on an item. easy.
+		      ((and (eq 'item (car element))
+			    (-contains?
+			     (org-element-property
+			      :attr_org
+			      (org-element-property :parent element))
+			     ":radio"))
+		       (org-element-property :parent element))
+		      ;; on an item paragraph
+		      ((and (eq 'paragraph (car element))
+			    (eq 'item (car (org-element-property :parent element)))
+			    (-contains?
+			     (org-element-property
+			      :attr_org
+			      (org-element-property
+			       :parent
+			       (org-element-property :parent element)))
+			     ":radio"))
+		       (org-element-property
+			:parent
+			(org-element-property :parent element)))
+		      ;; not on an item or item paragraph
+		      (t
+		       nil))))
+    radio-list))
 
-(add-hook 'org-checkbox-statistics-hook 'scimax-radio-check-box-hook-fn)
+(defun scimax-radio-CcCc ()
+  (interactive)
+
+  (let ((radio-list (scimax-in-radio-list-p))
+	(p (point)))
+    (when radio-list
+      ;; clear all boxes
+      (save-excursion
+	(loop for el in (org-element-property :structure radio-list)
+	      do
+	      (goto-char (car el))
+	      (when (re-search-forward "\\[X\\]" (line-end-position) t)
+		(replace-match "[ ]")))
+	;; Now figure out where to put the new X
+	(loop for el in (org-element-property :structure radio-list)
+	      do
+	      (when (and (> p (car el))
+			 (< p (car (last el))))
+		(goto-char (car el))
+		(when (re-search-forward "\\[ \\]" (line-end-position) t)
+		  (replace-match "[X]")))))
+      t)))
+
+(add-hook 'org-ctrl-c-ctrl-c-hook 'scimax-radio-CcCc)
+;; this works with mouse checking.
+(add-hook 'org-checkbox-statistics-hook 'scimax-radio-CcCc)
 
 (defun org-get-plain-list (name)
   "Get the org-element representation of a plain-list named NAME."
