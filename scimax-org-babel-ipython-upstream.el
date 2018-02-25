@@ -600,6 +600,26 @@ variables, etc."
 
 ;; * Modifications of ob-ipython
 
+(defun ob-ipython-kill-kernel (proc)
+  "Kill a kernel process. If you then re-evaluate a source block
+a new kernel will be started."
+  (interactive (ob-ipython--choose-kernel))
+  (when proc
+    (let* ((proc-name (process-name proc))
+	   (proc-buffer (format "*ob-ipython-%s*" proc-name))
+	   (cfile (expand-file-name
+		   (format "%s.json" (s-replace "kernel-" "emacs-" proc-name))
+		   (s-trim (shell-command-to-string "jupyter --runtime-dir")))))
+
+      (when (f-exists? cfile)
+	(f-delete cfile))
+      (delete-process proc)
+      (kill-buffer (process-buffer proc))
+      (if (get-buffer "*ob-ipython-out*") (kill-buffer "*ob-ipython-out*"))
+      (setq header-line nil)
+
+      (message (format "Killed %s and deleted %s" proc-name cfile)))))
+
 ;; Modified to make buffer unique kernels automatically
 (defun org-babel-execute:ipython (body params)
   "Execute a block of IPython code with Babel.
