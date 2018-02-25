@@ -647,7 +647,6 @@ This function is called by `org-babel-execute-src-block'."
 		   (cons :session session-name))
       (setf (cdr (assoc :session params)) session-name)))
 
-
   (ob-ipython--clear-output-buffer)
 
   ;; delete any figures that will be replaced and clear results here.
