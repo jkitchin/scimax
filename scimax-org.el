@@ -714,7 +714,11 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 		   (insert ,beginning-marker)
 		   (re-search-forward "\\>")
 		   (insert ,end-marker))
-		  ;; not at start, so we just sub/sup the character at point
+		  ;; end of a word
+		  ((looking-back "\\>" 1)
+		   (insert ,(concat beginning-marker end-marker))
+		   (backward-char ,(length end-marker)))
+		  ;; not at start or end, so we just sub/sup the character at point
 		  ((memq ',type '(subscript superscript))
 		   (insert ,beginning-marker)
 		   (forward-char ,(- (length beginning-marker) 1))
