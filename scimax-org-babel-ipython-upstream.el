@@ -508,11 +508,13 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 
 (defun scimax-ob-ipython-default-session ()
   "Returns the default name of the session for a src block."
-  (concat (car (org-babel-get-src-block-info t))
-	  "-"
-	  (if-let (bf (buffer-file-name))
-	      (md5 (expand-file-name bf))
-	    "scratch")))
+  (concat
+   ;; this is the block language
+   (car (org-babel-get-src-block-info t))
+   "-"
+   (if-let (bf (buffer-file-name))
+       (md5 (expand-file-name bf))
+     "scratch")))
 
 (defun scimax-ob-ipython-restart-kernel-execute-block ()
   "Restart kernel and execute block"
