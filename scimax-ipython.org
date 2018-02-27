@@ -231,7 +231,7 @@ Note you can put :restart in the src block header and ipython will restart every
 | H-e   | Edit the src block header in the minibuffer                      |
 | H-w   | Kill the current block                                           |
 | H-n   | Copy the current block                                           |
-| H-c   | Clone the current block (make a copy of it below the current one |
+| H-o   | Clone the current block (make a copy of it below the current one |
 | H-m   | Merge blocks in the selected region                              |
 | s-w   | Move current block before the previous one                       |
 | s-s   | Move current block below the next one                            |
@@ -262,34 +262,36 @@ ob-ipython-key-bindings
 #+END_SRC
 
 #+RESULTS:
-| C-<return>   | function | org-ctrl-c-ctrl-c                               |
-| M-<return>   | function | scimax-execute-and-next-block                   |
-| S-<return>   | function | scimax-execute-and-next-block                   |
-| M-S-<return> | function | scimax-execute-to-point                         |
-| s-<return>   | function | scimax-ob-ipython-restart-kernel-execute-block  |
-| M-s-<return> | function | scimax-restart-ipython-and-execute-to-point     |
-| H-<return>   | function | scimax-ob-ipython-restart-kernel-execute-buffer |
-| H-k          | function | scimax-ob-ipython-kill-kernel                   |
-| H-r          | function | org-babel-switch-to-session                     |
-| s-i          | function | org-babel-previous-src-block                    |
-| s-k          | function | org-babel-next-src-block                        |
-| H-q          | function | scimax-jump-to-visible-block                    |
-| H-s-q        | function | scimax-jump-to-block                            |
-| H-=          | function | scimax-insert-src-block                         |
-| H--          | function | scimax-split-src-block                          |
-| H-n          | function | scimax-ob-copy-block-and-results                |
-| H-w          | function | scimax-ob-kill-block-and-results                |
-| H-c          | function | scimax-ob-clone-block                           |
-| s-w          | function | scimax-ob-move-src-block-up                     |
-| s-s          | function | scimax-ob-move-src-block-down                   |
-| H-l          | function | org-babel-remove-result                         |
-| H-s-l        | function | scimax-ob-clear-all-results                     |
-| H-m          | function | scimax-merge-ipython-blocks                     |
-| H-e          | function | scimax-ob-edit-header                           |
-| H-M-l        | function | scimax-ob-toggle-line-numbers                   |
-| H-/          | function | ob-ipython-inspect                              |
-| H-s          | function | scimax-obi/body                                 |
-| <mouse-3>    | function | scimax-ob-ipython-popup-command                 |
+| C-<return>   | function | org-ctrl-c-ctrl-c                               |               |                                   |
+| M-<return>   | lambda   | nil                                             | (interactive) | (scimax-execute-and-next-block t) |
+| S-<return>   | function | scimax-execute-and-next-block                   |               |                                   |
+| M-S-<return> | function | scimax-execute-to-point                         |               |                                   |
+| s-<return>   | function | scimax-ob-ipython-restart-kernel-execute-block  |               |                                   |
+| M-s-<return> | function | scimax-restart-ipython-and-execute-to-point     |               |                                   |
+| H-<return>   | function | scimax-ob-ipython-restart-kernel-execute-buffer |               |                                   |
+| H-k          | function | scimax-ob-ipython-kill-kernel                   |               |                                   |
+| H-r          | function | org-babel-switch-to-session                     |               |                                   |
+| s-i          | function | org-babel-previous-src-block                    |               |                                   |
+| s-k          | function | org-babel-next-src-block                        |               |                                   |
+| H-q          | function | scimax-jump-to-visible-block                    |               |                                   |
+| H-s-q        | function | scimax-jump-to-block                            |               |                                   |
+| H-=          | function | scimax-insert-src-block                         |               |                                   |
+| H--          | function | scimax-split-src-block                          |               |                                   |
+| H-n          | function | scimax-ob-copy-block-and-results                |               |                                   |
+| H-w          | function | scimax-ob-kill-block-and-results                |               |                                   |
+| H-o          | function | scimax-ob-clone-block                           |               |                                   |
+| s-w          | function | scimax-ob-move-src-block-up                     |               |                                   |
+| s-s          | function | scimax-ob-move-src-block-down                   |               |                                   |
+| H-l          | function | org-babel-remove-result                         |               |                                   |
+| H-s-l        | function | scimax-ob-clear-all-results                     |               |                                   |
+| H-m          | function | scimax-merge-ipython-blocks                     |               |                                   |
+| H-h          | function | scimax-ob-edit-header                           |               |                                   |
+| H-M-l        | function | scimax-ob-toggle-line-numbers                   |               |                                   |
+| H-e          | function | scimax-jupyter-edit-mode/body                   |               |                                   |
+| H-c          | function | scimax-jupyter-commmand-mode/body               |               |                                   |
+| H-/          | function | ob-ipython-inspect                              |               |                                   |
+| H-s          | function | scimax-obi/body                                 |               |                                   |
+| <mouse-3>    | function | scimax-ob-ipython-popup-command                 |               |                                   |
 
 You can define/change any binding you want like this. They are only active in ipython src blocks.
 
@@ -297,12 +299,20 @@ You can define/change any binding you want like this. They are only active in ip
 (scimax-define-src-key ipython "H-/" #'some-command)
 #+END_SRC
 
+
+If you like the Jupyter keybindings more directly, checkout:
+
+| H-e | function | scimax-jupyter-edit-mode/body    |   |   |
+| H-c | function | scimax-jupyter-command-mode/body |   |   |
+
+
 ** Clickable buttons in src blocks
 
-Jupyter has some nice features like buttons to click on to run a block. We have something like that. The text in angle brackets in the comment below is clickable!
+Jupyter has some nice features like buttons to click on to run a block. We have something like that. The text in angle brackets in the comments below is clickable!
 
 #+BEGIN_SRC ipython
-# <run>  <restart and run>  <repl> <delete block> <menu>
+# <run>  <restart and run>  <repl>  <delete block>  <menu>
+# open some buffers  <output>  <execute>  <debug>
 6 * 2
 #+END_SRC
 
@@ -1176,3 +1186,31 @@ If you have a lot of blocks in your buffer, you can use a file property like thi
 #+BEGIN_EXAMPLE
 ,#+PROPERTY: header-args:ipython :session kernel-16577-ssh.json
 #+END_EXAMPLE
+* Known issues
+** Intermittent hang/error on startup
+Occasionally I notice when executing the first block that it seems to hang or results in an error like:
+
+#+BEGIN_EXAMPLE
+ob-ipython--dump-error: There was a fatal error trying to process the request. See *ob-ipython-debug*
+#+END_EXAMPLE
+
+It almost always works to type C-g if it is hung, and just rerun the block. Then it works fine.
+
+The root of this problem is in:
+
+#+BEGIN_EXAMPLE
+Traceback (most recent call last):
+  File "/Users/jkitchin/vc/jkitchin-github/scimax/ob-ipython-upstream/client.py", line 60, in <module>
+    c = create_client(args.conn_file)
+  File "/Users/jkitchin/vc/jkitchin-github/scimax/ob-ipython-upstream/client.py", line 43, in create_client
+    cf = find_connection_file('emacs-' + name)
+  File "/Users/jkitchin/anaconda/lib/python3.6/site-packages/jupyter_client/connect.py", line 218, in find_connection_file
+    raise IOError("Could not find %r in %r" % (filename, path))
+OSError: Could not find 'emacs-ipython-19a94859c854121de1c305426d09b77e' in ['.', '/Users/jkitchin/Library/Jupyter/runtime']
+#+END_EXAMPLE
+
+Related upstream issues: https://github.com/gregsexton/ob-ipython/issues/162
+
+** Interrupting the kernel does not work
+
+This seems to be an issue with the upstream repo. It may work on unix/Mac, but maybe not on Windows. Probably does not work on remote kernels. See https://github.com/gregsexton/ob-ipython/commit/fcb2c48f64ba1005ad6fe5d1a4149f1117a9b45d
