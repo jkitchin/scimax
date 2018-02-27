@@ -85,14 +85,18 @@ string to be formatted."
     ("H--" . #'scimax-split-src-block)
     ("H-n" . #'scimax-ob-copy-block-and-results)
     ("H-w" . #'scimax-ob-kill-block-and-results)
-    ("H-c" . #'scimax-ob-clone-block)
+    ("H-o" . #'scimax-ob-clone-block)
     ("s-w" . #'scimax-ob-move-src-block-up)
     ("s-s" . #'scimax-ob-move-src-block-down)
     ("H-l" . #'org-babel-remove-result)
     ("H-s-l" . #'scimax-ob-clear-all-results)
     ("H-m" . #'scimax-merge-ipython-blocks)
-    ("H-e" . #'scimax-ob-edit-header)
+    ("H-h" . #'scimax-ob-edit-header)
     ("H-M-l" . #'scimax-ob-toggle-line-numbers)
+
+    ;; the jupyter hydras
+    ("H-e" . #'scimax-jupyter-edit-mode/body)
+    ("H-c" . #'scimax-jupyter-command-mode/body)
 
     ;; Miscellaneous
     ("H-/" . #'ob-ipython-inspect)
@@ -100,7 +104,8 @@ string to be formatted."
     ;; The hydra/popup menu
     ("H-s" . #'scimax-obi/body)
     ("<mouse-3>" . #'scimax-ob-ipython-popup-command))
-  "An alist of key bindings and commands."
+  "An alist of key bindings and commands.
+These are activated in `ob-ipython-key-bindings'."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-menu-items
