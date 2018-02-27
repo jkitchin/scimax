@@ -748,7 +748,7 @@ This function is called by `org-babel-execute-src-block'."
 	  (ipython--async-replace-sentinel sentinel buffer replacement)))
 
      (list sentinel (current-buffer) file result-type))
-    (format "%s - %s" (length ob-ipython--async-queue) sentinel)))
+    (format "%s - %s <output>" (length ob-ipython--async-queue) sentinel)))
 
 
 (defun ob-ipython--execute-sync (body params)
