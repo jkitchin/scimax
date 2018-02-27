@@ -11,8 +11,6 @@
 ;; :async is not new, but it works by itself now, and causes an asynchronous evaluation of the cell
 
 (require 'scimax-ob)
-(require 'button-lock)
-(global-button-lock-mode +1)
 
 ;; * Customizations
 
@@ -140,8 +138,14 @@ string to be formatted."
     ("<repl>"  org-babel-switch-to-session "Click to open repl")
     ("<interrupt>"  ob-ipython-interrupt-kernel "Click to interrupt")
     ("<delete block>"  scimax-ob-kill-block-and-results "kill block")
-    ("<menu>" scimax-ob-ipython-popup-command "Popup menu"))
-  "A list of (text cmd help) to make buttons.
+    ("<menu>" scimax-ob-ipython-popup-command "Popup menu")
+    ("<output>" (lambda () (interactive)
+		  (pop-to-buffer "*ob-ipython-out*")) "open output buffer")
+    ("<debug>" (lambda () (interactive)
+		 (pop-to-buffer "*ob-ipython-debug*")) "open debug buffer")
+    ("<execute>" (lambda () (interactive)
+		   (pop-to-buffer "*ob-ipython-execute*")) "open execute buffer"))
+  "A list of (text cmd help) to make clickable buttons.
 text is regexp/string that will become a button.
 cmd is run when you click on the button.
 help is a string for a tooltip."
@@ -1002,18 +1006,39 @@ Note, this does not work if you run the block async."
 ;; This is an experiment to provide clickable buttons. The idea is you put them
 ;; in a comment line in the block and you can click on them.
 
+(defun ob-ipython-button-font-lock (pattern function help-echo)
+  "Creates the font lock function for buttons."
+  `(lambda (limit)
+     (while (re-search-forward ,pattern limit t)
+       (let ((start (match-beginning 0))
+	     (end (match-end 0))
+	     (map (make-sparse-keymap)))
+	 (define-key map [mouse-1] (lambda ()
+				     (interactive)
+				     (call-interactively ',function)))
+	 (define-key map (kbd "<return>")
+	   (lambda ()
+	     (interactive)
+
+	     (funcall ',function (org-mouse-down-mouse nil))))
+	 (add-text-properties start end
+			      (list 'face 'link
+				    'mouse-face 'highlight
+				    'help-echo ,help-echo
+				    'local-map map
+				    'font-lock-fontified t)))
+       t)))
+
 (defun ob-ipython-activate-buttons ()
   "Activate buttons."
   (loop for (text cmd help-echo) in ob-ipython-buttons
 	do
-	(button-lock-set-button
-	 text
-	 cmd
-	 :face (list 'link)
-	 :help-echo help-echo)))
+	(font-lock-add-keywords
+	 nil
+	 `((,(ob-ipython-button-font-lock text cmd help-echo) (0  'link t)))
+	 t)))
 
-;; Huh. This makes the repl read-only. Commenting it out for now.
-;; (add-hook 'org-mode-hook 'ob-ipython-activate-buttons t)
+(add-hook 'org-mode-hook 'ob-ipython-activate-buttons t)
 
 
 
