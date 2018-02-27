@@ -351,7 +351,7 @@ _c_: command mode   _z_: undo   _y_: redo
   ("C-<right>" right-word "one word right" :color red)
 
   ;; We can't use esc for command mode
-  ("c" scimax-jupyter-commmand-mode/body "command mode")
+  ("c" scimax-jupyter-command-mode/body "command mode")
 
   ("C-<return>" org-ctrl-c-ctrl-c "run cell" :color red)
   ("S-<return>" scimax-execute-and-next-block "run cell, select below" :color red)
@@ -407,7 +407,7 @@ previous cell."
       (next-line)))))
 
 ;; https://www.cheatography.com/weidadeyue/cheat-sheets/jupyter-notebook/
-(defhydra scimax-jupyter-commmand-mode (:color blue :hint nil)
+(defhydra scimax-jupyter-command-mode (:color blue :hint nil)
   "
          Navigate                 Execute                  Edit                    Misc
 -----------------------------------------------------------------------------------------------------------
