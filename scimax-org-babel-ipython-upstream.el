@@ -557,7 +557,16 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
      (cdr (assoc (scimax-ob-ipython-default-session)
 		 (ob-ipython--get-kernel-processes))))
     (setq header-line-format nil)
-    (redisplay)))
+    (redisplay)
+    ;; clean up some buffers
+    (loop for buf in (list
+		      "ob-ipython-out*" "*ob-ipython-debug*"
+		      "*ob-ipython-kernel-ipython*"
+		      (format "*ob-ipython-kernel-%s*" (scimax-ob-ipython-default-session))
+		      (format "*Python:%s" (scimax-ob-ipython-default-session)))
+	  do
+	  (when (get-buffer buf)
+	    (kill-buffer buf)))))
 
 
 
@@ -619,15 +628,13 @@ a new kernel will be started."
 	   (cfile (expand-file-name
 		   (format "%s.json" (s-replace "kernel-" "emacs-" proc-name))
 		   (s-trim (shell-command-to-string "jupyter --runtime-dir")))))
-
       (when (f-exists? cfile)
 	(f-delete cfile))
       (delete-process proc)
       (kill-buffer (process-buffer proc))
-      (if (get-buffer "*ob-ipython-out*") (kill-buffer "*ob-ipython-out*"))
       (setq header-line nil)
-
       (message (format "Killed %s and deleted %s" proc-name cfile)))))
+
 
 ;; Modified to make buffer unique kernels automatically
 (defun org-babel-execute:ipython (body params)
