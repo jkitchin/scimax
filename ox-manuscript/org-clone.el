@@ -52,9 +52,9 @@ the directory, and the bibliography file."
 	;; true if there is a bibliography and/or cite link.
 	cite-p bib-p)
     (org-element-map (org-element-parse-buffer) 'link
-      (lambda (link) 
-	(let* ((type (org-element-property :type link)) 
-	       (path (org-element-property :path link)) 
+      (lambda (link)
+	(let* ((type (org-element-property :type link))
+	       (path (org-element-property :path link))
 	       (fname (car (last (split-string path "/"))))
 	       (temporary-file-directory rebase-directory)
 	       new-file md5-hash)
@@ -136,7 +136,7 @@ the directory, and the bibliography file."
 						    (org-element-property :contents-end link)))
 				 "]")))
 		      link-list))))))))
-    
+
     ;; Now I need a copy of the org-file, and to replace the links in it. The
     ;; links are in reverse order and that is how we replace them so the points
     ;; do not get messed up as we go from bottom to top.
@@ -169,7 +169,8 @@ the directory, and the bibliography file."
 	  (insert (mapconcat
 		   'identity
 		   bibtex-entry-kill-ring
-		   "\n\n")))))))
+		   "\n\n")))))
+    rebase-directory))
 
 ;;;###autoload
 (defun org-create-standalone-zip ()
@@ -181,11 +182,14 @@ the links updated to point to them. A bibliography will be
 created for the org-file if needed.
 
 Returns the zip filename."
-  (interactive) 
-  (org-clone-standalone (replace-regexp-in-string " " "-" (file-name-base (buffer-file-name))))
-  ;; zip contents into a zip file
-  (let ((default-directory rebase-directory)
-	(zip-file (format "%s.zip" (substring rebase-directory 0 -1))))
+  (interactive)
+  (let* ((rebase-directory (expand-file-name
+			    (org-clone-standalone
+			     (replace-regexp-in-string
+			      " " "-"
+			      (file-name-base (buffer-file-name))))))
+	 (default-directory rebase-directory)
+	 (zip-file (format "%s.zip" rebase-directory)))
     (when (file-exists-p zip-file)
       (delete-file zip-file))
     (shell-command (format "zip -v -r %s *" zip-file))
@@ -196,7 +200,7 @@ Returns the zip filename."
 (defun org-create-zip-and-mail ()
   "create a zip file from current org-file and attach it to an email"
   (interactive)
-  (let ((zip (org-create-standalone-zip)))
+  (let ((zip-file (org-create-standalone-zip)))
     (message-mail)
     (mml-attach-file zip-file)
     (message-goto-to)))

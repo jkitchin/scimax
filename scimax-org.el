@@ -278,7 +278,7 @@ is positive, move after, and if negative, move before."
 
 ;; ** jupyter ipython blocks
 
-(require 'scimax-org-babel-ipython)
+(require 'scimax-org-babel-ipython-upstream)
 
 ;; ** jupyter-hy blocks
 ;; make src blocks open in the right mode
@@ -289,7 +289,7 @@ is positive, move after, and if negative, move before."
 (setq org-babel-default-header-args:jupyter-hy
       '((:results . "output replace")
 	(:session . "hy")
-	(:kernel . "hy")
+	(:kernel . "calysto_hy")
 	(:exports . "both")
 	(:eval . "never-export")
 	(:cache .   "no")
@@ -474,7 +474,7 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
 
 (defface org-block-ipython
   `((t (:background "thistle1")))
-  "Face for python blocks") 
+  "Face for python blocks")
 
 (defface org-block-jupyter-hy
   `((t (:background "light goldenrod yellow")))
@@ -620,11 +620,11 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 ;; ** numbering latex equations
 (defun org-renumber-environment (orig-func &rest args)
   "A function to inject numbers in LaTeX fragment previews."
-  (let ((results '()) 
+  (let ((results '())
 	(counter -1)
 	(numberp))
 
-    (setq results (loop for (begin .  env) in 
+    (setq results (loop for (begin .  env) in
 			(org-element-map (org-element-parse-buffer) 'latex-environment
 			  (lambda (env)
 			    (cons
@@ -639,7 +639,7 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 			 ((string-match "\\\\begin{align}" env)
 			  (prog2
 			      (incf counter)
-			      (cons begin counter)			    
+			      (cons begin counter)
 			    (with-temp-buffer
 			      (insert env)
 			      (goto-char (point-min))
@@ -656,7 +656,7 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 	    (concat
 	     (format "\\setcounter{equation}{%s}\n" numberp)
 	     (car args)))))
-  
+
   (apply orig-func args))
 
 (advice-add 'org-create-formula-image :around #'org-renumber-environment)
@@ -678,27 +678,22 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 			(upcase (symbol-name type)))
 	       (interactive)
 	       (cond
-		;; We have an active region we want to make bold
+		;; We have an active region we want to apply
 		((region-active-p)
-		 (let* ((bounds (list (region-beginning) (region-end))) 
+		 (let* ((bounds (list (region-beginning) (region-end)))
 			(start (apply 'min bounds))
 			(end (apply 'max bounds))
 			(lines))
-
-		   ;; this makes sure we don't do something silly like bold part
-		   ;; of a word, and moves the boundaries to be inclusive of the
-		   ;; part before start and after end if we are not looking at a
-		   ;; space or start/end of a word
-		   (save-excursion
-		     (goto-char start)
-		     (unless (looking-at " \\|\\<")
-		       (backward-word)
-		       (setq start (point)))
-		     (goto-char end)
-		     (unless (looking-at " \\|\>")
-		       (forward-word)
-		       (setq end (point))))
-
+		   (unless (memq ',type '(subscript superscript))
+		     (save-excursion
+		       (goto-char start)
+		       (unless (looking-at " \\|\\<")
+			 (backward-word)
+			 (setq start (point)))
+		       (goto-char end)
+		       (unless (looking-at " \\|\>")
+			 (forward-word)
+			 (setq end (point)))))
 		   (setq lines
 			 (s-join "\n" (mapcar
 				       (lambda (s)
@@ -707,10 +702,11 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 						     (s-trim s)
 						     ,end-marker)
 					   s))
-				       (split-string (buffer-substring start end) "\n"))))
+				       (split-string
+					(buffer-substring start end) "\n"))))
 		   (setf (buffer-substring start end) lines)
 		   (forward-char (length lines))))
-		;; We are on a word so mark it up
+		;; We are on a word with no region selected
 		((thing-at-point 'word)
 		 (cond
 		  ;; beginning of a word
@@ -718,13 +714,24 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 		   (insert ,beginning-marker)
 		   (re-search-forward "\\>")
 		   (insert ,end-marker))
-		  ;; in a word
+		  ;; end of a word
+		  ((looking-back "\\>" 1)
+		   (insert ,(concat beginning-marker end-marker))
+		   (backward-char ,(length end-marker)))
+		  ;; not at start or end, so we just sub/sup the character at point
+		  ((memq ',type '(subscript superscript))
+		   (insert ,beginning-marker)
+		   (forward-char ,(- (length beginning-marker) 1))
+		   (insert ,end-marker))
+		  ;; somewhere else in a word, and handled sub/sup. mark up the
+		  ;; whole word.
 		  (t
 		   (re-search-backward "\\<")
 		   (insert ,beginning-marker)
 		   (re-search-forward "\\>")
 		   (insert ,end-marker))))
-		;; not at a word, insert markers and put point between them.
+		;; not at a word or region, insert markers and put point between
+		;; them.
 		(t
 		 (insert ,(concat beginning-marker end-marker))
 		 (backward-char ,(length end-marker)))))))
@@ -815,24 +822,30 @@ F5 inserts the entity code."
 (defun ivy-insert-org-entity ()
   "Insert an org-entity using ivy."
   (interactive)
-  (ivy-read "Entity: " (loop for element in (append org-entities org-entities-user)
-			     when (not (stringp element))
-			     collect
-			     (cons 
-			      (format "%20s | %20s | %20s | %s"
-				      (first element) ;name
-				      (second element) ; latex
-				      (fourth element) ; html
-				      (seventh element)) ;utf-8
-			      element))
+  (ivy-read "Entity: " (cl-loop for element in (append org-entities org-entities-user)
+				when (not (stringp element))
+				collect
+				(cons
+				 (format "%20s | %20s | %20s | %s"
+					 (cl-first element) ;name
+					 (cl-second element) ; latex
+					 (cl-fourth element) ; html
+					 (cl-seventh element)) ;utf-8
+				 element))
 	    :require-match t
-	    :action '(1 
-		      ("u" (lambda (candidate) (insert (seventh (cdr candidate)))) "utf-8")
-		      ("o" (lambda (candidate) (insert "\\" (first (cdr candidate)))) "org-entity")
-		      ("l" (lambda (candidate) (insert (second (cdr candidate)))) "latex")
-		      ("h" (lambda (candidate) (insert (fourth (cdr candidate)))) "html")
-		      ("a" (lambda (candidate) (insert (fifth (cdr candidate)))) "ascii")
-		      ("L" (lambda (candidate) (insert (sixth (cdr candidate))) "Latin-1")))))
+	    :action '(1
+		      ("u" (lambda (candidate)
+			     (insert (cl-seventh (cdr candidate)))) "utf-8")
+		      ("o" (lambda (candidate)
+			     (insert "\\" (cl-first (cdr candidate)))) "org-entity")
+		      ("l" (lambda (candidate)
+			     (insert (cl-second (cdr candidate)))) "latex")
+		      ("h" (lambda (candidate)
+			     (insert (cl-fourth (cdr candidate)))) "html")
+		      ("a" (lambda (candidate)
+			     (insert (cl-fifth (cdr candidate)))) "ascii")
+		      ("L" (lambda (candidate)
+			     (insert (cl-sixth (cdr candidate))) "Latin-1")))))
 
 
 ;; * Font-lock
@@ -863,8 +876,8 @@ F5 inserts the entity code."
 			     (format
 			      "https://www.google.com/#safe=off&q=%s"
 			      path))))
-		 
-		 
+
+
 		 (cond
 		  ((eq format 'md)
 		   (format "[%s](%s)" (or desc path) url))))))
@@ -883,7 +896,7 @@ F5 inserts the entity code."
 		((eq format 'latex)
 		 ;; write out the latex command
 		 (format "\\attachfile{%s}" keyword)))))
-  
+
   (org-add-link-type
    "attachfile"
    (lambda (link-string) (org-open-file link-string))
@@ -904,10 +917,10 @@ F5 inserts the entity code."
 	       (cond
 		((eq format 'html)
 		 (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
-<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword)) 
+<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword))
 		((eq format 'latex)
 		 ""))))
-  
+
   (org-add-link-type
    "altmetric"
    (lambda (doi)
@@ -916,7 +929,7 @@ F5 inserts the entity code."
      (cond
       ((eq format 'html)
        (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
-<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword)) 
+<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword))
       ((eq format 'latex)
        "")))))
 
@@ -1012,9 +1025,9 @@ F5 inserts the entity code."
 Optional FONTIFY colors the headlines. It might slow things down
 a lot with large numbers of org-files or long org-files. This
 function does not open the files."
-  (let ((headlines '())) 
+  (let ((headlines '()))
     (loop for file in files do
-	  (with-temp-buffer 
+	  (with-temp-buffer
 	    (insert-file-contents file)
 	    (when fontify
 	      (org-mode)
@@ -1048,7 +1061,7 @@ Use a double prefix to make it recursive and fontified."
     (ivy-org-jump-to-heading-in-files
      (f-entries "."
 		(lambda (f)
-		  (and 
+		  (and
 		   (f-ext? f "org")
 		   (not (s-contains? "#" f))))
 		recursive)
@@ -1201,10 +1214,10 @@ boundaries."
 			  org-image-actual-width)))
 		       (old (get-char-property-and-overlay
 			     (org-element-property :begin link)
-			     'org-image-overlay))) 
+			     'org-image-overlay)))
 		   (if (and (car-safe old) refresh)
 		       (image-refresh (overlay-get (cdr old) 'display))
-		     
+
 		     (when (and width org-inline-image-resize-function)
 		       (setq file (funcall  org-inline-image-resize-function file width)
 			     width nil))
@@ -1212,7 +1225,7 @@ boundaries."
 						(cond
 						 ((image-type-available-p 'imagemagick)
 						  (and width 'imagemagick))
-						 (t nil)) 
+						 (t nil))
 						nil
 						:width width)))
 		       (when image
@@ -1278,15 +1291,21 @@ Use a prefix arg to get regular RET. "
      ((org-inlinetask-in-task-p)
       (org-return))
 
-     ;; checkboxes too
+     ;; checkboxes - add new or delete empty
      ((org-at-item-checkbox-p)
-      (if (org-element-property :contents-begin
-				(org-element-context))
-	  ;; we have content so add a new checkbox
-	  (org-insert-todo-heading nil)
-	;; no content so delete it
-	(setf (buffer-substring (line-beginning-position) (point)) "")
-	(org-return)))
+      (cond
+       ;; at the end of a line.
+       ((and (eolp)
+	     (not (eq 'item (car (org-element-context)))))
+	(org-insert-todo-heading nil))
+       ;; no content, delete
+       ((and (eolp) (eq 'item (car (org-element-context))))
+	(setf (buffer-substring (line-beginning-position) (point)) ""))
+       ((eq 'paragraph (car (org-element-context)))
+	(goto-char (org-element-property :end (org-element-context)))
+	(org-insert-todo-heading nil))
+       (t
+	(org-return))))
 
      ;; lists end with two blank lines, so we need to make sure we are also not
      ;; at the beginning of a line to avoid a loop where a new entry gets
@@ -1307,7 +1326,7 @@ Use a prefix arg to get regular RET. "
 	    (org-end-of-subtree)
 	    (org-insert-heading-respect-content)
 	    (outline-show-entry))
-	;; The heading was empty, so we delete it 
+	;; The heading was empty, so we delete it
 	(beginning-of-line)
 	(setf (buffer-substring
 	       (line-beginning-position) (line-end-position)) "")))
@@ -1487,8 +1506,90 @@ It is for commands that depend on the major mode. One example is
 ;; (add-hook 'org-mode-hook (lambda ()
 ;; 			   (scimax-src-keymap-mode +1)))
 
+;; * radio checkboxes
+(defun scimax-in-radio-list-p ()
+  "Returns radio list if in one, else nil."
+  (interactive)
+  (let* ((element (org-element-context))
+	 (radio-list (cond
+		      ;; on an item. easy.
+		      ((and (eq 'item (car element))
+			    (-contains?
+			     (org-element-property
+			      :attr_org
+			      (org-element-property :parent element))
+			     ":radio"))
+		       (org-element-property :parent element))
+		      ;; on an item paragraph
+		      ((and (eq 'paragraph (car element))
+			    (eq 'item (car (org-element-property :parent element)))
+			    (-contains?
+			     (org-element-property
+			      :attr_org
+			      (org-element-property
+			       :parent
+			       (org-element-property :parent element)))
+			     ":radio"))
+		       (org-element-property
+			:parent
+			(org-element-property :parent element)))
+		      ;; not on an item or item paragraph
+		      (t
+		       nil))))
+    radio-list))
+
+(defun scimax-radio-CcCc ()
+  (interactive)
+
+  (let ((radio-list (scimax-in-radio-list-p))
+	(p (point)))
+    (when radio-list
+      ;; clear all boxes
+      (save-excursion
+	(loop for el in (org-element-property :structure radio-list)
+	      do
+	      (goto-char (car el))
+	      (when (re-search-forward "\\[X\\]" (line-end-position) t)
+		(replace-match "[ ]")))
+	;; Now figure out where to put the new X
+	(loop for el in (org-element-property :structure radio-list)
+	      do
+	      (when (and (> p (car el))
+			 (< p (car (last el))))
+		(goto-char (car el))
+		(when (re-search-forward "\\[ \\]" (line-end-position) t)
+		  (replace-match "[X]")))))
+      t)))
+
+(add-hook 'org-ctrl-c-ctrl-c-hook 'scimax-radio-CcCc)
+;; this works with mouse checking.
+(add-hook 'org-checkbox-statistics-hook 'scimax-radio-CcCc)
+
+(defun org-get-plain-list (name)
+  "Get the org-element representation of a plain-list named NAME."
+  (catch 'found
+    (org-element-map
+        (org-element-parse-buffer)
+        'plain-list
+      (lambda (plain-list)
+        (when
+            (string= name (org-element-property :name plain-list))
+          (throw 'found plain-list))))))
+
+(defun get-radio-list-value (name)
+  "Return the value of the checked item in a radio list named NAME."
+  (save-excursion
+    (loop for el in (org-element-property
+                     :structure
+                     (org-get-plain-list name))
+          if (string= (nth 4 el) "[X]")
+          return (progn
+                   (let ((item (buffer-substring (car el) (car (last el)))))
+                     (string-match "\\[X\\]\\(.*\\)$" item)
+                     (match-string-no-properties 1 item))))))
+
+
 ;; * The end
 (provide 'scimax-org)
 
 ;;; scimax-org.el ends here
-

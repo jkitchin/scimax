@@ -187,8 +187,14 @@ and images in a multipart/related part."
          "src=\"cid:%s\""
          (let* ((url (and (string-match "src=\"\\([^\"]+\\)\"" text)
                           (match-string 1 text)))
-                (path (expand-file-name
-                       url temporary-file-directory))
+                (path (cond
+		       ((f-exists? url)
+			url)
+		       ;; I am not sure when this is going to work, unless these
+		       ;; are copied at some point.
+		       (t
+			(expand-file-name
+			 url temporary-file-directory))) )
                 (ext (file-name-extension path))
                 (id (replace-regexp-in-string "[\/\\\\]" "_" path)))
            (add-to-list 'html-images
@@ -468,7 +474,7 @@ otherwise export the entire body."
   :keymap org-mime-compose-mode-map
   (if org-mime-compose-mode
       ;; turn it on
-      (org-mime-switch-header-body) 
+      (org-mime-switch-header-body)
     ;; turn it off
     (remove-hook 'post-command-hook 'org-mime-switch-header-body t)))
 
@@ -498,13 +504,13 @@ otherwise export the entire body."
   "When in an org-mime-compose-mode message, htmlize and send it.
 This is usually run from a C-c C-c hook function in org-mode."
   (interactive)
-  (when (member 'org-mime-switch-header-body post-command-hook) 
+  (when (member 'org-mime-switch-header-body post-command-hook)
     (cond
      ((eq org-mime-html-method 'html)
       (org-mime-htmlize))
      ((eq org-mime-html-method 'htmlize)
       ;; use htmlize.el instead
-      (message-goto-body) 
+      (message-goto-body)
       (let* ((org (buffer-substring (point) (point-max)))
 	     (cb (htmlize-region (point) (point-max)))
 	     (html (prog1 (with-current-buffer cb (buffer-string))
@@ -551,12 +557,12 @@ htmlize :: Generate html of SCOPE using a the `htmlize' library."
       (save-excursion
 	(save-restriction
 	  ;; first narrow to the scope
-	  (cond 
+	  (cond
 	   ((string= scope "buffer")
 	    nil)
 	   ((string= scope "subtree")
 	    (org-narrow-to-subtree))
-	   ((string= scope "region") 
+	   ((string= scope "region")
 	    (narrow-to-region (region-beginning) (region-end))
 	    (goto-char (point-min))))
 

@@ -103,6 +103,8 @@ recent files and bookmarks. You can set a bookmark also."
   "Open Finder or Windows Explorer in the current directory."
   (interactive)
   (cond
+   ((string= system-type "gnu/linux")
+    (shell-command "nautilus"))
    ((string= system-type "darwin")
     (shell-command (format "open -b com.apple.finder %s"
 			   (if (buffer-file-name)
@@ -123,6 +125,8 @@ recent files and bookmarks. You can set a bookmark also."
   "Open a bash window."
   (interactive)
   (cond
+   ((string= system-type "gnu/linux")
+    (shell-command "gnome-terminal"))
    ((string= system-type "darwin")
     (shell-command
      (format "open -b com.apple.terminal \"%s\""
@@ -186,11 +190,13 @@ sentence in the region."
 
 
 ;; * profile me
-(require 'esup)
+(unless (memq system-type '(windows-nt ms-dos))
+  
+  (require 'esup)
 
-(defun scimax-profile ()
-  "Run `esup' on the scimax init file to profile it."
-  (esup (expand-file-name "init.el" scimax-dir)))
+  (defun scimax-profile ()
+    "Run `esup' on the scimax init file to profile it."
+    (esup (expand-file-name "init.el" scimax-dir))))
 
 ;; * The end
 (provide 'scimax-utils)

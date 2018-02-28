@@ -14,7 +14,6 @@
 
 (setq use-package-always-ensure t)
 
-
 ;; * org-mode
 ;; load this first before anything else to avoid mixed installations
 (use-package org-plus-contrib
@@ -39,6 +38,7 @@
 
 (use-package org-edna
   :init (org-edna-load))
+
 
 ;; * Other packages
 (use-package diminish)
@@ -75,6 +75,7 @@
   ;; I am not currently using this, and it loads a bunch of files on startup.
   :disabled t)
 
+(use-package button-lock)
 
 ;; Potential for commandline scripts using emacs
 (use-package commander
@@ -355,13 +356,20 @@
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
+(use-package scimax-ob
+  :ensure nil
+  :load-path scimax-dir)
+
 ;; this is a git submodule
 (use-package ob-ipython
   :ensure nil
-  :load-path (lambda () (expand-file-name "ob-ipython" scimax-dir))
-  :init
-  (add-to-list 'load-path
-	       (expand-file-name "ob-ipython" scimax-dir)))
+  :load-path (lambda () (expand-file-name "ob-ipython-upstream" scimax-dir))
+  :init (add-to-list 'load-path (expand-file-name "ob-ipython-upstream" scimax-dir))
+  (require 'ob-ipython))
+
+(use-package scimax-org-babel-ipython-upstream
+  :ensure nil
+  :load-path scimax-dir)
 
 (use-package ov)
 
@@ -555,7 +563,8 @@
   :bind ("H-h" . ov-highlight/body)
   :init
   (add-to-list 'load-path
-	       (expand-file-name "ov-highlight" scimax-dir)))
+	       (expand-file-name "ov-highlight" scimax-dir))
+  (require 'ov-highlight))
 
 
 ;; * User packages
