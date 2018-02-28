@@ -1,47 +1,47 @@
 
 # Table of Contents
 
-1.  [Headings](#org9e9624e)
-    1.  [subheading](#org27e5eec)
-        1.  [subsubheading](#org90cdb01)
-2.  [Markups](#org7457457)
-3.  [Lists](#org190ba86)
-    1.  [Numbered lists](#orga96336c)
-    2.  [plain lists](#org2e731a3)
-    3.  [checklists](#org011bb2c)
-    4.  [definition lists](#org9be13c2)
-4.  [Equations](#org72aa451)
-5.  [Code blocks](#orgdc12a97)
-6.  [Tables](#orgf2fb51e)
-7.  [Citations  label:sec-citations](#orgfd44411)
-8.  [Radio targets](#org52372cf)
-9.  [Cross-references](#orgcfab550)
-10. [needed](#orgdb9c89a)
-11. [Exporting](#org31e26b1)
+1.  [Headings](#org707bdf5)
+    1.  [subheading](#org1ae46c1)
+        1.  [subsubheading](#orga706fc1)
+2.  [Markups](#orgad5e545)
+3.  [Lists](#org30e0fec)
+    1.  [Numbered lists](#orgd66bb84)
+    2.  [plain lists](#orgb2fe309)
+    3.  [checklists](#org5dd51f9)
+    4.  [definition lists](#org1bd68d0)
+4.  [Equations](#org87512d8)
+5.  [Code blocks](#org412ef97)
+6.  [Tables](#orgf1eb3e5)
+7.  [Citations  label:sec-citations](#org0207a5e)
+8.  [Radio targets](#orgda9299d)
+9.  [Cross-references](#orgcfe2230)
+10. [needed](#org1cf27f2)
+11. [Exporting](#orgfe4e8cf)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 
-<a id="org9e9624e"></a>
+<a id="org707bdf5"></a>
 
 # Headings
 
 It goes without saying I hope.
 
 
-<a id="org27e5eec"></a>
+<a id="org1ae46c1"></a>
 
 ## subheading
 
 
-<a id="org90cdb01"></a>
+<a id="orga706fc1"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org7457457"></a>
+<a id="orgad5e545"></a>
 
 # Markups
 
@@ -52,12 +52,12 @@ subscripts: H<sub>2</sub>O
 superscripts: H<sup>+</sup>
 
 
-<a id="org190ba86"></a>
+<a id="org30e0fec"></a>
 
 # Lists
 
 
-<a id="orga96336c"></a>
+<a id="orgd66bb84"></a>
 
 ## Numbered lists
 
@@ -72,7 +72,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="org2e731a3"></a>
+<a id="orgb2fe309"></a>
 
 ## plain lists
 
@@ -85,7 +85,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="org011bb2c"></a>
+<a id="org5dd51f9"></a>
 
 ## checklists
 
@@ -94,7 +94,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org9be13c2"></a>
+<a id="org1bd68d0"></a>
 
 ## definition lists
 
@@ -102,7 +102,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org72aa451"></a>
+<a id="org87512d8"></a>
 
 # Equations
 
@@ -121,7 +121,7 @@ Suppose you have this equation to solve:
 The results above show the answer to <eq-sle>.
 
 
-<a id="orgdc12a97"></a>
+<a id="org412ef97"></a>
 
 # Code blocks
 
@@ -139,7 +139,7 @@ You might like a caption.
 ./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png
 
 
-<a id="orgf2fb51e"></a>
+<a id="orgf1eb3e5"></a>
 
 # Tables
 
@@ -187,21 +187,21 @@ You can have tables, with captions and labels.
 </table>
 
 
-<a id="orgfd44411"></a>
+<a id="org0207a5e"></a>
 
 # Citations  <a name="sec-citations">sec-citations</a>
 
-You can have proper scientific citations like this [^kitchin-2015-examp], including multiple references [^kitchin-2015-data-surfac-scien]<sup>,</sup>[^kitchin-2015-examp]<sup>,</sup>[^kitchin-2016-autom-data].
+You can have proper scientific citations like this <sup>[kitchin-2015-examp]</sup>, including multiple references <sup>[kitchin-2015-data-surfac-scien]</sup><sup>,</sup><sup>[kitchin-2015-examp]</sup><sup>,</sup><sup>[kitchin-2016-autom-data]</sup>.
 
 
-<a id="org52372cf"></a>
+<a id="orgda9299d"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="orgcfab550"></a>
+<a id="orgcfe2230"></a>
 
 # Cross-references
 
@@ -212,7 +212,7 @@ How about section [sec-citations](#sec-citations) on citations?
 Remember the [target](#target) we referred to earlier?
 
 
-<a id="orgdb9c89a"></a>
+<a id="org1cf27f2"></a>
 
 # TODO needed
 
@@ -220,9 +220,13 @@ Remember the [target](#target) we referred to earlier?
 -   [ ] redo how labels are done. Should they be visible?
 
 
-<a id="org31e26b1"></a>
+<a id="orgfe4e8cf"></a>
 
 # Exporting
+
+    (require 'scimax-md)
+
+    scimax-md
 
 To a buffer:
 
