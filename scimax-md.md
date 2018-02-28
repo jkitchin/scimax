@@ -1,47 +1,47 @@
 
 # Table of Contents
 
-1.  [Headings](#org7104b00)
-    1.  [subheading](#org5a7a62f)
-        1.  [subsubheading](#orge9307a5)
-2.  [Markups](#org9ffa436)
-3.  [Lists](#org6d353f0)
-    1.  [Numbered lists](#orgcd17c73)
-    2.  [plain lists](#orgdeed5c1)
-    3.  [checklists](#org5cef596)
-    4.  [definition lists](#org2c7c1c5)
-4.  [Equations](#org9b7d4cd)
-5.  [Code blocks](#org72647b2)
-6.  [Tables](#org0432c7d)
-7.  [Citations  label:sec-citations](#org2de5ebd)
-8.  [Radio targets](#orgfa771a9)
-9.  [Cross-references](#orgd3804a4)
-10. [needed](#orgd794279)
-11. [Exporting](#orgb4577a5)
+1.  [Headings](#org2a81b9b)
+    1.  [subheading](#org4afca93)
+        1.  [subsubheading](#org7deb171)
+2.  [Markups](#orge974b85)
+3.  [Lists](#orge659d7a)
+    1.  [Numbered lists](#org56e99e4)
+    2.  [plain lists](#org8689cba)
+    3.  [checklists](#org7a4e265)
+    4.  [definition lists](#orgce1da1c)
+4.  [Equations](#org5c43296)
+5.  [Code blocks](#org655d781)
+6.  [Tables](#org4872bde)
+7.  [Citations  label:sec-citations](#org3c18d49)
+8.  [Radio targets](#org5d35b82)
+9.  [Cross-references](#org275578b)
+10. [needed](#org0029aa3)
+11. [Exporting](#orgf86888b)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 
-<a id="org7104b00"></a>
+<a id="org2a81b9b"></a>
 
 # Headings
 
 It goes without saying I hope.
 
 
-<a id="org5a7a62f"></a>
+<a id="org4afca93"></a>
 
 ## subheading
 
 
-<a id="orge9307a5"></a>
+<a id="org7deb171"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org9ffa436"></a>
+<a id="orge974b85"></a>
 
 # Markups
 
@@ -52,12 +52,12 @@ subscripts: H<sub>2</sub>O
 superscripts: H<sup>+</sup>
 
 
-<a id="org6d353f0"></a>
+<a id="orge659d7a"></a>
 
 # Lists
 
 
-<a id="orgcd17c73"></a>
+<a id="org56e99e4"></a>
 
 ## Numbered lists
 
@@ -72,7 +72,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="orgdeed5c1"></a>
+<a id="org8689cba"></a>
 
 ## plain lists
 
@@ -85,7 +85,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="org5cef596"></a>
+<a id="org7a4e265"></a>
 
 ## checklists
 
@@ -94,7 +94,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org2c7c1c5"></a>
+<a id="orgce1da1c"></a>
 
 ## definition lists
 
@@ -102,7 +102,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org9b7d4cd"></a>
+<a id="org5c43296"></a>
 
 # Equations
 
@@ -121,7 +121,7 @@ Suppose you have this equation to solve:
 The results above show the answer to [eq-sle](#eq-sle).
 
 
-<a id="org72647b2"></a>
+<a id="org655d781"></a>
 
 # Code blocks
 
@@ -139,7 +139,7 @@ You might like a caption.
 ./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png
 
 
-<a id="org0432c7d"></a>
+<a id="org4872bde"></a>
 
 # Tables
 
@@ -187,21 +187,21 @@ You can have tables, with captions and labels.
 </table>
 
 
-<a id="org2de5ebd"></a>
+<a id="org3c18d49"></a>
 
 # Citations  <a name="sec-citations"></a>
 
-You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6">[kitchin-2015-examp](#kitchin-2015-examp)</sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b">[kitchin-2015-data-surfac-scien](#kitchin-2015-data-surfac-scien)</sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6">[kitchin-2015-examp](#kitchin-2015-examp)</sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542">[kitchin-2016-autom-data](#kitchin-2016-autom-data)</sup>.
+You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="test">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title="test">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="test">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title="test">kitchin-2016-autom-data</a></sup>.
 
 
-<a id="orgfa771a9"></a>
+<a id="org5d35b82"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="orgd3804a4"></a>
+<a id="org275578b"></a>
 
 # Cross-references
 
@@ -212,7 +212,7 @@ How about section [sec-citations](#sec-citations) on citations?
 Remember the [target](#target) we referred to earlier?
 
 
-<a id="orgd794279"></a>
+<a id="org0029aa3"></a>
 
 # TODO needed
 
@@ -220,7 +220,7 @@ Remember the [target](#target) we referred to earlier?
 -   [ ] redo how labels are done. Should they be visible?
 
 
-<a id="orgb4577a5"></a>
+<a id="orgf86888b"></a>
 
 # Exporting
 
@@ -234,6 +234,7 @@ To a buffer:
 
     #<buffer *scimax-md-export*>
 
+    (require 'scimax-md)
     (org-export-to-file 'scimax-md "scimax-md.md")
 
     scimax-md.md
