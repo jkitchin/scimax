@@ -1,47 +1,47 @@
 
 # Table of Contents
 
-1.  [Headings](#org0520e68)
-    1.  [subheading](#orgf0a045c)
-        1.  [subsubheading](#org9143a2a)
-2.  [Markups](#org2d3e1d8)
-3.  [Lists](#org18b0d3b)
-    1.  [Numbered lists](#orgd6fdc55)
-    2.  [plain lists](#orgecd6087)
-    3.  [checklists](#orgfc3d5f6)
-    4.  [definition lists](#org5917637)
-4.  [Equations](#orge474a75)
-5.  [Code blocks](#org7031988)
-6.  [Tables](#org7c0f358)
-7.  [Citations  label:sec-citations](#org289b18c)
-8.  [Radio targets](#org67d1cb1)
-9.  [Cross-references](#orge2623dc)
-10. [needed](#orgb75370c)
-11. [Exporting](#org4585e16)
+1.  [Headings](#org7104b00)
+    1.  [subheading](#org5a7a62f)
+        1.  [subsubheading](#orge9307a5)
+2.  [Markups](#org9ffa436)
+3.  [Lists](#org6d353f0)
+    1.  [Numbered lists](#orgcd17c73)
+    2.  [plain lists](#orgdeed5c1)
+    3.  [checklists](#org5cef596)
+    4.  [definition lists](#org2c7c1c5)
+4.  [Equations](#org9b7d4cd)
+5.  [Code blocks](#org72647b2)
+6.  [Tables](#org0432c7d)
+7.  [Citations  label:sec-citations](#org2de5ebd)
+8.  [Radio targets](#orgfa771a9)
+9.  [Cross-references](#orgd3804a4)
+10. [needed](#orgd794279)
+11. [Exporting](#orgb4577a5)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 
-<a id="org0520e68"></a>
+<a id="org7104b00"></a>
 
 # Headings
 
 It goes without saying I hope.
 
 
-<a id="orgf0a045c"></a>
+<a id="org5a7a62f"></a>
 
 ## subheading
 
 
-<a id="org9143a2a"></a>
+<a id="orge9307a5"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org2d3e1d8"></a>
+<a id="org9ffa436"></a>
 
 # Markups
 
@@ -52,12 +52,12 @@ subscripts: H<sub>2</sub>O
 superscripts: H<sup>+</sup>
 
 
-<a id="org18b0d3b"></a>
+<a id="org6d353f0"></a>
 
 # Lists
 
 
-<a id="orgd6fdc55"></a>
+<a id="orgcd17c73"></a>
 
 ## Numbered lists
 
@@ -72,7 +72,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="orgecd6087"></a>
+<a id="orgdeed5c1"></a>
 
 ## plain lists
 
@@ -85,7 +85,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="orgfc3d5f6"></a>
+<a id="org5cef596"></a>
 
 ## checklists
 
@@ -94,7 +94,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org5917637"></a>
+<a id="org2c7c1c5"></a>
 
 ## definition lists
 
@@ -102,7 +102,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="orge474a75"></a>
+<a id="org9b7d4cd"></a>
 
 # Equations
 
@@ -121,7 +121,7 @@ Suppose you have this equation to solve:
 The results above show the answer to [eq-sle](#eq-sle).
 
 
-<a id="org7031988"></a>
+<a id="org72647b2"></a>
 
 # Code blocks
 
@@ -139,7 +139,7 @@ You might like a caption.
 ./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png
 
 
-<a id="org7c0f358"></a>
+<a id="org0432c7d"></a>
 
 # Tables
 
@@ -187,21 +187,21 @@ You can have tables, with captions and labels.
 </table>
 
 
-<a id="org289b18c"></a>
+<a id="org2de5ebd"></a>
 
 # Citations  <a name="sec-citations"></a>
 
-You can have proper scientific citations like this <sup>[kitchin-2015-examp](#kitchin-2015-examp)</sup>, including multiple references <sup>[kitchin-2015-data-surfac-scien](#kitchin-2015-data-surfac-scien)</sup><sup>,</sup><sup>[kitchin-2015-examp](#kitchin-2015-examp)</sup><sup>,</sup><sup>[kitchin-2016-autom-data](#kitchin-2016-autom-data)</sup>.
+You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6">[kitchin-2015-examp](#kitchin-2015-examp)</sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b">[kitchin-2015-data-surfac-scien](#kitchin-2015-data-surfac-scien)</sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6">[kitchin-2015-examp](#kitchin-2015-examp)</sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542">[kitchin-2016-autom-data](#kitchin-2016-autom-data)</sup>.
 
 
-<a id="org67d1cb1"></a>
+<a id="orgfa771a9"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="orge2623dc"></a>
+<a id="orgd3804a4"></a>
 
 # Cross-references
 
@@ -212,7 +212,7 @@ How about section [sec-citations](#sec-citations) on citations?
 Remember the [target](#target) we referred to earlier?
 
 
-<a id="orgb75370c"></a>
+<a id="orgd794279"></a>
 
 # TODO needed
 
@@ -220,7 +220,7 @@ Remember the [target](#target) we referred to earlier?
 -   [ ] redo how labels are done. Should they be visible?
 
 
-<a id="org4585e16"></a>
+<a id="orgb4577a5"></a>
 
 # Exporting
 
@@ -239,8 +239,8 @@ To a buffer:
     scimax-md.md
 
 # Bibliography
-<a id="kitchin-2015-examp">kitchin-2015-examp</a>: Kitchin, Examples of Effective Data Sharing in Scientific Publishing, <i>{ACS Catalysis}</i>, <b>5(6)</b>, 3894-3899 (2015). <a href=" http://dx.doi.org/10.1021/acscatal.5b00538 ">link</a>. <a href="http://dx.doi.org/10.1021/acscatal.5b00538">doi</a>.
+<a id="kitchin-2015-examp">[kitchin-2015-examp]</a> Kitchin, Examples of Effective Data Sharing in Scientific Publishing, <i>{ACS Catalysis}</i>, <b>5(6)</b>, 3894-3899 (2015). <a href=" http://dx.doi.org/10.1021/acscatal.5b00538 ">link</a>. <a href="http://dx.doi.org/10.1021/acscatal.5b00538">doi</a>. [↩](#9e3ad98c9008c49c9d14834ca3913eb6)
 
-<a id="kitchin-2015-data-surfac-scien">kitchin-2015-data-surfac-scien</a>: "John Kitchin", Data Sharing in Surface Science, <i>"Surface Science "</i>, <b>647()</b>, 103-107 (2016). <a href="http://www.sciencedirect.com/science/article/pii/S0039602815001326">link</a>. <a href="http://dx.doi.org/10.1016/j.susc.2015.05.007">doi</a>.
+<a id="kitchin-2015-data-surfac-scien">[kitchin-2015-data-surfac-scien]</a> "John Kitchin", Data Sharing in Surface Science, <i>"Surface Science "</i>, <b>647()</b>, 103-107 (2016). <a href="http://www.sciencedirect.com/science/article/pii/S0039602815001326">link</a>. <a href="http://dx.doi.org/10.1016/j.susc.2015.05.007">doi</a>. [↩](#66b54b1976758a93506a846c2666419b)
 
-<a id="kitchin-2016-autom-data">kitchin-2016-autom-data</a>: "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>.
+<a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
