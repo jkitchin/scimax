@@ -1,19 +1,106 @@
 
 # Table of Contents
 
-1.  [Equations](#org13b154e)
-2.  [Code](#org787e021)
-3.  [Tables](#org16d6f6d)
-4.  [Citations  label:sec-citations](#org45bc413)
-5.  [Radio targets](#org89c6898)
-6.  [Cross-references](#org3a316c0)
-7.  [needed](#orgfe13ef9)
-8.  [Exporting](#org0d860f6)
+1.  [Headings](#orgc130fd0)
+    1.  [subheading](#orga830783)
+        1.  [subsubheading](#org7a94060)
+2.  [Markups](#orgf35a35f)
+3.  [Lists](#org6d121ca)
+    1.  [Numbered lists](#orgda20449)
+    2.  [plain lists](#orgc259f76)
+    3.  [checklists](#org5262984)
+    4.  [definition lists](#org583b903)
+4.  [Equations](#orga75771a)
+5.  [Code blocks](#org8ffdc48)
+6.  [Tables](#orgb5ef9d8)
+7.  [Citations  label:sec-citations](#orgdf2d2d1)
+8.  [Radio targets](#orgfe8e299)
+9.  [Cross-references](#orgbac2f8f)
+10. [needed](#org1fc7262)
+11. [Exporting](#orgac119cc)
 
-Why? Don't we already have org-mode? Yes, but some places like Markdown, and it is no fun to write when you have really technical documents.
+Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 
-<a id="org13b154e"></a>
+<a id="orgc130fd0"></a>
+
+# Headings
+
+It goes without saying I hope.
+
+
+<a id="orga830783"></a>
+
+## subheading
+
+
+<a id="org7a94060"></a>
+
+### subsubheading
+
+1.  sub{^4}heading
+
+
+<a id="orgf35a35f"></a>
+
+# Markups
+
+**bold** *italics* <span class="underline">underline</span> <del>strike</del> `verbatim` `code`
+
+subscripts: H<sub>2</sub>O
+
+superscripts: H<sup>+</sup>
+
+
+<a id="org6d121ca"></a>
+
+# Lists
+
+
+<a id="orgda20449"></a>
+
+## Numbered lists
+
+1.  one
+2.  two
+3.  three
+
+1.  apple
+2.  bear
+3.  cat
+
+
+<a id="orgc259f76"></a>
+
+## plain lists
+
+-   one
+-   two
+-   three
+    -   with nesting
+        -   deeper
+    -   back in
+-   all the way
+
+
+<a id="org5262984"></a>
+
+## checklists
+
+-   [ ] one
+-   [ ] two
+-   [ ] three
+
+
+<a id="org583b903"></a>
+
+## definition lists
+
+-   **org-mode:** what makes this possible
+-   **emacs:** the other thing you need
+
+
+<a id="orga75771a"></a>
 
 # Equations
 
@@ -32,9 +119,9 @@ Suppose you have this equation to solve:
 The results above show the answer to <eq-sle>.
 
 
-<a id="org787e021"></a>
+<a id="org8ffdc48"></a>
 
-# Code
+# Code blocks
 
     %matplotlib inline
     import matplotlib.pyplot as plt
@@ -47,16 +134,14 @@ The results above show the answer to <eq-sle>.
 
 You might like a caption.
 
-
-<figure>
-  <img src="obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png">
-  <figcaption>A figure with a  caption. <a name="fig-data">fig-data</a></figcaption>
-</figure>]]
+./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png
 
 
-<a id="org16d6f6d"></a>
+<a id="orgb5ef9d8"></a>
 
 # Tables
+
+You can have tables, with captions and labels.
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 <caption class="t-above"><span class="table-number">Table 1:</span> A data table. <a name="tab-data">tab-data</a></caption>
@@ -100,21 +185,21 @@ You might like a caption.
 </table>
 
 
-<a id="org45bc413"></a>
+<a id="orgdf2d2d1"></a>
 
 # Citations  <a name="sec-citations">sec-citations</a>
 
 You can have proper scientific citations like this [^kitchin-2015-examp], including multiple references [^kitchin-2015-data-surfac-scien]<sup>,</sup>[^kitchin-2015-examp]<sup>,</sup>[^kitchin-2016-autom-data].
 
 
-<a id="org89c6898"></a>
+<a id="orgfe8e299"></a>
 
 # Radio targets
 
-In org-mode you can define a <div name="target">target</div> that you can make a link to later.
+In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="org3a316c0"></a>
+<a id="orgbac2f8f"></a>
 
 # Cross-references
 
@@ -125,16 +210,15 @@ How about section [sec-citations](#sec-citations) on citations?
 Remember the [target](#target) we referred to earlier?
 
 
-<a id="orgfe13ef9"></a>
+<a id="org1fc7262"></a>
 
 # TODO needed
 
--   [ ] references to tables
 -   [ ] fix eqref in md export in org-ref
--   [ ] targets need a better export
+-   [ ] redo how labels are done. Should they be visible?
 
 
-<a id="org0d860f6"></a>
+<a id="orgac119cc"></a>
 
 # Exporting
 
