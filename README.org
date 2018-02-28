@@ -11,6 +11,20 @@ See the [[./scimax.org][manual]] for more details.
 <a href='https://coveralls.io/github/jkitchin/scimax?branch=master'><img src='https://coveralls.io/repos/github/jkitchin/scimax/badge.svg?branch=master' alt='Coverage Status' /></a>
 #+END_HTML
 
+* NEWS
+
+** <2018-02-28 Wed> scimax 2.0
+
+It is an update of scimax, and the main new features are:
+
+1. Major overhaul on ipython. See [[./scimax-ipython.org]].
+2. A dashboard feature: [[./scimax-dashboard.el]]
+3. A new inkscape link: [[./scimax-inkscape.el]]
+4. You can put images on links with images in the description: [[./scimax-link-thumbnails.el]]
+5. Functional text: [[./scimax-functional-text.el]]
+
+And probably more.
+
 * Installation
 
 ** Windows users
