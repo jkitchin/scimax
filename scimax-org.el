@@ -1311,12 +1311,26 @@ Use a prefix arg to get regular RET. "
      ;; at the beginning of a line to avoid a loop where a new entry gets
      ;; created with only one blank line.
      ((org-in-item-p)
-      (if (save-excursion
-	    (beginning-of-line) (org-element-property :contents-begin (org-element-context)))
-	  (org-insert-item)
+      (cond
+       ;; empty definition list
+       ((and (looking-at " ::")
+	     (looking-back "- " 3))
 	(beginning-of-line)
-	(delete-region (line-beginning-position) (line-end-position))
-	(org-return)))
+	(delete-region (line-beginning-position) (line-end-position)))
+       ;; empty item
+       ((and (looking-at "$")
+	     (looking-back "- " 3))
+	(beginning-of-line)
+	(delete-region (line-beginning-position) (line-end-position)))
+       ;; numbered list
+       ((and (looking-at "$")
+	     (looking-back "[0-9]*. " (line-beginning-position)))
+	(beginning-of-line)
+	(delete-region (line-beginning-position) (line-end-position)))
+       ;; insert new item
+       (t
+	(end-of-line)
+	(org-insert-item))))
 
      ;; org-heading
      ((org-at-heading-p)
