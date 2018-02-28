@@ -64,7 +64,8 @@ string to be formatted."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-key-bindings
-  '(("C-<return>" . #'org-ctrl-c-ctrl-c)
+  '(("<return>" . #'org-return-indent)
+    ("C-<return>" . #'org-ctrl-c-ctrl-c)
     ("M-<return>" . (lambda () (interactive) (scimax-execute-and-next-block t)))
     ("S-<return>" . #'scimax-execute-and-next-block)
     ("M-S-<return>" . #'scimax-execute-to-point)
