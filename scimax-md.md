@@ -1,49 +1,49 @@
 
 # Table of Contents
 
-1.  [Headings](#org43e225b)
-    1.  [subheading](#org46c5206)
-        1.  [subsubheading](#orga5bfb61)
-2.  [Markups](#org7840c30)
-3.  [Lists](#org00f6265)
-    1.  [Numbered lists](#org352ce96)
-    2.  [plain lists](#org9387976)
-    3.  [checklists](#org840f8dc)
-    4.  [definition lists](#org2e69783)
-4.  [Equations](#org4b1819f)
-5.  [Code blocks](#orgd6af078)
-6.  [Tables](#org99696cc)
-7.  [Citations  label:sec-citations](#orgd4581c4)
-8.  [Radio targets](#orgf24283b)
-9.  [Cross-references](#org705a19f)
-10. [needed](#orgc7a2762)
-11. [Exporting](#org32b2a6f)
-12. [Handling projects](#orgccd68cc)
-13. [Downsides to this approach](#org9f7610f)
+1.  [Headings](#org168ffd0)
+    1.  [subheading](#org1fde238)
+        1.  [subsubheading](#org59f1b66)
+2.  [Markups](#orgdd73b9b)
+3.  [Lists](#orgff4e10c)
+    1.  [Numbered lists](#orgb1765fa)
+    2.  [plain lists](#org6454591)
+    3.  [checklists](#orga0af5ce)
+    4.  [definition lists](#orgafcfd30)
+4.  [Equations](#org7e6cb36)
+5.  [Code blocks](#org7dfeec8)
+6.  [Tables](#org2ae3f67)
+7.  [Citations  label:sec-citations](#org3b29388)
+8.  [Radio targets](#org7365aea)
+9.  [Cross-references](#orga493358)
+10. [needed](#org4fc7d58)
+11. [Exporting a single file](#orgb648c00)
+12. [Handling projects](#org89c6fad)
+13. [Downsides to this approach](#org95e8865)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 
-<a id="org43e225b"></a>
+<a id="org168ffd0"></a>
 
 # Headings
 
 It goes without saying I hope.
 
 
-<a id="org46c5206"></a>
+<a id="org1fde238"></a>
 
 ## subheading
 
 
-<a id="orga5bfb61"></a>
+<a id="org59f1b66"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org7840c30"></a>
+<a id="orgdd73b9b"></a>
 
 # Markups
 
@@ -54,12 +54,12 @@ subscripts: H<sub>2</sub>O
 superscripts: H<sup>+</sup>
 
 
-<a id="org00f6265"></a>
+<a id="orgff4e10c"></a>
 
 # Lists
 
 
-<a id="org352ce96"></a>
+<a id="orgb1765fa"></a>
 
 ## Numbered lists
 
@@ -74,7 +74,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="org9387976"></a>
+<a id="org6454591"></a>
 
 ## plain lists
 
@@ -87,7 +87,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="org840f8dc"></a>
+<a id="orga0af5ce"></a>
 
 ## checklists
 
@@ -96,7 +96,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org2e69783"></a>
+<a id="orgafcfd30"></a>
 
 ## definition lists
 
@@ -104,7 +104,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org4b1819f"></a>
+<a id="org7e6cb36"></a>
 
 # Equations
 
@@ -123,7 +123,7 @@ Suppose you have this equation to solve:
 The results above show the answer to [eq-sle](#eq-sle).
 
 
-<a id="orgd6af078"></a>
+<a id="org7dfeec8"></a>
 
 # Code blocks
 
@@ -141,7 +141,7 @@ You might like a caption.
 ./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png
 
 
-<a id="org99696cc"></a>
+<a id="org2ae3f67"></a>
 
 # Tables
 
@@ -189,21 +189,21 @@ You can have tables, with captions and labels.
 </table>
 
 
-<a id="orgd4581c4"></a>
+<a id="org3b29388"></a>
 
 # Citations  <a name="sec-citations"></a>
 
-You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, &lt;i&gt;{ACS Catalysis}&lt;/i&gt;, &lt;b&gt;5(6)&lt;/b&gt;, 3894-3899 (2015). &lt;a href=" http://dx.doi.org/10.1021/acscatal.5b00538 "&gt;link&lt;/a&gt;. &lt;a href="http://dx.doi.org/10.1021/acscatal.5b00538"&gt;doi&lt;/a&gt;.">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title=""John Kitchin", Data Sharing in Surface Science, &lt;i&gt;"Surface Science "&lt;/i&gt;, &lt;b&gt;647()&lt;/b&gt;, 103-107 (2016). &lt;a href="http://www.sciencedirect.com/science/article/pii/S0039602815001326"&gt;link&lt;/a&gt;. &lt;a href="http://dx.doi.org/10.1016/j.susc.2015.05.007"&gt;doi&lt;/a&gt;.">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, &lt;i&gt;{ACS Catalysis}&lt;/i&gt;, &lt;b&gt;5(6)&lt;/b&gt;, 3894-3899 (2015). &lt;a href=" http://dx.doi.org/10.1021/acscatal.5b00538 "&gt;link&lt;/a&gt;. &lt;a href="http://dx.doi.org/10.1021/acscatal.5b00538"&gt;doi&lt;/a&gt;.">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title=""Kitchin, Van Gulick \&amp; Zilinski, Automating Data Sharing Through Authoring Tools, &lt;i&gt;"International Journal on Digital Libraries"&lt;/i&gt;, &lt;b&gt;18(2)&lt;/b&gt;, 93--98 (2016). &lt;a href="http://dx.doi.org/10.1007/s00799-016-0173-7"&gt;link&lt;/a&gt;. &lt;a href="http://dx.doi.org/10.1007/s00799-016-0173-7"&gt;doi&lt;/a&gt;.">kitchin-2016-autom-data</a></sup>. Check out the tooltips on them in the html that Github renders.
+You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title=""John Kitchin", Data Sharing in Surface Science, "Surface Science ", v(), 103-107 (2016).">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title=""Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, "International Journal on Digital Libraries", v(2), 93--98 (2016).">kitchin-2016-autom-data</a></sup>. Check out the tooltips on them in the html that Github renders.
 
 
-<a id="orgf24283b"></a>
+<a id="org7365aea"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="org705a19f"></a>
+<a id="orga493358"></a>
 
 # Cross-references
 
@@ -214,7 +214,7 @@ How about section [sec-citations](#sec-citations) on citations?
 Remember the [target](#target) we referred to earlier?
 
 
-<a id="orgc7a2762"></a>
+<a id="org4fc7d58"></a>
 
 # TODO needed
 
@@ -222,9 +222,9 @@ Remember the [target](#target) we referred to earlier?
 -   [ ] redo how labels are done. Should they be visible?
 
 
-<a id="org32b2a6f"></a>
+<a id="orgb648c00"></a>
 
-# Exporting
+# Exporting a single file
 
     (require 'scimax-md)
 
@@ -249,15 +249,15 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="orgccd68cc"></a>
+<a id="org89c6fad"></a>
 
 # Handling projects
 
 
-<a id="org9f7610f"></a>
+<a id="org95e8865"></a>
 
 # Downsides to this approach
 
-I never read or edit the markdown that is produced. There is probably a lot of stuff in it you would never write yourself. If that is a problem, there is a lot to do to get rid of it.
+I never read or edit the markdown that is produced. There is probably a lot of stuff in it you would never write yourself. If that is a problem, there is a lot to do to get rid of it. Especially the way I use html to get features might not be considered very standard.
 
 This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes.
