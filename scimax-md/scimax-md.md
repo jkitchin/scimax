@@ -137,7 +137,7 @@ You can put code right into your org file, and run it. The code and results show
 
     4
 
-[obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png)
+![img](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png)
 
 
 <a id="org893c32a"></a>
