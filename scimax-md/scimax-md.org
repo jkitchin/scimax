@@ -75,31 +75,30 @@ You can put a label near this and refer to it later.
 import matplotlib.pyplot as plt
 
 plt.plot([1, 2, 4, 8])
+plt.savefig('geometric.png')
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-# Out[3]:
-# text/plain
-: [<matplotlib.lines.Line2D at 0x10c6d34e0>]
-
+# Out[1]:
 
 
 # image/png
-[[file:obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png]]
+[[file:obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139zaF.png]]
 :END:
 
 * Figures
-You might like a caption with a label you can refer to later.
+
+You might like a caption with a label you can refer to later. The figures aren't numbered; instead the labels are used. It seems possible to get numbering, but it would take some work.
 
 #+caption: A figure with a  caption. label:fig-data
-[[./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png]]
+[[./geometric.png]]
 
 ** another figure
 
 
 #+caption: Another figure to check numbering. label:fig-data-2
-[[./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png]]
+[[./geometric.png]]
 
 
 * Tables
@@ -195,18 +194,15 @@ Your project might have many org files that should all be published. No problem.
          :base-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
          :publishing-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
          :publishing-function scimax-md-publish-to-md)))
-#+END_SRC
 
-#+RESULTS:
-| scimax-md | :base-directory | /Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/ | :publishing-directory | /Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/ | :publishing-function | scimax-md-publish-to-md |
-
-
-#+BEGIN_SRC emacs-lisp
 (require 'scimax-md)
 (org-publish-current-project)
 #+END_SRC
 
-Now, we can test a link to another file: [[./ideas.md]].
+Now, we can test a link to another file:
+
+1. A bare file link:  [[./ideas.md]].
+2. A file link with description  [[./ideas.md][ideas]].
 
 * Downsides to this approach
 
