@@ -1,52 +1,52 @@
 
 # Table of Contents
 
-1.  [Headings](#org1817901)
-    1.  [subheading](#org54ad83b)
-        1.  [subsubheading](#orgfdbc234)
-2.  [Markups](#orga50e334)
-3.  [Lists](#org226b8a9)
-    1.  [Numbered lists](#org62117fb)
-    2.  [plain lists](#orgeb9aca9)
-    3.  [checklists](#org5d53e12)
-    4.  [definition lists](#org92744ce)
-4.  [Equations](#orgbf104c9)
-5.  [Code blocks](#org10e633d)
-6.  [Figures](#orge819ed6)
-    1.  [another figure](#org31a5a32)
-7.  [Tables](#org9b9a1d3)
-8.  [Citations  label:sec-citations](#orgcdf9db3)
-9.  [Radio targets](#org6b39c24)
-10. [Cross-references](#org9bc1036)
-11. [Exporting a single file](#org79a9960)
-12. [Handling projects](#orgf97f41f)
-13. [Downsides to this approach](#org61b227d)
+1.  [Headings](#org3536353)
+    1.  [subheading](#org39c7705)
+        1.  [subsubheading](#orgc7e08e5)
+2.  [Markups](#org77861e7)
+3.  [Lists](#orgf5e8aad)
+    1.  [Numbered lists](#org39590eb)
+    2.  [plain lists](#org6baa12f)
+    3.  [checklists](#org8fe5c78)
+    4.  [definition lists](#org72cf505)
+4.  [Equations](#org27b3027)
+5.  [Code blocks](#org6a858e9)
+6.  [Figures](#org893c32a)
+    1.  [another figure](#orge44b464)
+7.  [Tables](#org121f356)
+8.  [Citations  label:sec-citations](#org8e9ff06)
+9.  [Radio targets](#orgcd550a1)
+10. [Cross-references](#org5ee750c)
+11. [Exporting a single file](#orgb93ffd6)
+12. [Handling projects](#org4769f6a)
+13. [Downsides to this approach](#orgf5827c6)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 Github's rendering of org-mode is only ok. This might be a nicer way to get better Github pages.
 
 
-<a id="org1817901"></a>
+<a id="org3536353"></a>
 
 # Headings
 
 It goes without saying I hope, that we use headings to organize things.
 
 
-<a id="org54ad83b"></a>
+<a id="org39c7705"></a>
 
 ## subheading
 
 
-<a id="orgfdbc234"></a>
+<a id="orgc7e08e5"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="orga50e334"></a>
+<a id="org77861e7"></a>
 
 # Markups
 
@@ -59,12 +59,12 @@ superscripts: H<sup>+</sup>
 Regular urls are fine: <http://google.com>.
 
 
-<a id="org226b8a9"></a>
+<a id="orgf5e8aad"></a>
 
 # Lists
 
 
-<a id="org62117fb"></a>
+<a id="org39590eb"></a>
 
 ## Numbered lists
 
@@ -79,7 +79,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="orgeb9aca9"></a>
+<a id="org6baa12f"></a>
 
 ## plain lists
 
@@ -92,7 +92,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="org5d53e12"></a>
+<a id="org8fe5c78"></a>
 
 ## checklists
 
@@ -101,7 +101,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org92744ce"></a>
+<a id="org72cf505"></a>
 
 ## definition lists
 
@@ -109,7 +109,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="orgbf104c9"></a>
+<a id="org27b3027"></a>
 
 # Equations
 
@@ -120,7 +120,7 @@ Suppose you have this equation to solve:
 You can put a label near this and refer to it later.
 
 
-<a id="org10e633d"></a>
+<a id="org6a858e9"></a>
 
 # Code blocks
 
@@ -133,7 +133,7 @@ You can put a label near this and refer to it later.
 [obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139zaF.png](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139zaF.png)
 
 
-<a id="orge819ed6"></a>
+<a id="org893c32a"></a>
 
 # Figures
 
@@ -146,7 +146,7 @@ You might like a caption with a label you can refer to later. The figures aren't
 </figure>
 
 
-<a id="org31a5a32"></a>
+<a id="orge44b464"></a>
 
 ## another figure
 
@@ -157,7 +157,7 @@ You might like a caption with a label you can refer to later. The figures aren't
 </figure>
 
 
-<a id="org9b9a1d3"></a>
+<a id="org121f356"></a>
 
 # Tables
 
@@ -235,8 +235,10 @@ Here is another table:
 </tbody>
 </table>
 
+Tables are numbered in the export, but they export as html, and it is the org-html exporter taking care of this.
 
-<a id="orgcdf9db3"></a>
+
+<a id="org8e9ff06"></a>
 
 # Citations  <a name="sec-citations"></a>
 
@@ -247,14 +249,14 @@ org-ref helps you insert citations from a bibtex database.
 It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
 
 
-<a id="org6b39c24"></a>
+<a id="orgcd550a1"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="org9bc1036"></a>
+<a id="org5ee750c"></a>
 
 # Cross-references
 
@@ -273,7 +275,7 @@ What matters the most in cross-references is that org-ref helps you complete the
 The results above show the answer to Eq. [eq-sle](#eq-sle).
 
 
-<a id="org79a9960"></a>
+<a id="orgb93ffd6"></a>
 
 # Exporting a single file
 
@@ -300,7 +302,7 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="orgf97f41f"></a>
+<a id="org4769f6a"></a>
 
 # Handling projects
 
@@ -321,12 +323,20 @@ Now, we can test a link to another file:
 2.  A file link with description  [ideas](./ideas.md).
 
 
-<a id="org61b227d"></a>
+<a id="orgf5827c6"></a>
 
 # Downsides to this approach
 
 I never read or edit the markdown that is produced. There is probably a lot of stuff in it you would never write yourself. If that is a problem, there is a lot to do to get rid of it. Especially the way I use html to get features might not be considered very standard.
 
+Here are some org-generated lines:
+
+    <a id="org0d027ad"></a>
+
+    You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>,
+
 This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes.
 
-Not every corner of org-mode has been tested yet.
+Not every corner of org-mode has been tested yet. Might as well try one more thing:
+
+> emacs outshines all other editing software in approximately the same way that the noonday sun does the stars. It is not just bigger and brighter; it simply makes everything else vanish. – Neal Stephenson, In the Beginning was the Command Line (1998)
