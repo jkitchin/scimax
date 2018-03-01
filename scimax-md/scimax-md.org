@@ -84,13 +84,13 @@ plt.savefig('geometric.png')
 
 #+RESULTS:
 :RESULTS:
-# Out[2]:
+# Out[3]:
 # output
 : 4
 
 
 # image/png
-[[file:obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139AlL.png]]
+[[file:obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png]]
 :END:
 
 * Figures
@@ -230,7 +230,7 @@ Your project might have many org files that should all be published. No problem.
          :publishing-function scimax-md-publish-to-md)))
 
 (require 'scimax-md)
-(org-publish-current-project)
+(org-publish "scimax-md" t)
 #+END_SRC
 
 Now, we can test a link to another file:

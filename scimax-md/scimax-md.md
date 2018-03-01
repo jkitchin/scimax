@@ -1,53 +1,53 @@
 
 # Table of Contents
 
-1.  [Headings](#org5754ed6)
-    1.  [subheading](#org74cadc0)
-        1.  [subsubheading](#orga6bbe87)
-2.  [Markups](#org07bf719)
-3.  [Lists](#orgc42e5a3)
-    1.  [Numbered lists](#orge84e83d)
-    2.  [plain lists](#org62b5b63)
-    3.  [checklists](#org8312b92)
-    4.  [definition lists](#orgf918c21)
-4.  [Equations](#orgd27a43a)
-5.  [Code blocks](#orgfe7d731)
-6.  [Figures](#orgcfee959)
-    1.  [another figure](#orgd3a8555)
-7.  [Tables](#org5e4856c)
-8.  [Citations  label:sec-citations](#org1fb4c8f)
-9.  [Radio targets](#orgb5e16e5)
-10. [Cross-references](#org6d6b322)
-11. [Custom links?](#org29afd4c)
-12. [Exporting a single file](#org3b2e218)
-13. [Handling projects](#org293beaf)
-14. [Downsides to this approach](#orge76ca6e)
+1.  [Headings](#org3536353)
+    1.  [subheading](#org39c7705)
+        1.  [subsubheading](#orgc7e08e5)
+2.  [Markups](#org77861e7)
+3.  [Lists](#orgf5e8aad)
+    1.  [Numbered lists](#org39590eb)
+    2.  [plain lists](#org6baa12f)
+    3.  [checklists](#org8fe5c78)
+    4.  [definition lists](#org72cf505)
+4.  [Equations](#org27b3027)
+5.  [Code blocks](#org6a858e9)
+6.  [Figures](#org893c32a)
+    1.  [another figure](#orge44b464)
+7.  [Tables](#org121f356)
+8.  [Citations  label:sec-citations](#org8e9ff06)
+9.  [Radio targets](#orgcd550a1)
+10. [Cross-references](#org5ee750c)
+11. [Custom links?](#org61d6f22)
+12. [Exporting a single file](#orgb93ffd6)
+13. [Handling projects](#org4769f6a)
+14. [Downsides to this approach](#orgf5827c6)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 Github's rendering of org-mode is only ok. Too many things like references, internal links, etc. don't work though to rely on it for high quality documentation in the browser. This might be a nicer way to get better Github pages. Why not just use html then? Some places like markdown.
 
 
-<a id="org5754ed6"></a>
+<a id="org3536353"></a>
 
 # Headings
 
 It goes without saying I hope, that we use headings to organize things.
 
 
-<a id="org74cadc0"></a>
+<a id="org39c7705"></a>
 
 ## subheading
 
 
-<a id="orga6bbe87"></a>
+<a id="orgc7e08e5"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org07bf719"></a>
+<a id="org77861e7"></a>
 
 # Markups
 
@@ -60,12 +60,12 @@ superscripts: H<sup>+</sup>
 Regular urls are fine: <http://google.com>.
 
 
-<a id="orgc42e5a3"></a>
+<a id="orgf5e8aad"></a>
 
 # Lists
 
 
-<a id="orge84e83d"></a>
+<a id="org39590eb"></a>
 
 ## Numbered lists
 
@@ -80,7 +80,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="org62b5b63"></a>
+<a id="org6baa12f"></a>
 
 ## plain lists
 
@@ -93,7 +93,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="org8312b92"></a>
+<a id="org8fe5c78"></a>
 
 ## checklists
 
@@ -102,7 +102,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="orgf918c21"></a>
+<a id="org72cf505"></a>
 
 ## definition lists
 
@@ -110,7 +110,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="orgd27a43a"></a>
+<a id="org27b3027"></a>
 
 # Equations
 
@@ -121,7 +121,7 @@ Suppose you have this equation to solve:
 You can put a label near this and refer to it later. I guess Github does not do a great job rendering equations.
 
 
-<a id="orgfe7d731"></a>
+<a id="org6a858e9"></a>
 
 # Code blocks
 
@@ -137,10 +137,10 @@ You can put code right into your org file, and run it. The code and results show
 
     4
 
-[obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139AlL.png](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139AlL.png)
+[obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png)
 
 
-<a id="orgcfee959"></a>
+<a id="org893c32a"></a>
 
 # Figures
 
@@ -149,22 +149,22 @@ You might like a caption with a label you can refer to later. The figures aren't
 
 <figure>
   <img src="./geometric.png">
-  <figcaption>Figure ((((A figure with a  caption.  (link (:type label :path fig-data :format plain :raw-link label:fig-data :application nil :search-option nil :begin 2085 :end 2099 :contents-begin nil :contents-end nil :post-blank 0 :parent #2)))))): A figure with a  caption. <a name="fig-data"></a></figcaption>
+  <figcaption>Figure (fig-data): A figure with a  caption. <a name="fig-data"></a></figcaption>
 </figure>
 
 
-<a id="orgd3a8555"></a>
+<a id="orge44b464"></a>
 
 ## another figure
 
 
 <figure>
   <img src="./geometric.png">
-  <figcaption>Figure ((((Another figure to check numbering.  (link (:type label :path fig-data-2 :format plain :raw-link label:fig-data-2 :application nil :search-option nil :begin 2187 :end 2203 :contents-begin nil :contents-end nil :post-blank 0 :parent #2)))))): Another figure to check numbering. <a name="fig-data-2"></a></figcaption>
+  <figcaption>Figure (fig-data-2): Another figure to check numbering. <a name="fig-data-2"></a></figcaption>
 </figure>
 
 
-<a id="org5e4856c"></a>
+<a id="org121f356"></a>
 
 # Tables
 
@@ -245,7 +245,7 @@ Here is another table:
 Tables are numbered in the export, but they export as html, and it is the org-html exporter taking care of this.
 
 
-<a id="org1fb4c8f"></a>
+<a id="org8e9ff06"></a>
 
 # Citations  <a name="sec-citations"></a>
 
@@ -256,14 +256,14 @@ org-ref helps you insert citations from a bibtex database.
 It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
 
 
-<a id="orgb5e16e5"></a>
+<a id="orgcd550a1"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="org6d6b322"></a>
+<a id="org5ee750c"></a>
 
 # Cross-references
 
@@ -282,7 +282,7 @@ What matters the most in cross-references is that org-ref helps you complete the
 The results above show the answer to Eq. [eq-sle](#eq-sle).
 
 
-<a id="org29afd4c"></a>
+<a id="org61d6f22"></a>
 
 # Custom links?
 
@@ -296,6 +296,7 @@ No problem, just define an exporter for markdown. How about a youtube link? On e
     	   (cond
     	    ((eq 'md backend)
     	     (format "[%s](%s)
+
     <a href=\"https://www.youtube.com/watch?v=%s\">
     <img src=\"http://img.youtube.com/vi/%s/0.jpg\"></a>"
     		     (or desc (format "https://youtu.be/%s" path))
@@ -303,34 +304,10 @@ No problem, just define an exporter for markdown. How about a youtube link? On e
     		     path path))))
      :help-echo "A youtube video. Click to open in browser.")
 
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+Checkout youtube:fgizHHd7nOo
 
 
-<colgroup>
-<col  class="org-left" />
-
-<col  class="org-left" />
-
-<col  class="org-left" />
-
-<col  class="org-left" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left">:follow</td>
-<td class="org-left">(lambda (path) (browse-url (format <https://youtu.be/%s> path)))</td>
-<td class="org-left">:export</td>
-<td class="org-left">(lambda (path desc backend) (cond ((eq (quote md) backend) (format [%s](%s)</td>
-</tr>
-</tbody>
-</table>
-
-Checkout [https://youtu.be/fgizHHd7nOo](https://youtu.be/fgizHHd7nOo)
-<a href="https://www.youtube.com/watch?v=fgizHHd7nOo">
-<img src="http://img.youtube.com/vi/fgizHHd7nOo/0.jpg"></a>
-
-
-<a id="org3b2e218"></a>
+<a id="orgb93ffd6"></a>
 
 # Exporting a single file
 
@@ -357,7 +334,7 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="org293beaf"></a>
+<a id="org4769f6a"></a>
 
 # Handling projects
 
@@ -370,7 +347,7 @@ Your project might have many org files that should all be published. No problem.
              :publishing-function scimax-md-publish-to-md)))
 
     (require 'scimax-md)
-    (org-publish-current-project)
+    (org-publish "scimax-md" t)
 
 Now, we can test a link to another file:
 
@@ -378,22 +355,26 @@ Now, we can test a link to another file:
 2.  A file link with description  [ideas](./ideas.md).
 
 
-<a id="orge76ca6e"></a>
+<a id="orgf5827c6"></a>
 
 # Downsides to this approach
 
-I never read or edit the markdown that is produced. There is probably a lot of stuff in it you would never write yourself. If that is a problem, there is a lot to do to get rid of it. Especially the way I use html to get features might not be considered very standard.
+I never read or edit the markdown that is produced. There is probably a lot of stuff in it you would never write yourself. If that is a problem, there is a lot to do to get rid of it. Especially the way I use html to get features might not be considered very standard. Others might not want to read it or edit it.
 
 Here are some org-generated lines:
 
     <a id="org0d027ad"></a>
 
+This `You can have proper scientific citations like this cite:kitchin-2015-examp,` expanded to this:
+
     You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>,
 
 You can see the citations are basically just html. They look good when rendered, but are kind of irritating to read in markdown. Not a problem in org-mode&#x2026;
 
-This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes. This isn't a big deal with version control, but could cause some issues.
+This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes. This isn't a big deal with version control, but could cause some issues. I don't forsee a markdown parser and converter to org-mode.
+
+Some ids are randomly generated. This may make version control a little irritating, as there will always be nuisance changes.
 
 Not every corner of org-mode has been tested yet. Might as well try one more thing:
 
-> emacs outshines all other editing software in approximately the same way that the noonday sun does the stars. It is not just bigger and brighter; it simply makes everything else vanish. – Neal Stephenson, In the Beginning was the Command Line (1998)
+> emacs outshines all other editing software in approximately the same way that the noonday sun does the stars. It is not just bigger and brighter; it simply makes everything else vanish. Neal Stephenson, In the Beginning was the Command Line (1998)
