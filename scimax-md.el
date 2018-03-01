@@ -69,12 +69,19 @@
   (let ((value (org-element-property :value target)))
     (format "<a name=\"%s\"></a>%s" value value)))
 
+
+(defun scimax-md-src-block (src contents info)
+  "use fences and language"
+  (format "```%s\n%s\n```" (org-element-property :language src)
+	  (org-element-property :value src)))
+
 ;; * New export backend
 ;; You need this to use the functions above.
 
 (org-export-define-derived-backend 'scimax-md 'md
   :translate-alist '((link . scimax-md-link)
-		     (target . scimax-md-target)))
+		     (target . scimax-md-target)
+		     (src-block . scimax-md-src-block)))
 
 
 ;; * Publishing
