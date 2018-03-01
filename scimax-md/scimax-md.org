@@ -197,10 +197,17 @@ Your project might have many org files that should all be published. No problem.
          :publishing-function scimax-md-publish-to-md)))
 #+END_SRC
 
+#+RESULTS:
+| scimax-md | :base-directory | /Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/ | :publishing-directory | /Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/ | :publishing-function | scimax-md-publish-to-md |
+
 
 #+BEGIN_SRC emacs-lisp
-(org-publish "scimax-md")
+(require 'scimax-md)
+(org-publish-current-project)
 #+END_SRC
+
+Now, we can test a link to another file: [[./ideas.md]].
+
 * Downsides to this approach
 
 I never read or edit the markdown that is produced. There is probably a lot of stuff in it you would never write yourself. If that is a problem, there is a lot to do to get rid of it. Especially the way I use html to get features might not be considered very standard.

@@ -1,52 +1,52 @@
 
 # Table of Contents
 
-1.  [Headings](#orge5ce6c2)
-    1.  [subheading](#org1ca3121)
-        1.  [subsubheading](#org57baae5)
-2.  [Markups](#org02024c9)
-3.  [Lists](#org2f0e2ff)
-    1.  [Numbered lists](#org3dd2f0e)
-    2.  [plain lists](#orge11654c)
-    3.  [checklists](#orge19b83d)
-    4.  [definition lists](#org3310b12)
-4.  [Equations](#org5cbc283)
-5.  [Code blocks](#orgc4de031)
-6.  [Figures](#org4d7473f)
-    1.  [another figure](#org5bded94)
-7.  [Tables](#orgbfbb467)
-8.  [Citations  label:sec-citations](#org53715c8)
-9.  [Radio targets](#org3bcbd74)
-10. [Cross-references](#orgf47297d)
-11. [Exporting a single file](#org62f1361)
-12. [Handling projects](#org8f174c5)
-13. [Downsides to this approach](#org50c1371)
+1.  [Headings](#org3536353)
+    1.  [subheading](#org39c7705)
+        1.  [subsubheading](#orgc7e08e5)
+2.  [Markups](#org77861e7)
+3.  [Lists](#orgf5e8aad)
+    1.  [Numbered lists](#org39590eb)
+    2.  [plain lists](#org6baa12f)
+    3.  [checklists](#org8fe5c78)
+    4.  [definition lists](#org72cf505)
+4.  [Equations](#org27b3027)
+5.  [Code blocks](#org6a858e9)
+6.  [Figures](#org893c32a)
+    1.  [another figure](#orge44b464)
+7.  [Tables](#org121f356)
+8.  [Citations  label:sec-citations](#org8e9ff06)
+9.  [Radio targets](#orgcd550a1)
+10. [Cross-references](#org5ee750c)
+11. [Exporting a single file](#orgb93ffd6)
+12. [Handling projects](#org4769f6a)
+13. [Downsides to this approach](#orgf5827c6)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 Github's rendering of org-mode is only ok. This might be a nicer way to get better Github pages.
 
 
-<a id="orge5ce6c2"></a>
+<a id="org3536353"></a>
 
 # Headings
 
 It goes without saying I hope, that we use headings to organize things.
 
 
-<a id="org1ca3121"></a>
+<a id="org39c7705"></a>
 
 ## subheading
 
 
-<a id="org57baae5"></a>
+<a id="orgc7e08e5"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org02024c9"></a>
+<a id="org77861e7"></a>
 
 # Markups
 
@@ -59,12 +59,12 @@ superscripts: H<sup>+</sup>
 Regular urls are fine: <http://google.com>.
 
 
-<a id="org2f0e2ff"></a>
+<a id="orgf5e8aad"></a>
 
 # Lists
 
 
-<a id="org3dd2f0e"></a>
+<a id="org39590eb"></a>
 
 ## Numbered lists
 
@@ -79,7 +79,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="orge11654c"></a>
+<a id="org6baa12f"></a>
 
 ## plain lists
 
@@ -92,7 +92,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="orge19b83d"></a>
+<a id="org8fe5c78"></a>
 
 ## checklists
 
@@ -101,7 +101,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org3310b12"></a>
+<a id="org72cf505"></a>
 
 ## definition lists
 
@@ -109,7 +109,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org5cbc283"></a>
+<a id="org27b3027"></a>
 
 # Equations
 
@@ -120,7 +120,7 @@ Suppose you have this equation to solve:
 You can put a label near this and refer to it later.
 
 
-<a id="orgc4de031"></a>
+<a id="org6a858e9"></a>
 
 # Code blocks
 
@@ -134,7 +134,7 @@ You can put a label near this and refer to it later.
 ![img](obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png)
 
 
-<a id="org4d7473f"></a>
+<a id="org893c32a"></a>
 
 # Figures
 
@@ -147,18 +147,18 @@ You might like a caption with a label you can refer to later.
 </figure>
 
 
-<a id="org5bded94"></a>
+<a id="orge44b464"></a>
 
 ## another figure
 
 
 <figure>
   <img src="./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png">
-  <figcaption>Figure (3): A figure with a  caption. <a name="fig-data"></a></figcaption>
+  <figcaption>Figure (3): Another figure to check numbering. <a name="fig-data-2"></a></figcaption>
 </figure>
 
 
-<a id="orgbfbb467"></a>
+<a id="org121f356"></a>
 
 # Tables
 
@@ -237,7 +237,7 @@ Here is another table:
 </table>
 
 
-<a id="org53715c8"></a>
+<a id="org8e9ff06"></a>
 
 # Citations  <a name="sec-citations"></a>
 
@@ -248,14 +248,14 @@ org-ref helps you insert citations from a bibtex database.
 It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
 
 
-<a id="org3bcbd74"></a>
+<a id="orgcd550a1"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="orgf47297d"></a>
+<a id="org5ee750c"></a>
 
 # Cross-references
 
@@ -274,7 +274,7 @@ What matters the most in cross-references is that org-ref helps you complete the
 The results above show the answer to Eq. [eq-sle](#eq-sle).
 
 
-<a id="org62f1361"></a>
+<a id="orgb93ffd6"></a>
 
 # Exporting a single file
 
@@ -301,12 +301,56 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="org8f174c5"></a>
+<a id="org4769f6a"></a>
 
 # Handling projects
 
+Your project might have many org files that should all be published. No problem. First, setup your project, e.g.
 
-<a id="org50c1371"></a>
+    (setq org-publish-project-alist
+          '(("scimax-md"
+             :base-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
+             :publishing-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
+             :publishing-function scimax-md-publish-to-md)))
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">scimax-md</td>
+<td class="org-left">:base-directory</td>
+<td class="org-left">*Users/jkitchin/vc/jkitchin-github/scimax/scimax-md*</td>
+<td class="org-left">:publishing-directory</td>
+<td class="org-left">*Users/jkitchin/vc/jkitchin-github/scimax/scimax-md*</td>
+<td class="org-left">:publishing-function</td>
+<td class="org-left">scimax-md-publish-to-md</td>
+</tr>
+</tbody>
+</table>
+
+    (require 'scimax-md)
+    (org-publish-current-project)
+
+Now, we can test a link to another file: <./ideas.md>.
+
+
+<a id="orgf5827c6"></a>
 
 # Downsides to this approach
 
