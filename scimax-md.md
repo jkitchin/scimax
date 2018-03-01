@@ -1,49 +1,49 @@
 
 # Table of Contents
 
-1.  [Headings](#org168ffd0)
-    1.  [subheading](#org1fde238)
-        1.  [subsubheading](#org59f1b66)
-2.  [Markups](#orgdd73b9b)
-3.  [Lists](#orgff4e10c)
-    1.  [Numbered lists](#orgb1765fa)
-    2.  [plain lists](#org6454591)
-    3.  [checklists](#orga0af5ce)
-    4.  [definition lists](#orgafcfd30)
-4.  [Equations](#org7e6cb36)
-5.  [Code blocks](#org7dfeec8)
-6.  [Tables](#org2ae3f67)
-7.  [Citations  label:sec-citations](#org3b29388)
-8.  [Radio targets](#org7365aea)
-9.  [Cross-references](#orga493358)
-10. [needed](#org4fc7d58)
-11. [Exporting a single file](#orgb648c00)
-12. [Handling projects](#org89c6fad)
-13. [Downsides to this approach](#org95e8865)
+1.  [Headings](#org53220ca)
+    1.  [subheading](#org85b46b0)
+        1.  [subsubheading](#orgcdbc000)
+2.  [Markups](#orga5fa1bc)
+3.  [Lists](#orgcfc2044)
+    1.  [Numbered lists](#org8c88774)
+    2.  [plain lists](#org2bdf671)
+    3.  [checklists](#org8018b98)
+    4.  [definition lists](#orgbd93779)
+4.  [Equations](#org21d72bc)
+5.  [Code blocks](#org3e1d1e1)
+6.  [Tables](#org8c95445)
+7.  [Citations  label:sec-citations](#orgb8e1c35)
+8.  [Radio targets](#org086581d)
+9.  [Cross-references](#orge223829)
+10. [needed](#orgc8e3fa5)
+11. [Exporting a single file](#org051bcb9)
+12. [Handling projects](#orga994bfe)
+13. [Downsides to this approach](#org98de2d1)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 
-<a id="org168ffd0"></a>
+<a id="org53220ca"></a>
 
 # Headings
 
 It goes without saying I hope.
 
 
-<a id="org1fde238"></a>
+<a id="org85b46b0"></a>
 
 ## subheading
 
 
-<a id="org59f1b66"></a>
+<a id="orgcdbc000"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="orgdd73b9b"></a>
+<a id="orga5fa1bc"></a>
 
 # Markups
 
@@ -54,12 +54,12 @@ subscripts: H<sub>2</sub>O
 superscripts: H<sup>+</sup>
 
 
-<a id="orgff4e10c"></a>
+<a id="orgcfc2044"></a>
 
 # Lists
 
 
-<a id="orgb1765fa"></a>
+<a id="org8c88774"></a>
 
 ## Numbered lists
 
@@ -74,7 +74,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="org6454591"></a>
+<a id="org2bdf671"></a>
 
 ## plain lists
 
@@ -87,7 +87,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="orga0af5ce"></a>
+<a id="org8018b98"></a>
 
 ## checklists
 
@@ -96,7 +96,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="orgafcfd30"></a>
+<a id="orgbd93779"></a>
 
 ## definition lists
 
@@ -104,7 +104,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org7e6cb36"></a>
+<a id="org21d72bc"></a>
 
 # Equations
 
@@ -123,7 +123,7 @@ Suppose you have this equation to solve:
 The results above show the answer to [eq-sle](#eq-sle).
 
 
-<a id="org7dfeec8"></a>
+<a id="org3e1d1e1"></a>
 
 # Code blocks
 
@@ -141,7 +141,7 @@ You might like a caption.
 ./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png
 
 
-<a id="org2ae3f67"></a>
+<a id="org8c95445"></a>
 
 # Tables
 
@@ -189,21 +189,21 @@ You can have tables, with captions and labels.
 </table>
 
 
-<a id="org3b29388"></a>
+<a id="orgb8e1c35"></a>
 
 # Citations  <a name="sec-citations"></a>
 
-You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title=""John Kitchin", Data Sharing in Surface Science, "Surface Science ", v(), 103-107 (2016).">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title=""Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, "International Journal on Digital Libraries", v(2), 93--98 (2016).">kitchin-2016-autom-data</a></sup>. Check out the tooltips on them in the html that Github renders.
+You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title=""John Kitchin", Data Sharing in Surface Science, "Surface Science ", v(), 103-107 (2016).">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title=""Kitchin, Van Gulick \&amp; Zilinski, Automating Data Sharing Through Authoring Tools, "International Journal on Digital Libraries", v(2), 93--98 (2016).">kitchin-2016-autom-data</a></sup>. Check out the tooltips on them in the html that Github renders.
 
 
-<a id="org7365aea"></a>
+<a id="org086581d"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="orga493358"></a>
+<a id="orge223829"></a>
 
 # Cross-references
 
@@ -214,7 +214,7 @@ How about section [sec-citations](#sec-citations) on citations?
 Remember the [target](#target) we referred to earlier?
 
 
-<a id="org4fc7d58"></a>
+<a id="orgc8e3fa5"></a>
 
 # TODO needed
 
@@ -222,7 +222,7 @@ Remember the [target](#target) we referred to earlier?
 -   [ ] redo how labels are done. Should they be visible?
 
 
-<a id="orgb648c00"></a>
+<a id="org051bcb9"></a>
 
 # Exporting a single file
 
@@ -238,6 +238,7 @@ To a buffer:
 
     (require 'scimax-md)
     (org-export-to-file 'scimax-md "scimax-md.md")
+    (save-buffer)
 
     scimax-md.md
 
@@ -249,12 +250,12 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="org89c6fad"></a>
+<a id="orga994bfe"></a>
 
 # Handling projects
 
 
-<a id="org95e8865"></a>
+<a id="org98de2d1"></a>
 
 # Downsides to this approach
 
