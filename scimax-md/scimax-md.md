@@ -1,53 +1,53 @@
 
 # Table of Contents
 
-1.  [Headings](#org6e18699)
-    1.  [subheading](#orgf113fdf)
-        1.  [subsubheading](#orgf62be08)
-2.  [Markups](#orgf17a261)
-3.  [Lists](#org44c8231)
-    1.  [Numbered lists](#orgd2e64cb)
-    2.  [plain lists](#org154a774)
-    3.  [checklists](#org265d28a)
-    4.  [definition lists](#org3e28980)
-4.  [Equations](#org84df550)
-5.  [Code blocks](#org8e8819e)
-6.  [Figures](#orge304757)
-    1.  [another figure](#org1a12a86)
-7.  [Tables](#orgac5f7b8)
-8.  [Citations  label:sec-citations](#org1baf832)
-9.  [Radio targets](#org7533811)
-10. [Cross-references](#org4d33ec8)
-11. [Custom links?](#org17f83dc)
-12. [Exporting a single file](#orgffef85b)
-13. [Handling projects](#org3bf77c2)
-14. [Downsides to this approach](#org57446c9)
+1.  [Headings](#org3536353)
+    1.  [subheading](#org39c7705)
+        1.  [subsubheading](#orgc7e08e5)
+2.  [Markups](#org77861e7)
+3.  [Lists](#orgf5e8aad)
+    1.  [Numbered lists](#org39590eb)
+    2.  [plain lists](#org6baa12f)
+    3.  [checklists](#org8fe5c78)
+    4.  [definition lists](#org72cf505)
+4.  [Equations](#org27b3027)
+5.  [Code blocks](#org6a858e9)
+6.  [Figures](#org893c32a)
+    1.  [another figure](#orge44b464)
+7.  [Tables](#org121f356)
+8.  [Citations  label:sec-citations](#org8e9ff06)
+9.  [Radio targets](#orgcd550a1)
+10. [Cross-references](#org5ee750c)
+11. [Custom links?](#org61d6f22)
+12. [Exporting a single file](#orgb93ffd6)
+13. [Handling projects](#org4769f6a)
+14. [Downsides to this approach](#orgf5827c6)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 Github's rendering of org-mode is only ok. Too many things like references, internal links, etc. don't work though to rely on it for high quality documentation in the browser. This might be a nicer way to get better Github pages. Why not just use html then? Some places like markdown.
 
 
-<a id="org6e18699"></a>
+<a id="org3536353"></a>
 
 # Headings
 
 It goes without saying I hope, that we use headings to organize things.
 
 
-<a id="orgf113fdf"></a>
+<a id="org39c7705"></a>
 
 ## subheading
 
 
-<a id="orgf62be08"></a>
+<a id="orgc7e08e5"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="orgf17a261"></a>
+<a id="org77861e7"></a>
 
 # Markups
 
@@ -60,12 +60,12 @@ superscripts: H<sup>+</sup>
 Regular urls are fine: <http://google.com>.
 
 
-<a id="org44c8231"></a>
+<a id="orgf5e8aad"></a>
 
 # Lists
 
 
-<a id="orgd2e64cb"></a>
+<a id="org39590eb"></a>
 
 ## Numbered lists
 
@@ -80,7 +80,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="org154a774"></a>
+<a id="org6baa12f"></a>
 
 ## plain lists
 
@@ -93,7 +93,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="org265d28a"></a>
+<a id="org8fe5c78"></a>
 
 ## checklists
 
@@ -102,7 +102,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org3e28980"></a>
+<a id="org72cf505"></a>
 
 ## definition lists
 
@@ -110,7 +110,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org84df550"></a>
+<a id="org27b3027"></a>
 
 # Equations
 
@@ -121,14 +121,13 @@ Suppose you have this equation to solve:
 You can put a label near this and refer to it later. I guess Github does not do a great job rendering equations.
 
 
-<a id="org8e8819e"></a>
+<a id="org6a858e9"></a>
 
 # Code blocks
 
 You can put code right into your org file, and run it. The code and results show in the markdown export.
 
-```ipython
-%matplotlib inline
+```python
 import matplotlib.pyplot as plt
 
 print(8 - 4)
@@ -140,21 +139,8 @@ plt.savefig('geometric.png')
 
     4
 
-![img](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png)
 
-```ipython
-%matplotlib inline
-import matplotlib.pyplot as plt
-
-print(8 - 4)
-
-plt.plot([1, 2, 4, 8])
-plt.savefig('geometric.png')
-
-```
-
-
-<a id="orge304757"></a>
+<a id="org893c32a"></a>
 
 # Figures
 
@@ -167,18 +153,30 @@ You might like a caption with a label you can refer to later. The figures aren't
 </figure>
 
 
-<a id="org1a12a86"></a>
+<a id="orge44b464"></a>
 
 ## another figure
 
+```python
+import matplotlib.pyplot as plt
+
+print(8 - 4)
+
+plt.plot([1, 8, 16, 32], 'ro-')
+plt.savefig('geometric-2.png')
+
+```
+
+    4
+
 
 <figure>
-  <img src="./geometric.png">
+  <img src="./geometric-2.png">
   <figcaption>Figure (fig-data-2): Another figure to check numbering. <a name="fig-data-2"></a></figcaption>
 </figure>
 
 
-<a id="orgac5f7b8"></a>
+<a id="org121f356"></a>
 
 # Tables
 
@@ -259,7 +257,7 @@ Here is another table:
 Tables are numbered in the export, but they export as html, and it is the org-html exporter taking care of this.
 
 
-<a id="org1baf832"></a>
+<a id="org8e9ff06"></a>
 
 # Citations  <a name="sec-citations"></a>
 
@@ -270,14 +268,14 @@ org-ref helps you insert citations from a bibtex database.
 It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
 
 
-<a id="org7533811"></a>
+<a id="orgcd550a1"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="org4d33ec8"></a>
+<a id="org5ee750c"></a>
 
 # Cross-references
 
@@ -299,7 +297,7 @@ print(f'x = {8 + 4}')
 The results above show the answer to Eq. [eq-sle](#eq-sle).
 
 
-<a id="org17f83dc"></a>
+<a id="org61d6f22"></a>
 
 # Custom links?
 
@@ -327,7 +325,7 @@ No problem, just define an exporter for markdown. How about a youtube link? On e
 Checkout youtube:fgizHHd7nOo
 
 
-<a id="orgffef85b"></a>
+<a id="orgb93ffd6"></a>
 
 # Exporting a single file
 
@@ -363,7 +361,7 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="org3bf77c2"></a>
+<a id="org4769f6a"></a>
 
 # Handling projects
 
@@ -387,7 +385,7 @@ Now, we can test a link to another file:
 2.  A file link with description  [ideas](./ideas.md).
 
 
-<a id="org57446c9"></a>
+<a id="orgf5827c6"></a>
 
 # Downsides to this approach
 
