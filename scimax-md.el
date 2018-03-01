@@ -126,10 +126,10 @@ Return output file name."
 	   (browse-url (match-string 1)))
 	  (t
 	   (message "I don't know what to do with %s" (match-string 1))))))
-     :help-echo "This points to a file or url."))
+     :help-echo "This points to a file or url.")))
 
-  (add-hook 'markdown-mode-hook 'scimax-md-activate-buttons)
+(add-hook 'markdown-mode-hook 'scimax-md-activate-buttons)
 
-  (provide 'scimax-md)
+(provide 'scimax-md)
 
 ;;; scimax-md.el ends here
