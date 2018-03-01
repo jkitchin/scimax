@@ -1,49 +1,50 @@
 
 # Table of Contents
 
-1.  [Headings](#org81f77ee)
-    1.  [subheading](#org84670c4)
-        1.  [subsubheading](#orge88eff7)
-2.  [Markups](#org1a616b9)
-3.  [Lists](#org53ccd80)
-    1.  [Numbered lists](#org85fe2d8)
-    2.  [plain lists](#orge99e12a)
-    3.  [checklists](#org163b326)
-    4.  [definition lists](#org04e1764)
-4.  [Equations](#org381aeb9)
-5.  [Code blocks](#org57ac0ff)
-6.  [Tables](#orgd168b0f)
-7.  [Citations  label:sec-citations](#org1d89ee4)
-8.  [Radio targets](#org828e488)
-9.  [Cross-references](#orgcf0cbdb)
-10. [needed](#org55d0601)
-11. [Exporting a single file](#orgab3f29a)
-12. [Handling projects](#org65b53f5)
-13. [Downsides to this approach](#org3d86724)
+1.  [Headings](#orgc50baa2)
+    1.  [subheading](#orgc6277bc)
+        1.  [subsubheading](#org38a1aaa)
+2.  [Markups](#org2120e5d)
+3.  [Lists](#orgf6fd289)
+    1.  [Numbered lists](#org378a5ec)
+    2.  [plain lists](#org2741ed5)
+    3.  [checklists](#orgd8fa291)
+    4.  [definition lists](#org305b129)
+4.  [Equations](#org9157172)
+5.  [Code blocks](#orge80403f)
+6.  [Tables](#org4b312bc)
+7.  [Citations  label:sec-citations](#org4c0fd33)
+8.  [Radio targets](#orgac2422a)
+9.  [Cross-references](#orgdc87718)
+10. [Exporting a single file](#orgadbe574)
+11. [Handling projects](#org7f86d18)
+12. [Downsides to this approach](#orgb6d344d)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
+Github's rendering of org-mode is only ok. This might be a nicer way to get better Github pages.
 
-<a id="org81f77ee"></a>
+
+<a id="orgc50baa2"></a>
 
 # Headings
 
-It goes without saying I hope.
+It goes without saying I hope, that we use headings to organize things.
 
 
-<a id="org84670c4"></a>
+<a id="orgc6277bc"></a>
 
 ## subheading
 
 
-<a id="orge88eff7"></a>
+<a id="org38a1aaa"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org1a616b9"></a>
+<a id="org2120e5d"></a>
 
 # Markups
 
@@ -53,13 +54,15 @@ subscripts: H<sub>2</sub>O
 
 superscripts: H<sup>+</sup>
 
+Regular urls are fine: <http://google.com>.
 
-<a id="org53ccd80"></a>
+
+<a id="orgf6fd289"></a>
 
 # Lists
 
 
-<a id="org85fe2d8"></a>
+<a id="org378a5ec"></a>
 
 ## Numbered lists
 
@@ -74,7 +77,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="orge99e12a"></a>
+<a id="org2741ed5"></a>
 
 ## plain lists
 
@@ -87,7 +90,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="org163b326"></a>
+<a id="orgd8fa291"></a>
 
 ## checklists
 
@@ -96,7 +99,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org04e1764"></a>
+<a id="org305b129"></a>
 
 ## definition lists
 
@@ -104,26 +107,18 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org381aeb9"></a>
+<a id="org9157172"></a>
 
 # Equations
 
 Suppose you have this equation to solve:
 
-<a name="eq-sle"></a>
+\[8 = x - 4\]  <a name="eq-sle"></a>
 
-\begin{equation}
-8 = x - 4
-\end{equation}
-
-    print(f'x = {8 + 4}')
-
-    x = 12
-
-The results above show the answer to [eq-sle](#eq-sle).
+You can put a label near this and refer to it later.
 
 
-<a id="org57ac0ff"></a>
+<a id="orge80403f"></a>
 
 # Code blocks
 
@@ -136,12 +131,16 @@ The results above show the answer to [eq-sle](#eq-sle).
 
 ![img](obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png)
 
-You might like a caption.
-
-./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png
+You might like a caption with a label you can refer to later.
 
 
-<a id="orgd168b0f"></a>
+<figure>
+  <img src="./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png">
+  <figcaption>A figure with a  caption. <a name="fig-data"></a></figcaption>
+</figure>
+
+
+<a id="org4b312bc"></a>
 
 # Tables
 
@@ -188,40 +187,76 @@ You can have tables, with captions and labels.
 </tbody>
 </table>
 
+Here is another table:
 
-<a id="org1d89ee4"></a>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption class="t-above"><span class="table-number">Table 2:</span> A count of categories. <a name="tab-cat"></a></caption>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">category</th>
+<th scope="col" class="org-right">count</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td class="org-left">apples</td>
+<td class="org-right">2</td>
+</tr>
+
+
+<tr>
+<td class="org-left">oranges</td>
+<td class="org-right">4</td>
+</tr>
+</tbody>
+</table>
+
+
+<a id="org4c0fd33"></a>
 
 # Citations  <a name="sec-citations"></a>
 
 You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title="John Kitchin, Data Sharing in Surface Science, Surface Science , v(), 103-107 (2016).">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title="Kitchin, Van Gulick \&amp; Zilinski, Automating Data Sharing Through Authoring Tools, International Journal on Digital Libraries, v(2), 93--98 (2016).">kitchin-2016-autom-data</a></sup>. Check out the tooltips on them in the html that Github renders.
 
+org-ref helps you insert citations from a bibtex database.
 
-<a id="org828e488"></a>
+It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
+
+
+<a id="orgac2422a"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="orgcf0cbdb"></a>
+<a id="orgdc87718"></a>
 
 # Cross-references
 
-Remember in Table [tab-data](#tab-data)?  How about [eq-sle](#eq-sle)? Or that figure we put a caption on (Fig.  [fig-data](#fig-data)).
+Remember Table [tab-data](#tab-data) or the category Table ([tab-cat](#tab-cat))?   Or that figure we put a caption on (Fig.  [fig-data](#fig-data)).
 
 How about section [sec-citations](#sec-citations) on citations?
 
 Remember the [target](#target) we referred to earlier?
 
+What matters the most in cross-references is that org-ref helps you complete them.
 
-<a id="org55d0601"></a>
+    print(f'x = {8 + 4}')
 
-# TODO needed
+    x = 12
 
--   [ ] fix eqref in md export in org-ref
+The results above show the answer to Eq. [eq-sle](#eq-sle).
 
 
-<a id="orgab3f29a"></a>
+<a id="orgadbe574"></a>
 
 # Exporting a single file
 
@@ -238,6 +273,8 @@ To a buffer:
     (require 'scimax-md)
     (org-export-to-file 'scimax-md "scimax-md.md")
 
+    scimax-md.md
+
 # Bibliography
 <a id="kitchin-2015-examp">[kitchin-2015-examp]</a> Kitchin, Examples of Effective Data Sharing in Scientific Publishing, <i>{ACS Catalysis}</i>, <b>5(6)</b>, 3894-3899 (2015). <a href=" http://dx.doi.org/10.1021/acscatal.5b00538 ">link</a>. <a href="http://dx.doi.org/10.1021/acscatal.5b00538">doi</a>. [↩](#9e3ad98c9008c49c9d14834ca3913eb6)
 
@@ -246,12 +283,12 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="org65b53f5"></a>
+<a id="org7f86d18"></a>
 
 # Handling projects
 
 
-<a id="org3d86724"></a>
+<a id="orgb6d344d"></a>
 
 # Downsides to this approach
 
