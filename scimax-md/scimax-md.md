@@ -1,53 +1,53 @@
 
 # Table of Contents
 
-1.  [Headings](#orgfbb6d97)
-    1.  [subheading](#org487a34c)
-        1.  [subsubheading](#orgbc37474)
-2.  [Markups](#orgc689588)
-3.  [Lists](#orgacfe1c7)
-    1.  [Numbered lists](#org8b75ba5)
-    2.  [plain lists](#org14a9dd1)
-    3.  [checklists](#orgf98d191)
-    4.  [definition lists](#org66ea06e)
-4.  [Equations](#orge99be70)
-5.  [Code blocks](#orge8e0b93)
-6.  [Figures](#org924f455)
-    1.  [another figure](#org7d3c7ea)
-7.  [Tables](#orgb3f5b8b)
-8.  [Citations  label:sec-citations](#org25dc272)
-9.  [Radio targets](#org836f19c)
-10. [Cross-references](#org8b57a90)
-11. [Custom links?](#orgf88cdd5)
-12. [Exporting a single file](#orgea6516b)
-13. [Handling projects](#orgadd3a78)
-14. [Downsides to this approach](#orgc648d03)
+1.  [Headings](#org5754ed6)
+    1.  [subheading](#org74cadc0)
+        1.  [subsubheading](#orga6bbe87)
+2.  [Markups](#org07bf719)
+3.  [Lists](#orgc42e5a3)
+    1.  [Numbered lists](#orge84e83d)
+    2.  [plain lists](#org62b5b63)
+    3.  [checklists](#org8312b92)
+    4.  [definition lists](#orgf918c21)
+4.  [Equations](#orgd27a43a)
+5.  [Code blocks](#orgfe7d731)
+6.  [Figures](#orgcfee959)
+    1.  [another figure](#orgd3a8555)
+7.  [Tables](#org5e4856c)
+8.  [Citations  label:sec-citations](#org1fb4c8f)
+9.  [Radio targets](#orgb5e16e5)
+10. [Cross-references](#org6d6b322)
+11. [Custom links?](#org29afd4c)
+12. [Exporting a single file](#org3b2e218)
+13. [Handling projects](#org293beaf)
+14. [Downsides to this approach](#orge76ca6e)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 Github's rendering of org-mode is only ok. Too many things like references, internal links, etc. don't work though to rely on it for high quality documentation in the browser. This might be a nicer way to get better Github pages. Why not just use html then? Some places like markdown.
 
 
-<a id="orgfbb6d97"></a>
+<a id="org5754ed6"></a>
 
 # Headings
 
 It goes without saying I hope, that we use headings to organize things.
 
 
-<a id="org487a34c"></a>
+<a id="org74cadc0"></a>
 
 ## subheading
 
 
-<a id="orgbc37474"></a>
+<a id="orga6bbe87"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="orgc689588"></a>
+<a id="org07bf719"></a>
 
 # Markups
 
@@ -60,12 +60,12 @@ superscripts: H<sup>+</sup>
 Regular urls are fine: <http://google.com>.
 
 
-<a id="orgacfe1c7"></a>
+<a id="orgc42e5a3"></a>
 
 # Lists
 
 
-<a id="org8b75ba5"></a>
+<a id="orge84e83d"></a>
 
 ## Numbered lists
 
@@ -80,7 +80,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="org14a9dd1"></a>
+<a id="org62b5b63"></a>
 
 ## plain lists
 
@@ -93,7 +93,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="orgf98d191"></a>
+<a id="org8312b92"></a>
 
 ## checklists
 
@@ -102,7 +102,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org66ea06e"></a>
+<a id="orgf918c21"></a>
 
 ## definition lists
 
@@ -110,7 +110,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="orge99be70"></a>
+<a id="orgd27a43a"></a>
 
 # Equations
 
@@ -121,7 +121,7 @@ Suppose you have this equation to solve:
 You can put a label near this and refer to it later. I guess Github does not do a great job rendering equations.
 
 
-<a id="orge8e0b93"></a>
+<a id="orgfe7d731"></a>
 
 # Code blocks
 
@@ -140,7 +140,7 @@ You can put code right into your org file, and run it. The code and results show
 [obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139AlL.png](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139AlL.png)
 
 
-<a id="org924f455"></a>
+<a id="orgcfee959"></a>
 
 # Figures
 
@@ -153,7 +153,7 @@ You might like a caption with a label you can refer to later. The figures aren't
 </figure>
 
 
-<a id="org7d3c7ea"></a>
+<a id="orgd3a8555"></a>
 
 ## another figure
 
@@ -164,7 +164,7 @@ You might like a caption with a label you can refer to later. The figures aren't
 </figure>
 
 
-<a id="orgb3f5b8b"></a>
+<a id="org5e4856c"></a>
 
 # Tables
 
@@ -245,7 +245,7 @@ Here is another table:
 Tables are numbered in the export, but they export as html, and it is the org-html exporter taking care of this.
 
 
-<a id="org25dc272"></a>
+<a id="org1fb4c8f"></a>
 
 # Citations  <a name="sec-citations"></a>
 
@@ -256,14 +256,14 @@ org-ref helps you insert citations from a bibtex database.
 It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
 
 
-<a id="org836f19c"></a>
+<a id="orgb5e16e5"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="org8b57a90"></a>
+<a id="org6d6b322"></a>
 
 # Cross-references
 
@@ -282,7 +282,7 @@ What matters the most in cross-references is that org-ref helps you complete the
 The results above show the answer to Eq. [eq-sle](#eq-sle).
 
 
-<a id="orgf88cdd5"></a>
+<a id="org29afd4c"></a>
 
 # Custom links?
 
@@ -296,11 +296,12 @@ No problem, just define an exporter for markdown. How about a youtube link? On e
     	   (cond
     	    ((eq 'md backend)
     	     (format "[%s](%s)
-    <iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/%s\" frameborder=\"0\" allow=\"autoplay; encrypted-media\" allowfullscreen></iframe>"
-    (or desc (format "https://youtu.be/%s" path))
-    path
-    path))))
-    :help-echo "A youtube video. Click to open in browser.")
+    <a href=\"https://www.youtube.com/watch?v=%s\">
+    <img src=\"http://img.youtube.com/vi/%s/0.jpg\"></a>"
+    		     (or desc (format "https://youtu.be/%s" path))
+    		     (format "https://youtu.be/%s" path)
+    		     path path))))
+     :help-echo "A youtube video. Click to open in browser.")
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -324,11 +325,12 @@ No problem, just define an exporter for markdown. How about a youtube link? On e
 </tbody>
 </table>
 
-Checkout [https://youtu.be/fgizHHd7nOo](fgizHHd7nOo)
-<iframe width="560" height="315" src="https://www.youtube.com/embed/fgizHHd7nOo" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+Checkout [https://youtu.be/fgizHHd7nOo](https://youtu.be/fgizHHd7nOo)
+<a href="https://www.youtube.com/watch?v=fgizHHd7nOo">
+<img src="http://img.youtube.com/vi/fgizHHd7nOo/0.jpg"></a>
 
 
-<a id="orgea6516b"></a>
+<a id="org3b2e218"></a>
 
 # Exporting a single file
 
@@ -355,7 +357,7 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="orgadd3a78"></a>
+<a id="org293beaf"></a>
 
 # Handling projects
 
@@ -376,7 +378,7 @@ Now, we can test a link to another file:
 2.  A file link with description  [ideas](./ideas.md).
 
 
-<a id="orgc648d03"></a>
+<a id="orge76ca6e"></a>
 
 # Downsides to this approach
 

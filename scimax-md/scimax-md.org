@@ -177,11 +177,12 @@ No problem, just define an exporter for markdown. How about a youtube link? On e
 	   (cond
 	    ((eq 'md backend)
 	     (format "[%s](%s)
-<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/%s\" frameborder=\"0\" allow=\"autoplay; encrypted-media\" allowfullscreen></iframe>"
-(or desc (format "https://youtu.be/%s" path))
-path
-path))))
-:help-echo "A youtube video. Click to open in browser.")
+<a href=\"https://www.youtube.com/watch?v=%s\">
+<img src=\"http://img.youtube.com/vi/%s/0.jpg\"></a>"
+		     (or desc (format "https://youtu.be/%s" path))
+		     (format "https://youtu.be/%s" path)
+		     path path))))
+ :help-echo "A youtube video. Click to open in browser.")
 #+END_SRC
 
 #+RESULTS:
