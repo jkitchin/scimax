@@ -2,11 +2,12 @@
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
-Github's rendering of org-mode is only ok. This might be a nicer way to get better Github pages.
+Github's rendering of org-mode is only ok. Too many things like references, internal links, etc. don't work though to rely on it for high quality documentation in the browser. This might be a nicer way to get better Github pages. Why not just use html then? Some places like markdown.
 
 * Headings
 
 It goes without saying I hope, that we use headings to organize things.
+
 ** subheading
 *** subsubheading
 
@@ -59,20 +60,23 @@ c. cat
 - org-mode :: what makes this possible
 - emacs :: the other thing you need
 
-
 * Equations
 
 Suppose you have this equation to solve:
 
 $$8 = x - 4$$  label:eq-sle
 
-You can put a label near this and refer to it later.
+You can put a label near this and refer to it later. I guess Github does not do a great job rendering equations.
 
 * Code blocks
+
+You can put code right into your org file, and run it. The code and results show in the markdown export.
 
 #+BEGIN_SRC ipython
 %matplotlib inline
 import matplotlib.pyplot as plt
+
+print(8 - 4)
 
 plt.plot([1, 2, 4, 8])
 plt.savefig('geometric.png')
@@ -80,11 +84,13 @@ plt.savefig('geometric.png')
 
 #+RESULTS:
 :RESULTS:
-# Out[1]:
+# Out[2]:
+# output
+: 4
 
 
 # image/png
-[[file:obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139zaF.png]]
+[[file:obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139AlL.png]]
 :END:
 
 * Figures
@@ -99,7 +105,6 @@ You might like a caption with a label you can refer to later. The figures aren't
 
 #+caption: Another figure to check numbering. label:fig-data-2
 [[./geometric.png]]
-
 
 * Tables
 
@@ -121,11 +126,12 @@ Here is another table:
 | apples   |     2 |
 | oranges  |     4 |
 
+
 Tables are numbered in the export, but they export as html, and it is the org-html exporter taking care of this.
 
 * Citations  label:sec-citations
 
-You can have proper scientific citations like this cite:kitchin-2015-examp, including multiple references cite:kitchin-2015-data-surfac-scien,kitchin-2015-examp,kitchin-2016-autom-data. Check out the tooltips on them in the html that Github renders.
+You can have proper scientific citations like this cite:kitchin-2015-examp, including multiple references cite:kitchin-2015-data-surfac-scien,kitchin-2015-examp,kitchin-2016-autom-data. Check out the tooltips on them in the html that Github renders. Somewhat unfortunately, the citations are exported basically as html, so they are not fun to read in the markdown. Oh well, did I mention tooltips!
 
 org-ref helps you insert citations from a bibtex database.
 
@@ -157,6 +163,31 @@ print(f'x = {8 + 4}')
 :END:
 
 The results above show the answer to Eq. ref:eq-sle.
+
+* Custom links?
+
+No problem, just define an exporter for markdown. How about a youtube link? On export, we will replace the link with an html iframe.
+
+#+BEGIN_SRC emacs-lisp
+(org-link-set-parameters
+ "youtube"
+ :follow (lambda (path)
+	   (browse-url (format "https://youtu.be/%s" path)))
+ :export (lambda (path desc backend)
+	   (cond
+	    ((eq 'md backend)
+	     (format "[%s](%s)
+<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/%s\" frameborder=\"0\" allow=\"autoplay; encrypted-media\" allowfullscreen></iframe>"
+(or desc (format "https://youtu.be/%s" path))
+path
+path))))
+:help-echo "A youtube video. Click to open in browser.")
+#+END_SRC
+
+#+RESULTS:
+| :follow | (lambda (path) (browse-url (format https://youtu.be/%s path))) | :export | (lambda (path desc backend) (cond ((eq (quote md) backend) (format [%s](%s) |
+
+Checkout youtube:fgizHHd7nOo
 
 * Exporting a single file
 
@@ -218,7 +249,9 @@ Here are some org-generated lines:
 You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>,
 #+END_EXAMPLE
 
-This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes.
+You can see the citations are basically just html. They look good when rendered, but are kind of irritating to read in markdown. Not a problem in org-mode...
+
+This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes. This isn't a big deal with version control, but could cause some issues.
 
 Not every corner of org-mode has been tested yet. Might as well try one more thing:
 

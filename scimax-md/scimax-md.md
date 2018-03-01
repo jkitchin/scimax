@@ -1,52 +1,53 @@
 
 # Table of Contents
 
-1.  [Headings](#org3536353)
-    1.  [subheading](#org39c7705)
-        1.  [subsubheading](#orgc7e08e5)
-2.  [Markups](#org77861e7)
-3.  [Lists](#orgf5e8aad)
-    1.  [Numbered lists](#org39590eb)
-    2.  [plain lists](#org6baa12f)
-    3.  [checklists](#org8fe5c78)
-    4.  [definition lists](#org72cf505)
-4.  [Equations](#org27b3027)
-5.  [Code blocks](#org6a858e9)
-6.  [Figures](#org893c32a)
-    1.  [another figure](#orge44b464)
-7.  [Tables](#org121f356)
-8.  [Citations  label:sec-citations](#org8e9ff06)
-9.  [Radio targets](#orgcd550a1)
-10. [Cross-references](#org5ee750c)
-11. [Exporting a single file](#orgb93ffd6)
-12. [Handling projects](#org4769f6a)
-13. [Downsides to this approach](#orgf5827c6)
+1.  [Headings](#orgfbb6d97)
+    1.  [subheading](#org487a34c)
+        1.  [subsubheading](#orgbc37474)
+2.  [Markups](#orgc689588)
+3.  [Lists](#orgacfe1c7)
+    1.  [Numbered lists](#org8b75ba5)
+    2.  [plain lists](#org14a9dd1)
+    3.  [checklists](#orgf98d191)
+    4.  [definition lists](#org66ea06e)
+4.  [Equations](#orge99be70)
+5.  [Code blocks](#orge8e0b93)
+6.  [Figures](#org924f455)
+    1.  [another figure](#org7d3c7ea)
+7.  [Tables](#orgb3f5b8b)
+8.  [Citations  label:sec-citations](#org25dc272)
+9.  [Radio targets](#org836f19c)
+10. [Cross-references](#org8b57a90)
+11. [Custom links?](#orgf88cdd5)
+12. [Exporting a single file](#orgea6516b)
+13. [Handling projects](#orgadd3a78)
+14. [Downsides to this approach](#orgc648d03)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
-Github's rendering of org-mode is only ok. This might be a nicer way to get better Github pages.
+Github's rendering of org-mode is only ok. Too many things like references, internal links, etc. don't work though to rely on it for high quality documentation in the browser. This might be a nicer way to get better Github pages. Why not just use html then? Some places like markdown.
 
 
-<a id="org3536353"></a>
+<a id="orgfbb6d97"></a>
 
 # Headings
 
 It goes without saying I hope, that we use headings to organize things.
 
 
-<a id="org39c7705"></a>
+<a id="org487a34c"></a>
 
 ## subheading
 
 
-<a id="orgc7e08e5"></a>
+<a id="orgbc37474"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org77861e7"></a>
+<a id="orgc689588"></a>
 
 # Markups
 
@@ -59,12 +60,12 @@ superscripts: H<sup>+</sup>
 Regular urls are fine: <http://google.com>.
 
 
-<a id="orgf5e8aad"></a>
+<a id="orgacfe1c7"></a>
 
 # Lists
 
 
-<a id="org39590eb"></a>
+<a id="org8b75ba5"></a>
 
 ## Numbered lists
 
@@ -79,7 +80,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="org6baa12f"></a>
+<a id="org14a9dd1"></a>
 
 ## plain lists
 
@@ -92,7 +93,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="org8fe5c78"></a>
+<a id="orgf98d191"></a>
 
 ## checklists
 
@@ -101,7 +102,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org72cf505"></a>
+<a id="org66ea06e"></a>
 
 ## definition lists
 
@@ -109,7 +110,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org27b3027"></a>
+<a id="orge99be70"></a>
 
 # Equations
 
@@ -117,23 +118,29 @@ Suppose you have this equation to solve:
 
 \[8 = x - 4\]  <a name="eq-sle"></a>
 
-You can put a label near this and refer to it later.
+You can put a label near this and refer to it later. I guess Github does not do a great job rendering equations.
 
 
-<a id="org6a858e9"></a>
+<a id="orge8e0b93"></a>
 
 # Code blocks
+
+You can put code right into your org file, and run it. The code and results show in the markdown export.
 
     %matplotlib inline
     import matplotlib.pyplot as plt
 
+    print(8 - 4)
+
     plt.plot([1, 2, 4, 8])
     plt.savefig('geometric.png')
 
-[obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139zaF.png](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139zaF.png)
+    4
+
+[obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139AlL.png](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139AlL.png)
 
 
-<a id="org893c32a"></a>
+<a id="org924f455"></a>
 
 # Figures
 
@@ -142,22 +149,22 @@ You might like a caption with a label you can refer to later. The figures aren't
 
 <figure>
   <img src="./geometric.png">
-  <figcaption>Figure (fig-data): A figure with a  caption. <a name="fig-data"></a></figcaption>
+  <figcaption>Figure ((((A figure with a  caption.  (link (:type label :path fig-data :format plain :raw-link label:fig-data :application nil :search-option nil :begin 2085 :end 2099 :contents-begin nil :contents-end nil :post-blank 0 :parent #2)))))): A figure with a  caption. <a name="fig-data"></a></figcaption>
 </figure>
 
 
-<a id="orge44b464"></a>
+<a id="org7d3c7ea"></a>
 
 ## another figure
 
 
 <figure>
   <img src="./geometric.png">
-  <figcaption>Figure (fig-data-2): Another figure to check numbering. <a name="fig-data-2"></a></figcaption>
+  <figcaption>Figure ((((Another figure to check numbering.  (link (:type label :path fig-data-2 :format plain :raw-link label:fig-data-2 :application nil :search-option nil :begin 2187 :end 2203 :contents-begin nil :contents-end nil :post-blank 0 :parent #2)))))): Another figure to check numbering. <a name="fig-data-2"></a></figcaption>
 </figure>
 
 
-<a id="org121f356"></a>
+<a id="orgb3f5b8b"></a>
 
 # Tables
 
@@ -238,25 +245,25 @@ Here is another table:
 Tables are numbered in the export, but they export as html, and it is the org-html exporter taking care of this.
 
 
-<a id="org8e9ff06"></a>
+<a id="org25dc272"></a>
 
 # Citations  <a name="sec-citations"></a>
 
-You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title="John Kitchin, Data Sharing in Surface Science, Surface Science , v(), 103-107 (2016).">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title="Kitchin, Van Gulick \&amp; Zilinski, Automating Data Sharing Through Authoring Tools, International Journal on Digital Libraries, v(2), 93--98 (2016).">kitchin-2016-autom-data</a></sup>. Check out the tooltips on them in the html that Github renders.
+You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title="John Kitchin, Data Sharing in Surface Science, Surface Science , v(), 103-107 (2016).">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title="Kitchin, Van Gulick \&amp; Zilinski, Automating Data Sharing Through Authoring Tools, International Journal on Digital Libraries, v(2), 93--98 (2016).">kitchin-2016-autom-data</a></sup>. Check out the tooltips on them in the html that Github renders. Somewhat unfortunately, the citations are exported basically as html, so they are not fun to read in the markdown. Oh well, did I mention tooltips!
 
 org-ref helps you insert citations from a bibtex database.
 
 It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
 
 
-<a id="orgcd550a1"></a>
+<a id="org836f19c"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="org5ee750c"></a>
+<a id="org8b57a90"></a>
 
 # Cross-references
 
@@ -275,7 +282,53 @@ What matters the most in cross-references is that org-ref helps you complete the
 The results above show the answer to Eq. [eq-sle](#eq-sle).
 
 
-<a id="orgb93ffd6"></a>
+<a id="orgf88cdd5"></a>
+
+# Custom links?
+
+No problem, just define an exporter for markdown. How about a youtube link? On export, we will replace the link with an html iframe.
+
+    (org-link-set-parameters
+     "youtube"
+     :follow (lambda (path)
+    	   (browse-url (format "https://youtu.be/%s" path)))
+     :export (lambda (path desc backend)
+    	   (cond
+    	    ((eq 'md backend)
+    	     (format "[%s](%s)
+    <iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/%s\" frameborder=\"0\" allow=\"autoplay; encrypted-media\" allowfullscreen></iframe>"
+    (or desc (format "https://youtu.be/%s" path))
+    path
+    path))))
+    :help-echo "A youtube video. Click to open in browser.")
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">:follow</td>
+<td class="org-left">(lambda (path) (browse-url (format <https://youtu.be/%s> path)))</td>
+<td class="org-left">:export</td>
+<td class="org-left">(lambda (path desc backend) (cond ((eq (quote md) backend) (format [%s](%s)</td>
+</tr>
+</tbody>
+</table>
+
+Checkout [https://youtu.be/fgizHHd7nOo](fgizHHd7nOo)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/fgizHHd7nOo" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+
+<a id="orgea6516b"></a>
 
 # Exporting a single file
 
@@ -302,7 +355,7 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="org4769f6a"></a>
+<a id="orgadd3a78"></a>
 
 # Handling projects
 
@@ -323,7 +376,7 @@ Now, we can test a link to another file:
 2.  A file link with description  [ideas](./ideas.md).
 
 
-<a id="orgf5827c6"></a>
+<a id="orgc648d03"></a>
 
 # Downsides to this approach
 
@@ -335,7 +388,9 @@ Here are some org-generated lines:
 
     You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>,
 
-This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes.
+You can see the citations are basically just html. They look good when rendered, but are kind of irritating to read in markdown. Not a problem in org-mode&#x2026;
+
+This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes. This isn't a big deal with version control, but could cause some issues.
 
 Not every corner of org-mode has been tested yet. Might as well try one more thing:
 
