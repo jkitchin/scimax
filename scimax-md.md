@@ -1,49 +1,49 @@
 
 # Table of Contents
 
-1.  [Headings](#orgdb8e2ff)
-    1.  [subheading](#org5011927)
-        1.  [subsubheading](#org5277bec)
-2.  [Markups](#orgc89ff35)
-3.  [Lists](#org764a343)
-    1.  [Numbered lists](#org3174557)
-    2.  [plain lists](#org08365b1)
-    3.  [checklists](#orga2dc1bf)
-    4.  [definition lists](#org9de49b2)
-4.  [Equations](#orgb1750c9)
-5.  [Code blocks](#org9a42095)
-6.  [Tables](#orga0fe5fc)
-7.  [Citations  label:sec-citations](#org7a634a9)
-8.  [Radio targets](#org0b3fd01)
-9.  [Cross-references](#org0080bb4)
-10. [needed](#org8133169)
-11. [Exporting](#org0a9a473)
-12. [Handling projects](#org3bff4c0)
-13. [Downsides to this approach](#org4845c58)
+1.  [Headings](#org43e225b)
+    1.  [subheading](#org46c5206)
+        1.  [subsubheading](#orga5bfb61)
+2.  [Markups](#org7840c30)
+3.  [Lists](#org00f6265)
+    1.  [Numbered lists](#org352ce96)
+    2.  [plain lists](#org9387976)
+    3.  [checklists](#org840f8dc)
+    4.  [definition lists](#org2e69783)
+4.  [Equations](#org4b1819f)
+5.  [Code blocks](#orgd6af078)
+6.  [Tables](#org99696cc)
+7.  [Citations  label:sec-citations](#orgd4581c4)
+8.  [Radio targets](#orgf24283b)
+9.  [Cross-references](#org705a19f)
+10. [needed](#orgc7a2762)
+11. [Exporting](#org32b2a6f)
+12. [Handling projects](#orgccd68cc)
+13. [Downsides to this approach](#org9f7610f)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 
-<a id="orgdb8e2ff"></a>
+<a id="org43e225b"></a>
 
 # Headings
 
 It goes without saying I hope.
 
 
-<a id="org5011927"></a>
+<a id="org46c5206"></a>
 
 ## subheading
 
 
-<a id="org5277bec"></a>
+<a id="orga5bfb61"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="orgc89ff35"></a>
+<a id="org7840c30"></a>
 
 # Markups
 
@@ -54,12 +54,12 @@ subscripts: H<sub>2</sub>O
 superscripts: H<sup>+</sup>
 
 
-<a id="org764a343"></a>
+<a id="org00f6265"></a>
 
 # Lists
 
 
-<a id="org3174557"></a>
+<a id="org352ce96"></a>
 
 ## Numbered lists
 
@@ -74,7 +74,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="org08365b1"></a>
+<a id="org9387976"></a>
 
 ## plain lists
 
@@ -87,7 +87,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="orga2dc1bf"></a>
+<a id="org840f8dc"></a>
 
 ## checklists
 
@@ -96,7 +96,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org9de49b2"></a>
+<a id="org2e69783"></a>
 
 ## definition lists
 
@@ -104,7 +104,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="orgb1750c9"></a>
+<a id="org4b1819f"></a>
 
 # Equations
 
@@ -123,7 +123,7 @@ Suppose you have this equation to solve:
 The results above show the answer to [eq-sle](#eq-sle).
 
 
-<a id="org9a42095"></a>
+<a id="orgd6af078"></a>
 
 # Code blocks
 
@@ -141,7 +141,7 @@ You might like a caption.
 ./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png
 
 
-<a id="orga0fe5fc"></a>
+<a id="org99696cc"></a>
 
 # Tables
 
@@ -189,21 +189,21 @@ You can have tables, with captions and labels.
 </table>
 
 
-<a id="org7a634a9"></a>
+<a id="orgd4581c4"></a>
 
 # Citations  <a name="sec-citations"></a>
 
-You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, <i>{ACS Catalysis}</i>, <b>5(6)</b>, 3894-3899 (2015). <a href=" http://dx.doi.org/10.1021/acscatal.5b00538 ">link</a>. <a href="http://dx.doi.org/10.1021/acscatal.5b00538">doi</a>.">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title=""John Kitchin", Data Sharing in Surface Science, <i>"Surface Science "</i>, <b>647()</b>, 103-107 (2016). <a href="http://www.sciencedirect.com/science/article/pii/S0039602815001326">link</a>. <a href="http://dx.doi.org/10.1016/j.susc.2015.05.007">doi</a>.">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, <i>{ACS Catalysis}</i>, <b>5(6)</b>, 3894-3899 (2015). <a href=" http://dx.doi.org/10.1021/acscatal.5b00538 ">link</a>. <a href="http://dx.doi.org/10.1021/acscatal.5b00538">doi</a>.">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title=""Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>.">kitchin-2016-autom-data</a></sup>. Check out the tooltips on them in the html that Github renders.
+You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, &lt;i&gt;{ACS Catalysis}&lt;/i&gt;, &lt;b&gt;5(6)&lt;/b&gt;, 3894-3899 (2015). &lt;a href=" http://dx.doi.org/10.1021/acscatal.5b00538 "&gt;link&lt;/a&gt;. &lt;a href="http://dx.doi.org/10.1021/acscatal.5b00538"&gt;doi&lt;/a&gt;.">kitchin-2015-examp</a></sup>, including multiple references <sup id="66b54b1976758a93506a846c2666419b"><a href="#kitchin-2015-data-surfac-scien" title=""John Kitchin", Data Sharing in Surface Science, &lt;i&gt;"Surface Science "&lt;/i&gt;, &lt;b&gt;647()&lt;/b&gt;, 103-107 (2016). &lt;a href="http://www.sciencedirect.com/science/article/pii/S0039602815001326"&gt;link&lt;/a&gt;. &lt;a href="http://dx.doi.org/10.1016/j.susc.2015.05.007"&gt;doi&lt;/a&gt;.">kitchin-2015-data-surfac-scien</a></sup><sup>,</sup><sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, &lt;i&gt;{ACS Catalysis}&lt;/i&gt;, &lt;b&gt;5(6)&lt;/b&gt;, 3894-3899 (2015). &lt;a href=" http://dx.doi.org/10.1021/acscatal.5b00538 "&gt;link&lt;/a&gt;. &lt;a href="http://dx.doi.org/10.1021/acscatal.5b00538"&gt;doi&lt;/a&gt;.">kitchin-2015-examp</a></sup><sup>,</sup><sup id="fe4ece7c7b3687ca21f32c0ee4e0a542"><a href="#kitchin-2016-autom-data" title=""Kitchin, Van Gulick \&amp; Zilinski, Automating Data Sharing Through Authoring Tools, &lt;i&gt;"International Journal on Digital Libraries"&lt;/i&gt;, &lt;b&gt;18(2)&lt;/b&gt;, 93--98 (2016). &lt;a href="http://dx.doi.org/10.1007/s00799-016-0173-7"&gt;link&lt;/a&gt;. &lt;a href="http://dx.doi.org/10.1007/s00799-016-0173-7"&gt;doi&lt;/a&gt;.">kitchin-2016-autom-data</a></sup>. Check out the tooltips on them in the html that Github renders.
 
 
-<a id="org0b3fd01"></a>
+<a id="orgf24283b"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="org0080bb4"></a>
+<a id="org705a19f"></a>
 
 # Cross-references
 
@@ -214,7 +214,7 @@ How about section [sec-citations](#sec-citations) on citations?
 Remember the [target](#target) we referred to earlier?
 
 
-<a id="org8133169"></a>
+<a id="orgc7a2762"></a>
 
 # TODO needed
 
@@ -222,7 +222,7 @@ Remember the [target](#target) we referred to earlier?
 -   [ ] redo how labels are done. Should they be visible?
 
 
-<a id="org0a9a473"></a>
+<a id="org32b2a6f"></a>
 
 # Exporting
 
@@ -249,12 +249,12 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="org3bff4c0"></a>
+<a id="orgccd68cc"></a>
 
 # Handling projects
 
 
-<a id="org4845c58"></a>
+<a id="org9f7610f"></a>
 
 # Downsides to this approach
 
