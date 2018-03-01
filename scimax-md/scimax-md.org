@@ -1,0 +1,210 @@
+#+TITLE: A better Markdown exporter
+
+Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
+
+Github's rendering of org-mode is only ok. This might be a nicer way to get better Github pages.
+
+* Headings
+
+It goes without saying I hope, that we use headings to organize things.
+** subheading
+*** subsubheading
+
+Anything deeper than this gets turned into paragraphs by default.
+
+* Markups
+
+*bold* /italics/ _underline_ +strike+ =verbatim= ~code~
+
+subscripts: H_{2}O
+
+superscripts: H^{+}
+
+Regular urls are fine: http://google.com.
+
+* Lists
+
+** Numbered lists
+
+1. one
+2. two
+3. three
+
+
+Note these letters will render as numbers.
+
+a. apple
+b. bear
+c. cat
+
+
+** plain lists
+
+- one
+- two
+- three
+  - with nesting
+    - deeper
+  - back in
+- all the way
+
+** checklists
+
+- [ ] one
+- [ ] two
+- [ ] three
+
+** definition lists
+
+- org-mode :: what makes this possible
+- emacs :: the other thing you need
+
+
+* Equations
+
+Suppose you have this equation to solve:
+
+$$8 = x - 4$$  label:eq-sle
+
+You can put a label near this and refer to it later.
+
+* Code blocks
+
+#+BEGIN_SRC ipython
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+plt.plot([1, 2, 4, 8])
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[3]:
+# text/plain
+: [<matplotlib.lines.Line2D at 0x10c6d34e0>]
+
+
+
+# image/png
+[[file:obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png]]
+:END:
+
+* Figures
+You might like a caption with a label you can refer to later.
+
+#+caption: A figure with a  caption. label:fig-data
+[[./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png]]
+
+** another figure
+
+
+#+caption: Another figure to check numbering. label:fig-data-2
+[[./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png]]
+
+
+* Tables
+
+You can have tables, with captions and labels.
+
+#+caption: A data table. label:tab-data
+| x |  y |
+|---+----|
+| 1 |  1 |
+| 2 |  4 |
+| 3 |  9 |
+| 4 | 16 |
+
+Here is another table:
+
+#+caption: A count of categories. label:tab-cat
+| category | count |
+|----------+-------|
+| apples   |     2 |
+| oranges  |     4 |
+
+* Citations  label:sec-citations
+
+You can have proper scientific citations like this cite:kitchin-2015-examp, including multiple references cite:kitchin-2015-data-surfac-scien,kitchin-2015-examp,kitchin-2016-autom-data. Check out the tooltips on them in the html that Github renders.
+
+org-ref helps you insert citations from a bibtex database.
+
+It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
+
+* Radio targets
+
+In org-mode you can define a <<target>> that you can make a link to later.
+
+* Cross-references
+
+Remember Table ref:tab-data or the category Table (ref:tab-cat)?   Or that figure we put a caption on (Fig.  ref:fig-data).
+
+How about section ref:sec-citations on citations?
+
+Remember the [[target]] we referred to earlier?
+
+What matters the most in cross-references is that org-ref helps you complete them.
+
+#+BEGIN_SRC ipython
+print(f'x = {8 + 4}')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[2]:
+# output
+: x = 12
+:END:
+
+The results above show the answer to Eq. ref:eq-sle.
+
+* Exporting a single file
+
+#+BEGIN_SRC emacs-lisp
+(require 'scimax-md)
+#+END_SRC
+
+#+RESULTS:
+: scimax-md
+
+To a buffer:
+
+#+BEGIN_SRC emacs-lisp
+(pop-to-buffer (org-export-to-buffer 'scimax-md "*scimax-md-export*"))
+#+END_SRC
+
+#+RESULTS:
+: #<buffer *scimax-md-export*>
+
+#+BEGIN_SRC emacs-lisp
+(require 'scimax-md)
+(org-export-to-file 'scimax-md "scimax-md.md")
+#+END_SRC
+
+#+RESULTS:
+: scimax-md.md
+
+
+bibliography:~/Dropbox/bibliography/references.bib
+* Handling projects
+
+Your project might have many org files that should all be published. No problem. First, setup your project, e.g.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-publish-project-alist
+      '(("scimax-md"
+         :base-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
+         :publishing-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
+         :publishing-function scimax-md-publish-to-md)))
+#+END_SRC
+
+
+#+BEGIN_SRC emacs-lisp
+(org-publish "scimax-md")
+#+END_SRC
+* Downsides to this approach
+
+I never read or edit the markdown that is produced. There is probably a lot of stuff in it you would never write yourself. If that is a problem, there is a lot to do to get rid of it. Especially the way I use html to get features might not be considered very standard.
+
+This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes.
+
+Not every corner of org-mode has been tested yet.
