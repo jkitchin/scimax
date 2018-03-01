@@ -125,7 +125,7 @@ Return output file name."
 
   ;; file links
   (button-lock-set-button
-   "\\[.*?\\](#\\(.*?\\))"
+   "\\[.*?\\](\\(.*?\\))"
    (lambda ()
      (interactive)
      (save-excursion
