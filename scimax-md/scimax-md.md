@@ -1,53 +1,53 @@
 
 # Table of Contents
 
-1.  [Headings](#org3536353)
-    1.  [subheading](#org39c7705)
-        1.  [subsubheading](#orgc7e08e5)
-2.  [Markups](#org77861e7)
-3.  [Lists](#orgf5e8aad)
-    1.  [Numbered lists](#org39590eb)
-    2.  [plain lists](#org6baa12f)
-    3.  [checklists](#org8fe5c78)
-    4.  [definition lists](#org72cf505)
-4.  [Equations](#org27b3027)
-5.  [Code blocks](#org6a858e9)
-6.  [Figures](#org893c32a)
-    1.  [another figure](#orge44b464)
-7.  [Tables](#org121f356)
-8.  [Citations  label:sec-citations](#org8e9ff06)
-9.  [Radio targets](#orgcd550a1)
-10. [Cross-references](#org5ee750c)
-11. [Custom links?](#org61d6f22)
-12. [Exporting a single file](#orgb93ffd6)
-13. [Handling projects](#org4769f6a)
-14. [Downsides to this approach](#orgf5827c6)
+1.  [Headings](#org6e18699)
+    1.  [subheading](#orgf113fdf)
+        1.  [subsubheading](#orgf62be08)
+2.  [Markups](#orgf17a261)
+3.  [Lists](#org44c8231)
+    1.  [Numbered lists](#orgd2e64cb)
+    2.  [plain lists](#org154a774)
+    3.  [checklists](#org265d28a)
+    4.  [definition lists](#org3e28980)
+4.  [Equations](#org84df550)
+5.  [Code blocks](#org8e8819e)
+6.  [Figures](#orge304757)
+    1.  [another figure](#org1a12a86)
+7.  [Tables](#orgac5f7b8)
+8.  [Citations  label:sec-citations](#org1baf832)
+9.  [Radio targets](#org7533811)
+10. [Cross-references](#org4d33ec8)
+11. [Custom links?](#org17f83dc)
+12. [Exporting a single file](#orgffef85b)
+13. [Handling projects](#org3bf77c2)
+14. [Downsides to this approach](#org57446c9)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 Github's rendering of org-mode is only ok. Too many things like references, internal links, etc. don't work though to rely on it for high quality documentation in the browser. This might be a nicer way to get better Github pages. Why not just use html then? Some places like markdown.
 
 
-<a id="org3536353"></a>
+<a id="org6e18699"></a>
 
 # Headings
 
 It goes without saying I hope, that we use headings to organize things.
 
 
-<a id="org39c7705"></a>
+<a id="orgf113fdf"></a>
 
 ## subheading
 
 
-<a id="orgc7e08e5"></a>
+<a id="orgf62be08"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org77861e7"></a>
+<a id="orgf17a261"></a>
 
 # Markups
 
@@ -60,12 +60,12 @@ superscripts: H<sup>+</sup>
 Regular urls are fine: <http://google.com>.
 
 
-<a id="orgf5e8aad"></a>
+<a id="org44c8231"></a>
 
 # Lists
 
 
-<a id="org39590eb"></a>
+<a id="orgd2e64cb"></a>
 
 ## Numbered lists
 
@@ -80,7 +80,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="org6baa12f"></a>
+<a id="org154a774"></a>
 
 ## plain lists
 
@@ -93,7 +93,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="org8fe5c78"></a>
+<a id="org265d28a"></a>
 
 ## checklists
 
@@ -102,7 +102,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="org72cf505"></a>
+<a id="org3e28980"></a>
 
 ## definition lists
 
@@ -110,7 +110,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org27b3027"></a>
+<a id="org84df550"></a>
 
 # Equations
 
@@ -121,26 +121,40 @@ Suppose you have this equation to solve:
 You can put a label near this and refer to it later. I guess Github does not do a great job rendering equations.
 
 
-<a id="org6a858e9"></a>
+<a id="org8e8819e"></a>
 
 # Code blocks
 
 You can put code right into your org file, and run it. The code and results show in the markdown export.
 
-    %matplotlib inline
-    import matplotlib.pyplot as plt
+```ipython
+%matplotlib inline
+import matplotlib.pyplot as plt
 
-    print(8 - 4)
+print(8 - 4)
 
-    plt.plot([1, 2, 4, 8])
-    plt.savefig('geometric.png')
+plt.plot([1, 2, 4, 8])
+plt.savefig('geometric.png')
+
+```
 
     4
 
 ![img](obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png)
 
+```ipython
+%matplotlib inline
+import matplotlib.pyplot as plt
 
-<a id="org893c32a"></a>
+print(8 - 4)
+
+plt.plot([1, 2, 4, 8])
+plt.savefig('geometric.png')
+
+```
+
+
+<a id="orge304757"></a>
 
 # Figures
 
@@ -153,7 +167,7 @@ You might like a caption with a label you can refer to later. The figures aren't
 </figure>
 
 
-<a id="orge44b464"></a>
+<a id="org1a12a86"></a>
 
 ## another figure
 
@@ -164,7 +178,7 @@ You might like a caption with a label you can refer to later. The figures aren't
 </figure>
 
 
-<a id="org121f356"></a>
+<a id="orgac5f7b8"></a>
 
 # Tables
 
@@ -245,7 +259,7 @@ Here is another table:
 Tables are numbered in the export, but they export as html, and it is the org-html exporter taking care of this.
 
 
-<a id="org8e9ff06"></a>
+<a id="org1baf832"></a>
 
 # Citations  <a name="sec-citations"></a>
 
@@ -256,14 +270,14 @@ org-ref helps you insert citations from a bibtex database.
 It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
 
 
-<a id="orgcd550a1"></a>
+<a id="org7533811"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="org5ee750c"></a>
+<a id="org4d33ec8"></a>
 
 # Cross-references
 
@@ -275,54 +289,69 @@ Remember the [target](#target) we referred to earlier?
 
 What matters the most in cross-references is that org-ref helps you complete them.
 
-    print(f'x = {8 + 4}')
+```ipython
+print(f'x = {8 + 4}')
+
+```
 
     x = 12
 
 The results above show the answer to Eq. [eq-sle](#eq-sle).
 
 
-<a id="org61d6f22"></a>
+<a id="org17f83dc"></a>
 
 # Custom links?
 
 No problem, just define an exporter for markdown. How about a youtube link? On export, we will replace the link with an html iframe.
 
-    (org-link-set-parameters
-     "youtube"
-     :follow (lambda (path)
-    	   (browse-url (format "https://youtu.be/%s" path)))
-     :export (lambda (path desc backend)
-    	   (cond
-    	    ((eq 'md backend)
-    	     (format "[%s](%s)
+```emacs-lisp
+(org-link-set-parameters
+ "youtube"
+ :follow (lambda (path)
+	   (browse-url (format "https://youtu.be/%s" path)))
+ :export (lambda (path desc backend)
+	   (cond
+	    ((eq 'md backend)
+	     (format "[%s](%s)
 
-    <a href=\"https://www.youtube.com/watch?v=%s\">
-    <img src=\"http://img.youtube.com/vi/%s/0.jpg\"></a>"
-    		     (or desc (format "https://youtu.be/%s" path))
-    		     (format "https://youtu.be/%s" path)
-    		     path path))))
-     :help-echo "A youtube video. Click to open in browser.")
+<a href=\"https://www.youtube.com/watch?v=%s\">
+<img src=\"http://img.youtube.com/vi/%s/0.jpg\"></a>"
+		     (or desc (format "https://youtu.be/%s" path))
+		     (format "https://youtu.be/%s" path)
+		     path path))))
+ :help-echo "A youtube video. Click to open in browser.")
+
+```
 
 Checkout youtube:fgizHHd7nOo
 
 
-<a id="orgb93ffd6"></a>
+<a id="orgffef85b"></a>
 
 # Exporting a single file
 
-    (require 'scimax-md)
+```emacs-lisp
+(require 'scimax-md)
+
+```
 
     scimax-md
 
 To a buffer:
 
-    (pop-to-buffer (org-export-to-buffer 'scimax-md "*scimax-md-export*"))
+```emacs-lisp
+(pop-to-buffer (org-export-to-buffer 'scimax-md "*scimax-md-export*"))
+
+```
 
     #<buffer *scimax-md-export*>
 
-    (require 'scimax-md)
-    (org-export-to-file 'scimax-md "scimax-md.md")
+```emacs-lisp
+(require 'scimax-md)
+(org-export-to-file 'scimax-md "scimax-md.md")
+
+```
 
     scimax-md.md
 
@@ -334,20 +363,23 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="org4769f6a"></a>
+<a id="org3bf77c2"></a>
 
 # Handling projects
 
 Your project might have many org files that should all be published. No problem. First, setup your project, e.g.
 
-    (setq org-publish-project-alist
-          '(("scimax-md"
-             :base-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
-             :publishing-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
-             :publishing-function scimax-md-publish-to-md)))
+```emacs-lisp
+(setq org-publish-project-alist
+      '(("scimax-md"
+         :base-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
+         :publishing-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
+         :publishing-function scimax-md-publish-to-md)))
 
-    (require 'scimax-md)
-    (org-publish "scimax-md" t)
+(require 'scimax-md)
+(org-publish "scimax-md" t)
+
+```
 
 Now, we can test a link to another file:
 
@@ -355,7 +387,7 @@ Now, we can test a link to another file:
 2.  A file link with description  [ideas](./ideas.md).
 
 
-<a id="orgf5827c6"></a>
+<a id="org57446c9"></a>
 
 # Downsides to this approach
 

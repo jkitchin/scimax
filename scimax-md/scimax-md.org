@@ -93,6 +93,17 @@ plt.savefig('geometric.png')
 [[file:obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png]]
 :END:
 
+
+#+BEGIN_SRC ipython
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+print(8 - 4)
+
+plt.plot([1, 2, 4, 8])
+plt.savefig('geometric.png')
+#+END_SRC
+
 * Figures
 
 You might like a caption with a label you can refer to later. The figures aren't numbered; instead the labels are used. It seems possible to get numbering, but it would take some work.
