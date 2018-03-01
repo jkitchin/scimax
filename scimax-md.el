@@ -40,13 +40,18 @@
 	     (org-export-get-caption
 	      (org-element-property :parent link))
 	     info)))
+
    ;; This is at least true for radio links.
    ((string= "fuzzy" (org-element-property :type link))
     (let ((path (org-element-property :path link)))
       (format "[%s](#%s)" path path)))
 
    ;; file links. treat links to org files as links to md files.
-   ((string= "file" (org-element-property :type link))
+   ((and (string= "file" (org-element-property :type link))
+	 (not (-contains?
+	       '("png")
+	       (file-name-extension
+		(org-element-property :path link)))))
     (format "[%s](%s)"
 	    (if (org-element-property :contents-begin link)
 		(buffer-substring (org-element-property :contents-begin link)
