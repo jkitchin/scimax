@@ -72,8 +72,7 @@ You can put a label near this and refer to it later. I guess Github does not do 
 
 You can put code right into your org file, and run it. The code and results show in the markdown export.
 
-#+BEGIN_SRC ipython
-%matplotlib inline
+#+BEGIN_SRC python
 import matplotlib.pyplot as plt
 
 print(8 - 4)
@@ -83,26 +82,7 @@ plt.savefig('geometric.png')
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
-# Out[3]:
-# output
 : 4
-
-
-# image/png
-[[file:obipy-resources/6236b0f6cfbcdf4e56fd901258712017-49139NvR.png]]
-:END:
-
-
-#+BEGIN_SRC ipython
-%matplotlib inline
-import matplotlib.pyplot as plt
-
-print(8 - 4)
-
-plt.plot([1, 2, 4, 8])
-plt.savefig('geometric.png')
-#+END_SRC
 
 * Figures
 
@@ -113,9 +93,20 @@ You might like a caption with a label you can refer to later. The figures aren't
 
 ** another figure
 
+#+BEGIN_SRC python
+import matplotlib.pyplot as plt
+
+print(8 - 4)
+
+plt.plot([1, 8, 16, 32], 'ro-')
+plt.savefig('geometric-2.png')
+#+END_SRC
+
+#+RESULTS:
+: 4
 
 #+caption: Another figure to check numbering. label:fig-data-2
-[[./geometric.png]]
+[[./geometric-2.png]]
 
 * Tables
 
