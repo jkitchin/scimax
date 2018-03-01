@@ -1,50 +1,52 @@
 
 # Table of Contents
 
-1.  [Headings](#orgab7d121)
-    1.  [subheading](#org8074f2d)
-        1.  [subsubheading](#org37db8e4)
-2.  [Markups](#org28c5644)
-3.  [Lists](#org0106ee1)
-    1.  [Numbered lists](#orgf6894b9)
-    2.  [plain lists](#orga82f2eb)
-    3.  [checklists](#orgf33273d)
-    4.  [definition lists](#orga85c1e8)
-4.  [Equations](#org4518a9f)
-5.  [Code blocks](#orged492fd)
-6.  [Tables](#org3276d0a)
-7.  [Citations  label:sec-citations](#org1e4cdca)
-8.  [Radio targets](#org08b30b8)
-9.  [Cross-references](#orgfe87e9d)
-10. [Exporting a single file](#org458aaf5)
-11. [Handling projects](#org7c84e29)
-12. [Downsides to this approach](#org50bdd10)
+1.  [Headings](#orgf44a18d)
+    1.  [subheading](#org9a2b37c)
+        1.  [subsubheading](#orgc9e14e6)
+2.  [Markups](#orgb0bf6da)
+3.  [Lists](#orgb0e4a4c)
+    1.  [Numbered lists](#orgf086f0a)
+    2.  [plain lists](#org075a34c)
+    3.  [checklists](#orgf1a420c)
+    4.  [definition lists](#org8f4ae14)
+4.  [Equations](#org52b5dda)
+5.  [Code blocks](#org84e2ee9)
+6.  [Figures](#org94517e2)
+    1.  [another figure](#orga8966c8)
+7.  [Tables](#org5bf27ab)
+8.  [Citations  label:sec-citations](#org0229e71)
+9.  [Radio targets](#org064cc65)
+10. [Cross-references](#org474ce2d)
+11. [Exporting a single file](#org109fc39)
+12. [Handling projects](#orga470431)
+13. [Downsides to this approach](#orgb47c59c)
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
 Github's rendering of org-mode is only ok. This might be a nicer way to get better Github pages.
 
 
-<a id="orgab7d121"></a>
+<a id="orgf44a18d"></a>
 
 # Headings
 
 It goes without saying I hope, that we use headings to organize things.
 
 
-<a id="org8074f2d"></a>
+<a id="org9a2b37c"></a>
 
 ## subheading
 
 
-<a id="org37db8e4"></a>
+<a id="orgc9e14e6"></a>
 
 ### subsubheading
 
 Anything deeper than this gets turned into paragraphs by default.
 
 
-<a id="org28c5644"></a>
+<a id="orgb0bf6da"></a>
 
 # Markups
 
@@ -57,12 +59,12 @@ superscripts: H<sup>+</sup>
 Regular urls are fine: <http://google.com>.
 
 
-<a id="org0106ee1"></a>
+<a id="orgb0e4a4c"></a>
 
 # Lists
 
 
-<a id="orgf6894b9"></a>
+<a id="orgf086f0a"></a>
 
 ## Numbered lists
 
@@ -77,7 +79,7 @@ Note these letters will render as numbers.
 3.  cat
 
 
-<a id="orga82f2eb"></a>
+<a id="org075a34c"></a>
 
 ## plain lists
 
@@ -90,7 +92,7 @@ Note these letters will render as numbers.
 -   all the way
 
 
-<a id="orgf33273d"></a>
+<a id="orgf1a420c"></a>
 
 ## checklists
 
@@ -99,7 +101,7 @@ Note these letters will render as numbers.
 -   [ ] three
 
 
-<a id="orga85c1e8"></a>
+<a id="org8f4ae14"></a>
 
 ## definition lists
 
@@ -107,7 +109,7 @@ Note these letters will render as numbers.
 -   **emacs:** the other thing you need
 
 
-<a id="org4518a9f"></a>
+<a id="org52b5dda"></a>
 
 # Equations
 
@@ -118,7 +120,7 @@ Suppose you have this equation to solve:
 You can put a label near this and refer to it later.
 
 
-<a id="orged492fd"></a>
+<a id="org84e2ee9"></a>
 
 # Code blocks
 
@@ -131,16 +133,32 @@ You can put a label near this and refer to it later.
 
 ![img](obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png)
 
+
+<a id="org94517e2"></a>
+
+# Figures
+
 You might like a caption with a label you can refer to later.
 
 
 <figure>
   <img src="./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png">
-  <figcaption>Figure nil: A figure with a  caption. <a name="fig-data"></a></figcaption>
+  <figcaption>Figure 2: A figure with a  caption. <a name="fig-data"></a></figcaption>
 </figure>
 
 
-<a id="org3276d0a"></a>
+<a id="orga8966c8"></a>
+
+## another figure
+
+
+<figure>
+  <img src="./obipy-resources/0a58dae9b8af7857c4824224987cae2f-18961DFU.png">
+  <figcaption>Figure 3: A figure with a  caption. <a name="fig-data"></a></figcaption>
+</figure>
+
+
+<a id="org5bf27ab"></a>
 
 # Tables
 
@@ -219,7 +237,7 @@ Here is another table:
 </table>
 
 
-<a id="org1e4cdca"></a>
+<a id="org0229e71"></a>
 
 # Citations  <a name="sec-citations"></a>
 
@@ -230,14 +248,14 @@ org-ref helps you insert citations from a bibtex database.
 It is conceivable to have numbered citations, and fancier formatting, but I have no plans to implement that.
 
 
-<a id="org08b30b8"></a>
+<a id="org064cc65"></a>
 
 # Radio targets
 
 In org-mode you can define a <a name="target"></a>target that you can make a link to later.
 
 
-<a id="orgfe87e9d"></a>
+<a id="org474ce2d"></a>
 
 # Cross-references
 
@@ -256,7 +274,7 @@ What matters the most in cross-references is that org-ref helps you complete the
 The results above show the answer to Eq. [eq-sle](#eq-sle).
 
 
-<a id="org458aaf5"></a>
+<a id="org109fc39"></a>
 
 # Exporting a single file
 
@@ -283,12 +301,12 @@ To a buffer:
 <a id="kitchin-2016-autom-data">[kitchin-2016-autom-data]</a> "Kitchin, Van Gulick \& Zilinski, Automating Data Sharing Through Authoring Tools, <i>"International Journal on Digital Libraries"</i>, <b>18(2)</b>, 93--98 (2016). <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">link</a>. <a href="http://dx.doi.org/10.1007/s00799-016-0173-7">doi</a>. [↩](#fe4ece7c7b3687ca21f32c0ee4e0a542)
 
 
-<a id="org7c84e29"></a>
+<a id="orga470431"></a>
 
 # Handling projects
 
 
-<a id="org50bdd10"></a>
+<a id="orgb47c59c"></a>
 
 # Downsides to this approach
 
