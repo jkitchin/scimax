@@ -177,6 +177,7 @@ No problem, just define an exporter for markdown. How about a youtube link? On e
 	   (cond
 	    ((eq 'md backend)
 	     (format "[%s](%s)
+
 <a href=\"https://www.youtube.com/watch?v=%s\">
 <img src=\"http://img.youtube.com/vi/%s/0.jpg\"></a>"
 		     (or desc (format "https://youtu.be/%s" path))
@@ -185,8 +186,6 @@ No problem, just define an exporter for markdown. How about a youtube link? On e
  :help-echo "A youtube video. Click to open in browser.")
 #+END_SRC
 
-#+RESULTS:
-| :follow | (lambda (path) (browse-url (format https://youtu.be/%s path))) | :export | (lambda (path desc backend) (cond ((eq (quote md) backend) (format [%s](%s) |
 
 Checkout youtube:fgizHHd7nOo
 
@@ -223,7 +222,7 @@ bibliography:~/Dropbox/bibliography/references.bib
 
 Your project might have many org files that should all be published. No problem. First, setup your project, e.g.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results silent
 (setq org-publish-project-alist
       '(("scimax-md"
          :base-directory "/Users/jkitchin/vc/jkitchin-github/scimax/scimax-md/"
@@ -241,21 +240,27 @@ Now, we can test a link to another file:
 
 * Downsides to this approach
 
-I never read or edit the markdown that is produced. There is probably a lot of stuff in it you would never write yourself. If that is a problem, there is a lot to do to get rid of it. Especially the way I use html to get features might not be considered very standard.
+I never read or edit the markdown that is produced. There is probably a lot of stuff in it you would never write yourself. If that is a problem, there is a lot to do to get rid of it. Especially the way I use html to get features might not be considered very standard. Others might not want to read it or edit it.
 
 Here are some org-generated lines:
 #+BEGIN_EXAMPLE
 <a id="org0d027ad"></a>
+#+END_EXAMPLE
 
+This =You can have proper scientific citations like this cite:kitchin-2015-examp,= expanded to this:
+
+#+BEGIN_EXAMPLE
 You can have proper scientific citations like this <sup id="9e3ad98c9008c49c9d14834ca3913eb6"><a href="#kitchin-2015-examp" title="Kitchin, Examples of Effective Data Sharing in Scientific Publishing, {ACS Catalysis}, v(6), 3894-3899 (2015).">kitchin-2015-examp</a></sup>,
 #+END_EXAMPLE
 
 You can see the citations are basically just html. They look good when rendered, but are kind of irritating to read in markdown. Not a problem in org-mode...
 
-This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes. This isn't a big deal with version control, but could cause some issues.
+This is a one way conversion. If someone edits the markdown, and you re-export, you will clobber their changes. This isn't a big deal with version control, but could cause some issues. I don't forsee a markdown parser and converter to org-mode.
+
+Some ids are randomly generated. This may make version control a little irritating, as there will always be nuisance changes.
 
 Not every corner of org-mode has been tested yet. Might as well try one more thing:
 
 #+BEGIN_QUOTE
-emacs outshines all other editing software in approximately the same way that the noonday sun does the stars. It is not just bigger and brighter; it simply makes everything else vanish. – Neal Stephenson, In the Beginning was the Command Line (1998)
+emacs outshines all other editing software in approximately the same way that the noonday sun does the stars. It is not just bigger and brighter; it simply makes everything else vanish. Neal Stephenson, In the Beginning was the Command Line (1998)
 #+END_QUOTE
