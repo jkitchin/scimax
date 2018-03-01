@@ -12,6 +12,25 @@
 ;;
 
 ;;; Code:
+(defun ox-export-get-pandoc-version ()
+  (string-to-number
+   (substring (shell-command-to-string "pandoc --version") 7 8)))
+
+(defun ox-export-call-pandoc-tex-to-docx (biboption csl tex-file docx-file)
+  (let* ((pandoc-version (ox-export-get-pandoc-version))
+         (pandoc-command
+          (if (>= pandoc-version 2)
+              "pandoc -s %s%s\"%s\" --to=docx+smart -o \"%s\""
+            "pandoc -s -S %s%s\"%s\" -o \"%s\"")))
+    (shell-command (format pandoc-command biboption csl tex-file docx-file))))
+
+(defun ox-export-call-pandoc-tex-to-html (biboption csl tex-file html-file)
+  (let* ((pandoc-version (ox-export-get-pandoc-version))
+         (pandoc-command
+          (if (>= pandoc-version 2)
+              "pandoc -s %s%s\"%s\" --to=html+smart -o \"%s\""
+            "pandoc -s -S %s%s\"%s\" -o \"%s\"")))
+    (shell-command (format pandoc-command biboption csl tex-file html-file))))
 
 (defun ox-export-via-latex-pandoc-to-docx-and-open (&optional async subtreep visible-only body-only options)
   "Export the current org file as a docx via LaTeX."
@@ -58,16 +77,11 @@
 					   (org-element-property :value key)))))))
     (if csl (setq csl (format " --csl=%s " csl))
       (setq csl " "))
-    
+
     (org-latex-export-to-latex async subtreep visible-only body-only options)
 
     (when (file-exists-p docx-file) (delete-file docx-file))
-    (shell-command (format
-		    "pandoc -s -S %s%s\"%s\" -o \"%s\""
-		    biboption
-		    csl
-		    tex-file
-		    docx-file))
+    (ox-export-call-pandoc-tex-to-docx biboption csl tex-file docx-file)
     (when (file-exists-p temp-bib)
       (delete-file temp-bib))
     (org-open-file docx-file '(16))))
@@ -118,18 +132,13 @@
     (if csl (setq csl (format " --csl=%s " csl))
       (setq csl " "))
 
-
     (org-latex-export-to-latex async subtreep visible-only body-only options)
 
     (when (file-exists-p html-file) (delete-file html-file))
-    (shell-command (format
-		    "pandoc -s -S %s%s%s -o %s"
-		    biboption
-		    csl
-		    tex-file
-		    html-file))
+    (ox-export-call-pandoc-tex-to-html biboption csl tex-file html-file)
+
     (when (file-exists-p temp-bib)
-      (delete-file temp-bib)) 
+      (delete-file temp-bib))
     (browse-url html-file)))
 
 
