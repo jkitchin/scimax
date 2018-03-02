@@ -78,10 +78,78 @@
 ;; * New export backend
 ;; You need this to use the functions above.
 
+(defun scimax-md-export-to-buffer (&optional async subtreep visible-only body-only ext-plist)
+  "Export current buffer as a scimax-md buffer.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+Optional argument BODY-ONLY has no effect.
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+Export is done in a buffer named \"*scimax-md*\", which
+will be displayed when `org-export-show-temporary-export-buffer'
+is non-nil."
+  (interactive)
+  (org-export-to-buffer 'scimax-md "*scimax-md*"
+    async subtreep visible-only body-only ext-plist
+    (lambda () (markdown-mode))))
+
+
+(defun scimax-md-export-to-file
+    (&optional async subtreep visible-only body-only ext-plist)
+  "Export current buffer to a scimax-md file.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+Optional argument BODY-ONLY has no effect
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings."
+  (interactive)
+  (let ((outfile (org-export-output-file-name ".md" subtreep)))
+    (org-export-to-file 'scimax-md outfile
+      async subtreep visible-only body-only ext-plist)))
+
 (org-export-define-derived-backend 'scimax-md 'md
   :translate-alist '((link . scimax-md-link)
 		     (target . scimax-md-target)
-		     (src-block . scimax-md-src-block)))
+		     (src-block . scimax-md-src-block))
+  :menu-entry
+  '(?s "Export with scimax-md"
+       ((?b "As buffer" scimax-md-export-to-buffer)
+	(?s "As file" scimax-md-export-to-file))))
 
 
 ;; * Publishing
@@ -97,6 +165,7 @@ Return output file name."
   (org-publish-org-to 'scimax-md filename
 		      ".md"
 		      plist pub-dir))
+
 
 
 ;; * buttons for markdown mode
