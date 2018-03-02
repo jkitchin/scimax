@@ -823,7 +823,7 @@ compatibility with the other formatters."
     (concat (s-join "\n"
 		    (mapcar (lambda (s)
 			      (s-concat *ob-ipython-output-results-prefix* s))
-			    (s-split "\n" output t)))
+			    (s-split "\n" output)))
 	    "\n")))
 
 
