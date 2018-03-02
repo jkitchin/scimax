@@ -2,7 +2,7 @@
 
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 
@@ -18,7 +18,6 @@
 
 (eval-when-compile
   (require 'use-package)
-  (package-refresh-contents)
   (when (and  (boundp 'scimax-package-refresh) scimax-package-refresh)
     (package-refresh-contents)))
 
