@@ -214,7 +214,7 @@ Jupyter notebooks have some nice key bindings, like all the variations of modifi
 #+caption: Commands to execute blocks.
 | Ctrl-<return>       | run current block                                          |
 | Shift-<return>      | run current block and go to next one, create one if needed |
-| Meta-<return>       | run all blocks to point                                    |
+| Meta-<return>       | runs the current cell and inserts a new one below.         |
 | super-<return>      | restart ipython and run block                              |
 | Meta-super-<return> | restart ipython and run all blocks to point                |
 | H-<return>          | restart ipython and run all blocks in buffer               |
