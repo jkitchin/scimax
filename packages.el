@@ -377,6 +377,15 @@
 
 (use-package pdf-tools)
 
+(use-package org-mime
+  :ensure nil
+  :load-path (lambda () (expand-file-name "org-mime" scimax-dir))
+  :init (setq org-mime-up-subtree-heading 'org-back-to-heading
+	      org-mime-export-options '(:section-numbers nil
+							 :with-author nil
+							 :with-toc nil
+							 :with-latex dvipng)))
+
 ;; this is a git submodule
 (use-package org-ref
   :ensure nil
