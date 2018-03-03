@@ -95,7 +95,7 @@ Make a new file if needed."
   (unless (f-ext-p path "svg") (error "Must be an svg file."))
   (unless (file-exists-p path)
     (with-temp-file path
-      (insert template-svg)))
+      (insert scimax-inkscape-template-svg)))
   (shell-command (format "inkscape %s &" path)))
 
 
@@ -143,8 +143,7 @@ Here are two examples:
   (org-html-export-to-html)))
 
  (org-open-file (let ((org-export-before-processing-hook '(scimax-inkscape-preprocess)))
-  (org-latex-export-to-pdf)))
-"
+  (org-latex-export-to-pdf)))"
   (let ((links (reverse (org-element-map (org-element-parse-buffer) 'link
 			  (lambda (link)
 			    (when (string= (org-element-property :type link) "inkscape")
@@ -161,9 +160,12 @@ Here are two examples:
  :follow 'scimax-inkscape-open
  :help-echo "Click to open in inkscape."
  :activate-func 'scimax-inkscape-thumbnail
- ;; no :export is defined. These should act like figures, and a simple export
- ;; does not do that. You need to use the `scimax-inkscape-preprocess' function
- ;; in a hook.
+ :export (lambda (path desc backend)
+	   (cond
+	    ((eq 'html backend)
+	     (format "<img src=\"%s\"" path))))
+ ;;  You need to use the `scimax-inkscape-preprocess' function in a hook for
+ ;; more advanced export options like captions.
  )
 
 (defun scimax-inkscape-insert-drawing (path)
