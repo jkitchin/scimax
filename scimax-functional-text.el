@@ -27,7 +27,7 @@
 ;; git commits:  commit 05fcea6
 ;; pull requests: pr #146  pull #146  or pull request #146
 
-(require 'thing-at-point)
+(require 'thingatpt)
 (require 'button-lock)
 ;;; Code:
 
@@ -63,7 +63,7 @@ _c_: Contacts _m_: Mail
  :help-echo "Click me to send a message from emacs")
 
 ;; * Username handles
-;; 
+;;
 ;; These may have many contexts, e.g. Twitter, Github, etc. The action on these
 ;;  is to launch a hydra menu to pick which action you want.
 ;;
@@ -76,11 +76,13 @@ _c_: Contacts _m_: Mail
 ;; The regex is too weak for these. These include Facebook, LinkedIn, and
 ;; others.
 
-(defvar @username-handle-regexp "\\s-@\\(?1:[a-zA-Z0-9_]+\\)\\b\\s-"
-  "Regexp for a username handle. The handle is in group 1.
-These are defined by whitespace then @username followed by white
-space. This pattern will not match usernames with punctuation in
-them, this is partly by design to avoid matching emails too.")
+(defvar @username-handle-regexp "\\(^\\|[[:space:]]\\|\\s(\\)\\(?2:@\\(?1:[[:alnum:]]*\\)\\)"
+  "Regexp for a username handle.
+It looks like @username preceded by a space, an opening bracket
+The handle is in group 1.
+These are defined by @username. This pattern will not match
+usernames with punctuation in them, this is partly by design to
+avoid matching emails too.")
 
 
 (defun @username-handle-at-p ()
@@ -121,6 +123,7 @@ _G_: GitLab     _l_: LinkedIn _r_: reddit  _t_: Twitter
 (button-lock-set-button
  @username-handle-regexp
  '@username/body
+ :grouping 2
  :face (list 'link)
  :help-echo "Click me to open username.")
 
@@ -132,7 +135,7 @@ _G_: GitLab     _l_: LinkedIn _r_: reddit  _t_: Twitter
 ;; They also could have different contexts, maybe Twitter, maybe Instagram, or
 ;; tags in org-mode, etc. so we also define a hydra for this.
 
-(defvar hashtag-regexp "\\s-#\\(?1:[a-zA-Z0-9_]+\\)\\b\\s-"
+(defvar hashtag-regexp "\\(^\\|[[:space:]]\\|\\s(\\)\\(?2:#\\(?1:[[:alnum:]]*\\)\\)"
   "A regexp for a hashtag.
 The hashtag is in group 1.")
 
@@ -166,6 +169,7 @@ _f_: Facebook _i_: Instagram  _o_: org-tag  _t_: Twitter"
 (button-lock-set-button
  hashtag-regexp
  'hashtag/body
+ :grouping 2
  :face (list 'link)
  :help-echo "Click me to open the hashtag.")
 
