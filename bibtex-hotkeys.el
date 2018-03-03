@@ -85,7 +85,7 @@
 				(lambda (c1 c2)
 				  (string< (car c1) (car c2))))))
 		      (n (length s))
-		      (m (floor (/ n 3)))) 
+		      (m (floor (/ n 3))))
 		 (message "%s" (loop for i to m concat
 				     (s-join " | "
 					     (append (-slice s (* i 3) (* 3 (+ i 1)))
@@ -133,6 +133,9 @@
 
 
 (bibtex-hotkey "y" "Paste last entry" (bibtex-yank))
+
+
+(bibtex-hotkey "/" "helm-bibtex" (helm-bibtex))
 
 
 
