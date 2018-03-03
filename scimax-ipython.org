@@ -1186,19 +1186,19 @@ If you have a lot of blocks in your buffer, you can use a file property like thi
 #+BEGIN_EXAMPLE
 ,#+PROPERTY: header-args:ipython :session kernel-16577-ssh.json
 #+END_EXAMPLE
-* Known issues
-** Intermittent hang/error on startup
-Occasionally I notice when executing the first block that it seems to hang or results in an error like:
+** Known issues
+*** Intermittent hang/error on startup
+ Occasionally I notice when executing the first block that it seems to hang or results in an error like:
 
-#+BEGIN_EXAMPLE
+ #+BEGIN_EXAMPLE
 ob-ipython--dump-error: There was a fatal error trying to process the request. See *ob-ipython-debug*
-#+END_EXAMPLE
+ #+END_EXAMPLE
 
-It almost always works to type C-g if it is hung, and just rerun the block. Then it works fine.
+ It almost always works to type C-g if it is hung, and just rerun the block. Then it works fine.
 
-The root of this problem is in:
+ The root of this problem is in:
 
-#+BEGIN_EXAMPLE
+ #+BEGIN_EXAMPLE
 Traceback (most recent call last):
   File "/Users/jkitchin/vc/jkitchin-github/scimax/ob-ipython-upstream/client.py", line 60, in <module>
     c = create_client(args.conn_file)
@@ -1207,10 +1207,10 @@ Traceback (most recent call last):
   File "/Users/jkitchin/anaconda/lib/python3.6/site-packages/jupyter_client/connect.py", line 218, in find_connection_file
     raise IOError("Could not find %r in %r" % (filename, path))
 OSError: Could not find 'emacs-ipython-19a94859c854121de1c305426d09b77e' in ['.', '/Users/jkitchin/Library/Jupyter/runtime']
-#+END_EXAMPLE
+ #+END_EXAMPLE
 
-Related upstream issues: https://github.com/gregsexton/ob-ipython/issues/162
+ Related upstream issues: https://github.com/gregsexton/ob-ipython/issues/162
 
-** Interrupting the kernel does not work
+*** Interrupting the kernel does not work
 
-This seems to be an issue with the upstream repo. It may work on unix/Mac, but maybe not on Windows. Probably does not work on remote kernels. See https://github.com/gregsexton/ob-ipython/commit/fcb2c48f64ba1005ad6fe5d1a4149f1117a9b45d
+ This seems to be an issue with the upstream repo. It may work on unix/Mac, but maybe not on Windows. Probably does not work on remote kernels. See https://github.com/gregsexton/ob-ipython/commit/fcb2c48f64ba1005ad6fe5d1a4149f1117a9b45d
