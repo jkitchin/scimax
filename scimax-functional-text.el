@@ -33,17 +33,6 @@
 
 (global-button-lock-mode)
 
-;; Action key
-(global-set-key (kbd "s-<return>")
-		(lambda ()
-		  "Mimics a mouse-1 click. Buttons have a mouse-1
-action defined in their keymap. We just get it and call it."
-		  (interactive)
-		  (funcall (cdr
-			    (assoc
-			     'mouse-1
-			     (cdr (get-text-property (point) 'keymap)))))))
-
 (defmacro scimax-functional-text (regexp action &rest plist)
   "A button-lock button maker.
 REGEXP is the regular expression to match. It may have subgroups
@@ -51,7 +40,9 @@ in it that are accessible in the ACTION. ACTION is either a list
 of sexps that are the body of a function, a lambda function, or a
 quoted symbol of a function. You can access the regexp subgroups
 in this function. PLIST is the rest of the arguments for
-`button-lock-set-button'.
+`button-lock-set-button'. I like <return> to be active, so it is
+set by default. If you have a help-echo function it is also
+wrapped so that it too can have access to the match-data.
 "
   (when (and (listp action) (functionp (cadr action)))
     (setq action `((funcall-interactively ,action))))
@@ -61,26 +52,33 @@ in this function. PLIST is the rest of the arguments for
     (setq plist (plist-put plist :help-echo
 			   `(lambda (win buf pt)
 			      (save-excursion
-				;; This is clunky, but with grouping the properties may not extend to
-				;; the whole regexp.
+				;; This is clunky, but with grouping the
+				;; properties may not extend to the whole
+				;; regexp.
+				(goto-char (previous-single-property-change (point)
+									    'button-lock))
+				;; now make sure we see it again to get the match-data
 				(while (not (looking-at ,regexp))
 				  (backward-char))
 				(save-match-data
 				  (looking-at ,regexp)
-				  (funcall ,(plist-get plist :help-echo) win buf pt))))))
-    )
+				  (funcall ,(plist-get plist :help-echo) win buf pt)))))))
   `(button-lock-register-global-button
     ,regexp
     (lambda ()
       (interactive)
       (save-excursion
 	;; This is clunky, but with grouping the properties may not extend to
-	;; the whole regexp.
+	;; the whole regexp, e.g. if you set properties on a subgroup.
+	(goto-char (previous-single-property-change (point)
+						    'button-lock))
+	;; now make sure we see it again to get the match-data
 	(while (not (looking-at ,regexp))
 	  (backward-char))
 	(save-match-data
 	  (looking-at ,regexp)
 	  ,@action)))
+    :keyboard-binding "RET"
     ,@plist))
 
 
