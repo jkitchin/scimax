@@ -53,9 +53,22 @@ quoted symbol of a function. You can access the regexp subgroups
 in this function. PLIST is the rest of the arguments for
 `button-lock-set-button'.
 "
-  (cond
-   ((and (listp action) (functionp (cadr action)))
-    (setq action `((funcall-interactively ,action)))))
+  (when (and (listp action) (functionp (cadr action)))
+    (setq action `((funcall-interactively ,action))))
+  ;; wrap the help-echo so match-data is available
+  (when (and (plist-get plist :help-echo)
+	     (functionp (plist-get plist :help-echo)))
+    (setq plist (plist-put plist :help-echo
+			   `(lambda (win buf pt)
+			      (save-excursion
+				;; This is clunky, but with grouping the properties may not extend to
+				;; the whole regexp.
+				(while (not (looking-at ,regexp))
+				  (backward-char))
+				(save-match-data
+				  (looking-at ,regexp)
+				  (funcall ,(plist-get plist :help-echo) win buf pt))))))
+    )
   `(button-lock-register-global-button
     ,regexp
     (lambda ()
