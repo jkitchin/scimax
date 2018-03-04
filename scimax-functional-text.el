@@ -113,7 +113,7 @@ _c_: Contacts _m_: Mail
 ;; The regex is too weak for these. These include Facebook, LinkedIn, and
 ;; others.
 
-(defvar @username-handle-regexp "\\(^\\|[[:space:]]\\|\\s(\\)\\(?2:@\\(?1:[[:alnum:]]*\\)\\)"
+(defvar @username-handle-regexp "\\(^\\|[[:space:]]\\|\\s(\\)\\(?2:@\\(?1:[[:alnum:]]+\\)\\)"
   "Regexp for a username handle.
 It looks like @username preceded by a space, an opening bracket
 The handle is in group 1.
@@ -160,7 +160,7 @@ _G_: GitLab     _l_: LinkedIn _r_: reddit  _t_: Twitter
 ;; They also could have different contexts, maybe Twitter, maybe Instagram, or
 ;; tags in org-mode, etc. so we also define a hydra for this.
 
-(defvar hashtag-regexp "\\(^\\|[[:space:]]\\|\\s(\\)\\(?2:#\\(?1:[[:alnum:]]*\\)\\)"
+(defvar hashtag-regexp "\\(^\\|[[:space:]]\\|\\s(\\)\\(?2:#\\(?1:[[:alnum:]]+\\)\\)"
   "A regexp for a hashtag.
 The hashtag is in group 1.")
 
