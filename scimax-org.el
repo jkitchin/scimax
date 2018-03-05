@@ -1553,8 +1553,8 @@ It is for commands that depend on the major mode. One example is
     radio-list))
 
 (defun scimax-radio-CcCc ()
+  "Hook function for C-cC-c to work in radio checklists."
   (interactive)
-
   (let ((radio-list (scimax-in-radio-list-p))
 	(p (point)))
     (when radio-list
