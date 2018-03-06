@@ -25,6 +25,16 @@ Note these modifier keys:
 
 Notation like s-b means press super and b together.
 
+super and Hyper aren't common on all keyboards, and using them is platform dependent. One good resource for configuring them is http://ergoemacs.org/emacs/emacs_hyper_super_keys.html.
+
+For Mac, I use:
+
+#+BEGIN_SRC emacs-lisp
+(setq mac-right-command-modifier 'hyper)
+(setq mac-right-option-modifier 'super)
+#+END_SRC
+
+
 | markup            | keyshortcut | emacs-command                       |
 |-------------------+-------------+-------------------------------------|
 | *Bold*            | s-b         | `org-bold-region-or-point'          |
@@ -190,7 +200,7 @@ scimax defines these new speed commands that are active when the cursor is on th
 The best way to see other speed commands is to put your cursor at the beginning of a headline and press ?. You can also run `org-speed-command-help' to see a full list of speed commands.
 
 ** Formatted copy and paste
-`ox-clip-formatted-copy' provides a way to copy org-mode with formatting so it can be pasted into other programs like MS Word and web browsers. It does this by copying the selected text to the HTML clipboard.  
+`ox-clip-formatted-copy' provides a way to copy org-mode with formatting so it can be pasted into other programs like MS Word and web browsers. It does this by copying the selected text to the HTML clipboard.
 
 * Writing tools
 ** Spell-checking
@@ -255,7 +265,7 @@ You can see the abbreviations defined with this command elisp:edit-abbrevs.
 
 Scimax provides some support for track changes and edit marks in org-mode.
 
-[[insert:Add this text]] [[delete:Delete this]] 
+[[insert:Add this text]] [[delete:Delete this]]
  [[comment:A comment]]
 
 The markup is clickable, and clicking on it deletes the markup.
@@ -272,7 +282,7 @@ You can use these commands
 On an editmark you can:
 - `em-accept-edit-mark-at-point'
 - `em-reject-edit-mark-at-point'
-- `em-delete-edit-mark-at-point' 
+- `em-delete-edit-mark-at-point'
 
 -`em-typo' to mark a [[typo:tpyo]]
 
@@ -317,7 +327,7 @@ The commands all have key bindings. The prefix key for these is H-e.
 
 Scimax provides some support for highlighting, comment overlays, and edit marks.
 
-The main way to access the functions is via a hydra menu: `ov-highlighter/body' that is bound to H-h (hyper-h). 
+The main way to access the functions is via a hydra menu: `ov-highlighter/body' that is bound to H-h (hyper-h).
 
 The highlights are not part of org-mode, and they do not export to any backend. The highlights should work in any kind of file.
 
@@ -451,7 +461,7 @@ Here are the bibtex entry types and fields you should use. You can add extra fie
 	    (if (>= (length field) 2)
 		(princ (format " :: %s\n" (nth 1 field)))
 	      (princ "\n")))
-      
+
       (princ "\n**** Optional if Crossref present but otherwise required fields\n\n")
       (loop for field in crossref
 	    do
@@ -743,7 +753,7 @@ Here are the bibtex entry types and fields you should use. You can add extra fie
 - note
 
 ** Bibtex hotkeys
-   
+
 Scimax provides hotkeys for when your cursor is on the @ at the beginning of an entry. Here are the currently defined hotkeys.
 
 #+BEGIN_SRC emacs-lisp
@@ -791,7 +801,7 @@ scimax provides some tools to do a mail merge in org-mode. The idea is to run `m
 
 * Contacts
 
-scimax provides a emacs-lisp library to interface with a contact database written in org-mode. 
+scimax provides a emacs-lisp library to interface with a contact database written in org-mode.
 
 First, add some org-files to the variable `contacts-files'. Any headline in these files that has an EMAIL property will be considered a contact. Then, you can search your database with `ivy-contacts' or `helm-contacts'. There are a variety of actions to choose from ranging from inserting email addresses, copying properties, opening contact urls, etc...
 
@@ -914,7 +924,7 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
 
   Use M-x magit-checkout-file select the branch, or enter a revision, and then choose a file.
 
- help:magit-checkout-file 
+ help:magit-checkout-file
 
  help:magit-find-file
  help:magit-find-file-other-window
@@ -973,7 +983,7 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
 *** Resetting
  [[info:magit#Resetting][info:magit#Resetting]]
 
-*** Rebasing 
+*** Rebasing
   [[info:magit#Rebasing][info:magit#Rebasing]]
 
 **** Interactve rebasing
@@ -991,7 +1001,7 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
 
   "W p" creates patches
   "W r" makes a pull request. This just creates an email with information in it. It is not a GitHUB request, and it is only useful if there is a public, external copy of the repo.
-*** Cherry-picking 
+*** Cherry-picking
  [[info:magit#Cherry%20picking][info:magit#Cherry picking]]
 
  Press "A"
@@ -1011,7 +1021,7 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
 	  unindented line saying "Notes (<refname>):" (or "Notes:" for
 	  refs/notes/commits).
 
-*** Cherry-picking 
+*** Cherry-picking
  [[info:magit#Cherry%20picking][info:magit#Cherry picking]]
 
 * Project management - projectile
@@ -1035,7 +1045,7 @@ While in a project, you may want to try:
 - `pydoc' provides nice, hyperlinked documentation for python.
 
 ** Asynchronous Python
-You can run python blocks asynchronously with M-x `org-babel-async-execute:python' with the cursor in a code block. This will allow you to keep typing, and show you a buffer with the progress of your code block. When it is done, the results will be inserted into the buffer where it belongs when the job is done. A temporary hash mark will go in the results. 
+You can run python blocks asynchronously with M-x `org-babel-async-execute:python' with the cursor in a code block. This will allow you to keep typing, and show you a buffer with the progress of your code block. When it is done, the results will be inserted into the buffer where it belongs when the job is done. A temporary hash mark will go in the results.
 
 You can make this the default behavior by adding this to your init file:
 
@@ -1178,7 +1188,7 @@ As with the Jupyter notebook, only the last returned cell is rendered.
 We finally have asynchronous execution of ipython blocks. This allows you to run a block, and keep working in Emacs. A temporary string is inserted into the results which is replaced when the code is done running. This command will make a clickable link to interrupt the kernel, or cancel the cell running. This will put names on every src block if they are not already named.
 
 #+NAME: bb21dabd-acb3-46bd-b8d8-ab174834fc37
-#+BEGIN_SRC ipython :session :results output drawer 
+#+BEGIN_SRC ipython :session :results output drawer
 import time
 time.sleep(5)
 #print(8)
@@ -1386,7 +1396,7 @@ scimax defines these additional key bindings:
 
 ** Archive the notebook with git
 
-Sometimes you may want a zip file of your notebook. You can use the `nb-archive' command to create a zip file of the current state of your notebook. This can be useful to back up versions of your project, send copies to collaborators who don't use git, or to create archives for data sharing and supporting information. 
+Sometimes you may want a zip file of your notebook. You can use the `nb-archive' command to create a zip file of the current state of your notebook. This can be useful to back up versions of your project, send copies to collaborators who don't use git, or to create archives for data sharing and supporting information.
 
 Note that only files under version control are archived, and only the current committed state is archived. So, uncommitted files and changes will not be included.
 
@@ -1504,7 +1514,7 @@ So, instead of C-x C-f to open a file (which still works by the way) you can sim
 
 ** Emacs
 
-Emacs is described as "self-documenting", and it provides a lot of introspective ways to access documentation. A classic way to access help is via "info" pages. These are hyperlinked documents containing a lot of detail about Emacs and its libraries. 
+Emacs is described as "self-documenting", and it provides a lot of introspective ways to access documentation. A classic way to access help is via "info" pages. These are hyperlinked documents containing a lot of detail about Emacs and its libraries.
 
 Emacs-manual: info:Emacs
 
@@ -1559,11 +1569,11 @@ In org-mode the `ore' command will give you information about the org-element un
 
 *** How do I learn shortcuts?
 
-If you use the menus, they will often have the shortcut in the menu. 
+If you use the menus, they will often have the shortcut in the menu.
 
 The help functions usually show you if a shortcut is defined for a command.
 
-If you really want to define your own keys, see `define-key' and `global-set-key'. 
+If you really want to define your own keys, see `define-key' and `global-set-key'.
 
 Make yourself some notes in org-mode using `emacs-keybinding-command-tooltip-mode'.
 
