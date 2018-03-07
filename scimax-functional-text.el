@@ -55,13 +55,12 @@ wrapped so that it too can have access to the match-data.
 				;; This is clunky, but with grouping the
 				;; properties may not extend to the whole
 				;; regexp.
-				(goto-char (previous-single-property-change (point)
+				(goto-char (previous-single-property-change pt
 									    'button-lock))
-				;; now make sure we see it again to get the match-data
-				(while (not (looking-at ,regexp))
-				  (backward-char))
+				;; now make sure we see it again to get the match-data 
 				(save-match-data
-				  (looking-at ,regexp)
+				  (while (not (looking-at ,regexp))
+				    (backward-char)) 
 				  (funcall ,(plist-get plist :help-echo) win buf pt)))))))
   `(button-lock-register-global-button
     ,regexp
