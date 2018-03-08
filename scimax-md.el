@@ -52,12 +52,18 @@
 	       '("png")
 	       (file-name-extension
 		(org-element-property :path link)))))
+    
     (format "[%s](%s)"
+	    ;; [%s] is the description
 	    (if (org-element-property :contents-begin link)
 		(buffer-substring (org-element-property :contents-begin link)
 				  (org-element-property :contents-end link))
-	      (org-element-property :path link))
-	    (org-element-property :path link)))
+	      (file-name-sans-extension (org-element-property :path link)))
+	    
+	    (let ((path (org-element-property :path link)))
+	      (if (plist-get info :md-link-org-files-as-md)
+		  (concat (file-name-sans-extension path) ".md")
+		path))))
 
    ;; fall-through to the default exporter.
    (t

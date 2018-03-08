@@ -55,30 +55,32 @@ wrapped so that it too can have access to the match-data.
 				;; This is clunky, but with grouping the
 				;; properties may not extend to the whole
 				;; regexp.
-				(goto-char (previous-single-property-change (point)
+				(goto-char (previous-single-property-change pt
 									    'button-lock))
-				;; now make sure we see it again to get the match-data
-				(while (not (looking-at ,regexp))
-				  (backward-char))
+				;; now make sure we see it again to get the match-data 
 				(save-match-data
-				  (looking-at ,regexp)
+				  (while (not (looking-at ,regexp))
+				    (backward-char)) 
 				  (funcall ,(plist-get plist :help-echo) win buf pt)))))))
   `(button-lock-register-global-button
     ,regexp
-    (lambda ()
-      (interactive)
-      (save-excursion
-	;; This is clunky, but with grouping the properties may not extend to
-	;; the whole regexp, e.g. if you set properties on a subgroup.
-	(goto-char (previous-single-property-change (point)
-						    'button-lock))
-	;; now make sure we see it again to get the match-data
-	(while (not (looking-at ,regexp))
-	  (backward-char))
-	(save-match-data
-	  (looking-at ,regexp)
-	  ,@action)))
+    ;; Suggested in https://github.com/rolandwalker/button-lock/issues/10
+    (lambda (event)
+      (interactive "e")
+      (let ((click-pos (posn-point (event-end event))))
+	(save-mark-and-excursion
+	 (save-match-data
+	   ;; This is clunky, but with grouping the properties may not extend to
+	   ;; the whole regexp, e.g. if you set properties on a subgroup.
+	   (goto-char (previous-single-property-change click-pos
+						       'button-lock))
+	   ;; now make sure we see it again to get the match-data
+	   (while (not (looking-at ,regexp))
+	     (backward-char))
+	   ,@action))))
+    ;; I like to press return on functional text to activate it.
     :keyboard-binding "RET"
+    ;; These are the rest of the properties
     ,@plist))
 
 

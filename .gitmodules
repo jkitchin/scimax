@@ -27,4 +27,5 @@
 	url = https://github.com/gregsexton/ob-ipython.git
 [submodule "org-mime"]
 	path = org-mime
-	url = https://github.com/org-mime/org-mime.git
+	url = https://github.com/jkitchin/org-mime.git
+	branch = file-eqns
