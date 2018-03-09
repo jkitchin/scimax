@@ -34,6 +34,63 @@ For Mac, I use:
 (setq mac-right-option-modifier 'super)
 #+END_SRC
 
+For Windows you can use:
+
+#+BEGIN_SRC emacs-lisp
+(setq w32-pass-lwindow-to-system nil)
+(setq w32-lwindow-modifier 'super) ; Left Windows key
+
+(setq w32-pass-rwindow-to-system nil)
+(setq w32-rwindow-modifier 'super) ; Right Windows key
+
+(setq w32-pass-apps-to-system nil)
+(setq w32-apps-modifier 'hyper) ; Menu/App key
+#+END_SRC
+
+This does not work for all key combination with the Windows key because Windows intercepts some keys. The intercepted keys depend on the Windows version:
+
+| Key     | Windows 7 | Windows 10 |
+|---------+-----------+------------|
+| A       | +         | w          |
+| B       | w         | w          |
+| C       |           |            |
+| D       | w         | w          |
+| E       | w         | w          |
+| F       | w         | w          |
+| G       | +         | w          |
+| H       |           | w          |
+| I       | +         | w          |
+| J       | +         |            |
+| K       | +         | w          |
+| L       | w         | w          |
+| M       | w         | w          |
+| N       | +         | +          |
+| O       | +         |            |
+| P       | w         | w          |
+| Q       | +         | w          |
+| R       | w         | w          |
+| S       | +         | w          |
+| T       | w         | w          |
+| U       | w         | w          |
+| V       |           |            |
+| W       | +         | w          |
+| X       | +         | w          |
+| Y       | +         | +          |
+| Z       | +         |            |
+| 0 ... 9 | w         | w          |
+| +       | w         | w          |
+| -       | +         | +          |
+| _       | +         | +          |
+| .       | +         |            |
+| ,       | +         |            |
+| #       | +         |            |
+| *       | +         | +          |
+
+- + :: Key is available for Emacs
+- w :: Key is intercepted by Windows
+- empty :: No reaction from Emacs or Windows
+
+The following keyboard shortcuts are defined:
 
 | markup            | keyshortcut | emacs-command                       |
 |-------------------+-------------+-------------------------------------|
@@ -50,7 +107,7 @@ For Mac, I use:
 | @@latex:snippet@@ | C-u C-u 4   |                                     |
 | °                 | s-e         | `ivy-insert-org-entity'             |
 
-Use  `ivy-insert-org-entity' (s-e) for all accented characters.
+Use `ivy-insert-org-entity' (s-e) for all accented characters.
 
 ** Block expansions in org-mode
 
