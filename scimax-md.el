@@ -48,6 +48,7 @@
 
    ;; file links. treat links to org files as links to md files.
    ((and (string= "file" (org-element-property :type link))
+	 (f-ext? (org-element-property :path link) "org")
 	 (not (-contains?
 	       '("png")
 	       (file-name-extension
