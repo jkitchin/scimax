@@ -65,6 +65,43 @@
 		  (concat (file-name-sans-extension path) ".md")
 		path))))
 
+   ;; cite links.
+   ((-contains? org-ref-cite-types (org-element-property :type link))
+    (when (plist-get info :md-publish-bibtex)
+      ;; here we need to save the entry.
+      (let* ((keys (split-string  (org-element-property :path link) ","))
+	     (bibfunc (plist-get info :md-publish-bibtex))
+	     entry
+	     bibfile)
+	(loop for key in keys do
+	      (setq bibfile (funcall bibfunc key))
+	      ;; now we get the bibtex entry
+	      (let ((org-ref-bibliography-files (org-ref-find-bibliography))
+		    (file) (entry) (bibtex-entry) (entry-type) (format)
+		    p1)
+
+		(setq file (catch 'result
+			     (cl-loop for file in org-ref-bibliography-files do
+				      (if (org-ref-key-in-file-p key (file-truename file))
+					  (throw 'result file)
+					(message "%s not found in %s"
+						 key (file-truename file))))))
+
+		(with-temp-buffer
+		  (insert-file-contents file)
+		  (bibtex-set-dialect (parsebib-find-bibtex-dialect) t)
+		  (bibtex-search-entry key nil 0)
+		  (bibtex-beginning-of-entry)
+		  (setq p1 (point))
+		  (bibtex-end-of-entry)
+		  (setq entry (buffer-substring p1 (point))))
+		(with-temp-buffer
+		  (insert entry)
+		  (write-file bibfile))))
+
+	;; finally, render as usual, and a markdown link to the bibtex file.
+	(org-md-link link contents info))))
+
    ;; fall-through to the default exporter.
    (t
     (org-md-link link contents info))))
@@ -155,7 +192,9 @@ file-local settings."
   :menu-entry
   '(?s "Export with scimax-md"
        ((?b "As buffer" scimax-md-export-to-buffer)
-	(?s "As file" scimax-md-export-to-file))))
+	(?s "As file" scimax-md-export-to-file)
+	(?f "Publish current file" (lambda (&rest args) (org-publish-current-file)))
+	(?p "Publish current project" (lambda (&rest args) (org-publish-current-project))))))
 
 
 ;; * Publishing
