@@ -40,7 +40,6 @@
 (add-to-list 'auto-mode-alist '("\\.Rcpp$" . poly-r+c++-mode))
 (add-to-list 'auto-mode-alist '("\\.cppR$" . poly-c++r-mode))
 
-(provides 'scimax-statistics)
 
 (provide 'scimacs-statistics)
 
