@@ -41,6 +41,6 @@
 (add-to-list 'auto-mode-alist '("\\.cppR$" . poly-c++r-mode))
 
 
-(provide 'scimacs-statistics)
+(provide 'scimax-statistics)
 
-;;; scimacs-statistics.el ends here
+;;; scimax-statistics.el ends here
