@@ -690,7 +690,7 @@ This function is called by `org-babel-execute-src-block'."
 				  (progn (forward-line) (org-babel-result-end))))))))
 	  (files '())
 	  ;; This matches automatic file generation
-	  (fregex "\\[\\[file:\\(./obipy-resources/.*\\)\\]\\]"))
+	  (fregex "\\[\\[file:\\(obipy-resources/.*\\)\\]\\]"))
       (when result-string
 	(with-temp-buffer
 	  (insert result-string)
