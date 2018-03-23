@@ -23,7 +23,7 @@
 (require 'cl)
 (require 'avy)
 (require 'counsel)
-
+(require 'dashboard)
 
 (defcustom scimax-dashboard-check-git-updates t
   "When non-nil check for updates."
