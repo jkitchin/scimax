@@ -166,6 +166,8 @@
 (use-package dash)
 (use-package dash-functional)
 
+(use-package dashboard)
+
 (use-package elfeed)
 
 ;; Python editing mode
