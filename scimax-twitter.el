@@ -43,6 +43,7 @@
   "List of usernames that either you follow or that follow you.")
 
 (defun scimax-twitter-insert-username (&optional reload)
+  "Insert a twitter handle from the list of people you follow and who follow you."
   (interactive "P")
   (unless (or reload scimax-twitter-usernames)
     (setq scimax-twitter-usernames (-uniq (append (process-lines "t" "followings")
@@ -181,9 +182,16 @@ done."
     (when (not (null (nth 1 components)))
       (org-entry-put nil "TWITTER_IN_REPLY_TO" (nth 1 components)))
     (org-entry-put nil "TWITTER_MSGID" msgid)
-    (org-entry-put nil "TWITTER_URL" (format "https://twitter.com/%s/status/%s"
-					     (car (process-lines "t" "accounts"))
-					     msgid))
+    (let* ((output (process-lines "t" "accounts"))
+	   ;; Note: this may break if you have multiple keys on an account.
+	   (i (-find-index
+	       (lambda (s)
+		 (s-contains? "(active)" s))
+	       output))
+	   (username (nth (- i 1) output)))
+      (org-entry-put nil "TWITTER_URL" (format "https://twitter.com/%s/status/%s"
+					       username
+					       msgid)))
     (message "%s" components)))
 
 
