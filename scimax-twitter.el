@@ -16,8 +16,11 @@
 ;;
 ;; Tweet from an org headline: `scimax-twitter-tweet-headline'
 ;;
+;; `scimax-twitter-ivy' an interface to your followers and followees.
+;;
 ;; Tweet a subtree as a thread: `scimax-twitter-org-subtree-tweet-thread'
 ;; TODO: check for lengths before trying to send.
+;;
 
 (require 'scimax-functional-text)
 
@@ -30,6 +33,7 @@
  :face (list 'org-link)
  :help-echo "Click me to open hashtag.")
 
+
 ;; * Twitter handles
 (scimax-functional-text
  "\\(^\\|[[:punct:]]\\|[[:space:]]\\)\\(?2:@\\(?1:[[:alnum:]]+\\)\\)"
@@ -39,16 +43,89 @@
  :face (list 'org-mlink)
  :help-echo "Click me to open username.")
 
+
+;; * Twitter usernames
+
+(defcustom scimax-twitter-directory "~/.scimax-twitter/"
+  "Directory to cache scimax-twitter data.")
+
+
+(unless (f-dir? scimax-twitter-directory)
+  (make-directory scimax-twitter-directory t))
+
+
+(defun scimax-twitter-download-whois-info (&optional reload)
+  "Download info on who you follow and followers."
+  (interactive "P")
+
+  (when (or reload (null scimax-twitter-usernames))
+    (setq scimax-twitter-usernames (-uniq (append (process-lines "t" "followings")
+						  (process-lines "t" "followers")))))
+
+  (unless (f-dir? (f-join scimax-twitter-directory "whois"))
+    (make-directory (f-join scimax-twitter-directory "whois") t))
+
+  ;; Here we download the files if necessary.
+  (loop for username in scimax-twitter-usernames
+	do
+	(let ((userfile (expand-file-name username
+					  (f-join scimax-twitter-directory "whois"))))
+	  (when (or reload (not (f-exists? userfile)))
+	    (with-temp-file userfile
+	      (insert (shell-command-to-string
+		       (format "t whois %s" username))))))))
+
 (defvar scimax-twitter-usernames nil
   "List of usernames that either you follow or that follow you.")
 
-(defun scimax-twitter-insert-username (&optional reload)
-  "Insert a twitter handle from the list of people you follow and who follow you."
+(defvar scimax-twitter-ivy-candidates '()
+  "List of candidate usernames for ivy.")
+
+(defun scimax-twitter-ivy-candidates (&optional reload)
   (interactive "P")
-  (unless (or reload scimax-twitter-usernames)
+  (when (or reload (null scimax-twitter-usernames))
     (setq scimax-twitter-usernames (-uniq (append (process-lines "t" "followings")
 						  (process-lines "t" "followers")))))
-  (insert "@" (ivy-read "Username: " scimax-twitter-usernames)))
+  (when (or reload (null scimax-twitter-ivy-candidates))
+    (setq scimax-twitter-ivy-candidates
+	  (loop for username in scimax-twitter-usernames
+		collect
+		(let* ((userfile (expand-file-name username
+						   (f-join scimax-twitter-directory "whois")))
+		       (info (when (f-exists? userfile)
+			       (mapcar (lambda (line)
+					 (cons (s-trim (substring line 0 13))
+					       (substring line 13)))
+				       (process-lines "cat" userfile)))))
+		  (list (format "%20s | %20s | %40s | %s"
+				(cdr (assoc "Screen name" info))
+				(cdr (assoc "Name" info))
+				(cdr (assoc "Bio" info))
+				(cdr (assoc "URL" info)))
+			info)))))
+  ;; return the variable
+  scimax-twitter-ivy-candidates)
+
+
+(defun scimax-twitter-ivy (&optional reload)
+  "Select from who you follow and your followers with ivy.
+Default action is to insert the screen name, but you can also
+open their twitter page or url."
+  (interactive "P")
+  (ivy-read "Username: " (scimax-twitter-ivy-candidates reload)
+	    :action '(1
+		      ("i" (lambda (cand)
+			     (let ((info (cadr cand)))
+			       (insert (cdr (assoc "Screen name" info))))))
+		      ("t" (lambda (cand)
+			     (let ((info (cadr cand)))
+			       (browse-url (format "https://twitter.com/%s"
+						   (substring
+						    (cdr (assoc "Screen name" info)) 1))))))
+		      ("u" (lambda (cand)
+			     (let ((info (cadr cand)))
+			       (browse-url (cdr (assoc "URL" info)))))))))
+
 
 
 ;; * Tweet functions
@@ -56,6 +133,10 @@
 (defun scimax-twitter-update (msg &optional file)
   "Post MSG as a tweet with an optional media FILE.
 Returns the msgid for the posted tweet or the output from t."
+
+  (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
+    (shell-command (format "t set active %s" account)))
+
   (let* ((output (apply 'process-lines `("t" "update" ,msg
 					 ,@(when file '("-f"))
 					 ,@(when file `(,file)))))
@@ -68,6 +149,8 @@ Returns the msgid for the posted tweet or the output from t."
 (defun scimax-twitter-reply (msg msgid &optional file)
   "Reply MSG to tweet with MSGID and optional media FILE.
 Returns the msgid for the posted tweet or the output from t."
+
+
   (let* ((output (apply 'process-lines `("t" "reply" ,msgid ,msg
 					 ,@(when file '("-f"))
 					 ,@(when file `(,file)))))
@@ -103,13 +186,18 @@ It is if the previous heading has TWITTER_MSGID property, and the
 current headline is tagged as part of a tweet thread. Returns the
 id to reply to if those conditions are met."
   (let ((tags (mapcar 'org-no-properties (org-get-tags-at))))
-    (and (-contains?  tags "tweet")
-	 (-contains? tags "thread")
-	 (save-excursion
-	   (unless (looking-at org-heading-regexp)
-	     (org-back-to-heading))
-	   (org-previous-visible-heading 1)
-	   (org-entry-get nil "TWITTER_MSGID")))))
+    (or (org-entry-get nil "TWITTER_IN_REPLY_TO")
+	(and (-contains?  tags "tweet")
+	     (-contains? tags "thread")
+	     (save-excursion
+	       (unless (looking-at org-heading-regexp)
+		 (org-back-to-heading))
+	       (org-previous-visible-heading 1)
+	       ;; Make sure previous heading is part of the thread
+	       (let ((tags (mapcar 'org-no-properties (org-get-tags-at))))
+		 (and (-contains?  tags "tweet")
+		      (-contains? tags "thread")
+		      (org-entry-get nil "TWITTER_MSGID"))))))))
 
 
 (defun scimax-twitter-org-tweet-components ()
@@ -194,14 +282,26 @@ done."
 					       msgid)))
     (message "%s" components)))
 
+;; Replace the speed command
+(setf (cdr (assoc "T" org-speed-commands-user)) 'scimax-twitter-tweet-headline)
+
 
 (defun scimax-twitter-org-subtree-tweet-thread ()
   "Tweet the subtree as a thread."
   (interactive)
   (save-restriction
     (org-narrow-to-subtree)
+
     (save-excursion
       (goto-char (point-min))
+      (unless (-contains?  (mapcar 'org-no-properties (org-get-tags-at)) "tweet")
+	(let ((current-tags (org-get-tags-at)))
+	  (org-set-tags-to (append current-tags '("tweet")))))
+
+      (unless (-contains?  (mapcar 'org-no-properties (org-get-tags-at)) "thread")
+	(let ((current-tags (org-get-tags-at)))
+	  (org-set-tags-to (append current-tags '("thread")))))
+
       (while (looking-at org-heading-regexp)
 	(scimax-twitter-tweet-headline)
 	(org-next-visible-heading 1)))))
