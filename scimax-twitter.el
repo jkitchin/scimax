@@ -137,6 +137,9 @@ Returns the msgid for the posted tweet or the output from t."
   (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
     (shell-command (format "t set active %s" account)))
 
+  ;; This will convert org-entities to utf-8 chars
+  (setq msg (org-export-string-as msg 'twitter t '(:ascii-charset utf-8)))
+
   (let* ((output (apply 'process-lines `("t" "update" ,msg
 					 ,@(when file '("-f"))
 					 ,@(when file `(,file)))))
@@ -150,6 +153,10 @@ Returns the msgid for the posted tweet or the output from t."
   "Reply MSG to tweet with MSGID and optional media FILE.
 Returns the msgid for the posted tweet or the output from t."
 
+  (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
+    (shell-command (format "t set active %s" account)))
+
+  (setq msg (org-export-string-as msg 'twitter t '(:ascii-charset utf-8)))
 
   (let* ((output (apply 'process-lines `("t" "reply" ,msgid ,msg
 					 ,@(when file '("-f"))
@@ -320,6 +327,73 @@ done."
 	(org-entry-delete nil "TWITTER_IN_REPLY_TO")
 	(org-next-visible-heading 1)))))
 
+
+;; * Exporter
+(defun scimax-twitter-filter-bold (text back-end info)
+  (let ((plain "ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz0123456789")
+	(ubold "𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗")
+	i)
+    (replace-regexp-in-string "*" ""
+			      (s-join "" (loop for letter across text collect
+					       (progn
+						 (setq i (s-index-of
+							  (char-to-string letter)
+							  plain))
+						 (if i (substring ubold  i (incf i))
+						   (char-to-string letter))))))))
+
+(defun scimax-twitter-filter-italic (text back-end info)
+  (let ((plain "ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz0123456789")
+	(uitalic "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧")
+	i)
+    (replace-regexp-in-string "/" ""
+			      (s-join "" (loop for letter across text collect
+					       (progn
+						 (setq i (s-index-of
+							  (char-to-string letter)
+							  plain))
+						 (if i (substring uitalic  i (incf i))
+						   (char-to-string letter))))))))
+
+(defun scimax-twitter-filter-verbatim (text back-end info)
+  (let ((plain "ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz0123456789")
+	(uverbatim "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚉𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿")
+	i)
+    (replace-regexp-in-string
+     "`\\|'" ""
+     (s-join "" (loop for letter across text collect
+		      (progn
+			(setq i (s-index-of
+				 (char-to-string letter)
+				 plain))
+			(if i (substring uverbatim  i (incf i))
+			  (char-to-string letter))))))))
+
+
+(defun scimax-twitter-export-headline (&rest args)
+  "Pseudo-export function for tweeting a headline."
+  (interactive)
+  (scimax-twitter-tweet-headline))
+
+(defun scimax-twitter-export-headline-force (&rest args)
+  "Pseudo-export function for force tweeting a headline."
+  (interactive)
+  (scimax-twitter-tweet-headline t))
+
+(defun scimax-twitter-export-subtree (&rest args)
+  "Pseudo-export function for tweeting a subtree as a thread."
+  (interactive)
+  (scimax-twitter-org-subtree-tweet-thread))
+
+(org-export-define-derived-backend 'twitter 'ascii
+  :filters-alist '((:filter-bold . scimax-twitter-filter-bold)
+		   (:filter-italic . scimax-twitter-filter-italic)
+		   (:filter-verbatim . scimax-twitter-filter-verbatim))
+  :menu-entry
+  '(?w "Export with scimax-twitter"
+       ((?h "Headline" scimax-twitter-export-headline)
+	(?H "Headline" scimax-twitter-export-headline-force)
+	(?s "Subtree" scimax-twitter-export-subtree))))
 
 (provide 'scimax-twitter)
 
