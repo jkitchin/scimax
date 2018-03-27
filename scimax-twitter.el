@@ -329,6 +329,7 @@ done."
 
 
 ;; * Exporter
+;; http://qaz.wtf/u/convert.cgi?text=ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz0123456789
 (defun scimax-twitter-filter-bold (text back-end info)
   (let ((plain "ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz0123456789")
 	(ubold "𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗")
@@ -342,6 +343,7 @@ done."
 						 (if i (substring ubold  i (incf i))
 						   (char-to-string letter))))))))
 
+
 (defun scimax-twitter-filter-italic (text back-end info)
   (let ((plain "ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz0123456789")
 	(uitalic "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧")
@@ -354,6 +356,7 @@ done."
 							  plain))
 						 (if i (substring uitalic  i (incf i))
 						   (char-to-string letter))))))))
+
 
 (defun scimax-twitter-filter-verbatim (text back-end info)
   (let ((plain "ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz0123456789")
@@ -375,15 +378,18 @@ done."
   (interactive)
   (scimax-twitter-tweet-headline))
 
+
 (defun scimax-twitter-export-headline-force (&rest args)
   "Pseudo-export function for force tweeting a headline."
   (interactive)
   (scimax-twitter-tweet-headline t))
 
+
 (defun scimax-twitter-export-subtree (&rest args)
   "Pseudo-export function for tweeting a subtree as a thread."
   (interactive)
   (scimax-twitter-org-subtree-tweet-thread))
+
 
 (org-export-define-derived-backend 'twitter 'ascii
   :filters-alist '((:filter-bold . scimax-twitter-filter-bold)
