@@ -220,6 +220,7 @@ the msg. "
 	file
 	gists
 	cp
+	latex-frag
 	next-heading)
 
     (save-excursion
@@ -243,6 +244,14 @@ the msg. "
 			       (string= "file" (org-element-property :type link))
 			       (f-ext? (org-element-property :path link) "png"))
 			    (org-element-property :path link))))))
+      ;; latex fragments overrule files.
+      (setq latex-frag (car (org-element-map (org-element-parse-buffer)
+				'(latex-environment latex-fragment) 'identity)))
+      (when latex-frag
+	(goto-char (org-element-property :begin latex-frag))
+	(unless (ov-at) (org-toggle-latex-fragment))
+	(setq file (plist-get (cdr (overlay-get (ov-at) 'display)) :file)))
+
       ;; src-blocks
       (setq gists (org-element-map (org-element-parse-buffer) 'src-block
 		    (lambda (src)
@@ -255,6 +264,7 @@ the msg. "
 			  (org-edit-src-abort)
 			  (org-no-properties (pop kill-ring))))))))
     (when gists (setq msg (s-concat msg " " (s-join " " gists))))
+
     (list msg reply-id file)))
 
 
@@ -398,7 +408,7 @@ done."
   :menu-entry
   '(?w "Export with scimax-twitter"
        ((?h "Headline" scimax-twitter-export-headline)
-	(?H "Headline" scimax-twitter-export-headline-force)
+	(?H "Headline (force)" scimax-twitter-export-headline-force)
 	(?s "Subtree" scimax-twitter-export-subtree))))
 
 (provide 'scimax-twitter)
