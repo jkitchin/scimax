@@ -32,7 +32,7 @@
 (fset 'yes-or-no-p 'y-or-n-p) ; answer with y/n instead of yes/no
 
 (setq custom-file (expand-file-name "user/custom.el" scimax-dir))
-(load custom-file)
+(when (f-exists? custom-file) (load custom-file))
 
 (setq auto-save-list-file-prefix (expand-file-name "auto-save-list/saves-" scimax-dir))
 
