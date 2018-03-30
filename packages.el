@@ -363,11 +363,13 @@
   :load-path scimax-dir)
 
 ;; this is a git submodule
-(use-package ob-ipython
-  :ensure nil
-  :load-path (lambda () (expand-file-name "ob-ipython-upstream" scimax-dir))
-  :init (add-to-list 'load-path (expand-file-name "ob-ipython-upstream" scimax-dir))
-  (require 'ob-ipython))
+(if (executable-find "jupyter")
+    (use-package ob-ipython
+      :ensure nil
+      :load-path (lambda () (expand-file-name "ob-ipython-upstream" scimax-dir))
+      :init (add-to-list 'load-path (expand-file-name "ob-ipython-upstream" scimax-dir))
+      (require 'ob-ipython))
+  (message "jupyter was not found on your path. ob-ipython was not loaded."))
 
 (use-package scimax-org-babel-ipython-upstream
   :ensure nil
