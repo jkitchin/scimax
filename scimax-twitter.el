@@ -538,7 +538,8 @@ This creates a file to be loaded later."
   (let* ((datafile (expand-file-name
 		    (concat (org-entry-get nil "ID") ".el")
 		    (f-join scimax-twitter-directory "scheduled-tweets")))
-	 (data `(save-excursion
+	 (data `(progn
+		  (find-file ,(buffer-file-name))
 		  (org-id-goto ,(org-entry-get nil "ID"))
 		  (when (org-time>
 			 ;; current-time
