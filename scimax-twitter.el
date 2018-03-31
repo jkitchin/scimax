@@ -535,12 +535,13 @@ done."
   "This sets a tweet to be scheduled.
 This creates a file to be loaded later."
   (interactive)
-  (let* ((datafile (expand-file-name
+  (let* ((id (org-id-get-create))
+	 (datafile (expand-file-name
 		    (concat (org-entry-get nil "ID") ".el")
 		    (f-join scimax-twitter-directory "scheduled-tweets")))
 	 (data `(progn
 		  (find-file ,(buffer-file-name))
-		  (org-id-goto ,(org-entry-get nil "ID"))
+		  (re-search-forward ,id)
 		  (when (org-time>
 			 ;; current-time
 			 (format-time-string "<%Y-%m-%d %a %H:%M>")
@@ -554,15 +555,17 @@ This creates a file to be loaded later."
 		    (f-delete ,datafile)))))
 
     (with-temp-file datafile
-      (pp data (current-buffer))))
-  (org-entry-put nil "TWEET_SCHEDULED" "t"))
+      (pp data (current-buffer)))
+    (org-entry-put nil "TWEET_SCHEDULED" datafile)))
 
 
 (defun scimax-twitter-process-scheduled ()
   (interactive)
   (loop for file in
 	(f-files (f-join scimax-twitter-directory "scheduled-tweets"))
-	do (load-file file)))
+	do
+	(message "Loading %s" file)
+	(load-file file)))
 
 
 (provide 'scimax-twitter)
