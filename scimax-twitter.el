@@ -21,7 +21,7 @@
 ;; Tweet a subtree as a thread: `scimax-twitter-org-subtree-tweet-thread'
 ;; TODO: check for lengths before trying to send.
 ;;
-
+(require 'f)
 (require 'scimax-functional-text)
 
 ;; * Hashtag functional text
@@ -60,7 +60,10 @@
 
   (when (or reload (null scimax-twitter-usernames))
     (setq scimax-twitter-usernames (-uniq (append (process-lines "t" "followings")
-						  (process-lines "t" "followers")))))
+						  (process-lines "t" "followers")
+						  (process-lines "t" "followings")
+						  (process-lines "t" "leaders")
+						  (process-lines "t" "groupies")))))
 
   (unless (f-dir? (f-join scimax-twitter-directory "whois"))
     (make-directory (f-join scimax-twitter-directory "whois") t))
@@ -75,13 +78,17 @@
 	      (insert (shell-command-to-string
 		       (format "t whois %s" username))))))))
 
+
 (defvar scimax-twitter-usernames nil
   "List of usernames that either you follow or that follow you.")
+
 
 (defvar scimax-twitter-ivy-candidates '()
   "List of candidate usernames for ivy.")
 
+
 (defun scimax-twitter-ivy-candidates (&optional reload)
+  "Returns a list of candidates"
   (interactive "P")
   (when (or reload (null scimax-twitter-usernames))
     (setq scimax-twitter-usernames (-uniq (append (process-lines "t" "followings")
@@ -116,15 +123,55 @@ open their twitter page or url."
 	    :action '(1
 		      ("i" (lambda (cand)
 			     (let ((info (cadr cand)))
-			       (insert (cdr (assoc "Screen name" info))))))
-		      ("t" (lambda (cand)
-			     (let ((info (cadr cand)))
-			       (browse-url (format "https://twitter.com/%s"
-						   (substring
-						    (cdr (assoc "Screen name" info)) 1))))))
+			       (insert (cdr (assoc "Screen name" info)))))
+		       "insert username")
+		      ("d" (lambda (cand)
+			     (let* ((info (cadr cand))
+				    (user (cdr (assoc "Screen name" info)))
+				    (msg (read-input "Msg: ")))
+			       (message (s-join "\n" (process-lines "t" "dm" user msg)))))
+		       "direct message")
+		      ("f" (lambda (cand)
+			     (let* ((info (cadr cand))
+				    (user (cdr (assoc "Screen name" info))))
+			       (message (s-join "\n" (process-lines "t" "follow" user)))))
+		       "follow")
+		      ;; list commands seem to be broken.
+		      ;; /usr/local/bin/t: Sorry, that page does not exist.
+		      ;; ("l" (lambda (cand)
+		      ;; 	     (let* ((info (cadr cand))
+		      ;; 		    (user (cdr (assoc "Screen name" info)))
+		      ;; 		    (list (completing-read
+		      ;; 			   "List: "
+		      ;; 			   (process-lines "t" "lists"))))
+		      ;; 	       (message (s-join "\n" (process-lines "t" "list" "add"
+		      ;; 						    list user)))))
+		      ;;  "add to list")
+		      ("M" (lambda (cand)
+			     (let* ((info (cadr cand))
+				    (user (cdr (assoc "Screen name" info))))
+			       (message (s-join "\n" (process-lines "t" "mute" user)))))
+		       "Mute")
+		      ;; TODO: update variable? remove whois entry?
+		      ("U" (lambda (cand)
+			     (let* ((info (cadr cand))
+				    (user (cdr (assoc "Screen name" info))))
+			       (message (s-join "\n" (process-lines "t" "unfollow" user)))))
+		       "unfollow")
+		      ("o" (lambda (cand)
+			     (let* ((info (cadr cand))
+				    (user (cdr (assoc "Screen name" info))))
+			       (message (s-join "\n" (process-lines "t" "open" user)))))
+		       "Open profile")
 		      ("u" (lambda (cand)
 			     (let ((info (cadr cand)))
-			       (browse-url (cdr (assoc "URL" info)))))))))
+			       (browse-url (cdr (assoc "URL" info)))))
+		       "Open their url")
+		      ("w" (lambda (cand)
+			     (let* ((info (cadr cand))
+				    (user (cdr (assoc "Screen name" info))))
+			       (message (s-join "\n" (process-lines "t" "whois" user)))))
+		       "whois"))))
 
 
 
@@ -133,9 +180,11 @@ open their twitter page or url."
 (defun scimax-twitter-update (msg &optional file)
   "Post MSG as a tweet with an optional media FILE.
 Returns the msgid for the posted tweet or the output from t."
+  (interactive (list (read-input "Msg: ")
+		     (read-file-name "File: ")))
 
-  (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
-    (shell-command (format "t set active %s" account)))
+  (unless (and file (f-ext? file "png"))
+    (setq file nil))
 
   ;; This will convert org-entities to utf-8 chars
   (setq msg (org-export-string-as msg 'twitter t '(:ascii-charset utf-8)))
@@ -145,16 +194,17 @@ Returns the msgid for the posted tweet or the output from t."
 					 ,@(when file `(,file)))))
 	 (last-line (car (last output))))
     (if (string-match "`t delete status \\([0-9]*\\)`" last-line)
-	(match-string-no-properties 1 last-line)
+	(prog1
+	    (match-string-no-properties 1 last-line)
+	  (org-entry-put nil "TWEETED_AT"
+			 (format-time-string "<%Y-%m-%d %a %H:%M>")))
+      ;; this probably means there was an error.
       last-line)))
 
 
 (defun scimax-twitter-reply (msg msgid &optional file)
   "Reply MSG to tweet with MSGID and optional media FILE.
 Returns the msgid for the posted tweet or the output from t."
-
-  (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
-    (shell-command (format "t set active %s" account)))
 
   (setq msg (org-export-string-as msg 'twitter t '(:ascii-charset utf-8)))
 
@@ -163,7 +213,9 @@ Returns the msgid for the posted tweet or the output from t."
 					 ,@(when file `(,file)))))
 	 (last-line (car (last output))))
     (if (string-match "`t delete status \\([0-9]*\\)`" last-line)
-	(match-string-no-properties 1 last-line)
+	(prog1
+	    (match-string-no-properties 1 last-line)
+	  (match-string-no-properties 1 last-line))
       last-line)))
 
 
@@ -279,6 +331,9 @@ done."
     (when (org-entry-get nil "TWITTER_MSGID")
       (user-error "This headline has already been tweeted.")))
 
+  (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
+    (shell-command (format "t set active %s" account)))
+
   (let* ((components (scimax-twitter-org-tweet-components))
 	 (msgid (if (not (null (nth 1 components)))
 		    ;; reply
@@ -306,6 +361,10 @@ done."
 (defun scimax-twitter-org-subtree-tweet-thread ()
   "Tweet the subtree as a thread."
   (interactive)
+
+  (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
+    (shell-command (format "t set active %s" account)))
+
   (save-restriction
     (org-narrow-to-subtree)
 
@@ -336,6 +395,56 @@ done."
 	(org-entry-delete nil "TWITTER_MSGID")
 	(org-entry-delete nil "TWITTER_IN_REPLY_TO")
 	(org-next-visible-heading 1)))))
+
+;; * Miscellaneous utilities
+
+(defun scimax-twitter-status ()
+  "Show status of tweet in current headline."
+  (interactive)
+  (message
+   (shell-command-to-string
+    (format "t status %s" (org-entry-get nil "TWITTER_MSGID")))))
+
+
+(defun scimax-twitter-delete-status ()
+  "Delete the tweet in the current headline."
+  (interactive)
+  (prog1
+      (message
+       (shell-command-to-string
+	(format "echo y | t delete status %s" (org-entry-get nil "TWITTER_MSGID"))))
+    (org-entry-put nil "TWITTER_MSGID" (concat (org-entry-get nil "TWITTER_MSGID")
+					       " - deleted"))
+    (org-entry-delete nil "TWITTER_URL")))
+
+
+(defun scimax-twitter-delete-thread ()
+  "Delete the tweets in the thread."
+  (interactive)
+  (save-restriction
+    (org-narrow-to-subtree)
+    (goto-char (point-min))
+    (while (looking-at org-heading-regexp)
+      (scimax-twitter-delete-status)
+      (org-next-visible-heading 1))))
+
+
+(defun scimax-twitter-dm (user msg)
+  "Send USER a MSG by dm."
+  (interactive
+   (list
+    (completing-read "User: " scimax-twitter-usernames)
+    (read-input "Msg: ")))
+  (message (shell-command-to-string
+	    (format "t dm %s \"%s\"" user msg))))
+
+
+(defun scimax-twitter-set-account (user)
+  "Set the account to tweet from."
+  (interactive (list (completing-read
+		      "Account: "
+		      (-slice (process-lines "t" "accounts") 0 -1 2))))
+  (message (shell-command-to-string (format "t set active %s" user))))
 
 
 ;; * Exporter
@@ -400,6 +509,10 @@ done."
   (interactive)
   (scimax-twitter-org-subtree-tweet-thread))
 
+(defun scimax-twitter-export-delete (&rest args)
+  "Pseudo-export function for deleting a tweet in a headline."
+  (scimax-twitter-delete-status))
+
 
 (org-export-define-derived-backend 'twitter 'ascii
   :filters-alist '((:filter-bold . scimax-twitter-filter-bold)
@@ -409,7 +522,47 @@ done."
   '(?w "Export with scimax-twitter"
        ((?h "Headline" scimax-twitter-export-headline)
 	(?H "Headline (force)" scimax-twitter-export-headline-force)
-	(?s "Subtree" scimax-twitter-export-subtree))))
+	(?s "Subtree" scimax-twitter-export-subtree)
+	(?d "delete" scimax-twitter-export-delete))))
+
+;; * scheduling tweets
+
+(unless (f-dir? (f-join scimax-twitter-directory "scheduled-tweets"))
+  (make-directory (f-join scimax-twitter-directory "scheduled-tweets") t))
+
+
+(defun scimax-twitter-schedule-tweet ()
+  "This sets a tweet to be scheduled.
+This creates a file to be loaded later."
+  (interactive)
+  (let* ((datafile (expand-file-name
+		    (concat (org-entry-get nil "ID") ".el")
+		    (f-join scimax-twitter-directory "scheduled-tweets")))
+	 (data `(save-excursion
+		  (org-id-goto ,(org-entry-get nil "ID"))
+		  (when (org-time>
+			 ;; current-time
+			 (format-time-string "<%Y-%m-%d %a %H:%M>")
+			 ;; scheduled entry time
+			 ,(format-time-string
+			   "<%Y-%m-%d %a %H:%M>" (org-get-scheduled-time nil)))
+		    (scimax-twitter-tweet-headline)
+		    (org-todo "DONE")
+		    (org-entry-put nil "TWEETED_AT"
+				   (format-time-string "<%Y-%m-%d %a %H:%M>"))
+		    (f-delete ,datafile)))))
+
+    (with-temp-file datafile
+      (pp data (current-buffer))))
+  (org-entry-put nil "TWEET_SCHEDULED" "t"))
+
+
+(defun scimax-twitter-process-scheduled ()
+  (interactive)
+  (loop for file in
+	(f-files (f-join scimax-twitter-directory "scheduled-tweets"))
+	do (load-file file)))
+
 
 (provide 'scimax-twitter)
 
