@@ -1634,6 +1634,20 @@ If you really want to define your own keys, see `define-key' and `global-set-key
 
 Make yourself some notes in org-mode using `emacs-keybinding-command-tooltip-mode'.
 
+** Using only parts of scimax
+
+Suppose you have your own Emacs setup already and only want to use a few parts of scimax without loading the whole thing. No problem. Just add the scimax dir to your load-path, and require as you like.
+
+For example, to just use the scimax ipython enhancements (https://github.com/jkitchin/scimax/issues/191#issuecomment-378758214), this might work:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "path/to/scimax-dir")
+(require 'ob-ipython)
+(require 'scimax-org-babel-ipython-upstream)
+#+END_SRC
+
+Note that a lot of packages are installed in [[./packages.el]] and you may have to inspect the source of the packages you are requiring to make sure all the dependencies get installed.
+
 * Archive
 ** Navigation - navy
    :PROPERTIES:
