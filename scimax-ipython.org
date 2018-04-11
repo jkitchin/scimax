@@ -1150,7 +1150,7 @@ jupyter console --existing kernel-226309.json --ssh username@hostname
 You should get some output like:
 
 #+BEGIN_EXAMPLE
-[ZMQTerminalIPythonApp] Forwarding connections to 127.0.0.1 via kitchin@kitchin.mtv.corp.google.com
+[ZMQTerminalIPythonApp] Forwarding connections to 127.0.0.1 via kitchin@some.host.com
 [ZMQTerminalIPythonApp] To connect another client via this tunnel, use:
 [ZMQTerminalIPythonApp] --existing kernel-16577-ssh.json
 Jupyter console 5.2.0
