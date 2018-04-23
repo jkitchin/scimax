@@ -86,7 +86,7 @@ uncommitted changes, you will be prompted to continue."
 	  "git archive --format zip HEAD -o \"%s-%s.zip\""
 	  (f-join (projectile-project-root)
 		  (car (last (f-split (projectile-project-root)))))
-	  (format-time-string "%Y-%m-%d-%H:%m%p")))))))
+	  (format-time-string "%Y-%m-%d-%H:%M%p")))))))
 
 ;; * Add a menu to scimax
 
