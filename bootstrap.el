@@ -5,10 +5,7 @@
 ;;
 
 ;;; Code:
-
-(package-initialize)
-;; this is done to avoid reinitializing in help-fns+.
-(setq package--initialized t)
+(unless package--initialized (package-initialize t))
 
 (unless (package-installed-p 'diminish)
   (package-refresh-contents)
