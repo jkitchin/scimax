@@ -5,7 +5,7 @@
 ;;
 
 ;;; Code:
-(unless package--initialized (package-initialize t))
+(unless package--initialized (package-initialize))
 
 (unless (package-installed-p 'diminish)
   (package-refresh-contents)
