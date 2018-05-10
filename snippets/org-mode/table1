@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: table with one column
+# key: <t
+# --
+| $0 |

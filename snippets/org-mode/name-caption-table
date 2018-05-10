@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: table with one column
+# key: nct
+# --
+#+name: ${1:name}
+#+caption: ${2:caption}
+| $0 |

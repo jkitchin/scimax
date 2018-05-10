@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: org-mode options keyword
+# key: o
+# --
+#+options: $0

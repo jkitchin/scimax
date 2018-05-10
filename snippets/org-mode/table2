@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: table with two columns
+# key: <t2
+# --
+| $0 |  |

@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: name-caption-figure
+# key: ncf
+# --
+#+name: ${1:name}
+#+caption: ${2:caption}
+[[${3:`(read-file-name "File: ")`}]]
+
+$0

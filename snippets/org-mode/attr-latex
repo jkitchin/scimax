@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: latex attribute
+# key: al
+# --
+#+attr_latex: $0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: table with three columns
+# key: <t3
+# --
+| $0 |  |  |
