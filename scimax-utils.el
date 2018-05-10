@@ -198,6 +198,21 @@ sentence in the region."
     "Run `esup' on the scimax init file to profile it."
     (esup (expand-file-name "init.el" scimax-dir))))
 
+
+
+(defmacro with-no-new-buffers (&rest body)
+  "Run BODY, and kill any new buffers created.
+Returns whatever BODY would return."
+  (let ((current-buffers (buffer-list)))
+    `(prog1
+	 (progn
+	   ,@body)
+       (mapc (lambda (buf)
+	       (unless (-contains? ',current-buffers buf)
+		 (kill-buffer buf)))
+	     (buffer-list)))))
+
+
 ;; * The end
 (provide 'scimax-utils)
 
