@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: verse-block
-# key: <v
+# key: <V
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 #+BEGIN_VERSE
 ${1:`(if (region-active-p) (yas-selected-text) "replace. Tab to end.")`}

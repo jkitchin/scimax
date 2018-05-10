@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
-# name: latex-block
-# key: <l
+# name: html-block
+# key: <h
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 #+BEGIN_EXPORT latex
 ${1:`(if (region-active-p) (yas-selected-text) "replace. Tab to end.")`}

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: import numpy
+# key: np
+# --
+import numpy as np

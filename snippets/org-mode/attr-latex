@@ -1,5 +1,6 @@
 # -*- mode: snippet -*-
 # name: latex attribute
 # key: al
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 #+attr_latex: $0

@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: ipython
 # key: <ip
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 #+BEGIN_SRC ipython
 $0

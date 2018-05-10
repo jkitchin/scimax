@@ -1,5 +1,6 @@
 # -*- mode: snippet -*-
 # name: table with three columns
 # key: <t3
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 | $0 |  |  |

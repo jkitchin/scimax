@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: emacs-lisp
 # key: <el
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 #+BEGIN_SRC emacs-lisp
 $0

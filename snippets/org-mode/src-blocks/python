@@ -1,6 +1,8 @@
 # -*- mode: snippet -*-
-# name: org-mode options keyword
-# key: o
+# name: python
+# key: <p
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
-#+options: $0
+#+BEGIN_SRC python
+$0
+#+END_SRC

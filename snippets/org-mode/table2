@@ -1,5 +1,6 @@
 # -*- mode: snippet -*-
 # name: table with two columns
 # key: <t2
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 | $0 |  |

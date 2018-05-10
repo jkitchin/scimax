@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: name-caption-figure
 # key: ncf
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 #+name: ${1:name}
 #+caption: ${2:caption}
