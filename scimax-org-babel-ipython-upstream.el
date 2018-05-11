@@ -1009,8 +1009,7 @@ Note, this does not work if you run the block async."
       (-if-let (result (->> (ob-ipython--inspect code pos)
 			    (assoc 'text/plain)
 			    cdr))
-	  (setq inspect-buffer (ob-ipython--create-inspect-buffer result))
-	(message "No documentation was found. Have you run the cell?")))
+	  (setq inspect-buffer (ob-ipython--create-inspect-buffer result))))
 
     (when return
       (with-current-buffer "*ob-ipython-src-edit-inspect*"
@@ -1040,9 +1039,16 @@ Note, this does not work if you run the block async."
 		(buffer-substring (line-beginning-position) (line-end-position)))
 	       (t
 		nil))
-	    (kill-buffer "*ob-ipython-inspect*")))))))
+	    ;; get rid of this so we don't accidently show old results later
+	    (with-current-buffer "*ob-ipython-inspect*"
+	      (toggle-read-only)
+	      (erase-buffer))))))))
 
 
+;; The org-eldoc-documentation-function has hard-coded language options, with no
+;; obvious way to hook into it for this application. So, I am just advising the
+;; function to check for ipython blocks, and run the original function if not in
+;; a block.
 (defun scimax-ob-ipython-eldoc-advice (orig-func &rest args)
   "Advice function to get eldoc signatures in blocks in org-mode"
   (or (scimax-ob-ipython-signature) (apply orig-func args)))
