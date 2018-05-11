@@ -10,9 +10,11 @@ Scimax is an Emacs starterkit designed for people interested in reproducible res
 Note: The org-mode version of this manual is the preferred version for reading; it is the most functional version, and the most up to date. The info:scimax version is also useful though, and you might prefer that one.
 
 * Org-mode
+
 scimax provides a lot of customization of org-mode. Here are some of the more important ones.
 
 ** Markup shortcuts
+
 scimax defines some shortcuts for org-mode markup. You can select text and type the shortcut to wrap the region in the markup, or if on a word, type the shortcut to wrap the word, or type the short cut to create the markup with the cursor inside it to keep typing.
 
 Note these modifier keys:
@@ -257,6 +259,7 @@ scimax defines these new speed commands that are active when the cursor is on th
 The best way to see other speed commands is to put your cursor at the beginning of a headline and press ?. You can also run `org-speed-command-help' to see a full list of speed commands.
 
 ** Formatted copy and paste
+
 `ox-clip-formatted-copy' provides a way to copy org-mode with formatting so it can be pasted into other programs like MS Word and web browsers. It does this by copying the selected text to the HTML clipboard.
 
 * Writing tools
@@ -936,6 +939,7 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
   You can unstage a file with "u"
 
 *** Commit a file
+
   [[info:magit#Initiating%20a%20commit][info:magit#Initiating a commit]]
 
   [[info:magit#Editing%20commit%20messages][info:magit#Editing commit messages]]
@@ -943,11 +947,13 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
   In the magit-status window with some files that are staged, press "c", review the options, and probably press "c" again. Enter a commit message and type "C-c C-c" to commit it, or "C-c C-k" to cancel it.
 
 *** Diffs
+
   [[info:magit#Diffing][info:magit#Diffing]]
 
   From the magit-status window, press "d" then "d" to see what has changed.
 
 *** See the log
+
   [[info:magit#Logging][info:magit#Logging]]
 
   In the magit-status window press "l", review the options, and press "l" again.
@@ -955,6 +961,7 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
   If you want to see only the commits that affected a file, in the magit-status window press "l" then "=f", enter the filename, and then press "l" again.
 
 *** Push
+
   [[info:magit#Pushing][info:magit#Pushing]]
 
   In the magit-status window press "P" then "p".
@@ -962,10 +969,12 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
   Note that tags don't normally get pushed, but there are options ("T" to push a tag, and "t" to push all tags).
 
 *** Pull
+
   [[info:magit#Pulling][info:magit#Pulling]]
   In the magit-status window press "F" then "p".
 
 *** Run a command-line git command manually
+
   [[info:magit#Running%20Git%20manually][info:magit#Running Git manually]]
   In the magit-status window, type "!" to get the popup and choose what you want to do (e.g. where to run the command, etc... You do not need to type "git" in the command. Note you can also run a shell command from this interface.
 
@@ -974,6 +983,7 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
   Press "$"
 
 *** Keybindings
+
   [[info:magit#Keystroke%20Index][info:magit#Keystroke Index]]
 
 ** Intermediate concepts
@@ -991,15 +1001,18 @@ Magit is a front-end for git version control. There is a good manual here: [[inf
 In a magit-status window press "l =g" enter a pattern to grep for, and then press "l".
 
 *** Revert a commit
- [[info:magit#Reverting][info:magit#Reverting]]
+
+  [[info:magit#Reverting][info:magit#Reverting]]
 
   Got to the log, select the commit and type "V" then "V".
 *** Tag a version
+
   [[info:magit#Tagging][info:magit#Tagging]]
 
   press "t" in the magit-status window. You can then create a tag, annotate it, delete tags, and prune them.
 
 *** Checkout an existing branch.
+
   [[info:magit#The%20branch%20popup][info:magit#The branch popup]]
 
   In the magit-status window press "b" then "b" and choose the branch.
@@ -1007,11 +1020,13 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
   To checkout a new branch, in the magit-status window press "b" then "c". Choose the branch to start from then a name for the new branch.
 
 *** Merge two branches
+
   [[info:magit#Merging][info:magit#Merging]]
 
   In the magit-status window press "m", then "m" and select the branch to merge into the current one.
 
 *** TODO Resolving conflicts
+
  [[info:magit#Resolving%20conflicts][info:magit#Resolving conflicts]]
 
  You will probably also want to get familiar with [[info:ediff#Top][info:ediff#Top]].
@@ -1019,17 +1034,20 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
  On a file in a magit-status window, press "e" to enter the 3-window ediff view. The A window is the version at HEAD, the B window is what is in the index, and the C window is the current version.
 
 *** Fetching
+
  [[info:magit#Fetching][info:magit#Fetching]]
 
  In the magit-status window press "f".
 
 *** Add a remote
+
   [[info:magit#Remotes][info:magit#Remotes]]
 
   M-x magit-remote-add
   then enter an alias, and the url.
 
 *** Stashing
+
  [[info:magit#Stashing][info:magit#Stashing]]
 
  Press "z" in the magit-status window
@@ -1038,35 +1056,44 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
 
 ** Advanced concepts
 *** Resetting
+
  [[info:magit#Resetting][info:magit#Resetting]]
 
 *** Rebasing
+
   [[info:magit#Rebasing][info:magit#Rebasing]]
 
 **** Interactve rebasing
-  Open the log, select the oldest commit you want to rebase on then press "r" and then "i". Use M-p and M-n to move commits around. Press "s" on any commits you want to squash into the commit above it. C-c C-c will start the commands.
+
+ Open the log, select the oldest commit you want to rebase on then press "r" and then "i". Use M-p and M-n to move commits around. Press "s" on any commits you want to squash into the commit above it. C-c C-c will start the commands.
 
   From the magit-status on unpushed commits, you can also press "r" to get the rebase popup.
 
 **** Reword a commit message
+
   "r w" allows you to reword the commit message.
 
 *** Create patches
+
   [[info:magit#Creating%20and%20sending%20patches][info:magit#Creating and sending patches]]
 
   In magit-status window, press "W"
 
   "W p" creates patches
   "W r" makes a pull request. This just creates an email with information in it. It is not a GitHUB request, and it is only useful if there is a public, external copy of the repo.
+
 *** Cherry-picking
+
  [[info:magit#Cherry%20picking][info:magit#Cherry picking]]
 
  Press "A"
 
 *** Apply patches
+
   [[info:magit#Applying%20patches][info:magit#Applying patches]]
 
 *** Notes about commits
+
   [[info:magit#Notes][info:magit#Notes]]
 
   Press "T" to attach a note.
@@ -1079,6 +1106,7 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
 	  refs/notes/commits).
 
 *** Cherry-picking
+
  [[info:magit#Cherry%20picking][info:magit#Cherry picking]]
 
 * Project management - projectile
@@ -1098,11 +1126,13 @@ While in a project, you may want to try:
 
 * Programming
 ** Python
+
 - scimax is setup with `elpy-mode'.
 - `pydoc' provides nice, hyperlinked documentation for python.
 
 ** Asynchronous Python
-You can run python blocks asynchronously with M-x `org-babel-async-execute:python' with the cursor in a code block. This will allow you to keep typing, and show you a buffer with the progress of your code block. When it is done, the results will be inserted into the buffer where it belongs when the job is done. A temporary hash mark will go in the results.
+
+You can run python blocks asynchronously with M-x `org-babel-async-execute:python' with the cursor in a code block. This will allow you to keep typing, and show you a buffer with the progress of your code block. When it is done, the results will be inserted into the buffer where it belongs when the job is done. A temporary hash string will go in the results. That hash will be replaced when the calculation is done.
 
 You can make this the default behavior by adding this to your init file:
 
@@ -1119,7 +1149,7 @@ Pygments doesn't support ipython out of the box for some reason, which is a prob
 
 ob-ipython allows you to use Ipython magic commands in your src blocks. Here is a protypical Ipython src block with a line magic.
 
-#+BEGIN_SRC ipython :session
+#+BEGIN_SRC ipython 
 %time print("hello world")
 a = 6
 #+END_SRC
@@ -1131,29 +1161,16 @@ a = 6
 
 And a block with cell magic.
 
-#+BEGIN_SRC ipython :session
+#+BEGIN_SRC ipython 
 %%timeit
 7
 #+END_SRC
 
-- `ob-ipython-inspect' seems to be broken
-
-- `org-babel-switch-to-session' will open the IPython REPL.
-
-M-x `ob-ipython-interrupt-kernel'
-M-x `ob-ipython-kill-kernel'
-
 *** Scimax enhancements to ob-ipython
 
-We have made a few improvements to ob-ipython. Inline images are supported now similar to how they are supported in the Jupyter notebook. You specify the %matplotlib inline magic, and then plots will appear "inline" along with any output from your cell block. The plots are saved in a directory ipython-inline-images in filenames derived from and md5 hash of the image. You can have more than one image, and you also get the output from your block, similar to the way the Jupyter notebook behaves.
+We have made a few improvements to ob-ipython (see [[./scimax-ipython.org]] for much more detail). Inline images are supported now similar to how they are supported in the Jupyter notebook. You specify the %matplotlib inline magic, and then plots will appear "inline" along with any output from your cell block. The plots are saved in a directory ipython-inline-images in filenames derived from and md5 hash of the image. You can have more than one image, and you also get the output from your block, similar to the way the Jupyter notebook behaves.
 
-You need a header like this, i.e. you need to specify the results as output, and for them to be in a drawer so that org-mode can display the file links.
-
-#+BEGIN_EXAMPLE
-,#+BEGIN_SRC ipython :session :results output drawer
-#+END_EXAMPLE
-
-#+BEGIN_SRC ipython :session :results output drawer
+#+BEGIN_SRC ipython 
 print('Hello world!')
 
 %matplotlib inline
@@ -1244,8 +1261,7 @@ As with the Jupyter notebook, only the last returned cell is rendered.
 
 We finally have asynchronous execution of ipython blocks. This allows you to run a block, and keep working in Emacs. A temporary string is inserted into the results which is replaced when the code is done running. This command will make a clickable link to interrupt the kernel, or cancel the cell running. This will put names on every src block if they are not already named.
 
-#+NAME: bb21dabd-acb3-46bd-b8d8-ab174834fc37
-#+BEGIN_SRC ipython :session :results output drawer
+#+BEGIN_SRC ipython :async
 import time
 time.sleep(5)
 #print(8)
@@ -1263,16 +1279,25 @@ plt.ylabel('y')
 plt.title('Decaying spiral')
 #+END_SRC
 
-#+RESULTS: bb21dabd-acb3-46bd-b8d8-ab174834fc37
+#+RESULTS:
 :RESULTS:
+# Out[1]:
+# text/plain
+: Text(0.5,1,'Decaying spiral')
 
-[[file:ipython-inline-images/ob-ipython-f7122a4c0570fc3bf4ef580b97d5c1ae.png]]
+# text/plain
+: <Figure size 432x288 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/scratch-TIEvXF.png]]
 :END:
+
 
 You can run all the blocks asynchronously with `org-babel-execute-ipython-buffer-async'. You can clear the queue `org-babel-async-ipython-clear-queue'.
 
 
 *** Export org to ipynb
+
 Finally, we can export org-mode files to Jupyter notebooks with the ox-ipynb library. If you load the library, there is a new export option in the export menu with the letter "n". Or you can use  `ox-ipynb-export-to-ipynb-file-and-open'.
 
 
@@ -1294,8 +1319,9 @@ scimax provides the jupyter-hy src block to run hylang in src blocks. The requir
 
 
 ** Emacs-lisp
+
 - `lispy-mode' is just amazing.
-- `scimax-org-eldoc' will generate documentation on elisp libraries in an org-mode format.
+- `scimax-org-eldoc' will generate documentation on elisp libraries in an org-mode format. It is a library you have to require.
 
 * RSS feeds
 
@@ -1510,6 +1536,7 @@ Here are some additional actions we define for `counsel-find-file'.
 | l   | relative org link    |
 | L   | absolute org link    |
 | r   | rename file          |
+
 * scimax-hydras
 
 Scimax uses a central hydra to launch a key-driven menu of commonly used commands.
