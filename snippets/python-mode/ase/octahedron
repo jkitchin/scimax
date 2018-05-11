@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: make an Octahedron instance
+# key: ioct
+# --
+atoms = Octahedron('${1:sym}', length=${2:2}, cutoff=${3:0})

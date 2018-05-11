@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: from ase.cluster.icosahedron import Icosahedron
+# key: iico
+# --
+from ase.cluster.icosahedron import Icosahedron
