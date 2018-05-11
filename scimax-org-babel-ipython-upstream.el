@@ -1062,7 +1062,7 @@ Note, this does not work if you run the block async."
 
 
 (when ob-ipython-eldoc-integration
-  scimax-ob-ipython-turn-on-eldoc)
+  (scimax-ob-ipython-turn-on-eldoc))
 
 ;; * Completion
 ;; This makes this function work from an org-buffer.
