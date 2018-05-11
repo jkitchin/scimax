@@ -1024,7 +1024,7 @@ Note, this does not work if you run the block async."
 	     (org-in-src-block-p)
 	     (string= "ipython" (car (org-babel-get-src-block-info t))))
     (save-window-excursion
-      (ob-ipython-inspect(current-buffer) (point))
+      (ob-ipython-inspect (current-buffer) (point))
       (when (get-buffer "*ob-ipython-inspect*")
 	(with-current-buffer "*ob-ipython-inspect*"
 	  (goto-char (point-min))
@@ -1045,6 +1045,68 @@ Note, this does not work if you run the block async."
   (or (scimax-ob-ipython-signature) (apply orig-func args)))
 
 (advice-add 'org-eldoc-documentation-function :around #'scimax-ob-ipython-eldoc-advice)
+
+;; * Completion
+;; This makes this function work from an org-buffer.
+(defun ob-ipython-completions (buffer pos)
+  "Ask a kernel for completions on the thing at POS in BUFFER."
+  (interactive (list (current-buffer) (point)))
+  (let ((return (org-in-src-block-p))
+	completion-buffer)
+    (when return
+      (org-edit-src-code nil "*ob-ipython-src-edit-completion*"))
+    
+    (prog1
+	(let* ((code (with-current-buffer buffer
+                       (buffer-substring-no-properties (point-min) (point-max))))
+               (resp (ob-ipython--complete-request code pos))
+               (status (ob-ipython--extract-status resp)))
+	  (if (not (string= "ok" status))
+              '()
+	    (->> resp
+		 (-filter (lambda (msg)
+			    (-contains? '("complete_reply")
+					(cdr (assoc 'msg_type msg)))))
+		 (-mapcat (lambda (msg)
+			    (->> msg
+				 (assoc 'content)
+				 cdr))))))
+      (when return
+	(with-current-buffer "*ob-ipython-src-edit-completion*"
+	  (org-edit-src-exit))))))
+
+;; Adapted to enable in org-buffers. Note, to enable this, you have to add
+;; (add-to-list 'company-backends 'company-ob-ipython) to an init file
+(defun company-ob-ipython (command &optional arg &rest ignored)
+  (interactive (list 'interactive))
+  (cl-case command
+    (interactive (company-begin-backend 'company-ob-ipython))
+    (prefix (and (or ob-ipython-mode (org-in-src-block-p) (string= "ipython" (car (org-babel-get-src-block-info t))))
+                 (let ((res (ob-ipython-completions (current-buffer) (1- (point)))))
+                   (substring-no-properties (buffer-string)
+                                            (cdr (assoc 'cursor_start res))
+                                            (cdr (assoc 'cursor_end res))))))
+    (candidates (cons :async (lambda (cb)
+                               (let ((res (ob-ipython-completions
+                                           (current-buffer) (1- (point)))))
+                                 (funcall cb (cdr (assoc 'matches res)))))))
+    (sorted t)
+    (doc-buffer (ob-ipython--company-doc-buffer
+                 (cdr (assoc 'text/plain (ob-ipython--inspect arg (length arg))))))))
+
+
+(defun scimax-ob-ipython-complete-ivy ()
+  "Use ivy to complete the thing at point."
+  (interactive)
+  (let* ((result (ob-ipython-completions (current-buffer) (1- (point))))
+	 (candidates (cdr (assoc 'matches result))) 
+	 (beg (1+ (cdr (assoc 'cursor_start result))))
+	 (end (1+ (cdr (assoc 'cursor_end result)))))
+    (ivy-read "Complete: " candidates
+	      :action (lambda (candidate)
+			(with-ivy-window
+			  (setf (buffer-substring beg end) candidate)
+			  (forward-char (length candidate)))))))
 
 
 ;; * clickable text buttons
