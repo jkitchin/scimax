@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ase Atom
+# key: atm
+# --
+Atom('${1:symbol}', ${2:position})$0

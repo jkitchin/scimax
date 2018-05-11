@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: import matplotlib
-# key: mpl
-# --
-import matplotlib.pyplot as plt

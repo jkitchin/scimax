@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: ase view
+# key: vw
+# --
+from ase.visualize import view
+view(${1:atoms})$0

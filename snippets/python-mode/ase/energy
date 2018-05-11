@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ase Atoms get_potential_energy
+# key: age
+# --
+${1:atoms}.get_potential_energy()$0

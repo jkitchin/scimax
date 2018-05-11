@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ase import Atom, Atoms
+# key: asei
+# --
+from ase import Atom, Atoms
