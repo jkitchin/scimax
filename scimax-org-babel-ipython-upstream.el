@@ -1025,8 +1025,7 @@ Note, this does not work if you run the block async."
 (defun scimax-ob-ipython-signature ()
   "Try to return a function signature for the thing at point."
   (when (and (eql major-mode 'org-mode)
-	     (org-in-src-block-p)
-	     (string= "ipython" (car (org-babel-get-src-block-info t))))
+	     (string= (or (get-text-property (point) 'lang) "") "ipython"))
     (save-window-excursion
       (ob-ipython-inspect (current-buffer) (point))
       (when (get-buffer "*ob-ipython-inspect*")
@@ -1099,7 +1098,7 @@ Note, this does not work if you run the block async."
   (interactive (list 'interactive))
   (cl-case command
     (interactive (company-begin-backend 'company-ob-ipython))
-    (prefix (and (or ob-ipython-mode (org-in-src-block-p) (string= "ipython" (car (org-babel-get-src-block-info t))))
+    (prefix (and (or ob-ipython-mode (string= (or (get-text-property (point) 'lang) "") "ipython"))
                  (let ((res (ob-ipython-completions (current-buffer) (1- (point)))))
                    (substring-no-properties (buffer-string)
                                             (cdr (assoc 'cursor_start res))
