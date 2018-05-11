@@ -1016,46 +1016,35 @@ Note, this does not work if you run the block async."
       (goto-char (point-min)))))
 
 
+;; * eldoc integration
+
 (defun scimax-ob-ipython-signature ()
   "Try to return a function signature for the thing at point."
-  (interactive)
   (when (and (eql major-mode 'org-mode)
 	     (org-in-src-block-p)
 	     (string= "ipython" (car (org-babel-get-src-block-info t))))
     (save-window-excursion
       (ob-ipython-inspect(current-buffer) (point))
-      (if (get-buffer "*ob-ipython-inspect*")
-	  (with-current-buffer "*ob-ipython-inspect*"
-	    (goto-char (point-min))
-	    (cond
-	     ((re-search-forward "Signature:" nil t 1) 
-	      (message (buffer-substring (line-beginning-position) (line-end-position))))
-	     ((re-search-forward "Docstring:" nil t 1)
-	      (forward-line)
-	      (message (buffer-substring (line-beginning-position) (line-end-position))))
-	     (t
-	      (message "no signature found.")))
-	    (kill-buffer "*ob-ipython-inspect*"))
-	(message "no signature found. Maybe you should run the cell first.")))))
+      (when (get-buffer "*ob-ipython-inspect*")
+	(with-current-buffer "*ob-ipython-inspect*"
+	  (goto-char (point-min))
+	  (prog1
+	      (cond
+	       ((re-search-forward "Signature:" nil t 1) 
+		(buffer-substring (line-beginning-position) (line-end-position)))
+	       ((re-search-forward "Docstring:" nil t 1)
+		(forward-line)
+		(buffer-substring (line-beginning-position) (line-end-position)))
+	       (t
+		nil))
+	    (kill-buffer "*ob-ipython-inspect*")))))))
 
 
-(defvar scimax-ob-ipython-signature-timer nil
-  "Variable to store the timer in.")
+(defun scimax-ob-ipython-eldoc-advice (orig-func &rest args)
+  "Advice function to get eldoc signatures in blocks in org-mode"
+  (or (scimax-ob-ipython-signature) (apply orig-func args)))
 
-
-(defun scimax-ob-ipython-show-signatures ()
-  "Turn on signature message timer."
-  (interactive)
-  (or scimax-ob-ipython-signature-timer
-      (setq scimax-ob-ipython-signature-timer
-	    (run-with-idle-timer 0.5 t 'scimax-ob-ipython-signature))))
-
-
-(defun scimax-ob-ipython-cancel-signatures ()
-  "Turn off signature message timer."
-  (interactive)
-  (cancel-timer scimax-ob-ipython-signature-timer)
-  (setq scimax-ob-ipython-signature-timer nil))
+(advice-add 'org-eldoc-documentation-function :around #'scimax-ob-ipython-eldoc-advice)
 
 
 ;; * clickable text buttons
