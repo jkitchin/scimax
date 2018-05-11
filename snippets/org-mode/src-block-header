@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# name: src-block-header
-# key: sh
-# expand-env: ((headers (org-babel-headers)))
-# --
-:${1:$$(yas-choose-value headers)} $0
-
-
