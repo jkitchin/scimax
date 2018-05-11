@@ -64,10 +64,9 @@ Adapated from helm-c-yasnippet."
 			("n"
 			 (lambda (candidate)
 			   (yas-new-snippet))
-			 "new template")
+			 "new template")))))
 
-			))))
-
+(global-set-key (kbd "H-,") 'scimax-ivy-yas)
 
 (provide 'scimax-yas)
 
