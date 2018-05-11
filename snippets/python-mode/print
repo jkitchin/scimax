@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: print
+# key: pr
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+print(${1:`(if (region-active-p) (yas-selected-text) "replace. Tab to end.")`})$0

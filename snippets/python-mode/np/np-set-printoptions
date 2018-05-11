@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: np.set_printoptions
+# key: npo
+# --
+np.set_printoptions(precision=3, suppress=True)
