@@ -14,6 +14,10 @@
 
 ;; * Customizations
 
+(defcustom ob-ipython-eldoc-integration nil
+  "If non-nil use eldoc to show signatures."
+  :group 'ob-ipython)
+
 (defcustom ob-ipython-buffer-unique-kernel t
   "If non-nil use a unique kernel for each buffer."
   :group 'ob-ipython)
@@ -1044,7 +1048,21 @@ Note, this does not work if you run the block async."
   "Advice function to get eldoc signatures in blocks in org-mode"
   (or (scimax-ob-ipython-signature) (apply orig-func args)))
 
-(advice-add 'org-eldoc-documentation-function :around #'scimax-ob-ipython-eldoc-advice)
+
+(defun scimax-ob-ipython-turn-on-eldoc ()
+  "Turn on eldoc signatures."
+  (interactive)
+  (advice-add 'org-eldoc-documentation-function :around #'scimax-ob-ipython-eldoc-advice))
+
+
+(defun scimax-ob-ipython-turn-off-eldoc ()
+  "Turn off eldoc signatures."
+  (interactive)
+  (advice-remove 'org-eldoc-documentation-function  #'scimax-ob-ipython-eldoc-advice))
+
+
+(when ob-ipython-eldoc-integration
+  scimax-ob-ipython-turn-on-eldoc)
 
 ;; * Completion
 ;; This makes this function work from an org-buffer.
