@@ -14,6 +14,8 @@
 
 ;; * Customizations
 
+;;; Code:
+
 (defcustom ob-ipython-eldoc-integration nil
   "If non-nil use eldoc to show signatures."
   :group 'ob-ipython)
@@ -110,7 +112,7 @@ string to be formatted."
     ("H-s" . #'scimax-obi/body)
     ("<mouse-3>" . #'scimax-ob-ipython-popup-command))
   "An alist of key bindings and commands.
-These are activated in `ob-ipython-key-bindings'."
+These are activated in function `ob-ipython-key-bindings'."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-menu-items
@@ -258,8 +260,7 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
 (defun ob-ipython-convert-block-to (type)
   "Convert current block to TYPE.
 TYPE is usually one of ipython, markdown, org
-Note: you will lose header arguments from this.
-"
+Note: you will lose header arguments from this."
   (interactive (list (completing-read "Type: " '(ipython markdown org))))
   (let* ((src-info (org-babel-get-src-block-info 'light))
 	 (header-start (sixth src-info))
@@ -394,6 +395,7 @@ previous cell."
      (t
       (previous-line)))))
 
+
 (defun ob-ipython-edit-down ()
   "Move to next line, unless at the bottom.
 In that case first move to beginning of line, and then move to
@@ -415,6 +417,7 @@ previous cell."
       (end-of-line))
      (t
       (next-line)))))
+
 
 ;; https://www.cheatography.com/weidadeyue/cheat-sheets/jupyter-notebook/
 (defhydra scimax-jupyter-command-mode (:color blue :hint nil)
@@ -494,7 +497,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   ;; ("h" "Show keyboard help")
   ("ii" ob-ipython-interrupt-kernel "Interrupt kernel")
   ;; 00 is not a good hydra command
-  ("0" (when (y-or-n-p "Restart kernel?")
+  ("0" (when (y-or-n-p "Restart kernel? ")
 	 (call-interactively 'ob-ipython-kill-kernel)) "restart kernel")
   ;; Emacs has the opposite scroll convention as a browser
   ("<SPC>" scroll-up-command "scroll down" :color red)
@@ -505,15 +508,19 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 
 (define-prefix-command 'scimax-ob-ipython-mode-map)
 
+
 (easy-menu-define ob-ipython-menu scimax-ob-ipython-mode-map "ob-ipython menu"
   ob-ipython-menu-items)
+
 
 (defun ob-ipython-org-menu ()
   "Add the ob-ipython menu to the Org menu."
   (easy-menu-change '("Org") "ob-ipython" ob-ipython-menu-items "Show/Hide")
   (easy-menu-change '("Org") "--" nil "Show/Hide"))
 
+
 (add-hook 'org-mode-hook 'ob-ipython-org-menu)
+
 
 (defun scimax-ob-ipython-popup-command (event)
   "Popu a menu of actions for src blocks."
@@ -525,7 +532,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 ;; * Execution functions
 
 (defun scimax-ob-ipython-default-session ()
-  "Returns the default name of the session for a src block."
+  "Return the default name of the session for a src block."
   (concat
    ;; this is the block language
    (car (org-babel-get-src-block-info t))
@@ -534,8 +541,9 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
        (md5 (expand-file-name bf))
      "scratch")))
 
+
 (defun scimax-ob-ipython-restart-kernel-execute-block ()
-  "Restart kernel and execute block"
+  "Restart kernel and execute block."
   (interactive)
   (ob-ipython-kill-kernel
    (cdr (assoc (scimax-ob-ipython-default-session )
@@ -544,7 +552,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 
 
 (defun scimax-ob-ipython-restart-kernel-execute-buffer ()
-  "Restart kernel and execute buffer"
+  "Restart kernel and execute buffer."
   (interactive)
   (ob-ipython-kill-kernel
    (cdr (assoc (scimax-ob-ipython-default-session)
@@ -562,7 +570,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 (defun scimax-ob-ipython-kill-kernel ()
   "Kill the active kernel."
   (interactive)
-  (when (y-or-n-p "Kill kernel?")
+  (when (y-or-n-p "Kill kernel? ")
     (ob-ipython-kill-kernel
      (cdr (assoc (scimax-ob-ipython-default-session)
 		 (ob-ipython--get-kernel-processes))))
@@ -629,8 +637,8 @@ variables, etc."
 ;; * Modifications of ob-ipython
 
 (defun ob-ipython-kill-kernel (proc)
-  "Kill a kernel process. If you then re-evaluate a source block
-a new kernel will be started."
+  "Kill a kernel process.
+If you then re-evaluate a source block a new kernel will be started."
   (interactive (ob-ipython--choose-kernel))
   (when proc
     (let* ((proc-name (process-name proc))
@@ -729,6 +737,7 @@ This function is called by `org-babel-execute-src-block'."
 ;; It was necessary to redefine these to get selective outputs via :display
 
 (defun ob-ipython--execute-async (body params)
+  "Execute asynchronously."
   (let* ((file (cdr (assoc :ipyfile params)))
          (session (cdr (assoc :session params)))
          (result-type (cdr (assoc :result-type params)))
@@ -949,7 +958,7 @@ way, but I have left it in for compatibility."
     (cond ((string= "ok" status) `((:result . ,(ob-ipython--extract-result service-response))
                                    (:output . ,(ob-ipython--extract-output service-response))
                                    (:exec-count . ,(ob-ipython--extract-execution-count service-response))))
-          ((string= "abort" status) (error "Kernel execution aborted."))
+          ((string= "abort" status) (error "Kernel execution aborted"))
           ((string= "error" status)
 	   (if ob-ipython-exception-results
 	       (let ((error-content
@@ -1032,7 +1041,7 @@ Note, this does not work if you run the block async."
 	  (goto-char (point-min))
 	  (prog1
 	      (cond
-	       ((re-search-forward "Signature:" nil t 1) 
+	       ((re-search-forward "Signature:" nil t 1)
 		(buffer-substring (line-beginning-position) (line-end-position)))
 	       ((re-search-forward "Docstring:" nil t 1)
 		(forward-line)
@@ -1050,7 +1059,7 @@ Note, this does not work if you run the block async."
 ;; function to check for ipython blocks, and run the original function if not in
 ;; a block.
 (defun scimax-ob-ipython-eldoc-advice (orig-func &rest args)
-  "Advice function to get eldoc signatures in blocks in org-mode"
+  "Advice function to get eldoc signatures in blocks in org-mode."
   (or (scimax-ob-ipython-signature) (apply orig-func args)))
 
 
@@ -1078,7 +1087,7 @@ Note, this does not work if you run the block async."
 	completion-buffer)
     (when return
       (org-edit-src-code nil "*ob-ipython-src-edit-completion*"))
-    
+
     (prog1
 	(let* ((code (with-current-buffer buffer
                        (buffer-substring-no-properties (point-min) (point-max))))
@@ -1122,7 +1131,7 @@ Note, this does not work if you run the block async."
   "Use ivy to complete the thing at point."
   (interactive)
   (let* ((result (ob-ipython-completions (current-buffer) (1- (point))))
-	 (candidates (cdr (assoc 'matches result))) 
+	 (candidates (cdr (assoc 'matches result)))
 	 (beg (1+ (cdr (assoc 'cursor_start result))))
 	 (end (1+ (cdr (assoc 'cursor_end result)))))
     (ivy-read "Complete: " candidates
