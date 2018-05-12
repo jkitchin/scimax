@@ -100,6 +100,7 @@ string to be formatted."
     ("H-m" . #'scimax-merge-ipython-blocks)
     ("H-h" . #'scimax-ob-edit-header)
     ("H-M-l" . #'scimax-ob-toggle-line-numbers)
+    ("s-." . #'scimax-ob-ipython-complete-ivy)
 
     ;; the jupyter hydras
     ("H-e" . #'scimax-jupyter-edit-mode/body)
@@ -217,7 +218,7 @@ You need this to get syntax highlighting."
     _<return>_: current           _i_: previous  _w_: move up     _/_: inspect
   _S-<return>_: current to next   _k_: next      _s_: move down   _l_: clear result
 _S-M-<return>_: to point          _q_: visible   _x_: kill        _L_: clear all
-  _s-<return>_: Restart/block     _Q_: any       _n_: copy
+  _s-<return>_: Restart/block     _Q_: any       _n_: copy        _._: complete
 _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   _H-<return>_: Restart/buffer    ^ ^            _m_: merge
            _K_: kill kernel       ^ ^            _-_: split
@@ -251,7 +252,8 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   ("L" scimax-ob-clear-all-results)
   ("h" scimax-ob-edit-header)
 
-  ("/" ob-ipython-inspect))
+  ("/" ob-ipython-inspect)
+  ("." scimax-ob-ipython-complete-ivy))
 
 ;; * command/edit-mode hydra
 
