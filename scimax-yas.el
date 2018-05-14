@@ -24,7 +24,8 @@
 
 (defun scimax-ivy-yas ()
   "Interactively insert a snippet.
-Adapated from helm-c-yasnippet."
+Adapted from helm-c-yasnippet.
+`ivy-yasnippet' might be a better function."
   (interactive)
   (let ((candidates (mapcar
 		     (lambda (template)
@@ -66,7 +67,7 @@ Adapated from helm-c-yasnippet."
 			   (yas-new-snippet))
 			 "new template")))))
 
-(global-set-key (kbd "H-,") 'scimax-ivy-yas)
+
 
 (provide 'scimax-yas)
 
