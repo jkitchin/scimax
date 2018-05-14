@@ -228,6 +228,9 @@ the variable `user-full-name' in a field 20 characters wide.
 
   will render as: 2.24
 
+This function is inspired by the f-strings in Python 3.6, which I
+enjoy using a lot.
+
 "
   (let* ((matches (s-match-strings-all"${\\(?3:\\(?1:[^} ]+\\) *\\(?2:[^}]*\\)\\)}" fmt))
 	 (agetter (loop for (m0 m1 m2 m3) in matches
