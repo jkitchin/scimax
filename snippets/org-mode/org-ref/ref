@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: org-ref ref link with completion
+# key: ref
+# --
+ref:${1:$$(completing-read "label: " (org-ref-get-labels))}

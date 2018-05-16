@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: org-ref cite link
+# key: cite
+# --
+cite:${1:$$(completing-read
+       "bibtex key: "
+       (let ((bibtex-files (org-ref-find-bibliography)))
+	 (bibtex-global-key-alist)))}
