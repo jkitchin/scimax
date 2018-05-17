@@ -2,4 +2,4 @@
 # name: latex-class-options
 # key: lco
 # --
-#+latex_class_options: $0
+#+latex_class_options: ${1:[12pt]}$0

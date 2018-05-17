@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
-# name: begin
-# key: beg
+# name: begin a block with completion
+# key: <b
 # --
 #+BEGIN_${1:$$(let ((type (yas-choose-value '("SRC" "EXAMPLE" "QUOTE" "VERSE" "CENTER" "LaTeX" "HTML" "ASCII"))))
                (if type (concat type (if (equal type "SRC")
