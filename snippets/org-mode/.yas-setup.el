@@ -36,7 +36,8 @@ $0
 			       (when (file-directory-p path)
 				 (f-entries path (lambda (f) (f-ext? f "bst")) t)))
 			     (split-string
-			      (shell-command-to-string "kpsewhich -show-path bst")
+			      ;; https://tex.stackexchange.com/questions/431948/get-a-list-of-installed-bibliography-styles-with-kpsewhich?noredirect=1#comment1082436_431948
+			      (shell-command-to-string "kpsewhich -expand-path '$BSTINPUTS'")
 			      ":"))))))
   "List of installed bibliography styles.")
 
@@ -45,7 +46,9 @@ $0
   "List of known installed packages.")
 
 ;; We start this async so it probably gets done by the time we need it. This is
-;; slow, so we don't want to do it on each time.
+;; slow, so we don't want to do it on each time. This approach seems more
+;; reliable than looking for sty files using kpsewhich like I did for the
+;; bibliography styles
 (unless (and scimax-installed-latex-packages
 	     (executable-find "tlmgr"))
   (require 'async)
