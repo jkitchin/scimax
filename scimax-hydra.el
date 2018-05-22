@@ -987,10 +987,259 @@ _k_: down      _a_: combine
     ('emacs-lisp-mode (scimax-open-hydra scimax-lisp/body))
     ('elfeed-search-mode (scimax-open-hydra scimax-elfeed/body))
     ('mu4e-headers-mode (scimax-open-hydra scimax-mu4e/body))
-    ('org-mode (message "org"))
-    (_ (message "no mode-specific hydra found"))))
+    ('bibtex-mode (scimax-open-hydra org-ref-bibtex-hydra/body))
+    ('dired-mode (scimax-open-hydra scimax-dired/body))
+    ('python-mode (scimax-open-hydra scimax-python-mode/body))
+    ('org-mode (let ((el (org-element-context)))
+		 (cond
+		  ((eql (car el) 'src-block)
+		   (scimax-open-hydra scimax-src-block-hydra/body))
+
+		  ((memq (car el) '(table table-row table-cell))
+		   (scimax-open-hydra scimax-org-table/body))
+
+		  ((eql (car el) 'headline)
+		   (scimax-open-hydra scimax-org-headline/body))
+
+		  ((memq (car el) '(latex-fragment latex-environment))
+		   (org-toggle-latex-fragment))
+
+		  ;; match most specific first then more general
+		  ((and (eql (car el) 'link)
+			(string= "cite" (or (org-element-property :type el) "")))
+		   (scimax-open-hydra scimax-org-ref-cite-hydra/body))
+
+		  ((eql (car el) 'link)
+		   (scimax-open-hydra scimax-link-hydra/body))
+
+		  ((org-in-item-p)
+		   (scimax-open-hydra scimax-item-hydra/body))
+
+		  )))
+    (_ (message "no hydra found for this context"))))
 
 (global-set-key (kbd "<H-f12>") 'scimax-dispatch-mode-hydra)
+
+;; ** major mode hydras
+
+(defhydra scimax-dired (:color blue :hint nil)
+  "
+Mark              Operate         Misc
+----              -------         ----
+_fd_: flag del    _C_: copy       _+_: mkdir
+_f#_: autosave    _R_: rename     _o_: open other
+_f~_: backups     _D_: delete
+_f&_: garbage     _F_: open marks
+_fe_: extension
+----
+_m_: mark         _T_: touch
+_/_: directories  _M_: chmod
+_@_: symlinks     _G_: chgrp
+_O_: omitted      _O_: chown
+----
+_U_: unmark all   _A_: find regx
+_t_: toggle marks _Q_: find/rep
+"
+  ;; marking
+  ("t" dired-toggle-marks "Toggle marks")
+  ("m" dired-mark "mark")
+  ("u" dired-unmark "unmark")
+  ("fd" dired-flag-file-deletion "Flag for deletion")
+  ("f#" dired-flag-auto-save-files "Flag autosave")
+  ("f~" dired-flag-backup-files "Flag backup files")
+  ("f&" dired-flag-garbage-files "Flag garbage files")
+  ("fe" dired-flag-extension "Flag extension")
+  ("/" dired-mark-directories "Mark directories")
+  ("@" dired-mark-symlinks "Mark symlinks")
+  ("." dired-mark-extension  "Mark extension")
+  ("O" dired-mark-omitted "Mark omitted")
+  ("U" dired-unmark-all-marks "Unmark all marks")
+
+  ("C" dired-do-copy)
+  ("R" dired-do-rename)
+  ("D" dired-do-delete)
+  ("F" dired-do-find-marked-files)
+  ("!" dired-do-shell-command)
+  ("&" dired-do-async-shell-command)
+
+  ("T" dired-do-touch)
+  ("M" dired-do-chmod)
+  ("G" dired-do-chgrp)
+  ("O" dired-do-chown)
+
+  ("A" dired-do-find-regexp)
+  ("Q" dired-do-find-regexp-and-replace)
+
+  ("+" dired-create-directory)
+  ("o" dired-find-file-other-window))
+
+
+(defhydra scimax-item-hydra (:color red)
+  "
+org item helper
+"
+  ("M-<right>" org-indent-item)
+  ("M-<left>" org-outdent-item)
+  ("M-<up>" org-move-item-up)
+  ("M-<down>" org-move-item-down))
+
+
+(defhydra scimax-src-block-hydra (:color pink :hint nil)
+  "
+org babel src block helper functions
+_n_ next       _i_ info           _I_ insert header
+_p_ prev       _c_ check
+_h_ goto head  _E_ expand
+^ ^            _s_ split
+_q_ quit       _r_ remove result  _e_ examplify region
+"
+  ("i" org-babel-view-src-block-info)
+  ("I" org-babel-insert-header-arg)
+  ("c" org-babel-check-src-block :color blue)
+  ("s" org-babel-demarcate-block :color blue)
+  ("n" org-babel-next-src-block)
+  ("p" org-babel-previous-src-block)
+  ("E" org-babel-expand-src-block :color blue)
+  ("e" org-babel-examplify-region :color blue)
+  ("r" org-babel-remove-result :color blue)
+  ("h" org-babel-goto-src-block-head)
+  ("q" nil :color blue))
+
+
+;; adapted from https://gist.github.com/dfeich/1df4e174d45f05fb5798ca514d28c68a
+(defhydra scimax-link-hydra (:color red)
+  "
+org link helper
+_i_ backward slurp <     _o_ forward slurp >   _n_ next link
+_j_ backward barf  <     _k_ forward barf  >   _p_ previous link
+_t_: toggle link display
+"
+  ("i" org-link-edit-backward-slurp)
+  ("o" org-link-edit-forward-slurp)
+  ("j" org-link-edit-backward-barf)
+  ("k" org-link-edit-forward-barf)
+  ("t" org-toggle-link-display)
+  ("n" org-next-link)
+  ("p" org-previous-link))
+
+
+(defhydra scimax-org-ref-cite-hydra (:color red :hint nil)
+  "
+org-ref
+_n_ext key _<left>_ swap left
+_p_revious key _<right>_ swap right
+_s_ort keys
+"
+  ("s" org-ref-sort-citation-link)
+  ("n" org-ref-next-key)
+  ("p" org-ref-previous-key)
+  ("<right>" (org-ref-swap-citation-link 1))
+  ("<left>" (org-ref-swap-citation-link -1)))
+
+
+(defhydra scimax-org-table (:color red :hint nil)
+  "
+org table
+_ic_: insert column    _M-<left>_: move col left    _d_: edit field
+_dc_: delete colum     _M-<right>_: move col right  _e_: eval formula
+_ir_: insert row       _M-<up>_: move row up        _E_: export table
+_ic_: delete row       _M-<down>_: move row down    _r_: recalculate
+_il_: insert line      _w_: wrap region             _I_: org-table-iterate
+_-_: insert line/move  ^ ^                          _D_: formula debugger
+_s_ort  _t_ranspose _m_ark
+_<_: beginning of table _>_: end of table
+"
+  ("ic" org-table-insert-column)
+  ("ir" org-table-insert-row)
+  ("dc" org-table-delete-column)
+  ("dr" org-table-kill-row)
+  ("i-" org-table-insert-hline)
+  ("-" org-table-hline-and-move)
+
+  ("d" org-table-edit-field)
+  ("e" org-table-eval-formula)
+  ("E" org-table-export :color blue)
+  ("r" org-table-recalculate)
+  ("i" org-table-iterate)
+  ("B" org-table-iterate-buffer-tables)
+  ("w" org-table-wrap-region)
+  ("D" org-table-toggle-formula-debugger)
+
+  ("M-<up>" org-table-move-row-up)
+  ("M-<down>" org-table-move-row-down)
+  ("M-<left>" org-table-move-column-left)
+  ("M-<right>" org-table-move-column-right)
+  ("t" org-table-transpose-table-at-point)
+
+  ("m" (progn (goto-char (org-table-begin))
+	      (org-mark-element)))
+  ("s" org-table-sort-lines)
+  ("<" (goto-char (org-table-begin)))
+  (">" (progn (goto-char (org-table-begin))
+	      (goto-char (org-element-property :end (org-element-context))))))
+
+
+(defhydra scimax-org-headline (:color red :hint nil)
+  "
+org headline
+Navigation          Organize         insert
+_n_ext heading      _mu_: move up    _ip_: set property    _s_: narrow subtree _I_: clock in   _,_: priority
+_p_revious heading  _md_: move down  _dp_: delete property _w_: widen          _O_: clock out  _0_: rm priority
+_f_: forward level  _mr_: demote     _it_: tag             _r_: refile         _e_: set effort _1_: A
+_b_: back level     _ml_: promote    _t_: todo             _@_: mark           _E_: inc effort _2_: B
+_j_ump to heading   _ih_: insert hl  _id_: deadline        _=_: columns        ^ ^             _3_: C
+_F_: next block     _a_: archive     _is_: schedule
+_B_: previous block _S_: sort _v_: agenda _/_: sparse tree
+"
+
+  ;; Navigation
+  ("n" org-next-visible-heading)
+  ("p" org-previous-visible-heading)
+  ("f" org-forward-heading-same-level)
+  ("b" org-backward-heading-same-level)
+  ("j" org-goto)
+  ("F" org-next-block)
+  ("B" org-previous-block)
+  ("a" org-archive-subtree-default-with-confirmation)
+  ("ih" org-insert-heading)
+  ("S" org-sort)
+  ("@" org-mark-subtree)
+
+  ;; organization
+  ("mu" org-move-subtree-up)
+  ("md" org-move-subtree-down)
+  ("mr" org-demote-subtree)
+  ("ml" org-promote-subtree)
+
+  ("ip" org-set-property)
+  ("dp" org-delete-property)
+  ("id" org-deadline)
+  ("is" org-schedule)
+  ("t" org-todo)
+  ("it" org-set-tags)
+  ("<tab>" org-cycle)
+
+  ("r" org-refile)
+  ("#" org-toggle-comment)
+  ("s" org-narrow-to-subtree)
+  ("w" widen)
+  ("=" org-columns)
+
+
+  ("I" org-clock-in)
+  ("O" org-clock-out)
+  ("e" org-set-effort)
+  ("E" org-inc-effort)
+  ("," org-priority)
+  ("0" (org-priority 32))
+  ("1" (org-priority 65))
+  ("2" (org-priority 66))
+  ("3" (org-priority 67))
+
+  ;; misc
+  ("v" org-agenda)
+  ("/" org-sparse-tree))
+
 
 (defhydra scimax-mu4e (:color red :hint nil)
   "
@@ -1003,6 +1252,42 @@ _u_: Update"
 elfeed
 _u_: Update"
   ("u" elfeed-update))
+
+
+(defhydra scimax-python-mode (:color red :hint nil)
+  "
+Python helper
+_a_: begin def/class  _w_: move up   _x_: syntax    _Sb_: send buffer
+_e_: end def/class    _s_: move down _n_: next err  _Ss_: switch shell
+_<_: dedent line      ^ ^            _p_: prev err
+_>_: indent line
+_j_: jump to
+_._: goto definition
+
+_t_: run tests _m_: magit  _8_: autopep8
+"
+  ("a" beginning-of-defun)
+  ("e" end-of-defun)
+  ("<" python-indent-shift-left)
+  (">" python-indent-shift-right)
+  ("j" counsel-imenu)
+
+  ("t" elpy-test)
+  ("." elpy-goto-definition)
+  ("x" elpy-check)
+  ("n" elpy-flymake-next-error)
+  ("p" elpy-flymake-previous-error)
+
+  ("m" magit-status)
+
+  ("w" elpy-nav-move-line-or-region-up)
+  ("s" elpy-nav-move-line-or-region-down)
+
+  ("Sb" elpy-shell-send-region-or-buffer)
+  ("Ss" elpy-shell-switch-to-shell)
+
+  ("8" autopep8))
+
 
 ;;* the end
 
