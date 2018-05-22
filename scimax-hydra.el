@@ -182,6 +182,7 @@ This is a macro so I don't have to quote the hydra name."
 						     (elfeed-search--count-unread)))))
 		       "RSS(?)"))))
 
+
 (defhydra scimax-applications (:hint nil
 				     :pre (scimax-app-hints)
 				     :color blue
@@ -273,7 +274,6 @@ Switch                  ^Kill                Split        Misc
 
 ;;** drag
 
-
 (defhydra scimax-drag (:color red :inherit (scimax-base/heads)  :hint nil)
   ("<left>" drag-stuff-left :color red)
   ("<right>" drag-stuff-right :color red)
@@ -305,6 +305,7 @@ _V_: paste ring
 
 
 ;;** files
+
 (defhydra scimax-files (:color blue :inherit (scimax-base/heads) :columns 3 :hint nil)
   "
 files
@@ -980,6 +981,26 @@ _k_: down      _a_: combine
 
 
 ;;* Mode specific hydras
+(defun sentence-beginning-p ()
+  "Determine if point is at the beginning of a sentence.
+The idea is to move forward a sentence, then back.  If the point
+doesn't move, it means you were at the beginning of a sentence."
+  (let ((cp (point)))
+    (save-excursion
+      (forward-sentence)
+      (backward-sentence)
+      (= cp (point)))))
+
+(defun paragraph-beginning-p ()
+  "Determine if point is at the beginning of a paragraph.
+The idea is to move forward a paragraph, then back.  If the point
+doesn't move, it means you were at the beginning of a paragraph."
+  (let ((cp (point)))
+    (save-excursion
+      (forward-paragraph)
+      (backward-paragraph)
+      (= cp (point)))))
+
 
 (defun scimax-dispatch-mode-hydra ()
   (interactive)
@@ -1015,14 +1036,46 @@ _k_: down      _a_: combine
 		  ((org-in-item-p)
 		   (scimax-open-hydra scimax-item-hydra/body))
 
-		  )))
+		  ((and (eql (car el) 'paragraph)
+			(paragraph-beginning-p))
+		   (scimax-open-hydra scimax-nav-paragraph/body))
+
+		  ((and (eql (car el) 'paragraph)
+			(sentence-beginning-p))
+		   (scimax-open-hydra scimax-nav-sentence/body))
+
+		  ((and (eql (car el) 'paragraph)
+			(thing-at-point 'word))
+		   (scimax-open-hydra scimax-words/body))
+
+		  (t
+		   (scimax-open-hydra scimax-org/body)))))
     (_ (message "no hydra found for this context"))))
 
 (global-set-key (kbd "<H-f12>") 'scimax-dispatch-mode-hydra)
 
 ;; ** major mode hydras
+(defhydra scimax-words (:color blue :hint nil :inherit (scimax-base/heads))
+  "
+word helper
+_b_old         _c_apitalize  _n_: scimax-nav-word
+_i_talic       _u_pcase
+_v_erbatim     _d_owncase
+___: underline
+_+_: strike
+"
+  ("c" capitalize-word)
+  ("u" upcase-word)
+  ("d" downcase-word)
+  ("t" transpose-words)
+  ("b" org-bold-region-or-point)
+  ("i" org-italics-region-or-point)
+  ("v" org-verbatim-region-or-point)
+  ("+" org-strikethrough-region-or-point)
+  ("_" org-underline-region-or-point)
+  ("n" scimax-nav-word/body))
 
-(defhydra scimax-dired (:color blue :hint nil)
+(defhydra scimax-dired (:color blue :hint nil :inherit (scimax-base/heads))
   "
 Mark              Operate         Misc
 ----              -------         ----
@@ -1074,7 +1127,7 @@ _t_: toggle marks _Q_: find/rep
   ("o" dired-find-file-other-window))
 
 
-(defhydra scimax-item-hydra (:color red)
+(defhydra scimax-item-hydra (:color red :inherit (scimax-base/heads))
   "
 org item helper
 "
@@ -1084,10 +1137,10 @@ org item helper
   ("M-<down>" org-move-item-down))
 
 
-(defhydra scimax-src-block-hydra (:color pink :hint nil)
+(defhydra scimax-src-block-hydra (:color pink :hint nil :inherit (scimax-base/heads))
   "
 org babel src block helper functions
-_n_ next       _i_ info           _I_ insert header
+_n_ next       _i_ info           _I_ insert header _t_angle
 _p_ prev       _c_ check
 _h_ goto head  _E_ expand
 ^ ^            _s_ split
@@ -1103,11 +1156,12 @@ _q_ quit       _r_ remove result  _e_ examplify region
   ("e" org-babel-examplify-region :color blue)
   ("r" org-babel-remove-result :color blue)
   ("h" org-babel-goto-src-block-head)
+  ("t" org-babel-tangle)
   ("q" nil :color blue))
 
 
 ;; adapted from https://gist.github.com/dfeich/1df4e174d45f05fb5798ca514d28c68a
-(defhydra scimax-link-hydra (:color red)
+(defhydra scimax-link-hydra (:color red :inherit (scimax-base/heads))
   "
 org link helper
 _i_ backward slurp <     _o_ forward slurp >   _n_ next link
@@ -1123,7 +1177,7 @@ _t_: toggle link display
   ("p" org-previous-link))
 
 
-(defhydra scimax-org-ref-cite-hydra (:color red :hint nil)
+(defhydra scimax-org-ref-cite-hydra (:color red :hint nil :inherit (scimax-base/heads))
   "
 org-ref
 _n_ext key _<left>_ swap left
@@ -1137,7 +1191,7 @@ _s_ort keys
   ("<left>" (org-ref-swap-citation-link -1)))
 
 
-(defhydra scimax-org-table (:color red :hint nil)
+(defhydra scimax-org-table (:color red :hint nil :inherit (scimax-base/heads))
   "
 org table
 _ic_: insert column    _M-<left>_: move col left    _d_: edit field
@@ -1179,7 +1233,7 @@ _<_: beginning of table _>_: end of table
 	      (goto-char (org-element-property :end (org-element-context))))))
 
 
-(defhydra scimax-org-headline (:color red :hint nil)
+(defhydra scimax-org-headline (:color red :hint nil :inherit (scimax-base/heads))
   "
 org headline
 Navigation          Organize         insert
@@ -1241,20 +1295,20 @@ _B_: previous block _S_: sort _v_: agenda _/_: sparse tree
   ("/" org-sparse-tree))
 
 
-(defhydra scimax-mu4e (:color red :hint nil)
+(defhydra scimax-mu4e (:color red :hint nil :inherit (scimax-base/heads))
   "
 mu4e
 _u_: Update"
   ("u" mu4e-update-mail-and-index))
 
-(defhydra scimax-elfeed (:color red :hint nil)
+(defhydra scimax-elfeed (:color red :hint nil :inherit (scimax-base/heads))
   "
 elfeed
 _u_: Update"
   ("u" elfeed-update))
 
 
-(defhydra scimax-python-mode (:color red :hint nil)
+(defhydra scimax-python-mode (:color red :hint nil :inherit (scimax-base/heads))
   "
 Python helper
 _a_: begin def/class  _w_: move up   _x_: syntax    _Sb_: send buffer
