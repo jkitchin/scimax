@@ -82,6 +82,45 @@
       (setq csl " "))
 
     (org-latex-export-to-latex async subtreep visible-only body-only options)
+    ;; Now we do some post-processing on the tex-file
+    ;; Tables first.
+    (let* ((table-regex "\\\\begin{table}.*
+    \\\\caption{\\(?3:\\(?1:.*\\)\\\\label{\\(?2:.*\\)}\\)}")
+	   (buf (find-file-noselect tex-file))
+	   (i 0)
+	   labels)
+      (with-current-buffer buf
+	(goto-char (point-min))
+	(while (re-search-forward table-regex nil t)
+	  (incf i)
+	  (push (cons (match-string 2) i) labels)
+	  (replace-match (format "Table %d. \\1" i) nil nil nil 3))
+    	;; Now replace the refs.
+    	(goto-char (point-min))
+    	(while (re-search-forward "\\\\ref{\\(?1:.*?\\)}" nil t)
+    	  (when (cdr (assoc (match-string 1) labels))
+    	    (replace-match (format "%d" (cdr (assoc (match-string 1) labels))))))
+	(save-buffer)))
+
+    ;; Now figures
+    (let* ((fig-regex "\\includegraphics.*
+\\\\caption{\\(?3:\\(?1:.*\\)\\\\label{\\(?2:.*\\)}\\)}")
+    	   (buf (find-file-noselect tex-file))
+    	   (i 0)
+    	   labels)
+      (with-current-buffer buf
+    	(goto-char (point-min))
+    	(while (re-search-forward fig-regex nil t)
+    	  (incf i)
+    	  (push (cons (match-string 2) i) labels)
+    	  (replace-match (format "Figure %d. \\1." i) nil nil nil 3))
+	;; Now replace the refs.
+	(goto-char (point-min))
+	(while (re-search-forward "\\\\ref{\\(?1:.*?\\)}" nil t)
+	  (when (cdr (assoc (match-string 1) labels))
+	    (replace-match (format "%d" (cdr (assoc (match-string 1) labels))))))
+    	(save-buffer)))
+
 
     (when (file-exists-p docx-file) (delete-file docx-file))
     (ox-export-call-pandoc-tex-to-docx biboption csl tex-file docx-file)
