@@ -13,10 +13,12 @@
 
 ;;; Code:
 (defun ox-export-get-pandoc-version ()
+  "Returns the major version of pandoc."
   (string-to-number
    (substring (shell-command-to-string "pandoc --version") 7 8)))
 
 (defun ox-export-call-pandoc-tex-to-docx (biboption csl tex-file docx-file)
+  "Run pandoc to convert the exported tex file to docx."
   (let* ((pandoc-version (ox-export-get-pandoc-version))
          (pandoc-command
           (if (>= pandoc-version 2)
@@ -25,6 +27,7 @@
     (shell-command (format pandoc-command biboption csl tex-file docx-file))))
 
 (defun ox-export-call-pandoc-tex-to-html (biboption csl tex-file html-file)
+  "Run pandoc to convert the exported tex file to html."
   (let* ((pandoc-version (ox-export-get-pandoc-version))
          (pandoc-command
           (if (>= pandoc-version 2)
