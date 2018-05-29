@@ -226,13 +226,34 @@ the variable `user-full-name' in a field 20 characters wide.
   will render as: 2.24
 This function is inspired by the f-strings in Python 3.6, which I
 enjoy using a lot.
+
+You can also try putting expressions in for formatting, e.g.:
+ (let ((a 11)) (f-string \"The sqrt of ${a} is ${(sqrt a) 1.2f}.\"))
+ will render as \"The sqrt of 11 is 3.32\".
 "
   (let* ((matches (s-match-strings-all"${\\(?3:\\(?1:[^} ]+\\) *\\(?2:[^}]*\\)\\)}" fmt))
-         (agetter (cl-loop for (m0 m1 m2 m3) in matches
-			   collect `(cons ,m3  (format (format "%%%s" (if (string= ,m2 "")
-									  (if s-lex-value-as-lisp "S" "s")
-									,m2))
-						       (symbol-value (intern ,m1)))))))
+         (agetter (cl-loop
+		   for (m0 m1 m2 m3) in matches
+		   collect
+		   `(cons ,m3
+			  ,(if (s-starts-with? "(" m3)
+			       ;; This means an expression is used
+			       (with-temp-buffer
+				 (insert m3)
+				 (goto-char (point-min))
+				 (let ((expr (read (current-buffer)))
+				       (fmt (s-trim (buffer-substring (point) (point-max)))))
+				   `(format
+				     (format "%%%s" (if (string= ,fmt "")
+							(if s-lex-value-as-lisp "S" "s")
+						      ,fmt))
+				     ,expr)))
+
+			     `(format
+			       (format "%%%s" (if (string= ,m2 "")
+						  (if s-lex-value-as-lisp "S" "s")
+						,m2))
+			       (symbol-value (intern ,m1))))))))
 
     `(s-format ,fmt 'aget (list ,@agetter))))
 
