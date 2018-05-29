@@ -1,21 +1,31 @@
 ;;; ox-word.el --- Collection of functions to export to MS Word documents
-;; Collection of ideas to get Word documents
-
-;; * Using pandoc via LaTeX
-
-;; Use #+PANDOC-CSL: /Users/jkitchin/Downloads/elsevier-with-titles.csl to set
-;; the bibliography style. You can get the csl files from
-;; https://www.zotero.org/styles
-
-
+;; Collection of ideas to get Word documents from org-documents
+;;
 ;;; Commentary:
 ;;
 
+;; * Using pandoc via LaTeX
+
+;; In this approach we export the org-document to latex, and use pandoc to
+;; convert to Word. This leverages Pandoc's ability to get pretty reasonable
+;; bibliographies and citations using CSL. The Pandoc I have tested with does
+;; not do a good job with cross-references (figures and tables are linked ,but
+;; not numbered), so here we post-process the tex file to hard code figure and
+;; table numbers in it, and to replace references to them in the text. This has
+;; the benefit that they are numbered, but they are not links in the word
+;; document, so they will not be updatable in the Word document.
+
+;; Use #+PANDOC-CSL: /full/path/to/some/style.csl to set
+;; the bibliography style. You can get the csl files from
+;; https://www.zotero.org/styles
+
 ;;; Code:
+
 (defun ox-export-get-pandoc-version ()
   "Returns the major version of pandoc."
   (string-to-number
    (substring (shell-command-to-string "pandoc --version") 7 8)))
+
 
 (defun ox-export-call-pandoc-tex-to-docx (biboption csl tex-file docx-file)
   "Run pandoc to convert the exported tex file to docx."
@@ -26,6 +36,7 @@
             "pandoc -s -S %s%s\"%s\" -o \"%s\"")))
     (shell-command (format pandoc-command biboption csl tex-file docx-file))))
 
+
 (defun ox-export-call-pandoc-tex-to-html (biboption csl tex-file html-file)
   "Run pandoc to convert the exported tex file to html."
   (let* ((pandoc-version (ox-export-get-pandoc-version))
@@ -34,6 +45,7 @@
               "pandoc -s %s%s\"%s\" --to=html+smart -o \"%s\""
             "pandoc -s -S %s%s\"%s\" -o \"%s\"")))
     (shell-command (format pandoc-command biboption csl tex-file html-file))))
+
 
 (defun ox-export-via-latex-pandoc-to-docx-and-open (&optional async subtreep visible-only body-only options)
   "Export the current org file as a docx via LaTeX."
@@ -85,41 +97,43 @@
     ;; Now we do some post-processing on the tex-file
     ;; Tables first.
     (let* ((table-regex "\\\\begin{table}.*
-    \\\\caption{\\(?3:\\(?1:.*\\)\\\\label{\\(?2:.*\\)}\\)}")
-	   (buf (find-file-noselect tex-file))
-	   (i 0)
-	   labels)
-      (with-current-buffer buf
-	(goto-char (point-min))
-	(while (re-search-forward table-regex nil t)
-	  (incf i)
-	  (push (cons (match-string 2) i) labels)
-	  (replace-match (format "Table %d. \\1" i) nil nil nil 3))
-    	;; Now replace the refs.
-    	(goto-char (point-min))
-    	(while (re-search-forward "\\\\ref{\\(?1:.*?\\)}" nil t)
-    	  (when (cdr (assoc (match-string 1) labels))
-    	    (replace-match (format "%d" (cdr (assoc (match-string 1) labels))))))
-	(save-buffer)))
-
-    ;; Now figures
-    (let* ((fig-regex "\\includegraphics.*
-\\\\caption{\\(?3:\\(?1:.*\\)\\\\label{\\(?2:.*\\)}\\)}")
+\\\\caption{\\(?1:\\(?2:.*\\)\\\\label{\\(?3:.*\\)}\\)}")
     	   (buf (find-file-noselect tex-file))
     	   (i 0)
     	   labels)
       (with-current-buffer buf
     	(goto-char (point-min))
-    	(while (re-search-forward fig-regex nil t)
+    	(while (re-search-forward table-regex nil t)
     	  (incf i)
-    	  (push (cons (match-string 2) i) labels)
-    	  (replace-match (format "Figure %d. \\1." i) nil nil nil 3))
+    	  (push (cons (match-string 3) i) labels)
+    	  (replace-match (format "Table %d. \\2" i) nil nil nil 1))
 	;; Now replace the refs.
 	(goto-char (point-min))
 	(while (re-search-forward "\\\\ref{\\(?1:.*?\\)}" nil t)
 	  (when (cdr (assoc (match-string 1) labels))
 	    (replace-match (format "%d" (cdr (assoc (match-string 1) labels))))))
-    	(save-buffer)))
+    	(save-buffer))
+      (message "done with tables."))
+
+    ;; Now figures
+    (let* ((fig-regex "\\includegraphics.*
+\\\\caption{\\(?3:\\(?1:.*\\)\\\\label{\\(?2:.*\\)}\\)}")
+	   (buf (find-file-noselect tex-file))
+	   (i 0)
+	   labels)
+      (with-current-buffer buf
+	(goto-char (point-min))
+	(while (re-search-forward fig-regex nil t)
+	  (incf i)
+	  (push (cons (match-string 2) i) labels)
+	  (replace-match (format "Figure %d. \\1." i) nil nil nil 3))
+    	;; Now replace the refs.
+    	(goto-char (point-min))
+    	(while (re-search-forward "\\\\ref{\\(?1:.*?\\)}" nil t)
+    	  (when (cdr (assoc (match-string 1) labels))
+    	    (replace-match (format "%d" (cdr (assoc (match-string 1) labels))))))
+	(save-buffer)
+	(kill-buffer buf)))
 
 
     (when (file-exists-p docx-file) (delete-file docx-file))
@@ -127,6 +141,7 @@
     (when (file-exists-p temp-bib)
       (delete-file temp-bib))
     (org-open-file docx-file '(16))))
+
 
 (defun ox-export-via-latex-pandoc-to-html-and-open (&optional async subtreep visible-only body-only options)
   "Export the current org file as a html via LaTeX."
@@ -188,6 +203,7 @@
   :menu-entry
   '(?w "Export to MS Word"
        ((?p "via Pandoc/LaTeX" ox-export-via-latex-pandoc-to-docx-and-open))))
+
 
 (org-export-define-derived-backend 'pandoc-html 'latex
   :menu-entry
