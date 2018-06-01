@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: npd
+# key: npd
+# --
+"""${1:One line description}
+
+Parameters
+----------
+${2:`(python-def-args)`}
+
+Returns
+-------
+$0
+"""
