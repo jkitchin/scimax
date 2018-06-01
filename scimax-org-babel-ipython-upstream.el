@@ -907,6 +907,16 @@ a filename is generated."
 		  (format "[[file:%s]]" file)))))
 
 
+(defun ob-ipython--write-base64-string (file b64-string)
+  "Write to FILE the image in B64-STRING.
+Note: the original version of this would sometimes hang, so I
+rewrote this."
+  (if b64-string
+      (with-temp-file file
+	(insert (base64-decode-string b64-string)))
+    (error "No output was produced to write to a file.")))
+
+
 (defun ob-ipython-format-image/svg+xml (file-or-nil value)
   "Format VALUE for image/svg+xml mime-types.
 FILE-OR-NIL if non-nil is the file to save the image in. If nil,
