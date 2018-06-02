@@ -59,7 +59,7 @@ $0
        (lambda (s)
 	 (second (split-string (first (split-string s ":")) " ")))
        (cl-loop for line in (process-lines ,(executable-find "tlmgr")  "list")
-		if (string= "i" (substring line 0 1))
+		if (and (stringp line) (string= "i" (substring line 0 1)))
 		collect line)))
 
    (lambda (result)
