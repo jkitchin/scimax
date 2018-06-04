@@ -1,6 +1,5 @@
 ;;; contacts.el --- Contact manager for org-mode -*- lexical-binding: t; -*-
 
-
 ;;; Commentary:
 ;; This is a replacement for org-contacts. I find it is too slow for large
 ;; numbers of contacts across many files. This library uses a cache system to
@@ -36,7 +35,7 @@ These are stored persistently in `contacts-cache-file'.")
 
 
 (defvar contacts '()
-  "List of contacts. (display-string property-a-list)")
+  "List of contacts. (display-string property-a-list).")
 
 
 ;; * load and clear cache functions
@@ -152,7 +151,7 @@ These are stored persistently in `contacts-cache-file'.")
 ;; * Tag filter
 
 (defun contacts-match-tag-expression-p (tag-expression contact)
-  "Return if the CONTACT matches the TAG-EXPRESSION."
+  "Return if the TAG-EXPRESSION matches the CONTACT."
   (let* ((lexical-binding t)
 	 (todo-only nil)
 	 (tags-list (let ((tags (cdr (assoc "ALLTAGS" contact))))
@@ -162,7 +161,7 @@ These are stored persistently in `contacts-cache-file'.")
 
 
 (defun contacts-filter (tag-expression)
-  "Return list of contacts matching TAG-EXPRESSION"
+  "Return list of contacts matching TAG-EXPRESSION."
   (loop for contact in contacts
 
 	if (with-current-buffer (find-file-noselect (cdr (assoc "FILE" contact)))
@@ -177,7 +176,7 @@ These are stored persistently in `contacts-cache-file'.")
 
 
 (defun contacts-search ()
-  "Search for word at point or selection in the files contained in `contacts-files'.
+  "Search for word at point or selection in `contacts-files'.
 e.g. on a person name, email, etc..."
   (interactive)
   (let ((word (if (region-active-p)
@@ -205,7 +204,7 @@ e.g. on a person name, email, etc..."
 ;; * Ivy-contacts
 
 (defvar ivy-marked-candidates '()
-  "Holds marked candidates")
+  "Holds marked candidates.")
 
 
 (defun ivy-mark-candidate ()
@@ -280,7 +279,7 @@ Loads cache file."
 
 
 (defun ivy-marked-transformer (s)
-  "Make entry red if it is marked."
+  "Make S entry red if it is marked."
   (if (-contains?
        (if (listp (car ivy-marked-candidates))
 	   (mapcar 'car ivy-marked-candidates)
@@ -297,9 +296,9 @@ Loads cache file."
 
 
 ;;;###autoload
-(defun ivy-contacts (&optional arg)
+(defun ivy-contacts ()
   "Select contacts using ivy."
-  (interactive "P")
+  (interactive)
   (setq ivy-marked-candidates '())
   (ivy-read "Contact: " (ivy-contacts-candidates)
 	    :keymap ivy-contacts-keymap
@@ -471,7 +470,7 @@ end tell" (cdr (assoc "PHONE" contact)))))
 
 
 (defun contact-store-link ()
-  "Store a contact link"
+  "Store a contact link."
   (when (org-entry-get (point) "EMAIL")
     (push (list (format "contact:%s" (org-id-get-create))
 		(or (org-entry-get (point) "NAME")
@@ -517,16 +516,16 @@ end tell" (cdr (assoc "PHONE" contact)))))
 ;; This is slow.
 
 (defun helm-contacts-candidates ()
-  "Returns list of strings for the helm source."
+  "Return list of strings for the helm source."
   (mapcar 'car (ivy-contacts-candidates)))
 
 
 (defun helm-contacts-get-contact (candidate)
-  "Given a helm candidate, return the corresponding contact."
+  "Given a helm CANDIDATE, return the corresponding contact."
   (cdr (assoc candidate (ivy-contacts-candidates))))
 
 
-(defun contact-insert-email (candidate)
+(defun contact-insert-email (_)
   "Insert email addresses in `helm-marked-candidates."
   (let ((emails (cl-loop for cand in (helm-marked-candidates)
 			 with contact = (helm-contacts-get-contact cand)
@@ -545,7 +544,7 @@ end tell" (cdr (assoc "PHONE" contact)))))
     (insert (mapconcat 'identity emails ","))))
 
 
-(defun contact-insert-name-email (candidate)
+(defun contact-insert-name-email (_)
   "Insert \"name\" <email> for selectected contacts, separated by ;."
   (insert
    (mapconcat 'identity (cl-loop for candidate in (helm-marked-candidates)
@@ -559,7 +558,7 @@ end tell" (cdr (assoc "PHONE" contact)))))
 	      "; ")))
 
 
-(defun contact-copy-name-email (candidate)
+(defun contact-copy-name-email (_)
   "Copy \"name\" <email> for selectected contacts, separated by ;."
   (kill-new
    (mapconcat 'identity (loop for candidate in (helm-marked-candidates)
@@ -690,9 +689,10 @@ end tell" (cdr (assoc "PHONE" contact)))))))
 	      ;; 					    (read-string "Separator:" nil nil ", ")
 	      ;; 					  "")))))))
 	      ))
-  "Helm contact source")
+  "Helm contact source.")
 
 (defun helm-contacts ()
+  "A helm source for contacts."
   (interactive)
   (helm :sources helm-contacts-source))
 
@@ -768,12 +768,13 @@ end tell" (org-entry-get (point) "PHONE"))))))
 ;; We can treat a headline like a location if they have an ADDRESS
 
 (defun location-google-maps ()
+  "Open the address in the current entry in google maps."
   (interactive)
   (google-maps (org-entry-get (point) "ADDRESS")))
 
 
 (defun contact-store-location-link ()
-  "Store a contact location link"
+  "Store a contact location link."
   (when (org-entry-get (point) "ADDRESS")
     (push (list (format "location:%s" (org-id-get-create))
 		(or (org-entry-get (point) "NAME")

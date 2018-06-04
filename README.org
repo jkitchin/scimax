@@ -1,7 +1,7 @@
 #+TITLE: scimax - Awesome editing for scientists and engineers
 #+AUTHOR: John Kitchin
 
-Scimax is a rewrite of jmax, with lessons learned, and improvements.
+Scimax is an Emacs starterkit for scientists and engineers. It provides a comprehensive configuration of Emacs for scientific programming and publishing.
 
 See the [[./scimax.org][manual]] for more details.
 
