@@ -732,7 +732,7 @@ _C-a_ Async export: %`hydra-ox/async-export
 ------------------------------------------------------------------------------------------
  _ff_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear
  _fw_: file dwim       _g_: update gtags      _b_: switch to buffer  _x_: remove known project
- _fd_: file curr dir   _o_: multi-occur       _K_: Kill all buffers  _X_: cleanup non-existing
+ _fd_: file curr dir   _m_: multi-occur       _K_: Kill all buffers  _X_: cleanup non-existing
   _r_: recent file                                               ^^^^_z_: cache current
   _d_: dir
 
@@ -744,7 +744,11 @@ _C-a_ Async export: %`hydra-ox/async-export
   ("ff"  projectile-find-file)
   ("fw"  projectile-find-file-dwim)
   ("fd"  projectile-find-file-in-directory)
-  ("g"   ggtags-update-tags)
+  ("g"   (let* ((pr (projectile-project-root))
+		(gtags (expand-file-name "GTAGS" pr)))
+	   (unless (file-exists-p gtags)
+	     (ggtags-create-tags (projectile-project-root)))
+	   (ggtags-update-tags)))
   ("i"   projectile-ibuffer)
   ("K"   projectile-kill-buffers)
   ("m"   projectile-multi-occur)
