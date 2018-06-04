@@ -77,7 +77,9 @@ This is a thin wrapper on `projectile-switch-project' that opens the master file
 ;;;###autoload
 (defun nb-new (name)
   "Create a new project of NAME in `nb-notebook-directory'."
-  (interactive "sNew project name: ")
+  (interactive (list (read-directory-name "New project name: " nb-notebook-directory)))
+  (when (file-directory-p name)
+    (user-error "%s already exists." name))
   (let ((dir (file-name-as-directory (expand-file-name name nb-notebook-directory)))
 	(nb-master-file-name (funcall nb-master-file name)))
     (unless (file-directory-p dir)
