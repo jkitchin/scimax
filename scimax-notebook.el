@@ -55,22 +55,29 @@ of the root directory, with a @ prefix so it sorts to the top of
 the directory with ls."
   (concat "@"
 	  (file-name-base (directory-file-name default-directory))
-	  ".org"))
+	  ".org")
+  :group 'scimax-notebook)
 
 
 (defcustom nb-scimax-update-menu-p nil
   "If non-nil, add a hook that updates the menu with known projects.
 This can be slow if you have a lot of projects because it runs
-when in a menu bar update hook. If nil, just add projects once.")
+when in a menu bar update hook. If nil, just add projects once."
+  :group 'scimax-notebook)
 
+
+(defcustom nb-switch-project-action
+  (lambda ()
+    (find-file (read-file-name "File: " "." nil nil (funcall nb-master-file))))
+  "Function to run after switching projects with `nb-open'."
+  :group 'scimax-notebook)
 
 ;;;###autoload
 (defun nb-open ()
   "Switch to a project and open the main file.
 This is a thin wrapper on `projectile-switch-project' that opens the master file."
   (interactive)
-  (let ((projectile-switch-project-action (lambda ()
-					    (find-file (read-file-name "File: " "." nil nil (funcall nb-master-file))))))
+  (let ((projectile-switch-project-action nb-switch-project-action))
     (projectile-switch-project)))
 
 
