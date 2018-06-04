@@ -18,10 +18,18 @@
 ;; things within the scope of the project, e.g. search by tag/property.
 ;;
 ;; `nb-archive' creates a zip-archive of the project.
+;;
+;; Note there is a projectile hydra defined: `hydra-projectile/body' that may be
+;; useful for scimax-notebooks.
 
 ;;; Code:
 ;; * Setup
 (projectile-mode +1)
+
+(use-package ggtags)
+(use-package ibuffer-projectile)
+(when (executable-find "ag")
+  (use-package ag))
 
 
 (defcustom nb-notebook-directory
@@ -72,6 +80,7 @@ when in a menu bar update hook. If nil, just add projects once."
   "Function to run after switching projects with `nb-open'."
   :group 'scimax-notebook)
 
+
 ;;;###autoload
 (defun nb-open ()
   "Switch to a project and open the main file.
@@ -79,6 +88,26 @@ This is a thin wrapper on `projectile-switch-project' that opens the master file
   (interactive)
   (let ((projectile-switch-project-action nb-switch-project-action))
     (projectile-switch-project)))
+
+
+;;;###autoload
+(defun nb-clone ()
+  "Create a clone (by a recursive copy) of the current notebook.
+This is helpful when you want to keep a copy of the repo, for
+example."
+  (interactive)
+  (let* ((project-root (projectile-project-root))
+	 (dir-one-up (file-name-directory (directory-file-name project-root)))
+	 (name (file-name-base (directory-file-name project-root)))
+	 (clone-base-name (read-directory-name
+			   "Clone name: "
+			   dir-one-up  nil nil
+			   (concat name "-clone"))))
+    (let ((default-directory dir-one-up))
+      (shell-command (format "cp -R %s %s" name clone-base-name))
+      (projectile-add-known-project clone-base-name)
+      (projectile-save-known-projects)
+      (projectile-switch-project-by-name clone-base-name))))
 
 
 ;;;###autoload
@@ -134,6 +163,8 @@ uncommitted changes, you will be prompted to continue."
 		  (car (last (f-split (projectile-project-root)))))
 	  (format-time-string "%Y-%m-%d-%H:%M%p")))))))
 
+
+
 ;; * Add a menu to scimax
 
 (easy-menu-change
@@ -163,6 +194,7 @@ uncommitted changes, you will be prompted to continue."
 (if nb-scimax-update-menu-p
     (add-hook 'menu-bar-update-hook 'update-scimax-projects-menu)
   (update-scimax-projects-menu))
+
 
 
 ;; * The end
