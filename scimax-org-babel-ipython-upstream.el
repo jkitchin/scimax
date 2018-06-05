@@ -912,8 +912,11 @@ a filename is generated."
 Note: the original version of this would sometimes hang, so I
 rewrote this."
   (if b64-string
-      (with-temp-file file
-	(insert (base64-decode-string b64-string)))
+      (progn
+	(unless (file-directory-p (file-name-directory file))
+	  (make-directory (file-name-directory file) t))
+	(with-temp-file file
+	  (insert (base64-decode-string b64-string))))
     (error "No output was produced to write to a file.")))
 
 
