@@ -453,6 +453,7 @@ _p_: ffap
   "bookmarks"
   ("j" bookmark-jump "jump")
   ("l" bookmark-bmenu-list "list")
+  ("su" bmkp-url-target-set "save url")
   ("n" bookmark-set "new"))
 
 ;;** lisp
