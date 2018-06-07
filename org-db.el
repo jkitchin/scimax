@@ -195,9 +195,9 @@ Adds FNAME to the database if it doesn't exist."
 
 (defun org-db-update-buffer (&optional force)
   "Update the entries in the database for the currently visited buffer.
-Optional argument FORCE"
+Optional argument FORCE. if non-nil force the buffer to be added."
   (interactive "P")
-  if non-nil force the buffer to be added.  (org-db-connect)
+  (org-db-connect)
   (save-buffer)
   (org-db-log "Updating in buffer: %s" (buffer-file-name))
   (org-with-wide-buffer
@@ -406,14 +406,14 @@ Optional argument FORCE"
 
 ;; * Idle timer to update
 
-(defun org-db-process-queue (&optional arg)
+(defun org-db-process-queue (&optional now)
   "Update all the files in `org-db-queue'.
 Use a prefix ARG to process now."
   (interactive "P")
   (org-db-connect)
   (catch 'done
     (while org-db-queue
-      (unless (or arg (current-idle-time))
+      (unless (or now (current-idle-time))
 	(throw 'done nil))
       (org-db-log "Updating org-db for files %s." org-db-queue)
       (let* ((filename (pop org-db-queue))
