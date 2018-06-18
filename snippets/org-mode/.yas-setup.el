@@ -54,13 +54,14 @@ $0
   (require 'async)
   (async-start
    `(lambda ()
-      (require 'cl)
+      (require 'cl) 
       (mapcar
        (lambda (s)
-	 (second (split-string (first (split-string s ":")) " ")))
-       (cl-loop for line in (process-lines ,(executable-find "tlmgr")  "list")
-		if (and (stringp line) (string= "i" (substring line 0 1)))
-		collect line)))
+      	 (second (split-string (first (split-string s ":")) " ")))
+       (cl-loop for line in (process-lines ,(executable-find "tlmgr")  "info" "--only-installed")
+      		if (and (stringp line) (string= "i" (substring line 0 1)))
+      		collect line)))
 
-   (lambda (result)
+   (lambda (result) 
      (setq scimax-installed-latex-packages result))))
+
