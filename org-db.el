@@ -3,6 +3,7 @@
 ;;; Commentary:
 ;;
 (require 'cl)
+(require 's)    ; for s-trim
 (require 'org)
 (require 'emacsql-sqlite)
 
