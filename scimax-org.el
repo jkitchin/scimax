@@ -1324,7 +1324,7 @@ Use a prefix arg to get regular RET. "
 	(delete-region (line-beginning-position) (line-end-position)))
        ;; numbered list
        ((and (looking-at "$")
-	     (looking-back "[0-9]*. " (line-beginning-position)))
+	     (looking-back "[0-9]+. " (line-beginning-position)))
 	(beginning-of-line)
 	(delete-region (line-beginning-position) (line-end-position)))
        ;; insert new item
