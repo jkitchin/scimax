@@ -845,7 +845,9 @@ compatibility with the other formatters."
 (defun ob-ipython-format-text/plain (file-or-nil value)
   "Format VALUE for text/plain mime-types.
 FILE-OR-NIL is not used in this function."
-  (let ((lines (s-lines value)))
+  (let ((lines (s-lines value))
+	(raw (-contains?
+	      (s-split " " (cdr (assoc :results (caddr (org-babel-get-src-block-info t))))) "raw")))
     ;; filter out uninteresting lines.
     (setq lines (-filter (lambda (line)
 			   (not (-any (lambda (regex)
@@ -854,7 +856,10 @@ FILE-OR-NIL is not used in this function."
 			 lines))
     (when lines
       ;; Add verbatim start string
-      (setq lines (mapcar (lambda (s) (s-concat ": " s)) lines))
+      (setq lines (mapcar (lambda (s) (s-concat
+				       (if raw "" ": ")
+				       s))
+			  lines))
       (when ob-ipython-show-mime-types
 	(setq lines (append '("# text/plain") lines)))
       (s-join "\n" lines))))
