@@ -729,10 +729,23 @@ This function is called by `org-babel-execute-src-block'."
 	       (when (get-buffer buf)
 		 (kill-buffer buf)))))
   ;; I think this returns the results that get inserted by
-  ;; `org-babel-execute-src-block'.
-  (if (assoc :async params)
-      (ob-ipython--execute-async body params)
-    (ob-ipython--execute-sync body params)))
+  ;; `org-babel-execute-src-block'. If there is an exec-dir, we wrap this block
+  ;; to temporarily change to that directory.
+  (let* ((exec-dir (cdr (assoc :dir params)))
+         (exec-body (concat
+                     (when exec-dir
+                       (concat "from os import chdir as __ob_ipy_chdir; "
+			       "from os import getcwd as __ob_ipy_getcwd; "
+			       "__ob_ipy_cwd = __ob_ipy_getcwd(); "
+			       " __ob_ipy_chdir(\""
+			       exec-dir
+			       "\")\n"))
+                     body
+		     (when exec-dir
+		       "\n__ob_ipy_chdir(__ob_ipy_cwd)"))))
+    (if (assoc :async params)
+	(ob-ipython--execute-async exec-body params)
+      (ob-ipython--execute-sync exec-body params))))
 
 
 ;; ** Fine tune the output of blocks
