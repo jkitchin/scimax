@@ -10,8 +10,6 @@
 
 ;;; Code:
 
-(add-to-list 'Info-directory-list scimax-dir)
-
 (setq use-package-always-ensure t)
 
 ;; * org-mode
@@ -597,6 +595,8 @@
        scimax-load-user-dir
        (file-exists-p (expand-file-name "user.el" scimax-user-dir)))
   (load (expand-file-name "user.el" scimax-user-dir)))
+
+(add-to-list 'Info-directory-list scimax-dir)
 
 ;; * The end
 (provide 'packages)
