@@ -538,9 +538,9 @@
   :ensure nil
   :load-path (lambda () (expand-file-name "org-show" scimax-dir)))
 
-(use-package techela
-  :ensure nil
-  :load-path (lambda () (expand-file-name "techela" scimax-dir)))
+;; (use-package techela
+;;   :ensure nil
+;;   :load-path (lambda () (expand-file-name "techela" scimax-dir)))
 
 (use-package words
   :ensure nil
