@@ -127,6 +127,7 @@ This is a macro so I don't have to quote the hydra name."
   ("8" (switch-to-buffer "*scratch*") "*scratch*")
   ("?" scimax-hydra-help "Menu help")
   ("." scimax-dispatch-mode-hydra "Major mode hydras")
+  ("u" universal-argument "C-u" :color "red\"\"")
   ("q" nil "quit"))
 
 ;;* scimax hydra
