@@ -661,7 +661,7 @@ If you then re-evaluate a source block a new kernel will be started."
   "Execute a block of IPython code with Babel.
 This function is called by `org-babel-execute-src-block'."
 
-  ;; make sure we get prompted to kill the
+  ;; make sure we get prompted to kill the kernel when exiting.
   (when ob-ipython-kill-kernel-on-exit
     (add-hook 'kill-buffer-hook 'scimax-ob-ipython-kill-kernel nil t))
 
