@@ -56,6 +56,7 @@ brew install emacs --with-gnutls --with-imagemagick --with-librsvg --with-x11 --
 Alternatively, lately I have been using emacs-plus which claims to be faster for magit and has all those options enabled by default.
 
 #+BEGIN_SRC sh
+brew tap d12frosted/emacs-plus
 brew install emacs-plus
 #+END_SRC
 
