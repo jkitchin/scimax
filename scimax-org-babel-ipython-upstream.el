@@ -652,7 +652,7 @@ If you then re-evaluate a source block a new kernel will be started."
 	(f-delete cfile))
       (delete-process proc)
       (kill-buffer (process-buffer proc))
-      (setq header-line nil)
+      (setq header-line-format nil)
       (message (format "Killed %s and deleted %s" proc-name cfile)))))
 
 
