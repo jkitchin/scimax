@@ -638,6 +638,40 @@ variables, etc."
 
 ;; * Modifications of ob-ipython
 
+;;  I frequently get an error on startup that seems to be related to how long
+;;  jupyter takes to start up. Usually, I just run the cell again and it works.
+;;  This modification is designed to wait just long enough for the json file to
+;;  get created. This seems to fix the issue. It used to wait just 1 second, but
+;;  sometimes it takes up to two seconds to create this file (it is used in
+;;  driver.py I think).
+(defcustom scimax-create-kernel-max-wait 5
+  "Maximum seconds to wait before kernel program starts."
+  :group 'ob-ipython)
+
+(defun ob-ipython--create-kernel (name &optional kernel)
+  (when (and (not (ignore-errors (process-live-p (get-process (format "kernel-%s" name)))))
+             (not (s-ends-with-p ".json" name)))
+    (ob-ipython--create-process
+     (format "kernel-%s" name)
+     (append
+      (list ob-ipython-command "console" "--simple-prompt")
+      (list "-f" (ob-ipython--kernel-file name))
+      (if kernel (list "--kernel" kernel) '())
+      ;;should be last in the list of args
+      ob-ipython-kernel-extra-args))
+    (let ((i 0)
+	  (t0 (float-time))
+    	  (tincrement 0.1)
+    	  (cfile (expand-file-name
+    		  (ob-ipython--kernel-file name)
+    		  (s-trim (shell-command-to-string "jupyter --runtime-dir")))))
+      (while (and (not (file-exists-p cfile))
+		  (< (- (float-time) t0) scimax-create-kernel-max-wait))
+	(sleep-for tincrement))
+      (message "Kernel started in %1.2f seconds" (- (float-time) t0))
+      (setq header-line-format name))))
+
+
 (defun ob-ipython-kill-kernel (proc)
   "Kill a kernel process.
 If you then re-evaluate a source block a new kernel will be started."
@@ -683,7 +717,6 @@ This function is called by `org-babel-execute-src-block'."
 
     ;; add the new session info
     (let ((session-name (scimax-ob-ipython-default-session)))
-      (setq header-line-format (format "IPython session: %s" session-name))
       (add-to-list 'org-babel-default-header-args:ipython
 		   (cons :session session-name))
       (setf (cdr (assoc :session params)) session-name)))
