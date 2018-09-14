@@ -452,7 +452,7 @@ _p_: ffap
 
 (defhydra scimax-bookmarks (:color blue :inherit (scimax-base/heads) :columns 3)
   "bookmarks"
-  ("j" bookmark-jump "jump")
+  ("k" bookmark-jump "jump")
   ("l" bookmark-bmenu-list "list")
   ("su" bmkp-url-target-set "save url")
   ("n" bookmark-set "new"))
