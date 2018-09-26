@@ -5,7 +5,7 @@
 #+default-filename: manuscript.org
 
 #+LATEX_CLASS: revtex4-1
-#+LATEX_CLASS_OPTIONS:[aps,prl,citeautoscript,preprint,citeautoscript,showkeys,floatfix]
+#+LATEX_CLASS_OPTIONS:[aps,prl,citeautoscript,preprint,showkeys,floatfix]
 #+OPTIONS: toc:nil author:nil ^:{}
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+LATEX_HEADER: \usepackage{natbib}
@@ -14,7 +14,7 @@
 #+LATEX_HEADER: \usepackage{amsmath}
 #+LATEX_HEADER: \usepackage{textcomp}
 #+LATEX_HEADER: \usepackage[version=3]{mhchem}
-#+LATEX_HEADER: \usepackage[linktocpage,pdfstartview=FitH,colorlinks,linkcolor=blue,anchorcolor=blue,citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue]{hyperref}
+#+LATEX_HEADER: \usepackage[linktocpage,pdfstartview=FitH,colorlinks,allcolors=blue]{hyperref}
 
 \raggedbottom
 
@@ -44,11 +44,11 @@
 <replace: or delete>
 \end{acknowledgments}
 
-bibliographystyle:unsrt
+# bibliographystyle:unsrt
 bibliography:<replace: bibfile>
 
 * Help  :noexport:
 
 #+BEGIN_SRC sh
-texdoc revtex4-1
+texdoc apsguide4-1
 #+END_SRC
