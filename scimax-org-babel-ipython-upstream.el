@@ -140,6 +140,7 @@ These are activated in function `ob-ipython-key-bindings'."
      ["Jump to visible block" scimax-jump-to-visible-block t]
      ["Jump to block" scimax-jump-to-block t])
     ["Inspect" ob-ipython-inspect t]
+    ["Show source" (lambda () (interactive) (ob-ipython-inspect t)) t]
     ["Kill kernel" scimax-ob-ipython-kill-kernel t]
     ["Switch to repl" org-babel-switch-to-session t])
   "Items for the menu bar and popup menu."
@@ -1072,9 +1073,25 @@ Note, this does not work if you run the block async."
 ;; ** inspect from an org buffer
 ;; This makes inspect work from an org-buffer.
 
-(defun ob-ipython-inspect (buffer pos)
+(defun ob-ipython-inspect (arg)
+  "Get the documentation for the thing at point if possible.
+With a prefix ARG show the source if possible."
+  (interactive "P")
+  (if arg
+      (ob-ipython-inspect-source (current-buffer) (point))
+    (ob-ipython-inspect-doc (current-buffer) (point))))
+
+
+(defun ob-ipython-inspect-doc (buffer pos)
   "Ask a kernel for documentation on the thing at POS in BUFFER."
   (interactive (list (current-buffer) (point)))
+  ;; It is probably helpful to be at the end of a symbol, otherwise you may get
+  ;; help on something else.
+  (save-excursion
+    (when (not (looking-back "\s_\b" (line-beginning-position)))
+      (forward-symbol 1)
+      (setq pos (point))))
+
   (let ((return (org-in-src-block-p))
 	(inspect-buffer))
     (when return
@@ -1092,6 +1109,50 @@ Note, this does not work if you run the block async."
     (when inspect-buffer
       (pop-to-buffer inspect-buffer)
       (goto-char (point-min)))))
+
+
+(defun ob-ipython-inspect-source (buffer pos)
+  "Show a buffer with the source for the thing at point."
+  (interactive (list (current-buffer) (point)))
+  (let ((return (org-in-src-block-p))
+	(ob-ipython-suppress-execution-count t)
+	(ob-ipython-show-mime-types nil)
+	(*ob-ipython-output-results-prefix* "")
+	(code-template "import inspect as __ob_inspect; __ob_inspect.getsource(%s)")
+	(current-buffer (current-buffer))
+	(result))
+    (when return
+      (org-edit-src-code nil "*ob-ipython-src-edit-inspect*")
+      (setq code-template (format code-template (thing-at-point 'symbol)))
+      (org-edit-src-exit))
+
+    (setq result (ob-ipython--execute-sync
+		  code-template
+		  `((:session . ,(scimax-ob-ipython-default-session))
+		    (:result-params "raw"))))
+
+    (pop-to-buffer "*ob-ipython-source*")
+    (setq header-line-format "Press q to close.")
+    (erase-buffer)
+    (local-set-key "q" `(lambda ()
+			  (interactive)
+			  (quit-restore-window nil 'bury)
+			  (pop-to-buffer ,current-buffer)))
+    ;; the substring here is because there is a spurious : I can't track down, a
+    ;; space, and a quote at the beginning and end I want to eliminate. I don't
+    ;; know why I have to split and rejoin the output here, but if I don't there
+    ;; are literal \n at every linebreak.
+    (cond ((s-starts-with? ": '" result)
+	   (setq result (substring result 3)))
+	  ((s-starts-with? "'" result)
+	   (setq result (substring result 1))))
+    (when (s-ends-with? "'" result)
+      (setq result (substring result 0 -1)))
+    ;; this seems to be needed to unescape at least single quotes.
+    (setq result (replace-regexp-in-string "\\\\'" "'" result))
+    (insert (s-join "\n" (split-string result "\\\\n")))
+    (goto-char (point-min))
+    (python-mode)))
 
 
 ;; * eldoc integration
