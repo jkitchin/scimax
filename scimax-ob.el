@@ -58,12 +58,13 @@ With a prefix BELOW move point to lower block."
   (let* ((el (org-element-context))
 	 (p (point))
 	 (language (org-element-property :language el))
+	 (switches (org-element-property :switches el))
 	 (parameters (org-element-property :parameters el)))
 
     (beginning-of-line)
     (insert (format "#+END_SRC
 
-#+BEGIN_SRC %s %s\n" language (or parameters "")))
+#+BEGIN_SRC %s %s %s\n" language (or switches "") (or parameters "")))
     (unless below
       (beginning-of-line)
       (forward-line -3)
