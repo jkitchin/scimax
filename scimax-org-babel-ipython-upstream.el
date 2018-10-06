@@ -858,6 +858,17 @@ This function is called by `org-babel-execute-src-block'."
 	 (output (cdr (assoc :output ret)))
 	 (value (cdr (assoc :value result)))
 	 (display (cdr (assoc :display result))))
+
+    ;; check for data to show.
+    (save-excursion
+      (when (cdr (assoc :data ret))
+	(pop-to-buffer "*ob-ipython-data*")
+	(read-only-mode -1)
+	(erase-buffer)
+	(insert (cdr (assoc :data ret)))
+	(goto-char (point-min))
+	(ansi-color-apply-on-region (point-min) (point-max))))
+
     (s-concat
      (if ob-ipython-suppress-execution-count
 	 ""
@@ -1019,12 +1030,24 @@ way, but I have left it in for compatibility."
 
 
 ;; ** Better exceptions
+
+(defun ob-ipython--extract-data (msgs)
+  "This extracts output from func? or func?? in ipython"
+  (->> msgs
+       (-filter (lambda (msg)
+		  (s-equals? "execute_reply"
+			     (cdr (assoc 'msg_type msg)))))
+       (-mapcat (lambda (msg)
+		  (->> msg (assoc 'content) (assoc 'payload) cadr (assoc 'data) cdadr)))))
+
 ;; I want an option to get exceptions in the buffer
 (defun ob-ipython--eval (service-response)
   (let ((status (ob-ipython--extract-status service-response)))
-    (cond ((string= "ok" status) `((:result . ,(ob-ipython--extract-result service-response))
-                                   (:output . ,(ob-ipython--extract-output service-response))
-                                   (:exec-count . ,(ob-ipython--extract-execution-count service-response))))
+    (cond ((string= "ok" status)
+	   `((:result . ,(ob-ipython--extract-result service-response))
+	     (:output . ,(ob-ipython--extract-output service-response))
+	     (:data . ,(ob-ipython--extract-data service-response))
+	     (:exec-count . ,(ob-ipython--extract-execution-count service-response))))
           ((string= "abort" status) (error "Kernel execution aborted"))
           ((string= "error" status)
 	   (if ob-ipython-exception-results
@@ -1073,16 +1096,7 @@ Note, this does not work if you run the block async."
 ;; ** inspect from an org buffer
 ;; This makes inspect work from an org-buffer.
 
-(defun ob-ipython-inspect (arg)
-  "Get the documentation for the thing at point if possible.
-With a prefix ARG show the source if possible."
-  (interactive "P")
-  (if arg
-      (ob-ipython-inspect-source (current-buffer) (point))
-    (ob-ipython-inspect-doc (current-buffer) (point))))
-
-
-(defun ob-ipython-inspect-doc (buffer pos)
+(defun ob-ipython-inspect (buffer pos)
   "Ask a kernel for documentation on the thing at POS in BUFFER."
   (interactive (list (current-buffer) (point)))
   ;; It is probably helpful to be at the end of a symbol, otherwise you may get
@@ -1110,49 +1124,6 @@ With a prefix ARG show the source if possible."
       (pop-to-buffer inspect-buffer)
       (goto-char (point-min)))))
 
-
-(defun ob-ipython-inspect-source (buffer pos)
-  "Show a buffer with the source for the thing at point."
-  (interactive (list (current-buffer) (point)))
-  (let ((return (org-in-src-block-p))
-	(ob-ipython-suppress-execution-count t)
-	(ob-ipython-show-mime-types nil)
-	(*ob-ipython-output-results-prefix* "")
-	(code-template "import inspect as __ob_inspect; __ob_inspect.getsource(%s)")
-	(current-buffer (current-buffer))
-	(result))
-    (when return
-      (org-edit-src-code nil "*ob-ipython-src-edit-inspect*")
-      (setq code-template (format code-template (thing-at-point 'symbol)))
-      (org-edit-src-exit))
-
-    (setq result (ob-ipython--execute-sync
-		  code-template
-		  `((:session . ,(scimax-ob-ipython-default-session))
-		    (:result-params "raw"))))
-
-    (pop-to-buffer "*ob-ipython-source*")
-    (setq header-line-format "Press q to close.")
-    (erase-buffer)
-    (local-set-key "q" `(lambda ()
-			  (interactive)
-			  (quit-restore-window nil 'bury)
-			  (pop-to-buffer ,current-buffer)))
-    ;; the substring here is because there is a spurious : I can't track down, a
-    ;; space, and a quote at the beginning and end I want to eliminate. I don't
-    ;; know why I have to split and rejoin the output here, but if I don't there
-    ;; are literal \n at every linebreak.
-    (cond ((s-starts-with? ": '" result)
-	   (setq result (substring result 3)))
-	  ((s-starts-with? "'" result)
-	   (setq result (substring result 1))))
-    (when (s-ends-with? "'" result)
-      (setq result (substring result 0 -1)))
-    ;; this seems to be needed to unescape at least single quotes.
-    (setq result (replace-regexp-in-string "\\\\'" "'" result))
-    (insert (s-join "\n" (split-string result "\\\\n")))
-    (goto-char (point-min))
-    (python-mode)))
 
 
 ;; * eldoc integration
