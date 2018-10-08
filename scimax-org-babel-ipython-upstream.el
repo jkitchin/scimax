@@ -777,9 +777,16 @@ This function is called by `org-babel-execute-src-block'."
                      body
 		     (when exec-dir
 		       "\n__ob_ipy_chdir(__ob_ipy_cwd)"))))
-    (if (assoc :async params)
-	(ob-ipython--execute-async exec-body params)
-      (ob-ipython--execute-sync exec-body params))))
+    ;; Check if we are debugging
+    (if (string-match "^%pdb" exec-body)
+	(progn
+	  (pop-to-buffer (org-babel-initiate-session))
+	  (comint-send-string (get-buffer-process (current-buffer)) body)
+	  (comint-send-input))
+      ;; not debugging
+      (if (assoc :async params)
+	  (ob-ipython--execute-async exec-body params)
+	(ob-ipython--execute-sync exec-body params)))))
 
 
 ;; ** Fine tune the output of blocks
@@ -867,7 +874,8 @@ This function is called by `org-babel-execute-src-block'."
 	(erase-buffer)
 	(insert (cdr (assoc :data ret)))
 	(goto-char (point-min))
-	(ansi-color-apply-on-region (point-min) (point-max))))
+	(ansi-color-apply-on-region (point-min) (point-max))
+	(special-mode)))
 
     (s-concat
      (if ob-ipython-suppress-execution-count
