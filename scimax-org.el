@@ -602,7 +602,9 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
     (when (and img
 	       ;; This means the equation is at the start of the line
 	       (= beg (line-beginning-position))
-	       (string= "" (s-trim (buffer-substring end (line-end-position)))))
+	       (or
+		(string= "" (s-trim (buffer-substring end (line-end-position))))
+		(eq 'latex-environment (car (org-element-context)))))
       (setq space-left (- (window-max-chars-per-line) (car (image-size img)))
 	    offset (floor (cond
 			   ((eq justification 'center)
