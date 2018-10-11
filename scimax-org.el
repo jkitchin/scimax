@@ -599,8 +599,11 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 			(image-type-available-p (plist-get (cdr img) :type)))
 		   img))
 	 space-left offset)
-    (when (and img (= beg (line-beginning-position)))
-      (setq space-left (- (window-max-chars-per-line) (car (image-display-size img)))
+    (when (and img
+	       ;; This means the equation is at the start of the line
+	       (= beg (line-beginning-position))
+	       (string= "" (s-trim (buffer-substring end (line-end-position)))))
+      (setq space-left (- (window-max-chars-per-line) (car (image-size img)))
 	    offset (floor (cond
 			   ((eq justification 'center)
 			    (- (/ space-left 2) shift))
