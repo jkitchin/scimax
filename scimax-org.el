@@ -623,6 +623,10 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 (advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-justify-advice)
 
 ;; ** numbering latex equations
+
+;; Numbered equations all have (1) as the number for fragments with vanilla
+;; org-mode. This code injects the correct numbers into the previews so they
+;; look good.
 (defun org-renumber-environment (orig-func &rest args)
   "A function to inject numbers in LaTeX fragment previews."
   (let ((results '())
@@ -665,6 +669,18 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
   (apply orig-func args))
 
 (advice-add 'org-create-formula-image :around #'org-renumber-environment)
+
+(defun org-inject-latex-fragment (orig-func &rest args)
+  "Advice function to inject latex code before and/or after the equation in a latex fragment.
+You can use this to set \\mathversion{bold} for example to make it bolder."
+  (setf (car args)
+	(concat
+	 (or (plist-get org-format-latex-options :latex-fragment-pre-body) "")
+	 (car args)
+	 (or (plist-get org-format-latex-options :latex-fragment-post-body) "")))
+  (apply orig-func args))
+
+(advice-add 'org-create-formula-image :around #'org-inject-latex-fragment )
 
 
 ;; * Markup commands for org-mode
