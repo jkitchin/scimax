@@ -280,3 +280,5 @@ Some limitations are related to running flycheck on a buffer that isn't really a
 As you modify the buffer, the positions here get out of date with the proxy-files. If the logic is right, this isn't a big deal, but it is confusing if not.
 
 At the moment, the overlays don't seem to work on all the blocks when multiple languages are present. It seems like only the last language has overlays on it, the rest seem to get removed. That is a bug to be fixed one day.
+
+This will not work with noweb.
