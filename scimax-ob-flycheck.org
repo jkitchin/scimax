@@ -36,8 +36,11 @@ See [[id:4C28546C-8F3F-4AD4-900E-C623C8485183][Known Limitations]].
 ;;; Commentary:
 ;; To use this module, enable `scimax-ob-flycheck-mode' in the buffer.
 
-;;; Code:
-
+;;; Code
+(require 'cl)
+(require 'f)
+(require 's)
+(require 'ov)
  #+END_SRC
 
 ** Helper functions
@@ -113,8 +116,6 @@ There will be a buffer holding the proxy file that is flychecked. After the synt
 Here is the function that will run in the proxy-buffer and transfer the overlays. The variable =obf-buffer= is buffer local and points to the org-file we want the overlays to go in. The variable =obf-lang= is also buffer-local and indicates the language for the overlays. This function is run by a hook function after a flycheck syntax check is done. We modify the overlays so they look like they came from the org-buffer. That way you can use a command like =flycheck-previous-error= (M-g p) or  =flycheck-next-error= (M-g n).
 
  #+BEGIN_SRC emacs-lisp
-(add-to-list 'font-lock-extra-managed-props 'flycheck-overlay)
-
 (defun obf-transfer-flycheck-overlays ()
   "Transfer flycheck overlays from proxy-buffer to the org-buffer."
   (let ((ovs '())
@@ -130,7 +131,7 @@ Here is the function that will run in the proxy-buffer and transfer the overlays
 	      (when start
 		(goto-char start)
 		(when (and (get-text-property (point) 'src-block)
-			   (string= lang (get-text-property (point) 'lang)))
+			   (string= lang (car (org-babel-get-src-block-info))))
 		  (setq newov (make-overlay start end))
 		  (setq props (overlay-properties ov))
 		  (setf (flycheck-error-buffer
