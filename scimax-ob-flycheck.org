@@ -131,7 +131,10 @@ Here is the function that will run in the proxy-buffer and transfer the overlays
 	      (when start
 		(goto-char start)
 		(when (and (get-text-property (point) 'src-block)
-			   (string= lang (car (org-babel-get-src-block-info))))
+			   (string= lang (car (org-babel-get-src-block-info)))
+			   (not (s-contains? "#\\+END_SRC" (buffer-substring
+							  (line-beginning-position)
+							  (line-end-position)))))
 		  (setq newov (make-overlay start end))
 		  (setq props (overlay-properties ov))
 		  (setf (flycheck-error-buffer
