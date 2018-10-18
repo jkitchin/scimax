@@ -877,16 +877,18 @@ This function is called by `org-babel-execute-src-block'."
 	(ansi-color-apply-on-region (point-min) (point-max))
 	(special-mode)))
 
-    (s-concat
-     (if ob-ipython-suppress-execution-count
-	 ""
-       (format "# Out[%d]:\n" (cdr (assoc :exec-count ret))))
-     (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
-     (ob-ipython-format-output nil output)
-     ;; I process the outputs one at a time here.
-     (s-join "\n\n" (loop for (type . value) in (append value display)
-			  collect
-			  (ob-ipython--render file (list (cons type value))))))))
+    (if (eq 'inline-src-block (car (org-element-context)))
+	(cdr (assoc 'text/plain value))
+      (s-concat
+       (if ob-ipython-suppress-execution-count
+	   ""
+	 (format "# Out[%d]:\n" (cdr (assoc :exec-count ret))))
+       (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
+       (ob-ipython-format-output nil output)
+       ;; I process the outputs one at a time here.
+       (s-join "\n\n" (loop for (type . value) in (append value display)
+			    collect
+			    (ob-ipython--render file (list (cons type value)))))))))
 
 
 ;; ** Formatters for output
