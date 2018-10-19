@@ -40,7 +40,7 @@
  (lambda ()
    (browse-url (format "https://twitter.com/%s" (match-string 1))))
  :grouping 2
- :face (list 'org-mlink)
+ :face (list 'org-link)
  :help-echo "Click me to open username.")
 
 
