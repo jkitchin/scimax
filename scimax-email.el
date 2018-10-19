@@ -35,13 +35,13 @@
 		      (bibtex-end-of-entry)
 		      (setq p2 (point)))
 		    (add-to-list 'bib-entries (buffer-substring-no-properties p1 p2))))))))
-    
+
     (compose-mail)
     (message-goto-body)
     (insert content)
     (insert "\n\n% Bibtex Entries:\n\n")
     (loop for bib-entry in bib-entries
-	  do 
+	  do
 	  (insert bib-entry))
     (message-goto-to)))
 
@@ -49,11 +49,7 @@
 (defun email-buffer ()
   "Send buffer as the body of an email."
   (interactive)
-  (let ((content (buffer-string)))
-    (compose-mail)
-    (message-goto-body)
-    (insert content)
-    (message-goto-to)))
+  (email-region (point-min) (point-max)))
 
 
 (defvar *email-heading-point* nil
@@ -214,7 +210,7 @@ overwritten on subsequent sends."
       (message-goto-body)
       (insert (pop bibtex-entry-kill-ring))
       (message-goto-subject)
-      (insert (concat "Bibtex entry: " key)) 
+      (insert (concat "Bibtex entry: " key))
       (when (file-exists-p pdf)
 	(mml-attach-file pdf))
       (message-goto-to))))
@@ -274,8 +270,8 @@ Example usage:
     (let ((this-id nil))
       (save-excursion
 	(unless (and (outline-next-heading)
-		     (string= "Messages" (nth 4 (org-heading-components)))) 
-	  (org-insert-subheading nil) 
+		     (string= "Messages" (nth 4 (org-heading-components))))
+	  (org-insert-subheading nil)
 	  (insert "Messages"))
 	(setq this-id (org-id-get-create)))
 
