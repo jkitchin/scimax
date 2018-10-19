@@ -60,7 +60,7 @@
 
 
 
-(defvar lp-etags-language-map
+(defvar scimax-lp-etags-language-map
   '(("emacs-lisp"  . "lisp")
     ("fortran" . "fortran")
     ("python" . "python")
@@ -69,7 +69,7 @@
 Each cons cell is (src-block lang . etags language)")
 
 
-(defun lp-tangle-p ()
+(defun scimax-lp-tangle-p ()
   "Return t if the block should be tangled.
 That means :tangle is not no."
   (and (org-in-src-block-p)
@@ -78,7 +78,7 @@ That means :tangle is not no."
 				(nth 2 (org-babel-get-src-block-info 'light))))))))
 
 
-(defun lp-update-lang-tags (org-file lang)
+(defun scimax-lp-update-lang-tags (org-file lang)
   "Run etags on a stripped version of the ORG-FILE in LANG mode.
 This should run etags on a version of the org-file where all
 content that is not a src-block in LANG that is supposed to be
@@ -89,7 +89,7 @@ replaced back. This is done inside an `atomic-change-group' which
 should make this a safe operation."
   (interactive "f\nsLang:")
   (message "Updating %s tags in %s" lang org-file)
-  (when (cdr (assoc lang lp-etags-language-map))
+  (when (cdr (assoc lang scimax-lp-etags-language-map))
     (let ((open (find-buffer-visiting org-file)))
       (with-current-buffer (find-file-noselect org-file)
 	(save-buffer)
@@ -102,7 +102,7 @@ should make this a safe operation."
 	    (while (and (not (eobp)))
 	      (if (and (org-in-src-block-p)
 		       (string= lang (car (org-babel-get-src-block-info 'light)))
-		       (lp-tangle-p))
+		       (scimax-lp-tangle-p))
 		  (let* ((src (org-element-context))
 			 (end (org-element-property :end src))
 			 (len (length (buffer-substring
@@ -128,7 +128,7 @@ should make this a safe operation."
 	    (shell-command
 	     (format "etags %s --declarations --language=%s %s"
 		     (if (file-exists-p "TAGS") "-a" "")
-		     (cdr (assoc lang lp-etags-language-map))
+		     (cdr (assoc lang scimax-lp-etags-language-map))
 		     org-file))
 	    ;; now replace the content back
 	    (erase-buffer)
@@ -138,10 +138,10 @@ should make this a safe operation."
       (unless open (kill-buffer (find-buffer-visiting org-file))))))
 
 
-(defun lp-generate-tags ()
+(defun scimax-lp-generate-tags ()
   "Generate a list of tags from org-files and visit the tag-file.
 This will attempt to get tags for every language defined in
-`lp-etags-language-map'."
+`scimax-lp-etags-language-map'."
   (interactive)
   (save-buffer)
   (when (file-exists-p "TAGS") (delete-file "TAGS"))
@@ -155,7 +155,7 @@ This will attempt to get tags for every language defined in
 	  (org-babel-map-src-blocks org-file
 	    (pushnew lang langs :test 'string=))
 	  (loop for lang in langs do
-		(lp-update-lang-tags org-file lang)))
+		(scimax-lp-update-lang-tags org-file lang)))
     (goto-char current-point)
     (let ((tag-buffer (or (find-buffer-visiting "TAGS")
 			  (find-file-noselect "TAGS"))))
@@ -164,7 +164,7 @@ This will attempt to get tags for every language defined in
 	(visit-tags-table "TAGS")))))
 
 
-(defun lp-signature-doc ()
+(defun scimax-lp-signature-doc ()
   "Get signature and docstring for thing at point.
 For emacs-lisp this should work for defun and defvar. For other
 languages you will get see the definition line."
