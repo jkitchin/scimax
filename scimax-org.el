@@ -518,6 +518,7 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
 	("" "wasysym" t)
 	("" "amssymb" t)
 	("" "amsmath" t)
+	("theorems, skins" "tcolorbox" t)
 	("version=3" "mhchem" t)
 	("numbers,super,sort&compress" "natbib" nil)
 	("" "natmove" nil)
