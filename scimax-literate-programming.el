@@ -10,15 +10,15 @@
 ;; version of the file. Only blocks that should be tangled are included in this
 ;; file.
 ;;
-;; You have to generate a TAGS file first with `lp-generate-tags' which will
+;; You have to generate a TAGS file first with `scimax-lp-generate-tags' which will
 ;; work on all the org-files in the current directory, including recursive
 ;; descent into all subdirectories. The languages that are supported are defined
-;; in `lp-etags-language-map'. The TAGS are not automatically updated, if you
-;; add new definitions, you should rerun `lp-generate-tags'. After this, when
+;; in `scimax-lp-etags-language-map'. The TAGS are not automatically updated, if you
+;; add new definitions, you should rerun `scimax-lp-generate-tags'. After this, when
 ;; you are on a symbol defined in the current org-file M-. should jump to the
 ;; definition, and M-, should jump back.
 ;;
-;; `lp-signature-doc' can be used to try getting a signature/docstring for the
+;; `scimax-lp-signature-doc' can be used to try getting a signature/docstring for the
 ;; symbol at point. In emacs-lisp blocks this works on functions and variables.
 ;; In other languages it will just return the line where the symbol is defined.
 ;;
