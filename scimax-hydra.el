@@ -730,10 +730,10 @@ _C-a_ Async export: %`hydra-ox/async-export
   "
      PROJECTILE: %(projectile-project-root)
 
-     Find File            Search/Tags          Buffers                Cache
-------------------------------------------------------------------------------------------
- _ff_: file            _a_: ag/grep           _i_: Ibuffer           _c_: cache clear
- _fw_: file dwim       _g_: update gtags      _b_: switch to buffer  _x_: remove known project
+     Find File            Search/Tags          Buffers                Cache                      Projects
+---------------------------------------------------------------------------------------------------------
+ _ff_: file            _a_: ag/grep           _i_: Ibuffer           _c_: cache clear            _ww_: Switch project
+ _fw_: file dwim       _g_: update gtags      _b_: switch to buffer  _x_: remove known project   _wo_: Switch open project
  _fd_: file curr dir   _m_: multi-occur       _K_: Kill all buffers  _X_: cleanup non-existing
   _r_: recent file     _._: find definition                      ^^^^_z_: cache current
   _d_: dir             _,_: jump back
@@ -756,6 +756,8 @@ _C-a_ Async export: %`hydra-ox/async-export
   ("m"   projectile-multi-occur)
   ("p"   projectile-switch-project)
   ("r"   projectile-recentf)
+  ("ww"   projectile-switch-project)
+  ("wo"   projectile-switch-open-project)
   ("x"   projectile-remove-known-project)
   ("X"   projectile-cleanup-known-projects)
   ("z"   projectile-cache-current-file)
