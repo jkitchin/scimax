@@ -129,7 +129,8 @@ Make a new file if needed."
 
 (defun scimax-inkscape-redraw-thumbnails (&rest args)
   "Use font-lock to redraw the links."
-  (org-restart-font-lock))
+  (with-current-buffer (buffer-base-buffer)
+    (org-restart-font-lock)))
 
 ;; This gets the thumbnails to be redrawn with inline image toggling.
 (advice-add 'org-display-inline-images :after 'scimax-inkscape-redraw-thumbnails)
