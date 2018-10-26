@@ -4,4 +4,5 @@
 
 
 (ert-deftest test-hunspell-status ()
+  (require 'ispell)
   (should (equal 0 (shell-command ispell-program-name))))
