@@ -35,4 +35,5 @@ package-archive: %s
 
 
 ;; See what spell-checker there is, and if it is working.
+(flyspell-mode)
 (message "%s: exit status = %s" ispell-program-name (shell-command ispell-program-name))
