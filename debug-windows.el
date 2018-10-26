@@ -38,5 +38,6 @@ package-archive: %s
 (load-file "init.el")
 (message "%s: exit status = %s" ispell-program-name (shell-command ispell-program-name))
 (message "%s" (shell-command-to-string ispell-program-name))
-(message "%s" (shell-command-to-string (format "%s -D" ispell-program-name)))
+(message "\n\n-D output: %s" (shell-command-to-string (format "%s -D" ispell-program-name)))
+(message "\n\n-d output: %s" (shell-command-to-string (format "%s -d" ispell-program-name)))
 (message "LANG: %s" (getenv "LANG") )
