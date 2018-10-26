@@ -36,6 +36,7 @@ package-archive: %s
 
 ;; See what spell-checker there is, and if it is working.
 (load-file "init.el")
+(setenv "LANG" "C")
 (message "%s: exit status = %s" ispell-program-name (shell-command ispell-program-name))
 (message "%s" (shell-command-to-string ispell-program-name))
 (message "\n\n-D output: %s" (shell-command-to-string (format "%s -D" ispell-program-name)))
