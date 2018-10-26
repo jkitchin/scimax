@@ -35,5 +35,5 @@ package-archive: %s
 
 
 ;; See what spell-checker there is, and if it is working.
-(flyspell-mode)
+(load-file "init.el")
 (message "%s: exit status = %s" ispell-program-name (shell-command ispell-program-name))
