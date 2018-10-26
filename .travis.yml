@@ -1,12 +1,17 @@
 language: emacs-lisp
 
-sudo: required
-dist: trusty
-group: deprecated-2017Q4
+os:
+  - linux
+  - osx
+  - windows
+
+
+
 cache:
   - directories:
       # Cache stable Emacs binaries (saves 1min per job)
       - "$HOME/emacs/"
+
 # Allow Emacs snapshot builds to fail and don’t wait for these as they can take
 # a looooong time
 matrix:
@@ -15,6 +20,12 @@ matrix:
     - env: EMACS_VERSION=24.5
     - env: EMACS_VERSION=26.1
     - env: EMACS_VERSION=snapshot
+  include:
+	- os: linux
+	  sudo: required
+          dist: trusty
+          group: deprecated-2017Q4
+
 env:
   - EMACS_VERSION=24.5
   - EMACS_VERSION=25.1
@@ -22,6 +33,7 @@ env:
   - EMACS_VERSION=25.3
   - EMACS_VERSION=26.1
   - EMACS_VERSION=snapshot
+
 before_install:
   # Configure $PATH: Executables are installed to $HOME/bin
   - export PATH="$HOME/bin:$PATH"
@@ -32,9 +44,11 @@ before_install:
   - make -f emacs-travis.mk install_cask
   # Install Texinfo, if you need to build info manuals for your project
   - make -f emacs-travis.mk install_texinfo
+
 install:
   # Install your dependencies
   - cask install
+
 script:
   # Run your tests
   - make build
