@@ -19,7 +19,7 @@
 	  ;; '("gnutls-cli -p %p %h"
 	  ;;   "openssl s_client -connect %h:%p -no_ssl2 -no_ssl3 -ign_eof")
 	  ))
-  
+
   (when (< emacs-major-version 24)
     ;; For important compatibility libraries like cl-lib
     (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
@@ -32,3 +32,7 @@ package-archive: %s
 "
 	       system-type
 	       package-archives))
+
+
+;; See what spell-checker there is, and if it is working.
+(message "%s: exit status = %s" ispell-program-name (shell-command ispell-program-name))
