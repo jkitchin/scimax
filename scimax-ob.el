@@ -136,6 +136,21 @@ Defaults to 3."
 			(recenter)))))
 
 
+(defun scimax-jump-to-inline-src ()
+  "Jump to an inline src element in the buffer."
+  (interactive)
+  (let ((p '()))
+    (org-element-map (org-element-parse-buffer) 'inline-src-block
+      (lambda (isrc)
+	(push (list  (buffer-substring (org-element-property :begin isrc) (org-element-property :end isrc))
+		     (org-element-property :begin isrc))
+	      p)))
+    (ivy-read "inline: " (reverse p)
+	      :action (lambda (candidate)
+			(goto-char (second candidate))
+			(recenter)))))
+
+
 (defun scimax-ob-edit-header ()
   "Edit the src-block header in the minibuffer."
   (interactive)
