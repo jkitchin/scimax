@@ -1204,7 +1204,7 @@ _ic_: insert column    _M-<left>_: move col left    _d_: edit field
 _dc_: delete colum     _M-<right>_: move col right  _e_: eval formula
 _ir_: insert row       _M-<up>_: move row up        _E_: export table
 _ic_: delete row       _M-<down>_: move row down    _r_: recalculate
-_il_: insert line      _w_: wrap region             _I_: org-table-iterate
+_i-_: insert line      _w_: wrap region             _I_: org-table-iterate
 _-_: insert line/move  ^ ^                          _D_: formula debugger
 _s_ort  _t_ranspose _m_ark
 _<_: beginning of table _>_: end of table
@@ -1220,7 +1220,7 @@ _<_: beginning of table _>_: end of table
   ("e" org-table-eval-formula)
   ("E" org-table-export :color blue)
   ("r" org-table-recalculate)
-  ("i" org-table-iterate)
+  ("I" org-table-iterate)
   ("B" org-table-iterate-buffer-tables)
   ("w" org-table-wrap-region)
   ("D" org-table-toggle-formula-debugger)
