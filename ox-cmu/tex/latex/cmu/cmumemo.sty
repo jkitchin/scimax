@@ -1,0 +1,161 @@
+%%% culetter.sty - Cornell letterhead style (for letter class)
+%%  1995/10/23 - Convert to LaTeX2e, add Stanford logo
+%% 1999/11/29 - modified to make more general (Emma Pease)
+%% 2000/03/18 - added black and white logo option bw-logo (Christoper Manning)
+%% 2000/09/01 - put in no-logo and britdate options (Christopher Manning)
+%% 2007/02/21 - transmogrified things for use at Cornell, added no-name option (Steve Gaarder)
+%% 2007/02/22 - modified to work with pdflatex and logos in pdf format
+
+% What the user can define:
+% \mailcode{mailcode}  
+% \zipcode{zipcode}  only define if not in 94305
+% \address{855 Serra Street\\ Stanford University\\ Stanford, CA 94305-4115}
+%  \address supercedes \location, \department, and \telephone
+% \location{Room 374}  acts as a modifier to the Standard Institutional address
+% \department{Department of XXX}  department name
+% \telephone{phone number}  default is Stanford Directory Infor
+% \name{Sender's name}  required
+
+% Class options:
+% color-logo: print the logo in color
+% bw-logo: print the logo in black and white, not color
+% no-logo: include no logo nor ``Stanford University'' text -- for printing
+%               on real letterhead
+% britdate: format the address day month year, not month day, year
+% no-name: don't put the sender's name in the letterhead
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cmumemo}[2014/02/19 CMU Letterhead Memo]
+\RequirePackage{graphicx}
+\RequirePackage[colorlinks=True,urlcolor=blue,linkcolor=blue,pdfstartview=FitH]{hyperref}
+\RequirePackage{attachfile}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{fixltx2e}
+
+
+\def\logo{                      %create Logo and from address
+\null\vspace{-80pt}\begingroup
+
+\begin{minipage}[t]{3in}\vspace{-7.5mm}\sulogo \end{minipage} \hfill \begin{minipage}{2.5in} \fromaddress \end{minipage}
+\vspace{20pt}
+
+\endgroup\par}
+
+\def\completeaddress{\hbox{\vtop{\hsize=.6\textwidth\small\rm%
+                   \fromaddress}}\hfill
+                   \hbox{\@date}}
+
+\def\sendername{\fromname}
+
+% you might want to set this default depending on your printer
+\def\sulogo{\includegraphics[width=3in]{CMU_logo_horiz_black}}
+
+%+cm
+\DeclareOption{no-name}{\def\sendername{}}
+\DeclareOption{color-logo}{\def\sulogo
+        {\includegraphics[width=3in]{CMU_logo_horiz_RGB.pdf}}}
+\DeclareOption{bw-logo}{\def\sulogo
+        {\includegraphics[width=3in]{CMU_logo_horiz_black}}}
+\DeclareOption{no-logo}{\def\logo{}}
+\DeclareOption{britdate}{\renewcommand*{\today}{\number\day\space
+   \ifcase\month\or
+   January\or February\or March\or April\or May\or June\or
+   July\or August\or September\or October\or November\or December\fi
+   \space\number\year}}
+
+\ProcessOptions
+
+% increase the indent for right stuff a little to 55%
+\longindentation=.55\textwidth
+\indentedwidth=\textwidth
+\advance\indentedwidth -\longindentation
+%-cm
+
+\newcommand*{\department}[1]{\def\deptname{#1}}
+\newcommand*{\mailcode}[1]{\def\mailcodenum{#1}}
+\newcommand*{\zipcode}[1]{\def\zipcodenum{#1}}
+\newcommand*{\proftitle}[1]{\def\fromtitle{#1}}
+\newcommand*{\email}[1]{\def\emailaddr{#1}}
+\newcommand{\emaillink}[0]{\href{mailto:\emailaddr}{\emailaddr}}
+
+\department{Department of Chemical Engineering}
+\name{}
+\proftitle{}
+\location{}
+\telephone{}
+\email{}
+\mailcode{}
+\zipcode{15213}
+
+\newcommand*{\NAME}[1]{\def\name{#1}}
+\newcommand*{\TO}[1]{\def\mto{#1}}
+\newcommand*{\FROM}[1]{\def\mfrom{#1}}
+\newcommand*{\SUBJECT}[1]{\def\msubject{#1}} % Memo subject
+\newcommand*{\CC}[1]{\def\mcc{#1}}
+
+%customization for letter format
+\oddsidemargin   25pt      % Left margin on odd-numbered pages.
+\evensidemargin  25pt      % Left margin on even-numbered pages.
+\textwidth 6in
+\topmargin -6pt
+
+\ifx\fromaddress\@empty         %create default address
+                \def\fromaddress{\ifx\deptname\@empty     \else {\small \bf \deptname} \fi
+                  \ifx\name\@empty     \else \\ {\small \name} \fi
+                  \ifx\fromtitle\@empty   \else \\ {\small \fromtitle} \fi
+                  \ifx\fromlocation\@empty   \else \\ \small{\fromlocation} \fi
+                  \\ Pittsburgh, PA USA \ifx \mailcodenum\@empty \zipcodenum \else {\small \zipcodenum--\mailcodenum}\fi
+                  \ifx\telephonenum\@empty \else \\ {\small \telephonenum} \fi
+                  \ifx\emailaddr\@empty \else \\ {\small \emaillink} \fi
+                  }
+
+\fi
+
+
+\def\memoheading{
+\textbf{To:      } \mto \\
+\textbf{From:    } \mfrom \\
+\textbf{Subject: } \msubject \\
+\textbf{Date:    } \@date \\
+\textbf{Cc:      } \mcc \\
+}
+
+
+
+\def\ps@headings{\def\@oddhead{\rm To \ignorespaces\toname \hfil \today
+    \hfil Page \thepage}\def\@oddfoot{}}
+
+\def\@texttop{\vskip 0pt}
+
+\def\opening#1{\logo            %Create all up to start of
+                                        % text
+  \vskip 1pt
+  \thispagestyle{empty} 
+  \vspace{\parskip}
+  \vspace{1.25\parskip}%
+  #1\par\nobreak%
+ \memoheading
+\hrule%
+}
+
+\def\signaturelines{
+\textbf{Approval Signatures} (Two required for minimal changes, three for significant alterations of curricular requirements):
+
+\textbf{Name}\hspace{1.5in}\textbf{Signature}\hspace{1.2in}\textbf{Date}\hspace{1in}\textbf{Comments}
+\hrule
+\vspace{1cm}
+\hrule
+\vspace{1cm}
+\hrule
+\vspace{1cm}
+\hrule
+\vspace{0.25in}}
+
+
+\def\summary{\textbf{Summary: }}
+
+\def\justification{\textbf{Justification: }}
+
+\def\studentprovided{
+\textbf{Information provided by student:\\}}
