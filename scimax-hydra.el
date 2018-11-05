@@ -630,9 +630,39 @@ _t_: transpose paragraphs
   ("p" org-previous-block "previous block"))
 
 
+(defun scimax-installed-latex-packages ()
+  (if (get 'scimax-installed-latex-packages 'packages)
+      (get 'scimax-installed-latex-packages 'packages)
+    (when
+	(executable-find "tlmgr")
+      (require 'async)
+      (async-start
+       `(lambda ()
+	  (require 'cl)
+	  (mapcar
+	   (lambda (s)
+	     (second (split-string (first (split-string s ":")) " ")))
+	   (cl-loop for line in (process-lines ,(executable-find "tlmgr")
+					       "info" "--only-installed")
+		    if (and (stringp line) (string= "i" (substring line 0 1)))
+		    collect line)))
+
+       (lambda (result)
+	 (put 'scimax-installed-latex-packages 'packages result))))
+    '("Getting packages. Try later")))
+
+
+(defun scimax-insert-latex-package ()
+  (interactive)
+  (insert (format "#+latex_header: \\usepackage{%s}"
+		  (completing-read "Package: " (scimax-installed-latex-packages)))))
+
+
 (defhydra scimax-org-ref (:color blue :inherit (scimax-base/heads) :columns 3)
   "org-ref"
   ("b" org-ref-insert-bibliography-link "bibliography")
+  ("s" org-ref-insert-bibliographystyle-link "bibliographystyle")
+  ("p" scimax-insert-latex-package "package")
   ("c" org-ref-insert-link "cite")
   ("l" (org-ref-insert-link '(16)) "label")
   ("r" (org-ref-insert-link '(4)) "ref")
