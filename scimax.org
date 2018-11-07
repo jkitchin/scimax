@@ -1,3 +1,4 @@
+
 #+TITLE: Scimax - The manual
 #+AUTHOR: John Kitchin
 #+DATE: 2016
@@ -1149,7 +1150,7 @@ Pygments doesn't support ipython out of the box for some reason, which is a prob
 
 ob-ipython allows you to use Ipython magic commands in your src blocks. Here is a protypical Ipython src block with a line magic.
 
-#+BEGIN_SRC ipython 
+#+BEGIN_SRC ipython
 %time print("hello world")
 a = 6
 #+END_SRC
@@ -1161,7 +1162,7 @@ a = 6
 
 And a block with cell magic.
 
-#+BEGIN_SRC ipython 
+#+BEGIN_SRC ipython
 %%timeit
 7
 #+END_SRC
@@ -1170,7 +1171,7 @@ And a block with cell magic.
 
 We have made a few improvements to ob-ipython (see [[./scimax-ipython.org]] for much more detail). Inline images are supported now similar to how they are supported in the Jupyter notebook. You specify the %matplotlib inline magic, and then plots will appear "inline" along with any output from your cell block. The plots are saved in a directory ipython-inline-images in filenames derived from and md5 hash of the image. You can have more than one image, and you also get the output from your block, similar to the way the Jupyter notebook behaves.
 
-#+BEGIN_SRC ipython 
+#+BEGIN_SRC ipython
 print('Hello world!')
 
 %matplotlib inline
@@ -1326,6 +1327,12 @@ scimax provides the jupyter-hy src block to run hylang in src blocks. The requir
 * RSS feeds
 
 It is a major challenge to keep up with the scientific literature. `elfeed' is the package we use in scimax for that. It aggregates RSS feeds and provides a pretty easy way to consume them, capture them in to org-mode, search them, and do things with them. scimax preconfigures elfeed with some python, and emacs feeds, and you can easily add new feeds:
+
+The scimax customizations of elfeed are not loaded by default. If you want them, you have to add this to  your init files.:
+
+#+BEGIN_SRC emacs-lisp
+(require 'scimax-elfeed
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'elfeed-feeds "http://feeds.feedburner.com/acs/accacs")
