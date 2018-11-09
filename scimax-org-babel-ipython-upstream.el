@@ -70,7 +70,7 @@ string to be formatted."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-key-bindings
-  '(("<return>" . #'org-return-indent)
+  '(("<return>" . #'newline-and-indent)
     ("C-<return>" . #'org-ctrl-c-ctrl-c)
     ("M-<return>" . (lambda () (interactive) (scimax-execute-and-next-block t)))
     ("S-<return>" . #'scimax-execute-and-next-block)
