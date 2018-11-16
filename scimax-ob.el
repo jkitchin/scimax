@@ -214,7 +214,7 @@ Defaults to 3."
 
 
 ;; Move blocks
-(defun scimax-ob-move-block-up ()
+(defun scimax-ob-move-src-block-up ()
   "Move block before previous one."
   (interactive)
   (let ((src (org-element-context)))
