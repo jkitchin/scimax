@@ -1,0 +1,51 @@
+#+TEMPLATE: European Physics Journal - Springer
+#+group: manuscript
+#+key: european-physics
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+#+latex_class: svjour
+#+latex_class_options: [epj]
+#+options: toc:nil date:nil author:nil
+
+# https://mc.manuscriptcentral.com/societyimages/epja/EPJA_templ.zip
+
+# Note: this is untested. I added this based on https://emacs.stackexchange.com/questions/46017/is-there-a-way-to-export-latex-template-to-scimax-template
+
+#+BEGIN_EXPORT latex
+\title{Insert your title here}
+\subtitle{Do you have a subtitle?\\ If so, write it here}
+\author{First author\inst{1} \and Second author\inst{2}
+% \thanks is optional - remove next line if not needed
+\thanks{\emph{Present address:} Insert the address here if needed}
+}
+
+\offprints{} % Insert a name or remove this line
+
+\institute{Insert the first address here \and the second here}
+
+\date{Received: date / Revised version: date}
+
+\abstract{
+Insert your abstract here.
+
+\PACS{
+      {PACS-key}{describing text of that key}   \and
+      {PACS-key}{describing text of that key}
+     }
+}
+
+\maketitle
+#+END_EXPORT
+
+
+* Introduction
+
+* Methods
+
+* Results and Discussion
+
+* Conclusions
+
+* References
+bibliographystyle:<replace: style>
+bibliography:<replace: bibfile>

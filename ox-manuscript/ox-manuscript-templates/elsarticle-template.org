@@ -1,0 +1,82 @@
+#+TEMPLATE:  - Elsevier
+#+group: manuscript
+#+key: elsarticle
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: manuscript.org
+#+LATEX_CLASS: elsarticle
+#+LATEX_CLASS_OPTIONS: [number, sort&compress, review, 12pt]
+
+#+OPTIONS:   H:4 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:nil pri:nil tags:not-in-toc
+#+OPTIONS: author:nil
+#+latex_header: \usepackage[utf8]{inputenc}
+#+latex_header: \usepackage{fixltx2e}
+#+latex_header: \usepackage{url}
+#+latex_header: \usepackage[version=3]{mhchem}
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{float}
+#+latex_header: \usepackage{color}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \usepackage{textcomp}
+#+latex_header: \usepackage{wasysym}
+#+latex_header: \usepackage{latexsym}
+#+latex_header: \usepackage[T1]{fontenc}
+#+latex_header: \usepackage{amssymb}
+#+latex_header: \usepackage{lineno}
+#+latex_header: \usepackage[linktocpage, pdfstartview=FitH, colorlinks, linkcolor=blue, anchorcolor=blue, citecolor=blue, filecolor=blue, menucolor=blue, urlcolor=blue]{hyperref}
+
+#+latex_header: \modulolinenumbers[5]
+#+latex_header: \journal{Journal of \LaTeX\ Templates}
+
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+# https://www.elsevier.com/__data/assets/file/0007/56842/elsarticle-template.zip
+
+# Note this is untested. I added it based on https://emacs.stackexchange.com/questions/46017/is-there-a-way-to-export-latex-template-to-scimax-template
+
+\begin{frontmatter}
+
+\title{Elsevier \LaTeX\ template\tnoteref{mytitlenote}}
+\tnotetext[mytitlenote]{Fully documented templates are available in the elsarticle package on \href{ http://www.ctan.org/tex-archive/macros/latex/contrib/elsarticle}{CTAN}.}
+
+%% Group authors per affiliation:
+\author{Elsevier\fnref{myfootnote}}
+\address{Radarweg 29, Amsterdam}
+\fntext[myfootnote]{Since 1880.}
+
+# %% or include affiliations in footnotes:
+\author[mymainaddress,mysecondaryaddress]{Elsevier Inc}
+\ead[url]{www.elsevier.com}
+
+\author[mysecondaryaddress]{Global Customer Service\corref{mycorrespondingauthor}}
+\cortext[mycorrespondingauthor]{Corresponding author}
+\ead{support@elsevier.com}
+
+\address[mymainaddress]{1600 John F Kennedy Boulevard, Philadelphia}
+\address[mysecondaryaddress]{360 Park Avenue South, New York}
+
+\begin{abstract}
+<replace: abstract text>
+\end{abstract}
+
+\begin{keyword}
+<replace: key1> \sep <replace: key2> \sep
+\end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
+
+
+* Introduction
+
+* Methods
+
+* Results and Discussion
+
+* Conclusions
+
+* References
+
+bibliographystyle:elsarticle-num
+bibliography:<replace: bibfile>
