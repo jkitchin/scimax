@@ -186,8 +186,18 @@ Usually called in a hook function."
 	       "<src lang=\"python\">\n?\n</src>"))
 
 (add-to-list 'org-structure-template-alist
-	     '("plt" "%matplotlib inline\nimport matplotlib.pyplot as plt\n"
+	     '("plt" "%matplotlib inline\nimport matplotlib.pyplot as plt\n?"
 	       ""))
+
+(add-to-list 'org-structure-template-alist
+	     '("np" "import numpy as np\n?"
+	       ""))
+
+(add-to-list 'org-structure-template-alist
+	     '("anp" "import autograd.numpy as np\n?"
+	       ""))
+
+
 
 (setq org-babel-default-header-args:ipython
       '((:results . "output replace drawer")
@@ -526,7 +536,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 
 
 (defun scimax-ob-ipython-popup-command (event)
-  "Popu a menu of actions for src blocks."
+  "Popup a menu of actions for src blocks."
   (interactive "e")
   (call-interactively
    (or (popup-menu (append '("ob-ipython") ob-ipython-menu-items))
