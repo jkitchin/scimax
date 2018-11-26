@@ -58,7 +58,8 @@
 ;; auto
 ;; none
 
-
+(defvar scimax-lp-consider-all nil
+  "If non-nil consider all src blocks when making tags.")
 
 (defvar scimax-lp-etags-language-map
   '(("emacs-lisp"  . "lisp")
@@ -70,12 +71,13 @@ Each cons cell is (src-block lang . etags language)")
 
 
 (defun scimax-lp-tangle-p ()
-  "Return t if the block should be tangled.
+  "Return absolute tangle filename if the block should be tangled.
 That means :tangle is not no."
-  (and (org-in-src-block-p)
-       (not (string= "no"
-		     (cdr (assq :tangle
-				(nth 2 (org-babel-get-src-block-info 'light))))))))
+  (when (org-in-src-block-p)
+    (let ((tangle (cdr (assq :tangle (nth 2 (org-babel-get-src-block-info 'light))))))
+      ;; Note this might be a "yes"
+      (when (not (string= "no" tangle))
+	(expand-file-name tangle)))))
 
 
 (defun scimax-lp-update-lang-tags (org-file lang)
@@ -93,7 +95,9 @@ should make this a safe operation."
     (let ((open (find-buffer-visiting org-file)))
       (with-current-buffer (find-file-noselect org-file)
 	(save-buffer)
-	(let* ((content (buffer-string)))
+
+	(let* ((content (buffer-string))
+	       (inhibit-read-only t))
 	  ;; This has potential for disaster since it deletes the buffer! I think
 	  ;; this is pretty safe, but you should be prepared for disaster. If
 	  ;; there is any error in this, I think it undoes the buffer damage.
@@ -102,7 +106,7 @@ should make this a safe operation."
 	    (while (and (not (eobp)))
 	      (if (and (org-in-src-block-p)
 		       (string= lang (car (org-babel-get-src-block-info 'light)))
-		       (scimax-lp-tangle-p))
+		       (or (scimax-lp-tangle-p) scimax-lp-consider-all))
 		  (let* ((src (org-element-context))
 			 (end (org-element-property :end src))
 			 (len (length (buffer-substring
@@ -138,31 +142,47 @@ should make this a safe operation."
       (unless open (kill-buffer (find-buffer-visiting org-file))))))
 
 
-(defun scimax-lp-generate-tags ()
+(defvar scimax-lp-update-tags-always t
+  "If non-nil, update TAGS file whenever the org file is newer.")
+
+
+(defun scimax-lp-generate-tags (&optional refresh)
   "Generate a list of tags from org-files and visit the tag-file.
 This will attempt to get tags for every language defined in
 `scimax-lp-etags-language-map'."
-  (interactive)
-  (save-buffer)
-  (when (file-exists-p "TAGS") (delete-file "TAGS"))
-  (let* ((current-point (point))
-	 (org-files (f-entries
-		     "."
-		     (lambda (f) (f-ext? f "org")) t))
-	 langs)
-    (loop for org-file in org-files do
-	  (setq langs '())
-	  (org-babel-map-src-blocks org-file
-	    (pushnew lang langs :test 'string=))
-	  (loop for lang in langs do
-		(scimax-lp-update-lang-tags org-file lang)))
-    (goto-char current-point)
-    (let ((tag-buffer (or (find-buffer-visiting "TAGS")
-			  (find-file-noselect "TAGS"))))
+  (interactive "P")
+  (when (and (eq major-mode 'org-mode)
+	     (or scimax-lp-update-tags-always refresh))
+    (save-buffer)
+    ;; (when (file-exists-p "TAGS") (delete-file "TAGS"))
+    (let* ((current-point (point))
+	   (org-files (f-entries
+		       "."
+		       (lambda (f) (f-ext? f "org")) t))
+	   langs)
+      (loop for org-file in org-files do
+	    (setq langs '())
+	    (org-babel-map-src-blocks org-file
+	      (pushnew lang langs :test 'string=))
+	    (loop for lang in langs do
+		  (scimax-lp-update-lang-tags org-file lang)))
+      (goto-char current-point)))
+  (let ((tag-buffer (or (find-buffer-visiting "TAGS")
+			(find-file-noselect "TAGS"))))
+    (when tag-buffer
       (with-current-buffer tag-buffer
 	(revert-buffer :ignore-auto :noconfirm)
 	(visit-tags-table "TAGS")))))
 
+
+;; I had to make this small function for a reason I don't understand. I could
+;; not use the `scimax-lp-generate-tags' function directly without an error
+;; related to number of arguments.
+(defun scimax-lp-xref-advice (arg)
+  ":before advice for xref-find-definitions to automatically make tags."
+  (scimax-lp-generate-tags))
+
+(advice-add 'xref-find-definitions :before #'scimax-lp-xref-advice)
 
 (defun scimax-lp-signature-doc ()
   "Get signature and docstring for thing at point.
@@ -171,11 +191,13 @@ languages you will get see the definition line."
   (interactive)
   (when (org-in-src-block-p)
     ;; This is a weird issue. It seems like read moves the point inside the
-    ;; save-window-excursion, so I save the point here to move back later.
+    ;; save-window-excursion and doesn't restore it, so I save the point here to
+    ;; move back later.
     (let ((current-point (point)))
       (save-window-excursion
-	(let* ((fname (symbol-name (symbol-at-point)))
-	       (p (xref-find-definitions fname)))
+	(let* ((sname (symbol-name (symbol-at-point)))
+	       (p (condition-case nil (xref-find-definitions sname)
+		    (error nil))))
 	  (cond
 	   ((string= (get-char-property (point) 'lang) 'emacs-lisp)
 	    (cond
@@ -184,7 +206,7 @@ languages you will get see the definition line."
 		     (args (nth 2 def))
 		     (n3 (nth 3 def))
 		     (docstring (if (stringp n3) n3 "")))
-		(message "%s: (%s) \"%s\"" fname args docstring)))
+		(message "%s: (%s) \"%s\"" sname args docstring)))
 	     ((looking-at "(defvar")
 	      (let* ((def (read (current-buffer)))
 		     (var (nth 1 def))
@@ -192,13 +214,57 @@ languages you will get see the definition line."
 		     (ds (nth 3 def)))
 		(message "%s=%s \"%s\"" var val ds)))))
 	   (t
-	    ;; This assumes that xref-find-definitions moved the point. I don't
-	    ;; know any better way to get reasonable information about the
-	    ;; definition. You need parsing to get it in general.
+	    ;; if p is nil it means nothing was found, so we try searching
+	    ;; instead. this is not a very sophisticated search yet, we should
+	    ;; search until we are in the right kind of code block. This will
+	    ;; fail on things not defined in the current file, e.g. variable
+	    ;; names that are imported.
+	    (unless p
+	      (goto-char (point-min))
+	      (re-search-forward sname))
+	    ;; Then, we show the context
 	    (message (buffer-substring
 		      (line-beginning-position)
 		      (line-end-position)))))))
       (goto-char current-point))))
+
+;; * Advice on org-babel-load-file
+
+;; The idea here is to replace all definitions of the tangled files with the
+;; org-file in `load-history' so that describe-function/variable points to them
+;; instead.
+
+(defun scimax-lp-modify-load-history (&rest args)
+  "Modify the load-history to point all tangled files to compile."
+  (interactive)
+  (let* ((file (nth 0 args))
+	 (compile (nth 1 args))
+	 (open (find-buffer-visiting file))
+	 tf
+	 (tangle-files '()))
+    (org-babel-map-src-blocks file
+      ;; I am not sure if it matters if the
+      (setq tf (cdr (assq :tangle (nth 2 (org-babel-get-src-block-info 'light)))))
+      (cond
+       ((string= "yes" tf)
+	(setq tf (concat (file-name-sans-extension (buffer-file-name)) ".el")))
+       ((not (string= "no" tf))
+	(setq tf (expand-file-name tf)))
+       (t
+	(setq tf nil)))
+      (when tf
+	(setq tf (concat tf (if compile "c" "")))
+	(pushnew (expand-file-name tf) tangle-files :test #'string=)))
+    ;; now modify the load-history
+    (mapc (lambda (tf)
+	    (when (car (assoc tf load-history))
+	      (setf (car (assoc tf load-history)) (expand-file-name file))))
+	  tangle-files)
+    (unless open (kill-buffer open))))
+
+(advice-add 'org-babel-load-file :after #'scimax-lp-modify-load-history)
+
+;; (advice-remove 'org-babel-load-file  'scimax-lp-modify-load-history)
 
 
 (provide 'scimax-literate-programming)
