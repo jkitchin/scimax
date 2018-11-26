@@ -24,24 +24,45 @@
 (require 'f)
 (require 'scimax-functional-text)
 
+
 ;; * Hashtag functional text
+(defface scimax-twitter-hashtag-face
+  `((t (:inherit org-link
+		 :weight bold)))
+  "Color for twitter hashtags.")
+
 (scimax-functional-text
  "\\(^\\|[[:punct:]]\\|[[:space:]]\\)\\(?2:#\\(?1:[[:alnum:]]+\\)\\)"
  (lambda ()
    (browse-url (format "https://twitter.com/hashtag/%s" (match-string 1))))
  :grouping 2
- :face (list 'org-link)
+ :face (list 'scimax-twitter-hashtag-face)
  :help-echo "Click me to open hashtag.")
 
 
 ;; * Twitter handles
+(defface scimax-twitter-handle-face
+  `((t (:inherit org-link
+                 :foreground "DarkOrange1"
+		 :weight bold)))
+  "Color for twitter handles.")
+
 (scimax-functional-text
  "\\(^\\|[[:punct:]]\\|[[:space:]]\\)\\(?2:@\\(?1:[[:alnum:]]+\\)\\)"
- (lambda ()
-   (browse-url (format "https://twitter.com/%s" (match-string 1))))
+ 'scimax-twitter-handle-hydra/body
  :grouping 2
- :face (list 'org-link)
+ :face (list 'scimax-twitter-handle-face)
  :help-echo "Click me to open username.")
+
+(defhydra scimax-twitter-handle-hydra (:color blue)
+  "
+_k_: copy  _o_: open"
+  ("k" (lambda () (kill-new (match-string 1))))
+  ("o" (lambda ()
+	 (browse-url (format "https://twitter.com/%s" (match-string 1)))))
+  ;; TODO:
+  ;; ("f" follow)
+  )
 
 
 ;; * Twitter usernames
@@ -74,6 +95,7 @@
 	(let ((userfile (expand-file-name username
 					  (f-join scimax-twitter-directory "whois"))))
 	  (when (or reload (not (f-exists? userfile)))
+	    (message "Getting user %s" username)
 	    (with-temp-file userfile
 	      (insert (shell-command-to-string
 		       (format "t whois %s" username))))))))
@@ -88,11 +110,13 @@
 
 
 (defun scimax-twitter-ivy-candidates (&optional reload)
-  "Returns a list of candidates"
+  "Returns a list of Twitter handle candidates."
   (interactive "P")
   (when (or reload (null scimax-twitter-usernames))
-    (setq scimax-twitter-usernames (-uniq (append (process-lines "t" "followings")
-						  (process-lines "t" "followers")))))
+    (setq scimax-twitter-usernames (-uniq
+				    (mapcar 'file-name-nondirectory
+					    (f-entries
+					     (f-join scimax-twitter-directory "whois"))))))
   (when (or reload (null scimax-twitter-ivy-candidates))
     (setq scimax-twitter-ivy-candidates
 	  (loop for username in scimax-twitter-usernames
@@ -189,17 +213,19 @@ Returns the msgid for the posted tweet or the output from t."
   ;; This will convert org-entities to utf-8 chars
   (setq msg (org-export-string-as msg 'twitter t '(:ascii-charset utf-8)))
 
-  (let* ((output (apply 'process-lines `("t" "update" ,msg
-					 ,@(when file '("-f"))
-					 ,@(when file `(,file)))))
+  (let* ((cmd `("t" "update" ,msg
+		,@(when file '("-f"))
+		,@(when file `(,file))))
+	 (msg (message "\"%s\"" (s-join " " cmd)))
+	 (output (apply 'process-lines cmd))
 	 (last-line (car (last output))))
     (if (string-match "`t delete status \\([0-9]*\\)`" last-line)
 	(prog1
 	    (match-string-no-properties 1 last-line)
 	  (org-entry-put nil "TWEETED_AT"
-			 (format-time-string "<%Y-%m-%d %a %H:%M>")))
+			 (format-time-string "[%Y-%m-%d %a %H:%M]")))
       ;; this probably means there was an error.
-      last-line)))
+      output)))
 
 
 (defun scimax-twitter-reply (msg msgid &optional file)
@@ -207,8 +233,13 @@ Returns the msgid for the posted tweet or the output from t."
 Returns the msgid for the posted tweet or the output from t."
 
   (setq msg (org-export-string-as msg 'twitter t '(:ascii-charset utf-8)))
+  ;; Note this does not account for links/images which shorten the count.
 
-  (let* ((output (apply 'process-lines `("t" "reply" ,msgid ,msg
+  (let* ((cmds `("t" "reply" ,msgid ,msg
+		 ,@(when file '("-f"))
+		 ,@(when file `(,file))))
+	 (s (message "%S" (s-join " " `,@cmds)))
+	 (output (apply 'process-lines `("t" "reply" ,msgid ,msg
 					 ,@(when file '("-f"))
 					 ,@(when file `(,file)))))
 	 (last-line (car (last output))))
@@ -235,6 +266,14 @@ last one."
 	    msgid (apply 'tweet-reply `(,msgid ,@(if (stringp tweet)
 						     (list tweet)
 						   tweet)))))))
+
+
+(defmacro scimax-twitter-save-account (&rest body)
+  "Execute body but save and restore the current account.
+You need this for tweeting from multiple accounts."
+  (let ((current-account (scimax-twitter-active-account))))
+  ,@body
+  (scimax-twitter-set-account current-account))
 
 
 ;; * Twitter - org integration
@@ -266,7 +305,7 @@ string that will be the tweet, reply-id is a string of the id to
 reply to (it may be nil), and file is an optional media file to
 attach to the tweet. If there are code blocks with a :gist in the
 header, they will be uploaded as a gist, and the link added to
-the msg. "
+the msg."
   (let (msg
 	reply-id
 	file
@@ -301,7 +340,16 @@ the msg. "
 				'(latex-environment latex-fragment) 'identity)))
       (when latex-frag
 	(goto-char (org-element-property :begin latex-frag))
-	(unless (ov-at) (org-toggle-latex-fragment))
+	;; Customized look for tweets.
+	(let ((org-preview-latex-default-process 'imagemagick)
+	      (org-latex-default-packages-alist org-latex-default-packages-alist)
+	      (org-format-latex-options org-format-latex-options))
+	  (add-to-list 'org-latex-default-packages-alist '("" "amsmath" t) t)
+	  (add-to-list 'org-latex-default-packages-alist '("theorems, skins" "tcolorbox" t) t)
+	  (add-to-list 'org-latex-default-packages-alist '("" "fourier" t) t)
+	  (plist-put org-format-latex-options :latex-fragment-pre-body "\\mathversion{bold}\n")
+	  (org-remove-latex-fragment-image-overlays)
+	  (org-toggle-latex-fragment))
 	(setq file (plist-get (cdr (overlay-get (ov-at) 'display)) :file)))
 
       ;; src-blocks
@@ -351,16 +399,18 @@ done."
 	   (username (nth (- i 1) output)))
       (org-entry-put nil "TWITTER_URL" (format "https://twitter.com/%s/status/%s"
 					       username
-					       msgid)))
+					       (s-trim msgid))))
     (message "%s" components)))
 
 ;; Replace the speed command
 (setf (cdr (assoc "T" org-speed-commands-user)) 'scimax-twitter-tweet-headline)
 
 
-(defun scimax-twitter-org-subtree-tweet-thread ()
-  "Tweet the subtree as a thread."
-  (interactive)
+(defun scimax-twitter-org-subtree-tweet-thread (&optional tweet)
+  "Tweet the subtree as a thread.
+The default behavior is to dry run and check each heading for length.
+Use a prefix arg to make it actually tweet."
+  (interactive "P")
 
   (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
     (shell-command (format "t set active %s" account)))
@@ -379,7 +429,11 @@ done."
 	  (org-set-tags-to (append current-tags '("thread")))))
 
       (while (looking-at org-heading-regexp)
-	(scimax-twitter-tweet-headline)
+	(if tweet
+	    (scimax-twitter-tweet-headline)
+	  (unless (scimax-twitter-check-length)
+	    (org-todo "TODO")
+	    (error "This headline is probably too long.")))
 	(org-next-visible-heading 1)))))
 
 
@@ -445,6 +499,32 @@ done."
 		      "Account: "
 		      (-slice (process-lines "t" "accounts") 0 -1 2))))
   (message (shell-command-to-string (format "t set active %s" user))))
+
+
+(defun scimax-twitter-check-length ()
+  "Return if the headline is less than 280 chars.
+Any link will count 23 characters."
+  (interactive)
+  (let* ((text (nth 4 (org-heading-components)))
+	 (nurls 0)
+	 (nurl-chars 0)
+	 (twitter-length)
+	 (url-string)
+	 (ret))
+    ;; Count # urls and number of url chars.
+    (with-temp-buffer
+      (insert text)
+      (goto-char (point-min))
+      (while (re-search-forward "http" nil t)
+	(setq nurls (+ 1 nurls))
+	(setq url-string (url-get-url-at-point))
+	(setq nurl-chars (+ nurl-chars (length url-string)))))
+
+    (setq twitter-length (+ (- (length text) nurl-chars) (* 23 nurls)))
+
+    (setq ret (< twitter-length 280 ))
+    (message "Length is %s" (if ret "probably ok" "too long"))
+    ret))
 
 
 ;; * Exporter
@@ -513,6 +593,37 @@ done."
   "Pseudo-export function for deleting a tweet in a headline."
   (scimax-twitter-delete-status))
 
+(defun scimax-twitter-export-pdf (&rest args)
+  (interactive)
+
+  (let ((tw-handle-regex "\\(^\\|[[:punct:]]\\|[[:space:]]\\)\\(?2:@\\(?1:[[:alnum:]_]+\\)\\)")
+	(tw-hashtag-regex "\\(^\\|[[:punct:]]\\|[[:space:]]\\)\\(?2:#\\(?1:[[:alnum:]]+\\)\\)")
+	(org-export-with-toc nil)
+	(org-export-with-title nil)
+	(org-export-before-processing-hook '((lambda (_)
+					       (while (re-search-forward tw-handle-regex nil t)
+						 (replace-match (format " [[%s][@%s]]"
+									(format "https://twitter.com/%s" (match-string 1))
+									(match-string 1))
+								t))
+
+					       (goto-char (point-min))
+					       (while (re-search-forward tw-hashtag-regex nil t)
+						 (replace-match (format " [[%s][#%s]]"
+									(format "https://twitter.com/hashtag/%s" (match-string 1))
+									(match-string 1))
+								t))
+					       ;; This just makes figures a
+					       ;; reasonable size. Most of the
+					       ;; figure have attr_org
+					       ;; attributes because they are
+					       ;; screenshots.
+					       (goto-char (point-min))
+					       (while (re-search-forward "#\\+attr_org:" nil t)
+						 (replace-match "#\+attr_latex: :placement [H] :width 3in"
+								t))))))
+
+    (org-open-file (org-latex-export-to-pdf nil t))))
 
 (org-export-define-derived-backend 'twitter 'ascii
   :filters-alist '((:filter-bold . scimax-twitter-filter-bold)
@@ -523,49 +634,105 @@ done."
        ((?h "Headline" scimax-twitter-export-headline)
 	(?H "Headline (force)" scimax-twitter-export-headline-force)
 	(?s "Subtree" scimax-twitter-export-subtree)
-	(?d "delete" scimax-twitter-export-delete))))
+	(?d "delete" scimax-twitter-export-delete)
+	(?p "pdf" scimax-twitter-export-pdf))))
 
 ;; * scheduling tweets
+
+;; The Twitter API for scheduling tweets is not that easy to use, and you have
+;; to register as an advertiser. Rather than do that, here I try to leverage the
+;; at scheduler (avialiable on Mac and Linux) to do scheduling of tweets. The
+;; idea is to use teh scheduled property on a headline to specify when to tweet
+;; it, then create a shell script that runs to tweet it. This is limited to a
+;; single image I think.
 
 (unless (f-dir? (f-join scimax-twitter-directory "scheduled-tweets"))
   (make-directory (f-join scimax-twitter-directory "scheduled-tweets") t))
 
-
 (defun scimax-twitter-schedule-tweet ()
-  "This sets a tweet to be scheduled.
-This creates a file to be loaded later."
+  "Schedule a tweet using at.
+This writes a shell script that saves the current account, sets
+the active account, tweets, restores the account, and deletes the
+script. It then schedules the tweet using at."
   (interactive)
   (let* ((id (org-id-get-create))
-	 (datafile (expand-file-name
-		    (concat (org-entry-get nil "ID") ".el")
-		    (f-join scimax-twitter-directory "scheduled-tweets")))
-	 (data `(progn
-		  (find-file ,(buffer-file-name))
-		  (re-search-forward ,id)
-		  (when (org-time>
-			 ;; current-time
-			 (format-time-string "<%Y-%m-%d %a %H:%M>")
-			 ;; scheduled entry time
-			 ,(format-time-string
-			   "<%Y-%m-%d %a %H:%M>" (org-get-scheduled-time nil)))
-		    (scimax-twitter-tweet-headline)
-		    (org-todo "DONE")
-		    (org-entry-put nil "TWEETED_AT"
-				   (format-time-string "<%Y-%m-%d %a %H:%M>"))
-		    (f-delete ,datafile)))))
+	 (sh-file (expand-file-name
+		   (concat (org-entry-get nil "ID") ".sh")
+		   (f-join scimax-twitter-directory "scheduled-tweets")))
+	 (scheduled-time (format-time-string
+			  "%Y%m%d%H%M" (org-get-scheduled-time nil)))
+	 (components (scimax-twitter-org-tweet-components))
+	 (msg (nth 0 components))
+	 (img (nth 2 components))
+	 (twitter-account (prog1 (org-entry-get nil "TWITTER_ACCOUNT" t)
+			    (unless (org-entry-get nil "TWITTER_ACCOUNT" t)
+			      (error "You need to set a TWITTER_ACCOUNT."))))
+	 (cmd (concat
+	       "account=`t whoami | grep \"Screen name\" |sed 's/.*@//'`\n"
+	       (format "t set active %s\n" twitter-account)
+	       (format "t update \"%s\"" msg)
+	       (if img (format " -f %s" (expand-file-name img)) "\n")
+	       ;; here is where we save the output in case we need the tweet id later, or if there is an error.
+	       (format "> %s.txt\n" id)
+	       ;; This restores the current active account
+	       "t set active $account\n")))
 
-    (with-temp-file datafile
-      (pp data (current-buffer)))
-    (org-entry-put nil "TWEET_SCHEDULED" datafile)))
+    (with-temp-file sh-file
+      (insert "#!/bin/bash\n")
+      (insert cmd)
+      ;; To avoid accumulating these, I remove the file
+      (insert (format "rm %s\n" sh-file)))
+    (org-entry-put nil "TWEET_SCHEDULED" sh-file)
+    (shell-command (format "at -f %s -t %s"
+			   sh-file
+			   scheduled-time))))
 
 
-(defun scimax-twitter-process-scheduled ()
+
+(defun scimax-twitter-active-account ()
+  "Return the active Twitter account."
   (interactive)
-  (loop for file in
-	(f-files (f-join scimax-twitter-directory "scheduled-tweets"))
-	do
-	(message "Loading %s" file)
-	(load-file file)))
+  (let ((s (car (-filter (lambda (s) (s-starts-with? "Screen name" s))
+			 (process-lines "t" "whoami")))))
+    (string-match
+     "@\\(.*\\)" s)
+    (match-string 1 s)))
+
+;; (defun scimax-twitter-schedule-tweet ()
+;;   "This sets a tweet to be scheduled.
+;; This creates a file to be loaded later."
+;;   (interactive)
+;;   (let* ((id (org-id-get-create))
+;; 	 (datafile (expand-file-name
+;; 		    (concat (org-entry-get nil "ID") ".el")
+;; 		    (f-join scimax-twitter-directory "scheduled-tweets")))
+;; 	 (data `(progn
+;; 		  (find-file ,(buffer-file-name))
+;; 		  (re-search-forward ,id)
+;; 		  (when (org-time>
+;; 			 ;; current-time
+;; 			 (format-time-string "<%Y-%m-%d %a %H:%M>")
+;; 			 ;; scheduled entry time
+;; 			 ,(format-time-string
+;; 			   "<%Y-%m-%d %a %H:%M>" (org-get-scheduled-time nil)))
+;; 		    (scimax-twitter-tweet-headline)
+;; 		    (org-todo "DONE")
+;; 		    (org-entry-put nil "TWEETED_AT"
+;; 				   (format-time-string "<%Y-%m-%d %a %H:%M>"))
+;; 		    (f-delete ,datafile)))))
+
+;;     (with-temp-file datafile
+;;       (pp data (current-buffer)))
+;;     (org-entry-put nil "TWEET_SCHEDULED" datafile)))
+
+
+;; (defun scimax-twitter-process-scheduled ()
+;;   (interactive)
+;;   (loop for file in
+;; 	(f-files (f-join scimax-twitter-directory "scheduled-tweets"))
+;; 	do
+;; 	(message "Loading %s" file)
+;; 	(load-file file)))
 
 
 (provide 'scimax-twitter)
