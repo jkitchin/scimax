@@ -153,6 +153,25 @@ sentence in the region."
 
 (global-set-key (kbd "M-<backspace>") 'backward-kill-sentence)
 
+;; * avy jump commands
+
+(defun avy-jump-to-word-in-line (&optional arg)
+  "Jump to a word in the current line."
+  (interactive)
+  (avy-with word-jump
+    (avy--process
+     (let ((p '())
+	   (e (line-end-position)))
+       (save-excursion
+	 (goto-char (line-beginning-position))
+	 (push (point) p)
+	 (while (< (point) e)
+	   (forward-word)
+	   (save-excursion
+	     (backward-word)
+	     (push (point) p)))
+	 (reverse p)))
+     (avy--style-fn avy-style))))
 
 (defun avy-jump-to-sentence ()
   "Jump to a sentence with avy."
@@ -184,7 +203,9 @@ sentence in the region."
 	 (push (point) p)
 	 (while (< (point) e)
 	   (forward-paragraph)
-	   (push (point) p))
+	   (save-excursion
+	     (backward-paragraph)
+	     (push (+ 1 (point)) p)))
 	 (reverse p)))
      (avy--style-fn avy-style))))
 
