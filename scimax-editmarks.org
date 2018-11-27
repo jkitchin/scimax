@@ -40,8 +40,6 @@ There are things to do. Check them out here: [[elisp:(org-agenda nil "t" "<")]]
   :PROPERTIES:
   :tangle:   no
   :END:
-
-
 ** Insertions
 
  {>+insert one line+<}
@@ -59,7 +57,6 @@ delete one line
 {>-delete
 multiple
 lines-<}
-
 
 ** Comments
 
@@ -313,7 +310,7 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 						    (cdr content-bounds)))))
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<p style=\"color:blue\">%s</p>@@"
+	    (format "@@html:<span style=\"color:blue\">%s</span>@@"
 		    (buffer-substring-no-properties (car content-bounds)
 						    (cdr content-bounds))))))))
 
@@ -329,7 +326,7 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 						    (cdr content-bounds)))))
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<p style=\"color: red\">%s</p>@@"
+	    (format "@@html:<span style=\"color: red\">%s</span>@@"
 		    (buffer-substring-no-properties (car content-bounds)
 						    (cdr content-bounds))))))))
 
@@ -346,7 +343,7 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 					    (cdr content-bounds)))))
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<p style=\"color: orange\">%s</p>@@"
+	    (format "@@html:<span style=\"color: orange\">%s</span>@@"
 		    (buffer-substring-no-properties (car content-bounds)
 						    (cdr content-bounds))))))))
 
@@ -363,7 +360,7 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 								   (cdr content-bounds)))))
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<p style=\"color: purple\">%s</p>@@"
+	    (format "@@html:<span style=\"color: purple\">%s</span>@@"
 		    (buffer-substring-no-properties (car content-bounds)
 						    (cdr content-bounds))))))))
 #+END_SRC
@@ -413,7 +410,7 @@ we go with the font color."
 
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<p style=\"color: %s; background-color: %s\">%s</p>@@"
+	    (format "@@html:<span style=\"color: %s; background-color: %s\">%s</span>@@"
 		    fg-hex bg-hex
 		    (buffer-substring-no-properties
 		     (car content-bounds)
