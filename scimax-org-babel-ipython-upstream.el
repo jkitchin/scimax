@@ -583,7 +583,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 (defun scimax-ob-ipython-kill-kernel ()
   "Kill the active kernel."
   (interactive)
-  (when (y-or-n-p "Kill kernel? ")
+  (when (and (not (s-contains? "*temp*" (buffer-name))) (y-or-n-p "Kill kernel? "))
     (ob-ipython-kill-kernel
      (cdr (assoc (scimax-ob-ipython-default-session)
 		 (ob-ipython--get-kernel-processes))))
