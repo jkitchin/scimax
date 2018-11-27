@@ -433,6 +433,7 @@ _p_: ffap
 
 (defhydra scimax-jump-word (:color blue :inherit (scimax-base/heads) :columns 3)
   "word"
+  ("l" avy-jump-to-word-in-line "in line")
   ("w" avy-goto-word-1 "word1")
   ("0" avy-goto-word-0 "word0")
   ("a" avy-goto-word-0-above "above-0")
