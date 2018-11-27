@@ -586,6 +586,7 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 	       (concat (buffer-substring beg end)
 		       "\nmouse-1 to toggle."))
   (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
+				    (define-key map (kbd "C-c C-x C-l") 'org-toggle-latex-fragment)
 				    (define-key map [mouse-1]
 				      `(lambda ()
 					 (interactive)
