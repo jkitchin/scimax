@@ -121,13 +121,13 @@ This is a macro so I don't have to quote the hydra name."
   "base"
   ("," scimax-hydra-pop "back" :color blue)
   ("x" counsel-M-x "M-x")
-  ("<return>" save-buffer "Save")
+  ("C-s" save-buffer "Save")
   ("/" undo-tree-undo "undo" :color red)
   ("\\" undo-tree-redo "redo" :color red)
   ("8" (switch-to-buffer "*scratch*") "*scratch*")
   ("?" scimax-hydra-help "Menu help")
   ("." scimax-dispatch-mode-hydra "Major mode hydras")
-  ("u" universal-argument "C-u" :color "red\"\"")
+  ("u" (hydra--universal-argument current-prefix-arg) "C-u" :color red)
   ("q" nil "quit"))
 
 ;;* scimax hydra
