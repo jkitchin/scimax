@@ -453,10 +453,19 @@ _p_: ffap
 
 ;;** bookmarks
 
+(require 'org-mac-link)
+
+(defun scimax-bookmark-chrome (nickname)
+  "Save the url currently open as a bookmark."
+  (interactive (list (bmkp-completing-read-lax "Nickname: ")))
+  (bmkp-url-target-set (car (split-string (org-as-mac-chrome-get-frontmost-url) "::"))
+		       nil nickname))
+
 (defhydra scimax-bookmarks (:color blue :inherit (scimax-base/heads) :columns 3)
   "bookmarks"
   ("k" bookmark-jump "jump")
   ("l" bookmark-bmenu-list "list")
+  ("sc" scimax-bookmark-chrome "save chrome url")
   ("su" bmkp-url-target-set "save url")
   ("n" bookmark-set "new"))
 
