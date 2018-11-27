@@ -1,0 +1,4 @@
+# key: f'
+# name: f-string
+# --
+src_ipython[:exports results]{$0}
