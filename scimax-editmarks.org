@@ -486,15 +486,16 @@ A minor mode is an easy way to turn font-locking on and off. All we do here is t
   "A minor mode for editmarks."
   :lighter " sem"
   (if (not sem-mode)
-      (font-lock-remove-keywords
-       nil
-       (sem-font-lock-keywords))
+      (progn
+	(font-lock-remove-keywords
+	 nil
+	 (sem-font-lock-keywords))
+	(remove-hook 'org-export-before-processing-hook 'sem-editmarks-to-org))
     (font-lock-add-keywords
      nil
-     (sem-font-lock-keywords)))
+     (sem-font-lock-keywords))
+    (add-hook 'org-export-before-processing-hook 'sem-editmarks-to-org nil t))
   (font-lock-fontify-buffer))
-
-
  #+END_SRC
 
  #+RESULTS:
@@ -502,12 +503,7 @@ A minor mode is an easy way to turn font-locking on and off. All we do here is t
 ** Convenience functions
 *** Utilities
 
- Two utilities that will be helpful are to get the bounds of the current editmark, and the bounds of the content in an editmark. These will be used later for acting on them. This code is surprisingly complex to me, it handles a number of corner cases that seem to result from using property changes to delineate boundaries.
-
-*************** TODO Can thingatpt help here?
-It seems to use forward/backward motion to define the bounds.
-*************** END
-
+ Two utilities that will be helpful are to get the bounds of the current editmark, and the bounds of the content in an editmark. These will be used later for acting on them. This code is surprisingly complex to me, it handles a number of corner cases that seem to result from using property changes to delineate boundaries. One day it might be a good idea to simplify this if it is possible.
 
  #+BEGIN_SRC emacs-lisp
 (defun sem-content-bounds ()
@@ -1176,13 +1172,22 @@ Finally we define a minor mode for the list view.
 
  The editmarks are primarily intended for use in org-mode, but it is sometimes nice to convert them to a PDF for visualization or sharing with others. This section makes this possible.
 
-*** LaTeX
+*** org-export
 
- It is convenient to convert editmarks into LaTeX code so that we can convert them to PDFs. Each editmark should define an export function that takes a single argument, the backend, that is responsible for converting the editmark to the export syntax.
+It appears that org-export--generate-copy-script makes a copy of the buffer with no properties, which breaks finding the editmarks. A solution I worked out is to temporarily redefine buffer-substring-no-properties to just be buffer-substring for that command. That seems to be the least intrusive.
 
- #+BEGIN_SRC emacs-lisp
-(defun sem-editmarks-to-org-latex (&optional backend)
-  "Convert sem editmarks in an org-file to LaTeX.
+#+BEGIN_SRC emacs-lisp
+
+(defun sem-export-copy-advice (orig-func &rest args)
+  "Temporarily redefine buffer-substring-no-properties for exporting."
+  (cl-letf (((symbol-function 'buffer-substring-no-properties) #'buffer-substring))
+    (apply orig-func args)))
+
+(advice-add 'org-export--generate-copy-script :around 'sem-export-copy-advice)
+
+
+(defun sem-editmarks-to-org (&optional backend)
+  "Convert sem editmarks in an org-file to org syntax for BACKEND.
 Inserts some headers at the top for todonotes and ulem, and the
 LaTeX markup commands. This is not super robust, but works for
 simple changes. There are issues with changes in citations,
@@ -1191,86 +1196,25 @@ tables, and other changes that cross org-element boundaries.
 Note this function changes the buffer, so you may want to use it
 in a copy of the buffer."
   (interactive)
-  (goto-char (point-min))
-  (insert "
-,#+latex_header: \\usepackage[normalem]{ulem}
-,#+latex_header: \\usepackage{todonotes}
-,#+latex_header: \\usepackage[usenames, dvipsnames]{color}
-\\listoftodos\n")
+  (when (eq 'latex backend)
+    (goto-char (point-min))
+    (insert "
+  ,#+latex_header: \\usepackage[normalem]{ulem}
+  ,#+latex_header: \\usepackage{todonotes}
+  ,#+latex_header: \\usepackage[usenames, dvipsnames]{color}
+  \\listoftodos\n"))
+
 
   (while (sem-next-editmark)
     (let ((export-func (plist-get (cdr (assoc (get-text-property (point) 'sem-type) sem-editmarks)) :export)))
       (if export-func
-	  (funcall export-func 'latex)
-	(sem-export-default 'latex)))))
+  	  (funcall export-func backend)
+  	(sem-export-default backend)))))
 
  #+END_SRC
 
  #+RESULTS:
- : sem-editmarks-to-org-latex
-
- To /conveniently/ get to a pdf we do some gymnastics. I thought that using a preprocessing hook would work, but it seems the markup gets escaped pretty early, so instead we save the buffer content, modify the buffer, export it, and put the buffer back the way it was. This function makes a pdf for you.
-
- #+BEGIN_SRC emacs-lisp
-(defun sem-editmarks-to-pdf ()
-  "Convert current buffer to a PDF with editmarks."
-  (interactive)
-  (when sem-track-change-mode (error "You cannot make a pdf in track change mode."))
-  (atomic-change-group
-    (let ((org (buffer-string)))
-      ;; Replace editmarks, then export to pdf
-      (sem-editmarks-to-org-latex)
-      (org-open-file (org-latex-export-to-pdf))
-      ;; Reset the buffer to original content.
-      (setf (buffer-string) org))))
-
-
- #+END_SRC
-
- #+RESULTS:
- : sem-editmarks-to-pdf
-
-
-*** HTML
-
- #+BEGIN_SRC emacs-lisp
-(defun sem-editmarks-to-org-html (&optional backend)
-  "Convert sem editmarks in an org-file to LaTeX.
-Inserts some headers at the top for todonotes and ulem, and the
-LaTeX markup commands. This is not super robust, but works for
-simple changes. There are issues with changes in citations,
-tables, and other changes that cross org-element boundaries.
-
-Note this function changes the buffer, so you may want to use it
-in a copy of the buffer."
-  (interactive)
-  (goto-char (point-min))
-  (while (sem-next-editmark)
-    (let ((export-func (plist-get (cdr (assoc (get-text-property (point) 'sem-type) sem-editmarks)) :export)))
-      (if export-func
-	  (funcall export-func 'html)
-	(sem-export-default 'html)))))
-
-
-(defun sem-editmarks-to-html ()
-  "Convert current buffer to a PDF with editmarks."
-  (interactive)
-  (when sem-track-change-mode (error "You cannot make an html in track change mode."))
-  (atomic-change-group
-    (let ((org (buffer-string)))
-      ;; Replace editmarks, then export to pdf
-      (sem-editmarks-to-org-html)
-      (org-open-file (org-html-export-to-html))
-      ;; Reset the buffer to original content.
-      (setf (buffer-string) org))))
-
-
- #+END_SRC
-
- #+RESULTS:
- : sem-editmarks-to-html
-
-
+ : sem-editmarks-to-org
 
 
 ** Generation
