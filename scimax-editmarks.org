@@ -186,7 +186,7 @@ An editmark supports speedkeys on the markers, enabling you to press a single ke
   "Keymap for speed keys on markers.")
 
 
-(defun sem-speed-help ()
+(defun sem-speedmap-help ()
   "Describe the speed keys."
   (interactive)
   (describe-keymap sem-speed-map))
