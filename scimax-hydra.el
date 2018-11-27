@@ -370,7 +370,7 @@ _p_: ffap
 ;;** insert
 
 (defhydra scimax-insert (:color blue :inherit (scimax-base/heads) :columns 3)
-  "help"
+  "insert stuff"
   ("b" insert-buffer "Buffer")
   ("c" insert-char "Char")
   ("e" ivy-insert-org-entity "Org-entity")
@@ -379,7 +379,9 @@ _p_: ffap
   ("p" insert-parentheses "Parentheses")
   ("r" insert-register "Register")
   ("s" screenshot "org screenshot")
-  ("t" org-time-stamp "Timestamp"))
+  ("t" org-time-stamp-inactive "Inctive [timestamp]")
+  ("T" org-time-stamp "Active <timestamp>")
+  ("y" yas-insert-snippet "yasnippet"))
 
 ;;** jump
 
