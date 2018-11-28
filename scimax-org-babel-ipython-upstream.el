@@ -913,11 +913,15 @@ This adds : to the beginning so the output will export as
 verbatim text. FILE-OR-NIL is not used, and is here for
 compatibility with the other formatters."
   (when (not (string= "" output))
-    (concat (s-join "\n"
-		    (mapcar (lambda (s)
-			      (s-concat *ob-ipython-output-results-prefix* s))
-			    (s-split "\n" output)))
-	    "\n")))
+    (let (*ob-ipython-output-results-prefix*)
+      (when (-contains?
+	     (s-split " " (cdr (assoc :results (caddr (org-babel-get-src-block-info t))))) "code")
+	(setq *ob-ipython-output-results-prefix* ""))
+      (concat (s-join "\n"
+		      (mapcar (lambda (s)
+				(s-concat *ob-ipython-output-results-prefix* s))
+			      (s-split "\n" output)))
+	      "\n"))))
 
 
 (defun ob-ipython-format-text/plain (file-or-nil value)
