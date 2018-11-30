@@ -141,7 +141,7 @@ sem-popup-command: Wrong type argument: commandp, 9027
 
 
 (defvar sem-editmark-content-map
-  (let ((map (make-sparse-keymap)))
+  (let ((map (copy-keymap org-mode-map)))
     (define-key map (kbd "<mouse-3>") 'sem-popup-command)
     (define-key map (kbd "C-a") (lambda ()
 				  (interactive)
@@ -463,6 +463,7 @@ The standard font-lock uses regexps for font-locking. We construct the regexp an
 	     ;; close-marker
 	     `(3 ',(list 'face (plist-get properties :marker-face)
 			 'sem-marker 'close
+			 'rear-nonsticky t
 			 'help-echo (plist-get properties :help-echo)))
 	     ;; author. This is sometimes missing
 	     ;; `(4 ',(list 'face nil
@@ -1175,6 +1176,8 @@ Finally we define a minor mode for the list view.
 *** org-export
 
 It appears that org-export--generate-copy-script makes a copy of the buffer with no properties, which breaks finding the editmarks. A solution I worked out is to temporarily redefine buffer-substring-no-properties to just be buffer-substring for that command. That seems to be the least intrusive.
+
+It seems this will be unnecessary in a future version of org-mode; Nicholas has changed this code in master. [2018-11-28 Wed].
 
 #+BEGIN_SRC emacs-lisp
 
