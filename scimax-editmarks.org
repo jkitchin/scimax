@@ -34,6 +34,10 @@ This document is the manual.
 
 There are things to do. Check them out here: [[elisp:(org-agenda nil "t" "<")]]
 
+1. Residual text properties sometimes when editmarks are removed?
+
+I have some concerns about using text properties exclusively for this project. It is appealing because they are stored where the changes should be. As long as font-lock manages the properties correctly it seems like it should work. Searching by property change is a little tricky sometimes though. The alternative is a regexp based search. I don't currently store the regexps though, and on an edit mark would need a regexp based way to identify what kind of editmark you are on.
+
 
 
 * Example usage
@@ -60,21 +64,21 @@ lines-<}
 
 ** Comments
 
-{>>one line  comment<<}
+{>~one line  comment~<}
 
-{>>multi
+{>~multi
 line
 comment <<}
 
-{>> @author comment<<}
+{>~ @author comment~<}
 
-** Todo
+** Task
 
-{>*A task todo*<}
+{>* This is something you should do. *<}
 
 ** Typos
 
-{>$tpyo$<}
+{>$tpyo$<} Type 4 on the open marker to spell check and replace this.
 
 ** Highlights
 
@@ -100,6 +104,9 @@ These don't really do anything but provide visual highlighting.
 ;;; Code
 (require 'cl)
 (require 'helm)
+(require 'color)
+
+
 #+END_SRC
 
 #+RESULTS:
@@ -107,11 +114,6 @@ These don't really do anything but provide visual highlighting.
 ** Menu and keymaps
 
 We create a popup menu and keymaps for the markers and content here.
-
-*************** TODO popmenu sometimes errors like these.
-sem-popup-command: Wrong type argument: commandp, 6651
-sem-popup-command: Wrong type argument: commandp, 9027
-*************** END
 
  #+BEGIN_SRC emacs-lisp
 (defcustom sem-menu-items
@@ -135,9 +137,7 @@ sem-popup-command: Wrong type argument: commandp, 9027
 (defun sem-popup-command (event)
   "Pop up a menu on editmarks."
   (interactive "e")
-  (call-interactively
-   (or (popup-menu (append '("sem") sem-menu-items))
-       'ignore)))
+  (popup-menu (append '("sem") sem-menu-items)))
 
 
 (defvar sem-editmark-content-map
@@ -154,6 +154,7 @@ sem-popup-command: Wrong type argument: commandp, 9027
     map)
   "Map for actions on editmark content.")
 
+
 #+END_SRC
 
 #+RESULTS:
@@ -162,7 +163,6 @@ sem-popup-command: Wrong type argument: commandp, 9027
 An editmark supports speedkeys on the markers, enabling you to press a single key to make something happen.  We define these keys here.
 
 #+BEGIN_SRC emacs-lisp
-
 (defvar sem-speed-map
   (let ((speedmap (make-sparse-keymap)))
     (define-key speedmap (kbd "n") 'sem-next-editmark)
@@ -176,8 +176,8 @@ An editmark supports speedkeys on the markers, enabling you to press a single ke
     (define-key speedmap (kbd "l") 'sem-editmark-display)
     (define-key speedmap (kbd "4") 'sem-editmark-spellcheck-typo)
     (define-key speedmap (kbd "$") 'sem-editmark-spellcheck)
-    (define-key speedmap (kbd "q") 'sem-editmark-jump-to-visible-editmark)
-    (define-key speedmap (kbd "j") 'sem-editmark-jump-to-editmark)
+    (define-key speedmap (kbd "q") 'sem-jump-to-visible-editmark)
+    (define-key speedmap (kbd "j") 'sem-jump-to-editmark)
     (define-key speedmap (kbd "?") 'sem-speedmap-help)
     speedmap)
   "Keymap for speed keys on markers.")
@@ -192,7 +192,7 @@ An editmark supports speedkeys on the markers, enabling you to press a single ke
  #+END_SRC
 
  #+RESULTS:
- : sem-speed-help
+ : sem-speedmap-help
 
 ** The editmarks
     :PROPERTIES:
@@ -200,14 +200,6 @@ An editmark supports speedkeys on the markers, enabling you to press a single ke
     :END:
 
 To define an editmark we need to define open and close markers, and the faces for the markers and the content between them. You can additionally define keymaps, and functions that define what happens when an editmark is accepted or rejected.
-
-*************** TODO typo keymap
-this should spell check the content and clear the markup.
-*************** END
-
-*************** TODO task keymap
-A way to mark it done or something?
-*************** END
 
 Export functions should take one argument, the backend as a symbol, and they are responsible for replacing the editmark with the new markup suitable for the backend. Example functions are in [[id:53446467-2C90-49B5-B0E2-09FB347B2B21][Export functions]].
 
@@ -237,6 +229,8 @@ Export functions should take one argument, the backend as a symbol, and they are
 	     :keymap sem-editmark-content-map
 	     :help-echo "Comment. Right click for menu"
 	     :accept-func sem-delete-editmark
+	     :reject-func sem-delete-editmark
+	     :include-author t
 	     :export sem-export-comment)
 
     (task :open-marker "{>*" :close-marker "*<}"
@@ -291,10 +285,6 @@ Export functions should take one argument, the backend as a symbol, and they are
 
 The export functions replace the current editmarks with alternate syntax. You should define different behaviors for different backends. Here we support LaTeX and html. If you don't define an export function a default function is used.
 
-*************** TODO handle multiline editmarks
-The inline LaTeX syntax isn't good for multiline editmarks. I need to split on \n wrap each line, and then rejoin them.
-*************** END
-
 For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tasks.
 
 #+BEGIN_SRC emacs-lisp
@@ -305,14 +295,22 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
     (cond
      ((eq 'latex backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@latex:\\protect\\bgroup\\markoverwith{\\textcolor{blue}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
-		    (buffer-substring-no-properties (car content-bounds)
-						    (cdr content-bounds)))))
+	    (mapconcat
+	     (lambda (s)
+	       (format "@@latex:\\noindent\\protect\\bgroup\\markoverwith{\\textcolor{blue}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
+		       s))
+	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
+							   (cdr content-bounds)))
+	     "@@latex:\\\\@@\n")))
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<span style=\"color:blue\">%s</span>@@"
-		    (buffer-substring-no-properties (car content-bounds)
-						    (cdr content-bounds))))))))
+	    (mapconcat
+	     (lambda (s)
+	       (format "@@html:<span style=\"color: blue\">%s</span>@@" s))
+	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
+							   (cdr content-bounds)))
+	     "@@html:<br>@@"))))))
+
 
 (defun sem-export-delete (backend)
   "Exporter for delete editmarks."
@@ -321,14 +319,21 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
     (cond
      ((eq 'latex backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@latex:\\protect\\bgroup\\markoverwith{\\textcolor{red}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
-		    (buffer-substring-no-properties (car content-bounds)
-						    (cdr content-bounds)))))
+	    (mapconcat
+	     (lambda (s)
+	       (format "@@latex:\\noindent\\protect\\bgroup\\markoverwith{\\textcolor{red}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
+		       s))
+	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
+							   (cdr content-bounds)))
+	     "@@latex:\\\\@@\n")))
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<span style=\"color: red\">%s</span>@@"
-		    (buffer-substring-no-properties (car content-bounds)
-						    (cdr content-bounds))))))))
+	    (mapconcat
+	     (lambda (s)
+	       (format "@@html:<span style=\"color: red\">%s</span>@@" s))
+	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
+							   (cdr content-bounds)))
+	     "@@html:<br>@@"))))))
 
 
 (defun sem-export-comment (backend)
@@ -338,14 +343,22 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
     (cond
      ((eq 'latex backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@latex:\\todo{%s}@@" (buffer-substring-no-properties
-					    (car content-bounds)
-					    (cdr content-bounds)))))
+	    (mapconcat
+	     (lambda (s)
+	       (format "@@latex:%s@@" s))
+	     (s-split "\n" (format "\\todo{%s}"
+				   (buffer-substring-no-properties
+				    (car content-bounds)
+				    (cdr content-bounds))))
+	     "@@latex:\\\\@@\n")))
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<span style=\"color: orange\">%s</span>@@"
-		    (buffer-substring-no-properties (car content-bounds)
-						    (cdr content-bounds))))))))
+	    (mapconcat
+	     (lambda (s)
+	       (format "@@html:<span style=\"color: orange\">%s</span>@@" s))
+	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
+							   (cdr content-bounds)))
+	     "@@html:<br>@@"))))))
 
 
 (defun sem-export-task (backend)
@@ -355,14 +368,24 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
     (cond
      ((eq 'latex backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@latex:\\todo[color=green!40]{TASK: %s}@@" (buffer-substring-no-properties
-								   (car content-bounds)
-								   (cdr content-bounds)))))
+	    (mapconcat
+	     (lambda (s)
+	       (format "@@latex:%s@@" s))
+	     (s-split "\n" (format "\\todo[color=green!40]{TASK: %s}"
+				   (buffer-substring-no-properties
+				    (car content-bounds)
+				    (cdr content-bounds))))
+	     "@@latex:\\\\@@\n")))
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<span style=\"color: purple\">%s</span>@@"
-		    (buffer-substring-no-properties (car content-bounds)
-						    (cdr content-bounds))))))))
+	    (mapconcat
+	     (lambda (s)
+	       (format "@@html:<span style=\"color: purple\">%s</span>@@" s))
+	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
+							   (cdr content-bounds)))
+	     "@@html:<br>@@"))))))
+
+
 #+END_SRC
 
 #+RESULTS:
@@ -371,8 +394,6 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 For markups with no exporter, we use a default function. This tries to be fancy and approximately represent the colors.
 
 #+BEGIN_SRC emacs-lisp
-(require 'color)
-
 (defun sem-export-default (backend)
   "Default exporter for editmarks.
 We wrap this something that approximates the appearance. If there
@@ -394,27 +415,35 @@ we go with the font color."
     (cond
      ((eq 'latex backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@latex:\\definecolor{%s}{rgb}{%s,%s,%s}%s{%s}{%s: %s}@@"
-		    (or bg-color fg-color)
-		    (if bg-color (first bg-rgb) (first fg-rgb))
-		    (if bg-color (second bg-rgb) (second fg-rgb))
-		    (if bg-color (third bg-rgb) (third fg-rgb))
-		    (if bg-color
-			"\\colorbox"
-		      "\\textcolor")
-		    (or bg-color fg-color)
-		    (get-text-property (point) 'sem-type)
-		    (buffer-substring-no-properties
-		     (car content-bounds)
-		     (cdr content-bounds)))))
+	    (concat
+	     (format "@@latex:\\definecolor{%s}{rgb}{%s,%s,%s}%s{%s}{\\parbox{\\textwidth}{%s:@@"
+		     (or bg-color fg-color)
+		     (if bg-color (first bg-rgb) (first fg-rgb))
+		     (if bg-color (second bg-rgb) (second fg-rgb))
+		     (if bg-color (third bg-rgb) (third fg-rgb))
+		     (if bg-color
+			 "\\colorbox"
+		       "\\textcolor")
+		     (or bg-color fg-color)
+		     (get-text-property (point) 'sem-type))
+	     (mapconcat
+	      (lambda (s)
+		(format "@@latex:%s@@" s))
+	      (s-split "\n" (buffer-substring-no-properties
+			     (car content-bounds)
+			     (cdr content-bounds)))
+	      "@@latex:\\\\@@\n")
+	     "@@latex: }}@@")))
 
      ((eq 'html backend)
       (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@html:<span style=\"color: %s; background-color: %s\">%s</span>@@"
-		    fg-hex bg-hex
-		    (buffer-substring-no-properties
-		     (car content-bounds)
-		     (cdr content-bounds))))))))
+	    (mapconcat
+	     (lambda (s)
+	       (format "@@html:<span style=\"color: %s; background-color: %s\">%s</span>@@"
+		       fg-hex bg-hex s)
+	       (s-split "\n" (buffer-substring-no-properties (car content-bounds)
+							     (cdr content-bounds)))
+	       "@@html:<br>@@")))))))
 #+END_SRC
 
 #+RESULTS:
@@ -433,6 +462,12 @@ The workhorse for fontification and property setting of editmarks is the font-lo
 The standard font-lock uses regexps for font-locking. We construct the regexp and font-lock keywords for each type in `sem-editmarks' in a function that is used in the minor mode to turn fontification on and off.
 
 #+BEGIN_SRC emacs-lisp
+;; these should get removed when a region is unfontified.
+(add-to-list 'font-lock-extra-managed-props 'sem-content)
+(add-to-list 'font-lock-extra-managed-props 'sem-marker)
+(add-to-list 'font-lock-extra-managed-props 'local-map)
+
+
 (defun sem-font-lock-keywords ()
   "Return the font-lock keywords for all the editmarks in `sem-editmarks'."
   (mapcar
@@ -497,6 +532,8 @@ A minor mode is an easy way to turn font-locking on and off. All we do here is t
      (sem-font-lock-keywords))
     (add-hook 'org-export-before-processing-hook 'sem-editmarks-to-org nil t))
   (font-lock-fontify-buffer))
+
+
  #+END_SRC
 
  #+RESULTS:
@@ -508,8 +545,7 @@ A minor mode is an easy way to turn font-locking on and off. All we do here is t
 
  #+BEGIN_SRC emacs-lisp
 (defun sem-content-bounds ()
-  "Return a cons cell of (start . end) of editmark content.
-Return nil if not on content."
+  "Return a cons cell of (start . end) of editmark content."
   (cond
    ;; on a marker
    ((eq (get-text-property (point) 'sem-marker) 'open)
@@ -600,95 +636,108 @@ If you have selected a region, wrap the region in markers.
 
 The functions try to be smart and not allow you to nest markups, or create new markups that cross existing markups.
 
-*************** TODO check if we are in a src block and be smart
- make a coderef and put the comment outside. This may be a special case. Maybe advise that one comment function?
-*************** END
+It is not so smart that it will prevent you from messing up a code block, or crossing org boundaries like headlines, blocks or tables. This would be pretty difficult to prevent.
 
-*************** TODO handle authors
-Maybe just in comments?
-*************** END
-
-
- #+BEGIN_SRC emacs-lisp
-(cl-loop for entry
-	 in sem-editmarks
-	 do
-	 (eval `(defun ,(intern (format "sem-insert-%s-region-or-point" (car entry))) ()
-		  ,(format "Insert a %s editmark on the region, word or character at point"
-			   (car entry))
-		  (interactive)
-		  (when (get-text-property (point) 'sem-type)
-		    (error "You are in an editmark. Nesting editmarks is not allowed."))
-		  (sem-without-following-changes
-		    (cond
-		     ;; We have an active region we want to apply
-		     ((region-active-p)
-		      (let* ((bounds (list (region-beginning) (region-end)))
-			     (start (apply 'min bounds))
-			     (end (apply 'max bounds))
-			     (lines))
-			;; make sure we are not crossing any existing markups
-			(when (or (get-text-property (region-beginning) 'sem-type)
-				  (get-text-property (region-end) 'sem-type)
-				  (not (= (region-end)
-					  (next-single-property-change
-					   (region-beginning)
-					   'sem-type
-					   nil
-					   (region-end)))))
-			  (error "You are in an editmark. Nesting editmarks is not allowed."))
-			;; Make sure we are at word boundaries
-			(save-excursion
-			  (goto-char start)
-			  (unless (looking-at " \\|\\<")
-			    (backward-word)
-			    (setq start (point)))
-			  (goto-char end)
-			  (unless (looking-at " \\|\>")
-			    (forward-word)
-			    (setq end (point))))
-
-			(setf (buffer-substring start end)
-			      (concat ,(plist-get (cdr entry) :open-marker)
-				      (buffer-substring start end)
-				      ,(plist-get (cdr entry) :close-marker)))))
-		     ;; We are on a word with no region selected
-		     ((thing-at-point 'word)
-		      (cond
-		       ;; beginning of a word
-		       ((looking-back " " 1)
-			(insert ,(plist-get (cdr entry) :open-marker)
-				;; (format " @%s " (s-downcase (s-join "-" (split-string (user-full-name)))))
-				)
-			(re-search-forward "\\>")
-			(insert ,(plist-get (cdr entry) :close-marker)))
-		       ;; end of a word
-		       ((looking-back "\\>" 1)
-			(insert ,(concat (plist-get (cdr entry) :open-marker)
-					 ;; (format " @%s " (s-downcase (s-join "-" (split-string (user-full-name)))))
-					 (plist-get (cdr entry) :close-marker)))
-			(backward-char ,(length (plist-get (cdr entry) :close-marker))))
-		       ;; somewhere else in a word
-		       (t
-			(re-search-backward "\\<")
-			(insert ,(plist-get (cdr entry) :open-marker)
-				;; (format " @%s " (s-downcase (s-join "-" (split-string (user-full-name)))))
-				)
-			(re-search-forward "\\>")
-			(insert ,(plist-get (cdr entry) :close-marker)))))
-		     ;; not at a word or region, insert markers and put point between
-		     ;; them.
-		     (t
-		      (insert (concat ,(plist-get (cdr entry) :open-marker)
-				      ;; (format " @%s " (s-downcase (s-join "-" (split-string (user-full-name)))))
-				      ,(plist-get (cdr entry) :close-marker)))
-		      ;; goto middle
-		      (backward-char (length ,(plist-get (cdr entry) :close-marker)))))))))
+#+BEGIN_SRC emacs-lisp
+(defun sem-author ()
+  "Return an author string"
+  (format "@%s" (s-join "" (mapcar (lambda (s)
+				     (downcase
+				      (substring s 0 1)))
+				   (split-string (or (user-full-name) "Not a name"))))))
 
 
- #+END_SRC
+#+END_SRC
 
- #+RESULTS:
+#+RESULTS:
+: sem-author
+
+Here is a generic insert function. It offers completion on the types to insert.
+
+#+BEGIN_SRC emacs-lisp
+(defun sem-insert (type)
+  "Insert an editmark of TYPE.
+TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'."
+  (interactive (list (completing-read "Type: " (mapcar 'car sem-editmarks))))
+
+  (when (get-text-property (point) 'sem-type)
+    (error "You are in an editmark. Nesting editmarks is not allowed."))
+
+  (let ((entry (assoc (intern-soft type) sem-editmarks)))
+    ;; we do not track changes when inserting so we don't trigger nested
+    ;; editmarks when editing editmarks.
+    (sem-without-following-changes
+      (cond
+       ;; We have an active region we want to apply
+       ((region-active-p)
+	(let* ((bounds (list (region-beginning) (region-end)))
+	       (start (apply 'min bounds))
+	       (end (apply 'max bounds))
+	       (lines))
+	  ;; make sure we are not crossing any existing markups
+	  (when (or (get-text-property (region-beginning) 'sem-type)
+		    (get-text-property (region-end) 'sem-type)
+		    (not (= (region-end)
+			    (next-single-property-change
+			     (region-beginning)
+			     'sem-type
+			     nil
+			     (region-end)))))
+	    (error "You are in an editmark. Nesting editmarks is not allowed."))
+	  ;; Make sure we are at word boundaries
+	  (save-excursion
+	    (goto-char start)
+	    (unless (looking-at " \\|\\<")
+	      (backward-word)
+	      (setq start (point)))
+	    (goto-char end)
+	    (unless (looking-at " \\|\>")
+	      (forward-word)
+	      (setq end (point))))
+
+	  (setf (buffer-substring start end)
+		(concat (plist-get (cdr entry) :open-marker)
+			(when (plist-get (cdr entry) :include-author)
+			  (concat " " (sem-author) " "))
+			(buffer-substring start end)
+			(plist-get (cdr entry) :close-marker)))))
+       ;; We are on a word with no region selected
+       ((thing-at-point 'word)
+	(cond
+	 ;; beginning of a word
+	 ((looking-back "\\<" 1)
+	  (insert (plist-get (cdr entry) :open-marker)
+		  (when (plist-get (cdr entry) :include-author)
+		    (concat " " (sem-author) " ")))
+	  (re-search-forward "\\>")
+	  (insert (plist-get (cdr entry) :close-marker)))
+	 ;; end of a word
+	 ((looking-back "\\>" 1)
+	  (insert (concat (plist-get (cdr entry) :open-marker)
+			  (when (plist-get (cdr entry) :include-author)
+			    (concat " " (sem-author) " "))
+			  (plist-get (cdr entry) :close-marker)))
+	  (backward-char (length (plist-get (cdr entry) :close-marker))))
+	 ;; somewhere else in a word
+	 (t
+	  (re-search-backward "\\<")
+	  (insert (plist-get (cdr entry) :open-marker)
+		  (if (plist-get (cdr entry) :include-author)
+		      (concat " " (sem-author) " ")
+		    ""))
+	  (re-search-forward "\\>")
+	  (insert (plist-get (cdr entry) :close-marker)))))
+       ;; not at a word or region, insert markers and put point between
+       ;; them.
+       (t
+	(insert (concat (plist-get (cdr entry) :open-marker)
+			(when (plist-get (cdr entry) :include-author)
+			  (concat " " (sem-author) " "))
+			(plist-get (cdr entry) :close-marker)))
+	;; goto middle
+	(backward-char (length (plist-get (cdr entry) :close-marker))))))))
+#+END_SRC
+
 
 *** Delete/Clear a editmark
 
@@ -729,6 +778,7 @@ For other editmarks, e.g. typo, or highlights, it is less clear what the right t
     (when bounds
       (setf (buffer-substring (car bounds) (cdr bounds))
 	    (buffer-substring-no-properties (car content-bounds) (cdr content-bounds))))))
+
 
 (defun sem-clear-and-next-editmark ()
   "Remove the markers but keep the content."
@@ -930,6 +980,8 @@ Finally, you might want to jump to any editmark in the buffer using completion f
 	(push (cons content pos) candidates)))
     (setq candidate (completing-read "editmark: " (reverse candidates)))
     (goto-char (cdr (assoc candidate candidates)))))
+
+
 #+END_SRC
 
 #+RESULTS:
@@ -957,6 +1009,8 @@ editmark is the full text including the markers."
 		    (buffer-substring-no-properties (car bounds) (cdr bounds)))
 	      editmarks))
       editmarks)))
+
+
  #+END_SRC
 
  #+RESULTS:
@@ -1015,6 +1069,7 @@ Next, we define a tabulated list view. There are a lot of moving parts here. We 
       (goto-char pos)
       (org-show-entry))))
 
+
 #+END_SRC
 
 #+RESULTS:
@@ -1023,7 +1078,6 @@ Next, we define a tabulated list view. There are a lot of moving parts here. We 
 In the list view, we need to have a key map that makes it easy to jump back to the highlights, accept/reject/clear/delete them, etc.
 
 #+BEGIN_SRC emacs-lisp
-
 (defvar sem-editmark-list-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "q") 'bury-buffer)
@@ -1068,6 +1122,7 @@ In the list view, we need to have a key map that makes it easy to jump back to t
     map)
   "Local keymap for `sem-editmark-list-mode'.")
 
+
 #+END_SRC
 
 #+RESULTS:
@@ -1076,7 +1131,6 @@ In the list view, we need to have a key map that makes it easy to jump back to t
 Finally we define a minor mode for the list view.
 
 #+BEGIN_SRC emacs-lisp
-
 (define-derived-mode sem-editmark-list-mode
   tabulated-list-mode "sem-editmarks"
   "Mode for viewing editmarks as a tabular list.
@@ -1095,20 +1149,28 @@ Finally we define a minor mode for the list view.
 
  Especially for typo editmarks, we should have an easy way to fix them.
 
+
  #+BEGIN_SRC emacs-lisp
 (defun sem-editmark-spellcheck ()
   "Spell check the content of the editmark."
   (interactive)
-  (destructuring-bind (start end) (sem-content-bounds)
+  (let* ((bounds (sem-content-bounds))
+	 (start (car bounds))
+	 (end (cdr bounds)))
     (ispell-region start end)))
 
 
 (defun sem-editmark-spellcheck-typo ()
   "Spell check the typo."
   (interactive)
-  (goto-char (car (sem-content-bounds)))
-  (flyspell-correct-word-generic)
-  (sem-clear-editmark))
+  (let ((bounds (sem-content-bounds)))
+    (goto-char (car bounds))
+    (flyspell-correct-word-generic)
+    ;; This seems to be important to get the text properties fixed up before
+    ;; clearing the editmark
+    (save-excursion
+      (font-lock-fontify-region (car bounds) (cdr bounds)))
+    (sem-clear-editmark)))
 
 
  #+END_SRC
@@ -1123,15 +1185,15 @@ Finally we define a minor mode for the list view.
  #+BEGIN_SRC emacs-lisp
 (defhydra sem-insert (:color blue :hint nil)
   "Editmark insert"
-  ("m" sem-insert-comment-region-or-point "comment")
-  ("i" sem-insert-insert-region-or-point "insert")
-  ("d" sem-insert-delete-region-or-point "delete")
-  ("t" sem-insert-typo-region-or-point "typo")
-  ("k" sem-insert-task-region-or-point "task")
-  ("b" sem-insert-blue-highlight-region-or-point "green")
-  ("g" sem-insert-green-highlight-region-or-point "blue")
-  ("y" sem-insert-yellow-highlight-region-or-point "yellow")
-  ("p" sem-insert-pink-highlight-region-or-point "pink")
+  ("m" (sem-insert 'comment) "comment")
+  ("i" (sem-insert 'insert) "insert")
+  ("d" (sem-insert 'delete) "delete")
+  ("t" (sem-insert 'typo) "typo")
+  ("k" (sem-insert 'task) "task")
+  ("b" (sem-insert 'blue-highlight) "green")
+  ("g" (sem-insert 'green-highlight) "green")
+  ("y" (sem-insert 'yellow-highlight) "yellow")
+  ("p" (sem-insert 'pink-highlight) "pink")
   ("n" sem-next-editmark "next")
   ("p" sem-previous-editmark "previous")
   ("a" sem-action/body "action menu"))
@@ -1151,23 +1213,25 @@ Finally we define a minor mode for the list view.
   ("d" sem-delete-editmark "delete")
   ("D" sem-delete-and-next-editmark "delete and next")
   ("C-d" sem-delete-all-editmarks "Delete all")
+  ("l" sem-editmark-display "List all")
   ("n" sem-next-editmark "next")
   ("p" sem-previous-editmark "previous"))
 
 
 (defun sem-hydra ()
-  "Open a hydra depending on context of point."
+  "Open the editmark hydras depending on context of point.
+On an editmark open the action menu, otherwise the insert menu."
   (interactive)
   (if (get-text-property (point) 'sem-type)
       (sem-action/body)
     (sem-insert/body)))
 
 
-(global-set-key (kbd "H-m") 'sem-hydra)
  #+END_SRC
 
  #+RESULTS:
  : sem-hydra
+
 
 ** Conversions
 
@@ -1207,7 +1271,6 @@ in a copy of the buffer."
   ,#+latex_header: \\usepackage[usenames, dvipsnames]{color}
   \\listoftodos\n"))
 
-
   (while (sem-next-editmark)
     (let ((export-func (plist-get (cdr (assoc (get-text-property (point) 'sem-type) sem-editmarks)) :export)))
       (if export-func
@@ -1233,6 +1296,8 @@ in a copy of the buffer."
 (defcustom sem-wdiff-cmd
   "wdiff -w \"{>-\" -x \"-<}\" -y \"{>+\" -z \"+<}\" "
   "Command to run wdiff with.")
+
+
  #+END_SRC
 
  #+RESULTS:
@@ -1263,77 +1328,54 @@ For line-based diff use `diff-buffer-with-file'."
     (delete-file tempf)
     (goto-char (point-min))
     (sem-mode)))
+
+
  #+END_SRC
 
  #+RESULTS:
  : sem-wdiff-buffer-with-file
 
-*** TODO From git diff
+*** From git diff
 
- This is lightly tested. I use helm because it is easier to make two selections. I could remove that and limit it to one selection vs HEAD.
-
-*************** TODO remove helm dependency
-I think it would be fine to have completing read here.
-*************** END
-
+ This is lightly tested. It should show changes from the current version to some version in a past git commit. Note if you have existing sem-editmarks in the old version, you might get confusing results.
 
  #+BEGIN_SRC emacs-lisp
-(defun sem-git-commit-selector ()
-  "Return list of commits.
-If you mark one commit, it means diff with HEAD.
-If you mark two commits, it is a diff between them."
-  (helm :sources `((name . "commits")
-		   (candidates . ,(mapcar (lambda (s)
-					    (let ((commit
-						   (nth
-						    0
-						    (split-string s))))
-					      (cons s
-						    commit)))
-					  (split-string
-					   (shell-command-to-string
-					    "git log --pretty=format:\"%h %ad | %s%d [%an]\" --date=relative") "\n")))
-		   (action . (lambda (candidate)
-			       (helm-marked-candidates))))))
-
-
-(defun sem-wdiff-git (commits)
-  "Perform a wdiff between git COMMITS.
-A helm selection buffer is used to choose commits.
+(defun sem-wdiff-git (commit)
+  "Perform a wdiff between HEAD and a git commit.
+An ivy selection is used to choose the commit.
 
 If you choose one commit, the wdiff is between that commit and
-the current version.
-
-If you choose two commits, the wdiff is between those two
-commits. Returns the buffer."
+the current version. Returns the buffer."
   (interactive
-   (list (sem-git-commit-selector)))
-  (let ((buf (get-buffer-create
-	      "*org-wdiff-git*"))
-	(mmode major-mode)
-	(git-root (vc-git-root
-		   (buffer-file-name)))
-	(fname
-	 (file-relative-name
-	  (buffer-file-name)
-	  (vc-git-root (buffer-file-name))))
-	cmd)
-    (cond
-     ;; current version vs commit
-     ((= 1 (length commits))
-      (setq cmd (format "%s <(git show %s:%s) %s"
-			sem-wdiff-cmd
-			(car commits) fname
-			fname)))
-     ;; more than 1 commit, we just take first two
-     ((> (length commits) 1)
-      (setq cmd (format "%s <(git show %s:%s) <(git show %s:%s)"
-			em-wdiff-cmd
-			(nth 0 commits) fname
-			(nth 1 commits) fname))))
+   (list (let ((candidates (mapcar (lambda (s)
+				     (let ((commit
+					    (nth
+					     0
+					     (split-string s))))
+				       (cons s
+					     commit)))
+				   (split-string
+				    (shell-command-to-string
+				     "git log --pretty=format:\"%h %ad | %s%d [%an]\" --date=relative") "\n"))))
+	   (cdr (assoc (ivy-read
+			"commit: "
+			candidates)
+		       candidates)))))
+  (let* ((buf (get-buffer-create
+	       "*org-wdiff-git*"))
+	 (curbuf (current-buffer))
+	 (mmode major-mode)
+	 (git-root (vc-git-root
+		    (buffer-file-name)))
+	 (fname
+	  (file-relative-name
+	   (buffer-file-name)
+	   (vc-git-root (buffer-file-name))))
+	 (cmd (format "%s <(git show %s:%s) %s"
+		      sem-wdiff-cmd
+		      commit fname
+		      fname)))
 
-    ;; Save fname in global var for convenience to save buffer later
-    (setq *sem-wdiff-git-source* fname)
     (switch-to-buffer-other-window buf)
     (let ((inhibit-read-only t))
       (erase-buffer))
@@ -1345,7 +1387,13 @@ commits. Returns the buffer."
     (let ((default-directory git-root))
       (insert (shell-command-to-string cmd)))
     (goto-char (point-min))
+    ;; save fname as buffer local variable to save back later.
+    (with-current-buffer buf
+      (make-local-variable '*sem-wdiff-git-source*)
+      (setq *sem-wdiff-git-source* curbuf))
     buf))
+
+
  #+END_SRC
 
  #+RESULTS:
@@ -1360,16 +1408,18 @@ commits. Returns the buffer."
   "Save changes.
 If there is an *org-wdiff-git* buffer, then we copy that content
 to the buffer visiting `*cm-wdiff-git-source*'. You may use
-*org-wdiff-git* to accept/reject changes, and then put it back to
+,*org-wdiff-git* to accept/reject changes, and then put it back to
 where it came from. Otherwise we just save the buffer."
   (interactive)
   (if (get-buffer "*org-wdiff-git*")
       (progn
-	(switch-to-buffer (find-buffer-visiting *sem-wdiff-git-source*))
+	(switch-to-buffer *sem-wdiff-git-source*)
 	(erase-buffer)
 	(insert-buffer-substring "*org-wdiff-git*")
 	(kill-buffer "*org-wdiff-git*"))
     (save-buffer)))
+
+
  #+END_SRC
 
 
@@ -1395,6 +1445,8 @@ where it came from. Otherwise we just save the buffer."
     (setq before-change-functions (delq 'sem-before-change before-change-functions))
     (setq after-change-functions (delq 'sem-after-change after-change-functions))
     (message "Track changes mode deactivated.")))
+
+
  #+END_SRC
 
  #+RESULTS:
