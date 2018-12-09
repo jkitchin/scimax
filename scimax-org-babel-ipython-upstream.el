@@ -224,18 +224,61 @@ You need this to get syntax highlighting."
 
 (defhydra scimax-obi (:color blue :hint nil)
   "
-        Execute                   Navigate     Edit             Misc
-----------------------------------------------------------------------
-    _<return>_: current           _i_: previous  _w_: move up     _/_: inspect
-  _S-<return>_: current to next   _k_: next      _s_: move down   _l_: clear result
-_S-M-<return>_: to point          _q_: visible   _x_: kill        _L_: clear all
-  _s-<return>_: Restart/block     _Q_: any       _n_: copy        _._: complete
-_M-s-<return>_: Restart/to point  ^ ^            _c_: clone
-  _H-<return>_: Restart/buffer    ^ ^            _m_: merge
-           _K_: kill kernel       ^ ^            _-_: split
-           _r_: Goto repl         ^ ^            _+_: insert above
-           ^ ^                    ^ ^            _=_: insert below
-           ^ ^                    ^ ^            _h_: header"
+        Execute                   Navigate                 Edit             Misc
+-----------------------------------------------------------------------------------------------------------------------------
+    _<return>_: current           _i_: previous            _w_: move up     _._: inspect                 _<up>_:
+  _S-<return>_: current to next   _k_: next                _s_: move down   _l_: clear result  _<left>_:           _<right>_:
+_S-M-<return>_: to point          _q_: visible             _x_: kill        _L_: clear all              _<down>_:
+  _s-<return>_: Restart/block     _Q_: any                 _n_: copy        _,_: complete
+_M-s-<return>_: Restart/to point  _C-<up>_: goto start     _c_: clone       _o_: toggle result folding
+  _H-<return>_: Restart/buffer    _C-<down>_: goto end     _m_: merge
+           _K_: kill kernel       _C-<left>_: word left    _-_: split
+           _r_: Goto repl         _C-<right>_: word right  _+_: insert above
+           ^ ^                    ^ ^                      _=_: insert below
+           ^ ^                    ^ ^                      _h_: header
+_[_: dedent _]_: indent  _3_: toggle comment  _z_: undo    _y_: redo
+Convert
+------------------------------------------------------------------
+_y_: to code
+_M_: to markdown
+_O_: to org
+markdown headings _1_: _2_: _3_: _4_: _5_: _6_:
+"
+  ("o" ob-ipython-toggle-output :color red)
+  ("<up>" ob-ipython-edit-up :color red)
+  ("<down>" ob-ipython-edit-down :color red)
+  ("<left>" left-char :color red)
+  ("<right>" right-char :color red)
+  ("C-<up>" ob-ipython-jump-to-first-line)
+  ("C-<down>" ob-ipython-jump-to-end-line)
+  ("C-<left>" left-word :color red)
+  ("C-<right>" right-word :color red)
+
+  ;; These don't really have great analogs in org-mode, but maybe it makes sense
+  ;; to be able to do this.
+  ("y" (ob-ipython-convert-block-to "ipython"))
+  ("M" (ob-ipython-convert-block-to "markdown"))
+  ("O" (ob-ipython-convert-block-to "org"))
+
+  ;; These change to markdown block and trim blank lines off the top and add #
+  ;; to beginning
+  ("1" (ob-ipython-markdown-headings 1))
+  ("2" (ob-ipython-markdown-headings 2))
+  ("3" (ob-ipython-markdown-headings 3))
+  ("4" (ob-ipython-markdown-headings 4))
+  ("5" (ob-ipython-markdown-headings 5))
+  ("6" (ob-ipython-markdown-headings 6))
+
+  ("z" undo-tree-undo)
+  ("y" undo-tree-redo)
+  ("[" (progn
+	 (org-edit-special)
+	 (python-indent-line t)
+	 (org-edit-src-exit))  :color red)
+  ("]" (progn
+	 (org-edit-special)
+	 (python-indent-line)
+	 (org-edit-src-exit))  :color red)
   ("<return>" org-ctrl-c-ctrl-c :color red)
   ("S-<return>" scimax-execute-and-next-block :color red)
   ("S-M-<return>" scimax-execute-to-point)
@@ -262,9 +305,9 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   ("l" org-babel-remove-result)
   ("L" scimax-ob-clear-all-results)
   ("h" scimax-ob-edit-header)
-
-  ("/" ob-ipython-inspect)
-  ("." scimax-ob-ipython-complete-ivy))
+  ("3" org-comment-dwim :color red)
+  ("." ob-ipython-inspect)
+  ("," scimax-ob-ipython-complete-ivy))
 
 ;; * command/edit-mode hydra
 
@@ -467,11 +510,11 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   ;; These change to markdown block and trim blank lines off the top and add #
   ;; to beginning
   ("1" (ob-ipython-markdown-headings 1) "to heading 1")
-  ("2" (ob-ipython-markdown-headings 1) "to heading 2")
-  ("3" (ob-ipython-markdown-headings 1) "to heading 3")
-  ("4" (ob-ipython-markdown-headings 1) "to heading 4")
-  ("5" (ob-ipython-markdown-headings 1) "to heading 5")
-  ("6" (ob-ipython-markdown-headings 1) "to heading 6")
+  ("2" (ob-ipython-markdown-headings 2) "to heading 2")
+  ("3" (ob-ipython-markdown-headings 3) "to heading 3")
+  ("4" (ob-ipython-markdown-headings 4) "to heading 4")
+  ("5" (ob-ipython-markdown-headings 5) "to heading 5")
+  ("6" (ob-ipython-markdown-headings 6) "to heading 6")
 
   ;; navigation
   ("<up>" org-babel-previous-src-block "select cell above" :color red)
@@ -829,8 +872,18 @@ This function is called by `org-babel-execute-src-block'."
 	  (setf (cdr (assoc :value (assoc :result ret)))
 		(-filter (lambda (el) (memq (car el) ',display))
 			 (cdr (assoc :value (assoc :result ret))))))
-	(let* ((replacement (ob-ipython--process-response ret file result-type)))
-	  (ipython--async-replace-sentinel sentinel buffer replacement)))
+	(save-window-excursion
+	  (save-excursion
+	    (save-restriction
+	      (with-current-buffer buffer
+		(goto-char (point-min))
+		(re-search-forward sentinel)
+		(re-search-backward "\\(call\\|src\\)_\\|^[ \t]*#\\+\\(BEGIN_SRC\\|CALL:\\)")
+		(org-babel-remove-result)
+		(org-babel-insert-result
+		 (ob-ipython--process-response ret file result-type)
+		 (cdr (assoc :result-params (nth 2 (org-babel-get-src-block-info)))))
+		(org-redisplay-inline-images))))))
 
      (list sentinel (current-buffer) file result-type))
     (format "%s - %s <output>" (length ob-ipython--async-queue) sentinel)))
