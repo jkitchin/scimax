@@ -1205,6 +1205,8 @@ Note, this does not work if you run the block async."
 
 ;; * eldoc integration
 
+;; This may not be the speediest way to do this, since it runs the
+;; ob-ipython-inspect function.
 (defun scimax-ob-ipython-signature ()
   "Try to return a function signature for the thing at point."
   (when (and (eql major-mode 'org-mode)
@@ -1254,6 +1256,7 @@ Note, this does not work if you run the block async."
   (scimax-ob-ipython-turn-on-eldoc))
 
 ;; * Completion
+
 ;; This makes this function work from an org-buffer.
 (defun ob-ipython-completions (buffer pos)
   "Ask a kernel for completions on the thing at POS in BUFFER."
@@ -1283,7 +1286,9 @@ Note, this does not work if you run the block async."
 	  (org-edit-src-exit))))))
 
 ;; Adapted to enable in org-buffers. Note, to enable this, you have to add
-;; (add-to-list 'company-backends 'company-ob-ipython) to an init file
+;; (add-to-list 'company-backends 'company-ob-ipython) to an init file. There
+;; are also reports that it is slow.
+
 (defun company-ob-ipython (command &optional arg &rest ignored)
   (interactive (list 'interactive))
   (cl-case command
@@ -1296,7 +1301,7 @@ Note, this does not work if you run the block async."
     (candidates (cons :async (lambda (cb)
                                (let ((res (ob-ipython-completions
                                            (current-buffer) (1- (point)))))
-                                 (funcall cb (cdr (assoc 'matches res)))))))
+                                 (funcall cb (-uniq (cdr (assoc 'matches res))))))))
     (sorted t)
     (doc-buffer (ob-ipython--company-doc-buffer
                  (cdr (assoc 'text/plain (ob-ipython--inspect arg (length arg))))))))
