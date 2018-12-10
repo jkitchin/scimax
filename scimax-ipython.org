@@ -157,12 +157,14 @@ print(1 / 0)
 
 #+RESULTS:
 :RESULTS:
-# Out[8]:
+# Out[6]:
 # output
-: ZeroDivisionErrorTraceback (most recent call last)
-: <ipython-input-8-3ec96714f820> in <module>()
-: ----> 1 print(1 / 0)
-: ZeroDivisionError: division by zero
+
+ZeroDivisionErrorTraceback (most recent call last)
+<ipython-input-6-3ec96714f820> in <module>()
+----> 1 print(1 / 0)
+
+ZeroDivisionError: division by zero
 :END:
 
 If you like an exception buffer, set this variable like this:
@@ -171,7 +173,9 @@ If you like an exception buffer, set this variable like this:
 (setq ob-ipython-exception-results nil)
 #+END_SRC
 
-Even this is better, press q to jump to the offending line in your src block. This does not work right when you run in async mode.
+#+RESULTS:
+
+Even this is better, press q in that buffer to jump to the offending line in your src block. This does not work right when you run in async mode.
 
 #+BEGIN_SRC ipython
 
@@ -196,13 +200,14 @@ print('done')
 
 #+RESULTS:
 :RESULTS:
-# Out[9]:
+# Out[16]:
 # output
-: 0
-: 1
-: 2
-: 3
-: done
+0
+1
+2
+3
+done
+
 :END:
 
 You will see another buffer pop up with intermediate results, and they will be put back in the results when it is done.
@@ -249,11 +254,11 @@ Note you can put :restart in the src block header and ipython will restart every
 | H-r | switch to session REPL                             |
 | H-k | Kill the kernel                                    |
 
-I should note that ob-ipython-inspect works in the org-buffer! Completion does not work in org yet, you have to be in the special edit buffer.
+I should note that ~ob-ipython-inspect~ works in the org-buffer! Completion does not work in org yet, you have to be in the special edit buffer.
 
 I am not 100% committed to all these bindings. I need to use them a while to see what works.
 
-Can't remember all these bindings? Me neither. Checkout M-x scimax-obi/body (bound to H-s) for a nice hydra. The hydra key-bindings don't match the ones in the tables above; I am not sure that makes sense. It would add keystrokes, but it would also be a good reminder of the bindings.
+Can't remember all these bindings? Me neither. Checkout M-x scimax-obi/body (usually bound to H-s) for a nice hydra. The hydra key-bindings don't match the ones in the tables above; I am not sure that makes sense. It would add keystrokes, but it would also be a good reminder of the bindings.
 
 These keybindings are relatively easy to customize. The are stored as cons cells in
 
@@ -262,6 +267,7 @@ ob-ipython-key-bindings
 #+END_SRC
 
 #+RESULTS:
+| <return>     | function | newline-and-indent                              |               |                                   |
 | C-<return>   | function | org-ctrl-c-ctrl-c                               |               |                                   |
 | M-<return>   | lambda   | nil                                             | (interactive) | (scimax-execute-and-next-block t) |
 | S-<return>   | function | scimax-execute-and-next-block                   |               |                                   |
@@ -287,20 +293,20 @@ ob-ipython-key-bindings
 | H-m          | function | scimax-merge-ipython-blocks                     |               |                                   |
 | H-h          | function | scimax-ob-edit-header                           |               |                                   |
 | H-M-l        | function | scimax-ob-toggle-line-numbers                   |               |                                   |
+| s-.          | function | scimax-ob-ipython-complete-ivy                  |               |                                   |
 | H-e          | function | scimax-jupyter-edit-mode/body                   |               |                                   |
-| H-c          | function | scimax-jupyter-commmand-mode/body               |               |                                   |
+| H-c          | function | scimax-jupyter-command-mode/body                |               |                                   |
 | H-/          | function | ob-ipython-inspect                              |               |                                   |
 | H-s          | function | scimax-obi/body                                 |               |                                   |
 | <mouse-3>    | function | scimax-ob-ipython-popup-command                 |               |                                   |
 
-You can define/change any binding you want like this. They are only active in ipython src blocks.
+You can define/change any binding you want like this. They are only active in ipython src blocks. For example, you can define a src-block key like this:
 
 #+BEGIN_SRC emacs-lisp
 (scimax-define-src-key ipython "H-/" #'some-command)
 #+END_SRC
 
-
-If you like the Jupyter keybindings more directly, checkout:
+If you like the Jupyter keybindings more directly, checkout these bindings when you are in an ipython block:
 
 | H-e | function | scimax-jupyter-edit-mode/body    |   |   |
 | H-c | function | scimax-jupyter-command-mode/body |   |   |
@@ -318,7 +324,7 @@ Jupyter has some nice features like buttons to click on to run a block. We have 
 
 #+RESULTS:
 :RESULTS:
-# Out[1]:
+# Out[17]:
 # text/plain
 : 12
 :END:
@@ -465,7 +471,7 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[2]:
+# Out[20]:
 # text/plain
 : Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
 :END:
@@ -501,7 +507,7 @@ latex_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[3]:
+# Out[21]:
 :END:
 
 #+BEGIN_SRC ipython
@@ -510,7 +516,7 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[4]:
+# Out[22]:
 # text/plain
 : Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
 
@@ -549,7 +555,7 @@ png_f.for_type_by_name('numpy.polynomial.polynomial',
 
 #+RESULTS:
 :RESULTS:
-# Out[5]:
+# Out[23]:
 :END:
 
 Now, we can easily see the formula and shape of this polynomial in a graphical form.
@@ -560,9 +566,9 @@ p
 
 #+RESULTS:
 :RESULTS:
-# Out[6]:
+# Out[24]:
 # image/png
-[[file:obipy-resources/19a94859c854121de1c305426d09b77e-50592w_s.png]]
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-70304sfy.png]]
 :END:
 
 Most likely you would not put all this code into a document like this, but would instead put it in a Python library you import. The point here is to show what can be done with that, and once it is done, you get easy visualization of objects.
@@ -999,7 +1005,7 @@ df
 
 #+RESULTS:
 :RESULTS:
-# Out[9]:
+# Out[25]:
 # text/org
 | indexname | widecolumn |
 |-----------+------------|
@@ -1018,15 +1024,15 @@ df2
 
 #+RESULTS:
 :RESULTS:
-# Out[10]:
+# Out[26]:
 # text/org
 |   | a | b | c | d | e |
 |---+---+---+---+---+---|
-| 0 | 2 | 8 | 2 | 2 | 5 |
-| 1 | 7 | 1 | 1 | 1 | 4 |
-| 2 | 3 | 2 | 8 | 3 | 2 |
-| 3 | 8 | 9 | 2 | 7 | 1 |
-| 4 | 2 | 8 | 7 | 0 | 2 |
+| 0 | 1 | 1 | 5 | 5 | 3 |
+| 1 | 9 | 0 | 1 | 5 | 7 |
+| 2 | 7 | 6 | 7 | 1 | 6 |
+| 3 | 7 | 6 | 5 | 2 | 7 |
+| 4 | 1 | 1 | 8 | 1 | 8 |
 :END:
 
 ** Other languages
