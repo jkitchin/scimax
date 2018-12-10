@@ -1179,7 +1179,7 @@ Note, this does not work if you run the block async."
   ;; It is probably helpful to be at the end of a symbol, otherwise you may get
   ;; help on something else.
   (save-excursion
-    (when (not (looking-back "\s_\b" (line-beginning-position)))
+    (when (not (looking-back "\\_>" (line-beginning-position)))
       (forward-symbol 1)
       (setq pos (point))))
 
