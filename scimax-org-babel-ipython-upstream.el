@@ -1306,7 +1306,7 @@ Note, this does not work if you run the block async."
   "Use ivy to complete the thing at point."
   (interactive)
   (let* ((result (ob-ipython-completions (current-buffer) (1- (point))))
-	 (candidates (cdr (assoc 'matches result)))
+	 (candidates (-uniq (cdr (assoc 'matches result))))
 	 (beg (1+ (cdr (assoc 'cursor_start result))))
 	 (end (1+ (cdr (assoc 'cursor_end result)))))
     (ivy-read "Complete: " candidates
