@@ -101,13 +101,11 @@ string to be formatted."
     ("H-h" . #'scimax-ob-edit-header)
     ("H-M-l" . #'scimax-ob-toggle-line-numbers)
     ("s-." . #'scimax-ob-ipython-complete-ivy)
+    ("s-/" . #'ob-ipython-inspect)
 
     ;; the jupyter hydras
     ("H-e" . #'scimax-jupyter-edit-mode/body)
     ("H-c" . #'scimax-jupyter-command-mode/body)
-
-    ;; Miscellaneous
-    ("H-/" . #'ob-ipython-inspect)
 
     ;; The hydra/popup menu
     ("H-s" . #'scimax-obi/body)
@@ -140,7 +138,10 @@ These are activated in function `ob-ipython-key-bindings'."
      ["Jump to visible block" scimax-jump-to-visible-block t]
      ["Jump to block" scimax-jump-to-block t])
     ["Inspect" ob-ipython-inspect t]
-    ["Show source" (lambda () (interactive) (ob-ipython-inspect t)) t]
+    ["Show source" (lambda ()
+		     (interactive)
+		     (ob-ipython-inspect))
+     t]
     ["Kill kernel" scimax-ob-ipython-kill-kernel t]
     ["Switch to repl" org-babel-switch-to-session t])
   "Items for the menu bar and popup menu."
@@ -269,8 +270,8 @@ markdown headings _1_: _2_: _3_: _4_: _5_: _6_:
   ("5" (ob-ipython-markdown-headings 5))
   ("6" (ob-ipython-markdown-headings 6))
 
-  ("z" undo-tree-undo)
-  ("y" undo-tree-redo)
+  ("z" undo-tree-undo :color red)
+  ("y" undo-tree-redo :color red)
   ("[" (progn
 	 (org-edit-special)
 	 (python-indent-line t)
