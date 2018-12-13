@@ -13,7 +13,7 @@ I am anticipating deprecating the old ob-ipython fork, but I have no idea how ma
 
 ** Basic output
 
-Source blocks usually differentiate between results that are output and value. This has rarely made sense for how I use org-mode. I usually print things and want outputs. A new feature for scimax users is the execution count, which shows you the counter for when the cell was executed. This shows as comment, so it won't appear in exported content. If you don't like the count, you can turn it off with
+Source blocks usually differentiate between results that are output and value. This has rarely made sense for how I use org-mode. I usually print things and want outputs. A new feature for scimax users is the execution count, which shows you the counter for when the cell was executed. This shows as comment, so it won't appear in exported content. If you don't like the count, you can turn it off with this in your init files. It defaults to on.
 
 #+BEGIN_SRC emacs-lisp
 (setq ob-ipython-suppress-execution-count nil)
@@ -42,21 +42,6 @@ Ipython can have many kinds of output. The =# text/plain= line in the output tel
 (setq ob-ipython-show-mime-types nil)
 #+END_SRC
 
-
-#+BEGIN_SRC ipython
-a = 55
-print(5)
-a
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-# Out[4]:
-# output
-: 5
-# text/plain
-: 55
-:END:
 
 ** Multiple inline figures and output
 
@@ -102,7 +87,7 @@ print('x .dot. y = {}'.format(x @ y))
 
 ** Fine tune the output
 
-By default we get all the outputs from the kernel. Here we get plain text, an image and a LaTeX reprentation.
+By default we get all the outputs from the kernel. Here we get plain text, an image and a LaTeX representation.
 
 #+BEGIN_SRC ipython
 from sympy import *
@@ -200,7 +185,7 @@ print('done')
 
 #+RESULTS:
 :RESULTS:
-# Out[16]:
+# Out[2]:
 # output
 0
 1
@@ -211,6 +196,96 @@ done
 :END:
 
 You will see another buffer pop up with intermediate results, and they will be put back in the results when it is done.
+
+** documentation and code via ? and ??
+
+You can access the documentation like you can in jupyter.
+
+#+BEGIN_SRC ipython
+import numpy as np
+?np.linspace
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[5]:
+:END:
+
+Similarly you can see the source code:
+
+#+BEGIN_SRC ipython
+??np.linspace
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[6]:
+:END:
+
+This works for functions defined in your org file too.
+
+#+BEGIN_SRC ipython
+def func(X):
+    '''a function of X'''
+    return 2 * X
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[7]:
+:END:
+
+#+BEGIN_SRC ipython
+??func
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[8]:
+:END:
+
+
+** Inspecting objects in src-blocks
+
+You can inspect things in your src-blocks to find out things about them. With your cursor on some object, type s-/ and if it can be figured out you will get some information about it.
+
+#+BEGIN_SRC ipython
+import numpy as np
+
+x = np.linspace(0, 1, 5)
+x
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[4]:
+# text/plain
+: array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
+:END:
+
+You can also enable something like eldoc with M-x scimax-ob-ipython-turn-on-eldoc and turn it off with =scimax-ob-ipython-turn-on-eldoc=. This is a little tricky, it sometimes only works when you have a syntactically correct command with parentheses, or after some cursor movement. I wish it worked better.
+
+#+BEGIN_SRC ipython
+np.linspace
+#+END_SRC
+
+** Completion in src-blocks
+
+You can get some completion options. I like =scimax-ob-ipython-complete-ivy=. I have this bound to s-. It often works on objects too.
+
+#+BEGIN_SRC ipython
+np.l
+x.
+#+END_SRC
+
+You can also use company mode like this:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'company-backends 'company-ob-ipython)
+(company-mode)
+#+END_SRC
+
+Company-mode is kind of slow, and lacks the completion like ivy, but it might work for you.
 
 ** Jupyter-like keybindings in src-blocks
 
@@ -233,7 +308,7 @@ Note you can put :restart in the src block header and ipython will restart every
 | C-u H--     | split current block at point, point in lower block |
 
 #+caption: Commands to manipulate blocks
-| H-e   | Edit the src block header in the minibuffer                      |
+| H-h   | Edit the src block header in the minibuffer                      |
 | H-w   | Kill the current block                                           |
 | H-n   | Copy the current block                                           |
 | H-o   | Clone the current block (make a copy of it below the current one |
@@ -250,11 +325,10 @@ Note you can put :restart in the src block header and ipython will restart every
 | H-s-q | Jump to a block in the buffer with ivy |
 
 #+caption: Miscellaneous
-| H-/ | get help about thing at point (ob-ipython-inspect) |
+| s-/ | get help about thing at point (ob-ipython-inspect) |
 | H-r | switch to session REPL                             |
 | H-k | Kill the kernel                                    |
 
-I should note that ~ob-ipython-inspect~ works in the org-buffer! Completion does not work in org yet, you have to be in the special edit buffer.
 
 I am not 100% committed to all these bindings. I need to use them a while to see what works.
 
@@ -294,9 +368,9 @@ ob-ipython-key-bindings
 | H-h          | function | scimax-ob-edit-header                           |               |                                   |
 | H-M-l        | function | scimax-ob-toggle-line-numbers                   |               |                                   |
 | s-.          | function | scimax-ob-ipython-complete-ivy                  |               |                                   |
+| s-/          | function | ob-ipython-inspect                              |               |                                   |
 | H-e          | function | scimax-jupyter-edit-mode/body                   |               |                                   |
 | H-c          | function | scimax-jupyter-command-mode/body                |               |                                   |
-| H-/          | function | ob-ipython-inspect                              |               |                                   |
 | H-s          | function | scimax-obi/body                                 |               |                                   |
 | <mouse-3>    | function | scimax-ob-ipython-popup-command                 |               |                                   |
 
@@ -311,7 +385,6 @@ If you like the Jupyter keybindings more directly, checkout these bindings when 
 | H-e | function | scimax-jupyter-edit-mode/body    |   |   |
 | H-c | function | scimax-jupyter-command-mode/body |   |   |
 
-
 ** Clickable buttons in src blocks
 
 Jupyter has some nice features like buttons to click on to run a block. We have something like that. The text in angle brackets in the comments below is clickable!
@@ -324,7 +397,7 @@ Jupyter has some nice features like buttons to click on to run a block. We have 
 
 #+RESULTS:
 :RESULTS:
-# Out[17]:
+# Out[9]:
 # text/plain
 : 12
 :END:
@@ -336,100 +409,6 @@ By default, each org file gets a unique kernel. I am sure there is a use case fo
 #+BEGIN_SRC emacs-lisp
 (setq ob-ipython-buffer-unique-kernel nil)
 #+END_SRC
-
-** Multiple sessions in one org file
-   :PROPERTIES:
-   :ID:       74f0669a-6322-4511-8b6f-fbeea6bd7821
-   :END:
-
-See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions, and [[id:f7b80c4b-fd88-4c25-baca-2910e57aa5f1][Remote kernels]] about remote kernels.  Here we use a properties drawer in two different headlines to have different sessions open in the same org file. Of course, you can manually define the :session in src blocks, but using a header like this:
-
- #+BEGIN_EXAMPLE
-   :PROPERTIES:
-   :header-args:ipython: :session session-1
-   :END:
- #+END_EXAMPLE
-
- means that you don't have to type that on every block. That is helpful, since if you forget the block will use the default buffer kernel. This shows I am currently running four kernels. See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions.
-
- #+BEGIN_SRC emacs-lisp
-(ob-ipython--get-kernel-processes)
- #+END_SRC
-
- #+RESULTS:
- : ((session-2 . kernel-session-2) (session-1 . kernel-session-1) (8f516355ee6cee60cbbb1e018eee2db1 . kernel-8f516355ee6cee60cbbb1e018eee2db1) (ipython . kernel-ipython))
-
-*** Session 1
-    :PROPERTIES:
-    :header-args:ipython: :session session-1
-    :END:
-
- Every block under this header will use the kernel associated with session-1. Here we just look at what ports are being used.
-
-  #+BEGIN_SRC ipython
-%connect_info
-  #+END_SRC
-
-  #+RESULTS:
-  :RESULTS:
-  # Out[1]:
-  # output
-  : {
-  :   "shell_port": 57257,
-  :   "iopub_port": 60990,
-  :   "stdin_port": 37898,
-  :   "control_port": 39142,
-  :   "hb_port": 55863,
-  :   "ip": "127.0.0.1",
-  :   "key": "26515aec-de8fd6f55cf49bf8b1f38f3c",
-  :   "transport": "tcp",
-  :   "signature_scheme": "hmac-sha256",
-  :   "kernel_name": ""
-  : }
-  : Paste the above JSON into a file, and connect with:
-  :     $> jupyter <app> --existing <file>
-  : or, if you are local, you can connect with just:
-  :     $> jupyter <app> --existing emacs-session-1.json
-  : or even just:
-  :     $> jupyter <app> --existing
-  : if this is the most recent Jupyter kernel you have started.
-  :END:
-
-*** Session 2
-    :PROPERTIES:
-    :header-args:ipython: :session session-2
-    :END:
-
- Every block in this heading will use the kernel associated with session-2. You can see here it uses different ports than session-1 does. They are both running at the same time though.
-
-  #+BEGIN_SRC ipython
-%connect_info
-  #+END_SRC
-
-  #+RESULTS:
-  :RESULTS:
-  # Out[1]:
-  # output
-  : {
-  :   "shell_port": 46039,
-  :   "iopub_port": 41366,
-  :   "stdin_port": 46391,
-  :   "control_port": 52731,
-  :   "hb_port": 54666,
-  :   "ip": "127.0.0.1",
-  :   "key": "580f8b50-4b846ca056cbe83b8027ddbe",
-  :   "transport": "tcp",
-  :   "signature_scheme": "hmac-sha256",
-  :   "kernel_name": ""
-  : }
-  : Paste the above JSON into a file, and connect with:
-  :     $> jupyter <app> --existing <file>
-  : or, if you are local, you can connect with just:
-  :     $> jupyter <app> --existing emacs-session-2.json
-  : or even just:
-  :     $> jupyter <app> --existing
-  : if this is the most recent Jupyter kernel you have started.
-  :END:
 
 ** Customizing outputs
 
@@ -1065,6 +1044,100 @@ There is a little issue with the double colon on output, but otherwise it looks 
 
 This kernel is a little quieter on exceptions than I would like, but still it could be useful if you want to play around with hylang and document your work.
 
+** Multiple sessions in one org file
+   :PROPERTIES:
+   :ID:       74f0669a-6322-4511-8b6f-fbeea6bd7821
+   :END:
+
+See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions, and [[id:f7b80c4b-fd88-4c25-baca-2910e57aa5f1][Remote kernels]] about remote kernels.  Here we use a properties drawer in two different headlines to have different sessions open in the same org file. Of course, you can manually define the :session in src blocks, but using a header like this:
+
+ #+BEGIN_EXAMPLE
+   :PROPERTIES:
+   :header-args:ipython: :session session-1
+   :END:
+ #+END_EXAMPLE
+
+ means that you don't have to type that on every block. That is helpful, since if you forget the block will use the default buffer kernel. This shows I am currently running four kernels. See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions.
+
+ #+BEGIN_SRC emacs-lisp
+(ob-ipython--get-kernel-processes)
+ #+END_SRC
+
+ #+RESULTS:
+ : ((session-2 . kernel-session-2) (session-1 . kernel-session-1) (8f516355ee6cee60cbbb1e018eee2db1 . kernel-8f516355ee6cee60cbbb1e018eee2db1) (ipython . kernel-ipython))
+
+*** Session 1
+    :PROPERTIES:
+    :header-args:ipython: :session session-1
+    :END:
+
+ Every block under this header will use the kernel associated with session-1. Here we just look at what ports are being used.
+
+  #+BEGIN_SRC ipython
+%connect_info
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+  # Out[1]:
+  # output
+  : {
+  :   "shell_port": 57257,
+  :   "iopub_port": 60990,
+  :   "stdin_port": 37898,
+  :   "control_port": 39142,
+  :   "hb_port": 55863,
+  :   "ip": "127.0.0.1",
+  :   "key": "26515aec-de8fd6f55cf49bf8b1f38f3c",
+  :   "transport": "tcp",
+  :   "signature_scheme": "hmac-sha256",
+  :   "kernel_name": ""
+  : }
+  : Paste the above JSON into a file, and connect with:
+  :     $> jupyter <app> --existing <file>
+  : or, if you are local, you can connect with just:
+  :     $> jupyter <app> --existing emacs-session-1.json
+  : or even just:
+  :     $> jupyter <app> --existing
+  : if this is the most recent Jupyter kernel you have started.
+  :END:
+
+*** Session 2
+    :PROPERTIES:
+    :header-args:ipython: :session session-2
+    :END:
+
+ Every block in this heading will use the kernel associated with session-2. You can see here it uses different ports than session-1 does. They are both running at the same time though.
+
+  #+BEGIN_SRC ipython
+%connect_info
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+  # Out[1]:
+  # output
+  : {
+  :   "shell_port": 46039,
+  :   "iopub_port": 41366,
+  :   "stdin_port": 46391,
+  :   "control_port": 52731,
+  :   "hb_port": 54666,
+  :   "ip": "127.0.0.1",
+  :   "key": "580f8b50-4b846ca056cbe83b8027ddbe",
+  :   "transport": "tcp",
+  :   "signature_scheme": "hmac-sha256",
+  :   "kernel_name": ""
+  : }
+  : Paste the above JSON into a file, and connect with:
+  :     $> jupyter <app> --existing <file>
+  : or, if you are local, you can connect with just:
+  :     $> jupyter <app> --existing emacs-session-2.json
+  : or even just:
+  :     $> jupyter <app> --existing
+  : if this is the most recent Jupyter kernel you have started.
+  :END:
+
 ** Remote kernels
    :PROPERTIES:
    :ID:       f7b80c4b-fd88-4c25-baca-2910e57aa5f1
@@ -1193,30 +1266,6 @@ If you have a lot of blocks in your buffer, you can use a file property like thi
 ,#+PROPERTY: header-args:ipython :session kernel-16577-ssh.json
 #+END_EXAMPLE
 ** Known issues
-*** Intermittent hang/error on startup
- Occasionally I notice when executing the first block that it seems to hang or results in an error like:
-
- #+BEGIN_EXAMPLE
-ob-ipython--dump-error: There was a fatal error trying to process the request. See *ob-ipython-debug*
- #+END_EXAMPLE
-
- It almost always works to type C-g if it is hung, and just rerun the block. Then it works fine.
-
- The root of this problem is in:
-
- #+BEGIN_EXAMPLE
-Traceback (most recent call last):
-  File "/Users/jkitchin/vc/jkitchin-github/scimax/ob-ipython-upstream/client.py", line 60, in <module>
-    c = create_client(args.conn_file)
-  File "/Users/jkitchin/vc/jkitchin-github/scimax/ob-ipython-upstream/client.py", line 43, in create_client
-    cf = find_connection_file('emacs-' + name)
-  File "/Users/jkitchin/anaconda/lib/python3.6/site-packages/jupyter_client/connect.py", line 218, in find_connection_file
-    raise IOError("Could not find %r in %r" % (filename, path))
-OSError: Could not find 'emacs-ipython-19a94859c854121de1c305426d09b77e' in ['.', '/Users/jkitchin/Library/Jupyter/runtime']
- #+END_EXAMPLE
-
- Related upstream issues: https://github.com/gregsexton/ob-ipython/issues/162
-
 *** Interrupting the kernel does not work
 
  This seems to be an issue with the upstream repo. It may work on unix/Mac, but maybe not on Windows. Probably does not work on remote kernels. See https://github.com/gregsexton/ob-ipython/commit/fcb2c48f64ba1005ad6fe5d1a4149f1117a9b45d
