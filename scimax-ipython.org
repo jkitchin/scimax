@@ -42,7 +42,6 @@ Ipython can have many kinds of output. The =# text/plain= line in the output tel
 (setq ob-ipython-show-mime-types nil)
 #+END_SRC
 
-
 ** Multiple inline figures and output
 
 The output really shines with printed output and figures. In the upstream ob-ipython you cannot do both, and it only shows one figure. We get everything with scimax, including all the outputs. You can also filter the outputs to only show what you want.
@@ -168,35 +167,6 @@ print(1 / 0)
 
 #+END_SRC
 
-** Easy async
-
-You can use an :async header to run a block asynchronously. That means it runs in the background and you can keep using emacs! You can mix and match async blocks in a document. I simplified how this is done compared to upstream; in my version just putting :async in the header (with no argument) makes it run asynchronously.
-
-#+BEGIN_SRC ipython :async
-import time
-
-for i in range(4):
-    print(i)
-    time.sleep(2)
-
-# keep on working!
-print('done')
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-# Out[2]:
-# output
-0
-1
-2
-3
-done
-
-:END:
-
-You will see another buffer pop up with intermediate results, and they will be put back in the results when it is done.
-
 ** documentation and code via ? and ??
 
 You can access the documentation like you can in jupyter.
@@ -244,7 +214,6 @@ def func(X):
 # Out[8]:
 :END:
 
-
 ** Inspecting objects in src-blocks
 
 You can inspect things in your src-blocks to find out things about them. With your cursor on some object, type s-/ and if it can be figured out you will get some information about it.
@@ -286,6 +255,35 @@ You can also use company mode like this:
 #+END_SRC
 
 Company-mode is kind of slow, and lacks the completion like ivy, but it might work for you.
+
+** Easy async
+
+You can use an :async header to run a block asynchronously. That means it runs in the background and you can keep using emacs! You can mix and match async blocks in a document. I simplified how this is done compared to upstream; in my version just putting :async in the header (with no argument) makes it run asynchronously.
+
+#+BEGIN_SRC ipython :async
+import time
+
+for i in range(4):
+    print(i)
+    time.sleep(2)
+
+# keep on working!
+print('done')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[2]:
+# output
+0
+1
+2
+3
+done
+
+:END:
+
+You will see another buffer pop up with intermediate results, and they will be put back in the results when it is done.
 
 ** Jupyter-like keybindings in src-blocks
 
