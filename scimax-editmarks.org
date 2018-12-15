@@ -40,7 +40,7 @@ I have some concerns about using text properties exclusively for this project. I
 
 
 
-* Example usage
+* Examples
   :PROPERTIES:
   :tangle:   no
   :END:
@@ -659,7 +659,7 @@ Here is a generic insert function. It offers completion on the types to insert.
   "Insert an editmark of TYPE.
 TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'."
   (interactive (list (completing-read "Type: " (mapcar 'car sem-editmarks))))
-
+  (if (not sem-mode) (sem-mode))
   (when (get-text-property (point) 'sem-type)
     (error "You are in an editmark. Nesting editmarks is not allowed."))
 
@@ -735,8 +735,15 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 			  (concat " " (sem-author) " "))
 			(plist-get (cdr entry) :close-marker)))
 	;; goto middle
-	(backward-char (length (plist-get (cdr entry) :close-marker))))))))
+	(backward-char (length (plist-get (cdr entry) :close-marker)))))))
+  ;; Should we add a local variable so the file opens in sem-mode?
+  (when (not (-contains?  file-local-variables-alist '(eval sem-mode)))
+    (save-excursion
+      (add-file-local-variable 'eval '(sem-mode)))))
 #+END_SRC
+
+#+RESULTS:
+: sem-insert
 
 
 *** Delete/Clear a editmark
@@ -1088,6 +1095,7 @@ In the list view, we need to have a key map that makes it easy to jump back to t
 				"Refresh the list."
 				(interactive)
 				(sem-editmark-refresh-list)))
+
     (define-key map (kbd "a") (lambda ()
 				(interactive)
 				"Accept the editmark"
@@ -1095,6 +1103,7 @@ In the list view, we need to have a key map that makes it easy to jump back to t
 				  (sem-editmark-list-jump)
 				  (sem-accept-editmark))
 				(sem-editmark-refresh-list)))
+
     (define-key map (kbd "c") (lambda ()
 				"Clear the editmark"
 				(interactive)
@@ -1102,6 +1111,7 @@ In the list view, we need to have a key map that makes it easy to jump back to t
 				  (sem-editmark-list-jump)
 				  (sem-clear-editmark))
 				(sem-editmark-refresh-list)))
+
     (define-key map (kbd "d") (lambda ()
 				"Delete the editmark"
 				(interactive)
@@ -1109,12 +1119,22 @@ In the list view, we need to have a key map that makes it easy to jump back to t
 				  (sem-editmark-list-jump)
 				  (sem-delete-editmark))
 				(sem-editmark-refresh-list)))
+
     (define-key map (kbd "u") (lambda ()
 				"Undo in the source buffer"
 				(interactive)
 				(with-current-buffer sem-editmark-source
 				  (undo))
 				(sem-editmark-refresh-list)))
+
+    (define-key map (kbd "4") (lambda ()
+				"spellcheck the editmark"
+				(interactive)
+				(save-window-excursion
+				  (sem-editmark-list-jump)
+				  (sem-editmark-spellcheck-typo))
+				(sem-editmark-refresh-list)))
+
     (define-key map (kbd "?") (lambda ()
 				"Show keymap help."
 				(interactive)
@@ -1147,7 +1167,7 @@ Finally we define a minor mode for the list view.
 
 *** Spell-check editmark
 
- Especially for typo editmarks, we should have an easy way to fix them.
+ Especially for typo editmarks, we should have an easy way to fix them. Here are two options. One spell checks the content, and one is really intended for typo editmarks.
 
 
  #+BEGIN_SRC emacs-lisp
@@ -1190,12 +1210,13 @@ Finally we define a minor mode for the list view.
   ("d" (sem-insert 'delete) "delete")
   ("t" (sem-insert 'typo) "typo")
   ("k" (sem-insert 'task) "task")
-  ("b" (sem-insert 'blue-highlight) "green")
-  ("g" (sem-insert 'green-highlight) "green")
-  ("y" (sem-insert 'yellow-highlight) "yellow")
-  ("p" (sem-insert 'pink-highlight) "pink")
+  ("hb" (sem-insert 'blue-highlight) "green")
+  ("hg" (sem-insert 'green-highlight) "green")
+  ("hy" (sem-insert 'yellow-highlight) "yellow")
+  ("hp" (sem-insert 'pink-highlight) "pink")
   ("n" sem-next-editmark "next")
   ("p" sem-previous-editmark "previous")
+  ("g" sem-track-change-mode "toggle track changes")
   ("a" sem-action/body "action menu"))
 
 
@@ -1215,7 +1236,9 @@ Finally we define a minor mode for the list view.
   ("C-d" sem-delete-all-editmarks "Delete all")
   ("l" sem-editmark-display "List all")
   ("n" sem-next-editmark "next")
-  ("p" sem-previous-editmark "previous"))
+  ("p" sem-previous-editmark "previous")
+  ("4" sem-editmark-spellcheck-typo "spellcheck typo")
+  ("g" sem-track-change-mode "toggle track changes"))
 
 
 (defun sem-hydra ()
@@ -1553,3 +1576,7 @@ of the affected text."
 
 ;;; scimax-editmarks.el ends here
 #+END_SRC
+
+# Local Variables:
+# eval: (sem-mode)
+# End:
