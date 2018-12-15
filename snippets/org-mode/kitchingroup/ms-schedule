@@ -1,0 +1,53 @@
+# -*- mode: snippet -*-
+# name: ms-schedule
+# key: kms
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+TITLE: MS project schedule
+
+Below you will find a description of a schedule we will try to follow over the next year. The dates are not mandatory, but if you anticipate having trouble completing them by the due date you should let me know in advance.
+
+** TODO Weekly report
+   DEADLINE: <2019-01-10 Thu +1w>
+
+I would like you to prepare a weekly report summarizing what you have accomplished and are working to do next. It does not need to be long, but it should be useful. This will complement our in-person meetings, and provide us with a way to keep track of your progress. I will provide feedback as needed. You should /always/ complete these, even if you have been busy with class work, or don't think you have anything to report. This will help you prioritize future efforts.
+
+This link will open the report each week elisp:kitchingroup-weekly-report
+
+** TODO Initial project plan
+   DEADLINE: <2019-01-11 Fri>
+
+You should prepare a written document that outlines your plans for your project and what you want to accomplish in the spring semester. This should be done in consultation with me so we agree on what is in it. This is your opportunity to articulate in words your understanding of what we are trying to do, and to begin organizing and prioritizing your thoughts on the project. This document does not need to be long, but it needs to be helpful.
+
+** TODO Literature review
+   DEADLINE: <2019-01-31 Thu>
+
+Understanding what has been done in the literature, and how to cite it in technical writing is an important skill. You should perform a literature search relevant to your project, and prepare a summary document of what you find. This document should cover 5-10 papers/books with a paragraph on each reference that briefly summarizes the reference. Make sure to create a bibtex file with the references in them, and use cite links in this document.
+
+See elisp:org-ref-help for some help on citations and references.
+
+** TODO Spring semester summary
+   DEADLINE: <2019-05-15 Wed>
+
+This document should summarize your project accomplishments for the spring semester. It should also discuss the plans for the summer and fall.
+
+** TODO Summer semester summary
+   DEADLINE: <2019-08-15 Thu>
+
+This document should summarize your project accomplishments for the summer and discuss plans for the fall.
+
+** TODO Final report introduction draft due
+   DEADLINE: <2019-08-31 Sat>
+
+The final report is due by the end of the Fall semester. We will complete it in stages to keep our stress levels low and ensure the highest quality product. The first thing you should do is draft the introduction. This section contains an overview of the project including the background literature review through the methods section. Use this link to create the report draft: [[elisp:(kitchingroup-new "ms-report.org" "ms-report")]]
+
+
+** TODO Results and discussion draft due
+   DEADLINE: <2019-10-31 Thu>
+
+The final report is due about a month from now, and I want to make sure we have plenty of time for revision and editing. This draft should be a continuation of the introduction you worked on earlier.
+
+** TODO Final report due
+   DEADLINE: <2019-12-01 Sun>
+
+My preference is you have the report done before the end of the semester.

@@ -1,0 +1,59 @@
+# -*- mode: snippet -*-
+# name: weekly-report
+# key: kwr
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+TITLE: Weekly progress report
+#+AUTHOR: `user-full-name`
+#+DATE: ${2$$(format-time-string "%F")}
+#+FILETAGS: weekly report `(if (boundp 'andrewid) andrewid "NOANDREWID")`
+
+*************** TODO Review                                        :jkitchin:
+Do not remove this. It is here so this shows up in my agenda as an item to do.
+*************** END
+
+# Create a new report each week. It is fine to link to previous reports if you are continuing discussion from them.
+
+* Executive summary
+# Briefly summarize the report in 1-2 paragraphs here. This summary should describe in bullet form the current goals and results. You may want to link to a project file that describes the project goals.
+
+$0
+
+* Results and discussion for the past week
+# Use this section to describe what was completed in the past week. Feel free to include tables, figures, and discussion. Short scripts are ok, but longer ones should go in an appendix with a reference link. This section should be complete enough for me to understand what you have done and what it means. It does not need to be excessively long. Use complete sentences, and a scientific writing style.
+
+
+
+* Work in progress
+# Briefly describe the work that is currently in progress, experiments, analysis, calculations, etc... Use subsections to organize your report.
+
+
+
+* Plans for next week
+# List specific plans that you plan to do in the next week. We will review these in the next report and discuss if they have been completed.
+
+
+
+* Papers read
+# Briefly summarize one or two papers with citations you read that are related to your work. This does not need to be more than a few sentences per paper, and does not need to be more than one or two papers unless this was a major effort for the week.
+
+
+* References
+# put bibliography link here if you use one.
+
+* Submit
+
+Run this code block to commit and submit your report.
+
+#+BEGIN_SRC sh
+git add weekly-report
+git commit weekly-report -m "Automated commit"
+git push
+#+END_SRC
+
+Note however, if you have any graphics or files other than this one, you should use elisp:magit-status to add, commit and push the files.
+
+a - will add a file
+s - will stage a file
+c - will commit a set of changes
+P - will push to the remote repo
