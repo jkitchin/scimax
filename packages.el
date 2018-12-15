@@ -586,6 +586,7 @@
 	       (expand-file-name "ov-highlight" scimax-dir))
   (require 'ov-highlight))
 
+(org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir))
 
 ;; * User packages
 
