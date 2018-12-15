@@ -4,7 +4,7 @@
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 #+TITLE: MS project schedule
-
+#+VERSION: 0.1.0
 Below you will find a description of a schedule we will try to follow over the next year. The dates are not mandatory, but if you anticipate having trouble completing them by the due date you should let me know in advance.
 
 ** TODO Weekly report
@@ -19,6 +19,9 @@ This link will open the report each week elisp:kitchingroup-weekly-report
 
 You should prepare a written document that outlines your plans for your project and what you want to accomplish in the spring semester. This should be done in consultation with me so we agree on what is in it. This is your opportunity to articulate in words your understanding of what we are trying to do, and to begin organizing and prioritizing your thoughts on the project. This document does not need to be long, but it needs to be helpful.
 
+
+[[elisp:(kitchingroup-new "reports/initial-project-plan.org" "project-plan")]]
+
 ** TODO Literature review
    DEADLINE: <2019-01-31 Thu>
 
@@ -26,21 +29,29 @@ Understanding what has been done in the literature, and how to cite it in techni
 
 See elisp:org-ref-help for some help on citations and references.
 
+[[elisp:(kitchingroup-new "reports/initial-literature-review.org" "literature-review")]]
+
 ** TODO Spring semester summary
    DEADLINE: <2019-05-15 Wed>
 
 This document should summarize your project accomplishments for the spring semester. It should also discuss the plans for the summer and fall.
+
+[[elisp:(kitchingroup-new "reports/spring-semester-summary.org" "semester-report")]]
 
 ** TODO Summer semester summary
    DEADLINE: <2019-08-15 Thu>
 
 This document should summarize your project accomplishments for the summer and discuss plans for the fall.
 
+
+[[elisp:(kitchingroup-new "reports/summer-summary.org" "semester-report")]]
+
 ** TODO Final report introduction draft due
    DEADLINE: <2019-08-31 Sat>
 
-The final report is due by the end of the Fall semester. We will complete it in stages to keep our stress levels low and ensure the highest quality product. The first thing you should do is draft the introduction. This section contains an overview of the project including the background literature review through the methods section. Use this link to create the report draft: [[elisp:(kitchingroup-new "ms-report.org" "ms-report")]]
+The final report is due by the end of the Fall semester. We will complete it in stages to keep our stress levels low and ensure the highest quality product. The first thing you should do is draft the introduction. This section contains an overview of the project including the background literature review through the methods section.
 
+[[elisp:(kitchingroup-new "reports/final-report.org" "ms-report")]]
 
 ** TODO Results and discussion draft due
    DEADLINE: <2019-10-31 Thu>

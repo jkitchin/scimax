@@ -5,8 +5,9 @@
 # --
 #+TITLE: Weekly progress report
 #+AUTHOR: `user-full-name`
-#+DATE: ${2$$(format-time-string "%F")}
+#+DATE: `(format-time-string "%F")`
 #+FILETAGS: weekly report `(if (boundp 'andrewid) andrewid "NOANDREWID")`
+#+VERSION: 0.1.0
 
 *************** TODO Review                                        :jkitchin:
 Do not remove this. It is here so this shows up in my agenda as an item to do.
@@ -55,5 +56,5 @@ Note however, if you have any graphics or files other than this one, you should 
 
 a - will add a file
 s - will stage a file
-c - will commit a set of changes
-P - will push to the remote repo
+cc - will commit a set of changes, enter your message and type C-cC-c
+Pp - will push to the remote repo

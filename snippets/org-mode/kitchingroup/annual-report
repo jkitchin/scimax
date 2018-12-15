@@ -5,9 +5,9 @@
 # --
 #+TITLE: Annual student review
 #+AUTHOR: `user-full-name`
-#+DATE: ${2$$(format-time-string "%F")}
+#+DATE: `(format-time-string "%F")`
 #+FILETAGS: annual report `(if (boundp 'andrewid) andrewid "NOANDREWID")`
-
+#+VERSION: 0.1.0
 Rate yourself in the following categories on a scale of 1 to 5. This is document is intended to help you assess your development as a professional. It is not necessary to be exceptional in every category. If that is your goal, however, this document may help you achieve that. Include any comments you feel are important.
 
 1 = Need significant improvement

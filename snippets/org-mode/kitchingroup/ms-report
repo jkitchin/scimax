@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: cmu-ms-report
+# name: ms-report
 # key: msr
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
@@ -7,6 +7,8 @@
 #+LATEX_CLASS_OPTIONS: [12pt]
 #+OPTIONS: toc:nil ^:{}
 #+EXPORT_EXCLUDE_TAGS: noexport
+#+VERSION: 0.1.0
+#+EXPORT_FILE_NAME: `andrewid`-ms-final-report.pdf
 #+FILETAGS: ms report `(if (boundp 'andrewid) andrewid "NOANDREWID")`
 # here is where you include the relevant packages. These are pretty
 # common ones. You may add additional ones. Note that the order of the

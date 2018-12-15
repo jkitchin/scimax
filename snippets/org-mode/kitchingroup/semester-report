@@ -5,8 +5,9 @@
 # --
 #+TITLE: Semester report
 #+AUTHOR: `user-full-name`
-#+DATE: ${1$$(format-time-string "%F")}
+#+DATE: `(format-time-string "%F")`
 #+FILETAGS: semester report `(if (boundp 'andrewid) andrewid "NOANDREWID")`
+#+VERSION: 0.1.0
 
 *************** TODO Review                                        :jkitchin:
 Do not remove this. It is here so this shows up in my agenda as an item to do.
