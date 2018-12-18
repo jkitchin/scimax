@@ -38,7 +38,7 @@ There are things to do. Check them out here: [[elisp:(org-agenda nil "t" "<")]]
 
 I have some concerns about using text properties exclusively for this project. It is appealing because they are stored where the changes should be. As long as font-lock manages the properties correctly it seems like it should work. Searching by property change is a little tricky sometimes though. The alternative is a regexp based search. I don't currently store the regexps though, and on an edit mark would need a regexp based way to identify what kind of editmark you are on.
 
-
+1. Need to disable editmark keymaps when in track change mode? It limits what you can type. Or, I need a prefix on all of them so that we don't collide with typing.
 
 * Examples
   :PROPERTIES:
@@ -103,7 +103,6 @@ These don't really do anything but provide visual highlighting.
 
 ;;; Code
 (require 'cl)
-(require 'helm)
 (require 'color)
 
 
@@ -160,39 +159,40 @@ We create a popup menu and keymaps for the markers and content here.
 #+RESULTS:
 : sem-editmark-content-map
 
-An editmark supports speedkeys on the markers, enabling you to press a single key to make something happen.  We define these keys here.
+# An editmark supports speedkeys on the markers, enabling you to press a single key to make something happen.  We define these keys here.
+I thought having speed keys was a nice idea, but in track-change mode, it interferes, e.g. when you want to insert things at the beginning of an editmark. I think the hydra is sufficient, so I am taking this out for now. Note that since the sem-editmark-content-map is all prefixed, there is not an issue.
 
 #+BEGIN_SRC emacs-lisp
-(defvar sem-speed-map
-  (let ((speedmap (make-sparse-keymap)))
-    (define-key speedmap (kbd "n") 'sem-next-editmark)
-    (define-key speedmap (kbd "p") 'sem-previous-editmark)
-    (define-key speedmap (kbd "a") 'sem-accept-editmark)
-    (define-key speedmap (kbd "A") 'sem-accept-and-next-editmark)
-    (define-key speedmap (kbd "r") 'sem-reject-editmark)
-    (define-key speedmap (kbd "R") 'sem-reject-and-next-editmark)
-    (define-key speedmap (kbd "c") 'sem-clear-editmark)
-    (define-key speedmap (kbd "d") 'sem-delete-editmark)
-    (define-key speedmap (kbd "l") 'sem-editmark-display)
-    (define-key speedmap (kbd "4") 'sem-editmark-spellcheck-typo)
-    (define-key speedmap (kbd "$") 'sem-editmark-spellcheck)
-    (define-key speedmap (kbd "q") 'sem-jump-to-visible-editmark)
-    (define-key speedmap (kbd "j") 'sem-jump-to-editmark)
-    (define-key speedmap (kbd "?") 'sem-speedmap-help)
-    speedmap)
-  "Keymap for speed keys on markers.")
+;; This is less useful than I thought.
+
+;; (defvar sem-speed-map
+;;   (let ((speedmap (make-sparse-keymap)))
+;;     (define-key speedmap (kbd "n") 'sem-next-editmark)
+;;     (define-key speedmap (kbd "p") 'sem-previous-editmark)
+;;     (define-key speedmap (kbd "a") 'sem-accept-editmark)
+;;     (define-key speedmap (kbd "A") 'sem-accept-and-next-editmark)
+;;     (define-key speedmap (kbd "r") 'sem-reject-editmark)
+;;     (define-key speedmap (kbd "R") 'sem-reject-and-next-editmark)
+;;     (define-key speedmap (kbd "c") 'sem-clear-editmark)
+;;     (define-key speedmap (kbd "d") 'sem-delete-editmark)
+;;     (define-key speedmap (kbd "l") 'sem-editmark-display)
+;;     (define-key speedmap (kbd "4") 'sem-editmark-spellcheck-typo)
+;;     (define-key speedmap (kbd "$") 'sem-editmark-spellcheck)
+;;     (define-key speedmap (kbd "q") 'sem-jump-to-visible-editmark)
+;;     (define-key speedmap (kbd "j") 'sem-jump-to-editmark)
+;;     (define-key speedmap (kbd "?") 'sem-speedmap-help)
+;;     speedmap)
+;;   "Keymap for speed keys on markers.")
 
 
-(defun sem-speedmap-help ()
-  "Describe the speed keys."
-  (interactive)
-  (describe-keymap sem-speed-map))
+;; (defun sem-speedmap-help ()
+;;   "Describe the speed keys."
+;;   (interactive)
+;;   (describe-keymap sem-speed-map))
 
 
  #+END_SRC
 
- #+RESULTS:
- : sem-speedmap-help
 
 ** The editmarks
     :PROPERTIES:
@@ -391,7 +391,7 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 #+RESULTS:
 : sem-export-task
 
-For markups with no exporter, we use a default function. This tries to be fancy and approximately represent the colors.
+For markups with no exporter, we use a default function. This tries to be fancy and approximately represent the colors you see in org-mode.
 
 #+BEGIN_SRC emacs-lisp
 (defun sem-export-default (backend)
@@ -488,7 +488,8 @@ The standard font-lock uses regexps for font-locking. We construct the regexp an
 	     ;; open-marker
 	     `(1 ',(list 'face (plist-get properties :marker-face)
 			 'sem-marker 'open
-			 'local-map sem-speed-map
+			 'rear-nonsticky t
+			 ;; 'local-map sem-speed-map
 			 'help-echo (plist-get properties :help-echo)))
 	     ;; content
 	     `(2 ',(list 'face (plist-get properties :face)
@@ -500,7 +501,7 @@ The standard font-lock uses regexps for font-locking. We construct the regexp an
 			 'sem-marker 'close
 			 'rear-nonsticky t
 			 'help-echo (plist-get properties :help-echo)))
-	     ;; author. This is sometimes missing
+	     ;; author. This is sometimes missing and it is a problem when it is for fontification. I am not sure how to make this conditional.
 	     ;; `(4 ',(list 'face nil
 	     ;; 		 'sem-author t
 	     ;; 		 'help-echo (plist-get properties :help-echo)))
@@ -737,14 +738,13 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 	;; goto middle
 	(backward-char (length (plist-get (cdr entry) :close-marker)))))))
   ;; Should we add a local variable so the file opens in sem-mode?
-  (when (not (-contains?  file-local-variables-alist '(eval sem-mode)))
+  (when (not (-contains?  file-local-variables-alist '(eval (sem-mode))))
     (save-excursion
       (add-file-local-variable 'eval '(sem-mode)))))
 #+END_SRC
 
 #+RESULTS:
 : sem-insert
-
 
 *** Delete/Clear a editmark
 
@@ -1255,7 +1255,6 @@ On an editmark open the action menu, otherwise the insert menu."
  #+RESULTS:
  : sem-hydra
 
-
 ** Conversions
 
  The editmarks are primarily intended for use in org-mode, but it is sometimes nice to convert them to a PDF for visualization or sharing with others. This section makes this possible.
@@ -1304,7 +1303,6 @@ in a copy of the buffer."
 
  #+RESULTS:
  : sem-editmarks-to-org
-
 
 ** Generation
 
@@ -1445,8 +1443,10 @@ where it came from. Otherwise we just save the buffer."
 
  #+END_SRC
 
-
 ** Track changes mode
+   :PROPERTIES:
+   :ID:       D5D9C6AE-9B8E-4DD3-B542-60DAA5AD979F
+   :END:
 
  One thing MS Word does really well is track changes. It turns out to be super tricky to do it well. We try to do it here.
 
@@ -1474,9 +1474,16 @@ where it came from. Otherwise we just save the buffer."
 
  #+RESULTS:
 
- The insertions are pretty easy to handle, they are done in the before-change function. The only details we track here are making sure we don't nest insertion markers.
+ The insertions are pretty easy to handle, they are done in the before-change function. The gist of this function seems to be to move the point to the right place, and make sure we put anything around it we need, e.g. markers, then the insertion happens.
 
- For deletions, if we are on an opening marker, we just delete the editmark. Otherwise, we save the deletion for handling after the change.
+There are a surprising number of cases to handle.
+
+1. Inside an editmark content insertion should work as expected. [[(insert-content)]]
+2. On editmark open markers we should move inside the content for insertion. [[(insert-open)]]
+3. On an editmark close marker we should move inside [[(insert-close)]]
+4. At the end of an insert editmark, merge backwards. [[(insert-merge-back)]]
+5. At the front of an insert editmark, merge forward. [[(insert-merge-forward)]]
+6. In plain text, insert markers [[(insert-simple)]]
 
  #+BEGIN_SRC emacs-lisp
 (defvar sem-current-deletion nil
@@ -1492,30 +1499,81 @@ BEG and END are the beginning and the end of the region to be
 changed."
   (unless (or undo-in-progress
               (and (= beg (point-min)) (= end (point-max)))) ; this happens on buffer switches
-    (cond
-     ;; New insertions
-     ((= beg end)
-      ;; We don't want to nest these so we check if we are on an editmark.
-      (when (not (get-text-property (point) 'sem-type))
-	(insert (plist-get (cdr (assoc 'insert sem-editmarks)) :open-marker))
-	(insert (plist-get (cdr (assoc 'insert sem-editmarks)) :close-marker))
-	(backward-char (length (plist-get (cdr (assoc 'insert sem-editmarks)) :close-marker)))))
-     ;; deletions
-     ((eq 'open (get-text-property beg 'sem-marker))
-      (sem-delete-editmark))
-     (t
-      ;; Deletions happen several ways, and we want point to be at different
-      ;; places, front or back accordingly. When the deletion was done with
-      ;; backspace, point is at end. We save this for processing after the change.
-      (setq sem-current-deletion (list (buffer-substring beg end) (= (point) end)))))))
+    (if (= beg end)			; this means we are inserting.
+	(let ((inhibit-modification-hooks t))
+	  ;; An insertion. There are a bunch of corner cases to handle
+	  (cond
+	   ;; We are on an open marker. Move in. (ref:insert-open)
+	   ((eq (get-text-property (point) 'sem-marker) 'open)
+	    ;; Move to beginning of content
+	    (goto-char (car (sem-content-bounds))))
+
+	   ;; On a close marker, move in and insert (ref:insert-close)
+	   ((eq (get-text-property (point) 'sem-marker) 'close)
+	    ;; Move to end of content
+	    (goto-char (cdr (sem-content-bounds))))
+
+	   ;; One character after an insert, merge back (ref:insert-merge-back)
+	   ((and (not (get-text-property (point) 'sem-type))
+		 (eq 'insert (get-text-property (- (point) 1) 'sem-type)))
+	    (backward-char (+ 1 (length (plist-get (cdr (assoc 'insert sem-editmarks)) :close-marker)))))
+
+	   ;; one character in front of an insert, merge in (ref:insert-merge-forward)
+	   ((and (not (get-text-property (point) 'sem-type))
+		 (eq 'insert (get-text-property (+ (point) 1) 'sem-type)))
+	    (forward-char (+ 1 (length (plist-get (cdr (assoc 'insert sem-editmarks)) :open-marker)))))
+
+	   ;; in an editmark, no need to do anything, just insert like normal. (ref:insert-content)
+	   ((get-text-property (point) 'sem-content)
+	    nil)
+
+	   ;; The simplest is we are just inserting away from other editmarks. In this case, we just insert
+	   ;; the insertion markers and put point in the middle. (ref:insert-simple)
+	   ((not (get-text-property (point) 'sem-type))
+	    (insert (plist-get (cdr (assoc 'insert sem-editmarks)) :open-marker))
+	    (insert (plist-get (cdr (assoc 'insert sem-editmarks)) :close-marker))
+	    (backward-char (length (plist-get (cdr (assoc 'insert sem-editmarks)) :close-marker))))
+
+	   ;; what is the fall through case? Warning? do nothing?
+	   ;; These are insertions on other editmarks.
+	   (t
+	    (message "Inserting in an unhandled state. Are you sure this makes sense?"))))
+      ;; Not an insertion, we have a deletion to handle. This is usually done in `sem-after-change'.
+      (cond
+       (t
+	(setq sem-current-deletion (list (buffer-substring beg end) (= (point) end))))))))
 
 
- #+END_SRC
+#+END_SRC
+
+#+RESULTS:
+: sem-before-change
+
+#+RESULTS:
+: sem-before-change
 
 
- Handling the deletions afterwards is considerable trickier. We handle simple deletions by cutting, C-d, etc. first. If we are deleting with backspace, we keep the cursor in front of the editmark and move deleted chars into it. In all cases, we try not to nest editmarks.
 
- #+BEGIN_SRC emacs-lisp
+ For deletions, There are two categories I have observed:
+1. Deletions from C-d, kill [[(delete-1)]].
+   1. These are characterized by (second sem-current-deletion) being nil. There several cases to consider here too.
+      1. If not on an editmark, insert a delete mark [[(delete-1-add-mark)]].
+      2. If you are on content, just let it happen. [[(delete-1-content)]]
+      3. On an open-marker, ignore this. [[(delete-1-open)]]
+      4. On a close-marker, ignore this. [[(delete-1-close)]]
+2. Deletions from backspace [[(delete-2)]]
+   1. These are characterized by (second sem-current-deletion) not being nil.
+      1. You are in an empty editmark, we should delete it. [[(delete-2-empty)]]
+      2. Fresh delete, insert markers and put content in them. [[(delete-2-new)]]
+      3. At the beginning of a delete, and deleting. Push deletion to front of content. [[(delete-2-front)]].
+      4. At the beginning of a delete and end of another delete. merge them. [[(delete-2-merge)]].
+      5. At the beginning of a delete and end of another mark. Just move in to previous mark. [[(delete-2-end+mark)]].
+      6. At the end of a delete, but not looking at another mark. Jump to the front. [[(delete-2-end-extend)]]
+
+
+#+BEGIN_SRC emacs-lisp
+
+
 (defun sem-after-change (beg end length)
   "Function to execute after a buffer change.
 This function marks deletions.  See `sem-before-change' for details.
@@ -1523,36 +1581,158 @@ BEG and END mark the region to be changed, LENGTH is the length
 of the affected text."
   (unless (or undo-in-progress
               (not sem-current-deletion))
-    (cond
-     ((null (second sem-current-deletion))
-      (sem-without-following-changes
-	;; deletion by C-d, kill, etc.
-	(when (and (not (get-text-property (point) 'sem-type))
-		   (not (get-text-property (- (point) 1) 'sem-type)))
+    (let ((inhibit-modification-hooks t))
+      (cond
+       ;; deletion by C-d, kill, etc. (ref:delete-1)
+       ((null (second sem-current-deletion))
+	(message "C-d, kill, delete")
+	(cond
+	 ;; just mark for deletion
+	 ;; (ref:delete-1-add-mark)
+	 ((and (not (get-text-property (point) 'sem-type))
+	       (not (get-text-property (- (point) 1) 'sem-type)))
 	  (insert (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
 	  (insert (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker)))
-	(backward-char (length (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker)))
-	(insert (first sem-current-deletion))
-	(forward-char (length (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker)))))
-     ;; backspace cases. Move cursor to front, and push deletions in
-     (t
-      (sem-without-following-changes
-	;; insert markers if we aren't on one
-	(when (and (not (get-text-property (point) 'sem-type))
-		   (not (get-text-property (+ (point) 1) 'sem-type)))
+	 ;; On content, just let deletions happen. Note we don't check
+	 ;; if open/close markers are present (ref:delete-1-content)
+	 ((get-text-property (point) 'sem-content)
+	  nil)
+
+	 ;; We are on an open marker. ignore. (ref:delete-1-open)
+	 ((eq (get-text-property (point) 'sem-marker) 'open)
+	  (insert (first sem-current-deletion)))
+
+	 ;; On a close marker, ignore (ref:delete-1-close)
+	 ((eq (get-text-property (point) 'sem-marker) 'close)
+	  (insert (first sem-current-deletion)))
+
+	 (t
+	  (message "Unhandled C-d/kill delete. did this make sense?"))))
+
+       ;; backspace cases. (ref:delete-2)
+       (t
+	(cond
+
+	 ;; empty editmark, we delete it. (ref:delete-2-empty)
+	 ((and (looking-at (regexp-opt (mapcar (lambda (em)
+						 (plist-get (cdr em) :close-marker))
+					       sem-editmarks)))
+	       (looking-back (regexp-opt (mapcar (lambda (em)
+						   (plist-get (cdr em) :open-marker))
+						 sem-editmarks))
+			     (apply 'max (mapcar
+					  'length
+					  (mapcar (lambda (em)
+						    (plist-get (cdr em) :open-marker))
+						  sem-editmarks)))))
+	  (re-search-forward (regexp-opt (mapcar (lambda (em)
+						   (plist-get (cdr em) :close-marker))
+						 sem-editmarks)))
+	  (replace-match "")
+	  (re-search-backward (regexp-opt (mapcar (lambda (em)
+						    (plist-get (cdr em) :open-marker))
+						  sem-editmarks)))
+	  (replace-match ""))
+
+	 ;; Simplest case, in text away from editmarks (ref:delete-2-new)
+	 ((and (not (get-text-property (point) 'sem-type))
+	       (not (get-text-property (+ (point) 1) 'sem-type)))
 	  (insert (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
 	  (insert (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker))
-	  (backward-char (length (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker)))
-	  (backward-char (length (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))))
+	  (backward-char (length (plist-get (cdr (assoc 'delete sem-editmarks))
+					    :close-marker)))
+	  (insert (first sem-current-deletion))
+	  ;; now go back to front of the mark.
+	  (backward-char (length (first sem-current-deletion)))
+	  (backward-char (length (plist-get (cdr (assoc 'delete sem-editmarks))
+					    :open-marker))))
 
-	(forward-char (length (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker)))
-	(insert (first sem-current-deletion))
-	(backward-char length)
-	(backward-char (length (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker))))))
-    (setq sem-current-deletion nil)))
+	 ;; (ref:delete-2-front)
+	 ;; at the front of delete but not at the end of any other editmark
+	 ((and (looking-at (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
+	       (not (string= "}" (first sem-current-deletion))))
+	  (forward-char (length (plist-get
+				 (cdr (assoc 'delete sem-editmarks)) :open-marker)))
+	  (insert (first sem-current-deletion))
+	  (backward-char (length (first sem-current-deletion)))
+	  (backward-char (length (plist-get
+				  (cdr (assoc 'delete sem-editmarks)) :close-marker))))
+
+	 ;; between two delete edit marks, merge them and jump to the front
+	 ;; (ref:delete-2-merge)
+	 ((and (looking-at (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
+	       (string= "}" (first sem-current-deletion)))
+	  (insert "}")
+	  (if (not (looking-back (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker)
+				 (length (plist-get
+					  (cdr (assoc 'delete sem-editmarks)) :close-marker))))
+	      (progn
+		;; this means it is some other kind of mark.
+		(re-search-backward (regexp-opt (mapcar (lambda (em)
+							  (plist-get (cdr em) :open-marker))
+							sem-editmarks))))
 
 
+	    (message "case 2 - merging delete")
+	    (delete-char (length (plist-get
+				  (cdr (assoc 'delete sem-editmarks)) :close-marker)))
+	    (delete-char (* -1 (length (plist-get
+					(cdr (assoc 'delete sem-editmarks)) :open-marker))))
+	    (re-search-backward (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))))
+
+
+	 ;; At end of a mark, and beginning of delete. we should jump
+	 ;; to end of previous content? (ref:delete-2-end+mark)
+	 ((and (looking-at (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
+	       (string= "}" (first sem-current-deletion)))
+	  (message "case 2 - front of delete and at end of a mark.")
+	  (insert "}")
+	  (if (not (looking-back (regexp-opt (mapcar (lambda (em)
+						       (plist-get (cdr em) :close-marker))
+						     sem-editmarks))
+				 (apply 'max (mapcar 'length
+						     (mapcar
+						      (lambda (em)
+							(plist-get (cdr em) :close-marker))
+						      sem-editmarks)))))
+	      (delete-backward-char 1)
+	    ;; put char back
+	    (forward-char (length
+			   (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker)))
+	    (insert (first sem-current-deletion))
+	    (backward-char (length (first sem-current-deletion)))
+	    (re-search-backward (regexp-opt (mapcar (lambda (em)
+						      (plist-get (cdr em) :open-marker))
+						    sem-editmarks)))))
+
+	 ;; at the back-end of a delete but not looking at the front
+	 ;; of a delete, probably we should jump to the front to
+	 ;; extend. (ref:delete-2-end-extend)
+	 ((or (eq 'close (get-text-property (- (point) 1) 'sem-marker))
+	      (eq 'open (get-text-property (- (point) 1) 'sem-marker)))
+	  (message "case 2 - deleting mark")
+	  (backward-char)
+	  (goto-char (car (sem-editmark-bounds))))
+
+	 ;; At front of some other mark
+	 ((looking-at (regexp-opt (mapcar (lambda (em)
+					    (plist-get (cdr em) :open-marker))
+					  sem-editmarks)))
+	  (insert (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
+	  (insert (first sem-current-deletion))
+	  (insert (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker))
+	  (re-search-backward (regexp-opt (mapcar (lambda (em)
+						    (plist-get (cdr em) :open-marker))
+						  sem-editmarks))))
+
+	 (t
+	  (message "after: why aren't you caught?>")))))))
+  (setq sem-current-deletion nil)
+  (save-excursion (font-lock-fontify-region (line-beginning-position) (line-end-position))))
  #+END_SRC
+
+ #+RESULTS:
+ : sem-after-change
 
  While in track changes mode, we often need to modify the buffer without triggering the change functions. This macro simplifies that.
 
