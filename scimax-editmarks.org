@@ -1203,7 +1203,7 @@ Finally we define a minor mode for the list view.
  I never remember all the things that are possible. Hydra menus solve that, and here we provide a context aware hydra menu that inserts editmarks when you are not on one, and provides actions for editmarks when you are on one. I bind it to H-m.
 
  #+BEGIN_SRC emacs-lisp
-(defhydra sem-insert (:color blue :hint nil)
+(defhydra sem-insert (:color blue :hint nil :columns 3)
   "Editmark insert"
   ("m" (sem-insert 'comment) "comment")
   ("i" (sem-insert 'insert) "insert")
@@ -1217,10 +1217,13 @@ Finally we define a minor mode for the list view.
   ("n" sem-next-editmark "next")
   ("p" sem-previous-editmark "previous")
   ("g" sem-track-change-mode "toggle track changes")
+  ("l" sem-editmark-display "List all")
+  ("q" sem-jump-to-editmark "Jump to editmark")
+  ("v" sem-jump-to-visible-editmark "Jump to visible")
   ("a" sem-action/body "action menu"))
 
 
-(defhydra sem-action (:color red :hint nil)
+(defhydra sem-action (:color red :hint nil :columns 3)
   "Editmark action"
   ("a" sem-accept-editmark "accept")
   ("A" sem-accept-and-next-editmark "accept and next")
@@ -1238,6 +1241,8 @@ Finally we define a minor mode for the list view.
   ("n" sem-next-editmark "next")
   ("p" sem-previous-editmark "previous")
   ("4" sem-editmark-spellcheck-typo "spellcheck typo")
+  ("q" sem-jump-to-editmark "Jump to editmark")
+  ("v" sem-jump-to-visible-editmark "Jump to visible")
   ("g" sem-track-change-mode "toggle track changes"))
 
 
