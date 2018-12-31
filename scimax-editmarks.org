@@ -193,7 +193,6 @@ I thought having speed keys was a nice idea, but in track-change mode, it interf
 
  #+END_SRC
 
-
 ** The editmarks
     :PROPERTIES:
     :ID:       6ABCE6EF-7106-4E80-AEA7-66B1F3CDB5DD
@@ -1521,12 +1520,16 @@ changed."
 	   ;; One character after an insert, merge back (ref:insert-merge-back)
 	   ((and (not (get-text-property (point) 'sem-type))
 		 (eq 'insert (get-text-property (- (point) 1) 'sem-type)))
-	    (backward-char (+ 1 (length (plist-get (cdr (assoc 'insert sem-editmarks)) :close-marker)))))
+	    (backward-char (+ 1 (length (plist-get
+					 (cdr (assoc 'insert sem-editmarks))
+					 :close-marker)))))
 
 	   ;; one character in front of an insert, merge in (ref:insert-merge-forward)
 	   ((and (not (get-text-property (point) 'sem-type))
 		 (eq 'insert (get-text-property (+ (point) 1) 'sem-type)))
-	    (forward-char (+ 1 (length (plist-get (cdr (assoc 'insert sem-editmarks)) :open-marker)))))
+	    (forward-char (+ 1 (length (plist-get
+					(cdr (assoc 'insert sem-editmarks))
+					:open-marker)))))
 
 	   ;; in an editmark, no need to do anything, just insert like normal. (ref:insert-content)
 	   ((get-text-property (point) 'sem-content)
