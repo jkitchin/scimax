@@ -134,7 +134,10 @@ These are activated in function `ob-ipython-key-bindings'."
      ["Toggle line numbers" scimax-ob-toggle-line-numbers t])
     ("Navigate"
      ["Previous block" org-babel-previous-src-block t]
-     ["Next block" org-babel-next-src-block t]
+     ["Next block" (lambda ()
+		     (interactive)
+		     (org-babel-next-src-block))
+      t]
      ["Jump to visible block" scimax-jump-to-visible-block t]
      ["Jump to block" scimax-jump-to-block t])
     ["Inspect" ob-ipython-inspect t]
@@ -582,9 +585,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 (defun scimax-ob-ipython-popup-command (event)
   "Popup a menu of actions for src blocks."
   (interactive "e")
-  (call-interactively
-   (or (popup-menu (append '("ob-ipython") ob-ipython-menu-items))
-       'ignore)))
+  (popup-menu (append '("ob-ipython") ob-ipython-menu-items)))
 
 ;; * Execution functions
 
