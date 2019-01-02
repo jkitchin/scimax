@@ -88,17 +88,20 @@
 
 (font-lock-add-keywords 'emacs-lisp-mode lel-font-lock-keywords)
 
-(defun lisp-outline-setup ()
-  "Setup outline and orgstruct mode for emacs-lisp code.
-This enables you to use tab to open and close outlines."
-  (setq-local outline-regexp ";; ?\\*+\\|\\`")
-  (setq-local orgstruct-heading-prefix-regexp ";; ?\\*+\\|\\`")
-  (outline-minor-mode)
-  (orgstruct-mode)
-  (outline-show-branches))
+;; (defun lisp-outline-setup ()
+;;   "Setup outline and orgstruct mode for emacs-lisp code.
+;; This enables you to use tab to open and close outlines."
+;;   (setq-local outline-regexp ";; ?\\*+\\|\\`")
+;;   (setq-local orgstruct-heading-prefix-regexp ";; ?\\*+\\|\\`")
+;;   (outline-minor-mode)
+;;   (orgstruct-mode)
+;;   (outline-show-branches))
 
-(add-hook 'emacs-lisp-mode-hook
-	  #'lisp-outline-setup)
+;; (add-hook 'emacs-lisp-mode-hook
+;; 	  #'lisp-outline-setup)
+
+;; (remove-hook 'emacs-lisp-mode-hook
+;;  	  #'lisp-outline-setup)
 
 ;; ** Python
 (setq python-indent-offset 4)
