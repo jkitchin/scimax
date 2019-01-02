@@ -6,8 +6,18 @@
 #+TITLE: Weekly progress report
 #+AUTHOR: `user-full-name`
 #+DATE: `(format-time-string "%F")`
-#+FILETAGS: weekly report `(if (boundp 'andrewid) andrewid "NOANDREWID")`
-#+VERSION: 0.1.0
+#+DUEDATE: `(let* ((day 1) ; 1 is for Monday
+					   (time (decode-time))
+					   (dow (nth 6 time))
+					   (day-of-month (nth 3 time))
+					   (new-dow (+ (- 7 dow) day))
+					   (new-time (encode-time 0 0 0
+								  (+ new-dow day-of-month)
+								  (nth 4 time)
+								  (nth 5 time))))
+				      (format-time-string "<%Y-%m-%d %a>" new-time))`
+#+FILETAGS: weekly report `(if (boundp 'kitchingroup-github-id) kitchingroup-github-id "NOGITHUBID")`
+#+VERSION: 0.1.1
 
 *************** TODO Review                                        :jkitchin:
 Do not remove this. It is here so this shows up in my agenda as an item to do.
@@ -16,7 +26,7 @@ Do not remove this. It is here so this shows up in my agenda as an item to do.
 # Create a new report each week. It is fine to link to previous reports if you are continuing discussion from them.
 
 * Executive summary
-# Briefly summarize the report in 1-2 paragraphs here. This summary should describe in bullet form the current goals and results. You may want to link to a project file that describes the project goals.
+# Briefly summarize the report  here. This summary should describe in bullet form the current goals and results. You may want to link to a project file that describes the project goals.
 
 $0
 
@@ -47,8 +57,8 @@ $0
 Run this code block to commit and submit your report.
 
 #+BEGIN_SRC sh
-git add weekly-report
-git commit weekly-report -m "Automated commit"
+git add *
+git commit -am "Automated commit"
 git push
 #+END_SRC
 
