@@ -181,25 +181,29 @@ Usually called in a hook function."
 
 ;; * org templates and default header args
 
-(add-to-list 'org-structure-template-alist
-	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
-	       "<src lang=\"python\">\n?\n</src>"))
+;; org 9.2 changed this variable in a backwards incompatible way. I think I do
+;; all of these through yasnippet now, so I am going to just comment these out
+;; for now, in case I want to add them to a snippet later.
 
-(add-to-list 'org-structure-template-alist
-	     '("ipv" "#+BEGIN_SRC ipython :results value\n?\n#+END_SRC"
-	       "<src lang=\"python\">\n?\n</src>"))
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
+;; 	       "<src lang=\"python\">\n?\n</src>"))
 
-(add-to-list 'org-structure-template-alist
-	     '("plt" "%matplotlib inline\nimport matplotlib.pyplot as plt\n?"
-	       ""))
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("ipv" "#+BEGIN_SRC ipython :results value\n?\n#+END_SRC"
+;; 	       "<src lang=\"python\">\n?\n</src>"))
 
-(add-to-list 'org-structure-template-alist
-	     '("np" "import numpy as np\n?"
-	       ""))
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("plt" "%matplotlib inline\nimport matplotlib.pyplot as plt\n?"
+;; 	       ""))
 
-(add-to-list 'org-structure-template-alist
-	     '("anp" "import autograd.numpy as np\n?"
-	       ""))
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("np" "import numpy as np\n?"
+;; 	       ""))
+
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("anp" "import autograd.numpy as np\n?"
+;; 	       ""))
 
 
 

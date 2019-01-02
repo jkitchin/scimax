@@ -164,77 +164,81 @@ is positive, move after, and if negative, move before."
     (todo "TODO"))))
 
 ;; * Block templates
-;; add <p for python expansion
-(add-to-list 'org-structure-template-alist
-	     '("p" "#+BEGIN_SRC python :results output org drawer\n?\n#+END_SRC"
-	       "<src lang=\"python\">\n?\n</src>"))
 
-;; add <por for python expansion with raw output
-(add-to-list 'org-structure-template-alist
-	     '("por" "#+BEGIN_SRC python :results output raw\n?\n#+END_SRC"
-	       "<src lang=\"python\">\n?\n</src>"))
+;; org 9.2 changed the template engine. It doesn't seem possible to use it as a
+;; general templating engine anymore that is mostly for inserting blocks.
+;; (when (version< (org-version) "9.2")
+;;   ;; add <p for python expansion
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("p" "#+BEGIN_SRC python :results output org drawer\n?\n#+END_SRC"
+;; 		 "<src lang=\"python\">\n?\n</src>"))
 
-;; add <pv for python expansion with value
-(add-to-list 'org-structure-template-alist
-	     '("pv" "#+BEGIN_SRC python :results value\n?\n#+END_SRC"
-	       "<src lang=\"python\">\n?\n</src>"))
+;;   ;; add <por for python expansion with raw output
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("por" "#+BEGIN_SRC python :results output raw\n?\n#+END_SRC"
+;; 		 "<src lang=\"python\">\n?\n</src>"))
 
-;; add <el for emacs-lisp expansion
-(add-to-list 'org-structure-template-alist
-	     '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"
-	       "<src lang=\"emacs-lisp\">\n?\n</src>"))
+;;   ;; add <pv for python expansion with value
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("pv" "#+BEGIN_SRC python :results value\n?\n#+END_SRC"
+;; 		 "<src lang=\"python\">\n?\n</src>"))
 
-(add-to-list 'org-structure-template-alist
-	     '("ell" "#+BEGIN_SRC emacs-lisp :lexical t\n?\n#+END_SRC"
-	       "<src lang=\"emacs-lisp\">\n?\n</src>"))
+;;   ;; add <el for emacs-lisp expansion
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"
+;; 		 "<src lang=\"emacs-lisp\">\n?\n</src>"))
 
-;; add <sh for shell
-(add-to-list 'org-structure-template-alist
-	     '("sh" "#+BEGIN_SRC sh\n?\n#+END_SRC"
-	       "<src lang=\"shell\">\n?\n</src>"))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("ell" "#+BEGIN_SRC emacs-lisp :lexical t\n?\n#+END_SRC"
+;; 		 "<src lang=\"emacs-lisp\">\n?\n</src>"))
 
-(add-to-list 'org-structure-template-alist
-	     '("lh" "#+latex_header: " ""))
+;;   ;; add <sh for shell
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("sh" "#+BEGIN_SRC sh\n?\n#+END_SRC"
+;; 		 "<src lang=\"shell\">\n?\n</src>"))
 
-(add-to-list 'org-structure-template-alist
-	     '("lc" "#+latex_class: " ""))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("lh" "#+latex_header: " ""))
 
-(add-to-list 'org-structure-template-alist
-	     '("lco" "#+latex_class_options: " ""))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("lc" "#+latex_class: " ""))
 
-(add-to-list 'org-structure-template-alist
-	     '("ao" "#+attr_org: " ""))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("lco" "#+latex_class_options: " ""))
 
-(add-to-list 'org-structure-template-alist
-	     '("al" "#+attr_latex: " ""))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("ao" "#+attr_org: " ""))
 
-(add-to-list 'org-structure-template-alist
-	     '("ca" "#+caption: " ""))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("al" "#+attr_latex: " ""))
 
-(add-to-list 'org-structure-template-alist
-	     '("tn" "#+tblname: " ""))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("ca" "#+caption: " ""))
 
-(add-to-list 'org-structure-template-alist
-	     '("n" "#+name: " ""))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("tn" "#+tblname: " ""))
 
-(add-to-list 'org-structure-template-alist
-	     '("o" "#+options: " ""))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("n" "#+name: " ""))
 
-(add-to-list 'org-structure-template-alist
-	     '("ti" "#+title: " ""))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("o" "#+options: " ""))
 
-;; table expansions
-(loop for i from 1 to 6
-      do
-      (let ((template (make-string i ?t))
-	    (expansion (concat "|"
-			       (mapconcat
-				'identity
-				(loop for j to i collect "   ")
-				"|"))))
-	(setf (substring expansion 2 3) "?")
-	(add-to-list 'org-structure-template-alist
-		     `(,template ,expansion ""))))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("ti" "#+title: " ""))
+
+;;   ;; table expansions
+;;   (loop for i from 1 to 6
+;; 	do
+;; 	(let ((template (make-string i ?t))
+;; 	      (expansion (concat "|"
+;; 				 (mapconcat
+;; 				  'identity
+;; 				  (loop for j to i collect "   ")
+;; 				  "|"))))
+;; 	  (setf (substring expansion 2 3) "?")
+;; 	  (add-to-list 'org-structure-template-alist
+;; 		       `(,template ,expansion "")))))
 
 ;; * Babel settings
 ;; enable prompt-free code running
@@ -301,9 +305,14 @@ is positive, move after, and if negative, move before."
 (defalias 'org-babel-prep-session:jupyter-hy 'org-babel-prep-session:ipython)
 (defalias 'org-babel-jupyter-hy-initiate-session 'org-babel-ipython-initiate-session)
 
-(add-to-list 'org-structure-template-alist
-	     '("hy" "#+BEGIN_SRC jupyter-hy\n?\n#+END_SRC"
-	       "<src lang=\"hy\">\n?\n</src>"))
+;; (when (version< (org-version) "9.2")
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("hy" "#+BEGIN_SRC jupyter-hy\n?\n#+END_SRC"
+;; 		 "<src lang=\"hy\">\n?\n</src>")))
+
+;; (when (version<= "9.2" (org-version))
+;;   (add-to-list 'org-structure-template-alist
+;; 	       '("hy" . "src jupyter-hy")))
 
 ;; * Images in org-mode
 
@@ -313,9 +322,12 @@ is positive, move after, and if negative, move before."
 ;; default width
 (setq org-image-actual-width nil)
 
+;; redisplay figures when you run a block so they are always current.
 (add-hook 'org-babel-after-execute-hook
 	  'org-display-inline-images)
 
+;; This automatically aligns tables, which is nice if you use code to generate
+;; tables.
 (defun scimax-align-result-table ()
   "Align tables in the subtree."
   (save-restriction

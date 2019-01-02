@@ -116,9 +116,13 @@ name that is unique within the document. You might also like
 
 ;;; Code:
 
-(add-to-list 'org-structure-template-alist
-	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
-	       "<src lang=\"python\">\n?\n</src>"))
+;; I decided to just remove these from scimax. I think they are all covered in
+;; yasnippet now.
+
+;; (if (version< (org-version) "9.2")
+;;     (add-to-list 'org-structure-template-alist
+;; 		 '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
+;; 		   "<src lang=\"python\">\n?\n</src>")))
 
 
 (setq org-babel-default-header-args:ipython
@@ -535,7 +539,7 @@ This can provide information about the type, etc."
     (when (org-in-ipython-block-p) (org-narrow-to-block))
     (if (ob-ipython-get-running)
 	(message "The kernel is busy running %s. Try later." (cdr (ob-ipython-get-running)))
-      
+
       (-if-let (result (->> (ob-ipython--inspect buffer
 						 (- pos (point-min)))
 			    (assoc 'text/plain) cdr))
@@ -826,7 +830,7 @@ that case the process that ipython uses appears to be default."
  "async-running"
  :follow (lambda (path)
 	   (org-babel-goto-named-src-block path)
-	   (nuke-ipython) 
+	   (nuke-ipython)
 	   (save-excursion
 	     (org-babel-previous-src-block)
 	     (org-babel-remove-result))
@@ -1240,7 +1244,7 @@ longer than I would expect to work."
 	(when (get-process proc)
 	  (ob-ipython-log "Killing proc: %s" proc)
 	  (delete-process proc)))
-  
+
   (org-babel-async-ipython-clear-queue)
   (setq header-line-format nil))
 
