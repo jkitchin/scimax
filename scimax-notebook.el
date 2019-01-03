@@ -165,6 +165,36 @@ uncommitted changes, you will be prompted to continue."
 
 
 
+;; * List tags in the notebook
+(defun nb-list-tags ()
+  "Get a list of tags in the notebook."
+  (interactive)
+  (let ((tags '())
+	(already-open nil)
+	(org-files (mapcar
+		    (lambda (f) (expand-file-name
+				 f (projectile-project-root)))
+		    (-filter (lambda (f)
+			       (and
+				(f-ext? f "org")
+				(not (s-contains? "#" f))))
+			     (projectile-current-project-files)))))
+    (cl-loop for org-file in org-files do
+	     (setq already-open (find-buffer-visiting org-file))
+	     (with-current-buffer (find-file-noselect org-file)
+	       (save-excursion
+		 (save-restriction
+		   (widen)
+		   (goto-char (point-min))
+		   (while (re-search-forward org-heading-regexp nil t)
+		     (setq tags (append tags (org-get-tags)))))))
+	     (unless already-open
+	       (y-or-n-p (format "kill %s" already-open))
+	       (kill-buffer already-open)
+	       (setq already-open nil)))
+    (-uniq tags)))
+
+
 ;; * Add a menu to scimax
 
 (easy-menu-change
