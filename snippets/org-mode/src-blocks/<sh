@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: shell
+# key: <sh
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+BEGIN_SRC sh
+$0
+#+END_SRC
