@@ -6,8 +6,8 @@
 #+TITLE: Annual student review
 #+AUTHOR: `user-full-name`
 #+DATE: `(format-time-string "%F")`
-#+FILETAGS: annual report `(if (boundp 'andrewid) andrewid "NOANDREWID")`
-#+VERSION: 0.1.0
+#+FILETAGS: annual report `(if (boundp 'kitchingroup-github-id) kitchingroup-github-id "NOGITHUBID")`
+#+VERSION: 0.1.1
 Rate yourself in the following categories on a scale of 1 to 5. This is document is intended to help you assess your development as a professional. It is not necessary to be exceptional in every category. If that is your goal, however, this document may help you achieve that. Include any comments you feel are important.
 
 1 = Need significant improvement
@@ -102,13 +102,44 @@ Rate yourself in the following categories on a scale of 1 to 5. This is document
 * Are there any broader Kitchin group issues you wish to discuss?
 
 
-*************** TODO Review                                        :jkitchin:
+* Submit
+
+Run this code block to commit and submit your report. Note that this will add everything in this directory, so do not do this if you have a lot of files
+
+#+BEGIN_SRC sh
+# 10 MB max report size
+MAXSIZE="10485760"
+CHECK="`du -s . | awk '{print $1}'cc`"
+
+if [ "$MAXSIZE" -gt "$CHECK" ]; then
+    git add *
+    git commit -am "Automated commit"
+    git push
+else
+    echo "This directory is too big. Please see Prof. Kitchin" 1>&2
+    exit 1
+fi
+#+END_SRC
+
+You can also use elisp:magit-status to add, commit and push the files.
+
+a - will add a file
+s - will stage a file
+cc - will commit a set of changes, enter your message and type C-cC-c
+Pp - will push to the remote repo
+
+Either way, don't forget to send Prof. Kitchin an email that you have submitted the report and it is ready for review. Then, wait for feed back from him for you to review. You should try to not modify the repo until then to keep things simple.
+
+Then run this block to pull the changes back for you to review.
+
+#+BEGIN_SRC emacs-lisp
+(shell-command "git pull")
+(revert-buffer)
+(goto-char (point-min))
+#+END_SRC
+
+If you run into any problems, please see Prof. Kitchin.
+
+*************** TODO Review annual report for `kitchingroup-github-id` :jkitchin:
 Do not remove this. It is here so this shows up in my agenda as an item to do.
 *************** END
-
-# Create a new report each week. It is fine to link to previous reports if you are continuing discussion from them.
-
-
-* TODO Review  :jkitchin:
-
-Do not remove this. It is here so this will show up in my agenda.

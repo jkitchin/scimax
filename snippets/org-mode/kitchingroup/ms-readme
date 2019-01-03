@@ -5,9 +5,10 @@
 # --
 #+TITLE: Kitchingroup README
 #+VERSION: 0.1.0
+
 This repo contains several documents we will use for communication and documentation of your projects.
 
-[[elisp:nb-agenda]] This link will show you list of tasks and their due dates.
+[[elisp:nb-agenda]] This link will show you a list of tasks and their due dates.
 
 [[./ms-schedule.org]] contains a list of tasks we will complete over the next year.
 
