@@ -91,6 +91,18 @@ This is a thin wrapper on `projectile-switch-project' that opens the master file
 
 
 ;;;###autoload
+(defun nb-git-clone (url path)
+  "Clone a git repo at URL as a project at PATH in `nb-notebook-directory'."
+  (interactive "sUrl: \nsPath: ")
+  (let ((default-directory nb-notebook-directory))
+    (when (file-exists-p path)
+      (error "%S already exists" path))
+    (make-directory path t)
+    (shell-command-to-string (format "git clone %s %s" url path))
+    (dired path)))
+
+
+;;;###autoload
 (defun nb-clone ()
   "Create a clone (by a recursive copy) of the current notebook.
 This is helpful when you want to keep a copy of the repo, for
@@ -141,6 +153,7 @@ example."
 				       (not (s-contains? "#" f))))
 				    (projectile-current-project-files)))))
     (org-agenda)))
+
 
 ;; * Archive a notebook
 ;;;###autoload
@@ -224,7 +237,6 @@ uncommitted changes, you will be prompted to continue."
 (if nb-scimax-update-menu-p
     (add-hook 'menu-bar-update-hook 'update-scimax-projects-menu)
   (update-scimax-projects-menu))
-
 
 
 ;; * The end
