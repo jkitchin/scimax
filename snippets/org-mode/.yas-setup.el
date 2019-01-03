@@ -9,9 +9,12 @@
 	 (header-vals (org-babel-combine-header-arg-lists
 		       org-babel-common-header-args-w-values
 		       (when (boundp lang-headers) (eval lang-headers t))))
-	 (header (completing-read "Header: " (mapcar 'symbol-name (mapcar 'car header-vals))))
-	 (vals (cdr (assoc (intern-soft header) headers-vals)))
-	 (val (completing-read "Value: " vals)))
+	 (header (completing-read "Header: "
+				  (mapcar 'symbol-name (mapcar 'car header-vals))))
+	 (vals (cdr (assoc (intern-soft header) header-vals)))
+	 (val (completing-read "Value: " (if (eq vals :any)
+					     '()
+					   vals))))
     (format ":${1:%s} ${2:%s} " header val)))
 
 
@@ -54,7 +57,7 @@ $0
   (require 'async)
   (async-start
    `(lambda ()
-      (require 'cl) 
+      (require 'cl)
       (mapcar
        (lambda (s)
       	 (second (split-string (first (split-string s ":")) " ")))
@@ -62,6 +65,5 @@ $0
       		if (and (stringp line) (string= "i" (substring line 0 1)))
       		collect line)))
 
-   (lambda (result) 
+   (lambda (result)
      (setq scimax-installed-latex-packages result))))
-
