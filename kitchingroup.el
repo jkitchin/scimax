@@ -1,44 +1,85 @@
 ;;; kitchingroup.el --- Kitchingroup utility functions
 
 ;;; Commentary:
-;; 
+;; This module is mostly for members of my research group.
 
-(defun kitchingroup-weekly-report (&optional arg) 
+(defcustom kitchingroup-github-id nil
+  "Your Github id.
+This should be defined in user/preload.el, e.g. (setq kitchingroup-github-id \"your-id\")"
+  :group 'kitchingroup)
+
+
+(when (null kitchingroup-github-id)
+  (warn "`kitchingroup-github-id' is nil. Please set it in %s/user/preload.el" scimax-dir))
+
+
+(defun kitchingroup-new-document (path template)
+  "Create a new document at PATH using TEMPLATE.
+TEMPLATE should be a yasnippet name and should be a string."
+  (if (file-exists-p path)
+      (find-file path)
+    ;; we need to make it.
+    (find-file path)
+    (yas-expand-snippet (yas-lookup-snippet template))))
+
+
+(defun kitchingroup-kitchinhub-repo ()
+  "Check for existence of your repo and get it if needed."
+  (when (null kitchingroup-github-id)
+    (error "`kitchingroup-github-id' is nil. Please set it in %s/user/preload.el"
+	   scimax-dir))
+
+  (unless (file-directory-p kitchingroup-root)
+    (make-directory kitchingroup-root t))
+
+  (unless (file-directory-p (expand-file-name kitchingroup-github-id kitchingroup-root))
+    (let ((default-directory kitchingroup-root))
+      (shell-command (format "git clone git@github.com:KitchinHUB/%s.git"
+			     kitchingroup-github-id)))))
+
+
+(defun kitchingroup-weekly-report ()
   "Create/open this week's progress report.
-With a prefix arg, specify the week to open.
-
-This function will create a folder called reports/year-mm-dd and put a weekly-report template inside it, or open the one that exists.
-
-The week beginning is defined by `calendar-week-start-day'. The
+This function will create a folder called reports/year-mm-dd and
+put a weekly-report template inside it, or open the one that
+exists. dd will be at the beginning of the week (Monday). The
 report is for the previous week."
-  (interactive "P")
-  
-  (let* ((date (if arg (org-read-date) (format-time-string "%Y-%m-%d")))
-	 (f (split-string date "-"))
-	 (year (string-to-number (nth 0 f)))
-	 (month (string-to-number (nth 1 f)))
-	 (day (string-to-number (nth 2 f)))
-	 (day-name (calendar-day-name (list month day year)))
-	 ;; this is the day number within a week.
-	 (day-number (loop for i from 0
-			   if (string= day-name (aref calendar-day-name-array i))
-			   return i))
-	 
-	 (week-beginning
-	  (if (= day-number calendar-week-start-day)
-	      day
-	    (- day (- day-number calendar-week-start-day))))
+  (interactive)
+  ;; make sure we have a repo to work in.
+  (kitchingroup-kitchinhub-repo)
+  (let* ((dir (format "reports/%s/" (format-time-string "%Y-%m-%d"
+							(iso-week-to-time
+							 (string-to-number
+							  (format-time-string
+							   "%Y" (current-time)))
+							 (string-to-number
+							  (format-time-string
+							   "%V" (current-time)))
+							 ;; 1 is for Monday
+							 1))))
+	 (fname (f-join dir "weekly-report.org"))
+	 (repo-dir (expand-file-name kitchingroup-github-id nb-notebook-directory))
+	 (projectile-switch-project-action (lambda ()
+					     (unless (file-directory-p
+						      (expand-file-name dir))
+					       (make-directory dir t))
+					     (if (file-exists-p fname)
+						 (find-file fname)
+					       (find-file fname)
+					       (yas-expand-snippet
+						(yas-lookup-snippet "weekly-report"))))))
+    ;; check that this exists, and if not get it.
+    (unless (file-directory-p (expand-file-name kitchingroup-github-id
+						nb-notebook-directory))
+      (let ((default-directory nb-notebook-directory))
+	(shell-command (format "git clone git@github.com:KitchinHUB/%s.git"
+			       kitchingroup-github-id)))
+      (projectile-add-known-project repo-dir))
 
-	 (dir (format "reports/%s-%s-%s/" year month week-beginning)))
-    
-    (unless (file-directory-p (expand-file-name dir))
-      (make-directory dir t))
-
-    (let ((default-directory (expand-file-name dir)))
-      (ox-manuscript-new-helm "weekly-progress-report"))))
-
-
-(defalias 'kitchinhub-weekly-report 'kitchingroup-weekly-report)
+    ;; Now switch to the repo
+    (projectile-switch-project-by-name
+     repo-dir
+     nil)))
 
 
 (defun kitchingroup-calendar ()
