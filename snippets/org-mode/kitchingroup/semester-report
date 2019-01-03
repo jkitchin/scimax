@@ -28,7 +28,7 @@ Run this code block to commit and submit your report. Note that this will add ev
 #+BEGIN_SRC sh
 # 10 MB max report size
 MAXSIZE="10485760"
-CHECK="`du -s . | awk '{print $1}'cc`"
+CHECK="\`du -s . | awk '{print \$1}'\`"
 
 if [ "$MAXSIZE" -gt "$CHECK" ]; then
     git add *

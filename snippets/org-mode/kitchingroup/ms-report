@@ -8,8 +8,8 @@
 #+OPTIONS: toc:nil ^:{}
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+VERSION: 0.1.0
-#+EXPORT_FILE_NAME: `andrewid`-ms-final-report.pdf
-#+FILETAGS: ms report `(if (boundp 'andrewid) andrewid "NOANDREWID")`
+#+EXPORT_FILE_NAME: `kitchingroup-github-id`-ms-final-report.pdf
+#+FILETAGS: ms report `(if (boundp 'kitchingroup-github-id) kitchingroup-github-id "NOGITHUBID")`
 # here is where you include the relevant packages. These are pretty
 # common ones. You may add additional ones. Note that the order of the
 # packages is significant. If you are not careful, your file will not
@@ -119,3 +119,45 @@ bibliography:${5:bibfile}
 
 - [ ] [[elisp:org-ref]]  run this to check for errors
 - [ ] Did you put in keywords?
+
+** Submit
+
+Run this code block to commit and submit your report. Note that this will add everything in this directory, so do not do this if you have a lot of files
+
+#+BEGIN_SRC sh
+# 10 MB max report size
+MAXSIZE="10485760"
+CHECK="\`du -s . | awk '{print \$1}'\`"
+
+if [ "$MAXSIZE" -gt "$CHECK" ]; then
+    git add *
+    git commit -am "Automated commit"
+    git push
+else
+    echo "This directory is too big. Please see Prof. Kitchin" 1>&2
+    exit 1
+fi
+#+END_SRC
+
+You can also use elisp:magit-status to add, commit and push the files.
+
+a - will add a file
+s - will stage a file
+cc - will commit a set of changes, enter your message and type C-cC-c
+Pp - will push to the remote repo
+
+Either way, don't forget to send Prof. Kitchin an email that you have submitted the report and it is ready for review. Then, wait for feed back from him for you to review. You should try to not modify the repo until then to keep things simple.
+
+Then run this block to pull the changes back for you to review.
+
+#+BEGIN_SRC emacs-lisp
+(shell-command "git pull")
+(revert-buffer)
+(goto-char (point-min))
+#+END_SRC
+
+If you run into any problems, please see Prof. Kitchin.
+
+*************** TODO Review annual report for `kitchingroup-github-id` :jkitchin:
+Do not remove this. It is here so this shows up in my agenda as an item to do.
+*************** END
