@@ -99,40 +99,39 @@ recent files and bookmarks. You can set a bookmark also."
 
 ;; * Windows
 ;;;###autoload
-(defun explorer ()
+(defun explorer (&optional path)
   "Open Finder or Windows Explorer in the current directory."
-  (interactive)
+  (interactive (list (if (buffer-file-name)
+			 (file-name-directory (buffer-file-name))
+		       (expand-file-name  "~/"))))
   (cond
    ((string= system-type "gnu/linux")
     (shell-command "nautilus"))
    ((string= system-type "darwin")
     (shell-command (format "open -b com.apple.finder %s"
-			   (if (buffer-file-name)
-			       (file-name-directory (buffer-file-name))
-			     "~/"))))
+			   path)))
    ((string= system-type "windows-nt")
     (shell-command (format "explorer %s"
 			   (replace-regexp-in-string
 			    "/" "\\\\"
-			    (if (buffer-file-name)
-				(file-name-directory (buffer-file-name))
-			      (expand-file-name  "~/"))))))))
+			    path))))))
 
 (defalias 'finder 'explorer "Alias for `explorer'.")
 
 
-(defun bash ()
-  "Open a bash window."
-  (interactive)
+(defun bash (&optional path)
+  "Open a bash window.
+PATH is optional, and defaults to the current directory."
+  (interactive (list (if (buffer-file-name)
+			 (file-name-directory (buffer-file-name))
+		       (expand-file-name default-directory))))
   (cond
    ((string= system-type "gnu/linux")
     (shell-command "gnome-terminal"))
    ((string= system-type "darwin")
     (shell-command
      (format "open -b com.apple.terminal \"%s\""
-	     (if (buffer-file-name)
-		 (file-name-directory (buffer-file-name))
-	       (expand-file-name default-directory)))))
+	     path)))
    ((string= system-type "windows-nt")
     (shell-command "start \"\" \"%SYSTEMDRIVE%\\Program Files\\Git\\bin\\bash.exe\" --login &"))))
 
