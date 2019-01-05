@@ -1,4 +1,14 @@
 (require 'yasnippet)
+(require 'cal-iso)
+
+(defun iso-week-to-time(year week day)
+  "Convert ISO year, week, day to elisp time value."
+  (apply #'encode-time
+         (append '(0 0 0)
+                 (-select-by-indices
+                  '(1 0 2)
+                  (calendar-gregorian-from-absolute (calendar-iso-to-absolute
+                                                     (list week day year)))))))
 
 (defun scimax-get-src-header-val-snippet ()
   "Returns a string for a header value snippet using completion."
@@ -27,6 +37,12 @@ block before there was a language defined."
     (format "#+BEGIN_SRC %s
 $0
 #+END_SRC" lang)))
+
+
+(defun scimax-insert-table-ncolumns ()
+  (concat "| $0 " (s-join " " (cl-loop for i below
+				       (read-number "N columns: ")
+				       collect "| "))))
 
 
 (defvar scimax-installed-bibliography-styles

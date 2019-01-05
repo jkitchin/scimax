@@ -1,0 +1,6 @@
+# key: opt
+# name: opt
+# The second field is optional here. To enter all three: a<tab><tab>b<tab>c<tab>
+# To skip the second one: a<tab><C-d>c<tab>
+# --
+myfunc($1${2:, two=$3}, three=$4)

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: table with n columns
+# key: <tn
+# type: command
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+(yas-expand-snippet (scimax-insert-table-ncolumns))

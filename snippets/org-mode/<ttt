@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: table with three columns
+# key: <ttt
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+| $0 |  |  |
