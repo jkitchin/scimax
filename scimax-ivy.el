@@ -1,7 +1,7 @@
 ;;; scimax-ivy.el --- ivy functions for scimax
 
 ;;; Commentary:
-;; 
+;;
 (require 'counsel)
 
 ;; * Generic ivy actions
@@ -19,7 +19,7 @@
  'counsel-find-file
  '(("a" (lambda (x)
 	  (unless (memq major-mode '(mu4e-compose-mode message-mode))
-	    (compose-mail)) 
+	    (compose-mail))
 	  (mml-attach-file x)) "Attach to email")
    ("c" (lambda (x) (kill-new (f-relative x))) "Copy relative path")
    ("4" (lambda (x) (find-file-other-window x)) "Open in new window")
@@ -53,7 +53,13 @@
     "Insert org-link (abs. path)")
    ("r" (lambda (path)
 	  (rename-file path (read-string "New name: ")))
-    "Rename")))
+    "Rename")
+   ("F" (lambda (path)
+	  (finder (file-name-directory path)))
+    "Open in finder/explorer")
+   ("b" (lambda (path)
+	  (bash (file-name-directory path)))
+    "Open in bash")))
 
 
 ;; * ivy colors
@@ -86,10 +92,10 @@
 	      ("h" (lambda (line)
 		     (insert (car (last line))))
 	       "Insert hex")
-	      ("r" (lambda (line) 
+	      ("r" (lambda (line)
 		     (insert (format "%s" (color-name-to-rgb (second line)))))
 	       "Insert RGB")
-	      
+
 	      ("m" (lambda (line) (message "%s" (cdr line)))))))
 
 ;; * ivy-top
