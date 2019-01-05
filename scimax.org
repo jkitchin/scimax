@@ -112,30 +112,21 @@ The following keyboard shortcuts are defined:
 
 Use `ivy-insert-org-entity' (s-e) for all accented characters.
 
-** Block expansions in org-mode
+** Template expansions in org-mode
 
-The following examples show the shortcuts defined in scimax for expansion. Put your cursor after the shortcut and press tab to expand them.
+The following examples show some of the shortcuts defined in scimax for expansion. Put your cursor after the shortcut and press tab to expand them. These are done with yasnippets (defined in [[./snippets/]]).
 
 #+BEGIN_EXAMPLE
 <ip
-#+BEGIN_SRC ipython :session :results output org drawer
+#+BEGIN_SRC ipython
 
 #+END_SRC
 
 <p
-#+BEGIN_SRC python :results org drawer
+#+BEGIN_SRC python
 
 #+END_SRC
 
-<por
-#+BEGIN_SRC python :results output raw
-
-#+END_SRC
-
-<pv
-#+BEGIN_SRC python :results value
-
-#+END_SRC
 
 <el
 #+BEGIN_SRC emacs-lisp
@@ -147,29 +138,55 @@ The following examples show the shortcuts defined in scimax for expansion. Put y
 
 #+END_SRC
 
-<lh
+<ti
+#+title:
+
+<ok   org-keywords with completions
+#+ARCHIVE:
+
+lh
 #+latex_header:
 
-<lc
-# +latex_class:
+lhp   latex header with completion on usepackage
+#+latex_header: \usepackage{12many}
 
-<lco
+
+lc
+#+latex_class:
+
+lco
 #+latex_class_options:
 
-<ao
-#+attr_org:
+ao
+#+attr_org: :width 300
 
-<al
-#+attr_latex:
+al
+#+attr_latex: :placement [H] :width 300
 
-<ca
+ca
 #+caption:
 
-<tn
-#+tblname:
+ncf
+#+name: name
+#+caption: caption
+[[...]]
+
+nct
+#+name: name
+#+caption: caption
+|  |
 
 <n
 #+name:
+
+o
+#+options:
+
+oo (org-mode options with completion
+toc:
+
+<<    noweb with completion
+<<nil>>
 
 Here are some convenient table expansions.
 
@@ -177,24 +194,33 @@ Here are some convenient table expansions.
 |  |
 
 <tt
-|  |   |
+|  |  |
 
 <ttt
-|  |   |   |
+|  |  |  |
+
 
 <tttt
-|  |   |   |   |
+|  |  |  |  |
 
-<ttttt
-|  |   |   |   |   |
+<tn (enter number of columns)
+|  |  |  |  |  |  |  |  |
 
-<tttttt
-|  |   |   |   |   |   |
 
 #+END_EXAMPLE
 
+There are some specific snippets to
+- emacs-lisp [[./snippets/emacs-lisp-mode/]]
+- python [[./snippets/python-mode/]]
 
-** LaTeX
+and in org-mode:
+- [[./snippets/org-mode/]]
+  - [[./snippets/org-mode/org-ref/]]  (bibliography, biliographystyle, cites and ref links)
+  - [[./snippets/org-mode/src-blocks/]] (src blocks)
+  - [[./snippets/org-mode/blocks/]] (quotes, verses, etc.)
+
+
+** Latex
 
 For numbered LaTeX equations, scimax will make sure that the overlays have correct numbers on them.
 
