@@ -100,6 +100,15 @@ report is for the previous week."
   (compose-mail "kitchin-group@lists.andrew.cmu.edu")
   (message-goto-subject))
 
+
+(defun kitchingroup-gitter ()
+  "Open the kitchin group gitter in erc.
+First get a gitter account. Then go to https://developer.gitter.im/apps to get your token. Finally, add this line
+machine gitter.im password here-is-your-token
+to ~/.authinfo"
+  (interactive)
+  (gitter--open-room "kitchingroup/community" "5c2df7f3d73408ce4fb38107"))
+
 (provide 'kitchingroup)
 
 ;;; kitchingroup.el ends here
