@@ -600,9 +600,10 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
 word navigation
 ----------------------------
 _j_: ← _k_: ↑ _l_: ↓ _;_: →
+_a_: beginning of line _e_: end of line _i_: imenu
 _f_: kill forward _d_: kill backward _m_: Mark word
 _t_: transpose words
-_z_: avy-goto-word-0
+_z_: avy-goto-word-0  _q_: word in line
 
 _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>_: %(ring-ref scimax-hydra-modes (- scimax-hydra-mode-counter 1))
 ------------------------------------------------------------------"
@@ -610,9 +611,15 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   (";" forward-word)
   ("k" previous-line)
   ("l" next-line)
+  ("<" beginning-of-buffer)
+  (">" end-of-buffer)
+  ("i" counsel-imenu)
+  ("a" beginning-of-line)
+  ("e" end-of-line)
   ("f" (kill-word 1))
   ("d" backward-kill-word)
   ("t" transpose-words)
+  ("q" avy-jump-to-word-in-line)
   ("z" avy-goto-word-0)
 
   ("m" mark-word)
@@ -627,6 +634,7 @@ sentence
 _j_: ← _k_: ↑ _l_: ↓ _;_: →
 _f_: kill forward _d_: kill backward
 _t_: transpose sentences
+_z_: jump to sentence
 
 _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>_: %(ring-ref scimax-hydra-modes (- scimax-hydra-mode-counter 1))
 ------------------------------------------------------------------"
@@ -641,6 +649,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
 	 (backward-sentence)
 	 (set-mark (point))
 	 (forward-sentence)))
+  ("z" avy-jump-to-sentence)
   ("<tab>" scimax-hydra-cycle-navigation-mode :color blue)
   ("S-<tab>" (scimax-hydra-cycle-navigation-mode t) :color blue))
 
@@ -652,6 +661,7 @@ paragraph
 _j_: ← _k_: ↑ _l_: ↓ _;_: →
 _f_: kill forward _d_: kill backward
 _t_: transpose paragraphs  _m_: mark paragraph
+_z_: jump to paragraph
 
 _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>_: %(ring-ref scimax-hydra-modes (- scimax-hydra-mode-counter 1))
 ------------------------------------------------------------------"
@@ -663,6 +673,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   ("f" (kill-paragraph nil))
   ("t" transpose-paragraphs)
   ("m" mark-paragraph)
+  ("z" avy-jump-to-paragraph)
   ("<tab>" scimax-hydra-cycle-navigation-mode :color blue)
   ("S-<tab>" (scimax-hydra-cycle-navigation-mode t) :color blue))
 
