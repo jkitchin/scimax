@@ -350,73 +350,33 @@ You can see the abbreviations defined with this command elisp:edit-abbrevs.
 
 ** Track changes
 
-Scimax provides some support for track changes and edit marks in org-mode.
+Scimax provides some support for track changes and edit marks in org-mode through the new [[./scimax-editmarks.org]] project.
 
-[[insert:Add this text]] [[delete:Delete this]]
- [[comment:A comment]]
+{>+Add this text.+<}{>-Delete this-<}
+{>~ @jk Here is a comment~<}
 
-The markup is clickable, and clicking on it deletes the markup.
+This is a {>$tpyo$<}
 
-You can use these commands
-- `em-insert' - insert text at point
-- `em-delete' - mark the selected text for deletion
-- `em-comment' - insert a comment from minibuffer and comment history.
-- `em-comment-1' - insert a comment at point with buffer editing, and multiline comments.
-- `em-replace' - marks selected text for deletion, inserts new text
+There are persistent highlights also.
 
-- `em-editmarks' - list all editmarks in an ivy selection buffer.
+{g>Green highlight<g}
+{b>blue highlight<b}
+{y>yellow<y}
+{p>pink<p}
 
-On an editmark you can:
-- `em-accept-edit-mark-at-point'
-- `em-reject-edit-mark-at-point'
-- `em-delete-edit-mark-at-point'
+There is a hydra menu bound to H-m that provides access to easily insert these markups.
 
--`em-typo' to mark a [[typo:tpyo]]
+There is limited support to convert these editmarks to LaTeX and html, and to generate these editmarks from git diffs or diffs with the copy on disk.
 
-scimax provides some commands to:
-- `em-accept-all-changes'
-- `em-reject-all-changes'
-
-You can navigate the editmarks with:
-- `em-next-editmark'
-- `em-previous-editmark'
-
-Note, for the next commands, you need a working wdiff command.
-
-You can also create diffs between git commits using helm to select them.
-- `em-wdiff-git'
-
-The commands all have key bindings. The prefix key for these is H-e.
-#+BEGIN_SRC emacs-lisp
-(loop for (char . func) in (cdr em-map) collect (list (char-to-string char) (format "`%s'" func)))
-#+END_SRC
-
-#+RESULTS:
-| m | `em-comment'                   |
-| w | `em-wdiff-git'                 |
-| R | `em-reject-all-changes'        |
-| A | `em-accept-all-changes'        |
-| j | `em-reject-edit-mark-at-point' |
-| a | `em-accept-edit-mark-at-point' |
-| p | `em-previous-editmark'         |
-| n | `em-next-editmark'             |
-| o | `org-inlinetask-insert-task'   |
-| r | `em-replace'                   |
-| l | `em-editmarks'                 |
-| k | `em-delete-editmark-at-point'  |
-| d | `em-delete'                    |
-| i | `em-insert'                    |
-| c | `em-comment-1'                 |
-| t | `em-typo'                      |
+There is also an experimental feature for track-change mode.
 
 
-** Highlighting and annotation
+Note: This library replaces several older attempts at this which are no longer maintained by me:
+1. ov-highlight
+2. org-editmarks.el
+3. cm-mods.el
 
-Scimax provides some support for highlighting, comment overlays, and edit marks.
 
-The main way to access the functions is via a hydra menu: `ov-highlighter/body' that is bound to H-h (hyper-h).
-
-The highlights are not part of org-mode, and they do not export to any backend. The highlights should work in any kind of file.
 
 ** org-ref
 
@@ -1546,7 +1506,7 @@ In the ivy selection buffer
 | s-RET         | quit with no action                                        |
 | ?             | show keymap help                                           |
 
-I use Hyper-c as a prefix map for a these commands.
+I use Hyper-c as a prefix map for these commands.
 
 | H-c r | `ivy-resume'           |
 | H-c l | `counsel-load-library' |
@@ -1569,6 +1529,8 @@ Here are some additional actions we define for `counsel-find-file'.
 | l   | relative org link    |
 | L   | absolute org link    |
 | r   | rename file          |
+| b   | open in bash         |
+| F   | open in Finder       |
 
 * scimax-hydras
 
@@ -1772,4 +1734,13 @@ I bind this to a key like "f9" and set it up to easily open my mail, calendar an
 
 # Local Variables:
 # eval: (progn (require 'emacs-keybinding-command-tooltip-mode) (emacs-keybinding-command-tooltip-mode +1))
+# eval: (sem-mode)
+# eval: (sem-mode)
+# eval: (sem-mode)
+# eval: (sem-mode)
+# eval: (sem-mode)
+# eval: (sem-mode)
+# eval: (sem-mode)
+# eval: (sem-mode)
+# eval: (sem-mode)
 # End:
