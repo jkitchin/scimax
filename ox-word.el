@@ -1,8 +1,9 @@
-;;; ox-word.el --- Collection of functions to export to MS Word documents
+;;; ox-word.el --- Collection of functions to export org-mode to MS Word documents
 ;; Collection of ideas to get Word documents from org-documents
 ;;
 ;;; Commentary:
-;;
+;; This library has only been tested in scimax. It may not work reliably outside
+;; of scimax.
 
 ;; * Using pandoc via LaTeX
 
@@ -13,13 +14,15 @@
 ;; not numbered), so here we post-process the tex file to hard code figure and
 ;; table numbers in it, and to replace references to them in the text. This has
 ;; the benefit that they are numbered, but they are not links in the word
-;; document, so they will not be updatable in the Word document.
+;; document, so they will not be updatable in the Word document if you edit it
+;; further.
 
 ;; Use #+PANDOC-CSL: /full/path/to/some/style.csl to set
 ;; the bibliography style. You can get the csl files from
 ;; https://www.zotero.org/styles
 
 ;;; Code:
+(require 'org-ref)
 
 (defun ox-export-get-pandoc-version ()
   "Returns the major version of pandoc."
