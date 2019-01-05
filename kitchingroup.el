@@ -3,6 +3,8 @@
 ;;; Commentary:
 ;; This module is mostly for members of my research group.
 
+(require 'scimax-notebook)
+
 (defcustom kitchingroup-github-id nil
   "Your Github id.
 This should be defined in user/preload.el, e.g. (setq kitchingroup-github-id \"your-id\")"
@@ -11,6 +13,12 @@ This should be defined in user/preload.el, e.g. (setq kitchingroup-github-id \"y
 
 (when (null kitchingroup-github-id)
   (warn "`kitchingroup-github-id' is nil. Please set it in %s/user/preload.el" scimax-dir))
+
+
+(defcustom kitchingroup-root (file-name-as-directory
+			      (expand-file-name "kitchingroup" nb-notebook-directory))
+  "Directory where kitchingroup files will be stored."
+  :group 'kitchingroup)
 
 
 (defun kitchingroup-new-document (path template)
@@ -32,10 +40,12 @@ TEMPLATE should be a yasnippet name and should be a string."
   (unless (file-directory-p kitchingroup-root)
     (make-directory kitchingroup-root t))
 
-  (unless (file-directory-p (expand-file-name kitchingroup-github-id kitchingroup-root))
-    (let ((default-directory kitchingroup-root))
-      (shell-command (format "git clone git@github.com:KitchinHUB/%s.git"
-			     kitchingroup-github-id)))))
+  (if (not (file-directory-p (expand-file-name kitchingroup-github-id kitchingroup-root)))
+      ;; get it
+      (let ((default-directory kitchingroup-root))
+	(shell-command (format "git clone git@github.com:KitchinHUB/%s.git"
+			       kitchingroup-github-id)))
+    0))
 
 
 (defun kitchingroup-weekly-report ()
@@ -46,7 +56,8 @@ exists. dd will be at the beginning of the week (Monday). The
 report is for the previous week."
   (interactive)
   ;; make sure we have a repo to work in.
-  (kitchingroup-kitchinhub-repo)
+  (unless (= 0 (kitchingroup-kitchinhub-repo))
+    (error "Could not open or get the repo."))
   (let* ((dir (format "reports/%s/" (format-time-string "%Y-%m-%d"
 							(iso-week-to-time
 							 (string-to-number
