@@ -953,7 +953,7 @@ This function is called by `org-babel-execute-src-block'."
 	   ""
 	 (format "# Out[%d]:\n" (cdr (assoc :exec-count ret))))
        (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
-       (ob-ipython-format-output nil output)
+       (funcall (cdr (assoc 'output ob-ipython-mime-formatters)) nil output)
        ;; I process the outputs one at a time here.
        (s-join "\n\n" (loop for (type . value) in (append value display)
 			    collect
