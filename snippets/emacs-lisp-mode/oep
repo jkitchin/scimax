@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: org-element-property
+# key: oep
+# --
+(org-element-property ${1:property} ${2:element})$0
