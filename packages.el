@@ -34,8 +34,10 @@
 
 (use-package org-bullets)
 
-(use-package org-edna
-  :init (org-edna-load))
+;; [2019-01-07 Mon] I don't use this now, and it frequently causes an issue on
+;; installing scimax
+;; (use-package org-edna
+;;   :init (org-edna-load))
 
 
 ;; * Other packages
@@ -56,11 +58,12 @@
   (use-package tex
     :ensure auctex))
 
-
+;; [2019-01-07 Mon] This also sometimes causes problems installing scimax,
+;; especially on Windows.
 ;; Make cursor more visible when you move a long distance
-(use-package beacon
-  :config
-  (beacon-mode 1))
+;; (use-package beacon
+;;   :config
+;;   (beacon-mode 1))
 
 
 (use-package bookmark
