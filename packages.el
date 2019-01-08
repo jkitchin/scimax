@@ -32,7 +32,9 @@
    ("s-<SPC>" . org-mark-ring-goto)
    ("H-." . org-time-stamp-inactive)))
 
-(use-package org-bullets)
+;; [2019-01-07 Mon] This is another package I don't use, and that sometimes is a
+;; problem on windows installations
+;; (use-package org-bullets)
 
 ;; [2019-01-07 Mon] I don't use this now, and it frequently causes an issue on
 ;; installing scimax
