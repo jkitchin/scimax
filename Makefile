@@ -21,6 +21,10 @@ clean:
 nouser:
 	${CASK_EXEC} ${emacs} -Q --eval="(setq scimax-load-user-dir nil)" -l ${INIT}
 
+org:
+	mkdir -p elpa-`date +%F`
+	find "elpa" -name "org-plus*" -type d -exec mv {} elpa-`date +%F` \;
+	${CASK_EXEC} ${emacs} -l ${INIT}
 travis:
 	open https://travis-ci.org/jkitchin/scimax
 
