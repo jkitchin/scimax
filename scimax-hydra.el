@@ -427,8 +427,11 @@ _p_: ffap
 (defhydra scimax-jump-org (:color blue :inherit (scimax-base/heads) :columns 3)
   "org"
   ("a" ivy-org-jump-to-agenda-heading "Agenda heading")
+  ("bb" scimax-jump-to-block "Jump to block")
+  ("bv" scimax-jump-to-visible-block "Jump to visible block")
   ("d" ivy-org-jump-to-heading-in-directory "Directory heading")
   ("h" ivy-org-jump-to-heading "Heading")
+  ("k" ace-link "link")
   ("o" ivy-org-jump-to-open-headline "Open heading")
   ("p" ivy-org-jump-to-project-headline "Project heading")
   ("v" ivy-org-jump-to-visible-headline "Visible heading"))
@@ -562,7 +565,7 @@ _a_: beginning of line _e_: end of line _<_: beginning of buffer _>_: end of buf
 
 _H-w_: beginning of word _H-s_: beginning of sentence _H-p_: beginning of paragraph
 _s-w_: end of word _s-s_: end of sentence _s-p_: end of paragraph
-_z_: avy-goto-char
+_z_: jump
 
 _f_: delete forward _d_: delete backward
 _t_: transpose chars
@@ -581,7 +584,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   ("<" beginning-of-buffer)
   (">" end-of-buffer)
   ("t" transpose-chars)
-  ("z" avy-goto-char)
+  ("z" (scimax-open-hydra scimax-jump/body) :color blue)
   ("H-w" backward-word)
   ("H-s" backward-sentence)
   ("H-p" backaward-paragraph)
@@ -603,7 +606,7 @@ _j_: ← _k_: ↑ _l_: ↓ _;_: →
 _a_: beginning of line _e_: end of line _i_: imenu
 _f_: kill forward _d_: kill backward _m_: Mark word
 _t_: transpose words
-_z_: avy-goto-word-0  _q_: word in line
+_z_: jump
 
 _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>_: %(ring-ref scimax-hydra-modes (- scimax-hydra-mode-counter 1))
 ------------------------------------------------------------------"
@@ -619,8 +622,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   ("f" (kill-word 1))
   ("d" backward-kill-word)
   ("t" transpose-words)
-  ("q" avy-jump-to-word-in-line)
-  ("z" avy-goto-word-0)
+  ("z" (scimax-open-hydra scimax-jump/body) :color blue)
 
   ("m" mark-word)
   ("<tab>" (scimax-hydra-cycle-navigation-mode) :color blue)
@@ -634,7 +636,7 @@ sentence
 _j_: ← _k_: ↑ _l_: ↓ _;_: →
 _f_: kill forward _d_: kill backward
 _t_: transpose sentences
-_z_: jump to sentence
+_z_: jump
 
 _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>_: %(ring-ref scimax-hydra-modes (- scimax-hydra-mode-counter 1))
 ------------------------------------------------------------------"
@@ -649,7 +651,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
 	 (backward-sentence)
 	 (set-mark (point))
 	 (forward-sentence)))
-  ("z" avy-jump-to-sentence)
+  ("z" (scimax-open-hydra scimax-jump/body) :color blue)
   ("<tab>" scimax-hydra-cycle-navigation-mode :color blue)
   ("S-<tab>" (scimax-hydra-cycle-navigation-mode t) :color blue))
 
@@ -661,7 +663,7 @@ paragraph
 _j_: ← _k_: ↑ _l_: ↓ _;_: →
 _f_: kill forward _d_: kill backward
 _t_: transpose paragraphs  _m_: mark paragraph
-_z_: jump to paragraph
+_z_: jump
 
 _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>_: %(ring-ref scimax-hydra-modes (- scimax-hydra-mode-counter 1))
 ------------------------------------------------------------------"
@@ -673,7 +675,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   ("f" (kill-paragraph nil))
   ("t" transpose-paragraphs)
   ("m" mark-paragraph)
-  ("z" avy-jump-to-paragraph)
+  ("z" (scimax-open-hydra scimax-jump/body) :color blue)
   ("<tab>" scimax-hydra-cycle-navigation-mode :color blue)
   ("S-<tab>" (scimax-hydra-cycle-navigation-mode t) :color blue))
 
