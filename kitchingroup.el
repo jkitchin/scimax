@@ -28,7 +28,8 @@ TEMPLATE should be a yasnippet name and should be a string."
       (find-file path)
     ;; we need to make it.
     (find-file path)
-    (yas-expand-snippet (yas-lookup-snippet template))))
+    (yas-expand-snippet (yas-lookup-snippet template)))
+  (goto-char (point-min)))
 
 
 (defun kitchingroup-kitchinhub-repo ()
