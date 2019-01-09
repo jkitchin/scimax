@@ -59,7 +59,7 @@
     (load-file "init.el")))
 
 ;; * Diminish modes
-(diminish 'orgstruct-mode)
+;; (diminish 'orgstruct-mode)
 (diminish 'ivy-mode)
 (diminish 'lispy-mode)
 (diminish 'abbrev-mode)
@@ -135,12 +135,12 @@
 	(end-of-line)
 	t))))
 
-(add-hook 'python-mode-hook
-	  (lambda ()
-	    (setq outline-regexp "# \\*+"
-		  orgstruct-heading-prefix-regexp "# ?\\*+\\|\\`")
-	    (orgstruct-mode)
-	    (org-global-cycle 3)))
+;; (add-hook 'python-mode-hook
+;; 	  (lambda ()
+;; 	    (setq outline-regexp "# \\*+"
+;; 		  orgstruct-heading-prefix-regexp "# ?\\*+\\|\\`")
+;; 	    (orgstruct-mode)
+;; 	    (org-global-cycle 3)))
 
 ;; * Misc
 
