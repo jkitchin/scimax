@@ -240,7 +240,7 @@ Export functions should take one argument, the backend as a symbol, and they are
 	  :accept-func sem-delete-editmark
 	  :export sem-export-task)
 
-    (typo :open-marker "{>" :close-marker "<}"
+    (typo :open-marker "{>." :close-marker ".<}"
 	  :marker-face (:foreground "Magenta3"  :weight ultra-light)
 	  :face (:foreground "Magenta3" :weight bold)
 	  :keymap sem-editmark-content-map
