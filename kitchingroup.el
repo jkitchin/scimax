@@ -112,6 +112,8 @@ report is for the previous week."
   (message-goto-subject))
 
 
+(use-package gitter)
+
 (defun kitchingroup-gitter ()
   "Open the kitchin group gitter in erc.
 First get a gitter account. Then go to https://developer.gitter.im/apps to get your token. Finally, add this line
