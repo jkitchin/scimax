@@ -57,8 +57,8 @@ exists. dd will be at the beginning of the week (Monday). The
 report is for the previous week."
   (interactive)
   ;; make sure we have a repo to work in.
-  (unless (= 0 (kitchingroup-kitchinhub-repo))
-    (error "Could not open or get the repo."))
+  ;; (unless (= 0 (kitchingroup-kitchinhub-repo))
+  ;;   (error "Could not open or get the repo."))
   (let* ((dir (format "reports/%s/" (format-time-string "%Y-%m-%d"
 							(iso-week-to-time
 							 (string-to-number
