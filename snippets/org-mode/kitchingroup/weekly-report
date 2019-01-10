@@ -17,7 +17,7 @@
 						  (nth 5 time))))
 		      (format-time-string "<%Y-%m-%d %a>" new-time))`
 #+FILETAGS: weekly report `(if (boundp 'kitchingroup-github-id) kitchingroup-github-id "NOGITHUBID")`
-#+VERSION: 0.1.1
+#+VERSION: 0.1.2
 
 # Create a new report each week. The report for the past week is due on Monday. This should not take more than 30 minutes to complete. If it does, you are not doing what I want, and we should talk about how to make it more efficient. It is fine to link to previous reports if you are continuing discussion from them.
 
@@ -47,6 +47,9 @@ $0
 * Questions for me?
 # You should probably have a question for me to answer. It could be about a research problem you are having (conceptual, programming, etc.), or how to do something in scimax. Put those questions here so I can answer them.
 
+* Feedback for me?
+# If there are things about this report, scimax or the group that you think could be changed to make you more effective, please note them here.
+
 * References
 # put a bibliography link here if you use one.
 
@@ -54,7 +57,7 @@ $0
 
 Run this code block to commit and submit your report. Note that this will add everything in this directory, so do not do this if you have a lot of files.
 
-#+BEGIN_SRC sh
+#+BEGIN_SRC sh :results silent :var save=(save-some-buffers t)
 # 10 MB max report size
 MAXSIZE="10485760"
 CHECK="\`du -s . | awk '{print \$1}'\`"
