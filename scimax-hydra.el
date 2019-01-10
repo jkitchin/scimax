@@ -489,6 +489,8 @@ _p_: ffap
   ("h" (describe-function 'lispy-mode) "lispy help")
   ("i" ielm "ielm")
   ("l" load-file "load file")
+  ("L" counsel-load-library "load library")
+  ("f" counsel-find-library "find library")
   ("r" eval-region "region")
   ("t" toggle-debug-on-error "toggle debug")
   ("y" edebug-on-entry "debug on entry"))
