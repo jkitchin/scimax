@@ -11,6 +11,10 @@
 ;;; Code:
 (require 'ox-md)
 
+;; Maybe this kind of modification warrants a derived exporter for this purpose
+;; to avoid surprising md users. It would probably make it easier to modify the
+;; transcoders.
+
 ;; strikethrough is not rendered in the markdown format needed for gitter. I
 ;; define an export function here, and set it in the exporter.
 (defun sg-org-md-strikethrough (_strikethrough contents _info)
