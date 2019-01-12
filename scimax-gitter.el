@@ -29,7 +29,7 @@
 		      (json-read-from-string
 		       (buffer-substring url-http-end-of-headers (point-max))))))
     (loop for room across room-data collect
-	  (list (plist-get room :name)
+	  (cons (plist-get room :name)
 		(plist-get room :id)))))
 
 
@@ -64,9 +64,9 @@
   "Send an org-heading to a gitter room."
   (interactive)
   (let* ((rooms (sg-get-rooms))
-	 (room-id (cadr (assoc (or (org-entry-get (point) "gitter-room")
-				   (completing-read "Room: " rooms))
-			       rooms)))
+	 (room (or (org-entry-get (point) "gitter-room")
+		   (completing-read "Room: " rooms)))
+	 (room-id (cdr (assoc room rooms)))
 	 (result))
     (save-excursion
       (unless (looking-at org-heading-regexp)
@@ -75,12 +75,13 @@
       (setq result (sg-send-region-to-room (region-beginning)
 					   (region-end)
 					   room-id)))
+    (org-entry-put (point) "gitter-room" room)
     (org-entry-put (point) "gitter-room-id" room-id)
     (org-entry-put (point) "gitter-message-id" (plist-get result :id))
     (org-entry-put (point) "gitter-sent" (plist-get result :sent))))
 
 
-(defun sg-update-heading-message ()
+(defun sg-update-heading-to-room ()
   "Update the message from the current heading.
 
 PUT /v1/rooms/:roomId/chatMessages/:chatMessageId"
@@ -130,6 +131,43 @@ PUT /v1/rooms/:roomId/chatMessages/:chatMessageId"
     (org-entry-delete (point) "gitter-message-id")
     (org-entry-delete (point) "gitter-sent")
     (org-entry-delete (point) "gitter-editedAt")))
+
+
+(defun sg-insert-room ()
+  "Insert room and id with completion."
+  (interactive)
+  (let* ((rooms (sg-get-rooms))
+	 (room (completing-read "Room: " rooms))
+	 (room-id (cdr (assoc room rooms))))
+    (org-entry-put (point) "gitter-room" room)
+    (org-entry-put (point) "gitter-room-id" room-id)))
+
+(defun sg-insert-user-in-room ()
+  "Insert a user handle in the room for the current heading.
+
+GET /v1/rooms/:roomId/users"
+  (interactive)
+  (let* ((token (sg-get-token))
+	 (room-id (org-entry-get (point) "gitter-room-id" t))
+  	 (url-request-method "GET")
+  	 (url-mime-accept-string "application/json")
+  	 (url-mime-encoding-string "application/json")
+  	 (url-request-extra-headers  `(("Content-Type" . "application/json")
+  				       ("Authorization" . ,(concat "BEARER "  token))))
+
+  	 (url (format "https://api.gitter.im/v1/rooms/%s/users"
+		      room-id))
+  	 (json-object-type 'plist)
+	 (result (with-current-buffer (url-retrieve-synchronously url)
+		   (json-read-from-string
+		    (buffer-substring url-http-end-of-headers (point-max)))))
+	 (users (loop for user across result collect
+		      (cons (plist-get user :displayName)
+			    (plist-get user :username))))
+	 (user (completing-read "User: " users)))
+
+    (insert (format "@%s" (cdr (assoc user users))))))
+
 
 (provide 'scimax-gitter)
 
