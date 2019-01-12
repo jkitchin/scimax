@@ -11,10 +11,8 @@
 ;;; Code:
 (require 'ox-md)
 
-;; Maybe this kind of modification warrants a derived exporter for this purpose
-;; to avoid surprising md users. It would probably make it easier to modify the
-;; transcoders.
-
+;; Customized markdown exporter to handle some cases different than the regular
+;; md exporter.
 (org-export-define-derived-backend 'sg-md 'md
   :translate-alist '((strike-through . sg-org-md-strikethrough)
 		     (underline . sg-org-md-underline)
@@ -47,13 +45,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(processing-type (plist-get info :with-latex)))
     latex-frag))
 
-;; (push
-;;  '(latex-fragment . sg-org-md-latex-fragment)
-;;  (org-export-backend-transcoders
-;;   (loop for be in org-export-registered-backends
-;; 	if (string= "md" (org-export-backend-name be))
-;; 	return be)))
-
 
 (defun sg-get-token ()
   "Get the gitter token from auth-sources."
@@ -85,6 +76,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		     (let ((rooms (sg-get-rooms)))
 		       (cdr (assoc (completing-read "Room: " rooms) rooms)))))
   (let* ((token (sg-get-token))
+	 (org-export-with-toc nil)
+	 (org-export-with-tags nil)
 	 (text (cond
 		((eq major-mode 'org-mode)
 		 (org-export-string-as
@@ -179,7 +172,7 @@ PUT /v1/rooms/:roomId/chatMessages/:chatMessageId"
 
 
 (defun sg-insert-room ()
-  "Insert room and id with completion."
+  "Insert room and id properties with completion."
   (interactive)
   (let* ((rooms (sg-get-rooms))
 	 (room (completing-read "Room: " rooms))
@@ -187,13 +180,13 @@ PUT /v1/rooms/:roomId/chatMessages/:chatMessageId"
     (org-entry-put (point) "gitter-room" room)
     (org-entry-put (point) "gitter-room-id" room-id)))
 
-(defun sg-insert-user-in-room ()
-  "Insert a user handle in the room for the current heading.
 
-GET /v1/rooms/:roomId/users"
-  (interactive)
+(defun sg-get-users-in-room ()
+  "Return list of users in the room."
   (let* ((token (sg-get-token))
-	 (room-id (org-entry-get (point) "gitter-room-id" t))
+	 (room-id (or (org-entry-get (point) "gitter-room-id" t)
+		      (let ((rooms (sg-get-rooms)))
+			(cdr (assoc (completing-read "Room: " rooms) rooms)))))
   	 (url-request-method "GET")
   	 (url-mime-accept-string "application/json")
   	 (url-mime-encoding-string "application/json")
@@ -208,10 +201,16 @@ GET /v1/rooms/:roomId/users"
 		    (buffer-substring url-http-end-of-headers (point-max)))))
 	 (users (loop for user across result collect
 		      (cons (plist-get user :displayName)
-			    (plist-get user :username))))
-	 (user (completing-read "User: " users)))
+			    (plist-get user :username)))))
+    users))
 
-    (insert (format "@%s" (cdr (assoc user users))))))
+(defun sg-insert-user-in-room ()
+  "Insert a user handle in the room for the current heading.
+
+GET /v1/rooms/:roomId/users"
+  (interactive)
+  (let* ((users (sg-get-users-in-room)))
+    (insert (format "@%s" (cdr (assoc (completing-read "User: " users) users))))))
 
 
 (defun scimax-gitter-erc ()
