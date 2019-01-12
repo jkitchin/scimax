@@ -140,7 +140,7 @@ PUT /v1/rooms/:roomId/chatMessages/:chatMessageId"
 		 (org-mark-element)
 		 (org-export-string-as
 		  (buffer-substring (region-beginning)(region-end))
-		  'md t '(:with-toc nil :with-tags nil))))
+		  'sg-md t '(:with-toc nil :with-tags nil))))
   	 (url-request-method "PUT")
   	 (url-mime-accept-string "application/json")
   	 (url-mime-encoding-string "application/json")
@@ -218,7 +218,7 @@ GET /v1/rooms/:roomId/users"
   "Open the gitter channel in `erc'.
 Go to https://irc.gitter.im/ to get your password. Save it in ~/.authinfo like this:
 machine irc.gitter.im password your-token.
-This token is not the same as the develope token."
+This token is not the same as the developer token."
   (interactive)
   (erc-ssl :server "irc.gitter.im"
 	   :port 6667
@@ -227,7 +227,8 @@ This token is not the same as the develope token."
 	   :password (let* ((plist (car (auth-source-search :max 1 :host "irc.gitter.im")))
 			    (k (plist-get plist :secret)))
 		       (if (functionp k)
-			   (funcall k)))))
+			   (funcall k))))
+  (erc-join-channel "#scimax-community"))
 
 
 (provide 'scimax-gitter)
