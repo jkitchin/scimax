@@ -15,6 +15,13 @@
 ;; to avoid surprising md users. It would probably make it easier to modify the
 ;; transcoders.
 
+(org-export-define-derived-backend 'sg-md 'md
+  :translate-alist '((strike-through . sg-org-md-strikethrough)
+		     (underline . sg-org-md-underline)
+		     (latex-fragment . sg-org-md-latex-fragment))
+  :options-alist '((:with-toc nil "toc" org-export-with-toc)
+		   (:with-tags nil "tags" org-export-with-tags)))
+
 ;; strikethrough is not rendered in the markdown format needed for gitter. I
 ;; define an export function here, and set it in the exporter.
 (defun sg-org-md-strikethrough (_strikethrough contents _info)
@@ -24,27 +31,12 @@ a communication channel."
   (format "~~%s~~" contents))
 
 
-(push
- '(strike-through . sg-org-md-strikethrough)
- (org-export-backend-transcoders
-  (loop for be in org-export-registered-backends
-	if (string= "md" (org-export-backend-name be))
-	return be)))
-
-
 ;; also, underline is exported as html, so I quench that here.
 (defun sg-org-md-underline (_underline contents _info)
   "Transcode UNDERLINE object into Markdown format.
 CONTENTS is the text within strikethrough markup.  INFO is a plist used as
 a communication channel."
   (format "_%s_" contents))
-
-(push
- '(underline . sg-org-md-underline)
- (org-export-backend-transcoders
-  (loop for be in org-export-registered-backends
-	if (string= "md" (org-export-backend-name be))
-	return be)))
 
 
 ;; We need latex-fragments to go verbatim with $$
@@ -55,12 +47,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(processing-type (plist-get info :with-latex)))
     latex-frag))
 
-(push
- '(latex-fragment . sg-org-md-latex-fragment)
- (org-export-backend-transcoders
-  (loop for be in org-export-registered-backends
-	if (string= "md" (org-export-backend-name be))
-	return be)))
+;; (push
+;;  '(latex-fragment . sg-org-md-latex-fragment)
+;;  (org-export-backend-transcoders
+;;   (loop for be in org-export-registered-backends
+;; 	if (string= "md" (org-export-backend-name be))
+;; 	return be)))
 
 
 (defun sg-get-token ()
@@ -97,7 +89,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		((eq major-mode 'org-mode)
 		 (org-export-string-as
 		  (buffer-substring r1 r2)
-		  'md t '(:with-toc nil :with-tags nil)))
+		  'sg-md t))
 		(t
 		 (buffer-substring r1 r2))))
   	 (url-request-method "POST")
@@ -220,6 +212,22 @@ GET /v1/rooms/:roomId/users"
 	 (user (completing-read "User: " users)))
 
     (insert (format "@%s" (cdr (assoc user users))))))
+
+
+(defun scimax-gitter-erc ()
+  "Open the gitter channel in `erc'.
+Go to https://irc.gitter.im/ to get your password. Save it in ~/.authinfo like this:
+machine irc.gitter.im password your-token.
+This token is not the same as the develope token."
+  (interactive)
+  (erc-ssl :server "irc.gitter.im"
+	   :port 6667
+	   :full-name (user-full-name)
+	   :nick (user-login-name)
+	   :password (let* ((plist (car (auth-source-search :max 1 :host "irc.gitter.im")))
+			    (k (plist-get plist :secret)))
+		       (if (functionp k)
+			   (funcall k)))))
 
 
 (provide 'scimax-gitter)
