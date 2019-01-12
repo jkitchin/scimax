@@ -9,6 +9,55 @@
 ;; where token comes from going to https://developer.gitter.im/apps
 
 ;;; Code:
+(require 'ox-md)
+
+;; strikethrough is not rendered in the markdown format needed for gitter. I
+;; define an export function here, and set it in the exporter.
+(defun sg-org-md-strikethrough (_strikethrough contents _info)
+  "Transcode STRIKETHROUGH object into Markdown format.
+CONTENTS is the text within strikethrough markup.  INFO is a plist used as
+a communication channel."
+  (format "~~%s~~" contents))
+
+
+(push
+ '(strike-through . sg-org-md-strikethrough)
+ (org-export-backend-transcoders
+  (loop for be in org-export-registered-backends
+	if (string= "md" (org-export-backend-name be))
+	return be)))
+
+
+;; also, underline is exported as html, so I quench that here.
+(defun sg-org-md-underline (_underline contents _info)
+  "Transcode UNDERLINE object into Markdown format.
+CONTENTS is the text within strikethrough markup.  INFO is a plist used as
+a communication channel."
+  (format "_%s_" contents))
+
+(push
+ '(underline . sg-org-md-underline)
+ (org-export-backend-transcoders
+  (loop for be in org-export-registered-backends
+	if (string= "md" (org-export-backend-name be))
+	return be)))
+
+
+;; We need latex-fragments to go verbatim with $$
+(defun sg-org-md-latex-fragment (latex-fragment _contents info)
+  "Transcode a LATEX-FRAGMENT object from Org to MD.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (let ((latex-frag (org-element-property :value latex-fragment))
+	(processing-type (plist-get info :with-latex)))
+    latex-frag))
+
+(push
+ '(latex-fragment . sg-org-md-latex-fragment)
+ (org-export-backend-transcoders
+  (loop for be in org-export-registered-backends
+	if (string= "md" (org-export-backend-name be))
+	return be)))
+
 
 (defun sg-get-token ()
   "Get the gitter token from auth-sources."
@@ -38,7 +87,7 @@
   (interactive (list (region-beginning)
 		     (region-end)
 		     (let ((rooms (sg-get-rooms)))
-		       (cadr (assoc (completing-read "Room: " rooms) rooms)))))
+		       (cdr (assoc (completing-read "Room: " rooms) rooms)))))
   (let* ((token (sg-get-token))
 	 (text (cond
 		((eq major-mode 'org-mode)
