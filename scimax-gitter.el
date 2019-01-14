@@ -84,7 +84,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		  (buffer-substring r1 r2)
 		  'sg-md t))
 		(t
-		 (buffer-substring r1 r2))))
+		 (buffer-substring-no-properties r1 r2))))
   	 (url-request-method "POST")
   	 (url-mime-accept-string "application/json")
   	 (url-mime-encoding-string "application/json")
