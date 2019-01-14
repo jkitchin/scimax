@@ -737,7 +737,8 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 	;; goto middle
 	(backward-char (length (plist-get (cdr entry) :close-marker)))))))
   ;; Should we add a local variable so the file opens in sem-mode?
-  (when (not (-contains?  file-local-variables-alist '(eval (sem-mode))))
+  (hack-local-variables)
+  (when (not (-contains?  file-local-variables-alist '(eval sem-mode)))
     (save-excursion
       (add-file-local-variable 'eval '(sem-mode)))))
 #+END_SRC
