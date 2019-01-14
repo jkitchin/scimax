@@ -892,7 +892,7 @@ This function is called by `org-babel-execute-src-block'."
 		(org-redisplay-inline-images))))))
 
      (list sentinel (current-buffer) file result-type))
-    (format "%s - %s <output>" (length ob-ipython--async-queue) sentinel)))
+    (format "%s - %s <output> <interrupt>" (length ob-ipython--async-queue) sentinel)))
 
 
 (defun ob-ipython--execute-sync (body params)
