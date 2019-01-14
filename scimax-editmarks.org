@@ -1290,19 +1290,22 @@ tables, and other changes that cross org-element boundaries.
 Note this function changes the buffer, so you may want to use it
 in a copy of the buffer."
   (interactive)
-  (when (eq 'latex backend)
-    (goto-char (point-min))
+  (goto-char (point-min))
+  (when
+      (and
+       (save-excursion (sem-next-editmark))
+       (eq 'latex backend))
     (insert "
   ,#+latex_header: \\usepackage[normalem]{ulem}
   ,#+latex_header: \\usepackage{todonotes}
   ,#+latex_header: \\usepackage[usenames, dvipsnames]{color}
-  \\listoftodos\n"))
+  \\listoftodos\n")
 
-  (while (sem-next-editmark)
-    (let ((export-func (plist-get (cdr (assoc (get-text-property (point) 'sem-type) sem-editmarks)) :export)))
-      (if export-func
-  	  (funcall export-func backend)
-  	(sem-export-default backend)))))
+    (while (sem-next-editmark)
+      (let ((export-func (plist-get (cdr (assoc (get-text-property (point) 'sem-type) sem-editmarks)) :export)))
+	(if export-func
+	    (funcall export-func backend)
+	  (sem-export-default backend))))))
 
  #+END_SRC
 
