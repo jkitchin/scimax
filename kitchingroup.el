@@ -50,15 +50,89 @@ TEMPLATE should be a yasnippet name and should be a string."
 
 
 (defun kitchingroup-weekly-report ()
+  "Open the report for the date prompted.
+If you pick a monday, you get the report due on that day. If you
+pick any other day, you get the report due on the following
+Monday."
+  (interactive)
+  (let* ((repo-dir (expand-file-name kitchingroup-github-id nb-notebook-directory))
+	 (date (org-read-date nil t))
+	 kg-due-date
+	 dir
+	 full-dir
+	 fname)
+    (cond
+     ;; If you choose a monday, you get the previous week
+     ((string= "Mon" (format-time-string "%a" date))
+      (setq kg-due-date (iso-week-to-time
+			 (string-to-number
+			  (format-time-string
+			   "%Y" date))
+			 ;; This is current week
+			 (string-to-number
+			  (format-time-string
+			   "%V" date))
+			 ;; 1 is for Monday
+			 1)
+	    dir (format "reports/%s/" (format-time-string "%Y-%m-%d" kg-due-date))
+	    full-dir (expand-file-name dir repo-dir)
+	    fname (expand-file-name "weekly-report.org" full-dir))
+      ;; make sure the directory exists
+      (unless (file-directory-p full-dir)
+	(make-directory full-dir t))
+
+      ;; open file if it exists
+      (if (file-exists-p fname)
+      	  (find-file fname)
+      	;; make file if it doesn't
+      	(find-file fname)
+      	(yas-expand-snippet
+      	 (yas-lookup-snippet "weekly-report")
+	 nil nil `((kg-due-date-string ,(format-time-string "<%Y-%m-%d %a>" kg-due-date)))))
+      (save-buffer)
+      (goto-char (point-min)))
+     ;; Otherwise you get the report due the monday after the selected date.
+     (t
+      (setq kg-due-date (iso-week-to-time
+			 (string-to-number
+			  (format-time-string
+			   "%Y" date))
+			 ;; This is due next week
+			 (+ (string-to-number
+			     (format-time-string
+			      "%V" date))
+			    1)
+			 ;; 1 is for Monday
+			 1)
+
+	    dir (format "reports/%s/" (format-time-string "%Y-%m-%d" kg-due-date))
+	    full-dir (expand-file-name dir repo-dir)
+	    fname (expand-file-name "weekly-report.org" full-dir))
+
+
+      ;; make sure the directory exists
+      (unless (file-directory-p full-dir)
+	(make-directory full-dir t))
+
+      ;; open file if it exists
+      (if (file-exists-p fname)
+	  (find-file fname)
+	;; make file if it doesn't
+	(find-file fname)
+	(yas-expand-snippet
+	 (yas-lookup-snippet "weekly-report")
+	 nil nil `((kg-due-date-string ,(format-time-string "<%Y-%m-%d %a>" kg-due-date)))))
+      (save-buffer)
+      (goto-char (point-min))))))
+
+
+(defun kitchingroup-weekly-report ()
   "Create/open this week's progress report.
 This function will create a folder called reports/year-mm-dd and
 put a weekly-report template inside it, or open the one that
 exists. dd will be at the beginning of the week (Monday). The
 report is for the previous week."
   (interactive)
-  ;; make sure we have a repo to work in.
-  ;; (unless (= 0 (kitchingroup-kitchinhub-repo))
-  ;;   (error "Could not open or get the repo."))
   (let* ((dir (format "reports/%s/" (format-time-string "%Y-%m-%d"
 							(iso-week-to-time
 							 (string-to-number
