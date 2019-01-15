@@ -557,11 +557,15 @@
   :load-path scimax-dir
   :bind ("H-o" . ore))
 
-(use-package org-editmarks
+;; (use-package org-editmarks
+;;   :ensure nil
+;;   :load-path scimax-dir)
+
+(use-package scimax-ivy
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-ivy
+(use-package scimax-lob
   :ensure nil
   :load-path scimax-dir)
 
@@ -582,14 +586,14 @@
   :ensure nil
   :load-path scimax-dir)
 
-(use-package ov-highlight
-  :ensure nil
-  :load-path (lambda () (expand-file-name "ov-highlight" scimax-dir))
-  :bind ("H-h" . ov-highlight/body)
-  :init
-  (add-to-list 'load-path
-	       (expand-file-name "ov-highlight" scimax-dir))
-  (require 'ov-highlight))
+;; (use-package ov-highlight
+;;   :ensure nil
+;;   :load-path (lambda () (expand-file-name "ov-highlight" scimax-dir))
+;;   :bind ("H-h" . ov-highlight/body)
+;;   :init
+;;   (add-to-list 'load-path
+;; 	       (expand-file-name "ov-highlight" scimax-dir))
+;;   (require 'ov-highlight))
 
 (org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir))
 
