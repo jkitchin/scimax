@@ -49,6 +49,15 @@ TEMPLATE should be a yasnippet name and should be a string."
     0))
 
 
+(defun iso-week-to-time(year week day)
+  "Convert ISO year, week, day to elisp time value."
+  (apply #'encode-time
+         (append '(0 0 0)
+                 (-select-by-indices
+                  '(1 0 2)
+                  (calendar-gregorian-from-absolute (calendar-iso-to-absolute
+                                                     (list week day year)))))))
+
 (defun kitchingroup-weekly-report ()
   "Open the report for the date prompted.
 If you pick a monday, you get the report due on that day. If you
