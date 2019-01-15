@@ -54,7 +54,8 @@ This should get the number of remote commits available. If it is not zero, you n
 : 0
 
 * Pushing the report
-This will commit and push the report.
+
+This will commit and push the report. This also inserts a bibliography file if needed.
 
 #+name: kitchingroup-weekly-push
 #+BEGIN_SRC emacs-lisp :noweb yes :results silent :var ok=kitchingroup-du-check() :var remotes=kitchingroup-remote-commits()
@@ -74,7 +75,8 @@ This will commit and push the report.
 
     (org-ref-extract-bibtex-to-file "weekly-report.bib")
     (goto-char (point-max))
-    (insert (format "\nbibliography:weekly-report.bib"))))
+    (insert (format "\nbibliography:%s" (s-join "," (append '("weekly-report.bib" )
+							    org-ref-default-bibliography))))))
 
 (save-some-buffers t)
 (if (not (eq ok 0))
