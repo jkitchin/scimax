@@ -1,0 +1,87 @@
+#+title: Library of babel calls for the Kitchin research group
+
+* Commit the current directory
+
+#+name: kitchingroup-pwd
+#+BEGIN_SRC sh :results silent
+pwd
+#+END_SRC
+
+
+#+name: kitchingroup-du-check
+#+BEGIN_SRC sh :results value :var save=(save-some-buffers t) :var bib=(org-ref-extract-bibtex-to-file "weekly-report.bib")
+# 10 MB max report size
+MAXSIZE="10485760"
+CHECK=`du -s . | awk '{print \$1}'`
+
+if [ "$MAXSIZE" -gt "$CHECK" ]; then
+    echo 0
+else
+    echo "This directory is too big. Please see Prof. Kitchin" 1>&2
+    echo 1
+fi
+#+END_SRC
+
+#+RESULTS: kitchingroup-du-check
+: 0
+
+#+BEGIN_SRC emacs-lisp :var var=kitchingroup-du-check()
+var
+#+END_SRC
+
+#+RESULTS:
+: nil
+
+
+This should get the number of remote commits available. If it is not zero, you need to pull before you can push.
+
+#+name: kitchingroup-remote-commits
+#+BEGIN_SRC emacs-lisp
+(let* (	;; get the branch we are on.
+       (branch (s-trim
+		(shell-command-to-string
+		 "git rev-parse --abbrev-ref HEAD")))
+       ;; get the remote the branch points to.
+       (remote (s-trim
+		(shell-command-to-string
+		 (format "git config branch.%s.remote" branch))))
+       (remote-branch (s-trim
+		       (shell-command-to-string
+			"git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
+       (commits (split-string
+		 (s-trim
+		  (shell-command-to-string
+		   (format
+		    "git rev-list --count --left-right HEAD...%s"
+		    remote-branch)))))
+       (local (nth 0 commits))
+       (remotes (nth 1 commits)))
+  remotes)
+#+END_SRC
+
+#+RESULTS: kitchingroup-remote-commits
+: 0
+
+
+#+name: kitchingroup-weekly-push
+#+BEGIN_SRC emacs-lisp :noweb yes :var ok=kitchingroup-du-check() :var remotes=kitchingroup-remote-commits()
+(when (> (string-to-number remotes) 0)
+  (error "It looks like there are remote commits you need to pull first."))
+
+(if (not (eq ok 0))
+  (message "your directory seems to be too big. Please submit manually")
+  (shell-command "git add *")
+  (shell-command "git commit -am \"Automated commit\"")
+  (shell-command "git push"))
+#+END_SRC
+
+#+RESULTS: kitchingroup-weekly-push
+: your directory seems to be too big. Please submit manually
+
+
+#+name: kitchingroup-weekly-pull
+#+BEGIN_SRC emacs-lisp :results silent :var save=(save-some-buffers t)
+(shell-command "git pull")
+(revert-buffer)
+(goto-char (point-min))
+#+END_SRC

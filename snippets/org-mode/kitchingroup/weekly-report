@@ -5,17 +5,8 @@
 # --
 #+TITLE: Weekly progress report
 #+AUTHOR: `user-full-name`
-#+DATE: `(format-time-string "%F")`
-#+DUEDATE: `(let* ((day 1) ; 1 is for Monday
-		   (time (decode-time))
-		   (dow (nth 6 time))
-		   (day-of-month (nth 3 time))
-		   (new-dow (+ (- 7 dow) day))
-		   (new-time (encode-time 0 0 0
-					  (+ new-dow day-of-month)
-		           			  (nth 4 time)
-						  (nth 5 time))))
-		      (format-time-string "<%Y-%m-%d %a>" new-time))`
+#+DATECREATED: `(format-time-string "%F")`
+#+DUEDATE: `kg-due-date-string`
 #+FILETAGS: weekly report `(if (boundp 'kitchingroup-github-id) kitchingroup-github-id "NOGITHUBID")`
 #+VERSION: 0.1.2
 
