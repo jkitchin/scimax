@@ -4,6 +4,7 @@
 ;; This module is mostly for members of my research group.
 
 (require 'scimax-notebook)
+(require 'cal-iso)
 
 (defcustom kitchingroup-github-id nil
   "Your Github id.
