@@ -136,48 +136,6 @@ Monday."
       (goto-char (point-min))))))
 
 
-(defun kitchingroup-weekly-report ()
-  "Create/open this week's progress report.
-This function will create a folder called reports/year-mm-dd and
-put a weekly-report template inside it, or open the one that
-exists. dd will be at the beginning of the week (Monday). The
-report is for the previous week."
-  (interactive)
-  (let* ((dir (format "reports/%s/" (format-time-string "%Y-%m-%d"
-							(iso-week-to-time
-							 (string-to-number
-							  (format-time-string
-							   "%Y" (current-time)))
-							 (string-to-number
-							  (format-time-string
-							   "%V" (current-time)))
-							 ;; 1 is for Monday
-							 1))))
-	 (fname (f-join dir "weekly-report.org"))
-	 (repo-dir (expand-file-name kitchingroup-github-id nb-notebook-directory))
-	 (projectile-switch-project-action (lambda ()
-					     (unless (file-directory-p
-						      (expand-file-name dir))
-					       (make-directory dir t))
-					     (if (file-exists-p fname)
-						 (find-file fname)
-					       (find-file fname)
-					       (yas-expand-snippet
-						(yas-lookup-snippet "weekly-report"))))))
-    ;; check that this exists, and if not get it.
-    (unless (file-directory-p (expand-file-name kitchingroup-github-id
-						nb-notebook-directory))
-      (let ((default-directory nb-notebook-directory))
-	(shell-command (format "git clone git@github.com:KitchinHUB/%s.git"
-			       kitchingroup-github-id)))
-      (projectile-add-known-project repo-dir))
-
-    ;; Now switch to the repo
-    (projectile-switch-project-by-name
-     repo-dir
-     nil)))
-
-
 (defun kitchingroup-calendar ()
   "Open the Kitchin Group Google calendar."
   (interactive)
