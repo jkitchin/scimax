@@ -52,7 +52,7 @@ $0
 
 Click the Submit link to commit and push your report. Note that this will add everything in this directory, so do not do this if you have a lot of files.
 
-[[elisp:kitchingroup-weekly-push][Submit]]
+[[elisp:kitchingroup-submit-weekly][Submit]]
 
 You can also use elisp:magit-status to add, commit and push the files.
 
