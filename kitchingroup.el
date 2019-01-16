@@ -3,8 +3,11 @@
 ;;; Commentary:
 ;; This module is mostly for members of my research group.
 
+(use-package gitter)
 (require 'scimax-notebook)
 (require 'cal-iso)
+
+;;; Code:
 
 (defcustom kitchingroup-github-id nil
   "Your Github id.
@@ -13,7 +16,8 @@ This should be defined in user/preload.el, e.g. (setq kitchingroup-github-id \"y
 
 
 (when (null kitchingroup-github-id)
-  (warn "`kitchingroup-github-id' is nil. Please set it in %s/user/preload.el" scimax-dir))
+  (warn "`kitchingroup-github-id' is nil. Please set it in %s"
+	(expand-file-name "user/preload.el" scimax-dir)))
 
 
 (defcustom kitchingroup-root (file-name-as-directory
@@ -136,6 +140,26 @@ Monday."
       (goto-char (point-min))))))
 
 
+(defun kitchingroup-submit-weekly ()
+  "Submit the weekly report.
+This is a convenience method for committing and pushing the
+weekly report. It checks to make sure the directory size is below
+10MB, and makes a bibliography file if needed. This file exists
+so we can have a simple link to click for this action."
+  (interactive)
+  (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-push")))))
+    (org-babel-execute-src-block nil info)))
+
+
+(defun kitchingroup-pull-weekly ()
+  "Submit the weekly report.
+This is a convenience method for pulling. This file exists so we
+can have a simple link to click for this action."
+  (interactive)
+  (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-pull")))))
+    (org-babel-execute-src-block nil info)))
+
+
 (defun kitchingroup-calendar ()
   "Open the Kitchin Group Google calendar."
   (interactive)
@@ -155,13 +179,12 @@ Monday."
   (message-goto-subject))
 
 
-(use-package gitter)
-
 (defun kitchingroup-gitter ()
   "Open the kitchin group gitter in erc.
-First get a gitter account. Then go to https://developer.gitter.im/apps to get your token. Finally, add this line
-machine gitter.im password here-is-your-token
-to ~/.authinfo"
+First get a gitter account. Then go to
+https://developer.gitter.im/apps to get your token. Finally, add
+this line machine gitter.im password here-is-your-token to
+~/.authinfo"
   (interactive)
   (gitter--open-room "kitchingroup/community" "5c2df7f3d73408ce4fb38107"))
 

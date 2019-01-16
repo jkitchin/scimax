@@ -8,9 +8,13 @@
 #+CREATED: `(format-time-string "%F")`
 #+DUEDATE: `kg-due-date-string`
 #+FILETAGS: weekly report `(if (boundp 'kitchingroup-github-id) kitchingroup-github-id "NOGITHUBID")`
-#+VERSION: 0.1.3
+#+VERSION: 0.1.4
 
 # Create a new report each week. The report for the past week is due on Monday. This should not take more than 30 minutes to complete. If it does, you are not doing what I want, and we should talk about how to make it more efficient. It is fine to link to previous reports if you are continuing discussion from them.
+
+Click this link to pull new content from GitHUB. Note this will only work when your repo is clean. If you have made changes to it since Prof. Kitchin pushed his feedback you will have to commit those first.
+
+[[elisp:kitchingroup-pull-weekly][Pull from GitHUB]]
 
 * Executive summary
 # Briefly summarize the report  here. This summary should describe in bullet form the current goals and results. You may want to link to a project file that describes the project goals.
@@ -46,9 +50,9 @@ $0
 
 * Submit
 
-Run this code block to commit and submit your report. Note that this will add everything in this directory, so do not do this if you have a lot of files. Put your cursor on the #+call line and type C-c C-c to execute it.
+Click the Submit link to commit and push your report. Note that this will add everything in this directory, so do not do this if you have a lot of files.
 
-#+call: kitchingroup-weekly-push()
+[[elispkitchingroup-weekly-push][Submit]]
 
 You can also use elisp:magit-status to add, commit and push the files.
 
@@ -59,9 +63,6 @@ Pp - will push to the remote repo
 
 Either way, don't forget to send Prof. Kitchin an email that you have submitted the report and it is ready for review. Then, wait for feed back from him for you to review. You should try to not modify the repo until then to keep things simple.
 
-Then run this block to pull the changes back for you to review. This block will probably only work if you have not made any new changes to this repo since you last pushed. If you did, you should see Prof. Kitchin for help merging the upstream changes with your local changes.
-
-#+call: kitchingroup-weekly-pull()
 
 If you run into any problems, please see Prof. Kitchin.
 
