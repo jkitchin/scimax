@@ -104,7 +104,7 @@ These don't really do anything but provide visual highlighting.
 ;;; Code
 (require 'cl)
 (require 'color)
-
+(require 'easymenu
 
 #+END_SRC
 
@@ -537,6 +537,32 @@ A minor mode is an easy way to turn font-locking on and off. All we do here is t
  #+END_SRC
 
  #+RESULTS:
+
+** Scimax menu
+
+This adds a menu to scimax for the editmarks.
+
+#+BEGIN_SRC emacs-lisp
+(defcustom sem-menu-items
+  '( ["Insert" sem-insert t]
+     ["List editmarks" sem-editmark-display t]
+     ["Clear editmark" sem-clear-editmark t]
+     ["Next" sem-next-editmark t]
+     ["Previous" sem-previous-editmark t]
+     ["Jump to editmark" sem-jump-to-editmark t]
+     ["Jump to visible" sem-jump-to-visible-editmark t]
+     ["Accept" sem-accept-editmark t]
+     ["Reject" sem-reject-editmark t]
+     ["Insert hydra" sem-insert/body t]
+     ["Action hydra" sem-action/body t])
+  "List of editmark menu items.")
+
+(easy-menu-define sem-menu scimax-mode-map "The editmarks"
+  sem-menu-items)
+
+
+(easy-menu-change '("Scimax") "editmarks" sem-menu-items "Update scimax")
+#+END_SRC
 
 ** Convenience functions
 *** Utilities
