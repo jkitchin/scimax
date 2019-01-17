@@ -361,6 +361,14 @@
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
+(use-package scimax-apps
+  :ensure nil
+  :load-path scimax-dir)
+
+(use-package scimax-journal
+  :ensure nil
+  :load-path scimax-dir)
+
 (use-package scimax-ob
   :ensure nil
   :load-path scimax-dir)
