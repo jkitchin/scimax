@@ -190,39 +190,28 @@ This is a macro so I don't have to quote the hydra name."
 				     :inherit (scimax-base/heads))
   "
 applications
-Emacs             Mac            Web
+Emacs             OS            Web
 -----------------------------------------------------
-_n_: contacts     _a_: app       _c_: google calendar
-_d_: dired        _f_: finder    _W_: tweetdeck
-_e_: %12s`mu4e-unread _i_: iChat
-_r_: %s`elfeed-count _o_: Office
-_w_: twit         _s_: Safari
-_j_: journal      _t_: Terminal
+_d_: dired           _b_: bash      _g_: browser
+_j_: journal         _f_: finder    _c_: google calendar
+^ ^                  _o_: Office
+_r_: %s`elfeed-count
 ------------------------------------------------------
 commands
 _k_: list packages _m_: compose mail
 ------------------------------------------------------
 "
-  ("a" app)
+
+  ("b" bash)
   ("c" google-calendar)
   ("d" dired)
-  ("e" (if (get-buffer "*mu4e-headers*")
-	   (progn
-	     (switch-to-buffer "*mu4e-headers*")
-	     (delete-other-windows))
-	 (mu4e)))
   ("f" finder)
-  ("i" messages)
   ("j" scimax-journal/body)
+  ("g" google)
   ("k" package-list-packages)
   ("m" compose-mail)
-  ("n" ivy-contacts)
-  ("r" elfeed)
-  ("s" safari)
-  ("t" terminal)
-  ("w" twit)
-  ("W" tweetdeck)
-  ("o" (scimax-open-hydra scimax-office/body)))
+  ("o" (scimax-open-hydra scimax-office/body))
+  ("r" elfeed))
 
 
 (defhydra scimax-office (:color blue)
