@@ -361,18 +361,6 @@
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
-(use-package scimax-apps
-  :ensure nil
-  :load-path scimax-dir)
-
-(use-package scimax-journal
-  :ensure nil
-  :load-path scimax-dir)
-
-(use-package scimax-ob
-  :ensure nil
-  :load-path scimax-dir)
-
 ;; this is a git submodule
 (if (executable-find "jupyter")
     (use-package ob-ipython
@@ -589,6 +577,18 @@
   :ensure nil
   :load-path scimax-dir
   :bind ("<f12>" . scimax/body))
+
+(use-package scimax-journal
+  :ensure nil
+  :load-path scimax-dir)
+
+(use-package scimax-apps
+  :ensure nil
+  :load-path scimax-dir)
+
+(use-package scimax-ob
+  :ensure nil
+  :load-path scimax-dir)
 
 (use-package kitchingroup
   :ensure nil
