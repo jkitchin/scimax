@@ -97,44 +97,7 @@ recent files and bookmarks. You can set a bookmark also."
 (define-key 'vc-prefix-map "P" (lambda () (interactive) (vc-git-pull nil)))
 
 
-;; * Windows
-;;;###autoload
-(defun explorer (&optional path)
-  "Open Finder or Windows Explorer in the current directory."
-  (interactive (list (if (buffer-file-name)
-			 (file-name-directory (buffer-file-name))
-		       (expand-file-name  "~/"))))
-  (cond
-   ((string= system-type "gnu/linux")
-    (shell-command "nautilus"))
-   ((string= system-type "darwin")
-    (shell-command (format "open -b com.apple.finder %s"
-			   path)))
-   ((string= system-type "windows-nt")
-    (shell-command (format "explorer %s"
-			   (replace-regexp-in-string
-			    "/" "\\\\"
-			    path))))))
-
-(defalias 'finder 'explorer "Alias for `explorer'.")
-
-
-(defun bash (&optional path)
-  "Open a bash window.
-PATH is optional, and defaults to the current directory."
-  (interactive (list (if (buffer-file-name)
-			 (file-name-directory (buffer-file-name))
-		       (expand-file-name default-directory))))
-  (cond
-   ((string= system-type "gnu/linux")
-    (shell-command "gnome-terminal"))
-   ((string= system-type "darwin")
-    (shell-command
-     (format "open -b com.apple.terminal \"%s\""
-	     path)))
-   ((string= system-type "windows-nt")
-    (shell-command "start \"\" \"%SYSTEMDRIVE%\\Program Files\\Git\\bin\\bash.exe\" --login &"))))
-
+;; * Misc
 
 
 ;; case on regions
