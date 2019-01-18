@@ -76,7 +76,7 @@ when in a menu bar update hook. If nil, just add projects once."
 
 (defcustom nb-switch-project-action
   (lambda ()
-    (find-file (read-file-name "File: " "." nil nil (funcall nb-master-file))))
+    (find-file (read-file-name "File: " "." (funcall nb-master-file))))
   "Function to run after switching projects with `nb-open'."
   :group 'scimax-notebook)
 
