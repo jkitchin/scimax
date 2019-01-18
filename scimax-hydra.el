@@ -158,11 +158,10 @@ This is a macro so I don't have to quote the hydra name."
   ("r" (scimax-open-hydra scimax-registers/body) "Registers/resume")
   ("s" (scimax-open-hydra scimax-search/body) "Search")
   ("t" (scimax-open-hydra scimax-text/body) "Text")
-  ;; u ?
+  ;; u is a prefix arg, do not reassign
   ("v" (scimax-open-hydra scimax-version-control/body) "Version control")
   ("w" (scimax-open-hydra scimax-windows/body) "Windows")
   ;; x is for M-x, don't reassign
-  ;; y ?
   ("z" (scimax-open-hydra scimax-customize/body) "Customize"))
 
 
@@ -170,12 +169,7 @@ This is a macro so I don't have to quote the hydra name."
 
 (defun scimax-app-hints ()
   "Calculate some variables for the applications hydra."
-  (setq mu4e-unread
-	(s-pad-right 12 " "
-		     (format "email(%s)"
-			     (shell-command-to-string
-			      "echo -n $( mu find maildir:/INBOX flag:unread 2>/dev/null | wc -l )")))
-	elfeed-count
+  (setq elfeed-count
 	(s-pad-right 12 " "
 		     (if (get-buffer "*elfeed-search*")
 			 (format "RSS(%s)"
@@ -1473,6 +1467,8 @@ _t_: run tests _m_: magit  _8_: autopep8
   ("Ss" elpy-shell-switch-to-shell)
 
   ("8" autopep8))
+
+
 
 
 ;;* the end
