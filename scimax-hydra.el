@@ -184,11 +184,11 @@ This is a macro so I don't have to quote the hydra name."
 				     :inherit (scimax-base/heads))
   "
 applications
-Emacs             OS            Web
+Emacs                 OS            Web
 -----------------------------------------------------
 _d_: dired           _b_: bash      _g_: browser
 _j_: journal         _f_: finder    _c_: google calendar
-^ ^                  _o_: Office
+^ ^                  _o_: Office    _s_: GSuite
 _r_: %s`elfeed-count
 ------------------------------------------------------
 commands
@@ -205,6 +205,7 @@ _k_: list packages _m_: compose mail
   ("k" package-list-packages)
   ("m" compose-mail)
   ("o" (scimax-open-hydra scimax-office/body))
+  ("s" (scimax-open-hydra scimax-gsuite/body))
   ("r" elfeed))
 
 
@@ -213,6 +214,13 @@ _k_: list packages _m_: compose mail
   ("e" excel"Excel")
   ("p" powerpoint "Powerpoint")
   ("w" word "Word"))
+
+(defhydra scimax-gsuite (:color blue)
+  "GSuite"
+  ("v" (browse-url "https://drive.google.com/drive/u/0/my-drive"))
+  ("d" (browse-url "https://docs.google.com/document/u/0/"))
+  ("h" (browse-url "https://docs.google.com/spreadsheets/u/0/"))
+  ("s" (browse-url "https://docs.google.com/presentation/u/0/")))
 
 ;;** buffers
 
