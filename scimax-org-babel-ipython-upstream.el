@@ -808,7 +808,8 @@ This function is called by `org-babel-execute-src-block'."
 		(when (f-exists? f)
 		  (f-delete f)))
 	      files))))
-  (org-babel-remove-result)
+
+  (org-babel-remove-result nil t)
 
   ;; scimax feature to restart
   (when (assoc :restart params)
