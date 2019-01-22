@@ -15,9 +15,9 @@ This should be defined in user/preload.el, e.g. (setq kitchingroup-github-id \"y
   :group 'kitchingroup)
 
 
-(when (null kitchingroup-github-id)
-  (warn "`kitchingroup-github-id' is nil. Please set it in %s"
-	(expand-file-name "user/preload.el" scimax-dir)))
+;; (when (null kitchingroup-github-id)
+;;   (warn "`kitchingroup-github-id' is nil. Please set it in %s"
+;; 	(expand-file-name "user/preload.el" scimax-dir)))
 
 
 (defcustom kitchingroup-root (file-name-as-directory
