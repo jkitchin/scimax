@@ -65,7 +65,7 @@ This will commit and push the report. This also inserts a bibliography file if n
 (if (not (eq ok 0))
     (message "your directory seems to be too big. Please submit manually")
   (shell-command "git add *")
-  (shell-command "git commit -am \"Automated commit\"")
+  (shell-command (format "git commit -am \"Automated commit %s\"" (format-time-string "%Y-%m-%d")))
   (shell-command "git push"))
 #+END_SRC
 
