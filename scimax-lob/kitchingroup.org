@@ -78,7 +78,7 @@ This will commit and push the report. This also inserts a bibliography file if n
 #+BEGIN_SRC emacs-lisp :results silent :var dirty?=kg-git-dirty?()
 (save-some-buffers t)
 
-(when dirty?
+(when (not (string= dirty? "nil"))
   (error "Your repo is not clean. You cannot pull right now.\n
 To fix this you have to at least commit changes to the modified files.
 %s"
