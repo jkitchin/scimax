@@ -68,18 +68,18 @@ $0
 ;; slow, so we don't want to do it on each time. This approach seems more
 ;; reliable than looking for sty files using kpsewhich like I did for the
 ;; bibliography styles
-(unless (and scimax-installed-latex-packages
-	     (executable-find "tlmgr"))
+(when (and (null scimax-installed-latex-packages)
+	   (executable-find "tlmgr"))
   (require 'async)
   (async-start
    `(lambda ()
       (require 'cl)
       (mapcar
        (lambda (s)
-      	 (second (split-string (first (split-string s ":")) " ")))
+	 (second (split-string (first (split-string s ":")) " ")))
        (cl-loop for line in (process-lines ,(executable-find "tlmgr")  "info" "--only-installed")
-      		if (and (stringp line) (string= "i" (substring line 0 1)))
-      		collect line)))
+		if (and (stringp line) (string= "i" (substring line 0 1)))
+		collect line)))
 
    (lambda (result)
      (setq scimax-installed-latex-packages result))))
