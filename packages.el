@@ -376,7 +376,8 @@
 
 (use-package ov)
 
-(use-package org-edit-latex)
+;; [2019-01-23 Wed] commented out. I don't use this at all, and it causes an error on Windows when starting up.
+;; (use-package org-edit-latex)
 
 (use-package pdf-tools)
 
