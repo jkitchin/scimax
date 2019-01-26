@@ -1317,7 +1317,7 @@ It is a major challenge to keep up with the scientific literature. `elfeed' is t
 The scimax customizations of elfeed are not loaded by default. If you want them, you have to add this to  your init files.:
 
 #+BEGIN_SRC emacs-lisp
-(require 'scimax-elfeed
+(require 'scimax-elfeed)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
