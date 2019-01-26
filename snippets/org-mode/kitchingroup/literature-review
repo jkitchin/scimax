@@ -9,13 +9,9 @@
 #+FILETAGS: literature review `(if (boundp 'kitchingroup-github-id) kitchingroup-github-id "NOGITHUBID")`
 #+VERSION: 0.1.0
 
-*************** TODO Create a bibtex file
-Click on this to create a file:references.bib.
+* Initial literature review
 
-Put 5-10 references in this file. I recommend you do this with M-x doi-add-bibtex-entry for scientific papers.  Books are best done manually at this point.
-*************** END
-
-
+# Find 5-10 references on topics that are related to what your project may be on, and write a short summary of each one in this document.
 
 * build                                                            :noexport:
 
@@ -23,43 +19,13 @@ Export this file to a pdf with C-c C-e lo. or this link:
 
 [[elisp:(org-open-file (org-latex-export-to-pdf))]]
 
-Make sure the file builds into a nice looking PDF.
+Make sure the file builds into a nice looking PDF. Make sure to check that the citations look right, and that the bibliography is formatted correctly.
 
-* Submit
+Run M-x org-ref to check the document for problems.
 
-Run this code block to commit and submit your report. Note that this will add everything in this directory, so do not do this if you have a lot of files
+* Submit                                                           :noexport:
 
-#+BEGIN_SRC sh
-# 10 MB max report size
-MAXSIZE="10485760"
-CHECK="\`du -s . | awk '{print \$1}'\`"
-
-if [ "$MAXSIZE" -gt "$CHECK" ]; then
-    git add *
-    git commit -am "Automated commit"
-    git push
-else
-    echo "This directory is too big. Please see Prof. Kitchin" 1>&2
-    exit 1
-fi
-#+END_SRC
-
-You can also use elisp:magit-status to add, commit and push the files.
-
-a - will add a file
-s - will stage a file
-cc - will commit a set of changes, enter your message and type C-cC-c
-Pp - will push to the remote repo
-
-Either way, don't forget to send Prof. Kitchin an email that you have submitted the report and it is ready for review. Then, wait for feed back from him for you to review. You should try to not modify the repo until then to keep things simple.
-
-Then run this block to pull the changes back for you to review.
-
-#+BEGIN_SRC emacs-lisp
-(shell-command "git pull")
-(revert-buffer)
-(goto-char (point-min))
-#+END_SRC
+Please let Prof. Kitchin know this is ready for review.
 
 If you run into any problems, please see Prof. Kitchin.
 

@@ -21,22 +21,7 @@
 
 * Submit
 
-Click on the submit link to submit your report. Note that this will add everything in this directory, so do not do this if you have a lot of files
-
-[[elisp:kitchingroup-submit-weekly][Submit]]
-
-You can also use elisp:magit-status to add, commit and push the files.
-
-a - will add a file
-s - will stage a file
-cc - will commit a set of changes, enter your message and type C-cC-c
-Pp - will push to the remote repo
-
-Either way, don't forget to send Prof. Kitchin an email that you have submitted the plan and it is ready for review. Then, wait for feed back from him for you to review. You should try to not modify the repo until then to keep things simple.
-
-When he let's you know there is feedback for you to read click this link to pull the results:
-
-[[elisp:kitchingroup-pull-weekly][Pull]]
+Please let Prof. Kitchin know when this is ready to review.
 
 If you run into any problems, please see Prof. Kitchin.
 
