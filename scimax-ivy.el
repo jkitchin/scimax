@@ -14,6 +14,16 @@
 	  (interactive)
 	  (describe-keymap ivy-minibuffer-map)) "Describe keys")))
 
+;; ** Extra projectile actions
+;; Here I can open bash or finder when switching projects
+(ivy-add-actions
+ 'projectile-completing-read
+ '(("b" (lambda (x)
+	  (bash x))  "Open bash here.")
+   ("f" (lambda (x)
+	  (finder x))  "Open Finder here.")))
+
+
 ;; ** Find file actions
 (ivy-add-actions
  'counsel-find-file
