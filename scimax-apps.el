@@ -13,8 +13,10 @@
    ((string= system-type "gnu/linux")
     (shell-command "nautilus"))
    ((string= system-type "darwin")
-    (shell-command (format "open -b com.apple.finder %s"
-			   path)))
+    (shell-command (format "open -b com.apple.finder%s"
+			   (if path (format " \"%s\""
+					    (file-name-directory
+					     (expand-file-name path))) ""))))
    ((string= system-type "windows-nt")
     (shell-command (format "explorer %s"
 			   (replace-regexp-in-string
@@ -35,8 +37,8 @@ PATH is optional, and defaults to the current directory."
     (shell-command "gnome-terminal"))
    ((string= system-type "darwin")
     (shell-command
-     (format "open -b com.apple.terminal \"%s\""
-	     path)))
+     (format "open -b com.apple.terminal%s"
+	     (if path (format " \"%s\"" path) ""))))
    ((string= system-type "windows-nt")
     (shell-command "start \"\" \"%SYSTEMDRIVE%\\Program Files\\Git\\bin\\bash.exe\" --login &"))))
 
