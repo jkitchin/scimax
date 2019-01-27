@@ -19,6 +19,7 @@
 ;;; Code:
 (when (featurep 'rg)
   (require 'rg))
+
 (require 'scimax-org)
 
 (defvar scimax-journal-root-dir "~/vc/journal"
@@ -104,7 +105,7 @@ Argument REGEX the pattern to grep for."
 
 (defun scimax-journal-entries ()
   "Get a list of journal entries.
-These are not sorted."
+These are not sorted and rely on the pattern I defined for the file name."
   (f-entries scimax-journal-root-dir
 	     (lambda (f)
 	       (and (f-ext? f "org")
@@ -131,20 +132,156 @@ These are not sorted."
   (interactive "P")
   (when refresh
     (setq scimax-journal-entry-filenames (scimax-journal-entries)))
-  (when-let ((pos (cl-position (buffer-file-name) scimax-journal-entry-filenames :test 'string=))
+  (when-let ((pos (cl-position (buffer-file-name)
+			       scimax-journal-entry-filenames :test 'string=))
 	     (previous (> pos 0)))
     (find-file (nth (- pos 1) scimax-journal-entry-filenames))))
 
 
-(defhydra scimax-journal (:color blue)
-  "Scimax-Journal"
+;; * Search functions
+(defun scimax-journal-get-entries (t1 t2)
+  "Return a list of entry files between T1 and T2.
+T1 and T2 are org-dates in string form."
+  ;; Make sure t1 is less than t2
+  (when (org-time> t1 t2)
+    (let ((a t1)
+	  (b t2))
+      (setq t1 b
+	    t2 a)))
+  (let* ((entries (loop for entry in scimax-journal-entry-filenames
+			collect
+			(org-read-date nil nil (file-name-base entry))))
+	 (valid (mapcar (lambda (e)
+			  (and
+			   (org-time>= e t1)
+			   (org-time<= e t2)))
+			entries))
+	 (decorated (-zip valid
+			  scimax-journal-entry-filenames)))
+    (loop for (keep . entry) in decorated
+	  if keep collect entry)))
+
+
+(defun scimax-journal-grep-range (t1 t2 regexp &optional case-sensitive)
+  "Search the journal from T1 to T2 for REGEXP.
+T1 and T2 are strings as selected from `org-read-date'
+With a prefix arg, make it CASE-SENSTIVE."
+  (interactive (list
+		(org-read-date)
+		(org-read-date)
+		(read-input "Search for: ")
+		current-prefix-arg))
+  (message "Searching for %s in %S" regexp (scimax-journal-get-entries t1 t2))
+  (pop-to-buffer (grep
+		  (format "grep -nH %s %s %s"
+			  (if (null case-sensitive) "-i" "")
+			  regexp
+			  (s-join " " (scimax-journal-get-entries t1 t2))))))
+
+
+(defun scimax-journal-grep-last-year (regexp &optional case-sensitive)
+  "Search the last year of entries."
+  (interactive (list (read-input "Search for: ")
+		     current-prefix-arg))
+  (scimax-journal-grep-range (org-read-date nil nil "-1y")
+			     (org-read-date nil nil "today")
+			     regexp case-sensitive))
+
+
+(defun scimax-journal-grep-last-month (regexp &optional case-sensitive)
+  "Search the last month of entries."
+  (interactive (list (read-input "Search for: ")
+		     current-prefix-arg))
+  (scimax-journal-grep-range (org-read-date nil nil "-1m")
+			     (org-read-date nil nil "today")
+			     regexp case-sensitive))
+
+
+(defun scimax-journal-grep-last-week (regexp &optional case-sensitive)
+  "Search the last month of entries."
+  (interactive (list (read-input "Search for: ")
+		     current-prefix-arg))
+  (scimax-journal-grep-range (org-read-date nil nil "-1w")
+			     (org-read-date nil nil "today")
+			     regexp case-sensitive))
+
+(defun scimax-journal-swiper-range (t1 t2)
+  "Run Swiper on entries between T1 and T2."
+  (interactive (list
+		(org-read-date)
+		(org-read-date)))
+  (let* ((swiper-multi-buffers nil)
+	 (swiper-multi-candidates nil)
+	 (this-command 'ivy-done))
+    (mapc 'swiper-multi-action-1 (mapcar
+				  (lambda (f)
+				    (buffer-name (find-file-noselect f)))
+				  (scimax-journal-get-entries
+				   (org-read-date nil nil t1)
+				   (org-read-date nil nil t2))))
+
+    (ivy-read "Swiper: " swiper-multi-candidates
+    	      :action #'swiper-multi-action-2
+    	      :unwind #'swiper--cleanup
+    	      :caller 'swiper-multi)))
+
+
+(defun scimax-journal-swiper-last-week ()
+  (interactive)
+  (scimax-journal-swiper-range "-1w" "today"))
+
+
+(defun scimax-journal-swiper-last-month ()
+  (interactive)
+  (scimax-journal-swiper-range "-1m" "today"))
+
+
+(defun scimax-journal-swiper-last-year ()
+  (interactive)
+  (scimax-journal-swiper-range "-1y" "today"))
+
+(defun scimax-journal-agenda-range (t1 t2)
+  "Show an agenda."
+  (interactive (list
+		(org-read-date)
+		(org-read-date)))
+  (let ((org-agenda-files (scimax-journal-get-entries
+			   (org-read-date nil nil t1)
+			   (org-read-date nil nil t2))))
+    (org-agenda)))
+
+
+;; * Hydra for scimax journal
+(defhydra scimax-journal (:color blue :hint nil)
+  "
+Scimax-Journal
+Swiper       Grep          Open              Navigate       Agenda
+---------------------------------------------------------------------
+_sr_: range  _gr_: range   _e_: new          _n_: next      _a_: agenda
+_sw_: week   _gw_: week    _h_: heading      _p_: previous
+_sm_: month  _gm_: month   _f_: file
+_sy_: year   _gy_: year    _j_: journal dir
+"
+  ("a" scimax-journal-agenda-range "agenda")
+
   ("n" scimax-journal-next-entry "Next entry" :color red)
   ("p" scimax-journal-previous-entry "Previous entry" :color red)
-  ("j" (scimax-journal-open) "Open journal")
-  ("o" (scimax-journal-go-to-file) "Open a journal file")
+
+  ("j" (scimax-journal-open) "Open journal directory")
+  ("f" (scimax-journal-go-to-file) "Open a journal file")
   ("e" (scimax-journal-new-entry) "New entry")
-  ("g" scimax-journal-grep "grep journal")
-  ("h" scimax-journal-open-heading "Open to heading"))
+  ("h" scimax-journal-open-heading "Open to heading")
+
+  ("sr" scimax-journal-swiper-last-week "Swiper date range")
+  ("sw" scimax-journal-swiper-last-week "Swiper last week")
+  ("sm" scimax-journal-swiper-last-month "Swiper last month")
+  ("sy" scimax-journal-swiper-last-year "Swiper last year")
+
+  ("gg" scimax-journal-grep "grep journal")
+  ("gw" scimax-journal-grep-last-week "grep last week")
+  ("gm" scimax-journal-grep-last-month "grep last month")
+  ("gy" scimax-journal-grep-last-year "grep last year")
+  ("gr" scimax-journal-grep-range "grep a date range"))
 
 (provide 'scimax-journal)
 
