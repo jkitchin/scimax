@@ -17,8 +17,7 @@
 ;; `scimax-journal-git-grep' search the journal using `counsel-git-grep
 ;;
 ;;; Code:
-(when (featurep 'rg)
-  (require 'rg))
+
 
 (require 'scimax-org)
 
@@ -91,16 +90,14 @@ Argument REGEX the pattern to grep for."
     (counsel-git-grep)))
 
 
-(defun scimax-journal-grep (regex)
+(defun scimax-journal-grep (regex &optional case-sensitive)
   "Run grep on the files in the journal.
  Argument REGEX the pattern to grep for."
-  (interactive "sPattern: ")
+  (interactive "sPattern: \nP")
   (let ((default-directory scimax-journal-root-dir))
-    (cond
-     ((featurep 'rg)
-      (rg regex "*.org" scimax-journal-root-dir))
-     (t
-      (projectile-grep regex)))))
+    (grep (format "grep -nH %s --recursive %s *"
+		  (if case-sensitive "" "-i")
+		  regex))))
 
 
 (defun scimax-journal-entries ()
@@ -162,48 +159,50 @@ T1 and T2 are org-dates in string form."
 	  if keep collect entry)))
 
 
-(defun scimax-journal-grep-range (t1 t2 regexp &optional case-sensitive)
-  "Search the journal from T1 to T2 for REGEXP.
-T1 and T2 are strings as selected from `org-read-date'
-With a prefix arg, make it CASE-SENSTIVE."
-  (interactive (list
-		(org-read-date)
-		(org-read-date)
-		(read-input "Search for: ")
-		current-prefix-arg))
-  (message "Searching for %s in %S" regexp (scimax-journal-get-entries t1 t2))
-  (pop-to-buffer (grep
-		  (format "grep -nH %s %s %s"
-			  (if (null case-sensitive) "-i" "")
-			  regexp
-			  (s-join " " (scimax-journal-get-entries t1 t2))))))
+;; (defun scimax-journal-grep-range (t1 t2 regexp &optional case-sensitive)
+;;   "Search the journal from T1 to T2 for REGEXP.
+;; T1 and T2 are strings as selected from `org-read-date'
+;; With a prefix arg, make it CASE-SENSTIVE."
+;;   (interactive (list
+;; 		(org-read-date)
+;; 		(org-read-date)
+;; 		(read-input "Search for: ")
+;; 		current-prefix-arg))
+;;   (message "Searching for %s in %S" regexp (scimax-journal-get-entries t1 t2))
+;;   (pop-to-buffer (grep
+;; 		  (format "grep -nH %s %s %s"
+;; 			  (if (null case-sensitive) "-i" "")
+;; 			  regexp
+;; 			  (s-join " " (scimax-journal-get-entries t1 t2))))))
 
 
-(defun scimax-journal-grep-last-year (regexp &optional case-sensitive)
-  "Search the last year of entries."
-  (interactive (list (read-input "Search for: ")
-		     current-prefix-arg))
-  (scimax-journal-grep-range (org-read-date nil nil "-1y")
-			     (org-read-date nil nil "today")
-			     regexp case-sensitive))
+;; (defun scimax-journal-grep-last-year (regexp &optional case-sensitive)
+;;   "Search the last year of entries."
+;;   (interactive (list (read-input "Search for: ")
+;; 		     current-prefix-arg))
+;;   (scimax-journal-grep-range (org-read-date nil nil "-1y")
+;; 			     (org-read-date nil nil "today")
+;; 			     regexp case-sensitive))
 
 
-(defun scimax-journal-grep-last-month (regexp &optional case-sensitive)
-  "Search the last month of entries."
-  (interactive (list (read-input "Search for: ")
-		     current-prefix-arg))
-  (scimax-journal-grep-range (org-read-date nil nil "-1m")
-			     (org-read-date nil nil "today")
-			     regexp case-sensitive))
+;; (defun scimax-journal-grep-last-month (regexp &optional case-sensitive)
+;;   "Search the last month of entries."
+;;   (interactive (list (read-input "Search for: ")
+;; 		     current-prefix-arg))
+;;   (scimax-journal-grep-range (org-read-date nil nil "-1m")
+;; 			     (org-read-date nil nil "today")
+;; 			     regexp case-sensitive))
 
 
-(defun scimax-journal-grep-last-week (regexp &optional case-sensitive)
-  "Search the last month of entries."
-  (interactive (list (read-input "Search for: ")
-		     current-prefix-arg))
-  (scimax-journal-grep-range (org-read-date nil nil "-1w")
-			     (org-read-date nil nil "today")
-			     regexp case-sensitive))
+;; (defun scimax-journal-grep-last-week (regexp &optional case-sensitive)
+;;   "Search the last month of entries."
+;;   (interactive (list (read-input "Search for: ")
+;; 		     current-prefix-arg))
+;;   (scimax-journal-grep-range (org-read-date nil nil "-1w")
+;; 			     (org-read-date nil nil "today")
+;; 			     regexp case-sensitive))
+
+;; ** Swiper searches
 
 (defun scimax-journal-swiper-range (t1 t2)
   "Run Swiper on entries between T1 and T2."
@@ -250,6 +249,59 @@ With a prefix arg, make it CASE-SENSTIVE."
 			   (org-read-date nil nil t2))))
     (org-agenda)))
 
+;; ** grep regexp searching
+
+(defun scimax-journal-find-regexp-range (regexp t1 t2)
+  "Find all matches for REGEXP in journal entries between T1 and T2.
+Adapted from `dired-do-find-regexp'.
+
+REGEXP should use constructs supported by your local `grep' command."
+  (interactive (list (read-input "Search marked files (regexp): ")
+		     (org-read-date)
+		     (org-read-date)))
+  (require 'grep)
+  (defvar grep-find-ignored-files)
+  (defvar grep-find-ignored-directories)
+  (let* ((files (scimax-journal-get-entries
+		 (org-read-date nil nil t1)
+		 (org-read-date nil nil t2)))
+         (ignores (nconc (mapcar
+                          (lambda (s) (concat s "/"))
+                          grep-find-ignored-directories)
+                         grep-find-ignored-files))
+         (xrefs (cl-mapcan
+                 (lambda (file)
+                   (xref-collect-matches regexp "*" file
+                                         (and (file-directory-p file)
+                                              ignores)))
+                 files)))
+    (unless xrefs
+      (user-error "No matches for: %s" regexp))
+    (xref--show-xrefs xrefs nil t)))
+
+(defun scimax-journal-find-regexp-last-week (regexp)
+  (interactive "sSearch marked files (regexp): ")
+  (scimax-journal-find-regexp-range
+   regexp
+   (org-read-date nil nil "-1w")
+   (org-read-date nil nil "today")))
+
+
+(defun scimax-journal-find-regexp-last-month (regexp)
+  (interactive "sSearch marked files (regexp): ")
+  (scimax-journal-find-regexp-range
+   regexp
+   (org-read-date nil nil "-1m")
+   (org-read-date nil nil "today")))
+
+
+(defun scimax-journal-find-regexp-last-year (regexp)
+  (interactive "sSearch marked files (regexp): ")
+  (scimax-journal-find-regexp-range
+   regexp
+   (org-read-date nil nil "-1y")
+   (org-read-date nil nil "today")))
+
 
 ;; * Hydra for scimax journal
 (defhydra scimax-journal (:color blue :hint nil)
@@ -278,10 +330,10 @@ _sy_: year   _gy_: year    _j_: journal dir
   ("sy" scimax-journal-swiper-last-year "Swiper last year")
 
   ("gg" scimax-journal-grep "grep journal")
-  ("gw" scimax-journal-grep-last-week "grep last week")
-  ("gm" scimax-journal-grep-last-month "grep last month")
-  ("gy" scimax-journal-grep-last-year "grep last year")
-  ("gr" scimax-journal-grep-range "grep a date range"))
+  ("gw" scimax-journal-find-regexp-last-week "grep last week")
+  ("gm" scimax-journal-find-regexp-last-month "grep last month")
+  ("gy" scimax-journal-find-regexp-last-year "grep last year")
+  ("gr" scimax-journal-find-regexp-range "grep a date range"))
 
 (provide 'scimax-journal)
 
