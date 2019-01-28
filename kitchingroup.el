@@ -9,20 +9,28 @@
 
 ;;; Code:
 
-(defcustom kitchingroup-github-id nil
-  "Your Github id.
-This should be defined in user/preload.el, e.g. (setq kitchingroup-github-id \"your-id\")"
+(defcustom box-drive-root (expand-file-name "~/Box/")
+  "Root directory where Box Drive exists."
   :group 'kitchingroup)
 
 
-;; (when (null kitchingroup-github-id)
-;;   (warn "`kitchingroup-github-id' is nil. Please set it in %s"
-;; 	(expand-file-name "user/preload.el" scimax-dir)))
-
-
 (defcustom kitchingroup-root (file-name-as-directory
-			      (expand-file-name "kitchingroup" nb-notebook-directory))
+			      (expand-file-name
+			       "kitchingroup"
+			       box-drive-root))
   "Directory where kitchingroup files will be stored."
+  :group 'kitchingroup)
+
+
+(defcustom kitchingroup-personal-root nil
+  "Directory where personal files for the kitchingroup are.
+Usually at ~/Box/andrewid."
+  :group 'kitchingroup)
+
+
+(defcustom kitchingroup-github-id nil
+  "Your Github id.
+This should be defined in user/preload.el, e.g. (setq kitchingroup-github-id \"your-id\")"
   :group 'kitchingroup)
 
 
@@ -37,25 +45,8 @@ TEMPLATE should be a yasnippet name and should be a string."
   (goto-char (point-min)))
 
 
-(defun kitchingroup-kitchinhub-repo ()
-  "Check for existence of your repo and get it if needed."
-  (when (null kitchingroup-github-id)
-    (error "`kitchingroup-github-id' is nil. Please set it in %s/user/preload.el"
-	   scimax-dir))
-
-  (unless (file-directory-p kitchingroup-root)
-    (make-directory kitchingroup-root t))
-
-  (if (not (file-directory-p (expand-file-name kitchingroup-github-id kitchingroup-root)))
-      ;; get it
-      (let ((default-directory kitchingroup-root))
-	(shell-command (format "git clone git@github.com:KitchinHUB/%s.git"
-			       kitchingroup-github-id)))
-    0))
-
-
 (defun iso-week-to-time(year week day)
-  "Convert ISO year, week, day to elisp time value."
+  "Convert ISO YEAR WEEK DAY to elisp time value."
   (apply #'encode-time
          (append '(0 0 0)
                  (-select-by-indices
@@ -64,13 +55,12 @@ TEMPLATE should be a yasnippet name and should be a string."
                                                      (list week day year)))))))
 
 (defun kitchingroup-weekly-report ()
-  "Open the report for the date prompted.
-If you pick a monday, you get the report due on that day. If you
-pick any other day, you get the report due on the following
-Monday."
+  "Open a weekly report.
+You will be prompted with a calendar to pick a date. If you pick
+a Monday, you get the report due on that day. If you pick any
+other day, you get the report due on the following Monday."
   (interactive)
-  (let* ((repo-dir (expand-file-name kitchingroup-github-id nb-notebook-directory))
-	 (date (org-read-date nil t))
+  (let* ((date (org-read-date nil t))
 	 kg-due-date
 	 dir
 	 full-dir
@@ -89,7 +79,7 @@ Monday."
 			 ;; 1 is for Monday
 			 1)
 	    dir (format "reports/%s/" (format-time-string "%Y-%m-%d" kg-due-date))
-	    full-dir (expand-file-name dir repo-dir)
+	    full-dir (expand-file-name dir kitchingroup-personal-root)
 	    fname (expand-file-name "weekly-report.org" full-dir))
       ;; make sure the directory exists
       (unless (file-directory-p full-dir)
@@ -120,9 +110,8 @@ Monday."
 			 1)
 
 	    dir (format "reports/%s/" (format-time-string "%Y-%m-%d" kg-due-date))
-	    full-dir (expand-file-name dir repo-dir)
+	    full-dir (expand-file-name dir kitchingroup-personal-root)
 	    fname (expand-file-name "weekly-report.org" full-dir))
-
 
       ;; make sure the directory exists
       (unless (file-directory-p full-dir)
@@ -138,26 +127,6 @@ Monday."
 	 nil nil `((kg-due-date-string ,(format-time-string "<%Y-%m-%d %a>" kg-due-date)))))
       (save-buffer)
       (goto-char (point-min))))))
-
-
-(defun kitchingroup-submit-weekly ()
-  "Submit the weekly report.
-This is a convenience method for committing and pushing the
-weekly report. It checks to make sure the directory size is below
-10MB, and makes a bibliography file if needed. This file exists
-so we can have a simple link to click for this action."
-  (interactive)
-  (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-push")))))
-    (org-babel-execute-src-block nil info)))
-
-
-(defun kitchingroup-pull-weekly ()
-  "Submit the weekly report.
-This is a convenience method for pulling. This file exists so we
-can have a simple link to click for this action."
-  (interactive)
-  (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-pull")))))
-    (org-babel-execute-src-block nil info)))
 
 
 (defun kitchingroup-calendar ()
@@ -183,10 +152,81 @@ can have a simple link to click for this action."
   "Open the kitchin group gitter in erc.
 First get a gitter account. Then go to
 https://developer.gitter.im/apps to get your token. Finally, add
-this line machine gitter.im password here-is-your-token to
-~/.authinfo"
+this line:
+
+machine gitter.im password here-is-your-token
+
+to ~/.authinfo."
   (interactive)
   (gitter--open-room "kitchingroup/community" "5c2df7f3d73408ce4fb38107"))
+
+
+(defun kitchingroup-erc ()
+  "Open #kitchingroup on erc.
+Go to https://irc.gitter.im/ to get your token, and save it in ~/.authinfo like this:
+machine irc.gitter.im password your-token
+"
+  (interactive)
+  (require 'erc)
+  (let ((password (let* ((plist (car (auth-source-search
+				      :max 1 :host "irc.gitter.im")))
+			 (k (plist-get plist :secret)))
+		    (if (functionp k)
+			(funcall k)))))
+    (erc-ssl :server "irc.gitter.im"
+	     :full-name "John Kitchin"
+	     :port 6667
+	     :nick "jkitchin"
+	     :password password)
+    (erc-nickserv-identify password)
+    (erc-join-channel "#kitchingroup")))
+
+
+;; * Old git integration
+
+;; [2019-01-27 Sun] This is harder to get to work than I want; I spend too much
+;; time fixing merge conflicts for people. We are switching over to Box.com to
+;; see if that works better using Box Drive for syncing.
+
+(defun kitchingroup-submit-weekly ()
+  "Submit the weekly report.
+This is a convenience method for committing and pushing the
+weekly report. It checks to make sure the directory size is below
+10MB, and makes a bibliography file if needed. This file exists
+so we can have a simple link to click for this action."
+  (interactive)
+  (message "We do not use this anymore. Please see Prof. Kitchin.")
+  ;; (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-push")))))
+  ;;   (org-babel-execute-src-block nil info))
+  )
+
+
+(defun kitchingroup-pull-weekly ()
+  "Submit the weekly report.
+This is a convenience method for pulling. This file exists so we
+can have a simple link to click for this action."
+  (interactive)
+  (message "We do not use this anymore. Please see Prof. Kitchin.")
+  ;; (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-pull")))))
+  ;;   (org-babel-execute-src-block nil info))
+  )
+
+;; (defun kitchingroup-kitchinhub-repo ()
+;;   "Check for existence of your repo and get it if needed."
+;;   (when (null kitchingroup-github-id)
+;;     (error "`kitchingroup-github-id' is nil. Please set it in %s/user/preload.el"
+;; 	   scimax-dir))
+
+;;   (unless (file-directory-p kitchingroup-root)
+;;     (make-directory kitchingroup-root t))
+
+;;   (if (not (file-directory-p (expand-file-name kitchingroup-github-id kitchingroup-root)))
+;;       ;; get it
+;;       (let ((default-directory kitchingroup-root))
+;; 	(shell-command (format "git clone git@github.com:KitchinHUB/%s.git"
+;; 			       kitchingroup-github-id)))
+;;     0))
+
 
 (provide 'kitchingroup)
 
