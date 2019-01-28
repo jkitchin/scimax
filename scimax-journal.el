@@ -83,9 +83,10 @@ Add new day if necessary, otherwise, add to current day."
     (ivy-org-jump-to-heading-in-directory t)))
 
 
-(defun scimax-journal-git-grep (regex)
-  "Run grep on the files in the scimax-journal.
-Argument REGEX the pattern to grep for."
+(defun scimax-journal-git-grep ()
+  "Run `counsel-git-grep' on the files in the scimax-journal.
+Note this may only work if you set your journal up as a git repo and commit the files to it."
+  (interactive)
   (let ((default-directory scimax-journal-root-dir))
     (counsel-git-grep)))
 
