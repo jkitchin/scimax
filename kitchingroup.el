@@ -28,7 +28,7 @@ Usually at ~/Box/andrewid."
   :group 'kitchingroup)
 
 
-(defcustom kitchingroup-github-id nil
+(defcustom kitchingroup-github-id anil
   "Your Github id.
 This should be defined in user/preload.el, e.g. (setq kitchingroup-github-id \"your-id\")"
   :group 'kitchingroup)
@@ -61,7 +61,7 @@ a Monday, you get the report due on that day. If you pick any
 other day, you get the report due on the following Monday."
   (interactive)
   (let* ((date (org-read-date nil t))
-	 kg-due-date
+	 kg-due-date kg-review-date
 	 dir
 	 full-dir
 	 fname)
@@ -78,6 +78,16 @@ other day, you get the report due on the following Monday."
 			   "%V" date))
 			 ;; 1 is for Monday
 			 1)
+	    kg-review-date (iso-week-to-time
+			    (string-to-number
+			     (format-time-string
+			      "%Y" date))
+			    ;; This is current week
+			    (string-to-number
+			     (format-time-string
+			      "%V" date))
+			    ;; 2 is for Tuesday
+			    2)
 	    dir (format "reports/%s/" (format-time-string "%Y-%m-%d" kg-due-date))
 	    full-dir (expand-file-name dir kitchingroup-personal-root)
 	    fname (expand-file-name "weekly-report.org" full-dir))
@@ -92,7 +102,8 @@ other day, you get the report due on the following Monday."
       	(find-file fname)
       	(yas-expand-snippet
       	 (yas-lookup-snippet "weekly-report")
-	 nil nil `((kg-due-date-string ,(format-time-string "<%Y-%m-%d %a>" kg-due-date)))))
+	 nil nil `((kg-due-date-string ,(format-time-string "<%Y-%m-%d %a>" kg-due-date))
+		   (kg-review-date-string ,(format-time-string "<%Y-%m-%d %a>" kg-review-date)))))
       (save-buffer)
       (goto-char (point-min)))
      ;; Otherwise you get the report due the monday after the selected date.
@@ -108,7 +119,16 @@ other day, you get the report due on the following Monday."
 			    1)
 			 ;; 1 is for Monday
 			 1)
-
+	    kg-review-date (iso-week-to-time
+			    (string-to-number
+			     (format-time-string
+			      "%Y" date))
+			    ;; This is current week
+			    (string-to-number
+			     (format-time-string
+			      "%V" date))
+			    ;; 2 is for Tuesday
+			    2)
 	    dir (format "reports/%s/" (format-time-string "%Y-%m-%d" kg-due-date))
 	    full-dir (expand-file-name dir kitchingroup-personal-root)
 	    fname (expand-file-name "weekly-report.org" full-dir))
@@ -124,7 +144,8 @@ other day, you get the report due on the following Monday."
 	(find-file fname)
 	(yas-expand-snippet
 	 (yas-lookup-snippet "weekly-report")
-	 nil nil `((kg-due-date-string ,(format-time-string "<%Y-%m-%d %a>" kg-due-date)))))
+	 nil nil `((kg-due-date-string ,(format-time-string "<%Y-%m-%d %a>" kg-due-date))
+		   (kg-review-date-string ,(format-time-string "<%Y-%m-%d %a>" kg-review-date)))))
       (save-buffer)
       (goto-char (point-min))))))
 
