@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: save-restriction-excursion
+# key: ser
+# --
+(save-restriction
+  (save-excursion
+    $0))
