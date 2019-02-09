@@ -203,24 +203,24 @@ e.g. on a person name, email, etc..."
 
 ;; * Ivy-contacts
 
-(defvar ivy-marked-candidates '()
+(defvar contacts-marked-candidates '()
   "Holds marked candidates.")
 
 
 (defun ivy-mark-candidate ()
-  "Add current candidate to `ivy-marked-candidates'.
+  "Add current candidate to `contacts-marked-candidates'.
 If candidate is already in, remove it."
   (interactive)
   (let ((cand (or (assoc (org-ref-ivy-current) (ivy-state-collection ivy-last))
 		  (org-ref-ivy-current))))
-    (if (-contains? ivy-marked-candidates cand)
+    (if (-contains? contacts-marked-candidates cand)
         ;; remove it from the marked list
-        (setq ivy-marked-candidates
-              (-remove-item cand ivy-marked-candidates))
+        (setq contacts-marked-candidates
+              (-remove-item cand contacts-marked-candidates))
 
       ;; add to list
-      (setq ivy-marked-candidates
-            (append ivy-marked-candidates (list cand)))))
+      (setq contacts-marked-candidates
+            (append contacts-marked-candidates (list cand)))))
 
   ;; move to the next line
   (ivy-next-line))
@@ -229,8 +229,8 @@ If candidate is already in, remove it."
 (defun ivy-show-marked-candidates ()
   "Show marked candidates."
   (interactive)
-  (when ivy-marked-candidates
-    (setf (ivy-state-collection ivy-last) ivy-marked-candidates)
+  (when contacts-marked-candidates
+    (setf (ivy-state-collection ivy-last) contacts-marked-candidates)
     (ivy--reset-state ivy-last)))
 
 
@@ -254,14 +254,16 @@ Loads cache file."
   (when (and (featurep 'mu4e) (not (boundp 'mu4e~contacts)))
     (mu4e t))
 
-  (when (featurep 'mu4e)
-    (append contacts
-	    (loop for entry in
-		  (split-string (shell-command-to-string "mu cfind --format=mutt-ab") "\n" t)
-		  collect
-		  (let ((tup (split-string  entry "\t")))
-		    (format "\"%s\" <%s>" (nth 1 tup) (nth 0 tup))))))
-  contacts)
+  (if (featurep 'mu4e)
+      (append contacts
+	      (loop for entry in
+		    (split-string (shell-command-to-string "mu cfind --format=mutt-ab") "\n" t)
+		    collect
+		    (let ((tup (split-string  entry "\t")))
+		      (list
+		       (format "\"%s\" <%s>" (nth 1 tup) (nth 0 tup))
+		       (cons "EMAIL" (nth 0 tup))))))
+    contacts))
 
 
 (defvar ivy-contacts-keymap
@@ -281,10 +283,10 @@ Loads cache file."
 (defun ivy-marked-transformer (s)
   "Make S entry red if it is marked."
   (if (-contains?
-       (if (listp (car ivy-marked-candidates))
-	   (mapcar 'car ivy-marked-candidates)
+       (if (listp (car contacts-marked-candidates))
+	   (mapcar 'car contacts-marked-candidates)
 	 ;; we have a list of strings
-	 ivy-marked-candidates)
+	 contacts-marked-candidates)
        s)
       (propertize s 'face 'font-lock-warning-face)
     (propertize s 'face nil)))
@@ -295,34 +297,35 @@ Loads cache file."
  'ivy-marked-transformer)
 
 
+(defun ivy-contact-insert (contact)
+  (with-ivy-window
+    ;; Make sure we are at the end of a word or line
+    (unless (or (eolp)
+		(looking-at "\\>"))
+      (re-search-forward "\\>"))
+    ;; put in a comma unless we are looking back at a
+    ;; space or comma
+    (when (not (looking-back " \\|,")) (insert ","))
+    (if contacts-marked-candidates
+	(insert (mapconcat (lambda (contact)
+			     (if (listp contact)
+				 (cdr (assoc "EMAIL" contact))
+			       contact))
+			   contacts-marked-candidates
+			   ","))
+      (insert (if (listp contact)
+		  (cdr (assoc "EMAIL" contact))
+		contact)))))
 ;;;###autoload
 (defun ivy-contacts ()
   "Select contacts using ivy."
   (interactive)
-  (setq ivy-marked-candidates '())
+  (setq contacts-marked-candidates '())
   (ivy-read "Contact: " (ivy-contacts-candidates)
 	    :keymap ivy-contacts-keymap
 	    :caller 'ivy-contacts
 	    :action '(1
-		      ("i" (lambda (contact)
-			     (with-ivy-window
-			       ;; Make sure we are at the end of a word or line
-			       (unless (or (eolp)
-					   (looking-at "\\>"))
-				 (re-search-forward "\\>"))
-			       ;; put in a comma unless we are looking back at a
-			       ;; space or comma
-			       (when (not (looking-back " \\|,")) (insert ","))
-			       (if ivy-marked-candidates
-				   (insert (mapconcat (lambda (contact)
-							(if (listp contact)
-							    (cdr (assoc "EMAIL" contact))
-							  contact))
-						      ivy-marked-candidates
-						      ","))
-				 (insert (if (listp contact)
-					     (cdr (assoc "EMAIL" contact))
-					   contact)))))
+		      ("i" ivy-contact-insert
 		       "Insert email")
 		      ("x" (lambda (contact)
 			     (with-ivy-window
@@ -412,8 +415,8 @@ end tell" (cdr (assoc "PHONE" contact)))))
 			     (let ((tags (split-string
 					  (read-string "Tag (space separated): ")
 					  " " t)))
-			       (if ivy-marked-candidates
-				   (loop for contact in ivy-marked-candidates
+			       (if contacts-marked-candidates
+				   (loop for contact in contacts-marked-candidates
 					 do
 					 (message "%s" contact)
 					 ;; this edits the buffer, so points can get messed up.
