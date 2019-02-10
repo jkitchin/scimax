@@ -1220,6 +1220,7 @@ Finally we define a minor mode for the list view.
   ("d" (sem-insert 'delete) "delete")
   ("t" (sem-insert 'typo) "typo")
   ("k" (sem-insert 'task) "task")
+  ("c" (insert "✓") "checkmark")
   ("hb" (sem-insert 'blue-highlight) "green")
   ("hg" (sem-insert 'green-highlight) "green")
   ("hy" (sem-insert 'yellow-highlight) "yellow")
