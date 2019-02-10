@@ -477,6 +477,10 @@ Default to killing the word at point"
 	   (end (cdr bounds)))
       (kill-region start end)))))
 
+
+;; * garbage-collect when you switch out of Emacs
+(add-hook 'focus-out-hook #'garbage-collect)
+
 ;; * The end
 (provide 'scimax)
 
