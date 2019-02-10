@@ -334,43 +334,42 @@
 ;; http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html
 (require 'dired )
 
-(defun xah-dired-rename-space-to-underscore ()
-  "In dired, rename current or marked files by replacing space to underscore _.
-If not in `dired', do nothing.
-URL `http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html'
-Version 2016-12-22"
+(defun scimax-dired-cycle-space-hyphen-underscore ()
+  "In dired, rename current or marked files by cycling spaces->hyphens->underscores.
+We only change the filename, not the rest of the path.
+Adapted from http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html."
   (interactive)
+  (require 'f)
   (require 'dired-aux)
   (if (equal major-mode 'dired-mode)
-      (progn
-        (mapc (lambda (x)
-                (when (string-match " " x )
-                  (dired-rename-file x (replace-regexp-in-string " " "_" x) nil)
-                  ))
-              (dired-get-marked-files ))
-        (revert-buffer)
-        (forward-line ))
+      (let ((p (point)))
+	(progn
+	  (mapc (lambda (x)
+		  (let ((dired-rename-file-split (f-split x)))
+		    (cond
+		     ;; There is a space, so we switch them all to -
+		     ((string-match " " (car (last dired-rename-file-split)))
+		      (setcar (last dired-rename-file-split)
+			      (replace-regexp-in-string " " "-" (car (last dired-rename-file-split))))
+		      (dired-rename-file x (apply 'f-join dired-rename-file-split) nil))
+		     ;; no spaces, but - gets converted to _
+		     ((string-match "-" (car (last dired-rename-file-split)))
+		      (setcar (last dired-rename-file-split)
+			      (replace-regexp-in-string "-" "_" (car (last dired-rename-file-split))))
+		      (dired-rename-file x (apply 'f-join dired-rename-file-split) nil))
+		     ;; no -, convert _ to spaces
+		     ((string-match "_" (car (last dired-rename-file-split)))
+		      (setcar (last dired-rename-file-split)
+			      (replace-regexp-in-string "_" " " (car (last dired-rename-file-split))))
+		      (dired-rename-file x (apply 'f-join dired-rename-file-split) nil)))))
+		(dired-get-marked-files ))
+	  (revert-buffer))
+	(goto-char p))
     (user-error "Not in dired")))
 
+(define-key dired-mode-map (kbd "-") 'scimax-dired-cycle-space-hyphen-underscore)
 
-(defun xah-dired-rename-space-to-hyphen ()
-  "In dired, rename current or marked files by replacing space to hyphen -.
-If not in `dired', do nothing.
-URL `http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.html'
-Version 2016-12-22"
-  (interactive)
-  (require 'dired-aux)
-  (if (equal major-mode 'dired-mode)
-      (progn
-        (mapc (lambda (x)
-                (when (string-match " " x )
-                  (dired-rename-file x (replace-regexp-in-string " " "_" x) nil)))
-              (dired-get-marked-files ))
-        (revert-buffer))
-    (user-error "Not in dired")))
 
-(define-key dired-mode-map (kbd "_") 'xah-dired-rename-space-to-underscore)
-(define-key dired-mode-map (kbd "-") 'xah-dired-rename-space-to-hyphen)
 
 ;; * dubcaps
 (defun dcaps-to-scaps ()
