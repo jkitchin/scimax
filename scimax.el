@@ -364,8 +364,9 @@ Adapted from http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.h
 		      (setcar (last path-parts)
 			      (replace-regexp-in-string "_" " " path-file-name))))
 
-		    ;; now rename the file
-		    (dired-rename-file x (apply 'f-join path-parts) nil)
+		    ;; now rename the file if match
+		    (if (string-match "[\-|_| ]" path-file-name)
+			(dired-rename-file x (apply 'f-join path-parts) nil))
 		    ;; and save it so we can remark it at the end
 		    (push (apply 'f-join path-parts) new-names)))
 		(dired-get-marked-files))
