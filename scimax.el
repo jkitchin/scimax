@@ -342,28 +342,34 @@ Adapted from http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.h
   (require 'f)
   (require 'dired-aux)
   (if (equal major-mode 'dired-mode)
-      (let ((p (point)))
+      (let ((p (point))
+	    (new-names '()))
 	(progn
 	  (mapc (lambda (x)
-		  (let ((dired-rename-file-split (f-split x)))
+		  (let ((path-parts (f-split x)))
 		    (cond
 		     ;; There is a space, so we switch them all to -
-		     ((string-match " " (car (last dired-rename-file-split)))
-		      (setcar (last dired-rename-file-split)
-			      (replace-regexp-in-string " " "-" (car (last dired-rename-file-split))))
-		      (dired-rename-file x (apply 'f-join dired-rename-file-split) nil))
+		     ((string-match " " (car (last path-parts)))
+		      (setcar (last path-parts)
+			      (replace-regexp-in-string " " "-" (car (last path-parts)))))
 		     ;; no spaces, but - gets converted to _
-		     ((string-match "-" (car (last dired-rename-file-split)))
-		      (setcar (last dired-rename-file-split)
-			      (replace-regexp-in-string "-" "_" (car (last dired-rename-file-split))))
-		      (dired-rename-file x (apply 'f-join dired-rename-file-split) nil))
+		     ((string-match "-" (car (last path-parts)))
+		      (setcar (last path-parts)
+			      (replace-regexp-in-string "-" "_" (car (last path-parts)))))
 		     ;; no -, convert _ to spaces
-		     ((string-match "_" (car (last dired-rename-file-split)))
-		      (setcar (last dired-rename-file-split)
-			      (replace-regexp-in-string "_" " " (car (last dired-rename-file-split))))
-		      (dired-rename-file x (apply 'f-join dired-rename-file-split) nil)))))
-		(dired-get-marked-files ))
-	  (revert-buffer))
+		     ((string-match "_" (car (last path-parts)))
+		      (setcar (last path-parts)
+			      (replace-regexp-in-string "_" " " (car (last path-parts))))))
+
+		    ;; now rename the file
+		    (dired-rename-file x (apply 'f-join path-parts) nil)
+		    ;; and save it so we can remark it at the end
+		    (push (apply 'f-join path-parts) new-names)))
+		(dired-get-marked-files))
+	  (revert-buffer)
+	  (loop for f in new-names do
+		(dired-goto-file f)
+		(dired-mark nil)))
 	(goto-char p))
     (user-error "Not in dired")))
 
