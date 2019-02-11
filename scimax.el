@@ -343,23 +343,26 @@ Adapted from http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.h
   (require 'dired-aux)
   (if (equal major-mode 'dired-mode)
       (let ((p (point))
-	    (new-names '()))
+	    (new-names '())
+	    ;; evals to 2 if only one file is marked
+	    (number-marked-files (length (dired-get-marked-files nil nil nil t))))
 	(progn
 	  (mapc (lambda (x)
-		  (let ((path-parts (f-split x)))
+		  (let* ((path-parts (f-split x))
+			 (path-file-name (car (last path-parts))))
 		    (cond
 		     ;; There is a space, so we switch them all to -
-		     ((string-match " " (car (last path-parts)))
+		     ((string-match " " path-file-name)
 		      (setcar (last path-parts)
-			      (replace-regexp-in-string " " "-" (car (last path-parts)))))
+			      (replace-regexp-in-string " " "-" path-file-name)))
 		     ;; no spaces, but - gets converted to _
-		     ((string-match "-" (car (last path-parts)))
+		     ((string-match "-" path-file-name)
 		      (setcar (last path-parts)
-			      (replace-regexp-in-string "-" "_" (car (last path-parts)))))
+			      (replace-regexp-in-string "-" "_" path-file-name)))
 		     ;; no -, convert _ to spaces
-		     ((string-match "_" (car (last path-parts)))
+		     ((string-match "_" path-file-name)
 		      (setcar (last path-parts)
-			      (replace-regexp-in-string "_" " " (car (last path-parts))))))
+			      (replace-regexp-in-string "_" " " path-file-name))))
 
 		    ;; now rename the file
 		    (dired-rename-file x (apply 'f-join path-parts) nil)
@@ -367,9 +370,10 @@ Adapted from http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.h
 		    (push (apply 'f-join path-parts) new-names)))
 		(dired-get-marked-files))
 	  (revert-buffer)
-	  (loop for f in new-names do
-		(dired-goto-file f)
-		(dired-mark nil)))
+	  (when (not (eq 1 number-marked-files))
+	    (loop for f in new-names do
+		  (dired-goto-file f)
+		  (dired-mark nil))))
 	(goto-char p))
     (user-error "Not in dired")))
 
