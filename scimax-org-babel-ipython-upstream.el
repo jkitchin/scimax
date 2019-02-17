@@ -809,7 +809,7 @@ This function is called by `org-babel-execute-src-block'."
 		  (f-delete f)))
 	      files))))
 
-  (org-babel-remove-result nil t)
+  ;; (org-babel-remove-result nil t)
 
   ;; scimax feature to restart
   (when (assoc :restart params)
