@@ -527,8 +527,8 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   ;; navigation
   ("<up>" org-babel-previous-src-block "select cell above" :color red)
   ("k" org-babel-previous-src-block "select cell above" :color red)
-  ("<down>" org-babel-next-src-block "select cell below" :colr red)
-  ("j" org-babel-next-src-block "select cell below" :colr red)
+  ("<down>" org-babel-next-src-block "select cell below" :color red)
+  ("j" org-babel-next-src-block "select cell below" :color red)
 
   ("a" scimax-insert-src-block "insert cell above")
   ("b" (scimax-insert-src-block t) "insert cell below")
