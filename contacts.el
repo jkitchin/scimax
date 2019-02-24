@@ -359,7 +359,7 @@ Loads cache file."
 	send \"%s\" to targetBuddy
 end tell"
 				 cellphone-number
-				 (read-input "SMS: "))))
+				 (read-string "SMS: "))))
 			     ))
 		      ("e" (lambda (contact)
 			     (compose-mail)
