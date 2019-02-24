@@ -751,12 +751,9 @@ BRACKETP is non-nil for bracketed links."
 
 I often want to open a link in the Finder/Explorer or bash. We make a keymap to make that easy here.
 
-| H-f | open in finder |
-| H-b | open in bash   |
-
 We have to get the link path and then open it.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle yes :results silent
 (defun nb-link-bash ()
   "Open the nb link at point in bash."
   (interactive)
@@ -781,7 +778,11 @@ We have to get the link path and then open it.
 	      (bash (expand-file-name (car candidates)))
 	    (bash (read-string "Project: " candidates))))))))
 
+#+END_SRC
 
+Here is a function to open the link in explorer.
+
+#+BEGIN_SRC emacs-lisp :tangle yes :results silent
 (defun nb-link-explorer ()
   "Open the nb link at point in explorer/finder."
   (interactive)
@@ -809,19 +810,75 @@ We have to get the link path and then open it.
 
 #+END_SRC
 
-#+RESULTS:
-: nb-link-bash
+This function lets you get to the file or another one using projectile.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
-(defvar nb-link-map (let ((map (copy-keymap org-mouse-map)))
-		      (define-key map (kbd "M-b") 'nb-link-bash)
-		      (define-key map (kbd "M-f") 'nb-link-explorer)
-		      map)
-  "Key bindings for notebook links")
+#+BEGIN_SRC emacs-lisp :tangle yes :results silent
+(defun nb-link-projectile-find-file ()
+  "Open the nb link at point with projectile."
+  (interactive)
+  (let* ((link (org-element-context))
+	 (path (org-element-property :path link)))
+    (when (and (eq 'link (car link))
+	       (string= "nb" (org-element-property :type link)))
+      (destructuring-bind (project fpath link-target) (nb-parse-path path)
+	(let* ((projects (remove nil (append (projectile-relevant-known-projects)
+					     (list
+					      (when (projectile-project-p)
+						(projectile-project-root))))))
+	       ;; These are projects that match the project spec
+	       (project-candidates (-filter (lambda (p)
+					      (string-match (concat project "/\\'") p))
+					    projects))
+	       ;; These are projects that match the spec, and that have the file we want.
+	       (candidates (-filter (lambda (p)
+				      (file-exists-p (expand-file-name fpath p)))
+				    project-candidates)))
+	  (if (= 1 (length candidates))
+	      (let ((default-directory (expand-file-name (car candidates))))
+		(projectile-completing-read "Find file: "
+                                            (projectile-project-files
+					     (projectile-project-root))
+					    :initial-input fpath))))))))
+
+
 #+END_SRC
 
-#+RESULTS:
-: nb-link-map
+
+It seems like we might want a hydra for various actions on a link. This would be useful if you don't remember the keymap.
+
+#+BEGIN_SRC emacs-lisp :tangle yes :results silent
+(defhydra nb-hydra ()
+  "scimax-notebook"
+  ("b" nb-link-bash "bash")
+  ("e" nb-link-explorer "explorer")
+  ("f" nb-link-projectile-find-file "find-file"))
+
+
+(defun nb-event (event)
+  "EVENT is from a mouse click.
+We use this with C-mouse-1 on a link."
+  (interactive "e")
+  (with-selected-window (nth 0 (cadr event))
+    (goto-char (nth 1 (cadr event)))
+    (nb-hydra/body)))
+
+
+#+END_SRC
+
+Here is our keymap.
+
+#+BEGIN_SRC emacs-lisp :tangle yes :results silent
+(defvar nb-link-map (let ((map (copy-keymap org-mouse-map)))
+		      (define-key map (kbd "M-b") 'nb-link-bash)
+		      (define-key map (kbd "M-e") 'nb-link-explorer)
+		      (define-key map (kbd "M-f" 'nb-link-projectile-find-file))
+		      (define-key map (kbd "<C-mouse-1>") 'nb-event)
+		      map)
+  "Key bindings for notebook links")
+
+
+#+END_SRC
+
 
 ** Defining the link
 
