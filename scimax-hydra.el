@@ -831,19 +831,9 @@ _C-a_ Async export: %`hydra-ox/async-export
 
 
 ;;** project
-;; https://github.com/abo-abo/hydra/wiki/Projectile
+;; See also https://github.com/abo-abo/hydra/wiki/Projectile
 
-(defhydra hydra-projectile-other-window (:color teal)
-  "projectile-other-window"
-  ("f"  projectile-find-file-other-window        "file")
-  ("g"  projectile-find-file-dwim-other-window   "file dwim")
-  ("d"  projectile-find-dir-other-window         "dir")
-  ("b"  projectile-switch-to-buffer-other-window "buffer")
-  ("q"  nil                                      "cancel" :color blue))
-
-
-(defhydra hydra-projectile (:color teal :hint nil)
-  "
+"
      PROJECTILE: %(projectile-project-root)
 
      Find File            Search/Tags          Buffers                Cache                      Projects
@@ -855,33 +845,59 @@ _C-a_ Async export: %`hydra-ox/async-export
   _d_: dir             _,_: jump back
   ^ ^                _s-._: xref apropos
 "
-  ("a"   (if (executable-find "ag") projectile-ag projectile-grep))
-  ("b"   projectile-switch-to-buffer)
-  ("c"   projectile-invalidate-cache)
-  ("d"   projectile-find-dir)
-  ("ff"  projectile-find-file)
-  ("fw"  projectile-find-file-dwim)
-  ("fd"  projectile-find-file-in-directory)
-  ("g"   (let* ((pr (projectile-project-root))
-		(gtags (expand-file-name "GTAGS" pr)))
-	   (unless (file-exists-p gtags)
-	     (ggtags-create-tags (projectile-project-root)))
-	   (ggtags-update-tags)))
-  ("i"   projectile-ibuffer)
-  ("K"   projectile-kill-buffers)
-  ("m"   projectile-multi-occur)
-  ("p"   projectile-switch-project)
-  ("r"   projectile-recentf)
-  ("ww"   projectile-switch-project)
-  ("wo"   projectile-switch-open-project)
-  ("x"   projectile-remove-known-project)
-  ("X"   projectile-cleanup-known-projects)
-  ("z"   projectile-cache-current-file)
-  ("`"   hydra-projectile-other-window/body "other window")
-  ("." xref-find-definitions)
-  ("," xref-pop-marker-stack)
-  ("s-." xref-find-apropos)
-  ("q"   nil "cancel" :color blue))
+(defhydra hydra-projectile (:color teal :hint nil :inherit (scimax-base/heads))
+  "
+     PROJECTILE: %(projectile-project-root)
+"
+
+  ("A" projectile-add-known-project "Add project" :column "projects")
+  ("C" projectile-configure-project "Configure" :column "build")
+  ("D" projectile-dired "Dired" :column "Files")
+  ("E" projectile-edit-dir-locals "dir-locals.el" :column "projects")
+  ("F" projectile-find-file-in-known-projects "Find in projects" :column "Files")
+  ("I" projectile-ibuffer "ibuffer" :column "buffers")
+  ("P" projectile-test-project "Run tests" :column "build")
+  ("R" projectile-regenerate-tags "Rebuild tags" :column "search")
+  ("S" projectile-save-project-buffers "Save buffers" :column "buffers")
+  ("T" projectile-find-test-file)
+  ("V" projectile-browse-dirty-projects "Dirty projects" :column "projects")
+  ("X" projectile-remove-known-project "Remove project" :column "projects")
+
+  ("a" projectile-find-other-file "Find other file" :column "Files")
+  ("b" projectile-switch-to-buffer "Switch buffer" :column "buffers")
+  ("c" projectile-compile-project "Compile" :column "build")
+  ("d" projectile-find-dir "Find dir" :column "Files")
+  ("e" projectile-recentf "Recentf" :column "Files")
+  ("f" projectile-find-file "Find file" :column "Files")
+  ("g" projectile-find-file-dwim "Find dwim" :column "Files")
+  ("h" helm-projectile "helm-projectile")
+  ("i" projectile-invalidate-cache "invalidate cache" :column "projects")
+  ("j" projectile-find-tag "find tag" :column "search")
+  ("k" projectile-kill-buffers "Kill buffers" :column "buffers")
+  ("l" projectile-find-file-in-directory "Find in dir" :column "Files")
+  ("m" projectile-commander)
+  ("o" projectile-multi-occur "moccur" :column "search")
+  ("p" projectile-switch-project "Switch" :column "projects")
+  ("q" projectile-switch-open-project "Switch to open" :column "projects")
+  ("r" projectile-replace "Replace" :column "search")
+  ("t" projectile-toggle-between-implementation-and-test)
+  ("u" projectile-run-project "Run" :column "build")
+  ("v" projectile-vc "vc" :column "build")
+  ("z" projectile-cache-current-file "Cache file" :column "projects")
+
+  ("x1" projectile-run-shell-command-in-root "Run cmd" :column "cmd")
+  ("x7" projectile-run-async-shell-command-in-root "Run async cmd" :column "cmd")
+  ("xe" projectile-run-eshell "eshell" :column "cmd")
+  ("xi" projectile-run-ielm "ielm" :column "cmd")
+  ("xs" projectile-run-shell "shell" :column "cmd")
+  ("xt" projectile-run-term "term" :column "cmd")
+
+  ("sg" projectile-grep "Grep" :column "search")
+  ("sr" projectile-ripgrep "Ripgrep" :column "search")
+  ("ss" projectile-ag "ag" :column "search")
+  ("M-." xref-find-definitions "xref find" :column "search")
+  ("M-," xref-pop-marker-stack "xref pop" :column "search")
+  ("M-/" xref-find-apropos "xref apropos" :column "search"))
 
 
 ;;** registers/resume/replace
