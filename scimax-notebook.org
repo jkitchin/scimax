@@ -871,7 +871,7 @@ Here is our keymap.
 (defvar nb-link-map (let ((map (copy-keymap org-mouse-map)))
 		      (define-key map (kbd "M-b") 'nb-link-bash)
 		      (define-key map (kbd "M-e") 'nb-link-explorer)
-		      (define-key map (kbd "M-f" 'nb-link-projectile-find-file))
+		      (define-key map (kbd "M-f") 'nb-link-projectile-find-file)
 		      (define-key map (kbd "<C-mouse-1>") 'nb-event)
 		      map)
   "Key bindings for notebook links")
