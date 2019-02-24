@@ -519,9 +519,10 @@
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-notebook
-  :ensure nil
-  :load-path scimax-dir)
+(org-babel-load-file (expand-file-name "scimax-notebook.org" scimax-dir))
+;; (use-package scimax-notebook
+;;   :ensure nil
+;;   :load-path scimax-dir)
 
 (use-package scimax-utils
   :ensure nil
