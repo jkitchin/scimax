@@ -826,6 +826,7 @@ This function is called by `org-babel-execute-src-block'."
 		  (f-delete f)))
 	      files))))
 
+  ;; [2019-02-24 Sun] this line removes results in dependent blocks which isn't what we want.
   ;; (org-babel-remove-result nil t)
 
   ;; scimax feature to restart
