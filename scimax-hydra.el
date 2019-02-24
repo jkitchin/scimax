@@ -1008,9 +1008,9 @@ _l_: list registers
   ("l" magit-log-all "Log")
   ("n" vc-next-action "Next action")
   ("p" magit-push-popup "Push")
-  ("P" magit-pull-popup "Pull")
   ("r" magit-revert-popup "Revert")
   ("s" magit-stage "Stage")
+  ("u" magit-pull-popup "Pull")
   ("v" magit-status "Magit"))
 
 
