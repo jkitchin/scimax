@@ -33,8 +33,25 @@
   :group 'ob-ipython)
 
 (defcustom ob-ipython-suppress-execution-count nil
-  "If non-nil do not show the execution count in output."
+  "Deprecated. See `ob-ipython-execution-count'.
+If non-nil do not show the execution count in output."
   :group 'ob-ipython)
+
+(defcustom ob-ipython-execution-count
+  #'ob-ipython-execution-count-output
+  "Function for showing the execution count.
+The function takes one argument, the execution count. It should return a string to be displayed. Use an empty string to suppress the count.
+`ob-ipython-execution-count-suppress' will not show anything.
+`ob-ipython-execution-count-output' will show a string in the ouput.
+`ob-ipython-execution-count-overlay' will show an overlay in the margin.
+`ob-ipython-execution-count-attribute' will store it in a src-block attribute."
+  :group 'ob-ipython
+  :type 'function)
+
+(defcustom ob-ipython-count-overlay-width 11
+  "Width of the left-margin fringe for the execution count overlays."
+  :group 'ob-ipython
+  :type 'number)
 
 (defcustom ob-ipython-kill-kernel-on-exit t
   "If non-nil, prompt user to kill kernel when killing a buffer."
@@ -928,6 +945,59 @@ This function is called by `org-babel-execute-src-block'."
 	(ob-ipython--process-response ret file result-type)))))
 
 
+(defun ob-ipython-execution-count-suppress (N)
+  "Function that does not display the execution count."
+  "")
+
+
+(defun ob-ipython-execution-count-output (N)
+  "Return a string for the execution count in the output."
+  (format "# Out [%d]: \n" N))
+
+
+(defun ob-ipython-clear-execution-count-overlays ()
+  "Clear the execution count overlays."
+  (interactive)
+  (ov-clear 'ob-ipython-execution-count)
+  (set-window-margins (get-buffer-window) 0))
+
+
+(defun ob-ipython-execution-count-overlay (N)
+  "Put the execution count in an overlay in the left margin.
+The overlays are not persistent, and are not saved."
+  (set-window-margins (get-buffer-window) ob-ipython-count-overlay-width)
+  (let ((display-string (format "Out [%d]: " N))
+	ov)
+    (save-excursion
+      (scimax-ob-jump-to-header)
+      (setq ov (or (ov-at) (make-overlay (point) (incf (point)))))
+      (overlay-put ov 'ob-ipython-execution-count t)
+      (overlay-put ov
+		   'before-string
+		   (concat
+		    (propertize " " 'display
+				`((margin left-margin) ,display-string))))))
+  ;; Return an empty string so there is nothing in the output
+  "")
+
+
+(defun ob-ipython-execution-count-attribute (N)
+  "Put the execution count in a src-block attribute."
+  (let ((src (org-element-context)))
+    (if (-any (lambda (s)
+		(string-match ":execution-count" s))
+	      (org-element-property :attr_org src))
+	(save-excursion
+	  (re-search-backward "^#\\+attr_org: :execution-count \\([0-9]+\\)")
+	  (replace-match (format "%d" N) nil nil nil 1))
+      ;; Add new attribute
+      (save-excursion
+	(scimax-ob-jump-to-header)
+	(insert (format "#+attr_org: :execution-count %d\n" N)))))
+  ;; Empty string so there is no output.
+  "")
+
+
 ;; This gives me the output I want. Note I changed this to process one result at
 ;; a time instead of passing all the results to `ob-ipython--render.
 (defun ob-ipython--process-response (ret file result-type)
@@ -950,9 +1020,7 @@ This function is called by `org-babel-execute-src-block'."
     (if (eq 'inline-src-block (car (org-element-context)))
 	(cdr (assoc 'text/plain value))
       (s-concat
-       (if ob-ipython-suppress-execution-count
-	   ""
-	 (format "# Out[%d]:\n" (cdr (assoc :exec-count ret))))
+       (funcall ob-ipython-execution-count (cdr (assoc :exec-count ret)))
        (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
        (funcall (cdr (assoc 'output ob-ipython-mime-formatters)) nil output)
        ;; I process the outputs one at a time here.
