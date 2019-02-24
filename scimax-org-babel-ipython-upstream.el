@@ -1026,7 +1026,11 @@ The overlays are not persistent, and are not saved."
        ;; I process the outputs one at a time here.
        (s-join "\n\n" (loop for (type . value) in (append value display)
 			    collect
-			    (ob-ipython--render file (list (cons type value)))))))))
+			    (ob-ipython--render
+			     (if (memq type '(image/png image/svg))
+				 (pop file)
+			       file)
+			     (list (cons type value)))))))))
 
 
 ;; ** Formatters for output
@@ -1098,53 +1102,102 @@ FILE-OR-NIL is not used in this function."
 		     value)))
 
 
-(defun ob-ipython--generate-file-name (suffix)
-  "Generate a file name to store an image in.
-I added an md5-hash of the buffer name so you can tell what file
-the names belong to. This is useful later to delete files that
-are no longer used."
-  (s-concat (make-temp-name
-	     (concat (f-join ob-ipython-resources-dir (if-let (bf (buffer-file-name))
-							  (md5 (expand-file-name bf))
-							"scratch"))
-		     "-"))
-	    suffix))
-
-
 (defun ob-ipython-format-image/png (file-or-nil value)
   "Format VALUE for image/png mime-types.
-FILE-OR-NIL if non-nil is the file to save the image in. If nil,
-a filename is generated."
-  (let ((file (or file-or-nil (ob-ipython--generate-file-name ".png"))))
-    (ob-ipython--write-base64-string file value)
-    (s-join "\n" (list
-		  (if ob-ipython-show-mime-types "# image/png" "")
-		  (format "[[file:%s]]" file)))))
+FILE-OR-NIL if non-nil is either a plist of values or a string."
+  (let ((require-final-newline nil)
+	(file (cond
+	       ;; A string is the filename
+	       ((stringp file-or-nil) file-or-nil)
+	       ;; You specified a filename
+	       ((and (listp file-or-nil) (plist-get file-or-nil :filename))
+		(plist-get file-or-nil :filename))
+	       ;; make a filename
+	       (t
+		(f-join ob-ipython-resources-dir
+			(if-let (bf (buffer-file-name))
+			    (sha1 (expand-file-name bf))
+			  "scratch")
+			(concat (sha1 value) ".png"))))))
+    ;; Write file to disk
+    (when (file-name-directory file)
+      (unless (file-directory-p (file-name-directory file))
+	(make-directory (file-name-directory file) t)))
+    (with-temp-file file
+      (insert (base64-decode-string value)))
 
-
-(defun ob-ipython--write-base64-string (file b64-string)
-  "Write to FILE the image in B64-STRING.
-Note: the original version of this would sometimes hang, so I
-rewrote this."
-  (if b64-string
-      (progn
-	(unless (file-directory-p (file-name-directory file))
-	  (make-directory (file-name-directory file) t))
-	(with-temp-file file
-	  (insert (base64-decode-string b64-string))))
-    (error "No output was produced to write to a file.")))
+    ;; Return the string for the result
+    (s-join
+     "\n"
+     (remove nil
+	     (list
+	      (if ob-ipython-show-mime-types "# image/png" "")
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_org))
+		  (format "#+attr_org: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_html))
+		  (format "#+attr_html: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_latex))
+		  (format "#+attr_latex: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (caption (plist-get file-or-nil :caption))
+		  (format "#+caption: %s" caption)))
+	      (when (listp file-or-nil)
+		(when-let (name (plist-get file-or-nil :name))
+		  (format "#+name: %s" name)))
+	      (format "[[file:%s]]" file))))))
 
 
 (defun ob-ipython-format-image/svg+xml (file-or-nil value)
   "Format VALUE for image/svg+xml mime-types.
 FILE-OR-NIL if non-nil is the file to save the image in. If nil,
 a filename is generated."
-  (let ((file (or file-or-nil (ob-ipython--generate-file-name ".svg"))))
-    (ob-ipython--write-string-to-file file value)
-    (s-join "\n"
-	    (list
-	     (if ob-ipython-show-mime-types "# image/svg" "")
-	     (format "[[file:%s]]" file)))))
+  (let ((require-final-newline nil)
+	(file (cond
+	       ;; A string is the filename
+	       ((stringp file-or-nil) file-or-nil)
+	       ;; You specified a filename
+	       ((and (listp file-or-nil) (plist-get file-or-nil :filename))
+		(plist-get file-or-nil :filename))
+	       ;; make a filename
+	       (t
+		(f-join ob-ipython-resources-dir
+			(if-let (bf (buffer-file-name))
+			    (sha1 (expand-file-name bf))
+			  "scratch")
+			(concat (sha1 value) ".svg"))))))
+    ;; Write file to disk
+    (when (file-name-directory file)
+      (unless (file-directory-p (file-name-directory file))
+	(make-directory (file-name-directory file) t)))
+
+    (with-temp-file file
+      (insert value))
+
+    ;; Return the string for the result
+    (s-join
+     "\n"
+     (remove nil
+	     (list
+	      (if ob-ipython-show-mime-types "# image/svg" "")
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_org))
+		  (format "#+attr_org: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_html))
+		  (format "#+attr_html: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_latex))
+		  (format "#+attr_latex: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (caption (plist-get file-or-nil :caption))
+		  (format "#+caption: %s" caption)))
+	      (when (listp file-or-nil)
+		(when-let (name (plist-get file-or-nil :name))
+		  (format "#+name: %s" name)))
+	      (format "[[file:%s]]" file))))))
 
 
 (defun ob-ipython-format-application/javascript (file-or-nil value)

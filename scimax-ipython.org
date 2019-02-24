@@ -33,12 +33,11 @@ f(1.41)
 : 1.9880999999999998
 :END:
 
-A new feature for scimax users is the execution count, which shows you the counter for when the cell was executed. This shows as comment, so it won't appear in exported content. If you don't like the count, you can turn it off with this in your init files. It defaults to on.
+A new feature for scimax users is the execution count, which shows you the counter for when the cell was executed. This shows as comment in the results, so it won't appear in exported content. The count is controlled by the output of the function defined in =ob-ipython-execution-count=. See the docstring of that variable for other options.
 
 #+BEGIN_SRC emacs-lisp
-(setq ob-ipython-suppress-execution-count nil)
+(setq ob-ipython-execution-count 'ob-ipython-execution-count-suppress)
 #+END_SRC
-
 
 Ipython can have many kinds of output. The =# text/plain= line in the output tells you what kind of output this is. Later we will see how to filter these. If you don't like these lines, turn them off like this.
 
@@ -88,6 +87,55 @@ x .dot. y = 1.3598389888491538
 # image/png
 [[file:obipy-resources/19a94859c854121de1c305426d09b77e-647879Ej.png]]
 :END:
+
+** Add attributes to images in the output
+
+You can use an =:ipyfile= header argument to put attributes on images in the output and to specify their filenames. This is helpful when writing technical documents so you can do things like make references to them like ref:clockwise and ref:counterclockwise, and when you want nice filenames for other purposes. We support :name, :filename, :caption, :attr_org, :attr_html and :attr_latex. These should be entered as a list of plists. It is necessary to quote the list.
+
+#+BEGIN_SRC ipython :ipyfile '((:name "clockwise" :filename "obipy-resources/clockwise.png" :caption "A clockwise spiral.") (:name "counterclockwise" :filename "obipy-resources/counterclockwise.png" :caption "A counterclockwise spiral."))
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as np
+
+t = np.linspace(0, 20 * np.pi, 350)
+x = np.exp(-0.1 * t) * np.sin(t)
+y = np.exp(-0.1 * t) * np.cos(t)
+
+plt.plot(x, y)
+plt.axis('equal')
+
+plt.figure()
+plt.plot(y, x)
+
+plt.axis('equal')
+
+print('Length of t = {}'.format(len(t)))
+print('x .dot. y = {}'.format(x @ y))
+#+END_SRC
+
+#+RESULTS:
+:results:
+# output
+Length of t = 350
+x .dot. y = 1.3598389888491538
+
+
+
+# image/png
+#+caption: A clockwise spiral.
+#+name: clockwise
+[[file:obipy-resources/clockwise.png]]
+
+
+
+# image/png
+#+caption: A counterclockwise spiral.
+#+name: counterclockwise
+[[file:obipy-resources/counterclockwise.png]]
+:end:
+
+
+
 
 ** Fine tune the output
 
