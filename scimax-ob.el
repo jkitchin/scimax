@@ -159,8 +159,8 @@ Defaults to 3."
 	 (header-end (save-excursion (goto-char header-start)
 				     (line-end-position))))
     (setf (buffer-substring header-start header-end)
-	  (read-input "Header: "
-		      (buffer-substring-no-properties header-start header-end)))))
+	  (read-string "Header: "
+		       (buffer-substring-no-properties header-start header-end)))))
 
 
 ;; kill block
