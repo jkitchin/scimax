@@ -190,7 +190,7 @@ This is a convenience function that should allow you to make a notebook from a g
 The URL and PATH should work in a command like: git clone URL
 PATH. You need to specify the path you want the file to be in. A
 default name based on the url is suggested."
-  (interactive (list (read-input "git url: ") nil))
+  (interactive (list (read-string "git url: ") nil))
   (setq path (read-directory-name "Path: " nb-notebook-directory
 				  nil nil
 				  (replace-regexp-in-string
@@ -339,7 +339,7 @@ For tar with -cjf I recommend .tbz2"
 (defun nb-archive (zip-file project)
   "Create an archive file of the project.
 The type of archive is determined by `nb-archive-command'."
-  (interactive (list (read-input
+  (interactive (list (read-string
 		      "Archive name: "
 		      (concat (projectile-project-name) nb-archive-extension))
 		     (projectile-completing-read "Project: "
@@ -779,7 +779,7 @@ We have to get the link path and then open it.
 				    project-candidates)))
 	  (if (= 1 (length candidates))
 	      (bash (expand-file-name (car candidates)))
-	    (bash (read-input "Project: " candidates))))))))
+	    (bash (read-string "Project: " candidates))))))))
 
 
 (defun nb-link-explorer ()
@@ -804,7 +804,7 @@ We have to get the link path and then open it.
 				    project-candidates)))
 	  (if (= 1 (length candidates))
 	      (explorer (expand-file-name (car candidates)))
-	    (explorer (read-input "Project: " candidates))))))))
+	    (explorer (read-string "Project: " candidates))))))))
 
 
 #+END_SRC
