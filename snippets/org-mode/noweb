@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: noweb with completion
-# key: <<
+# key: nw
 # --
 <<${1:$$(yas-choose-value
          (org-element-map (org-element-parse-buffer) 'src-block

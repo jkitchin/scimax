@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: table with one column
-# key: <t
+# key: t
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
 | $0 |
