@@ -1110,6 +1110,7 @@ way, but I have left it in for compatibility."
       ;; fall-through
       (funcall
        (cdr (assoc 'default ob-ipython-mime-formatters))
+       file-or-nil
        (cdar values)))))
 
 
