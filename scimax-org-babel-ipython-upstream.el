@@ -1214,9 +1214,9 @@ FILE-OR-NIL is not used in this function."
 This is used for mime-types that don't have a formatter already
 defined. FILE-OR-NIL is not used in this function."
   (format "%s%s" (if ob-ipython-show-mime-types
-		     (format "\n# %s\n: " (caar values))
+		     (format "\n# %s\n: " (caar value))
 		   ": ")
-	  (cdar values)))
+	  (cdar value)))
 
 
 (defun ob-ipython--render (file-or-nil values)
@@ -1232,6 +1232,7 @@ way, but I have left it in for compatibility."
       ;; fall-through
       (funcall
        (cdr (assoc 'default ob-ipython-mime-formatters))
+       file-or-nil
        (cdar values)))))
 
 
