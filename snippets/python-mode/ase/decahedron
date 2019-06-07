@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: make an Decahedron instance
+# key: dec
+# --
+atoms = Decahedron('${1:sym}', p=${2:1}, q=${3:1}, r=${4:1})

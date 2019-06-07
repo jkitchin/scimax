@@ -10,8 +10,6 @@
 
 ;;; Code:
 
-(add-to-list 'Info-directory-list scimax-dir)
-
 (setq use-package-always-ensure t)
 
 ;; * org-mode
@@ -34,10 +32,14 @@
    ("s-<SPC>" . org-mark-ring-goto)
    ("H-." . org-time-stamp-inactive)))
 
-(use-package org-bullets)
+;; [2019-01-07 Mon] This is another package I don't use, and that sometimes is a
+;; problem on windows installations
+;; (use-package org-bullets)
 
-(use-package org-edna
-  :init (org-edna-load))
+;; [2019-01-07 Mon] I don't use this now, and it frequently causes an issue on
+;; installing scimax
+;; (use-package org-edna
+;;   :init (org-edna-load))
 
 
 ;; * Other packages
@@ -58,11 +60,12 @@
   (use-package tex
     :ensure auctex))
 
-
+;; [2019-01-07 Mon] This also sometimes causes problems installing scimax,
+;; especially on Windows.
 ;; Make cursor more visible when you move a long distance
-(use-package beacon
-  :config
-  (beacon-mode 1))
+;; (use-package beacon
+;;   :config
+;;   (beacon-mode 1))
 
 
 (use-package bookmark
@@ -165,6 +168,8 @@
 ;; Provides functions for working on lists
 (use-package dash)
 (use-package dash-functional)
+
+(use-package dashboard)
 
 (use-package elfeed)
 
@@ -356,16 +361,14 @@
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
-(use-package scimax-ob
-  :ensure nil
-  :load-path scimax-dir)
-
 ;; this is a git submodule
-(use-package ob-ipython
-  :ensure nil
-  :load-path (lambda () (expand-file-name "ob-ipython-upstream" scimax-dir))
-  :init (add-to-list 'load-path (expand-file-name "ob-ipython-upstream" scimax-dir))
-  (require 'ob-ipython))
+(if (executable-find "jupyter")
+    (use-package ob-ipython
+      :ensure nil
+      :load-path (lambda () (expand-file-name "ob-ipython-upstream" scimax-dir))
+      :init (add-to-list 'load-path (expand-file-name "ob-ipython-upstream" scimax-dir))
+      (require 'ob-ipython))
+  (message "jupyter was not found on your path. ob-ipython was not loaded."))
 
 (use-package scimax-org-babel-ipython-upstream
   :ensure nil
@@ -373,7 +376,8 @@
 
 (use-package ov)
 
-(use-package org-edit-latex)
+;; [2019-01-23 Wed] commented out. I don't use this at all, and it causes an error on Windows when starting up.
+;; (use-package org-edit-latex)
 
 (use-package pdf-tools)
 
@@ -469,6 +473,11 @@
 ;; are right after one you cannot add a space without getting a new line.
 (use-package ws-butler)
 
+(use-package yasnippet)
+
+(unless (version-list-<= (version-to-list emacs-version) '(25 3 1))
+  (use-package ivy-yasnippet
+    :bind ("H-," . ivy-yasnippet)))
 
 ;; * Scimax packages
 (use-package scimax
@@ -510,9 +519,10 @@
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-notebook
-  :ensure nil
-  :load-path scimax-dir)
+(org-babel-load-file (expand-file-name "scimax-notebook.org" scimax-dir))
+;; (use-package scimax-notebook
+;;   :ensure nil
+;;   :load-path scimax-dir)
 
 (use-package scimax-utils
   :ensure nil
@@ -531,9 +541,9 @@
   :ensure nil
   :load-path (lambda () (expand-file-name "org-show" scimax-dir)))
 
-(use-package techela
-  :ensure nil
-  :load-path (lambda () (expand-file-name "techela" scimax-dir)))
+;; (use-package techela
+;;   :ensure nil
+;;   :load-path (lambda () (expand-file-name "techela" scimax-dir)))
 
 (use-package words
   :ensure nil
@@ -545,11 +555,19 @@
   :load-path scimax-dir
   :bind ("H-o" . ore))
 
-(use-package org-editmarks
+;; (use-package org-editmarks
+;;   :ensure nil
+;;   :load-path scimax-dir)
+
+(use-package scimax-ivy
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-ivy
+(use-package scimax-lob
+  :ensure nil
+  :load-path scimax-dir)
+
+(use-package scimax-yas
   :ensure nil
   :load-path scimax-dir)
 
@@ -562,19 +580,32 @@
   :load-path scimax-dir
   :bind ("<f12>" . scimax/body))
 
+(use-package scimax-journal
+  :ensure nil
+  :load-path scimax-dir)
+
+(use-package scimax-apps
+  :ensure nil
+  :load-path scimax-dir)
+
+(use-package scimax-ob
+  :ensure nil
+  :load-path scimax-dir)
+
 (use-package kitchingroup
   :ensure nil
   :load-path scimax-dir)
 
-(use-package ov-highlight
-  :ensure nil
-  :load-path (lambda () (expand-file-name "ov-highlight" scimax-dir))
-  :bind ("H-h" . ov-highlight/body)
-  :init
-  (add-to-list 'load-path
-	       (expand-file-name "ov-highlight" scimax-dir))
-  (require 'ov-highlight))
+;; (use-package ov-highlight
+;;   :ensure nil
+;;   :load-path (lambda () (expand-file-name "ov-highlight" scimax-dir))
+;;   :bind ("H-h" . ov-highlight/body)
+;;   :init
+;;   (add-to-list 'load-path
+;; 	       (expand-file-name "ov-highlight" scimax-dir))
+;;   (require 'ov-highlight))
 
+(org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir))
 
 ;; * User packages
 
@@ -584,6 +615,8 @@
        scimax-load-user-dir
        (file-exists-p (expand-file-name "user.el" scimax-user-dir)))
   (load (expand-file-name "user.el" scimax-user-dir)))
+
+(add-to-list 'Info-directory-list scimax-dir)
 
 ;; * The end
 (provide 'packages)

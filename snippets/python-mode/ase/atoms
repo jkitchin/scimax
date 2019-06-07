@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ase Atoms
+# key: atms
+# --
+atoms = Atoms([${1:atom}], cell=[${2:cell}])

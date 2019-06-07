@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: save-restriction
+# key: sr
+# --
+(save-restriction
+  $0)

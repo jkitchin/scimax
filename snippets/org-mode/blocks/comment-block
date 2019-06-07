@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: comment-block
+# key: <C
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+BEGIN_COMMENT
+${1:`(if (region-active-p) (yas-selected-text) "replace. Tab to end.")`}
+#+END_COMMENT

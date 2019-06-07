@@ -69,7 +69,7 @@
 	 (from (plist-get info :from))
 	 (subject (plist-get info :subject))
 	 (fromname (plist-get info :fromname))
-	 (cc (plist-get info :cc)))     
+	 (cc (plist-get info :cc)))
      (concat "
 \\usepackage[color-logo]{cmumemo}
 \\usepackage{charter}
@@ -90,7 +90,7 @@
 contents
 
 (unless (string= "nil" (plist-get info :signature-lines))
-"
+  "
 \\signaturelines
 ")
 
@@ -209,11 +209,14 @@ Return PDF file's name."
       (lambda (file) (org-latex-compile file)))))
 
 ;;;###autoload
-(defun cmu-memo-export-to-pdf-and-open 
-  (&optional async subtreep visible-only body-only ext-plist)
+(defun cmu-memo-export-to-pdf-and-open
+    (&optional async subtreep visible-only body-only ext-plist)
   (interactive)
-
-  (org-open-file (cmu-memo-export-to-pdf async subtreep visible-only body-only ext-plist)))
+  (let* ((*TEXINPUTS* (format "TEXINPUTS=%s%s/tex/latex/cmu:"
+			      (or (getenv "TEXINPUTS") "")
+			      (file-name-directory (locate-library "ox-cmu-memo"))))
+	 (process-environment (cons *TEXINPUTS* process-environment)))
+    (org-open-file (cmu-memo-export-to-pdf async subtreep visible-only body-only ext-plist))))
 
 (provide 'ox-cmu-memo)
 ;;; ox-cmu-memo ends here

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: caption
+# key: ca
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+caption: ${1:caption}$0

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: name keyword
+# key: n
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+name: ${1:name}$0

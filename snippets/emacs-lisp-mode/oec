@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: org-element-context
+# key: oec
+# --
+(org-element-context)$0

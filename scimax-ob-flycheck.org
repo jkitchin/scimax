@@ -1,0 +1,288 @@
+#+TITLE: Flycheck for org-babel
+#+property: header-args :tangle yes
+
+* Overview of the code
+
+The goal of this library is to get flycheck overlays onto org-babel src-blocks /in org-mode/. The difficulty in this is that flycheck requires a file, but the src-blocks often have no corresponding file.
+
+The solution here is to create a proxy file for the src-blocks that is used with flycheck. We get the overlays from that buffer, and then transfer them to the org-file.
+
+We rely on some hook functions to create the proxy file after saving, and an idle timer to asynchronously move the overlays back.
+
+For dog-fooding fun, this library is written in an org-file and tangled to get it.
+
+You load the file like this:
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(org-babel-load-file "scimax-ob-flycheck.org")
+#+END_SRC
+
+#+RESULTS:
+: Loaded /Users/jkitchin/vc/jkitchin-github/scimax/scimax-ob-flycheck.el
+
+And to use it,
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(scimax-ob-flycheck-mode +1)
+#+END_SRC
+
+See [[id:4C28546C-8F3F-4AD4-900E-C623C8485183][Known Limitations]].
+
+** Header
+
+ #+BEGIN_SRC emacs-lisp
+;;; scimax-ob-flycheck.el --- Add flycheck to org-babel src-blocks.  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; To use this module, enable `scimax-ob-flycheck-mode' in the buffer.
+
+;;; Code
+(require 'cl)
+(require 'f)
+(require 's)
+(require 'ov)
+ #+END_SRC
+
+** Helper functions
+
+ We need to create a set of proxy files for each language in the file. First, we create a function to get all the languages in the file.
+
+ #+BEGIN_SRC emacs-lisp
+(defun obf-get-src-languages ()
+  "Return a list of the languages in this file."
+  (let ((langs '()))
+    (org-babel-map-src-blocks (buffer-file-name)
+      (pushnew lang langs :test 'string=))
+    langs))
+ #+END_SRC
+
+ #+RESULTS:
+ : obf-get-src-languages
+
+ Here is a test of that function. I don't want this block in the src file, so I set tangle to "no".
+
+ #+BEGIN_SRC emacs-lisp :tangle no
+(obf-get-src-languages)
+ #+END_SRC
+
+ #+RESULTS:
+ | emacs-lisp |
+
+ Next, for each language, we need to create a proxy file. The proxy file should contain just the code for that language, and it is important that the code be in the same place as in the org-file. That way, we can get the overlays in the proxy-file and just move them to the org-file. We will accomplish this by replacing all the non-code characters with spaces. We will use this function in an after-save-hook to update those files.
+
+ For now we keep this simple and assume that all the code will be flychecked. We do not make separate proxies for blocks that should be tangled to other files, nor do we exclude code that should not be tangled.
+
+ #+BEGIN_SRC emacs-lisp
+(defvar obf-file-extensions
+  '(("emacs-lisp" . ".el")
+    ("python" . ".py")
+    ("ipython" . ".py"))
+  "An a-list of (language . extension).
+When we create the proxy files we need an extension for each block.")
+
+ #+END_SRC
+
+ #+RESULTS:
+ : obf-file-extensions
+
+ We will generate a filename for each proxy file. This could cause some problems if flycheck uses filenames to check things like imports, etc. This is the place to fix that if it comes up.
+
+ #+BEGIN_SRC emacs-lisp
+(defun obf-proxy-filename (lang)
+  "Generate the proxy filename for LANG."
+  (s-concat (if-let (bf (buffer-file-name))
+		(md5 (expand-file-name bf))
+	      "scratch")
+	    (cdr (assoc lang obf-file-extensions))))
+ #+END_SRC
+
+ #+RESULTS:
+ : obf-proxy-filename
+
+ #+BEGIN_SRC emacs-lisp :tangle no
+(obf-proxy-filename "emacs-lisp")
+ #+END_SRC
+
+ #+RESULTS:
+ : c5cf61bd19967646e8dd15c53e6c6435.el
+
+
+
+** Transferring the overlays
+
+There will be a buffer holding the proxy file that is flychecked. After the syntax check is done,  we now want to loop over the overlays in that buffer, get their start, end and properties, and transfer them to the original buffer. There is conveniently a flycheck-after-syntax-check-hook.
+
+
+Here is the function that will run in the proxy-buffer and transfer the overlays. The variable =obf-buffer= is buffer local and points to the org-file we want the overlays to go in. The variable =obf-lang= is also buffer-local and indicates the language for the overlays. This function is run by a hook function after a flycheck syntax check is done. We modify the overlays so they look like they came from the org-buffer. That way you can use a command like =flycheck-previous-error= (M-g p) or  =flycheck-next-error= (M-g n).
+
+ #+BEGIN_SRC emacs-lisp
+(defun obf-transfer-flycheck-overlays ()
+  "Transfer flycheck overlays from proxy-buffer to the org-buffer."
+  (let ((ovs '())
+	(props)
+	(lang obf-lang))
+    (cl-loop for ov in (ov-all) do
+	     (when (overlay-get ov 'flycheck-overlay)
+	       (push (list (ov-beg ov) (ov-end ov) ov) ovs)))
+    (with-current-buffer obf-buffer
+      (flycheck-mode -1)
+      (save-excursion
+	(loop for (start end ov) in ovs do
+	      (when start
+		(goto-char start)
+		(when (and (get-text-property (point) 'src-block)
+			   (string= lang (car (org-babel-get-src-block-info)))
+			   (not (s-contains? "#\\+END_SRC" (buffer-substring
+							  (line-beginning-position)
+							  (line-end-position)))))
+		  (setq newov (make-overlay start end))
+		  (setq props (overlay-properties ov))
+		  (setf (flycheck-error-buffer
+			 (elt props
+			      (+ 1 (-find-index (lambda (a) (eq a 'flycheck-error)) props))))
+			(current-buffer))
+		  (setf (flycheck-error-filename
+			 (elt props
+			      (+ 1 (-find-index (lambda (a) (eq a 'flycheck-error)) props))))
+			(buffer-file-name (current-buffer)))
+		  (ov-set newov props))))))))
+ #+END_SRC
+
+ #+RESULTS:
+ : obf-transfer-flycheck-overlays
+
+** Generating the proxy files
+
+ Next, we need to generate the proxy files for each language.
+
+ #+BEGIN_SRC emacs-lisp
+(defun obf-generate-proxy-files ()
+  "Generate the proxy-files for each language in the current buffer."
+  (let ((org-content (buffer-string))
+	(cb (current-buffer))
+	proxy-file
+	proxy-buffer)
+    (save-buffer)
+    (cl-loop for lang in (obf-get-src-languages) do
+	     (setq proxy-file (obf-proxy-filename lang))
+	     (with-temp-file proxy-file
+	       (insert org-content)
+	       (org-mode)
+	       (goto-char (point-min))
+	       (while (and (not (eobp)))
+		 (if (and (org-in-src-block-p)
+			  (string= lang (car (org-babel-get-src-block-info 'light))))
+		     (let* ((src (org-element-context))
+			    (end (org-element-property :end src))
+			    (len (length (buffer-substring
+					  (line-beginning-position)
+					  (line-end-position))))
+			    newend)
+		       (setf (buffer-substring
+			      (line-beginning-position)
+			      (line-end-position))
+			     (make-string len ?\s))
+		       ;; Now skip to end, and go back to then src delimiter and eliminate that line.
+		       (goto-char end)
+		       (forward-line (- (* -1 (org-element-property :post-blank src)) 1))
+		       (setf (buffer-substring
+			      (line-beginning-position)
+			      (line-end-position))
+			     (make-string (length (buffer-substring
+						   (line-beginning-position)
+						   (line-end-position)))
+					  ?\s)))
+		   (setf (buffer-substring
+			  (line-beginning-position)
+			  (line-end-position))
+			 (make-string (length (buffer-substring
+					       (line-beginning-position)
+					       (line-end-position)))
+				      ?\s)))
+		 (forward-line 1)))
+	     (save-buffer)
+	     ;; Now, make sure it is open and getting checked
+	     (setq proxy-buffer (or (find-buffer-visiting proxy-file)
+				    (find-file-noselect proxy-file)))
+	     (with-current-buffer proxy-buffer
+	       (revert-buffer :ignore-auto :noconfirm)
+	       ;; put the original buffer into a local variable for use later
+	       (make-local-variable 'obf-buffer)
+	       (make-local-variable 'obf-lang)
+	       (setq obf-lang (org-no-properties lang))
+	       (setq obf-buffer cb)
+	       ; Make sure we have the hook function setup, then trigger a check.
+	       (add-hook 'flycheck-after-syntax-check-hook 'obf-transfer-flycheck-overlays t t)
+	       (flycheck-mode +1)
+	       (flycheck-buffer)))))
+ #+END_SRC
+
+ #+RESULTS:
+ : obf-generate-proxy-files
+
+
+
+ #+RESULTS:
+ | flycheck-handle-save | t | org-db-hook-function | obf-generate-proxy-files |
+
+
+
+** Minor mode
+
+ We want to be able to turn this on and off conveniently so we define this minor mode.
+
+#+BEGIN_SRC emacs-lisp
+(defun obf-delete-proxy-files ()
+  "Delete all the proxy-files.
+If you delete all the language blocks, this will leave some behind."
+  (cl-loop for lang in (obf-get-src-languages) do
+	   (kill-buffer (find-file-noselect (obf-proxy-filename lang)))
+	   (when (file-exists-p (obf-proxy-filename lang))
+	     (delete-file (obf-proxy-filename lang)))))
+
+
+(define-minor-mode scimax-ob-flycheck-mode
+  "Minor mode to put flycheck overlays on src-blocks."
+  :lighter " obf"
+  (if scimax-ob-flycheck-mode
+      ;; turn it on
+      (progn
+	(flycheck-mode -1)
+	(add-hook 'kill-buffer-hook 'obf-delete-proxy-files t t)
+	(add-hook 'after-save-hook 'obf-generate-proxy-files t t)
+	(obf-generate-proxy-files))
+
+    ;; turn it off
+    ;; clear current overlays
+    (ov-clear)
+    ;; close and delete proxy-files
+    (obf-delete-proxy-files)
+    (remove-hook 'after-save-hook 'obf-generate-proxy-files t)))
+#+END_SRC
+
+ #+RESULTS:
+
+** Footer
+
+ #+BEGIN_SRC emacs-lisp
+(provide 'scimax-ob-flycheck)
+
+;;; scimax-ob-flycheck.el ends here
+ #+END_SRC
+
+
+
+* Known Limitations
+  :PROPERTIES:
+  :ID:       4C28546C-8F3F-4AD4-900E-C623C8485183
+  :END:
+
+Overall, this works ok.
+
+Some limitations are related to running flycheck on a buffer that isn't really a code file. So, you can get some spurious flycheck errors related to extra blank lines, elisp files not starting or ending the right way etc.
+
+As you modify the buffer, the positions here get out of date with the proxy-files. If the logic is right, this isn't a big deal, but it is confusing if not.
+
+At the moment, the overlays don't seem to work on all the blocks when multiple languages are present. It seems like only the last language has overlays on it, the rest seem to get removed. That is a bug to be fixed one day.
+
+This will not work with noweb.

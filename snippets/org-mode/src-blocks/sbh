@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# name: src-block-header and value
+# key: sbh
+# type: command
+# condition: (org-in-src-block-p)
+# --
+(yas-expand-snippet (scimax-get-src-header-val-snippet))

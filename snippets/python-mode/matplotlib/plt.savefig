@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: plt.savefig
+# key: psf
+# --
+plt.savefig('${1:fname}'$0)

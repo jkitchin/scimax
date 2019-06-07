@@ -1,0 +1,51 @@
+# -*- mode: snippet -*-
+# name: weekly-report
+# key: kwr
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+TITLE: Weekly progress report
+#+AUTHOR: `user-full-name`
+#+CREATED: `(format-time-string "%F")`
+#+DUEDATE: `kg-due-date-string`
+#+FILETAGS: weekly report `(if (boundp 'kitchingroup-github-id) kitchingroup-github-id "NOGITHUBID")`
+#+VERSION: 0.1.5
+
+# Create a new report each week. The report for the past week is due on Monday. This should not take more than 30 minutes to complete. If it does, you are not doing what I want, and we should talk about how to make it more efficient. It is fine to link to previous reports if you are continuing discussion from them.
+
+* Executive summary
+# Briefly summarize the report  here. This summary should describe in bullet form the current goals and results. You may want to link to a project file that describes the project goals.
+
+$0
+
+* Results and discussion for the past week
+# Use this section to describe what was completed in the past week. Feel free to include tables, figures, and discussion. Short scripts are ok, but longer ones should go in an appendix with a reference link. This section should be complete enough for me to understand what you have done and what it means. It does not need to be excessively long. Use complete sentences, and a scientific writing style.
+
+
+
+* Work in progress
+# Briefly describe the work that is currently in progress, experiments, analysis, calculations, etc... Use subsections to organize your report.
+
+
+
+* Plans for next week
+# List specific plans that you plan to do in the next week. We will review these in the next report and discuss if they have been completed.
+
+
+* Papers read
+# Briefly summarize one or two papers with citations you read that are related to your work. This does not need to be more than a few sentences per paper, and does not need to be more than one or two papers unless this was a major effort for the week.
+
+
+* Questions for me?
+# You should probably have a question for me to answer. It could be about a research problem you are having (conceptual, programming, etc.), or how to do something in scimax. Put those questions here so I can answer them.
+
+* Feedback for me?
+# If there are things about this report, scimax or the group that you think could be changed to make you more effective, please note them here.
+
+* Submit :noexport:
+
+Please email Prof. Kitchin to let him know this report is ready to read.
+
+*************** TODO Review weekly report for `kitchingroup-github-id` :jkitchin:
+		DEADLINE: `kg-review-date-string`
+Do not remove this. It is here so this shows up in my agenda as an item to do.
+*************** END

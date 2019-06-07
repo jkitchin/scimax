@@ -14,6 +14,12 @@
 
 ;; * Customizations
 
+;;; Code:
+
+(defcustom ob-ipython-eldoc-integration nil
+  "If non-nil use eldoc to show signatures."
+  :group 'ob-ipython)
+
 (defcustom ob-ipython-buffer-unique-kernel t
   "If non-nil use a unique kernel for each buffer."
   :group 'ob-ipython)
@@ -27,8 +33,25 @@
   :group 'ob-ipython)
 
 (defcustom ob-ipython-suppress-execution-count nil
-  "If non-nil do not show the execution count in output."
+  "Deprecated. See `ob-ipython-execution-count'.
+If non-nil do not show the execution count in output."
   :group 'ob-ipython)
+
+(defcustom ob-ipython-execution-count
+  #'ob-ipython-execution-count-output
+  "Function for showing the execution count.
+The function takes one argument, the execution count. It should return a string to be displayed. Use an empty string to suppress the count.
+`ob-ipython-execution-count-suppress' will not show anything.
+`ob-ipython-execution-count-output' will show a string in the ouput.
+`ob-ipython-execution-count-overlay' will show an overlay in the margin.
+`ob-ipython-execution-count-attribute' will store it in a src-block attribute."
+  :group 'ob-ipython
+  :type 'function)
+
+(defcustom ob-ipython-count-overlay-width 11
+  "Width of the left-margin fringe for the execution count overlays."
+  :group 'ob-ipython
+  :type 'number)
 
 (defcustom ob-ipython-kill-kernel-on-exit t
   "If non-nil, prompt user to kill kernel when killing a buffer."
@@ -64,7 +87,7 @@ string to be formatted."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-key-bindings
-  '(("<return>" . #'org-return-indent)
+  '(("<return>" . #'newline-and-indent)
     ("C-<return>" . #'org-ctrl-c-ctrl-c)
     ("M-<return>" . (lambda () (interactive) (scimax-execute-and-next-block t)))
     ("S-<return>" . #'scimax-execute-and-next-block)
@@ -94,19 +117,18 @@ string to be formatted."
     ("H-m" . #'scimax-merge-ipython-blocks)
     ("H-h" . #'scimax-ob-edit-header)
     ("H-M-l" . #'scimax-ob-toggle-line-numbers)
+    ("s-." . #'scimax-ob-ipython-complete-ivy)
+    ("s-/" . #'ob-ipython-inspect)
 
     ;; the jupyter hydras
     ("H-e" . #'scimax-jupyter-edit-mode/body)
     ("H-c" . #'scimax-jupyter-command-mode/body)
 
-    ;; Miscellaneous
-    ("H-/" . #'ob-ipython-inspect)
-
     ;; The hydra/popup menu
     ("H-s" . #'scimax-obi/body)
     ("<mouse-3>" . #'scimax-ob-ipython-popup-command))
   "An alist of key bindings and commands.
-These are activated in `ob-ipython-key-bindings'."
+These are activated in function `ob-ipython-key-bindings'."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-menu-items
@@ -129,10 +151,17 @@ These are activated in `ob-ipython-key-bindings'."
      ["Toggle line numbers" scimax-ob-toggle-line-numbers t])
     ("Navigate"
      ["Previous block" org-babel-previous-src-block t]
-     ["Next block" org-babel-next-src-block t]
+     ["Next block" (lambda ()
+		     (interactive)
+		     (org-babel-next-src-block))
+      t]
      ["Jump to visible block" scimax-jump-to-visible-block t]
      ["Jump to block" scimax-jump-to-block t])
     ["Inspect" ob-ipython-inspect t]
+    ["Show source" (lambda ()
+		     (interactive)
+		     (ob-ipython-inspect))
+     t]
     ["Kill kernel" scimax-ob-ipython-kill-kernel t]
     ["Switch to repl" org-babel-switch-to-session t])
   "Items for the menu bar and popup menu."
@@ -169,17 +198,31 @@ Usually called in a hook function."
 
 ;; * org templates and default header args
 
-(add-to-list 'org-structure-template-alist
-	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
-	       "<src lang=\"python\">\n?\n</src>"))
+;; org 9.2 changed this variable in a backwards incompatible way. I think I do
+;; all of these through yasnippet now, so I am going to just comment these out
+;; for now, in case I want to add them to a snippet later.
 
-(add-to-list 'org-structure-template-alist
-	     '("ipv" "#+BEGIN_SRC ipython :results value\n?\n#+END_SRC"
-	       "<src lang=\"python\">\n?\n</src>"))
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("ip" "#+BEGIN_SRC ipython\n?\n#+END_SRC"
+;; 	       "<src lang=\"python\">\n?\n</src>"))
 
-(add-to-list 'org-structure-template-alist
-	     '("plt" "%matplotlib inline\nimport matplotlib.pyplot as plt\n"
-	       ""))
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("ipv" "#+BEGIN_SRC ipython :results value\n?\n#+END_SRC"
+;; 	       "<src lang=\"python\">\n?\n</src>"))
+
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("plt" "%matplotlib inline\nimport matplotlib.pyplot as plt\n?"
+;; 	       ""))
+
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("np" "import numpy as np\n?"
+;; 	       ""))
+
+;; (add-to-list 'org-structure-template-alist
+;; 	     '("anp" "import autograd.numpy as np\n?"
+;; 	       ""))
+
+
 
 (setq org-babel-default-header-args:ipython
       '((:results . "output replace drawer")
@@ -206,18 +249,61 @@ You need this to get syntax highlighting."
 
 (defhydra scimax-obi (:color blue :hint nil)
   "
-        Execute                   Navigate     Edit             Misc
-----------------------------------------------------------------------
-    _<return>_: current           _i_: previous  _w_: move up     _/_: inspect
-  _S-<return>_: current to next   _k_: next      _s_: move down   _l_: clear result
-_S-M-<return>_: to point          _q_: visible   _x_: kill        _L_: clear all
-  _s-<return>_: Restart/block     _Q_: any       _n_: copy
-_M-s-<return>_: Restart/to point  ^ ^            _c_: clone
-  _H-<return>_: Restart/buffer    ^ ^            _m_: merge
-           _K_: kill kernel       ^ ^            _-_: split
-           _r_: Goto repl         ^ ^            _+_: insert above
-           ^ ^                    ^ ^            _=_: insert below
-           ^ ^                    ^ ^            _h_: header"
+        Execute                   Navigate                 Edit             Misc
+-----------------------------------------------------------------------------------------------------------------------------
+    _<return>_: current           _i_: previous            _w_: move up     _._: inspect                 _<up>_:
+  _S-<return>_: current to next   _k_: next                _s_: move down   _l_: clear result  _<left>_:           _<right>_:
+_S-M-<return>_: to point          _q_: visible             _x_: kill        _L_: clear all              _<down>_:
+  _s-<return>_: Restart/block     _Q_: any                 _n_: copy        _,_: complete
+_M-s-<return>_: Restart/to point  _C-<up>_: goto start     _c_: clone       _o_: toggle result folding
+  _H-<return>_: Restart/buffer    _C-<down>_: goto end     _m_: merge
+           _K_: kill kernel       _C-<left>_: word left    _-_: split
+           _r_: Goto repl         _C-<right>_: word right  _+_: insert above
+           ^ ^                    ^ ^                      _=_: insert below
+           ^ ^                    ^ ^                      _h_: header
+_[_: dedent _]_: indent  _3_: toggle comment  _z_: undo    _y_: redo
+Convert
+------------------------------------------------------------------
+_y_: to code
+_M_: to markdown
+_O_: to org
+markdown headings _1_: _2_: _3_: _4_: _5_: _6_:
+"
+  ("o" ob-ipython-toggle-output :color red)
+  ("<up>" ob-ipython-edit-up :color red)
+  ("<down>" ob-ipython-edit-down :color red)
+  ("<left>" left-char :color red)
+  ("<right>" right-char :color red)
+  ("C-<up>" ob-ipython-jump-to-first-line)
+  ("C-<down>" ob-ipython-jump-to-end-line)
+  ("C-<left>" left-word :color red)
+  ("C-<right>" right-word :color red)
+
+  ;; These don't really have great analogs in org-mode, but maybe it makes sense
+  ;; to be able to do this.
+  ("y" (ob-ipython-convert-block-to "ipython"))
+  ("M" (ob-ipython-convert-block-to "markdown"))
+  ("O" (ob-ipython-convert-block-to "org"))
+
+  ;; These change to markdown block and trim blank lines off the top and add #
+  ;; to beginning
+  ("1" (ob-ipython-markdown-headings 1))
+  ("2" (ob-ipython-markdown-headings 2))
+  ("3" (ob-ipython-markdown-headings 3))
+  ("4" (ob-ipython-markdown-headings 4))
+  ("5" (ob-ipython-markdown-headings 5))
+  ("6" (ob-ipython-markdown-headings 6))
+
+  ("z" undo-tree-undo :color red)
+  ("y" undo-tree-redo :color red)
+  ("[" (progn
+	 (org-edit-special)
+	 (python-indent-line t)
+	 (org-edit-src-exit))  :color red)
+  ("]" (progn
+	 (org-edit-special)
+	 (python-indent-line)
+	 (org-edit-src-exit))  :color red)
   ("<return>" org-ctrl-c-ctrl-c :color red)
   ("S-<return>" scimax-execute-and-next-block :color red)
   ("S-M-<return>" scimax-execute-to-point)
@@ -244,8 +330,9 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
   ("l" org-babel-remove-result)
   ("L" scimax-ob-clear-all-results)
   ("h" scimax-ob-edit-header)
-
-  ("/" ob-ipython-inspect))
+  ("3" org-comment-dwim :color red)
+  ("." ob-ipython-inspect)
+  ("," scimax-ob-ipython-complete-ivy))
 
 ;; * command/edit-mode hydra
 
@@ -254,8 +341,7 @@ _M-s-<return>_: Restart/to point  ^ ^            _c_: clone
 (defun ob-ipython-convert-block-to (type)
   "Convert current block to TYPE.
 TYPE is usually one of ipython, markdown, org
-Note: you will lose header arguments from this.
-"
+Note: you will lose header arguments from this."
   (interactive (list (completing-read "Type: " '(ipython markdown org))))
   (let* ((src-info (org-babel-get-src-block-info 'light))
 	 (header-start (sixth src-info))
@@ -390,6 +476,7 @@ previous cell."
      (t
       (previous-line)))))
 
+
 (defun ob-ipython-edit-down ()
   "Move to next line, unless at the bottom.
 In that case first move to beginning of line, and then move to
@@ -411,6 +498,7 @@ previous cell."
       (end-of-line))
      (t
       (next-line)))))
+
 
 ;; https://www.cheatography.com/weidadeyue/cheat-sheets/jupyter-notebook/
 (defhydra scimax-jupyter-command-mode (:color blue :hint nil)
@@ -447,17 +535,17 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   ;; These change to markdown block and trim blank lines off the top and add #
   ;; to beginning
   ("1" (ob-ipython-markdown-headings 1) "to heading 1")
-  ("2" (ob-ipython-markdown-headings 1) "to heading 2")
-  ("3" (ob-ipython-markdown-headings 1) "to heading 3")
-  ("4" (ob-ipython-markdown-headings 1) "to heading 4")
-  ("5" (ob-ipython-markdown-headings 1) "to heading 5")
-  ("6" (ob-ipython-markdown-headings 1) "to heading 6")
+  ("2" (ob-ipython-markdown-headings 2) "to heading 2")
+  ("3" (ob-ipython-markdown-headings 3) "to heading 3")
+  ("4" (ob-ipython-markdown-headings 4) "to heading 4")
+  ("5" (ob-ipython-markdown-headings 5) "to heading 5")
+  ("6" (ob-ipython-markdown-headings 6) "to heading 6")
 
   ;; navigation
   ("<up>" org-babel-previous-src-block "select cell above" :color red)
   ("k" org-babel-previous-src-block "select cell above" :color red)
-  ("<down>" org-babel-next-src-block "select cell below" :colr red)
-  ("j" org-babel-next-src-block "select cell below" :colr red)
+  ("<down>" org-babel-next-src-block "select cell below" :color red)
+  ("j" org-babel-next-src-block "select cell below" :color red)
 
   ("a" scimax-insert-src-block "insert cell above")
   ("b" (scimax-insert-src-block t) "insert cell below")
@@ -490,7 +578,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   ;; ("h" "Show keyboard help")
   ("ii" ob-ipython-interrupt-kernel "Interrupt kernel")
   ;; 00 is not a good hydra command
-  ("0" (when (y-or-n-p "Restart kernel?")
+  ("0" (when (y-or-n-p "Restart kernel? ")
 	 (call-interactively 'ob-ipython-kill-kernel)) "restart kernel")
   ;; Emacs has the opposite scroll convention as a browser
   ("<SPC>" scroll-up-command "scroll down" :color red)
@@ -501,27 +589,29 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 
 (define-prefix-command 'scimax-ob-ipython-mode-map)
 
+
 (easy-menu-define ob-ipython-menu scimax-ob-ipython-mode-map "ob-ipython menu"
   ob-ipython-menu-items)
+
 
 (defun ob-ipython-org-menu ()
   "Add the ob-ipython menu to the Org menu."
   (easy-menu-change '("Org") "ob-ipython" ob-ipython-menu-items "Show/Hide")
   (easy-menu-change '("Org") "--" nil "Show/Hide"))
 
+
 (add-hook 'org-mode-hook 'ob-ipython-org-menu)
 
+
 (defun scimax-ob-ipython-popup-command (event)
-  "Popu a menu of actions for src blocks."
+  "Popup a menu of actions for src blocks."
   (interactive "e")
-  (call-interactively
-   (or (popup-menu (append '("ob-ipython") ob-ipython-menu-items))
-       'ignore)))
+  (popup-menu (append '("ob-ipython") ob-ipython-menu-items)))
 
 ;; * Execution functions
 
 (defun scimax-ob-ipython-default-session ()
-  "Returns the default name of the session for a src block."
+  "Return the default name of the session for a src block."
   (concat
    ;; this is the block language
    (car (org-babel-get-src-block-info t))
@@ -530,8 +620,9 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
        (md5 (expand-file-name bf))
      "scratch")))
 
+
 (defun scimax-ob-ipython-restart-kernel-execute-block ()
-  "Restart kernel and execute block"
+  "Restart kernel and execute block."
   (interactive)
   (ob-ipython-kill-kernel
    (cdr (assoc (scimax-ob-ipython-default-session )
@@ -540,7 +631,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 
 
 (defun scimax-ob-ipython-restart-kernel-execute-buffer ()
-  "Restart kernel and execute buffer"
+  "Restart kernel and execute buffer."
   (interactive)
   (ob-ipython-kill-kernel
    (cdr (assoc (scimax-ob-ipython-default-session)
@@ -558,7 +649,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 (defun scimax-ob-ipython-kill-kernel ()
   "Kill the active kernel."
   (interactive)
-  (when (y-or-n-p "Kill kernel?")
+  (when (and (not (s-contains? "*temp*" (buffer-name))) (y-or-n-p "Kill kernel? "))
     (ob-ipython-kill-kernel
      (cdr (assoc (scimax-ob-ipython-default-session)
 		 (ob-ipython--get-kernel-processes))))
@@ -624,9 +715,43 @@ variables, etc."
 
 ;; * Modifications of ob-ipython
 
+;;  I frequently get an error on startup that seems to be related to how long
+;;  jupyter takes to start up. Usually, I just run the cell again and it works.
+;;  This modification is designed to wait just long enough for the json file to
+;;  get created. This seems to fix the issue. It used to wait just 1 second, but
+;;  sometimes it takes up to two seconds to create this file (it is used in
+;;  driver.py I think).
+(defcustom scimax-create-kernel-max-wait 5
+  "Maximum seconds to wait before kernel program starts."
+  :group 'ob-ipython)
+
+(defun ob-ipython--create-kernel (name &optional kernel)
+  (when (and (not (ignore-errors (process-live-p (get-process (format "kernel-%s" name)))))
+             (not (s-ends-with-p ".json" name)))
+    (ob-ipython--create-process
+     (format "kernel-%s" name)
+     (append
+      (list ob-ipython-command "console" "--simple-prompt")
+      (list "-f" (ob-ipython--kernel-file name))
+      (if kernel (list "--kernel" kernel) '())
+      ;;should be last in the list of args
+      ob-ipython-kernel-extra-args))
+    (let ((i 0)
+	  (t0 (float-time))
+    	  (tincrement 0.1)
+    	  (cfile (expand-file-name
+    		  (ob-ipython--kernel-file name)
+    		  (s-trim (shell-command-to-string "jupyter --runtime-dir")))))
+      (while (and (not (file-exists-p cfile))
+		  (< (- (float-time) t0) scimax-create-kernel-max-wait))
+	(sleep-for tincrement))
+      (message "Kernel started in %1.2f seconds" (- (float-time) t0))
+      (setq header-line-format name))))
+
+
 (defun ob-ipython-kill-kernel (proc)
-  "Kill a kernel process. If you then re-evaluate a source block
-a new kernel will be started."
+  "Kill a kernel process.
+If you then re-evaluate a source block a new kernel will be started."
   (interactive (ob-ipython--choose-kernel))
   (when proc
     (let* ((proc-name (process-name proc))
@@ -638,7 +763,7 @@ a new kernel will be started."
 	(f-delete cfile))
       (delete-process proc)
       (kill-buffer (process-buffer proc))
-      (setq header-line nil)
+      (setq header-line-format nil)
       (message (format "Killed %s and deleted %s" proc-name cfile)))))
 
 
@@ -647,7 +772,7 @@ a new kernel will be started."
   "Execute a block of IPython code with Babel.
 This function is called by `org-babel-execute-src-block'."
 
-  ;; make sure we get prompted to kill the
+  ;; make sure we get prompted to kill the kernel when exiting.
   (when ob-ipython-kill-kernel-on-exit
     (add-hook 'kill-buffer-hook 'scimax-ob-ipython-kill-kernel nil t))
 
@@ -669,7 +794,6 @@ This function is called by `org-babel-execute-src-block'."
 
     ;; add the new session info
     (let ((session-name (scimax-ob-ipython-default-session)))
-      (setq header-line-format (format "IPython session: %s" session-name))
       (add-to-list 'org-babel-default-header-args:ipython
 		   (cons :session session-name))
       (setf (cdr (assoc :session params)) session-name)))
@@ -690,7 +814,7 @@ This function is called by `org-babel-execute-src-block'."
 				  (progn (forward-line) (org-babel-result-end))))))))
 	  (files '())
 	  ;; This matches automatic file generation
-	  (fregex "\\[\\[file:\\(./obipy-resources/.*\\)\\]\\]"))
+	  (fregex "\\[\\[file:\\(obipy-resources/.*\\)\\]\\]"))
       (when result-string
 	(with-temp-buffer
 	  (insert result-string)
@@ -701,7 +825,9 @@ This function is called by `org-babel-execute-src-block'."
 		(when (f-exists? f)
 		  (f-delete f)))
 	      files))))
-  (org-babel-remove-result)
+
+  ;; [2019-02-24 Sun] this line removes results in dependent blocks which isn't what we want.
+  ;; (org-babel-remove-result nil t)
 
   ;; scimax feature to restart
   (when (assoc :restart params)
@@ -715,16 +841,37 @@ This function is called by `org-babel-execute-src-block'."
 	       (when (get-buffer buf)
 		 (kill-buffer buf)))))
   ;; I think this returns the results that get inserted by
-  ;; `org-babel-execute-src-block'.
-  (if (assoc :async params)
-      (ob-ipython--execute-async body params)
-    (ob-ipython--execute-sync body params)))
+  ;; `org-babel-execute-src-block'. If there is an exec-dir, we wrap this block
+  ;; to temporarily change to that directory.
+  (let* ((exec-dir (cdr (assoc :dir params)))
+         (exec-body (concat
+                     (when exec-dir
+                       (concat "from os import chdir as __ob_ipy_chdir; "
+			       "from os import getcwd as __ob_ipy_getcwd; "
+			       "__ob_ipy_cwd = __ob_ipy_getcwd(); "
+			       " __ob_ipy_chdir(\""
+			       exec-dir
+			       "\")\n"))
+                     body
+		     (when exec-dir
+		       "\n__ob_ipy_chdir(__ob_ipy_cwd)"))))
+    ;; Check if we are debugging
+    (if (string-match "^%pdb" exec-body)
+	(progn
+	  (pop-to-buffer (org-babel-initiate-session))
+	  (comint-send-string (get-buffer-process (current-buffer)) body)
+	  (comint-send-input))
+      ;; not debugging
+      (if (assoc :async params)
+	  (ob-ipython--execute-async exec-body params)
+	(ob-ipython--execute-sync exec-body params)))))
 
 
 ;; ** Fine tune the output of blocks
 ;; It was necessary to redefine these to get selective outputs via :display
 
 (defun ob-ipython--execute-async (body params)
+  "Execute asynchronously."
   (let* ((file (cdr (assoc :ipyfile params)))
          (session (cdr (assoc :session params)))
          (result-type (cdr (assoc :result-type params)))
@@ -750,11 +897,21 @@ This function is called by `org-babel-execute-src-block'."
 	  (setf (cdr (assoc :value (assoc :result ret)))
 		(-filter (lambda (el) (memq (car el) ',display))
 			 (cdr (assoc :value (assoc :result ret))))))
-	(let* ((replacement (ob-ipython--process-response ret file result-type)))
-	  (ipython--async-replace-sentinel sentinel buffer replacement)))
+	(save-window-excursion
+	  (save-excursion
+	    (save-restriction
+	      (with-current-buffer buffer
+		(goto-char (point-min))
+		(re-search-forward sentinel)
+		(re-search-backward "\\(call\\|src\\)_\\|^[ \t]*#\\+\\(BEGIN_SRC\\|CALL:\\)")
+		(org-babel-remove-result)
+		(org-babel-insert-result
+		 (ob-ipython--process-response ret file result-type)
+		 (cdr (assoc :result-params (nth 2 (org-babel-get-src-block-info)))))
+		(org-redisplay-inline-images))))))
 
      (list sentinel (current-buffer) file result-type))
-    (format "%s - %s <output>" (length ob-ipython--async-queue) sentinel)))
+    (format "%s - %s <output> <interrupt>" (length ob-ipython--async-queue) sentinel)))
 
 
 (defun ob-ipython--execute-sync (body params)
@@ -789,6 +946,59 @@ This function is called by `org-babel-execute-src-block'."
 	(ob-ipython--process-response ret file result-type)))))
 
 
+(defun ob-ipython-execution-count-suppress (N)
+  "Function that does not display the execution count."
+  "")
+
+
+(defun ob-ipython-execution-count-output (N)
+  "Return a string for the execution count in the output."
+  (format "# Out [%d]: \n" N))
+
+
+(defun ob-ipython-clear-execution-count-overlays ()
+  "Clear the execution count overlays."
+  (interactive)
+  (ov-clear 'ob-ipython-execution-count)
+  (set-window-margins (get-buffer-window) 0))
+
+
+(defun ob-ipython-execution-count-overlay (N)
+  "Put the execution count in an overlay in the left margin.
+The overlays are not persistent, and are not saved."
+  (set-window-margins (get-buffer-window) ob-ipython-count-overlay-width)
+  (let ((display-string (format "Out [%d]: " N))
+	ov)
+    (save-excursion
+      (scimax-ob-jump-to-header)
+      (setq ov (or (ov-at) (make-overlay (point) (incf (point)))))
+      (overlay-put ov 'ob-ipython-execution-count t)
+      (overlay-put ov
+		   'before-string
+		   (concat
+		    (propertize " " 'display
+				`((margin left-margin) ,display-string))))))
+  ;; Return an empty string so there is nothing in the output
+  "")
+
+
+(defun ob-ipython-execution-count-attribute (N)
+  "Put the execution count in a src-block attribute."
+  (let ((src (org-element-context)))
+    (if (-any (lambda (s)
+		(string-match ":execution-count" s))
+	      (org-element-property :attr_org src))
+	(save-excursion
+	  (re-search-backward "^#\\+attr_org: :execution-count \\([0-9]+\\)")
+	  (replace-match (format "%d" N) nil nil nil 1))
+      ;; Add new attribute
+      (save-excursion
+	(scimax-ob-jump-to-header)
+	(insert (format "#+attr_org: :execution-count %d\n" N)))))
+  ;; Empty string so there is no output.
+  "")
+
+
 ;; This gives me the output I want. Note I changed this to process one result at
 ;; a time instead of passing all the results to `ob-ipython--render.
 (defun ob-ipython--process-response (ret file result-type)
@@ -796,16 +1006,32 @@ This function is called by `org-babel-execute-src-block'."
 	 (output (cdr (assoc :output ret)))
 	 (value (cdr (assoc :value result)))
 	 (display (cdr (assoc :display result))))
-    (s-concat
-     (if ob-ipython-suppress-execution-count
-	 ""
-       (format "# Out[%d]:\n" (cdr (assoc :exec-count ret))))
-     (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
-     (ob-ipython-format-output nil output)
-     ;; I process the outputs one at a time here.
-     (s-join "\n\n" (loop for (type . value) in (append value display)
-			  collect
-			  (ob-ipython--render file (list (cons type value))))))))
+
+    ;; check for data to show.
+    (save-excursion
+      (when (cdr (assoc :data ret))
+	(pop-to-buffer "*ob-ipython-data*")
+	(read-only-mode -1)
+	(erase-buffer)
+	(insert (cdr (assoc :data ret)))
+	(goto-char (point-min))
+	(ansi-color-apply-on-region (point-min) (point-max))
+	(special-mode)))
+
+    (if (eq 'inline-src-block (car (org-element-context)))
+	(cdr (assoc 'text/plain value))
+      (s-concat
+       (funcall ob-ipython-execution-count (cdr (assoc :exec-count ret)))
+       (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
+       (funcall (cdr (assoc 'output ob-ipython-mime-formatters)) nil output)
+       ;; I process the outputs one at a time here.
+       (s-join "\n\n" (loop for (type . value) in (append value display)
+			    collect
+			    (ob-ipython--render
+			     (if (memq type '(image/png image/svg))
+				 (pop file)
+			       file)
+			     (list (cons type value)))))))))
 
 
 ;; ** Formatters for output
@@ -820,17 +1046,23 @@ This adds : to the beginning so the output will export as
 verbatim text. FILE-OR-NIL is not used, and is here for
 compatibility with the other formatters."
   (when (not (string= "" output))
-    (concat (s-join "\n"
-		    (mapcar (lambda (s)
-			      (s-concat *ob-ipython-output-results-prefix* s))
-			    (s-split "\n" output)))
-	    "\n")))
+    (let (*ob-ipython-output-results-prefix*)
+      (when (-contains?
+	     (s-split " " (cdr (assoc :results (caddr (org-babel-get-src-block-info t))))) "code")
+	(setq *ob-ipython-output-results-prefix* ""))
+      (concat (s-join "\n"
+		      (mapcar (lambda (s)
+				(s-concat *ob-ipython-output-results-prefix* s))
+			      (s-split "\n" output)))
+	      "\n"))))
 
 
 (defun ob-ipython-format-text/plain (file-or-nil value)
   "Format VALUE for text/plain mime-types.
 FILE-OR-NIL is not used in this function."
-  (let ((lines (s-lines value)))
+  (let ((lines (s-lines value))
+	(raw (-contains?
+	      (s-split " " (cdr (assoc :results (caddr (org-babel-get-src-block-info t))))) "raw")))
     ;; filter out uninteresting lines.
     (setq lines (-filter (lambda (line)
 			   (not (-any (lambda (regex)
@@ -839,7 +1071,10 @@ FILE-OR-NIL is not used in this function."
 			 lines))
     (when lines
       ;; Add verbatim start string
-      (setq lines (mapcar (lambda (s) (s-concat ": " s)) lines))
+      (setq lines (mapcar (lambda (s) (s-concat
+				       (if raw "" ": ")
+				       s))
+			  lines))
       (when ob-ipython-show-mime-types
 	(setq lines (append '("# text/plain") lines)))
       (s-join "\n" lines))))
@@ -868,40 +1103,102 @@ FILE-OR-NIL is not used in this function."
 		     value)))
 
 
-(defun ob-ipython--generate-file-name (suffix)
-  "Generate a file name to store an image in.
-I added an md5-hash of the buffer name so you can tell what file
-the names belong to. This is useful later to delete files that
-are no longer used."
-  (s-concat (make-temp-name
-	     (concat (f-join ob-ipython-resources-dir (if-let (bf (buffer-file-name))
-							  (md5 (expand-file-name bf))
-							"scratch"))
-		     "-"))
-	    suffix))
-
-
 (defun ob-ipython-format-image/png (file-or-nil value)
   "Format VALUE for image/png mime-types.
-FILE-OR-NIL if non-nil is the file to save the image in. If nil,
-a filename is generated."
-  (let ((file (or file-or-nil (ob-ipython--generate-file-name ".png"))))
-    (ob-ipython--write-base64-string file value)
-    (s-join "\n" (list
-		  (if ob-ipython-show-mime-types "# image/png" "")
-		  (format "[[file:%s]]" file)))))
+FILE-OR-NIL if non-nil is either a plist of values or a string."
+  (let ((require-final-newline nil)
+	(file (cond
+	       ;; A string is the filename
+	       ((stringp file-or-nil) file-or-nil)
+	       ;; You specified a filename
+	       ((and (listp file-or-nil) (plist-get file-or-nil :filename))
+		(plist-get file-or-nil :filename))
+	       ;; make a filename
+	       (t
+		(f-join ob-ipython-resources-dir
+			(if-let (bf (buffer-file-name))
+			    (sha1 (expand-file-name bf))
+			  "scratch")
+			(concat (sha1 value) ".png"))))))
+    ;; Write file to disk
+    (when (file-name-directory file)
+      (unless (file-directory-p (file-name-directory file))
+	(make-directory (file-name-directory file) t)))
+    (with-temp-file file
+      (insert (base64-decode-string value)))
+
+    ;; Return the string for the result
+    (s-join
+     "\n"
+     (remove nil
+	     (list
+	      (if ob-ipython-show-mime-types "# image/png" "")
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_org))
+		  (format "#+attr_org: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_html))
+		  (format "#+attr_html: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_latex))
+		  (format "#+attr_latex: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (caption (plist-get file-or-nil :caption))
+		  (format "#+caption: %s" caption)))
+	      (when (listp file-or-nil)
+		(when-let (name (plist-get file-or-nil :name))
+		  (format "#+name: %s" name)))
+	      (format "[[file:%s]]" file))))))
 
 
 (defun ob-ipython-format-image/svg+xml (file-or-nil value)
   "Format VALUE for image/svg+xml mime-types.
 FILE-OR-NIL if non-nil is the file to save the image in. If nil,
 a filename is generated."
-  (let ((file (or file-or-nil (ob-ipython--generate-file-name ".svg"))))
-    (ob-ipython--write-string-to-file file value)
-    (s-join "\n"
-	    (list
-	     (if ob-ipython-show-mime-types "# image/svg" "")
-	     (format "[[file:%s]]" file)))))
+  (let ((require-final-newline nil)
+	(file (cond
+	       ;; A string is the filename
+	       ((stringp file-or-nil) file-or-nil)
+	       ;; You specified a filename
+	       ((and (listp file-or-nil) (plist-get file-or-nil :filename))
+		(plist-get file-or-nil :filename))
+	       ;; make a filename
+	       (t
+		(f-join ob-ipython-resources-dir
+			(if-let (bf (buffer-file-name))
+			    (sha1 (expand-file-name bf))
+			  "scratch")
+			(concat (sha1 value) ".svg"))))))
+    ;; Write file to disk
+    (when (file-name-directory file)
+      (unless (file-directory-p (file-name-directory file))
+	(make-directory (file-name-directory file) t)))
+
+    (with-temp-file file
+      (insert value))
+
+    ;; Return the string for the result
+    (s-join
+     "\n"
+     (remove nil
+	     (list
+	      (if ob-ipython-show-mime-types "# image/svg" "")
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_org))
+		  (format "#+attr_org: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_html))
+		  (format "#+attr_html: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (attr (plist-get file-or-nil :attr_latex))
+		  (format "#+attr_latex: %s" attr)))
+	      (when (listp file-or-nil)
+		(when-let (caption (plist-get file-or-nil :caption))
+		  (format "#+caption: %s" caption)))
+	      (when (listp file-or-nil)
+		(when-let (name (plist-get file-or-nil :name))
+		  (format "#+name: %s" name)))
+	      (format "[[file:%s]]" file))))))
 
 
 (defun ob-ipython-format-application/javascript (file-or-nil value)
@@ -917,9 +1214,9 @@ FILE-OR-NIL is not used in this function."
 This is used for mime-types that don't have a formatter already
 defined. FILE-OR-NIL is not used in this function."
   (format "%s%s" (if ob-ipython-show-mime-types
-		     (format "\n# %s\n: " (caar values))
+		     (format "\n# %s\n: " (caar value))
 		   ": ")
-	  (cdar values)))
+	  (cdar value)))
 
 
 (defun ob-ipython--render (file-or-nil values)
@@ -935,17 +1232,30 @@ way, but I have left it in for compatibility."
       ;; fall-through
       (funcall
        (cdr (assoc 'default ob-ipython-mime-formatters))
+       file-or-nil
        (cdar values)))))
 
 
 ;; ** Better exceptions
+
+(defun ob-ipython--extract-data (msgs)
+  "This extracts output from func? or func?? in ipython"
+  (->> msgs
+       (-filter (lambda (msg)
+		  (s-equals? "execute_reply"
+			     (cdr (assoc 'msg_type msg)))))
+       (-mapcat (lambda (msg)
+		  (->> msg (assoc 'content) (assoc 'payload) cadr (assoc 'data) cdadr)))))
+
 ;; I want an option to get exceptions in the buffer
 (defun ob-ipython--eval (service-response)
   (let ((status (ob-ipython--extract-status service-response)))
-    (cond ((string= "ok" status) `((:result . ,(ob-ipython--extract-result service-response))
-                                   (:output . ,(ob-ipython--extract-output service-response))
-                                   (:exec-count . ,(ob-ipython--extract-execution-count service-response))))
-          ((string= "abort" status) (error "Kernel execution aborted."))
+    (cond ((string= "ok" status)
+	   `((:result . ,(ob-ipython--extract-result service-response))
+	     (:output . ,(ob-ipython--extract-output service-response))
+	     (:data . ,(ob-ipython--extract-data service-response))
+	     (:exec-count . ,(ob-ipython--extract-execution-count service-response))))
+          ((string= "abort" status) (error "Kernel execution aborted"))
           ((string= "error" status)
 	   (if ob-ipython-exception-results
 	       (let ((error-content
@@ -996,6 +1306,13 @@ Note, this does not work if you run the block async."
 (defun ob-ipython-inspect (buffer pos)
   "Ask a kernel for documentation on the thing at POS in BUFFER."
   (interactive (list (current-buffer) (point)))
+  ;; It is probably helpful to be at the end of a symbol, otherwise you may get
+  ;; help on something else.
+  (save-excursion
+    (when (not (looking-back "\\_>" (line-beginning-position)))
+      (forward-symbol 1)
+      (setq pos (point))))
+
   (let ((return (org-in-src-block-p))
 	(inspect-buffer))
     (when return
@@ -1005,13 +1322,133 @@ Note, this does not work if you run the block async."
       (-if-let (result (->> (ob-ipython--inspect code pos)
 			    (assoc 'text/plain)
 			    cdr))
-	  (setq inspect-buffer (ob-ipython--create-inspect-buffer result))
-	(message "No documentation was found. Have you run the cell?")))
+	  (setq inspect-buffer (ob-ipython--create-inspect-buffer result))))
 
     (when return
       (with-current-buffer "*ob-ipython-src-edit-inspect*"
 	(org-edit-src-exit)))
-    (when inspect-buffer (pop-to-buffer inspect-buffer))))
+    (when inspect-buffer
+      (pop-to-buffer inspect-buffer)
+      (goto-char (point-min)))))
+
+
+
+;; * eldoc integration
+
+;; This may not be the speediest way to do this, since it runs the
+;; ob-ipython-inspect function.
+(defun scimax-ob-ipython-signature ()
+  "Try to return a function signature for the thing at point."
+  (when (and (eql major-mode 'org-mode)
+	     (string= (or (get-text-property (point) 'lang) "") "ipython"))
+    (save-window-excursion
+      (ob-ipython-inspect (current-buffer) (point))
+      (when (get-buffer "*ob-ipython-inspect*")
+	(with-current-buffer "*ob-ipython-inspect*"
+	  (goto-char (point-min))
+	  (prog1
+	      (cond
+	       ((re-search-forward "Signature:" nil t 1)
+		(buffer-substring (line-beginning-position) (line-end-position)))
+	       ((re-search-forward "Docstring:" nil t 1)
+		(forward-line)
+		(buffer-substring (line-beginning-position) (line-end-position)))
+	       (t
+		nil))
+	    ;; get rid of this so we don't accidently show old results later
+	    (with-current-buffer "*ob-ipython-inspect*"
+	      (toggle-read-only)
+	      (erase-buffer))))))))
+
+
+;; The org-eldoc-documentation-function has hard-coded language options, with no
+;; obvious way to hook into it for this application. So, I am just advising the
+;; function to check for ipython blocks, and run the original function if not in
+;; a block.
+(defun scimax-ob-ipython-eldoc-advice (orig-func &rest args)
+  "Advice function to get eldoc signatures in blocks in org-mode."
+  (or (scimax-ob-ipython-signature) (apply orig-func args)))
+
+
+(defun scimax-ob-ipython-turn-on-eldoc ()
+  "Turn on eldoc signatures."
+  (interactive)
+  (advice-add 'org-eldoc-documentation-function :around #'scimax-ob-ipython-eldoc-advice))
+
+
+(defun scimax-ob-ipython-turn-off-eldoc ()
+  "Turn off eldoc signatures."
+  (interactive)
+  (advice-remove 'org-eldoc-documentation-function  #'scimax-ob-ipython-eldoc-advice))
+
+
+(when ob-ipython-eldoc-integration
+  (scimax-ob-ipython-turn-on-eldoc))
+
+;; * Completion
+
+;; This makes this function work from an org-buffer.
+(defun ob-ipython-completions (buffer pos)
+  "Ask a kernel for completions on the thing at POS in BUFFER."
+  (interactive (list (current-buffer) (point)))
+  (let ((return (org-in-src-block-p))
+	completion-buffer)
+    (when return
+      (org-edit-src-code nil "*ob-ipython-src-edit-completion*"))
+
+    (prog1
+	(let* ((code (with-current-buffer buffer
+                       (buffer-substring-no-properties (point-min) (point-max))))
+               (resp (ob-ipython--complete-request code pos))
+               (status (ob-ipython--extract-status resp)))
+	  (if (not (string= "ok" status))
+              '()
+	    (->> resp
+		 (-filter (lambda (msg)
+			    (-contains? '("complete_reply")
+					(cdr (assoc 'msg_type msg)))))
+		 (-mapcat (lambda (msg)
+			    (->> msg
+				 (assoc 'content)
+				 cdr))))))
+      (when return
+	(with-current-buffer "*ob-ipython-src-edit-completion*"
+	  (org-edit-src-exit))))))
+
+;; Adapted to enable in org-buffers. Note, to enable this, you have to add
+;; (add-to-list 'company-backends 'company-ob-ipython) to an init file. There
+;; are also reports that it is slow.
+
+(defun company-ob-ipython (command &optional arg &rest ignored)
+  (interactive (list 'interactive))
+  (cl-case command
+    (interactive (company-begin-backend 'company-ob-ipython))
+    (prefix (and (or ob-ipython-mode (string= (or (get-text-property (point) 'lang) "") "ipython"))
+                 (let ((res (ob-ipython-completions (current-buffer) (1- (point)))))
+                   (substring-no-properties (buffer-string)
+                                            (cdr (assoc 'cursor_start res))
+                                            (cdr (assoc 'cursor_end res))))))
+    (candidates (cons :async (lambda (cb)
+                               (let ((res (ob-ipython-completions
+                                           (current-buffer) (1- (point)))))
+                                 (funcall cb (-uniq (cdr (assoc 'matches res))))))))
+    (sorted t)
+    (doc-buffer (ob-ipython--company-doc-buffer
+                 (cdr (assoc 'text/plain (ob-ipython--inspect arg (length arg))))))))
+
+
+(defun scimax-ob-ipython-complete-ivy ()
+  "Use ivy to complete the thing at point."
+  (interactive)
+  (let* ((result (ob-ipython-completions (current-buffer) (1- (point))))
+	 (candidates (-uniq (cdr (assoc 'matches result))))
+	 (beg (1+ (cdr (assoc 'cursor_start result))))
+	 (end (1+ (cdr (assoc 'cursor_end result)))))
+    (ivy-read "Complete: " candidates
+	      :action (lambda (candidate)
+			(with-ivy-window
+			  (setf (buffer-substring beg end) candidate)
+			  (forward-char (length candidate)))))))
 
 
 ;; * clickable text buttons

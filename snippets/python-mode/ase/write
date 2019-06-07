@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: ase write
+# key: wr
+# --
+from ase.io import write
+write('${1:fname}.png', ${2:atoms}, show_unit_cell=${3:2})$0

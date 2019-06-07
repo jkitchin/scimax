@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: org attribute
+# key: ao
+# --
+#+attr_org: ${1::width 300}$0

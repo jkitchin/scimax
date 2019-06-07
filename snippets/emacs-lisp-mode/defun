@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: defun
+# key: def
+# --
+(defun ${1:func-name} ($2)
+$> \"$3 
+$>${2:$(elisp-args-to-docstring)}
+$> Returns: $4\"
+$> $0)

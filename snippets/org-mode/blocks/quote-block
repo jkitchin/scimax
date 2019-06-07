@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: quote-block
+# key: <q
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+BEGIN_QUOTE
+${1:`(if (region-active-p) (yas-selected-text) "replace. Tab to end.")`}
+#+END_QUOTE
+$0

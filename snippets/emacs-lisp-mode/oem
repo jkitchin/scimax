@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: org-element-map
+# key: oem
+# --
+(org-element-map (org-element-parse-buffer) '$1
+		     $2
+		     $3)

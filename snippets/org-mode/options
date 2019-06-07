@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: org-mode options keyword
+# key: o
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+options: $0

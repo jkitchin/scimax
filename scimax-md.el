@@ -48,17 +48,24 @@
 
    ;; file links. treat links to org files as links to md files.
    ((and (string= "file" (org-element-property :type link))
+	 (f-ext? (org-element-property :path link) "org")
 	 (not (-contains?
 	       '("png")
 	       (file-name-extension
 		(org-element-property :path link)))))
+    
     (format "[%s](%s)"
+	    ;; [%s] is the description
 	    (if (org-element-property :contents-begin link)
 		(buffer-substring (org-element-property :contents-begin link)
 				  (org-element-property :contents-end link))
-	      (org-element-property :path link))
-	    (org-element-property :path link)))
-
+	      (file-name-sans-extension (org-element-property :path link)))
+	    
+	    (let ((path (org-element-property :path link)))
+	      (if (plist-get info :md-link-org-files-as-md)
+		  (concat (file-name-sans-extension path) ".md")
+		path))))
+   
    ;; fall-through to the default exporter.
    (t
     (org-md-link link contents info))))
@@ -149,7 +156,9 @@ file-local settings."
   :menu-entry
   '(?s "Export with scimax-md"
        ((?b "As buffer" scimax-md-export-to-buffer)
-	(?s "As file" scimax-md-export-to-file))))
+	(?s "As file" scimax-md-export-to-file)
+	(?f "Publish current file" (lambda (&rest args) (org-publish-current-file)))
+	(?p "Publish current project" (lambda (&rest args) (org-publish-current-project))))))
 
 
 ;; * Publishing

@@ -1,0 +1,30 @@
+# -*- mode: snippet -*-
+# name: project-plan
+# key: kpp
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+TITLE: Project plan
+#+AUTHOR: `user-full-name`
+#+DATE: `(format-time-string "%F")`
+#+FILETAGS: project plan `(if (boundp 'kitchingroup-github-id) kitchingroup-github-id "NOGITHUBID")`
+#+VERSION: 0.1.0
+
+
+* Summary
+# Briefly describe the nature of the project and its goals
+
+* Project Goals
+# Describe in more detail what the goals of this project are. Good goals have an obvious finishing point, e.g. you can tell when they are done.
+
+* Milestones
+# In this section describe milestones in subsections that you think you will achieve, along with the dates you plan to meet them. In each subsection you should describe what you will need to learn to achieve it, and some discussion of how you will learn it.
+
+* Submit
+
+Please let Prof. Kitchin know when this is ready to review.
+
+If you run into any problems, please see Prof. Kitchin.
+
+*************** TODO Review project plan for `kitchingroup-github-id` :jkitchin:
+Do not remove this. It is here so this shows up in my agenda as an item to do.
+*************** END

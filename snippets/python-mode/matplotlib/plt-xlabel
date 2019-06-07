@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: plt.xlabel
+# key: pxl
+# --
+plt.xlabel($0)

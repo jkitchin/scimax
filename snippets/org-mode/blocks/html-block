@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: html-block
+# key: <h
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+BEGIN_EXPORT html
+${1:`(if (region-active-p) (yas-selected-text) "replace. Tab to end.")`}
+#+END_EXPORT

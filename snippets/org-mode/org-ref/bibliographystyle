@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: org-ref bibliographystyle
+# key: bs
+# --
+bibliographystyle:${1:$$(yas-choose-value scimax-installed-bibliography-styles)}

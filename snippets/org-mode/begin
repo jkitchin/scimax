@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: begin a block with completion
+# key: b
+# --
+#+BEGIN_${1:$$(let ((type (yas-choose-value '("SRC" "EXAMPLE" "QUOTE" "VERSE" "CENTER" "LaTeX" "HTML" "ASCII"))))
+               (if type (concat type (if (equal type "SRC")
+                                         (concat " " (yas-choose-value '("C" "C++" "emacs-lisp" "lisp" "latex" "python" "sh" "sqlite" "css" "haskell" "js" "plantuml" "ruby" "sql" "clojure")))))))}
+$0
+#+END_${1:$(car (split-string yas-text))}

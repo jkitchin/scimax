@@ -1,0 +1,149 @@
+#+title: Library of babel calls for the Kitchin research group
+
+#+name: kg-pwd
+#+BEGIN_SRC sh
+pwd
+#+END_SRC
+
+#+name: kg-date
+#+BEGIN_SRC sh
+date
+#+END_SRC
+
+
+* Check the directory size
+
+#+name: kitchingroup-du-check
+#+BEGIN_SRC sh :results value
+# 10 MB max report size
+MAXSIZE="10485760"
+CHECK=`du -s . | awk '{print \$1}'`
+
+if [ "$MAXSIZE" -gt "$CHECK" ]; then
+    echo 0
+else
+    echo "This directory is too big. Please see Prof. Kitchin" 1>&2
+    echo 1
+fi
+#+END_SRC
+
+#+RESULTS: kitchingroup-du-check
+: 0
+
+
+* Pushing the report
+
+This will commit and push the report. This also inserts a bibliography file if needed.
+
+#+name: kitchingroup-weekly-push
+#+BEGIN_SRC emacs-lisp :noweb yes :results silent :var ok=kitchingroup-du-check() :var remotes=kg-git-remote-commits()
+(when (> (string-to-number remotes) 0)
+  (error "It looks like there are remote commits you need to pull first."))
+
+;; Check for citations and a bibliography link
+(let ((pd (org-element-parse-buffer)))
+  (when (and (org-element-map pd 'link
+	       (lambda (lnk)
+		 (when (-contains?  org-ref-cite-types
+				    (org-element-property :type lnk))
+		   lnk))
+	       nil t)
+	     (not (org-element-map pd 'link
+		    (lambda (lnk)
+		      (when (string= "bibliography"
+				     (org-element-property :type lnk))
+			lnk))
+		    nil t)))
+
+    (org-ref-extract-bibtex-to-file "weekly-report.bib")
+    (goto-char (point-max))
+    (insert (format "\nbibliography:%s"
+		    (s-join "," (append '("weekly-report.bib" )
+					org-ref-default-bibliography))))))
+
+(save-some-buffers t)
+(if (not (eq ok 0))
+    (message "your directory seems to be too big. Please submit manually")
+  (shell-command "git add *")
+  (shell-command (format "git commit -am \"Automated commit %s\"" (format-time-string "%Y-%m-%d")))
+  (shell-command "git push"))
+#+END_SRC
+
+#+RESULTS: kitchingroup-weekly-push
+: 0
+
+* Pull the repo
+
+#+name: kitchingroup-weekly-pull
+#+BEGIN_SRC emacs-lisp :results silent :var dirty?=kg-git-dirty?()
+(save-some-buffers t)
+
+(when (not (string= dirty? "nil"))
+  (error "Your repo is not clean. You cannot pull right now.\n
+To fix this you have to at least commit changes to the modified files.
+%s"
+	 (shell-command-to-string "git status")))
+
+
+
+(shell-command "git pull")
+(revert-buffer)
+(goto-char (point-min))
+#+END_SRC
+
+* Git checks
+
+Adapted from https://remarkablemark.org/blog/2017/10/12/check-git-dirty/.
+
+#+name: kg-git-dirty?
+#+BEGIN_SRC sh
+git diff --quiet || echo 'dirty'
+#+END_SRC
+
+#+RESULTS:
+: dirty
+
+#+BEGIN_SRC sh
+[[ -z $(git status -s) ]] || echo 'modified/untracked'
+#+END_SRC
+
+#+RESULTS:
+: modified/untracked
+
+#+name: kg-git-clean?
+#+BEGIN_SRC sh :results value
+[[ -n $(git status -s) ]] || echo 'clean'
+#+END_SRC
+
+#+RESULTS:
+
+** Check for remote commits
+
+ This should get the number of remote commits available. If it is not zero, you need to pull before you can push.
+
+ #+name: kg-git-remote-commits
+ #+BEGIN_SRC emacs-lisp
+(let* (	;; get the branch we are on.
+       (branch (s-trim
+		(shell-command-to-string
+		 "git rev-parse --abbrev-ref HEAD")))
+       ;; get the remote the branch points to.
+       (remote (s-trim
+		(shell-command-to-string
+		 (format "git config branch.%s.remote" branch))))
+       (remote-branch (s-trim
+		       (shell-command-to-string
+			"git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
+       (commits (split-string
+		 (s-trim
+		  (shell-command-to-string
+		   (format
+		    "git rev-list --count --left-right HEAD...%s"
+		    remote-branch)))))
+       (local (nth 0 commits))
+       (remotes (nth 1 commits)))
+  remotes)
+ #+END_SRC
+
+ #+RESULTS: kitchingroup-remote-commits
+ : 0

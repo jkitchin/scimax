@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: from ase.cluster.octahedron import Octahedron
+# key: ioct
+# --
+from ase.cluster.octahedron import Octahedron

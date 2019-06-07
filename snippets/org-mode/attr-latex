@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: latex attribute
+# key: al
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+attr_latex: ${1::placement [H]} ${2::width 300}$0

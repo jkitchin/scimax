@@ -55,30 +55,32 @@ wrapped so that it too can have access to the match-data.
 				;; This is clunky, but with grouping the
 				;; properties may not extend to the whole
 				;; regexp.
-				(goto-char (previous-single-property-change (point)
+				(goto-char (previous-single-property-change pt
 									    'button-lock))
-				;; now make sure we see it again to get the match-data
-				(while (not (looking-at ,regexp))
-				  (backward-char))
+				;; now make sure we see it again to get the match-data 
 				(save-match-data
-				  (looking-at ,regexp)
+				  (while (not (looking-at ,regexp))
+				    (backward-char)) 
 				  (funcall ,(plist-get plist :help-echo) win buf pt)))))))
   `(button-lock-register-global-button
     ,regexp
-    (lambda ()
-      (interactive)
-      (save-excursion
-	;; This is clunky, but with grouping the properties may not extend to
-	;; the whole regexp, e.g. if you set properties on a subgroup.
-	(goto-char (previous-single-property-change (point)
-						    'button-lock))
-	;; now make sure we see it again to get the match-data
-	(while (not (looking-at ,regexp))
-	  (backward-char))
-	(save-match-data
-	  (looking-at ,regexp)
-	  ,@action)))
+    ;; Suggested in https://github.com/rolandwalker/button-lock/issues/10
+    (lambda (event)
+      (interactive "e")
+      (let ((click-pos (posn-point (event-end event))))
+	(save-mark-and-excursion
+	 (save-match-data
+	   ;; This is clunky, but with grouping the properties may not extend to
+	   ;; the whole regexp, e.g. if you set properties on a subgroup.
+	   (goto-char (previous-single-property-change click-pos
+						       'button-lock))
+	   ;; now make sure we see it again to get the match-data
+	   (while (not (looking-at ,regexp))
+	     (backward-char))
+	   ,@action))))
+    ;; I like to press return on functional text to activate it.
     :keyboard-binding "RET"
+    ;; These are the rest of the properties
     ,@plist))
 
 
@@ -104,11 +106,13 @@ _c_: Contacts _m_: Mail
   ("c" (let ((ivy-initial-inputs-alist `((ivy-contacts . ,(thing-at-point 'email)))))
 	 (ivy-contacts))))
 
-(scimax-functional-text
- thing-at-point-email-regexp
- 'mail-address/body
- :face (list 'link)
- :help-echo "Click me to send a message from emacs")
+(defun sf-activate-emails ()
+  (interactive)
+  (scimax-functional-text
+   thing-at-point-email-regexp
+   'mail-address/body
+   :face (list 'link)
+   :help-echo "Click me to send a message from emacs"))
 
 ;; * Username handles
 ;;
@@ -155,13 +159,14 @@ _G_: GitLab     _l_: LinkedIn _r_: reddit  _t_: Twitter
   ("r" (@username-open "https://www.reddit.com/user/%s/"))
   ("t" (@username-open "https://twitter.com/%s")))
 
-
-(scimax-functional-text
- @username-handle-regexp
- '@username/body
- :grouping 2
- :face (list 'link)
- :help-echo "Click me to open username.")
+(defun sf-activate-usernames ()
+  (interactive)
+  (scimax-functional-text
+   @username-handle-regexp
+   '@username/body
+   :grouping 2
+   :face (list 'link)
+   :help-echo "Click me to open username."))
 
 
 ;; * Hashtags
@@ -190,13 +195,14 @@ _f_: Facebook _i_: Instagram  _o_: org-tag  _t_: Twitter"
   ("o" (org-tags-view nil (hashtag-at-p)))
   ("t" (hashtag-open "https://twitter.com/hashtag/%s")))
 
-
-(scimax-functional-text
- hashtag-regexp
- 'hashtag/body
- :grouping 2
- :face (list 'link)
- :help-echo "Click me to open the hashtag.")
+(defun sf-activate-hashtags ()
+  (interactive)
+  (scimax-functional-text
+   hashtag-regexp
+   'hashtag/body
+   :grouping 2
+   :face (list 'link)
+   :help-echo "Click me to open the hashtag."))
 
 ;; * Github
 ;; ** Github issues
@@ -230,11 +236,13 @@ _g_: Github"
 			project-name issue)))
       url)))
 
-(scimax-functional-text
- github-issue-regexp
- 'github-issue/body
- :face (list 'link)
- :help-echo "Click me to open issue at Github.")
+(defun sf-activate-github-issues ()
+  (interactive)
+  (scimax-functional-text
+   github-issue-regexp
+   'github-issue/body
+   :face (list 'link)
+   :help-echo "Click me to open issue at Github."))
 
 ;; ** Github pull requests
 ;; pull request #146
@@ -269,11 +277,13 @@ _g_: Github"
 	 (when-let (url (pull-request-at-p))
 	   (browse-url url)))))
 
-(scimax-functional-text
- pull-request-regexp
- 'github-pull-request/body
- :face (list 'link)
- :help-echo "Click me to open pull request at Github.")
+(defun sf-activate-github-pull-requests ()
+  (interactive)
+  (scimax-functional-text
+   pull-request-regexp
+   'github-pull-request/body
+   :face (list 'link)
+   :help-echo "Click me to open pull request at Github."))
 
 ;; ** Github commits
 ;; Open a commit in a browser.
@@ -310,11 +320,13 @@ _g_: Github _m_: Magit log
 	 (browse-url url)))
   ("m" (magit-log (list (third (github-commit-at-p))))))
 
-(scimax-functional-text
- github-commit-regexp
- 'git-commit/body
- :face (list 'link)
- :help-echo "Click me to open the commit on Github.")
+(defun sf-activate-git-commits ()
+  (interactive)
+  (scimax-functional-text
+   github-commit-regexp
+   'git-commit/body
+   :face (list 'link)
+   :help-echo "Click me to open the commit on Github."))
 
 (provide 'scimax-functional-text)
 

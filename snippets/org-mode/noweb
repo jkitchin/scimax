@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: noweb with completion
+# key: nw
+# --
+<<${1:$$(yas-choose-value
+         (org-element-map (org-element-parse-buffer) 'src-block
+          (lambda (src-block)
+           (when-let (name (org-element-property :name src-block))
+             name))))}>>$0

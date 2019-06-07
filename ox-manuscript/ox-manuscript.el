@@ -108,6 +108,38 @@ if you should continue to the next step."
 				  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 ;; ** <<Springer journals>>
+(add-to-list 'org-latex-classes '("svjour"
+				  "%%%%%%%%%%%%%%%%%%%%%%%% Springer-Verlag %%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\\begin{filecontents}{leer.eps}
+%!PS-Adobe-2.0 EPSF-2.0
+%%CreationDate: Mon Jul 13 16:51:17 1992
+%%DocumentFonts: (atend)
+%%Pages: 0 1
+%%BoundingBox: 72 31 601 342
+%%EndComments
+
+gsave
+72 31 moveto
+72 342 lineto
+601 342 lineto
+601 31 lineto
+72 31 lineto
+showpage
+grestore
+%%Trailer
+%%DocumentFonts: Helvetica
+\\end{filecontents}
+\\documentclass{svjour}
+ [NO-DEFAULT-PACKAGES]
+ [PACKAGES]
+ [EXTRA]"
+				  ("\\section{%s}" . "\\section*{%s}")
+				  ("\\subsection{%s}" . "\\subsection*{%s}")
+				  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+				  ("\\paragraph{%s}" . "\\paragraph*{%s}")
+				  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
 (add-to-list 'org-latex-classes '("svjour3"
 				  "\\documentclass{svjour3}
  [NO-DEFAULT-PACKAGES]

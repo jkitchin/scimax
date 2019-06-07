@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: org-option-keyword
+# key: ok
+# --
+#+${1:$$(yas-choose-value org-options-keywords)} $0

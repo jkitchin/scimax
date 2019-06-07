@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ase Atoms get_forces
+# key: agf
+# --
+${1:atoms}.get_forces()$0

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: gitter handle
+# key: gh
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+${1:`(sg-insert-user-in-room)`}

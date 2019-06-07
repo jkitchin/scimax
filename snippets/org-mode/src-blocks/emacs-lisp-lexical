@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: emacs-lisp with :lexical t
+# key: <ell
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+BEGIN_SRC emacs-lisp :lexical t
+$0
+#+END_SRC

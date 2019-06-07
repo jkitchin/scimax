@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bibliography with completion
+# key: bib
+# --
+bibliography:${1:$$(yas-choose-value (org-ref-find-bibliography))}

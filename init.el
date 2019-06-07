@@ -110,6 +110,8 @@
 (when (file-directory-p (expand-file-name "emacs-win" scimax-dir))
   (load-library "help"))
 
+(setq gc-cons-threshold 800000)
+
 (provide 'init)
 
 ;;; init.el ends here

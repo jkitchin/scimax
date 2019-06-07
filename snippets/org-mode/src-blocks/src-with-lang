@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: src block and language choice
+# key: <sl
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# type: command
+# --
+(yas-expand-snippet (scimax-get-src-block-with-lang-snippet))

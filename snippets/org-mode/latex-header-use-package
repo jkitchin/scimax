@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: latex header usepackage with completion on installed packages
+# key: lhp
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+latex_header: \usepackage{${1:$$(yas-choose-value scimax-installed-latex-packages)}}$0

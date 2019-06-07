@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: plt.ylabel
+# key: pyl
+# --
+plt.ylabel($0)

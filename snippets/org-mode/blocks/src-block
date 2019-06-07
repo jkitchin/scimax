@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: src-block
+# key: <s
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+BEGIN_SRC $0
+
+#+END_SRC

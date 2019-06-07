@@ -3,15 +3,18 @@
 ;;; Commentary:
 ;;
 (require 'cl)
+(require 's)    ; for s-trim
 (require 'org)
 (require 'emacsql-sqlite)
+
+;;; Code:
 
 (defcustom org-db-root "~/org-db/"
   "Root directory for db files."
   :group 'org-db)
 
 (defcustom org-db-name "org-db.sqlite"
-  "Name of the sqlite database file"
+  "Name of the sqlite database file."
   :group 'org-db)
 
 (defcustom org-db-index-content nil
@@ -22,7 +25,7 @@
   (make-directory org-db-root t))
 
 (defvar org-db (emacsql-sqlite (expand-file-name org-db-name org-db-root))
-  "Variable for the org-db connection.")
+  "Variable for the ‘org-db’ connection.")
 
 (defvar org-db-queue '()
   "A list of files that need to be updated.")
@@ -34,16 +37,16 @@
   "A list of regexps of files (including their path) to ignore.")
 
 (defvar org-db-ignore-tags '()
-  "A list of tags to exclude from the database")
+  "A list of tags to exclude from the database.")
 
 (defvar org-db-ignore-properties '("RESULT")
-  "A list of properties to exclude from the database")
+  "A list of properties to exclude from the database.")
 
 (defvar org-db-ignore-keywords '( )
-  "A list of keywords to exclude from the database")
+  "A list of keywords to exclude from the database.")
 
 (defvar org-db-debug nil
-  "if non-nil log messages.")
+  "If non-nil log messages.")
 
 (setq org-db-debug t)
 
@@ -153,7 +156,7 @@
 
 
 (defun org-db-get-filename-id (fname)
-  "Returns the rowid corresponding to FNAME.
+  "Return the rowid corresponding to FNAME.
 Adds FNAME to the database if it doesn't exist."
   (org-db-connect)
   (or
@@ -192,7 +195,8 @@ Adds FNAME to the database if it doesn't exist."
 
 
 (defun org-db-update-buffer (&optional force)
-  "Update the entries in the database for the currently visited buffer."
+  "Update the entries in the database for the currently visited buffer.
+Optional argument FORCE. if non-nil force the buffer to be added."
   (interactive "P")
   (org-db-connect)
   (save-buffer)
@@ -381,7 +385,7 @@ Adds FNAME to the database if it doesn't exist."
 
 
 (defun org-db-hook-function ()
-  "Function to run when org-mode starts."
+  "Function to run after starting ‘org-mode’."
   ;; Run when we open in case it changed from some external program. Only for
   ;; org and org_archive files, and not just when we enter org-mode for some
   ;; reason.
@@ -403,13 +407,14 @@ Adds FNAME to the database if it doesn't exist."
 
 ;; * Idle timer to update
 
-(defun org-db-process-queue (&optional arg)
-  "Update all the files in `org-db-queue'."
+(defun org-db-process-queue (&optional now)
+  "Update all the files in `org-db-queue'.
+Use a prefix ARG to process now."
   (interactive "P")
   (org-db-connect)
   (catch 'done
     (while org-db-queue
-      (unless (or arg (current-idle-time))
+      (unless (or now (current-idle-time))
 	(throw 'done nil))
       (org-db-log "Updating org-db for files %s." org-db-queue)
       (let* ((filename (pop org-db-queue))
@@ -436,7 +441,7 @@ Adds FNAME to the database if it doesn't exist."
 
 (defun org-db-refresh (&optional force)
   "Update all the files in the database.
-Use a prefix arg to force updates."
+Use a prefix arg to FORCE updates."
   (interactive "P")
   (let* ((files (emacsql org-db [:select [filename] :from files :order-by rowid :asc]))
 	 (N (length files))
@@ -459,7 +464,8 @@ Use a prefix arg to force updates."
 
 
 (defun org-db-index (path  &optional recursive)
-  "Index all the org-files in PATH."
+  "Index all the org-files in PATH.
+Optional RECURSIVE is non-nil find files recursively."
   (interactive (list (read-directory-name "Path: ")
 		     current-prefix-arg))
   (let* ((enable-local-variables nil)
@@ -542,7 +548,7 @@ Use a prefix arg to force updates."
 ;; * org-db-locations
 
 (defun org-db-locations-candidates ()
-  "Returns a list of headings with an ADDRESS property."
+  "Return a list of headings with an ADDRESS property."
   (let ((locations (emacsql org-db [:select [headlines:title headline-properties:value headlines:tags files:filename headlines:begin]
 					    :from headlines
 					    :inner :join headline-properties :on (=  headlines:rowid headline-properties:headline-id)
@@ -591,6 +597,7 @@ Use a prefix arg to force updates."
 
 ;; * org-db headlines
 (defun org-db-heading-candidates ()
+  "Return candidates for ivy or helm selection."
   (let* ((headings (emacsql org-db [:select [headlines:level headlines:title headlines:tags
 							     files:filename headlines:begin]
 					    :from headlines
@@ -609,6 +616,7 @@ Use a prefix arg to force updates."
     candidates))
 
 (defun org-db-open-heading ()
+  "Use helm to select and open a heading."
   (interactive)
   (helm :sources (helm-build-sync-source "org-db-headlines"
 		   :candidates (org-db-heading-candidates)
@@ -635,14 +643,14 @@ Use a prefix arg to force updates."
 ;; * org-db files
 
 (defun org-db-open-file ()
-  "Open a file in org-db with completion."
+  "Open a file in ‘org-db’ with completion."
   (interactive)
   (find-file (completing-read "File: " (mapcar 'car (emacsql org-db [:select [filename]
 									     :from files
 									     :order :by filename])))))
 
 (defun org-db-open-recent-file ()
-  "Open a recent file in org-db with completion."
+  "Open a recent file in ‘org-db’ with completion."
   (interactive)
   (let ((candidates (mapcar (lambda (x)
 			      (cons (format "%s %s" (cdr x) (car x)) (car x)))

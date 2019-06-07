@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: numpy docstring
+# key: npd
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# type: command
+# --
+(yas-expand-snippet (scimax-get-numpy-docstring-snippet))

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: org-mode options keyword with completion
+# key: oo
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# expand-env: ((options (-filter (lambda (x) (not (null x))) (mapcar (lambda (al) (nth 2 al)) org-export-options-alist))))
+# --
+${1:$$(yas-choose-value options)}:$0

@@ -1,0 +1,13 @@
+The idea of this block is that you can use it to incorporate the contents of an element into tangled code blocks using noweb syntax. This allows you to pull in examples, docstrings, etc.
+
+#+name: element-to-string
+#+BEGIN_SRC emacs-lisp :var name=""
+(let* ((named-element (org-element-map (org-element-parse-buffer) org-element-all-elements
+                        (lambda (element)
+                          (when (string= (org-element-property :name element) name)
+                            element))
+                        nil t))
+       (result (buffer-substring (org-element-property :contents-begin named-element)
+                                 (org-element-property :contents-end named-element))))
+  (format "\"%s\"" (replace-regexp-in-string "\\\"" "\\\\\"" result))) ;; escape quote
+#+END_SRC

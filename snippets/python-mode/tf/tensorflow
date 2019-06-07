@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: import tensorflow
+# key: itf
+# --
+import tensorflow as tf

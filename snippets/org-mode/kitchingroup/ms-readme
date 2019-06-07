@@ -1,0 +1,29 @@
+# -*- mode: snippet -*-
+# name: ms-readme
+# key: krm
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+TITLE: Kitchingroup README
+#+VERSION: 0.1.0
+
+This repo contains several documents we will use for communication and documentation of your projects.
+
+[[elisp:nb-agenda]] This link will show you a list of tasks and their due dates.
+
+[[./ms-schedule.org]] contains a list of tasks we will complete over the next year.
+
+
+* Reports
+
+There should be a directory called [[./reports]] which will contain subdirectories of weekly reports, semester reports, and your final report. There will usually be links in the tasks that will open these reports in the format I would like them for you to complete.
+
+* Using this repo
+
+The documents in this repo are in a version control system (VCS) called git. You have a local copy of them which you can edit. When you are done, you save the files, commit them to the VCS and push the changes to Github. Then, I can pull your changes to my copy, review them, add comments, etc. When I am done, I will push my edits back to GitHUB. You can then pull my changes down for your review.
+
+It will take some practice and some time to understand how it all works.
+
+1. You can always edit your local copy.
+2. You can always commit your changes locally.
+3. If nobody has pushed any changes to the remote repo since you updated, you can push your new commits.
+4. If anyone has pushed any changes to the remote repo since you updated, you /have/ to pull their changes, merge them with your changes, commit the merge, and then push them to the remote repo. The merge may result in conflicts which have to be resolved before you can commit and push the changes. The best way to avoid conflicts is communication. We tell each other when we have pushed changes for review, and then avoid further modification until we tell each other there are reviews to pull and read.
