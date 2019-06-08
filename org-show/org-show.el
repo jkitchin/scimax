@@ -205,7 +205,7 @@ slide order."
   (setq org-show-presentation-file (expand-file-name (buffer-name)))
   (beginning-of-buffer)
   (setq org-tags-column org-show-tags-column)
-  (org-set-tags-command '(4) t)
+  (org-set-tags-command '(4))
 
   (org-show-initialize)
   ;; hide slide tags
@@ -276,7 +276,7 @@ Try to reset the state of your Emacs. It isn't perfect ;)"
   (set-frame-name (if (buffer-file-name)
 		      (abbreviate-file-name (buffer-file-name))))
   (setq org-tags-column org-show-original-tags-column)
-  (org-set-tags-command '(4) t)
+  (org-set-tags-command '(4))
   (setq *org-show-running* nil)
   (org-show-mode -1))
 
