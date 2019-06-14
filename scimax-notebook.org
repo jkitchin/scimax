@@ -547,12 +547,11 @@ Following a link means opening the file it points to.
 	 ((string-match "\\<[0-9]*\\>" link-target)
 	  (forward-line (- (string-to-number link-target) 1)))
 	 ;; a pattern like c23 means go to char 23
-	 ((string-match "c\\([0-9]*\\)" link-target)
+	 ((string-match "^c\\([0-9]*\\)" link-target)
 	  (goto-char (string-to-number (match-string 1 link-target))))
-	 ;; Everything else means search for it. I don't know why I have to
-	 ;; use goto-char here. I thought it should just go.
 	 (t
-	  (goto-char (re-search-forward link-target nil 'mv)))))))))
+	  (goto-char (point-min))
+	  (goto-char (re-search-forward (regexp-quote link-target) nil t)))))))))
 
 (defun nb-follow-other (path &optional new-frame)
   "Open the project at PATH in other window."
