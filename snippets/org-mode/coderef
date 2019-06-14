@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: coderef
+# key: cr
+# Insert a coderef and copy a link to it.
+# --
+${`(let* ((anchor (substring (md5 (current-time-string)) 0 8))
+	       (src (org-element-context))
+	       (caption (org-element-property :caption src))
+	       (name (org-element-property :name src))
+	       (name-link (if (and name caption) (format " (Listing [[%s]])" name) "")))
+	    (prog1
+		(format "%s (ref:%s)" comment-start anchor)
+	    (kill-new (format "line [[(%s)]]%s" anchor name-link))))`}

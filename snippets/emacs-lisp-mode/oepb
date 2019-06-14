@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: org-element-parse-buffer
+# key: oepb
+# --
+(org-element-parse-buffer)

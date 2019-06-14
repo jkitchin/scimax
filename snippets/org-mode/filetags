@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: filetags keyword
+# key: ft
+# --
+#+filetags: $0
