@@ -215,6 +215,7 @@ them with the full version."
 (defcustom scimax-chemical-formula-abbreviations
   '(("co2" "CO_{2}")
     ("n2" "N_{2}")
+    ("h2" "H_{2}")
     ("h2o" "H_{2}O")
     ("ch4" "CH_{4}")
     ("c2h2" "C_{2}H_{2}")
