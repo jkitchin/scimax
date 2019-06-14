@@ -499,6 +499,7 @@ Following a link means opening the file it points to.
 #+BEGIN_SRC emacs-lisp  :tangle yes :results silent
 (defun nb-follow (path)
   "Open the project at PATH."
+  (interactive (list (org-element-property :path (org-element-context))))
   (destructuring-bind (project fpath link-target) (nb-parse-path path)
     (let* ((projects (remove nil (append (projectile-relevant-known-projects)
 					 (list
@@ -553,7 +554,109 @@ Following a link means opening the file it points to.
 	 (t
 	  (goto-char (re-search-forward link-target nil 'mv)))))))))
 
+(defun nb-follow-other (path &optional new-frame)
+  "Open the project at PATH in other window."
+  (interactive (list (org-element-property :path (org-element-context))
+		     current-prefix-arg))
+  (destructuring-bind (project fpath link-target) (nb-parse-path path)
+    (let* ((projects (remove nil (append (projectile-relevant-known-projects)
+					 (list
+					  (when (projectile-project-p)
+					    (projectile-project-root))))))
+	   ;; These are projects that match the project spec
+	   (project-candidates (-filter (lambda (p)
+					  (string-match (concat project "/\\'") p))
+					projects))
+	   ;; These are projects that match the spec, and that have the file we want.
+	   (candidates (-filter (lambda (p)
+				  (file-exists-p (expand-file-name fpath p)))
+				project-candidates)))
+      (cond
+       ((null project-candidates)
+	(error "%s is not a known project" project))
+       ((null candidates)
+	(error "%s was not found in %s\nproject-candidates: %S\ncandidates: %s" fpath project project-candidates candidates))
+       ;; one project, and the file exists
+       ((and (= 1 (length candidates))
+	     (file-exists-p (expand-file-name fpath (car candidates))))
+	(org-mark-ring-push)
+	(if new-frame
+	    (find-file-other-frame (expand-file-name fpath (car candidates)))
+	  (find-file-other-window (expand-file-name fpath (car candidates)))))
+       ;; multiple matches, select project interactively
+       (t
+	(org-mark-ring-push)
+	(if new-frame
+	    (find-file-other-frame (expand-file-name fpath (completing-read "Project: " candidates)))
+	  (find-file-other-window (expand-file-name fpath (completing-read "Project: " candidates))))))
+      ;; If we get here, we have not errored and should have opened a file. Now,
+      ;; link-target the end link.
+      (cond
+       ((eq major-mode 'org-mode)
+	(when (not (or (null link-target) (string= "" link-target)))
+	  (cond
+	   ((string-match "\\<[0-9]+\\>" link-target)
+	    (forward-line (- (string-to-number link-target) 1)))
+	   ((string-match "\\<c\\([0-9]+\\)\\>" link-target)
+	    (goto-char (string-to-number (match-string 1 link-target))))
+	   (t
+	    (org-open-link-from-string (format "[[%s]]" link-target)))))
+	(org-show-entry))
+       ;; everything else
+       (t
+	(cond
+	 ;; if it is just a number it is a line number
+	 ((string-match "\\<[0-9]*\\>" link-target)
+	  (forward-line (- (string-to-number link-target) 1)))
+	 ;; a pattern like c23 means go to char 23
+	 ((string-match "c\\([0-9]*\\)" link-target)
+	  (goto-char (string-to-number (match-string 1 link-target))))
+	 ;; Everything else means search for it. I don't know why I have to
+	 ;; use goto-char here. I thought it should just go.
+	 (t
+	  (goto-char (re-search-forward link-target nil 'mv)))))))))
 
+
+(defun nb-follow-other-frame (path)
+  "Follow path in other frame."
+  (interactive (list (org-element-property :path (org-element-context))))
+  (nb-follow-other path t))
+
+#+END_SRC
+
+
+We may want to open this link with a system program, e.g. if it is an ipynb or something.
+
+#+BEGIN_SRC emacs-lisp  :tangle yes :results silent
+(defun nb-follow-sys (path)
+  "Open the project at PATH with a system program."
+  (interactive (list (org-element-property :path (org-element-context))))
+  (destructuring-bind (project fpath link-target) (nb-parse-path path)
+    (let* ((projects (remove nil (append (projectile-relevant-known-projects)
+					 (list
+					  (when (projectile-project-p)
+					    (projectile-project-root))))))
+	   ;; These are projects that match the project spec
+	   (project-candidates (-filter (lambda (p)
+					  (string-match (concat project "/\\'") p))
+					projects))
+	   ;; These are projects that match the spec, and that have the file we want.
+	   (candidates (-filter (lambda (p)
+				  (file-exists-p (expand-file-name fpath p)))
+				project-candidates)))
+      (cond
+       ((null project-candidates)
+	(error "%s is not a known project" project))
+       ((null candidates)
+	(error "%s was not found in %s\nproject-candidates: %S\ncandidates: %s" fpath project project-candidates candidates))
+       ;; one project, and the file exists
+       ((and (= 1 (length candidates))
+	     (file-exists-p (expand-file-name fpath (car candidates))))
+	(org-mark-ring-push)
+	(org-open-file-with-system (expand-file-name fpath (car candidates))))
+       ;; multiple matches, select project interactively
+       (t
+	(error "no match found"))))))
 #+END_SRC
 
 ** Store a project link
@@ -563,7 +666,7 @@ This adds a capability for using C-c l to store a link in org-mode. It creates a
 #+BEGIN_SRC emacs-lisp  :tangle yes :results silent
 (defun nb-store-link ()
   "Store a project link to a file in a project."
-  (if (not (projectile-project-p))
+  (if (or (null (buffer-file-name)) (not (projectile-project-p)))
       nil
     (let* ((root (projectile-project-root))
 	   (current-file (buffer-file-name))
@@ -576,7 +679,8 @@ This adds a capability for using C-c l to store a link in org-mode. It creates a
        ;; Note I use the concat here just to avoid fontifying errors in the link
        ;; in the org file.
        :link (format (concat "nb:" "%s::%s::%s") project relpath link-target)
-       :description ""))))
+       :description "")
+      (format (concat "nb:" "%s::%s::%s") project relpath link-target))))
 
 
 #+END_SRC
@@ -622,7 +726,8 @@ If we can't find a project or file, it will be red."
 	   (project (nth 0 parts))
 	   (fpath (nth 1 parts))
 	   (follow (nth 2 parts))
-	   (projects (projectile-relevant-known-projects))
+	   (projects (append (projectile-relevant-known-projects)
+			     (list (projectile-project-root))))
 	   (project-candidates (-filter (lambda (p)
 					  (string-match project (or p "")))
 					projects))
@@ -636,7 +741,7 @@ If we can't find a project or file, it will be red."
         '(:foreground "red"))
        ;; one project, and the file exists
        ((= 1 (length candidates))
-        'org-link)
+	'(:foreground "darkviolet"))
        ;; Multiple projects seem to match.
        ((> (length candidates) 1)
         '(:foreground "orange"))))))
@@ -656,7 +761,8 @@ The links have a tooltip that tells you the path that will be opened, or helpful
       (goto-char position)
       (let ((path (org-element-property :path (org-element-context))))
   	(destructuring-bind (project fpath follow) (nb-parse-path path)
-  	  (let* ((projects (projectile-relevant-known-projects))
+  	  (let* ((projects (append (projectile-relevant-known-projects)
+				   (list (projectile-project-root))))
   		 (project-candidates (-filter (lambda (p)
   						(string-match project p))
   					      projects))
@@ -664,7 +770,6 @@ The links have a tooltip that tells you the path that will be opened, or helpful
   		 (candidates (-filter (lambda (p)
   					(file-exists-p (expand-file-name fpath p)))
   				      project-candidates)))
-
   	    (cond
   	     ((null project-candidates)
   	      (format "%s is not a known project." project))
@@ -851,7 +956,10 @@ It seems like we might want a hydra for various actions on a link. This would be
   "scimax-notebook"
   ("b" nb-link-bash "bash")
   ("e" nb-link-explorer "explorer")
-  ("f" nb-link-projectile-find-file "find-file"))
+  ("f" nb-link-projectile-find-file "find-file")
+  ("o" nb-follow-other "open other window")
+  ("O" nb-follow-other-frame "Open other frame")
+  ("s" nb-follow-sys "Open with system program"))
 
 
 (defun nb-event (event)
@@ -869,14 +977,16 @@ Here is our keymap.
 
 #+BEGIN_SRC emacs-lisp :tangle yes :results silent
 (defvar nb-link-map (let ((map (copy-keymap org-mouse-map)))
+		      (define-key map (kbd "M-o") 'nb-follow-other)
+		      (define-key map (kbd "M-O") 'nb-follow-other-frame)
+		      (define-key map (kbd "M-s") 'nb-follow-sys)
 		      (define-key map (kbd "M-b") 'nb-link-bash)
 		      (define-key map (kbd "M-e") 'nb-link-explorer)
 		      (define-key map (kbd "M-f") 'nb-link-projectile-find-file)
+		      (define-key map (kbd "M-h") 'nb-hydra/body)
 		      (define-key map (kbd "<C-mouse-1>") 'nb-event)
 		      map)
   "Key bindings for notebook links")
-
-
 #+END_SRC
 
 
