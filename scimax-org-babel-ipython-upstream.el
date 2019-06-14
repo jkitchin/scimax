@@ -1109,9 +1109,7 @@ This puts an image overlay over "
       (when (and (eq 'export-block (car el)) (not (ov-at)))
 	(setq html (org-element-property :value el)
 	      beg (org-element-property :begin el)
-	      end (save-excursion (goto-char (org-element-property :end el))
-				  (forward-line (* -1 (org-element-property :post-blank el)))
-				  (point))
+	      end (save-excursion (re-search-forward "^#\\+END_EXPORT"))
 	      tf (make-temp-file "ob-ipython-html" nil ".html" html)
 	      png (concat (file-name-sans-extension tf) ".png"))
 	;; (shell-command (format "wkhtmltoimage %s %s" tf png))
@@ -1122,8 +1120,15 @@ This puts an image overlay over "
 	(overlay-put ov 'display img)
 	(overlay-put ov 'face 'default)
 	(overlay-put ov 'org-image-overlay t)
+	(overlay-put ov 'mouse-face 'highlight)
 	(overlay-put ov 'modification-hooks
 		     (list 'org-display-inline-remove-overlay))
+	(overlay-put ov 'local-map (let ((map (make-sparse-keymap)))
+				     (define-key map [mouse-1]
+				       `(lambda ()
+					  (interactive)
+					  (org-open-file ,tf)))
+				     map))
 	(push ov org-inline-image-overlays)))))
 
 
