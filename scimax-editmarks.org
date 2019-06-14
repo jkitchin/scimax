@@ -205,8 +205,8 @@ Export functions should take one argument, the backend as a symbol, and they are
  #+BEGIN_SRC emacs-lisp
 (defvar sem-editmarks
   '((delete :open-marker "{>-" :close-marker "-<}"
-	    :marker-face (:foreground "red" :weight ultra-light)
-	    :face (:foreground "red" :weight bold)
+	    :marker-face (:foreground "red" :weight ultra-light :strike-through t)
+	    :face (:foreground "red" :weight bold :strike-through t)
 	    :keymap sem-editmark-content-map
 	    :help-echo "Deletion. Right click for menu"
 	    :accept-func sem-delete-editmark
@@ -493,7 +493,7 @@ The standard font-lock uses regexps for font-locking. We construct the regexp an
 	     ;; content
 	     `(2 ',(list 'face (plist-get properties :face)
 			 'sem-content t
-			 'local-map sem-editmark-content-map
+			 'local-map (or (plist-get properties :keymap) sem-editmark-content-map)
 			 'help-echo (plist-get properties :help-echo)))
 	     ;; close-marker
 	     `(3 ',(list 'face (plist-get properties :marker-face)
