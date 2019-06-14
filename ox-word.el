@@ -35,7 +35,7 @@
   (let* ((pandoc-version (ox-export-get-pandoc-version))
          (pandoc-command
           (if (>= pandoc-version 2)
-              "pandoc -s %s%s\"%s\" --to=docx+smart -o \"%s\""
+              "pandoc -F pandoc-crossref -s %s%s\"%s\" --to=docx+smart -o \"%s\""
             "pandoc -s -S %s%s\"%s\" -o \"%s\"")))
     (shell-command (format pandoc-command biboption csl tex-file docx-file))))
 
@@ -98,7 +98,7 @@
 
     (org-latex-export-to-latex async subtreep visible-only body-only options)
     ;; Now we do some post-processing on the tex-file
-    ;; Tables first.
+    ;; Tables first. It looks like this should be inserting numbers.
     (let* ((table-regex "\\\\begin{table}.*
 \\\\caption{\\(?1:\\(?2:.*\\)\\\\label{\\(?3:.*\\)}\\)}")
     	   (buf (find-file-noselect tex-file))
