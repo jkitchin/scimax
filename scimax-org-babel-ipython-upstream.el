@@ -186,6 +186,17 @@ cmd is run when you click on the button.
 help is a string for a tooltip."
   :group 'ob-ipython)
 
+
+(defcustom ob-ipython-preview-html t
+  "if non-nil try previewing html."
+  :group 'ob-ipython)
+
+
+(defcustom ob-ipython-preview-html-size 800
+  "Size in pixels to make the html previews."
+  :group 'ob-ipython)
+
+
 (defun ob-ipython-key-bindings ()
   "Function to define key-bindings.
 Usually called in a hook function."
@@ -1088,6 +1099,34 @@ FILE-OR-NIL is not used in this function."
 		(format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value))))
 
 
+(defun ob-ipython-html-font-lock (limit)
+  "Font-lock rule for html blocks.
+This puts an image overlay over "
+  (while (re-search-forward "^#\\+BEGIN_EXPORT html" limit t)
+    (let* ((el (org-element-context))
+	   tf png beg end ov img
+	   html)
+      (when (and (eq 'export-block (car el)) (not (ov-at)))
+	(setq html (org-element-property :value el)
+	      beg (org-element-property :begin el)
+	      end (save-excursion (goto-char (org-element-property :end el))
+				  (forward-line (* -1 (org-element-property :post-blank el)))
+				  (point))
+	      tf (make-temp-file "ob-ipython-html" nil ".html" html)
+	      png (concat (file-name-sans-extension tf) ".png"))
+	;; (shell-command (format "wkhtmltoimage %s %s" tf png))
+	(call-process-shell-command (format "wkhtmltoimage %s %s" tf png))
+	(setq img (create-image (expand-file-name png)
+				'imagemagick nil :width ob-ipython-preview-html-size)
+	      ov (make-overlay beg end))
+	(overlay-put ov 'display img)
+	(overlay-put ov 'face 'default)
+	(overlay-put ov 'org-image-overlay t)
+	(overlay-put ov 'modification-hooks
+		     (list 'org-display-inline-remove-overlay))
+	(push ov org-inline-image-overlays)))))
+
+
 (defun ob-ipython-format-text/latex (file-or-nil value)
   "Format VALUE for text/latex mime-types.
 FILE-OR-NIL is not used in this function."
@@ -1486,7 +1525,12 @@ Note, this does not work if you run the block async."
 	(font-lock-add-keywords
 	 nil
 	 `((,(ob-ipython-button-font-lock text cmd help-echo) (0  'link t)))
-	 t)))
+	 t))
+  (when (and ob-ipython-preview-html (executable-find "wkhtmltoimage"))
+    (font-lock-add-keywords
+     nil
+     '((ob-ipython-html-font-lock (0  'font-lock-keyword-face t)))
+     t)))
 
 (add-hook 'org-mode-hook 'ob-ipython-activate-buttons t)
 
