@@ -232,6 +232,16 @@ Export functions should take one argument, the backend as a symbol, and they are
 	     :include-author t
 	     :export sem-export-comment)
 
+    (reply :open-marker "{r>" :close-marker "<r}"
+	     :marker-face (:foreground "DarkOrange3"  :weight ultra-light)
+	     :face (:foreground "DarkOrange3" :weight bold)
+	     :keymap sem-editmark-content-map
+	     :help-echo "Reply. Right click for menu"
+	     :accept-func sem-delete-editmark
+	     :reject-func sem-delete-editmark
+	     :include-author t
+	     :export sem-export-comment)
+
     (task :open-marker "{>*" :close-marker "*<}"
 	  :marker-face (:foreground "SteelBlue4" :weight ultra-light)
 	  :face (:foreground "SteelBlue4" :weight bold)
