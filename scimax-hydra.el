@@ -908,7 +908,7 @@ register/resume/replace
 Register                     Resume             Replace
 ------------------------------------------------------------------
 _j_: jump to register        _h_: helm resume   _q_: query replace
-_i_: insert regester         _v_: ivy resume    _x_: regexp replace
+_i_: insert register         _v_: ivy resume    _x_: regexp replace
 _c_: copy to register
 _a_: append to register
 _n_: number to register
