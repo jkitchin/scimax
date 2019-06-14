@@ -938,7 +938,7 @@ _l_: list registers
   "search"
   ("a" counsel-ag "ag")
   ("g" counsel-git-grep "grep")
-  ("m" multioccur "moccur")
+  ("m" multi-moccur "moccur")
   ("o" occur "occur")
   ("p" projectile-grep "project grep")
   ("r" isearch-backward "search back")
