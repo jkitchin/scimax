@@ -8,7 +8,7 @@
   "Open Finder or Windows Explorer in the current directory."
   (interactive (list (if (buffer-file-name)
 			 (file-name-directory (buffer-file-name))
-		       (expand-file-name  "~/"))))
+		       (expand-file-name default-directory))))
   (cond
    ((string= system-type "gnu/linux")
     (shell-command "nautilus"))
