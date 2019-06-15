@@ -321,6 +321,7 @@ REGEXP should use constructs supported by your local `grep' command."
       (user-error "No matches for: %s" regexp))
     (xref--show-xrefs xrefs nil t)))
 
+
 (defun scimax-journal-find-regexp-last-week (regexp)
   (interactive "sSearch marked files (regexp): ")
   (scimax-journal-find-regexp-range
