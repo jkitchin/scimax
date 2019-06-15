@@ -355,7 +355,7 @@ The type of archive is determined by `nb-archive-command'."
 
 
 
-** List the tags in a notebook
+** TODO List the tags in a notebook
 
 The notebook is just a collection of org-files, so it should be possible to use the agenda commands to search for things in it using tags and properties. That means it would be helpful to get a list of tags in the notebook, e.g. to help construct the queries, or to make sure you use them consistently. Here we loop through all the org-files and collect the tags in a list. This is lightly tested, and in a large project might be slow.
 
@@ -404,6 +404,8 @@ Here are the tags in this project.
 #+RESULTS:
 | random | noexport | feature | slide | example | bug |
 
+
+
 ** Notebook menu
 
 Sometimes I find it helpful to use a menu instead of keyboard commands. This creates that menu, so it is easy to create a new notebook or open an existing one, and also to see a list of known projects. When that list gets very long it can get somewhat slow to list them all. By default the list of projects is only made once when this library is loaded. You can set =nb-scimax-update-menu-p= to be non-nil so it is updated all the time, or manually run =nb-update-scimax-projects-menu= to update it if you have new projects you want to see there.
@@ -444,6 +446,84 @@ Sometimes I find it helpful to use a menu instead of keyboard commands. This cre
 
 
 #+END_SRC
+
+
+** Searching the notebook
+
+*** Searching whole notebook for a string
+
+These search for strings in files in whole notebook. You run these commands, enter the search string and press enter. Then a new window pops up with the results.
+
+| M-x projectile-ripgrep |         | H-p sr | fast, better than grep                   |
+| M-x projectile-ag      |         | H-p ss | fast, nice interface                     |
+| M-x projectile-grep    | C-c p g |        | Not my favorite, the interface is clunky |
+
+
+This uses a counsel/ivy interface for searching.
+
+| M-x counsel-git-grep   |         | H-c g  | Only searches files in a git repo        |
+
+*** Limiting the search scope to the current directory
+
+These commands will search for text in files in the current directory.
+
+| counsel-ag   | H-c a | find in current directory using ag, recurses into directories |
+| counsel-grep |       | find in current directory using grep, does not recurse        |
+| counsel-pt   | H-c p |                                                               |
+
+*** Finding files/directories in the notebook
+
+| M-x projectile-find-file                   | C-c p f | H-p f |                                |
+| M-x projectile-find-file-dwim              |         | H-p g |                                |
+| M-x projectile-find-dir                    |         | H-p d |                                |
+| M-x projectile-dired                       |         | H-p D | open root in dired             |
+| M-x counsel-git                            |         | H-c f | limited to files in a git repo |
+| M-x projectile-find-file-in-directory      |         | H-p l | may be does not work?          |
+| M-x projectile-find-file-in-known-projects |         | H-p F | May be slow!                   |
+
+*** Searching in open project buffers
+
+| M-x projectile-multi-occur |   | H-p o |
+
+
+*** Limiting scope to some kinds of files
+
+Here is a function you can use to interactively search files by pattern. For example to find the string xref in org files you could do this:
+
+#+BEGIN_SRC emacs-lisp
+(nb-search ".org$" "xref")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ivy-xref
+  :ensure t
+  :init (if (< emacs-major-version 27)
+            (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)
+          (setq xref-show-definitions-function #'ivy-xref-show-defs)))
+
+
+(defun nb-search (file-pattern regexp)
+  "Search files matching FILE-PATTERN for REGEXP and show matches."
+  (interactive "sfile pattern: \nsSearch for: ")
+  (let* ((files (-filter (lambda (fname) (string-match file-pattern fname))
+			 (projectile-project-files (projectile-project-root))))
+	 (xrefs (cl-mapcan
+                 (lambda (file)
+		   (when (file-exists-p file)
+                     (xref-collect-matches regexp "*" file
+                                           (and (file-directory-p file)
+						ignores))))
+                 files)))
+    (unless xrefs
+      (user-error "No matches for: %s" regexp))
+    (xref--show-xrefs xrefs nil t)))
+
+
+#+END_SRC
+
+#+RESULTS:
+: nb-search
+
 
 * Notebook/project links
 
