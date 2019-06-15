@@ -187,6 +187,16 @@ help is a string for a tooltip."
   :group 'ob-ipython)
 
 
+(defcustom ob-ipython-html-to-image-program
+  (executable-find "wkhtmltoimage")
+  "Path to wkhtmltoimage, and any additional options you want."
+  :group 'ob-ipython)
+
+
+(unless ob-ipython-html-to-image-program
+  (warn "No wkhtmltoimage found. Either set `ob-ipython-html-to-image-program' to the location, or go to https://wkhtmltopdf.org/downloads.html to get and install it."))
+
+
 (defcustom ob-ipython-preview-html t
   "if non-nil try previewing html."
   :group 'ob-ipython)
@@ -1112,8 +1122,9 @@ This puts an image overlay over "
 	      end (save-excursion (re-search-forward "^#\\+END_EXPORT"))
 	      tf (make-temp-file "ob-ipython-html" nil ".html" html)
 	      png (concat (file-name-sans-extension tf) ".png"))
-	;; (shell-command (format "wkhtmltoimage %s %s" tf png))
-	(call-process-shell-command (format "wkhtmltoimage %s %s" tf png))
+	(call-process-shell-command (format "%s %s %s"
+					    ob-ipython-html-to-image-program
+					    tf png))
 	(setq img (create-image (expand-file-name png)
 				'imagemagick nil :width ob-ipython-preview-html-size)
 	      ov (make-overlay beg end))
@@ -1531,7 +1542,7 @@ Note, this does not work if you run the block async."
 	 nil
 	 `((,(ob-ipython-button-font-lock text cmd help-echo) (0  'link t)))
 	 t))
-  (when (and ob-ipython-preview-html (executable-find "wkhtmltoimage"))
+  (when (and ob-ipython-preview-html ob-ipython-html-to-image-program)
     (font-lock-add-keywords
      nil
      '((ob-ipython-html-font-lock (0  'font-lock-keyword-face t)))
