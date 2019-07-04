@@ -28,6 +28,7 @@ commands (`scimax-user-hotspot-commands'),
 locations (`scimax-user-hotspot-locations'), org agenda files,
 recent files and bookmarks. You can set a bookmark also."
   (interactive "P")
+  (require 'helm-for-files)
   (helm :sources `(((name . "Commands")
 		    (candidates . ,scimax-user-hotspot-commands)
 		    (action . (("Open" . (lambda (x) (funcall x))))))
