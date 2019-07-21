@@ -83,7 +83,7 @@
 	 (results (car xml))
 	 (errors (xml-get-children results 'error)))
 
-    (switch-to-buffer-other-frame "*ATD*")
+    (pop-to-buffer "*ATD*")
     (erase-buffer)
     (dolist (err errors)
       (let* ((children (xml-node-children err))
