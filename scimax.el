@@ -42,6 +42,8 @@
 (setq-default abbrev-mode t)
 (setq save-abbrevs 'silently)
 
+(setq large-file-warning-threshold nil)
+
 ;; * Version control
 ;; Disable all version control. makes startup and opening files much faster
 ;; except git and svn which I actually use
