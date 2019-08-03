@@ -302,6 +302,18 @@ You can also try putting expressions in for formatting, e.g.:
   (goto-char (point-min)))
 
 
+(defun scimax-github ()
+  "Open the Github repo."
+  (interactive)
+  (browse-url "https://github.com/jkitchin/scimax"))
+
+
+(defun scimax-github-issues ()
+  "Open the Github repo issues page."
+  (interactive)
+  (browse-url "https://github.com/jkitchin/scimax/issues"))
+
+
 
 ;; * The end
 (provide 'scimax-utils)

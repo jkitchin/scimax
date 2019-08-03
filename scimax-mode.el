@@ -56,6 +56,20 @@ one and open it."
 		 user-file))
     (find-file user-file)))
 
+(defun scimax-customize-preload ()
+  "Open scimax/user/preload.el. If it does not exist, copy the example
+one and open it."
+  (interactive)
+  (let ((preload-file (expand-file-name
+		       "user/preload.el"
+		       scimax-dir)))
+    (unless (file-exists-p preload-file)
+      (copy-file (expand-file-name
+		  "user/preload.example"
+		  scimax-dir)
+		 preload-file))
+    (find-file preload-file)))
+
 (define-prefix-command 'scimax-mode-map)
 (easy-menu-define my-menu scimax-mode-map "My own menu"
   '("Scimax"
@@ -128,6 +142,9 @@ one and open it."
      ["Lookup in Thesaurus" words-thesaurus t])
     ["Update scimax" scimax-update t]
     ["Help with scimax" scimax-help t]
+    ["Scimax on github" scimax-github t]
+    ["Report a Scimax issue" scimax-github-issues t]
+    ["Customize preload.el" scimax-customize-preload t]
     ["Customize user.el" scimax-customize-user t]))
 
 
