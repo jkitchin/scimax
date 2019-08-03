@@ -2,7 +2,7 @@
 
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 
@@ -96,8 +96,8 @@ LaTeX path for class: [[${cls-path}]]
  [[elisp:(shell-command \"texdoc ${cls}\"][texdoc ${cls}]]
 
 Latex style path: [[${sty-path}]]
- 
-" 
+
+"
 			      (lambda (arg &optional extra)
 				(eval (read arg)))))))
 
@@ -118,7 +118,7 @@ Latex style path: [[${sty-path}]]
     (insert "\n\n* org-mode LaTeX compiling setup\n\n")
     (insert (format "org-latex-pdf-process = \"%s\"\n" org-latex-pdf-process))
     (if (functionp org-latex-pdf-process)
-	(insert "%s" (describe-function org-latex-pdf-process))))
+	(insert (format "%s" (describe-function org-latex-pdf-process)))))
 
   (switch-to-buffer "*scimax-latex-setup*")
   (goto-char (point-min)))
