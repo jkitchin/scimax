@@ -314,6 +314,9 @@ is positive, move after, and if negative, move before."
 ;;   (add-to-list 'org-structure-template-alist
 ;; 	       '("hy" . "src jupyter-hy")))
 
+;; ** Fortran
+(defalias 'org-babel-execute:f90 'org-babel-execute:fortran)
+
 ;; * Images in org-mode
 
 ;; default with images open
