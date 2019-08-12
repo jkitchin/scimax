@@ -11,6 +11,7 @@
   ;; On windows this solves some issues checking package signatures in the gnu elpa.
   (setq package-check-signature nil))
 
+(require 'gnutls)
 (when (and (string= "26" (substring emacs-version 0 2))
 	   (null gnutls-algorithm-priority))
   ;; This appears to be a bug in emacs 26 that prevents the gnu archive from being downloaded.
