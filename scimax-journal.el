@@ -155,7 +155,7 @@ Slow when you have a large journal or many files."
     tree))
 
 
-(defvar scimax-journal-entries (pcache-repository "scimax-journal")
+(defvar scimax-journal-entries (pcache-repository)
   "Persistent cache to store entries.")
 
 
