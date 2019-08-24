@@ -6,4 +6,3 @@
 # --
 #+latex_class: ${1:$$(yas-choose-value classes)}
 $0
-
