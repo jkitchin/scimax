@@ -808,6 +808,8 @@ Or insert those and put point in the middle to add an equation."
       (backward-char (length (cdr chars))))))
 
 
+
+
 (defun helm-insert-org-entity ()
   "Helm interface to insert an entity from `org-entities'.
 F1 inserts utf-8 character
@@ -1651,6 +1653,27 @@ It is for commands that depend on the major mode. One example is
                      (string-match "\\[X\\]\\(.*\\)$" item)
                      (match-string-no-properties 1 item))))))
 
+;; * Fixing <> fontlock in src blocks
+;;
+;; this was broken so that if you had < or > in a src block it would break
+;; parens matching.
+
+(defun org-mode-<>-syntax-fix (start end)
+  (when (eq major-mode 'org-mode)
+    (save-excursion
+      (goto-char start)
+      (while (re-search-forward "<\\|>" end t)
+	(when (get-text-property (point) 'src-block)
+	  ;; This is a < or > in an org-src block
+	  (put-text-property (point) (1- (point))
+			     'syntax-table (string-to-syntax "_")))))))
+
+(defun scimax-fix-<>-syntax ()
+  (setq syntax-propertize-function 'org-mode-<>-syntax-fix)
+  (syntax-propertize (point-max)))
+
+(add-hook 'org-mode-hook
+	  #'scimax-fix-<>-syntax)
 
 ;; * The end
 (provide 'scimax-org)
