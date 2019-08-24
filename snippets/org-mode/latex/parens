@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: latex parens
+# key: lrp
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# condition: (eq (face-at-point) 'org-latex-and-related)
+# --
+\left($0\right)

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: latex mathmode
+# key: mm
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+$${0}$
