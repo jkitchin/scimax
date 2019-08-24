@@ -280,14 +280,14 @@ You can also try putting expressions in for formatting, e.g.:
 	    (f-string "
   - git branch :: ${branch}
   - git commit :: ${commit}
-  - git remote :: ${remote}\n")))
+  - git remote :: ${remote}\n"))
 
-  (insert "\n* Executables\n"
-	  (f-string "
+    (insert "\n* Executables\n"
+	    (f-string "
 - emacs ::  ${(executable-find \"emacs\")}
 - git :: ${(executable-find \"git\")}
 - python :: ${(executable-find \"python\")}")
-	  (f-string "
+	    (f-string "
 - emacs ::  ${(executable-find \"emacs\")}
 - git :: ${(executable-find \"git\")}
     - git version :: ${(string-trim (shell-command-to-string \"git --version\"))}
@@ -296,10 +296,19 @@ You can also try putting expressions in for formatting, e.g.:
 - python :: ${(executable-find \"python\")}
 - latex :: ${(executable-find \"latex\")}
   - For more latex info click [[elisp:scimax-latex-setup]]
+- Searching tools
+  - grep :: ${(executable-find \"grep\")}
+  - ag ::  ${(executable-find \"ag\")}
+  - pt ::  ${(executable-find \"pt\")}
+  - find ::  ${(executable-find \"find\")}
+  - locate ::  ${(executable-find \"locate\")}
+- Graphics
+  - convert :: ${(executable-find \"convert\"}
+  - mogrify :: ${(executable-find \"mogrify\"}
 "))
 
-  ;; the end
-  (goto-char (point-min)))
+    ;; the end
+    (goto-char (point-min))))
 
 
 (defun scimax-github ()
