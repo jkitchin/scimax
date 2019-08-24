@@ -555,8 +555,17 @@ Here is a function you can use to interactively search files by pattern. For exa
 #+END_SRC
 
 #+RESULTS:
-: nb-search
+: nb-search-all
 
+
+** Help
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defun nb-help ()
+  "Open the org-file describing the notebook."
+  (interactive)
+  (find-file (expand-file-name "scimax-notebook.org" scimax-dir)))
+#+END_SRC
 
 * Notebook/project links
 
