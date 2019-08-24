@@ -192,78 +192,6 @@
   (add-hook 'org-mode-hook #'flycheck-mode)
   (define-key flycheck-mode-map (kbd "s-;") 'flycheck-previous-error))
 
-
-;; https://manuel-uberti.github.io/emacs/2016/06/06/spellchecksetup/
-(use-package flyspell-correct-ivy
-  :ensure t
-  :init
-  (if (file-directory-p (expand-file-name "emacs-win" scimax-dir))
-      (progn
-	;; spell-checking on windows
-	(setq ispell-program-name
-	      (expand-file-name
-	       "emacs-win/bin/hunspell"
-	       scimax-dir))
-
-	(setq ispell-dictionary "english")
-
-	(setq ispell-local-dictionary-alist
-	      `(("english"
-		 "[[:alpha:]]"
-		 "[^[:alpha:]]"
-		 "[']"
-		 t
-		 ("-d" "en_US" "-p" ,(expand-file-name
-				      "emacs-win/share/hunspell/en_US"
-				      scimax-dir))
-		 nil
-		 utf-8))))
-    (setenv "DICPATH" (expand-file-name "~/Library/Spelling"))
-    (setq ispell-program-name (executable-find "hunspell")
-	  ispell-dictionary "en_US"
-	  ispell-local-dictionary "en_US"
-	  ispell-local-dictionary-alist
-	  `(("english"
-	     "[[:alpha:]]"
-	     "[^[:alpha:]]"
-	     "[']"
-	     t
-	     ("-d" "en_US" "-p" ,(expand-file-name "~/Library/Spelling/"))
-	     nil
-	     utf-8)
-	    ("en_US"
-	     "[[:alpha:]]"
-	     "[^[:alpha:]]"
-	     "[']"
-	     t
-	     ("-d" "en_US" "-p" ,(expand-file-name "~/Library/Spelling/"))
-	     nil
-	     utf-8))
-	  flyspell-correct-interface 'flyspell-correct-ivy))
-  (add-hook 'flyspell-incorrect-hook
-	    (lambda (beg end sym)
-	      (message "%s misspelled. Type %s to fix it."
-		       (buffer-substring beg end)
-		       (substitute-command-keys
-			"\\[flyspell-correct-previous-word-generic]"))
-	      ;; return nil so word is still highlighted.
-	      nil))
-  (add-hook 'text-mode-hook
-	    (lambda ()
-	      (flyspell-mode)
-	      (flycheck-mode)))
-
-  (add-hook 'org-mode-hook
-	    (lambda ()
-	      (flyspell-mode +1)
-	      (flycheck-mode +1)))
-
-  :after flyspell
-  :config
-  (progn
-    (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)))
-
-
 (use-package flx)
 
 (use-package git-messenger
@@ -458,7 +386,6 @@
   (setq sml/theme 'light)
   (sml/setup))
 
-
 ;; keep recent commands available in M-x
 (use-package smex)
 
@@ -513,6 +440,10 @@
   :bind ("H-k" . ox-clip-formatted-copy))
 
 (use-package scimax-email
+  :ensure nil
+  :load-path scimax-dir)
+
+(use-package scimax-spellcheck
   :ensure nil
   :load-path scimax-dir)
 
