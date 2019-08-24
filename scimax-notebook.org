@@ -505,8 +505,41 @@ Here is a function you can use to interactively search files by pattern. For exa
 (defun nb-search (file-pattern regexp)
   "Search files matching FILE-PATTERN for REGEXP and show matches."
   (interactive "sfile pattern: \nsSearch for: ")
-  (let* ((files (-filter (lambda (fname) (string-match file-pattern fname))
-			 (projectile-project-files (projectile-project-root))))
+  (let* ((files (projectile-project-files (projectile-project-root)))
+	 (ignores (nconc (mapcar
+                          (lambda (s) (concat s "/"))
+                          grep-find-ignored-directories)
+                         grep-find-ignored-files))
+	 (xrefs (cl-mapcan
+                 (lambda (file)
+		   (when (file-exists-p file)
+                     (xref-collect-matches regexp "*" file
+                                           (and (file-directory-p file)
+						ignores))))
+                 files)))
+    (unless xrefs
+      (user-error "No matches for: %s" regexp))
+    (xref--show-xrefs xrefs nil t)))
+
+
+(defun nb-search-all (regexp)
+  "Search files for REGEXP and show matches."
+  (interactive "sSearch for: ")
+  (let* ((files (projectile-project-files (projectile-project-root)))
+	 (ignores (nconc (mapcar
+                          (lambda (s) (concat s "/"))
+                          grep-find-ignored-directories)
+                         (append '("*.pdf") grep-find-ignored-files)))
+	 ;; This was a little surprising, I had to add -a in a few places to treat binary files like text
+	 (grep-host-defaults-alist '((localhost
+				      (grep-command "grep  -nH --null -e -a ")
+				      (grep-template "grep <X> <C> -nH --null -e <R> <F>")
+				      (grep-use-null-device nil)
+				      (grep-find-command ("find . -type f -exec grep  -nH --null -e -a \\{\\} +" . 42))
+				      (grep-find-template "find <D> <X> -type f <F> -exec grep <C> -nH --null -e <R> -a \\{\\} +")
+				      (grep-use-null-filename-separator t) (grep-find-use-xargs exec-plus)
+				      (grep-highlight-matches nil))))
+
 	 (xrefs (cl-mapcan
                  (lambda (file)
 		   (when (file-exists-p file)
