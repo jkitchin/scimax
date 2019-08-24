@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: alert-warning
+# key: ad
+# --
+<div class="alert alert-warning">
+$0
+</div>
