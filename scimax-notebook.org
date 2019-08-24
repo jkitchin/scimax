@@ -1073,14 +1073,6 @@ This function lets you get to the file or another one using projectile.
 It seems like we might want a hydra for various actions on a link. This would be useful if you don't remember the keymap.
 
 #+BEGIN_SRC emacs-lisp :tangle yes :results silent
-(defhydra nb-hydra ()
-  "scimax-notebook"
-  ("b" nb-link-bash "bash")
-  ("e" nb-link-explorer "explorer")
-  ("f" nb-link-projectile-find-file "find-file")
-  ("o" nb-follow-other "open other window")
-  ("O" nb-follow-other-frame "Open other frame")
-  ("s" nb-follow-sys "Open with system program"))
 
 
 (defun nb-event (event)
@@ -1152,6 +1144,35 @@ nb:eeg-pitt::./obipy-resources/6d9672694ff9a17f61f22a2b1be01575-10220Ctf.png
 prj:students::README.org
 
 
+* A notebook hydra
+
+#+BEGIN_SRC emacs-lisp
+(defhydra nb-hydra (:hint nil :color blue)
+  "
+navigation      search              utilities            link
+--------------------------------------------------------------------------------
+_f_: file       _sa_: search all   _b_: Open in bash      _o_: open other window
+_d_: dir        _ss_: search some  _e_: Open in explorer  _O_: open other frame
+_D_: open root  _sb_: search bufs  _n_: new notebook      _y_: open with sys
+"
+  ("b" bash "bash")
+  ("e" explorer "explorer")
+  ("f" projectile-find-file-dwim "find-file")
+  ("d" projectile-find-dir "find dir")
+  ("D" projectile-dired "open root in dired")
+  ("n" nb-new "new notebook")
+
+  ("sa" nb-search-all "search all files")
+  ("ss" nb-search "search some files")
+  ("sb" projectile-multi-occur "search nb buffers")
+  ("o" nb-follow-other "open other window")
+  ("O" nb-follow-other-frame "Open other frame")
+  ("y" nb-follow-sys "Open with system program"))
+
+#+END_SRC
+
+#+RESULTS:
+: nb-hydra/body
 
 * The end
 
