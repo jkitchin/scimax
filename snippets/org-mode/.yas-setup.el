@@ -60,7 +60,8 @@ $0
 			       ;; directories. I don't see this, but issue #300
 			       ;; https://github.com/jkitchin/scimax/issues/300
 			       ;; inspired this addition.
-			       (when (and (file-name-absolute-p path)
+			       (when (and (not (file-symlink-p path))
+					  (file-name-absolute-p path)
 					  (file-directory-p path)
 					  ;; you probably do not want to do this
 					  ;; in your home path
