@@ -3,7 +3,15 @@
 ;;; Commentary:
 ;;
 ;; * Basic settings
-(load-theme 'leuven)
+(defcustom scimax-theme 'leuven
+  "Theme to use for scimax. Defaults to `leuven'.
+Set to nil to avoid loading a theme."
+  :group 'scimax)
+
+
+(when scimax-theme
+  (load-theme scimax-theme))
+
 
 ;; Source code pro for the font if it is available
 
