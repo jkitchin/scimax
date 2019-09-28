@@ -164,6 +164,7 @@ Slow when you have a large journal or many files."
 
 
 (defun scimax-journal-next-entry ()
+  "Go to next entry (by date) after the one you are in."
   (interactive)
   (let* ((entries (avl-tree-flatten (pcache-get scimax-journal-entries 'entries)))
 	 (n (length entries))
@@ -174,7 +175,7 @@ Slow when you have a large journal or many files."
 
 
 (defun scimax-journal-previous-entry ()
-  "Go to next entry."
+  "Go to previous entry from the one you are in (by date)."
   (interactive)
   (let* ((entries (avl-tree-flatten (pcache-get scimax-journal-entries 'entries)))
 	 (i (cl-position (buffer-file-name)  entries
@@ -268,21 +269,26 @@ T1 and T2 are org-dates in string form."
 
 
 (defun scimax-journal-swiper-last-week ()
+  "Run swiper on entries from the last week."
   (interactive)
   (scimax-journal-swiper-range "-1w" "today"))
 
 
 (defun scimax-journal-swiper-last-month ()
+  "Run swiper on entries from the last month."
   (interactive)
   (scimax-journal-swiper-range "-1m" "today"))
 
 
 (defun scimax-journal-swiper-last-year ()
+  "Run swiper on entries from the last year.
+This may be very slow."
   (interactive)
   (scimax-journal-swiper-range "-1y" "today"))
 
+
 (defun scimax-journal-agenda-range (t1 t2)
-  "Show an agenda for the range T1 to T2."
+  "Show an agenda for journal entries for the range T1 to T2."
   (interactive (list
 		(org-read-date)
 		(org-read-date)))
@@ -323,6 +329,7 @@ REGEXP should use constructs supported by your local `grep' command."
 
 
 (defun scimax-journal-find-regexp-last-week (regexp)
+  "Grep for REGEXP in journal entries for the last week."
   (interactive "sSearch marked files (regexp): ")
   (scimax-journal-find-regexp-range
    regexp
@@ -331,6 +338,7 @@ REGEXP should use constructs supported by your local `grep' command."
 
 
 (defun scimax-journal-find-regexp-last-month (regexp)
+  "Grep for REGEXP in journal entries for the last month."
   (interactive "sSearch marked files (regexp): ")
   (scimax-journal-find-regexp-range
    regexp
@@ -339,6 +347,7 @@ REGEXP should use constructs supported by your local `grep' command."
 
 
 (defun scimax-journal-find-regexp-last-year (regexp)
+  "Grep for REGEXP in journal entries for the last year."
   (interactive "sSearch marked files (regexp): ")
   (scimax-journal-find-regexp-range
    regexp
