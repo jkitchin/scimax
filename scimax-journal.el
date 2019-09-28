@@ -53,15 +53,15 @@
 
 (defun scimax-journal-mark-entries ()
   "Mark entries in a calendar when there are journal entries."
-  (loop for fname in (avl-tree-flatten (pcache-get scimax-journal-entries 'entries))
-	do
-	(let* ((bf (split-string (file-name-base fname) "-"))
-	       (year (nth 0 bf))
-	       (month (nth 1 bf))
-	       (day (nth 2 bf))
-	       (d (mapcar 'string-to-number (list month day year))))
-	  (when (calendar-date-is-visible-p d)
-	    (calendar-mark-visible-date d 'scimax-journal-calendar-entry-face)))))
+  (cl-loop for fname in (avl-tree-flatten (pcache-get scimax-journal-entries 'entries))
+	   do
+	   (let* ((bf (split-string (file-name-base fname) "-"))
+		  (year (nth 0 bf))
+		  (month (nth 1 bf))
+		  (day (nth 2 bf))
+		  (d (mapcar 'string-to-number (list month day year))))
+	     (when (calendar-date-is-visible-p d)
+	       (calendar-mark-visible-date d 'scimax-journal-calendar-entry-face)))))
 
 
 (defun scimax-journal-open-entry (date-string)
@@ -149,9 +149,9 @@ Slow when you have a large journal or many files."
 				  (org-read-date nil t  (file-name-base fname1))
 				  (org-read-date nil t  (file-name-base fname2)))))))
 
-    (loop for entry in entries
-	  do
-	  (avl-tree-enter tree entry))
+    (cl-loop for entry in entries
+	     do
+	     (avl-tree-enter tree entry))
     tree))
 
 
@@ -194,55 +194,12 @@ T1 and T2 are org-dates in string form."
 	  (b t2))
       (setq t1 b
 	    t2 a)))
-  (loop for entry in (avl-tree-flatten (pcache-get scimax-journal-entries 'entries))
-	if (and (org-time> (file-name-base entry) t1)
-		(org-time> t2 (file-name-base entry)))
-	collect
-	entry))
+  (cl-loop for entry in (avl-tree-flatten (pcache-get scimax-journal-entries 'entries))
+	   if (and (org-time> (file-name-base entry) t1)
+		   (org-time> t2 (file-name-base entry)))
+	   collect
+	   entry))
 
-
-;; (defun scimax-journal-grep-range (t1 t2 regexp &optional case-sensitive)
-;;   "Search the journal from T1 to T2 for REGEXP.
-;; T1 and T2 are strings as selected from `org-read-date'
-;; With a prefix arg, make it CASE-SENSTIVE."
-;;   (interactive (list
-;; 		(org-read-date)
-;; 		(org-read-date)
-;; 		(read-input "Search for: ")
-;; 		current-prefix-arg))
-;;   (message "Searching for %s in %S" regexp (scimax-journal-get-entries t1 t2))
-;;   (pop-to-buffer (grep
-;; 		  (format "grep -nH %s %s %s"
-;; 			  (if (null case-sensitive) "-i" "")
-;; 			  regexp
-;; 			  (s-join " " (scimax-journal-get-entries t1 t2))))))
-
-
-;; (defun scimax-journal-grep-last-year (regexp &optional case-sensitive)
-;;   "Search the last year of entries."
-;;   (interactive (list (read-input "Search for: ")
-;; 		     current-prefix-arg))
-;;   (scimax-journal-grep-range (org-read-date nil nil "-1y")
-;; 			     (org-read-date nil nil "today")
-;; 			     regexp case-sensitive))
-
-
-;; (defun scimax-journal-grep-last-month (regexp &optional case-sensitive)
-;;   "Search the last month of entries."
-;;   (interactive (list (read-input "Search for: ")
-;; 		     current-prefix-arg))
-;;   (scimax-journal-grep-range (org-read-date nil nil "-1m")
-;; 			     (org-read-date nil nil "today")
-;; 			     regexp case-sensitive))
-
-
-;; (defun scimax-journal-grep-last-week (regexp &optional case-sensitive)
-;;   "Search the last month of entries."
-;;   (interactive (list (read-input "Search for: ")
-;; 		     current-prefix-arg))
-;;   (scimax-journal-grep-range (org-read-date nil nil "-1w")
-;; 			     (org-read-date nil nil "today")
-;; 			     regexp case-sensitive))
 
 ;; ** Swiper searches
 ;; These can be slow.
