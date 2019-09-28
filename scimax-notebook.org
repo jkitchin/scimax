@@ -1146,7 +1146,7 @@ prj:students::README.org
 
 * A notebook hydra
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 (defhydra nb-hydra (:hint nil :color blue)
   "
 navigation      search              utilities            link
