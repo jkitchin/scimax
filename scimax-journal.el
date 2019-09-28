@@ -159,8 +159,13 @@ Slow when you have a large journal or many files."
   "Persistent cache to store entries.")
 
 
-(unless (pcache-get scimax-journal-entries 'entries)
+(defun scimax-journal-update-cache ()
+  "Update the cache with the output of `scimax-journal-entries'."
   (pcache-put scimax-journal-entries 'entries (scimax-journal-entries)))
+
+
+(unless (pcache-get scimax-journal-entries 'entries)
+  (scimax-journal-update-cache))
 
 
 (defun scimax-journal-next-entry ()
