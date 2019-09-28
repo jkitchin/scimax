@@ -53,7 +53,7 @@
 
 (defun scimax-journal-mark-entries ()
   "Mark entries in a calendar when there are journal entries."
-  (loop for (fname . time) in (pcache-get scimax-journal-entries 'entries)
+  (loop for fname in (avl-tree-flatten (pcache-get scimax-journal-entries 'entries))
 	do
 	(let* ((bf (split-string (file-name-base fname) "-"))
 	       (year (nth 0 bf))
