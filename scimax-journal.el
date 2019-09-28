@@ -27,7 +27,8 @@
 
 (defcustom scimax-journal-new-entry-hook
   '()
-  "List of functions to run in a new entry.")
+  "List of functions to run in a new entry.
+These functions take no arguments.")
 
 
 ;; this creates the journal directory and makes it a projectile project. This is
@@ -83,6 +84,8 @@ Add new day if necessary, otherwise, add to current day."
 				    day))
 	 (org-file (f-join journal-entry-dir
 			   (format "%s-%s-%s.org" year month day)))
+	 ;; we only run hooks on new files. If the file exists, we do not want
+	 ;; to run hooks.
 	 (run-hooks (file-exists-p org-file))
 	 (tree (pcache-get scimax-journal-entries 'entries)))
 
@@ -115,15 +118,8 @@ Add new day if necessary, otherwise, add to current day."
 Slow when you have a large journal or many files."
   (interactive)
   (let ((default-directory scimax-journal-root-dir))
+    ;; Note this next function is in scimax-org.
     (ivy-org-jump-to-heading-in-directory t)))
-
-
-;; (defun scimax-journal-git-grep ()
-;;   "Run `counsel-git-grep' on the files in the scimax-journal.
-;; Note this may only work if you set your journal up as a git repo and commit the files to it."
-;;   (interactive)
-;;   (let ((default-directory scimax-journal-root-dir))
-;;     (counsel-git-grep)))
 
 
 (defun scimax-journal-grep (regex &optional case-sensitive)
