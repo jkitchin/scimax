@@ -912,20 +912,21 @@ a lot with large numbers of org-files or long org-files. This
 function does not open the files."
   (let ((headlines '()))
     (loop for file in files do
-	  (with-temp-buffer
-	    (insert-file-contents file)
-	    (when fontify
-	      (org-mode)
-	      (font-lock-fontify-buffer))
-	    (goto-char (point-min))
-	    (while (re-search-forward org-heading-regexp nil t)
-	      (cl-pushnew (list
-			   (format "%-80s (%s)"
-				   (match-string 0)
-				   (file-name-nondirectory file))
-			   :file file
-			   :position (match-beginning 0))
-			  headlines))))
+	  (when (file-exists-p file)
+	    (with-temp-buffer
+	      (insert-file-contents file)
+	      (when fontify
+		(org-mode)
+		(font-lock-fontify-buffer))
+	      (goto-char (point-min))
+	      (while (re-search-forward org-heading-regexp nil t)
+		(cl-pushnew (list
+			     (format "%-80s (%s)"
+				     (match-string 0)
+				     (file-name-nondirectory file))
+			     :file file
+			     :position (match-beginning 0))
+			    headlines)))))
     (ivy-read "Headline: "
 	      (reverse headlines)
 	      :action (lambda (candidate)
@@ -979,6 +980,14 @@ Use a prefix arg FONTIFY for colored headlines."
 		      (-when-let (f (buffer-file-name b))
 			(f-ext? f "org")))
 		    (buffer-list)))
+   fontify))
+
+
+(defun ivy-org-jump-to-recent-headline (&optional fontify)
+  "Jump to a headline in an org-file in `recentf-list'."
+  (interactive)
+  (ivy-org-jump-to-heading-in-files
+   (-filter (lambda (f) (f-ext? f "org")) recentf-list)
    fontify))
 
 
