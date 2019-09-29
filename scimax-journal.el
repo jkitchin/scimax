@@ -1,20 +1,44 @@
 ;;; scimax-journal.el --- Journal commands for orgmode
 
 ;;; Commentary:
-;; This is a set of functions to make journaling in org-mode easier. The main
-;; entry point is a hydra menu bound to `scimax-journal/body'. I suggest you bind this
-;; to a convenient key of your choice, perhaps H-j.
+;; This is a set of functions to make journaling in org-mode easier. A journal
+;; entry is defined as an org-file in `scimax-journal-root-dir' that follows the
+;; name convention year/month/day/year-month-day.org. These entries are saved in
+;; an avl-tree to make it easy to navigate them.
+
+
+
+;; There are many interactive functions, but I consider the main entry point to
+;; be a hydra menu bound to `scimax-journal/body'. I suggest you bind this to a
+;; convenient key of your choice, perhaps H-j. Then, you have the following actions:
 ;;
-;; The hydra menu provides easy access to the following functions:
+;; H-j j to open a new entry or the current entry
+;; H-j e to open an entry from a previous date
+;; H-j h to open a heading in the journal
+;; H-j f to open a file in the journal (uses projectile)
 ;;
-;; `scimax-journal-new-entry' which creates a new entry for the day, or opens the current day.
+;; H-j n/p to navigate to the next/previous entries by date.
 ;;
-;; `scimax-journal-open' which just opens the journal in the main root directory
-;; defined by `scimax-journal-root-dir'.
+;; There are a variety of search options.
+;; Swiper options:
+;; H-j sr prompts you to pick two dates, and then uses swiper on that range
+;; H-j sw uses swiper to search entries in the last week
+;; H-j sm uses swiper to search entries in the last month
+;; H-j sy uses swiper to search entries in the last year
 ;;
-;; `scimax-journal-open-heading' to open a heading in the journal
+;; There are also grep versions of those commands, and agenda versions. With the
+;; agenda commands you can use all the agenda search capabilities, e.g. tags,
+;; keywords, properties, etc.
 ;;
-;; `scimax-journal-git-grep' search the journal using `counsel-git-grep
+;; H-j gr and H-j ar on a range
+;; H-j gw and H-j aw for the last week
+;; H-j gm and H-j gm for the last month
+;; H-j gy and H-j ay for the last year
+;; H-j ga and H-j aa for all the entries.
+;;
+;; The journal is registered as a projectile project, so you can also use any
+;; functionality from projectile to search/find files, etc.
+;; `projectile-ag' is another tool for searching.
 ;;
 ;;; Code:
 
@@ -123,7 +147,7 @@ Slow when you have a large journal or many files."
 
 
 (defun scimax-journal-grep (regex &optional case-sensitive)
-  "Run grep on the files in the journal.
+  "Run grep on all the files in `scimax-journal-root-dir'.
  Argument REGEX the pattern to grep for."
   (interactive "sPattern: \nP")
   (let ((default-directory scimax-journal-root-dir))
@@ -155,6 +179,16 @@ Slow when you have a large journal or many files."
   "Persistent cache to store entries.")
 
 
+(defun scimax-journal-get-list-of-entries (&optional refresh)
+  "Return a list of entries in the journal from the cache."
+  (interactive)
+  (when refresh (scimax-journal-update-cache))
+  ;; make sure we have a cache to read from
+  (unless (pcache-get scimax-journal-entries 'entries)
+    (scimax-journal-update-cache))
+  (avl-tree-flatten (pcache-get scimax-journal-entries 'entries)))
+
+
 (defun scimax-journal-update-cache ()
   "Update the cache with the output of `scimax-journal-entries'."
   (interactive)
@@ -172,18 +206,20 @@ Slow when you have a large journal or many files."
 	 (n (length entries))
 	 (i (cl-position (buffer-file-name)  entries
 			 :test (lambda (item entry) (string= item entry)))))
-    (when (nth (min (incf i) n) entries)
-      (find-file (nth (min (incf i) n) entries)))))
+    (if (and i (nth (min (incf i) n) entries))
+	(find-file (nth (min (incf i) n) entries))
+      (message "No next entry found. Maybe you are not on a journal file?"))))
 
 
 (defun scimax-journal-previous-entry ()
-  "Go to previous entry from the one you are in (by date)."
+  "Go to previous entry (by date)from the one you are in."
   (interactive)
   (let* ((entries (avl-tree-flatten (pcache-get scimax-journal-entries 'entries)))
 	 (i (cl-position (buffer-file-name)  entries
 			 :test (lambda (item entry) (string= item entry)))))
-    (when (nth (max (decf i) 0) entries)
-      (find-file (nth (max (decf i) 0) entries)))))
+    (if (and i (nth (max (decf i) 0) entries))
+	(find-file (nth (max (decf i) 0) entries))
+      (message "No previous entry found. Maybe you are not on a journal file?"))))
 
 
 ;; * Search functions
@@ -256,6 +292,29 @@ This may be very slow."
 			   (org-read-date nil nil t2))))
     (org-agenda)))
 
+(defun scimax-journal-agenda ()
+  (interactive)
+  (let ((org-agenda-files (scimax-journal-entries)))
+    (org-agenda)))
+
+
+(defun scimax-journal-agenda-last-week ()
+  "Show an agenda for journal entries for the last week."
+  (interactive)
+  (scimax-journal-agenda-range "-1w" "today"))
+
+
+(defun scimax-journal-agenda-last-month ()
+  "Show an agenda for journal entries for the last month."
+  (interactive)
+  (scimax-journal-agenda-range "-1m" "today"))
+
+
+(defun scimax-journal-agenda-last-year ()
+  "Show an agenda for journal entries for the last year."
+  (interactive)
+  (scimax-journal-agenda-range "-1y" "today"))
+
 ;; ** grep regexp searching
 
 (defun scimax-journal-find-regexp-range (regexp t1 t2)
@@ -320,12 +379,17 @@ REGEXP should use constructs supported by your local `grep' command."
 Scimax-Journal
 Swiper       Grep          Open              Navigate       Agenda
 ---------------------------------------------------------------------
-_sr_: range  _gr_: range   _j_: today        _n_: next      _a_: agenda
-_sw_: week   _gw_: week    _e_: entry        _p_: previous
-_sm_: month  _gm_: month   _h_: heading
-_sy_: year   _gy_: year    _f_: file
+_sr_: range  _gr_: range   _j_: today        _n_: next      _ar_: agenda range
+_sw_: week   _gw_: week    _e_: entry        _p_: previous  _aw_: agenda week
+_sm_: month  _gm_: month   _h_: heading      ^ ^            _am_: agenda month
+_sy_: year   _gy_: year    _f_: file         ^ ^            _ay_: agenda year
+^ ^          _ga_: all     ^ ^               ^ ^            _aa_: agenda all
 "
-  ("a" scimax-journal-agenda-range "agenda")
+  ("aa" scimax-journal-agenda "agenda")
+  ("ar" scimax-journal-agenda-range "agenda range")
+  ("aw" scimax-journal-agenda-last-week "agenda last week")
+  ("am" scimax-journal-agenda-last-month "agenda last month")
+  ("ay" scimax-journal-agenda-last-year "agenda last year")
 
   ("n" scimax-journal-next-entry "Next entry" :color red)
   ("p" scimax-journal-previous-entry "Previous entry" :color red)
@@ -340,7 +404,7 @@ _sy_: year   _gy_: year    _f_: file
   ("sm" scimax-journal-swiper-last-month "Swiper last month")
   ("sy" scimax-journal-swiper-last-year "Swiper last year")
 
-  ("gg" scimax-journal-grep "grep journal")
+  ("ga" scimax-journal-grep "grep journal")
   ("gw" scimax-journal-find-regexp-last-week "grep last week")
   ("gm" scimax-journal-find-regexp-last-month "grep last month")
   ("gy" scimax-journal-find-regexp-last-year "grep last year")
