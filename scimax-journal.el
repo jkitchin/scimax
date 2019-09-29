@@ -157,6 +157,7 @@ Slow when you have a large journal or many files."
 
 (defun scimax-journal-update-cache ()
   "Update the cache with the output of `scimax-journal-entries'."
+  (interactive)
   (pcache-put scimax-journal-entries 'entries (scimax-journal-entries)))
 
 
