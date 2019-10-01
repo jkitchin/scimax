@@ -110,8 +110,6 @@ These functions take no arguments.")
     tree))
 
 
-
-
 (defun scimax-journal-get-list-of-entries (&optional refresh)
   "Return a list of entries in the journal from the cache.
 Use an optional prefix arg REFRESH to force refresh the cache."
@@ -184,7 +182,10 @@ Add new day if necessary, otherwise, add to current day."
       (run-hooks 'scimax-journal-new-entry-hook))
 
     (unless (avl-tree-member tree org-file)
-      (avl-tree-enter tree org-file))))
+      (avl-tree-enter tree org-file)
+      ;; this is to make sure we save the new entry
+      (pcache-put scimax-journal-entries 'entries tree)
+      (pcache-save scimax-journal-entries t))))
 
 
 (defun scimax-journal-open ()
