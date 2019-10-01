@@ -226,9 +226,11 @@ CASE-SENSITIVE is optional to mke the search case sensitive if non-nil."
   (let* ((entries (avl-tree-flatten (pcache-get scimax-journal-entries 'entries)))
 	 (n (length entries))
 	 (i (cl-position (buffer-file-name)  entries
-			 :test (lambda (item entry) (string= item entry)))))
-    (if (and i (nth (min (incf i) n) entries))
-	(find-file (nth (min (incf i) n) entries))
+			 :test (lambda (item entry) (string= item entry))))
+	 (next (when i
+		 (nth (min (incf i) n) entries))))
+    (if next
+	(find-file next)
       ;; If you aren't in an entry there is no match so we just go to the last entry.
       (find-file (car (last entries))))))
 
@@ -238,9 +240,10 @@ CASE-SENSITIVE is optional to mke the search case sensitive if non-nil."
   (interactive)
   (let* ((entries (avl-tree-flatten (pcache-get scimax-journal-entries 'entries)))
 	 (i (cl-position (buffer-file-name)  entries
-			 :test (lambda (item entry) (string= item entry)))))
-    (if (and i (nth (max (decf i) 0) entries))
-	(find-file (nth (max (decf i) 0) entries))
+			 :test (lambda (item entry) (string= item entry))))
+	 (prev (when i (nth (max (decf i) 0) entries))))
+    (if prev
+	(find-file prev)
       ;; If you aren't in an entry there is no match so we just go to the second
       ;; to last entry.
       (find-file (car (last (butlast entries)))))))
