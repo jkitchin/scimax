@@ -107,8 +107,10 @@ Assumes the version command returns something like \"pandoc
       (setq csl " "))
 
     (org-latex-export-to-latex async subtreep visible-only body-only options)
-    ;; Now we do some post-processing on the tex-file
-    ;; Tables first. It looks like this should be inserting numbers.
+    ;; Now we do some post-processing on the tex-file. pandoc does not seem to
+    ;; put numbers on tables and figures. Here we do it manually. If there is a
+    ;; better way to get pandoc to do this, I prefer to remove this code! Tables
+    ;; first.
     (let* ((table-regex "\\\\begin{table}.*
 \\\\caption{\\(?1:\\(?2:.*\\)\\\\label{\\(?3:.*\\)}\\)}")
     	   (buf (find-file-noselect tex-file))
