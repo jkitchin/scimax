@@ -24,30 +24,40 @@
 ;;; Code:
 (require 'org-ref)
 
+(defcustom ox-word-pandoc-executable "pandoc"
+  "Path to the pandoc executable.")
+
+
 (defun ox-export-get-pandoc-version ()
-  "Returns the major version of pandoc."
+  "Returns the major version of pandoc.
+Assumes the version command returns something like \"pandoc
+2.7.8\" and extracts the substring."
   (string-to-number
-   (substring (shell-command-to-string "pandoc --version") 7 8)))
+   (substring (shell-command-to-string (format "%s --version" ox-word-pandoc-executable)) 7 8)))
 
 
 (defun ox-export-call-pandoc-tex-to-docx (biboption csl tex-file docx-file)
   "Run pandoc to convert the exported tex file to docx."
   (let* ((pandoc-version (ox-export-get-pandoc-version))
-         (pandoc-command
+         (pandoc-command-template
           (if (>= pandoc-version 2)
-              "pandoc -F pandoc-crossref -s %s%s\"%s\" --to=docx+smart -o \"%s\""
-            "pandoc -s -S %s%s\"%s\" -o \"%s\"")))
-    (shell-command (format pandoc-command biboption csl tex-file docx-file))))
+              "%s -F pandoc-crossref -s %s%s\"%s\" --to=docx+smart -o \"%s\""
+            "%s -s -S %s%s\"%s\" -o \"%s\""))
+	 (pandoc-command (format pandoc-command-template ox-word-pandoc-executable biboption csl tex-file docx-file)))
+    (message "Running %S" pandoc-command)
+    (shell-command pandoc-command)))
 
 
 (defun ox-export-call-pandoc-tex-to-html (biboption csl tex-file html-file)
   "Run pandoc to convert the exported tex file to html."
   (let* ((pandoc-version (ox-export-get-pandoc-version))
-         (pandoc-command
+         (pandoc-command-template
           (if (>= pandoc-version 2)
-              "pandoc -s %s%s\"%s\" --to=html+smart -o \"%s\""
-            "pandoc -s -S %s%s\"%s\" -o \"%s\"")))
-    (shell-command (format pandoc-command biboption csl tex-file html-file))))
+              "%s -s %s%s\"%s\" --to=html+smart -o \"%s\""
+            "%s -s -S %s%s\"%s\" -o \"%s\""))
+	 (pandoc-command (format pandoc-command-template ox-word-pandoc-executable biboption csl tex-file html-file)))
+    (message "running %s" pandoc-command)
+    (shell-command pandoc-command)))
 
 
 (defun ox-export-via-latex-pandoc-to-docx-and-open (&optional async subtreep visible-only body-only options)
