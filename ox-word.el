@@ -128,9 +128,12 @@ Assumes the version command returns something like \"pandoc
     	(save-buffer))
       (message "done with tables."))
 
-    ;; Now figures
-    (let* ((fig-regex "\\includegraphics.*
-\\\\caption{\\(?3:\\(?1:.*\\)\\\\label{\\(?2:.*\\)}\\)}")
+    ;; Now figures. We want to find the labels, and then replace the ref links.
+    (let* ((fig-regex "includegraphics.*
+\\\\caption{\\(?1:.*\\)\\(?2:\\\\label{\\(?3:.*\\)}\\)"
+		      ;; "\\includegraphics.*
+		      ;; \\\\caption{\\(?3:\\(?1:.*\\)\\\\label{\\(?2:.*\\)}\\)}"
+		      )
 	   (buf (find-file-noselect tex-file))
 	   (i 0)
 	   labels)
@@ -138,8 +141,8 @@ Assumes the version command returns something like \"pandoc
 	(goto-char (point-min))
 	(while (re-search-forward fig-regex nil t)
 	  (incf i)
-	  (push (cons (match-string 2) i) labels)
-	  (replace-match (format "Figure %d. \\1." i) nil nil nil 3))
+	  (push (cons (match-string 3) i) labels)
+	  (replace-match (format "Figure %d. \\1" i) nil nil nil 3))
     	;; Now replace the refs.
     	(goto-char (point-min))
     	(while (re-search-forward "\\\\ref{\\(?1:.*?\\)}" nil t)
