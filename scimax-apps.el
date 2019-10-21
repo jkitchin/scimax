@@ -38,7 +38,7 @@ PATH is optional, and defaults to the current directory."
    ((string= system-type "darwin")
     (shell-command
      (format "open -b com.apple.terminal%s"
-	     (if path (format " \"%s\"" path) ""))))
+	     (if path (format " \"%s\"" (expand-file-name path)) ""))))
    ((string= system-type "windows-nt")
     (shell-command "start \"\" \"%SYSTEMDRIVE%\\Program Files\\Git\\bin\\bash.exe\" --login &"))))
 
