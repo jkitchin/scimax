@@ -373,7 +373,7 @@ is positive, move after, and if negative, move before."
 	("" "natmove" nil)
 	("" "url" nil)
 	("" "minted" nil)
-	("" "underscore" nil)
+	("strings" "underscore" nil)
 	("linktocpage,pdfstartview=FitH,colorlinks,
 linkcolor=blue,anchorcolor=blue,
 citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
