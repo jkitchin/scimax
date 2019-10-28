@@ -427,9 +427,11 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 
+
+
 ;; * Fragment overlays
 
-(defun org-latex-fragment-tooltip (beg end image imagetype)
+(defun scimax-org-latex-fragment-tooltip (beg end image imagetype)
   "Add the fragment tooltip to the overlay and set click function to toggle it."
   (overlay-put (ov-at) 'help-echo
 	       (concat (buffer-substring beg end)
@@ -442,9 +444,9 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 					 (org-remove-latex-fragment-image-overlays ,beg ,end)))
 				    map)))
 
-(advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-tooltip)
+(advice-add 'org--format-latex-make-overlay :after 'scimax-org-latex-fragment-tooltip)
 
-(defun org-latex-fragment-justify (justification)
+(defun scimax-org-latex-fragment-justify (justification)
   "Justify the latex fragment at point with JUSTIFICATION.
 JUSTIFICATION is a symbol for 'left, 'center or 'right."
   (interactive
@@ -478,18 +480,18 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
       (when (>= offset 0)
 	(overlay-put ov 'before-string (make-string offset ?\ ))))))
 
-(defun org-latex-fragment-justify-advice (beg end image imagetype)
+(defun scimax-org-latex-fragment-justify-advice (beg end image imagetype)
   "After advice function to justify fragments."
   (org-latex-fragment-justify (or (plist-get org-format-latex-options :justify) 'left)))
 
-(advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-justify-advice)
+(advice-add 'org--format-latex-make-overlay :after 'scimax-org-latex-fragment-justify-advice)
 
 ;; ** numbering latex equations
 
 ;; Numbered equations all have (1) as the number for fragments with vanilla
 ;; org-mode. This code injects the correct numbers into the previews so they
 ;; look good.
-(defun org-renumber-environment (orig-func &rest args)
+(defun scimax-org-renumber-environment (orig-func &rest args)
   "A function to inject numbers in LaTeX fragment previews."
   (let ((results '())
 	(counter -1)
@@ -530,9 +532,9 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 
   (apply orig-func args))
 
-(advice-add 'org-create-formula-image :around #'org-renumber-environment)
+(advice-add 'org-create-formula-image :around #'scimax-org-renumber-environment)
 
-(defun org-inject-latex-fragment (orig-func &rest args)
+(defun scimax-org-inject-latex-fragment (orig-func &rest args)
   "Advice function to inject latex code before and/or after the equation in a latex fragment.
 You can use this to set \\mathversion{bold} for example to make it bolder."
   (setf (car args)
@@ -542,7 +544,7 @@ You can use this to set \\mathversion{bold} for example to make it bolder."
 	 (or (plist-get org-format-latex-options :latex-fragment-post-body) "")))
   (apply orig-func args))
 
-(advice-add 'org-create-formula-image :around #'org-inject-latex-fragment )
+(advice-add 'org-create-formula-image :around #'scimax-org-inject-latex-fragment )
 
 
 ;; * Markup commands for org-mode
@@ -996,12 +998,12 @@ Use a prefix arg FONTIFY for colored headlines."
 ;; * Rescaling inline-images
 ;; This will eventually be obsolete if this makes it into org-mode
 (defvar org-inline-image-resize-function
-  #'org-inline-image-resize
+  #'scimax-org-inline-image-resize
   "Function that takes a filename and resize argument and returns
  a new filename pointing to the resized image.")
 
 
-(defun org-inline-image-resize (fname resize-options)
+(defun scimax-org-inline-image-resize (fname resize-options)
   "Resize FNAME with RESIZE-OPTIONS.
 RESIZE-OPTIONS are passed to \"mogrify resized-fname -resize resize-options\".
 RESIZE-OPTIONS could be:
@@ -1033,8 +1035,10 @@ See http://www.imagemagick.org/Usage/resize/#resize for more options."
       resized-fname)))
 
 
+(advice-add 'org-display-inline-images :override #'scimax-org-display-inline-images)
+
 ;; this is copied and modified from org.el
-(defun org-display-inline-images (&optional include-linked refresh beg end)
+(defun scimax-org-display-inline-images (&optional include-linked refresh beg end)
   "Display inline images.
 
 An inline image is a link which follows either of these
