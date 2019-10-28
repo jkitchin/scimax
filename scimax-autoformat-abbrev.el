@@ -399,6 +399,8 @@ define the definitions."
 (defcustom scimax-save-spellcheck-abbrevs t
   "If t save spellchecks as global-abbrevs.")
 
+;; Note this redefines an alias in flyspell-correct that points to
+;; `flyspell-correct-previous'.
 (defun flyspell-correct-previous-word-generic (position)
   "Correct the first misspelled word that occurs before point.
 But don't look beyond what's visible on the screen.
