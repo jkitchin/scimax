@@ -175,11 +175,10 @@ sentence in the region."
 
 ;; * profile me
 (unless (memq system-type '(windows-nt ms-dos))
-
-  (require 'esup)
-
   (defun scimax-profile ()
     "Run `esup' on the scimax init file to profile it."
+    (interactive)
+    (require 'esup)
     (esup (expand-file-name "init.el" scimax-dir))))
 
 
