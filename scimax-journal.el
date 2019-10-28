@@ -46,36 +46,38 @@
 ;; functionality from `projectile' to search/find files, etc.
 ;; `projectile-ag' is another tool for searching.
 ;;
-;; TODO: 1. It would be nice to have a way to use a directory-local journal,
-;; e.g. in a project. This would require a directory local
-;; `scimax-journal-root-dir', and a directory local pcache. I think you might be
-;; able to make a directory-local `pcache-directory' for that. It is a little
-;; tricky to think about how you might access the default journal then though.
-;; You would have to change out of the directory where the local settings are
-;; relevant.
+;; You can make a project specific journal with
+;; `scimax-journal-make-directory-local'. This uses directory-local variables.
 ;;
 ;;; Code:
 
 (require 'calendar)
 (require 'scimax-org)
-(use-package pcache)
 
 
-(defvar scimax-journal-root-dir "~/vc/journal"
-  "Directory for journal entries.")
+(defcustom scimax-journal-root-dir "~/vc/journal/"
+  "Directory for journal entries.
+This is the default, system journal. See
+`scimax-journal-make-directory-local' to setup a local, project
+journal.")
+
+
+(defcustom scimax-journal-cache ".scimax-journal-cache"
+  "File name for the cache.
+It will be expanded in `scimax-journal-root-dir'.")
+
+
+(defface scimax-journal-calendar-entry-face
+  '((t (:foreground "DarkOrange2" :weight bold)))
+  "Face for highlighting scimax-journal entries in M-x calendar."
+  :group 'scimax-journal)
+
 
 (defcustom scimax-journal-new-entry-hook
   '()
   "List of functions to run in a new entry.
-These functions take no arguments.")
-
-
-(defclass scimax-journal-entries-cache (pcache-repository) ()
-  "Persistent cache object to save scimax-journal entries in.")
-
-
-(defvar scimax-journal-entries (scimax-journal-entries-cache)
-  "Persistent cache to store entries.")
+These functions take no arguments and they are run in the buffer
+of the new entry.")
 
 
 ;; this creates the journal directory and makes it a projectile project. This is
@@ -91,18 +93,77 @@ These functions take no arguments.")
     (projectile-save-known-projects)))
 
 
+
+(defun scimax-journal-write-cache (tree)
+  "Write TREE to cache on disk."
+  (with-temp-file (expand-file-name scimax-journal-cache scimax-journal-root-dir)
+    (print tree (current-buffer))))
+
+
+(defun scimax-journal-read-cache ()
+  "Read the tree from the cache on disk."
+  (hack-dir-local-variables)
+  (hack-dir-local-variables-non-file-buffer)
+  (unless (file-exists-p (expand-file-name
+			  scimax-journal-cache
+			  scimax-journal-root-dir))
+    (scimax-journal-update-cache))
+  (with-temp-buffer
+    (hack-dir-local-variables)
+    (hack-dir-local-variables-non-file-buffer)
+    (insert-file-contents (expand-file-name
+			   scimax-journal-cache
+			   scimax-journal-root-dir))
+    (read (current-buffer))))
+
+
 (defun scimax-journal-entries ()
-  "Get an avl-tree of journal entries, sorted by the date."
+  "Return the tree of entries."
+  (scimax-journal-read-cache))
+
+
+(defun scimax-journal-describe ()
+  "Describe setup of journal in the current buffer."
+  (interactive)
+  (let ((entry-list (scimax-journal-get-list-of-entries)))
+    (message (s-format "current-directory: ${default-directory}
+
+scimax-journal-root-dir: ${scimax-journal-root-dir}
+cache-file: ${cache-file}
+
+Number of entries: ${nentries}
+first-entry: ${first-entry}
+last-entry: ${last-entry}
+"
+		       'aget
+		       (list (cons 'default-directory default-directory)
+			     (cons 'scimax-journal-root-dir scimax-journal-root-dir)
+			     (cons 'cache-file (expand-file-name
+						scimax-journal-cache
+						scimax-journal-root-dir))
+			     (cons 'nentries (length entry-list))
+			     (cons 'first-entry (car entry-list))
+			     (cons 'last-entry (car (last entry-list))))))))
+
+
+(defun scimax-journal-entries-tree ()
+  "Get an avl-tree of journal entries, sorted by the date.
+This will loop over all the entries in the journal, so the
+results are usually cached."
   (let ((entries (f-entries scimax-journal-root-dir
 			    (lambda (f)
 			      (and (f-ext? f "org")
-				   (string-match "[0-9]\\{4,\\}-[0-9]\\{2,\\}-[0-9]\\{2,\\}"
-						 (file-name-nondirectory f))))
+				   ;; this is the year-month-day pattern. It is
+				   ;; not a sophisticated match
+				   (string-match
+				    "[0-9]\\{4,\\}-[0-9]\\{2,\\}-[0-9]\\{2,\\}"
+				    (file-name-nondirectory f))))
 			    t))
 	(tree (avl-tree-create (lambda (fname1 fname2)
+				 (message "processing %s and %s" fname1 fname2)
 				 (time-less-p
-				  (org-read-date nil t  (file-name-base fname1))
-				  (org-read-date nil t  (file-name-base fname2)))))))
+				  (org-read-date nil t (file-name-base fname1))
+				  (org-read-date nil t (file-name-base fname2)))))))
 
     (cl-loop for entry in entries
 	     do
@@ -114,31 +175,22 @@ These functions take no arguments.")
   "Return a list of entries in the journal from the cache.
 Use an optional prefix arg REFRESH to force refresh the cache."
   (interactive "P")
-  (when (or refresh (not (pcache-get scimax-journal-entries 'entries))
-	    (scimax-journal-update-cache)))
-  (avl-tree-flatten (pcache-get scimax-journal-entries 'entries)))
+  (when (or refresh (not (scimax-journal-entries)))
+    (scimax-journal-update-cache))
+  (avl-tree-flatten (scimax-journal-entries)))
 
 
 (defun scimax-journal-update-cache ()
   "Update the cache with the output of the function `scimax-journal-entries'."
   (interactive)
-  (pcache-put scimax-journal-entries 'entries (scimax-journal-entries))
-  (pcache-save scimax-journal-entries t))
-
-
-(unless (pcache-get scimax-journal-entries 'entries)
-  (scimax-journal-update-cache))
-
-
-(defface scimax-journal-calendar-entry-face
-  '((t (:foreground "DarkOrange2" :weight bold)))
-  "Face for highlighting scimax-journal entries in M-x calendar."
-  :group 'scimax-journal)
+  (scimax-journal-write-cache (scimax-journal-entries-tree)))
 
 
 (defun scimax-journal-mark-entries ()
   "Mark entries in a calendar when there are journal entries."
-  (cl-loop for fname in (avl-tree-flatten (pcache-get scimax-journal-entries 'entries))
+  ;; scimax-journal-tree is lexically bound. Otherwise, you don't get the right
+  ;; journal when it is locally bound.
+  (cl-loop for fname in (avl-tree-flatten scimax-journal-tree)
 	   do
 	   (let* ((bf (split-string (file-name-base fname) "-"))
 		  (year (nth 0 bf))
@@ -146,7 +198,9 @@ Use an optional prefix arg REFRESH to force refresh the cache."
 		  (day (nth 2 bf))
 		  (d (mapcar 'string-to-number (list month day year))))
 	     (when (calendar-date-is-visible-p d)
-	       (calendar-mark-visible-date d 'scimax-journal-calendar-entry-face)))))
+	       (calendar-mark-visible-date
+		d
+		'scimax-journal-calendar-entry-face)))))
 
 
 (defun scimax-journal-open-entry (date-string)
@@ -154,10 +208,14 @@ Use an optional prefix arg REFRESH to force refresh the cache."
 DATE-STRING should be in the form \"year-month-day\".
 Add new day if necessary, otherwise, add to current day."
   (interactive (list
-		(let ((calendar-today-visible-hook))
+		(let ((scimax-journal-tree (scimax-journal-entries))
+		      (calendar-today-visible-hook))
 		  (progn
-		    (add-hook 'calendar-today-visible-hook 'scimax-journal-mark-entries)
+		    (add-hook 'calendar-today-visible-hook
+			      'scimax-journal-mark-entries)
 		    (org-read-date)))))
+  (hack-dir-local-variables)
+  (hack-dir-local-variables-non-file-buffer)
   (let* ((date (split-string date-string "-"))
 	 (year (elt date 0))
 	 (month (elt date 1))
@@ -171,21 +229,35 @@ Add new day if necessary, otherwise, add to current day."
 	 ;; we only run hooks on new files. If the file exists, we do not want
 	 ;; to run hooks.
 	 (run-hooks (file-exists-p org-file))
-	 (tree (pcache-get scimax-journal-entries 'entries)))
+	 (tree (scimax-journal-entries)))
 
     (when (not (file-directory-p journal-entry-dir))
       (mkdir journal-entry-dir t))
 
     (find-file org-file)
 
-    (when run-hooks
-      (run-hooks 'scimax-journal-new-entry-hook))
-
     (unless (avl-tree-member tree org-file)
       (avl-tree-enter tree org-file)
       ;; this is to make sure we save the new entry
-      (pcache-put scimax-journal-entries 'entries tree)
-      (pcache-save scimax-journal-entries t))))
+      (scimax-journal-write-cache tree))
+
+    (when run-hooks
+      (run-hooks 'scimax-journal-new-entry-hook))))
+
+
+(defun scimax-journal-delete-entry ()
+  "Delete the entry and file associated with the buffer."
+  (interactive)
+  (let* ((fname (buffer-file-name))
+	 (tree (scimax-journal-entries)))
+    (if (not (avl-tree-member tree fname))
+	(messsage "%s doesn't seem to be a journal file. Not deleting.")
+      (when (y-or-n-p (format "Really delete %s? " fname)))
+      ;; Now we delete it.
+      (avl-tree-delete tree fname)
+      (scimax-journal-write-cache tree)
+      (kill-buffer)
+      (delete-file fname))))
 
 
 (defun scimax-journal-open ()
@@ -209,21 +281,12 @@ Slow when you have a large journal or many files."
     (ivy-org-jump-to-heading-in-directory t)))
 
 
-(defun scimax-journal-grep (regex &optional case-sensitive)
-  "Run grep on all the files in `scimax-journal-root-dir'.
-Argument REGEX the pattern to grep for.
-CASE-SENSITIVE is optional to mke the search case sensitive if non-nil."
-  (interactive "sPattern: \nP")
-  (let ((default-directory scimax-journal-root-dir))
-    (grep (format "grep -nH %s --recursive %s *"
-		  (if case-sensitive "" "-i")
-		  regex))))
-
+;; * Entry navigation
 
 (defun scimax-journal-next-entry ()
   "Go to next entry (by date) after the one you are in."
   (interactive)
-  (let* ((entries (avl-tree-flatten (pcache-get scimax-journal-entries 'entries)))
+  (let* ((entries (avl-tree-flatten (scimax-journal-entries)))
 	 (n (length entries))
 	 (i (cl-position (buffer-file-name)  entries
 			 :test (lambda (item entry) (string= item entry))))
@@ -238,7 +301,7 @@ CASE-SENSITIVE is optional to mke the search case sensitive if non-nil."
 (defun scimax-journal-previous-entry ()
   "Go to previous entry (by date)from the one you are in."
   (interactive)
-  (let* ((entries (avl-tree-flatten (pcache-get scimax-journal-entries 'entries)))
+  (let* ((entries (avl-tree-flatten (scimax-journal-entries)))
 	 (i (cl-position (buffer-file-name)  entries
 			 :test (lambda (item entry) (string= item entry))))
 	 (prev (when i (nth (max (decf i) 0) entries))))
@@ -249,7 +312,37 @@ CASE-SENSITIVE is optional to mke the search case sensitive if non-nil."
       (find-file (car (last (butlast entries)))))))
 
 
+;; * Refiling an entry
+
+(defun scimax-journal-refile-entry ()
+  "Refile a heading to another place in the journal.
+This is usually for moving an entry from the past to the future.
+This is faster than trying to do it through the agenda. I don't
+use this a lot, but Shreyas thought it would be helpful."
+  (interactive)
+  (let* ((refile-file (completing-read
+		       "Choose file: "
+		       (reverse
+			(scimax-journal-get-list-of-entries))))
+	 (org-agenda-files (list refile-file))
+	 (org-refile-targets '((org-agenda-files :maxlevel . 3))))
+    (org-refile)))
+
+
+
 ;; * Search functions
+
+(defun scimax-journal-grep (regex &optional case-sensitive)
+  "Run grep on all the files in `scimax-journal-root-dir'.
+Argument REGEX the pattern to grep for.
+CASE-SENSITIVE is optional to mke the search case sensitive if non-nil."
+  (interactive "sPattern: \nP")
+  (let ((default-directory scimax-journal-root-dir))
+    (grep (format "grep -nH %s --recursive %s *"
+		  (if case-sensitive "" "-i")
+		  regex))))
+
+
 (defun scimax-journal-get-entries (t1 t2)
   "Return a list of entry files between T1 and T2.
 T1 and T2 are org-dates in string form."
@@ -259,9 +352,9 @@ T1 and T2 are org-dates in string form."
 	  (b t2))
       (setq t1 b
 	    t2 a)))
-  (cl-loop for entry in (avl-tree-flatten (pcache-get scimax-journal-entries 'entries))
-	   if (and (org-time> (file-name-base entry) t1)
-		   (org-time> t2 (file-name-base entry)))
+  (cl-loop for entry in (avl-tree-flatten (scimax-journal-entries))
+	   if (and (org-time>= (file-name-base entry) t1)
+		   (org-time>= t2 (file-name-base entry)))
 	   collect
 	   entry))
 
@@ -324,10 +417,13 @@ This may be very slow."
     (org-agenda)))
 
 
+;; TODO
 (defun scimax-journal-agenda ()
-  "Open an ‘org-agenda’ for journal entries."
+  "Open an ‘org-agenda’ for journal entries.
+This may be slow for large journals, and will result in all the
+entries getting opened."
   (interactive)
-  (let ((org-agenda-files (scimax-journal-entries)))
+  (let ((org-agenda-files (scimax-journal-get-list-of-entries)))
     (org-agenda)))
 
 
@@ -408,6 +504,24 @@ REGEXP should use constructs supported by your local `grep' command."
    (org-read-date nil nil "today")))
 
 
+;; * Directory local journals
+;; To have a project specific journal, we have to use directory local variables.
+(defun scimax-journal-make-directory-local (journal-root-name)
+  "Setup directory local variables so you can have a project specific journal."
+  (interactive (list (read-string "Journal root name:" "journal")))
+  (let* ((project-root (projectile-project-root))
+	 (journal-root (file-name-as-directory (f-join project-root journal-root-name)))
+	 (default-directory project-root))
+    (add-dir-local-variable nil 'scimax-journal-root-dir journal-root)
+    (unless (file-directory-p journal-root)
+      (make-directory journal-root t))
+    (scimax-journal-update-cache)
+    ;; The last two commands leave .dir-locals.el open. We save and close it next.
+    (save-buffer)
+    (kill-buffer)
+    (hack-dir-local-variables)))
+
+
 ;; * Hydra for scimax journal
 (defhydra scimax-journal (:color blue :hint nil)
   "
@@ -418,7 +532,7 @@ _sr_: range  _gr_: range   _j_: today        _n_: next      _ar_: agenda range
 _sw_: week   _gw_: week    _e_: entry        _p_: previous  _aw_: agenda week
 _sm_: month  _gm_: month   _h_: heading      ^ ^            _am_: agenda month
 _sy_: year   _gy_: year    _f_: file         ^ ^            _ay_: agenda year
-^ ^          _ga_: all     ^ ^               ^ ^            _aa_: agenda all
+^ ^          _ga_: all     _d_: delete entry ^ ^            _aa_: agenda all
 "
   ("aa" scimax-journal-agenda "agenda")
   ("ar" scimax-journal-agenda-range "agenda range")
@@ -433,6 +547,7 @@ _sy_: year   _gy_: year    _f_: file         ^ ^            _ay_: agenda year
   ("f" (scimax-journal-go-to-file) "Open a journal file")
   ("e" scimax-journal-open-entry "Open entry")
   ("h" scimax-journal-open-heading "Open to heading")
+  ("d" scimax-journal-delete-entry "Delete entry")
 
   ("sr" scimax-journal-swiper-last-week "Swiper date range")
   ("sw" scimax-journal-swiper-last-week "Swiper last week")
