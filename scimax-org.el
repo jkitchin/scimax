@@ -482,7 +482,7 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 
 (defun scimax-org-latex-fragment-justify-advice (beg end image imagetype)
   "After advice function to justify fragments."
-  (org-latex-fragment-justify (or (plist-get org-format-latex-options :justify) 'left)))
+  (scimax-org-latex-fragment-justify (or (plist-get org-format-latex-options :justify) 'left)))
 
 (advice-add 'org--format-latex-make-overlay :after 'scimax-org-latex-fragment-justify-advice)
 
@@ -1510,17 +1510,26 @@ It is for commands that depend on the major mode. One example is
 ;; this was broken so that if you had < or > in a src block it would break
 ;; parens matching.
 
+;; https://emacs.stackexchange.com/questions/50216/org-mode-code-block-parentheses-mismatch
 (defun org-mode-<>-syntax-fix (start end)
-  (when (eq major-mode 'org-mode)
-    (save-excursion
-      (goto-char start)
-      (while (re-search-forward "<\\|>" end t)
-	(when (get-text-property (point) 'src-block)
-	  ;; This is a < or > in an org-src block
-	  (put-text-property (point) (1- (point))
-			     'syntax-table (string-to-syntax "_")))))))
+  "Change syntax of characters ?< and ?> to symbol within source code blocks."
+  (let ((case-fold-search t))
+    (when (eq major-mode 'org-mode)
+      (save-excursion
+        (goto-char start)
+        (while (re-search-forward "<\\|>" end t)
+          (when (save-excursion
+                  (and
+                   (re-search-backward "[[:space:]]*#\\+\\(begin\\|end\\)_src\\_>" nil t)
+                   (string-equal (match-string 1) "begin")))
+            ;; This is a < or > in an org-src block
+            (put-text-property (point) (1- (point))
+                               'syntax-table (string-to-syntax "_"))))))))
+
 
 (defun scimax-fix-<>-syntax ()
+  "Fix syntax of <> in code blocks.
+This function should be added to `org-mode-hook' to make it work."
   (setq syntax-propertize-function 'org-mode-<>-syntax-fix)
   (syntax-propertize (point-max)))
 
