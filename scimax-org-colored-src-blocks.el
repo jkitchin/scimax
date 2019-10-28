@@ -3,14 +3,15 @@
 ;;; Commentary:
 ;; This makes the background color of src blocks be customizable. I like this
 ;; because it makes it simple to see what a src block language is by color, and
-;; makes them stand out more than the default color. It does require modifying
-;; `org-src-font-lock-fontify-block' and `org-fontify-meta-lines-and-blocks-1'
-;; by monkey-patching though.
-
-;; * Colored src blocks
+;; makes them stand out more than the default color. The modification of org is
+;; done by :override advice, so you can disable it with
+;; `scimax-org-disable-colored-blocks'. By default it is on.
+;;
+;; You define a face like org-block-<lang> that defines the face for the background.
+;;
 ;; based on patches from Rasmus <rasmus@gmx.us>
 
-;; You define a face like org-block-<lang> that defines the face for the background.
+;; * Colored src blocks
 
 (defface org-block-emacs-lisp
   `((t (:background "LightCyan1")))
@@ -33,12 +34,36 @@
   "Face for python blocks")
 
 
+(defun scimax-org-enable-colored-blocks ()
+  "Advise org-functions to turn on colored src blocks."
+  (interactive)
+  (advice-add 'org-src-font-lock-fontify-block :override #'scimax-org-src-font-lock-fontify-block)
+  (advice-add 'org-fontify-meta-lines-and-blocks-1 :override #'scimax-org-fontify-meta-lines-and-blocks-1))
+
+;; If you load this, I assume you want these on.
+(scimax-org-enable-colored-blocks)
+
+(defun scimax-org-disable-colored-blocks ()
+  "Remove advices that enable colored src blocks."
+  (interactive)
+  (advice-remove 'org-src-font-lock-fontify-block  #'scimax-org-src-font-lock-fontify-block)
+  (advice-remove 'org-fontify-meta-lines-and-blocks-1 #'scimax-org-fontify-meta-lines-and-blocks-1))
+
+
 ;; This function overwrites the org-src function to make src blocks be colored again.
-(defun org-src-font-lock-fontify-block (lang start end)
+(defun scimax-org-src-font-lock-fontify-block (lang start end)
   "Fontify code block.
 LANG is the language of the block.  START and END are positions of
 the block.  This function is called by Emacs automatic
-fontification, as long as `org-src-fontify-natively' is non-nil."
+fontification, as long as `org-src-fontify-natively' is non-nil.
+
+jkitchin: I modified this function so the src blocks will have
+different colors defined in the faces above. If you define a face
+named `org-block-lang', then lang blocks will use that facefor
+the background. This function is in an override advice. You can
+remove this with `(advice-remove 'org-src-font-lock-fontify-block
+#'scimax-org-src-font-lock-fontify-block)'
+"
   (let ((lang-mode (org-src--get-lang-mode lang)))
     (when (fboundp lang-mode)
       (let ((string (buffer-substring-no-properties start end))
@@ -74,8 +99,13 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
 	(set-buffer-modified-p modified)))))
 
 
-(defun org-fontify-meta-lines-and-blocks-1 (limit)
-  "Fontify #+ lines and blocks."
+(defun scimax-org-fontify-meta-lines-and-blocks-1 (limit)
+  "Fontify #+ lines and blocks.
+
+jkitchin: This function has been modified to support colored src
+blocks. See `scimax-org-src-font-lock-fontify-block'. It looks
+like I add some extra properties like the src_block start and end
+points."
   (let ((case-fold-search t))
     (if (re-search-forward
 	 "^\\([ \t]*#\\(\\(\\+[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
@@ -95,7 +125,7 @@ fontification, as long as `org-src-fontify-natively' is non-nil."
 		  quoting (member block-type org-protecting-blocks))
 	    (when (re-search-forward
 		   (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
-		   nil t)  ;; on purpose, we look further than LIMIT
+		   nil t) ;; on purpose, we look further than LIMIT
 	      (setq end (min (point-max) (match-end 0))
 		    end1 (min (point-max) (1- (match-beginning 0))))
 	      (setq block-end (match-beginning 0))
