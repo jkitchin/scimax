@@ -621,29 +621,34 @@ You can use this to set \\mathversion{bold} for example to make it bolder."
 		 (insert ,(concat beginning-marker end-marker))
 		 (backward-char ,(length end-marker)))))))
 
+
 (defun org-latex-math-region-or-point (&optional arg)
   "Wrap the selected region in latex math markup.
 \(\) or $$ (with prefix ARG) or @@latex:@@ with double prefix.
-Or insert those and put point in the middle to add an equation."
+With no region selected, insert those and put point in the middle
+to add an equation. Finally, if you are between these markers
+then exit them."
   (interactive "P")
-  (let ((chars
-	 (cond
-	  ((null arg)
-	   '("\\(" . "\\)"))
-	  ((equal arg '(4))
-	   '("$" . "$"))
-	  ((equal arg '(16))
-	   '("@@latex:" . "@@")))))
-    (if (region-active-p)
-	(progn
-	  (goto-char (region-end))
-	  (insert (cdr chars))
-	  (goto-char (region-beginning))
-	  (insert (car chars)))
-      (insert (concat  (car chars) (cdr chars)))
-      (backward-char (length (cdr chars))))))
-
-
+  (if (memq 'org-latex-and-related (get-char-property (point) 'face))
+      ;; in a fragment, let's get out.
+      (goto-char (or (next-single-property-change (point) 'face) (line-end-position)))
+    (let ((chars
+	   (cond
+	    ((null arg)
+	     '("\\(" . "\\)"))
+	    ((equal arg '(4))
+	     '("$" . "$"))
+	    ((equal arg '(16))
+	     '("@@latex:" . "@@")))))
+      (if (region-active-p)
+	  ;; wrap region
+	  (progn
+	    (goto-char (region-end))
+	    (insert (cdr chars))
+	    (goto-char (region-beginning))
+	    (insert (car chars)))
+	(insert (concat  (car chars) (cdr chars)))
+	(backward-char (length (cdr chars)))))))
 
 
 (defun helm-insert-org-entity ()
