@@ -5,7 +5,6 @@
 
 ;;; Code:
 (require 'org)
-(require 'ox-latex)
 (require 'org-inlinetask)
 (require 'org-mouse)
 (require 'org-ref)
@@ -345,206 +344,6 @@ is positive, move after, and if negative, move before."
 	  'scimax-align-result-table)
 
 
-;; * Latex Export settings
-
-;; Interpret "_" and "^" for export when braces are used.
-(setq org-export-with-sub-superscripts '{})
-
-(setq org-latex-default-packages-alist
-      '(("AUTO" "inputenc" t)
-	("" "lmodern" nil)
-	("T1" "fontenc" t)
-	("" "fixltx2e" nil)
-	("" "graphicx" t)
-	("" "longtable" nil)
-	("" "float" nil)
-	("" "wrapfig" nil)
-	("" "rotating" nil)
-	("normalem" "ulem" t)
-	("" "amsmath" t)
-	("" "textcomp" t)
-	("" "marvosym" t)
-	("" "wasysym" t)
-	("" "amssymb" t)
-	("" "amsmath" t)
-	("theorems, skins" "tcolorbox" t)
-	("version=3" "mhchem" t)
-	("numbers,super,sort&compress" "natbib" nil)
-	("" "natmove" nil)
-	("" "url" nil)
-	("" "minted" nil)
-	("strings" "underscore" nil)
-	("linktocpage,pdfstartview=FitH,colorlinks,
-linkcolor=blue,anchorcolor=blue,
-citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
-	 "hyperref" nil)
-	("" "attachfile" nil)))
-
-;; do not put in \hypersetup. Use your own if you want it e.g.
-;; \hypersetup{pdfkeywords={%s},\n pdfsubject={%s},\n pdfcreator={%}}
-(setq org-latex-with-hyperref nil)
-
-;; this is for code syntax highlighting in export. you need to use
-;; -shell-escape with latex, and install pygments.
-(setq org-latex-listings 'minted)
-(setq org-latex-minted-options
-      '(("frame" "lines")
-	("fontsize" "\\scriptsize")
-	("linenos" "")))
-
-;; avoid getting \maketitle right after begin{document}
-;; you should put \maketitle if and where you want it.
-(setq org-latex-title-command "")
-
-(setq org-latex-prefer-user-labels t)
-
-;; ** Custom new classes
-;; customized article. better margins
-(add-to-list 'org-latex-classes
-	     '("article-1"                          ;class-name
-	       "\\documentclass{article}
-\\usepackage[top=1in, bottom=1.in, left=1in, right=1in]{geometry}
- [PACKAGES]
- [EXTRA]" ;;header-string
-	       ("\\section{%s}" . "\\section*{%s}")
-	       ("\\subsection{%s}" . "\\subsection*a{%s}")
-	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
-	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
-;; This is for when you don't want any default packages, and you want
-;; to declare them all yourself.
-(add-to-list 'org-latex-classes
-	     '("article-no-defaults"                          ;class-name
-	       "\\documentclass{article}
- [NO-DEFAULT-PACKAGES]
- [PACKAGES]
- [EXTRA]" ;;header-string
-	       ("\\section{%s}" . "\\section*{%s}")
-	       ("\\subsection{%s}" . "\\subsection*a{%s}")
-	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
-	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
-
-
-
-;; * Fragment overlays
-
-(defun scimax-org-latex-fragment-tooltip (beg end image imagetype)
-  "Add the fragment tooltip to the overlay and set click function to toggle it."
-  (overlay-put (ov-at) 'help-echo
-	       (concat (buffer-substring beg end)
-		       "\nmouse-1 to toggle."))
-  (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
-				    (define-key map (kbd "C-c C-x C-l") 'org-toggle-latex-fragment)
-				    (define-key map [mouse-1]
-				      `(lambda ()
-					 (interactive)
-					 (org-remove-latex-fragment-image-overlays ,beg ,end)))
-				    map)))
-
-(advice-add 'org--format-latex-make-overlay :after 'scimax-org-latex-fragment-tooltip)
-
-(defun scimax-org-latex-fragment-justify (justification)
-  "Justify the latex fragment at point with JUSTIFICATION.
-JUSTIFICATION is a symbol for 'left, 'center or 'right."
-  (interactive
-   (list (intern-soft
-          (completing-read "Justification (left): " '(left center right)
-                           nil t nil nil 'left))))
-
-  (let* ((ov (ov-at))
-	 (beg (ov-beg ov))
-	 (end (ov-end ov))
-	 (shift (- beg (line-beginning-position)))
-	 (img (overlay-get ov 'display))
-	 (img (and (and img (consp img) (eq (car img) 'image)
-			(image-type-available-p (plist-get (cdr img) :type)))
-		   img))
-	 space-left offset)
-    (when (and img
-	       ;; This means the equation is at the start of the line
-	       (= beg (line-beginning-position))
-	       (or
-		(string= "" (s-trim (buffer-substring end (line-end-position))))
-		(eq 'latex-environment (car (org-element-context)))))
-      (setq space-left (- (window-max-chars-per-line) (car (image-size img)))
-	    offset (floor (cond
-			   ((eq justification 'center)
-			    (- (/ space-left 2) shift))
-			   ((eq justification 'right)
-			    (- space-left shift))
-			   (t
-			    0))))
-      (when (>= offset 0)
-	(overlay-put ov 'before-string (make-string offset ?\ ))))))
-
-(defun scimax-org-latex-fragment-justify-advice (beg end image imagetype)
-  "After advice function to justify fragments."
-  (scimax-org-latex-fragment-justify (or (plist-get org-format-latex-options :justify) 'left)))
-
-(advice-add 'org--format-latex-make-overlay :after 'scimax-org-latex-fragment-justify-advice)
-
-;; ** numbering latex equations
-
-;; Numbered equations all have (1) as the number for fragments with vanilla
-;; org-mode. This code injects the correct numbers into the previews so they
-;; look good.
-(defun scimax-org-renumber-environment (orig-func &rest args)
-  "A function to inject numbers in LaTeX fragment previews."
-  (let ((results '())
-	(counter -1)
-	(numberp))
-
-    (setq results (loop for (begin .  env) in
-			(org-element-map (org-element-parse-buffer) 'latex-environment
-			  (lambda (env)
-			    (cons
-			     (org-element-property :begin env)
-			     (org-element-property :value env))))
-			collect
-			(cond
-			 ((and (string-match "\\\\begin{equation}" env)
-			       (not (string-match "\\\\tag{" env)))
-			  (incf counter)
-			  (cons begin counter))
-			 ((string-match "\\\\begin{align}" env)
-			  (prog2
-			      (incf counter)
-			      (cons begin counter)
-			    (with-temp-buffer
-			      (insert env)
-			      (goto-char (point-min))
-			      ;; \\ is used for a new line. Each one leads to a number
-			      (incf counter (count-matches "\\\\$"))
-			      ;; unless there are nonumbers.
-			      (goto-char (point-min))
-			      (decf counter (count-matches "\\nonumber")))))
-			 (t
-			  (cons begin nil)))))
-
-    (when (setq numberp (cdr (assoc (point) results)))
-      (setf (car args)
-	    (concat
-	     (format "\\setcounter{equation}{%s}\n" numberp)
-	     (car args)))))
-
-  (apply orig-func args))
-
-(advice-add 'org-create-formula-image :around #'scimax-org-renumber-environment)
-
-(defun scimax-org-inject-latex-fragment (orig-func &rest args)
-  "Advice function to inject latex code before and/or after the equation in a latex fragment.
-You can use this to set \\mathversion{bold} for example to make it bolder."
-  (setf (car args)
-	(concat
-	 (or (plist-get org-format-latex-options :latex-fragment-pre-body) "")
-	 (car args)
-	 (or (plist-get org-format-latex-options :latex-fragment-post-body) "")))
-  (apply orig-func args))
-
-(advice-add 'org-create-formula-image :around #'scimax-org-inject-latex-fragment )
 
 
 ;; * Markup commands for org-mode
@@ -740,10 +539,6 @@ F5 inserts the entity code."
 			     (insert (cl-sixth (cdr candidate))) "Latin-1")))))
 
 
-;; * Font-lock
-;; ** Latex fragments
-(setq org-highlight-latex-and-related '(latex script entities))
-(set-face-foreground 'org-latex-and-related "blue")
 
 ;; * New org links
 
@@ -1459,6 +1254,13 @@ This function should be added to `org-mode-hook' to make it work."
   :load-path scimax-dir)
 
 
+(use-package scimax-org-latex
+  :load-path scimax-dir
+  :config
+  (scimax-toggle-org-latex-fragment-tooltip)
+  (scimax-toggle-latex-fragment-justification)
+  (scimax-toggle-latex-equation-numbering)
+  (scimax-toggle-inject-latex))
 ;; * The end
 (provide 'scimax-org)
 
