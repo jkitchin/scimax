@@ -880,14 +880,6 @@ Use a prefix arg to get regular RET. "
 	  (overlay-put ov 'numbered-heading t))))
 
 
-;; (define-minor-mode scimax-numbered-org-mode
-;;   "Minor mode to number org headings."
-;;   :init-value nil
-;;   (if scimax-numbered-org-mode
-;;       (scimax-overlay-numbered-headings)
-;;     (ov-clear 'numbered-heading)))
-
-
 (define-minor-mode scimax-numbered-org-mode
   "Minor mode to number org headings."
   :init-value nil
