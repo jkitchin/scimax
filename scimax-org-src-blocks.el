@@ -1,15 +1,19 @@
-;;; scimax-org-colored-src-blocks.el --- Make src blocks in org-mode have colored backgrounds
+;;; scimax-org-src-blocks.el --- Scimax customizations for src blocks.
 
 ;;; Commentary:
-;; This makes the background color of src blocks be customizable. I like this
-;; because it makes it simple to see what a src block language is by color, and
-;; makes them stand out more than the default color. The modification of org is
-;; done by :override advice, so you can disable it with
-;; `scimax-org-disable-colored-blocks'. By default it is on.
+;; This makes the background color of src blocks be customizable based on
+;; patches from Rasmus <rasmus@gmx.us>. I like this because it makes it simple
+;; to see what a src block language is by color, and makes them stand out more
+;; than the default color.
 ;;
-;; You define a face like org-block-<lang> that defines the face for the background.
+;; You define a face like org-block-<lang> that defines the face for the
+;; background. You can toggle this on and off with
+;; `scimax-org-toggle-colored-src-blocks'.
 ;;
-;; based on patches from Rasmus <rasmus@gmx.us>
+;; This library fixes the fontification of <> in src-blocks so that you can use
+;; them as operators.
+;;
+;;
 
 ;; * Colored src blocks
 
@@ -17,37 +21,40 @@
   `((t (:background "LightCyan1")))
   "Face for elisp src blocks")
 
+
 (defface org-block-python
   `((t (:background "DarkSeaGreen1")))
   "Face for python blocks")
+
 
 (defface org-block-ipython
   `((t (:background "thistle1")))
   "Face for python blocks")
 
+
 (defface org-block-jupyter-hy
   `((t (:background "light goldenrod yellow")))
   "Face for hylang blocks")
+
 
 (defface org-block-sh
   `((t (:background "gray90")))
   "Face for python blocks")
 
 
-(defun scimax-org-enable-colored-blocks ()
-  "Advise org-functions to turn on colored src blocks."
+(defun scimax-org-toggle-colored-src-blocks ()
+  "Toggle whether colored src-blocks in org-mode are used."
   (interactive)
-  (advice-add 'org-src-font-lock-fontify-block :override #'scimax-org-src-font-lock-fontify-block)
-  (advice-add 'org-fontify-meta-lines-and-blocks-1 :override #'scimax-org-fontify-meta-lines-and-blocks-1))
-
-;; If you load this, I assume you want these on.
-(scimax-org-enable-colored-blocks)
-
-(defun scimax-org-disable-colored-blocks ()
-  "Remove advices that enable colored src blocks."
-  (interactive)
-  (advice-remove 'org-src-font-lock-fontify-block  #'scimax-org-src-font-lock-fontify-block)
-  (advice-remove 'org-fontify-meta-lines-and-blocks-1 #'scimax-org-fontify-meta-lines-and-blocks-1))
+  (if (not (get 'scimax-org-src-font-lock-fontify-block 'enabled))
+      (progn
+	(advice-add 'org-src-font-lock-fontify-block :override #'scimax-org-src-font-lock-fontify-block)
+	(advice-add 'org-fontify-meta-lines-and-blocks-1 :override #'scimax-org-fontify-meta-lines-and-blocks-1)
+	(put 'scimax-org-src-font-lock-fontify-block 'enabled t)
+	(message "Colored src-blocks enabled."))
+    (advice-remove 'org-src-font-lock-fontify-block  #'scimax-org-src-font-lock-fontify-block)
+    (advice-remove 'org-fontify-meta-lines-and-blocks-1 #'scimax-org-fontify-meta-lines-and-blocks-1)
+    (put 'scimax-org-src-font-lock-fontify-block 'enabled nil)
+    (message "Colored src-blocks disabled.")))
 
 
 ;; This function overwrites the org-src function to make src blocks be colored again.
@@ -206,6 +213,37 @@ points."
 	    t))))))
 
 
-(provide 'scimax-org-colored-src-blocks)
+;; * Fixing <> fontlock in src blocks
+;;
+;; this was broken so that if you had < or > in a src block it would break
+;; parens matching.
 
-;;; scimax-org-colored-src-blocks.el ends here
+;; https://emacs.stackexchange.com/questions/50216/org-mode-code-block-parentheses-mismatch
+(defun scimax-org-mode-<>-syntax-fix (start end)
+  "Change syntax of characters ?< and ?> to symbol within source code blocks."
+  (let ((case-fold-search t))
+    (when (eq major-mode 'org-mode)
+      (save-excursion
+        (goto-char start)
+        (while (re-search-forward "<\\|>" end t)
+          (when (save-excursion
+                  (and
+                   (re-search-backward "[[:space:]]*#\\+\\(begin\\|end\\)_src\\_>" nil t)
+                   (string-equal (match-string 1) "begin")))
+            ;; This is a < or > in an org-src block
+            (put-text-property (point) (1- (point))
+                               'syntax-table (string-to-syntax "_"))))))))
+
+
+(defun scimax-fix-<>-syntax ()
+  "Fix syntax of <> in code blocks.
+This function should be added to `org-mode-hook' to make it work."
+  (setq syntax-propertize-function 'scimax-org-mode-<>-syntax-fix)
+  (syntax-propertize (point-max)))
+
+(add-hook 'org-mode-hook
+	  #'scimax-fix-<>-syntax)
+
+(provide 'scimax-org-src-blocks)
+
+;;; scimax-org-src-blocks.el ends here

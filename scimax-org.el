@@ -900,39 +900,6 @@ Use a prefix arg to get regular RET. "
        `((fl-noh 0 nil))))))
 
 
-
-
-
-;; * Fixing <> fontlock in src blocks
-;;
-;; this was broken so that if you had < or > in a src block it would break
-;; parens matching.
-
-;; https://emacs.stackexchange.com/questions/50216/org-mode-code-block-parentheses-mismatch
-(defun org-mode-<>-syntax-fix (start end)
-  "Change syntax of characters ?< and ?> to symbol within source code blocks."
-  (let ((case-fold-search t))
-    (when (eq major-mode 'org-mode)
-      (save-excursion
-        (goto-char start)
-        (while (re-search-forward "<\\|>" end t)
-          (when (save-excursion
-                  (and
-                   (re-search-backward "[[:space:]]*#\\+\\(begin\\|end\\)_src\\_>" nil t)
-                   (string-equal (match-string 1) "begin")))
-            ;; This is a < or > in an org-src block
-            (put-text-property (point) (1- (point))
-                               'syntax-table (string-to-syntax "_"))))))))
-
-
-(defun scimax-fix-<>-syntax ()
-  "Fix syntax of <> in code blocks.
-This function should be added to `org-mode-hook' to make it work."
-  (setq syntax-propertize-function 'org-mode-<>-syntax-fix)
-  (syntax-propertize (point-max)))
-
-(add-hook 'org-mode-hook
-	  #'scimax-fix-<>-syntax)
 (use-package scimax-org-radio-checkbox
   :load-path scimax-dir)
 
@@ -948,6 +915,11 @@ This function should be added to `org-mode-hook' to make it work."
 
 (use-package scimax-org-images
   :load-path scimax-dir)
+
+(use-package scimax-org-src-blocks
+  :ensure nil
+  :load-path scimax-dir
+  :config (scimax-org-toggle-colored-src-blocks))
 
 
 ;; * The end
