@@ -59,6 +59,7 @@
 			 (avy-with avy-goto-line
 			   (avy--generic-jump "^\\*+" nil avy-style)))))
 
+
 (defun org-teleport (&optional arg)
   "Teleport the current heading to after a headline selected with avy.
 With a prefix ARG move the headline to before the selected
