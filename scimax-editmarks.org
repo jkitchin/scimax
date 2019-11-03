@@ -1028,11 +1028,22 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 	(backward-char (length (plist-get (cdr entry) :close-marker)))))))
   ;; Should we add a local variable so the file opens in sem-mode?
   (hack-local-variables)
-  (when (not (-contains?  file-local-variables-alist '(eval sem-mode)))
-    (save-excursion
-      (save-restriction
-	(widen)
-	(add-file-local-variable 'eval '(sem-mode))))))
+  ;; This is more complicated than I thought it should be. When I try to just
+  ;; add a file-local variable, it often fails on new files because of some
+  ;; weird issue in comment-region. I hacked this together, and it seems more
+  ;; reliable.
+  (if (not (member '(eval sem-mode) file-local-variables-alist))
+      (let ((mode major-mode))
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (goto-char (point-max))
+	    (insert (with-temp-buffer
+		      (funcall mode)
+		      (insert "Local Variables:\neval: (sem-mode)\nEnd:\n")
+		      (comment-region (point-min) (point-max))
+		      (buffer-string))))))
+    (add-file-local-variable 'eval '(sem-mode))))
 #+END_SRC
 
 #+RESULTS:
