@@ -302,10 +302,6 @@
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-org-colored-src-blocks
-  :ensure nil
-  :load-path scimax-dir)
-
 (use-package ov)
 
 (use-package pdf-tools)
