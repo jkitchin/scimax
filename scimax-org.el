@@ -1431,22 +1431,22 @@ It is for commands that depend on the major mode. One example is
 	 (radio-list (cond
 		      ;; on an item. easy.
 		      ((and (eq 'item (car element))
-			    (-contains?
+			    (member
+			     ":radio"
 			     (org-element-property
 			      :attr_org
-			      (org-element-property :parent element))
-			     ":radio"))
+			      (org-element-property :parent element))))
 		       (org-element-property :parent element))
 		      ;; on an item paragraph
 		      ((and (eq 'paragraph (car element))
 			    (eq 'item (car (org-element-property :parent element)))
-			    (-contains?
+			    (member
+			     ":radio"
 			     (org-element-property
 			      :attr_org
 			      (org-element-property
 			       :parent
-			       (org-element-property :parent element)))
-			     ":radio"))
+			       (org-element-property :parent element)))))
 		       (org-element-property
 			:parent
 			(org-element-property :parent element)))
@@ -1463,26 +1463,27 @@ It is for commands that depend on the major mode. One example is
     (when radio-list
       ;; clear all boxes
       (save-excursion
-	(loop for el in (org-element-property :structure radio-list)
-	      do
-	      (goto-char (car el))
-	      (when (re-search-forward "\\[X\\]" (line-end-position) t)
-		(replace-match "[ ]")))
-	;; Now figure out where to put the new X
-	(loop for el in (org-element-property :structure radio-list)
-	      do
-	      (when (and (> p (car el))
-			 (< p (car (last el))))
+	(mapc (lambda (el)
 		(goto-char (car el))
-		(when (re-search-forward "\\[ \\]" (line-end-position) t)
-		  (replace-match "[X]")))))
+		(when (re-search-forward "\\[X\\]" (line-end-position) t)
+		  (replace-match "[ ]")))
+	      (org-element-property :structure radio-list))
+	;; Now figure out where to put the new X
+	(mapc (lambda (el)
+		(when (and (> p (car el))
+			   (< p (car (last el))))
+		  (goto-char (car el))
+		  (when (re-search-forward "\\[ \\]" (line-end-position) t)
+		    (replace-match "[X]"))))
+	      (org-element-property :structure radio-list)))
+      ;; return t so the hook ends I think
       t)))
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'scimax-radio-CcCc)
 ;; this works with mouse checking.
 (add-hook 'org-checkbox-statistics-hook 'scimax-radio-CcCc)
 
-(defun org-get-plain-list (name)
+(defun scimax-org-get-plain-list (name)
   "Get the org-element representation of a plain-list named NAME."
   (catch 'found
     (org-element-map
@@ -1493,17 +1494,19 @@ It is for commands that depend on the major mode. One example is
             (string= name (org-element-property :name plain-list))
           (throw 'found plain-list))))))
 
-(defun get-radio-list-value (name)
+
+(defun scimax-get-radio-list-value (name)
   "Return the value of the checked item in a radio list named NAME."
   (save-excursion
     (loop for el in (org-element-property
                      :structure
-                     (org-get-plain-list name))
+                     (scimax-org-get-plain-list name))
           if (string= (nth 4 el) "[X]")
           return (progn
                    (let ((item (buffer-substring (car el) (car (last el)))))
                      (string-match "\\[X\\]\\(.*\\)$" item)
                      (match-string-no-properties 1 item))))))
+
 
 ;; * Fixing <> fontlock in src blocks
 ;;
