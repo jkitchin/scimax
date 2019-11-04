@@ -873,7 +873,7 @@ Return nil if not on an editmark."
   (when (get-text-property (point) 'sem-editmark)
     (cond
      ;; At the very beginning
-     ((not (get-text-property (- (point) 1) 'sem-editmark))
+     ((bobp)
       (cons (point) (next-single-property-change (point) 'sem-editmark)))
      (t
       (cons (or (previous-single-property-change (point) 'sem-editmark) (point))
@@ -1318,6 +1318,12 @@ editmark is the full text including the markers."
     (let ((editmarks '())
 	  bounds
 	  cem)
+      (when (get-text-property (point) 'sem-type)
+	(push (list (get-text-property (point) 'sem-type)
+		    (current-buffer)
+		    (setq bounds (sem-editmark-bounds))
+		    (buffer-substring-no-properties (car bounds) (cdr bounds)))
+	      editmarks))
       (while (setq cem (sem-next-editmark))
 	(setq bounds (sem-editmark-bounds))
 	(push (list (get-text-property (point) 'sem-type)
