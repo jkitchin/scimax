@@ -533,7 +533,8 @@
 ;; 	       (expand-file-name "ov-highlight" scimax-dir))
 ;;   (require 'ov-highlight))
 
-(org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir))
+(let ((enable-local-variables nil))
+  (org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir)))
 
 ;; * User packages
 
