@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: latex subscript
+# key: ^
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+${1:symbol}^{${2:superscript}}
