@@ -69,10 +69,13 @@
   (interactive)
 
   (let* ((url-request-method "POST")
+	 (text (if (region-active-p)
+		   (buffer-substring (region-beginning) (region-end))
+		 (thing-at-point 'paragraph)))
 	 (url-request-data (format
 			    "key=some-random-text-&data=%s"
 			    (url-hexify-string
-			     (thing-at-point 'paragraph))))
+			     text)))
 	 (xml  (with-current-buffer
 		   (url-retrieve-synchronously
 		    "http://service.afterthedeadline.com/checkDocument")
@@ -80,7 +83,7 @@
 	 (results (car xml))
 	 (errors (xml-get-children results 'error)))
 
-    (switch-to-buffer-other-frame "*ATD*")
+    (pop-to-buffer "*ATD*")
     (erase-buffer)
     (dolist (err errors)
       (let* ((children (xml-node-children err))

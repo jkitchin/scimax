@@ -2,7 +2,7 @@
 
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 
@@ -38,10 +38,11 @@ possible unless REFRESH is non-nil."
   "Display buffer with LaTeX setup information."
   (interactive)
   (message "Please wait while I gather some information. This can take a while.")
-  (with-current-buffer (get-buffer-create "*scimax-latex-setup*")
-    (erase-buffer)
-    (org-mode)
-    (insert (s-format "#+TITLE: LaTeX setup
+  (pop-to-buffer "*scimax-latex-setup*")
+  (erase-buffer)
+  (org-mode)
+  (message "Getting information on executables")
+  (insert (s-format "#+TITLE: LaTeX setup
 
 This file describes how LaTeX is setup on your computer.
 
@@ -72,55 +73,66 @@ Note: Not every class has a corresponding style file. Click on the texdoc link t
 Missing files should be installed in the TEXMFHOME directory listed above. See https://en.wikibooks.org/wiki/LaTeX/Installing_Extra_Packages for help.
 
 "
-		      (lambda (arg &optional extra)
-			(eval (read arg)))))
-    (loop for (org-name header-string cls) in
-	  (-uniq (loop for latex-class in org-latex-classes
-		       collect
-		       (list (car latex-class)
-			     (nth 1 latex-class)
-			     (let ((header-string (nth 1 latex-class)))
-			       (when (string-match "documentclass.*?{\\(.*?\\)}" header-string)
-				 (match-string 1 header-string))))))
-	  do
-	  (let ((cls-path (s-trim (shell-command-to-string (format "kpsewhich %s.cls" cls))))
-		(sty-path (s-trim (shell-command-to-string (format "kpsewhich %s.sty" cls)))))
-	    (insert (s-format "
+		    (lambda (arg &optional extra)
+		      (eval (read arg)))))
+  (message "Getting information on org-mode latex classes.")
+  (cl-loop for (org-name header-string cls) in
+	   (-uniq (cl-loop for latex-class in org-latex-classes
+			   collect
+			   (list (car latex-class)
+				 (nth 1 latex-class)
+				 (let ((header-string (nth 1 latex-class)))
+				   (when (string-match "documentclass.*?{\\(.*?\\)}" header-string)
+				     (match-string 1 header-string))))))
+	   do
+	   (message "Getting %s" org-name)
+	   (let ((cls-path (s-trim (shell-command-to-string (format "kpsewhich %s.cls" cls))))
+		 (sty-path (s-trim (shell-command-to-string (format "kpsewhich %s.sty" cls)))))
+	     (insert (s-format "
 ** ${org-name} creates documents with this LaTeX documentclass: ${cls}
+
 This is the header that is expanded.
 
+#+BEGIN_EXPORT latex
 ${header-string}
+#+END_EXPORT
 
 LaTeX path for class: [[${cls-path}]]
 
  [[elisp:(shell-command \"texdoc ${cls}\"][texdoc ${cls}]]
 
 Latex style path: [[${sty-path}]]
- 
-" 
-			      (lambda (arg &optional extra)
-				(eval (read arg)))))))
 
-    (insert "* org-mode default latex packages\n\n")
-    (loop for (options package snippet compilers) in org-latex-default-packages-alist
-	  do
-	  (insert (s-format "- ${package} (options=${options}) [[elisp:(shell-command \"texdoc ${package}\"][texdoc ${package}]]\n"
-			    (lambda (arg &optional extra)
-			      (eval (read arg))))))
+"
+			       (lambda (arg &optional extra)
+				 (eval (read arg)))))))
 
-    (insert "\n* org-mode defined latex packages\n\n")
-    (loop for (options package snippet compilers) in org-latex-packages-alist
-	  do
-	  (insert (s-format "- ${package} [${options}] [[elisp:(shell-command \"texdoc ${package}\"][texdoc ${package}]]\n"
-			    (lambda (arg &optional extra)
-			      (eval (read arg))))))
+  (message "Getting information on default latex packages.")
+  (insert "* org-mode default latex packages\n
+These are defined in [[elisp:(describe-variable 'org-latex-default-packages-alist)][org-latex-default-packages-alist]]\n\n")
+  (cl-loop for (options package snippet compilers) in org-latex-default-packages-alist
+	   do
+	   (insert (s-format "- ${package} (options=${options}) [[elisp:(shell-command \"texdoc ${package}\"][texdoc ${package}]]\n"
+			     (lambda (arg &optional extra)
+			       (eval (read arg))))))
 
-    (insert "\n\n* org-mode LaTeX compiling setup\n\n")
-    (insert (format "org-latex-pdf-process = \"%s\"\n" org-latex-pdf-process))
-    (if (functionp org-latex-pdf-process)
-	(insert "%s" (describe-function org-latex-pdf-process))))
+  (message "Getting information on org-defined latex packages")
+  (insert "\n* org-mode defined latex packages\n
+These are defined in [[elisp:(describe-variable 'org-latex-packages-alist)][org-latex-packages-alist]]\n\n")
+  (cl-loop for (options package snippet compilers) in org-latex-packages-alist
+	   do
+	   (insert (s-format "- ${package} [${options}] [[elisp:(shell-command \"texdoc ${package}\"][texdoc ${package}]]\n"
+			     (lambda (arg &optional extra)
+			       (eval (read arg))))))
 
-  (switch-to-buffer "*scimax-latex-setup*")
+  (message "Getting information on compiling setup.")
+  (insert "\n\n* org-mode LaTeX compiling setup\n\n")
+  (insert (format "org-latex-pdf-process = \"%s\"\n" org-latex-pdf-process))
+  (when (functionp org-latex-pdf-process)
+    (insert (format "%s" (describe-function org-latex-pdf-process)))
+    (kill-buffer "*Help*"))
+
+  (pop-to-buffer "*scimax-latex-setup*")
   (goto-char (point-min)))
 
 (provide 'scimax-latex)

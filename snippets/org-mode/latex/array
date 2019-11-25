@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: latex array
+# key: array
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+\left| \begin{array}{$1}
+$2
+\end{array} \right|$0

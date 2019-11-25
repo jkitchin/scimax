@@ -28,8 +28,7 @@
 #+LATEX_HEADER: \usepackage{setspace}
 #+LATEX_HEADER: \usepackage[linktocpage, pdfstartview=FitH, colorlinks, linkcolor=blue, anchorcolor=blue, citecolor=blue,  filecolor=blue,  menucolor=blue,  urlcolor=blue]{hyperref}
 
-
-#+BEGIN_LaTeX
+#+BEGIN_EXPORT latex
 \doublespace
 \thispagestyle{empty}
 \begin{titlepage}
@@ -72,10 +71,10 @@
 \newpage
 
 \section*{Abstract}
-\onehalfspacing \large 
+\onehalfspacing \large
 <replace: your abstract>
 
-\newline 
+\newline
 Keywords: <replace: your keywords>.
 
 \newpage
@@ -92,7 +91,7 @@ Keywords: <replace: your keywords>.
 \newpage
 \clearpage
 \setcounter{page}{1}
-#+END_LaTeX
+#+END_EXPORT
 
 
 * Introduction
@@ -114,5 +113,3 @@ bibliography:<replace: your bibfile>
 * build								   :noexport:
 
 [[elisp:(org-open-file (org-latex-export-to-pdf))]]
-
-

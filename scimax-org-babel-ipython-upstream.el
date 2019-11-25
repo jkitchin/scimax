@@ -186,6 +186,27 @@ cmd is run when you click on the button.
 help is a string for a tooltip."
   :group 'ob-ipython)
 
+
+(defcustom ob-ipython-html-to-image-program
+  (executable-find "wkhtmltoimage")
+  "Path to wkhtmltoimage, and any additional options you want."
+  :group 'ob-ipython)
+
+
+(unless ob-ipython-html-to-image-program
+  (warn "No wkhtmltoimage found. Either set `ob-ipython-html-to-image-program' to the location, or go to https://wkhtmltopdf.org/downloads.html to get and install it."))
+
+
+(defcustom ob-ipython-preview-html t
+  "if non-nil try previewing html."
+  :group 'ob-ipython)
+
+
+(defcustom ob-ipython-preview-html-size 800
+  "Size in pixels to make the html previews."
+  :group 'ob-ipython)
+
+
 (defun ob-ipython-key-bindings ()
   "Function to define key-bindings.
 Usually called in a hook function."
@@ -1088,6 +1109,40 @@ FILE-OR-NIL is not used in this function."
 		(format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value))))
 
 
+(defun ob-ipython-html-font-lock (limit)
+  "Font-lock rule for html blocks.
+This puts an image overlay over "
+  (while (re-search-forward "^#\\+BEGIN_EXPORT html" limit t)
+    (let* ((el (org-element-context))
+	   tf png beg end ov img
+	   html)
+      (when (and (eq 'export-block (car el)) (not (ov-at)))
+	(setq html (org-element-property :value el)
+	      beg (org-element-property :begin el)
+	      end (save-excursion (re-search-forward "^#\\+END_EXPORT"))
+	      tf (make-temp-file "ob-ipython-html" nil ".html" html)
+	      png (concat (file-name-sans-extension tf) ".png"))
+	(call-process-shell-command (format "%s %s %s"
+					    ob-ipython-html-to-image-program
+					    tf png))
+	(setq img (create-image (expand-file-name png)
+				'imagemagick nil :width ob-ipython-preview-html-size)
+	      ov (make-overlay beg end))
+	(overlay-put ov 'display img)
+	(overlay-put ov 'face 'default)
+	(overlay-put ov 'org-image-overlay t)
+	(overlay-put ov 'mouse-face 'highlight)
+	(overlay-put ov 'modification-hooks
+		     (list 'org-display-inline-remove-overlay))
+	(overlay-put ov 'local-map (let ((map (make-sparse-keymap)))
+				     (define-key map [mouse-1]
+				       `(lambda ()
+					  (interactive)
+					  (org-open-file ,tf)))
+				     map))
+	(push ov org-inline-image-overlays)))))
+
+
 (defun ob-ipython-format-text/latex (file-or-nil value)
   "Format VALUE for text/latex mime-types.
 FILE-OR-NIL is not used in this function."
@@ -1486,7 +1541,12 @@ Note, this does not work if you run the block async."
 	(font-lock-add-keywords
 	 nil
 	 `((,(ob-ipython-button-font-lock text cmd help-echo) (0  'link t)))
-	 t)))
+	 t))
+  (when (and ob-ipython-preview-html ob-ipython-html-to-image-program)
+    (font-lock-add-keywords
+     nil
+     '((ob-ipython-html-font-lock (0  'font-lock-keyword-face t)))
+     t)))
 
 (add-hook 'org-mode-hook 'ob-ipython-activate-buttons t)
 

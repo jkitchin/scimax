@@ -1735,12 +1735,4 @@ I bind this to a key like "f9" and set it up to easily open my mail, calendar an
 # Local Variables:
 # eval: (progn (require 'emacs-keybinding-command-tooltip-mode) (emacs-keybinding-command-tooltip-mode +1))
 # eval: (sem-mode)
-# eval: (sem-mode)
-# eval: (sem-mode)
-# eval: (sem-mode)
-# eval: (sem-mode)
-# eval: (sem-mode)
-# eval: (sem-mode)
-# eval: (sem-mode)
-# eval: (sem-mode)
 # End:

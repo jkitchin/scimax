@@ -28,6 +28,7 @@ commands (`scimax-user-hotspot-commands'),
 locations (`scimax-user-hotspot-locations'), org agenda files,
 recent files and bookmarks. You can set a bookmark also."
   (interactive "P")
+  (require 'helm-for-files)
   (helm :sources `(((name . "Commands")
 		    (candidates . ,scimax-user-hotspot-commands)
 		    (action . (("Open" . (lambda (x) (funcall x))))))
@@ -174,11 +175,10 @@ sentence in the region."
 
 ;; * profile me
 (unless (memq system-type '(windows-nt ms-dos))
-
-  (require 'esup)
-
   (defun scimax-profile ()
     "Run `esup' on the scimax init file to profile it."
+    (interactive)
+    (require 'esup)
     (esup (expand-file-name "init.el" scimax-dir))))
 
 
@@ -239,6 +239,87 @@ You can also try putting expressions in for formatting, e.g.:
 			       (symbol-value (intern ,m1))))))))
 
     `(s-format ,fmt 'aget (list ,@agetter))))
+
+;; * scimax describe
+(defun scimax-describe ()
+  "Open an org-buffer describing the scimax setup."
+  (interactive)
+  (pop-to-buffer "*scimax*")
+  (erase-buffer)
+  (org-mode)
+  (insert (f-string "* System info
+
+- System type :: ${system-type}
+- System configuration :: ${system-configuration}
+- Window system :: ${window-system}
+- Emacs version :: ${emacs-version}
+  - Package user dir :: ${package-user-dir}
+  - User dir :: ${user-emacs-directory}
+  - imagemagick support :: ${(image-type-available-p 'imagemagick)}
+  - image types :: ${(imagemagick-types)}
+  - gnutls available :: ${(gnutls-available-p)}
+- Org-version :: ${(org-version)}\n")
+	  "\n- exec-path (this is what Emacs knows)\n"
+
+	  (cl-loop for path in exec-path concat
+		   (f-string "  - ${path}\n"))
+
+	  "\n- system path (this is what your shell knows)\n"
+	  (cl-loop for p in (split-string (getenv "PATH") ":")
+		   concat
+		   (format " - %s\n" p)))
+
+  (let* ((default-directory scimax-dir)
+	 (branch (string-trim (shell-command-to-string "git rev-parse --abbrev-ref HEAD")))
+	 (commit (string-trim (shell-command-to-string "git rev-parse HEAD")))
+	 (remote (string-trim (shell-command-to-string "git config --get remote.origin.url"))))
+    (insert (f-string "\n* scimax
+
+- scimax-dir :: ${scimax-dir}")
+	    (f-string "
+  - git branch :: ${branch}
+  - git commit :: ${commit}
+  - git remote :: ${remote}\n"))
+
+    (insert "\n* Executables\n"
+	    (f-string "
+- emacs ::  ${(executable-find \"emacs\")}
+- git :: ${(executable-find \"git\")}
+- python :: ${(executable-find \"python\")}")
+	    (f-string "
+- emacs ::  ${(executable-find \"emacs\")}
+- git :: ${(executable-find \"git\")}
+    - git version :: ${(string-trim (shell-command-to-string \"git --version\"))}
+- ssh :: ${(executable-find \"ssh\")}
+  - ssh version :: ${(string-trim (shell-command-to-string \"ssh -V\"))}
+- python :: ${(executable-find \"python\")}
+- latex :: ${(executable-find \"latex\")}
+  - For more latex info click [[elisp:scimax-latex-setup]]
+- Searching tools
+  - grep :: ${(executable-find \"grep\")}
+  - ag ::  ${(executable-find \"ag\")}
+  - pt ::  ${(executable-find \"pt\")}
+  - find ::  ${(executable-find \"find\")}
+  - locate ::  ${(executable-find \"locate\")}
+- Graphics
+  - convert :: ${(executable-find \"convert\"}
+  - mogrify :: ${(executable-find \"mogrify\"}
+"))
+
+    ;; the end
+    (goto-char (point-min))))
+
+
+(defun scimax-github ()
+  "Open the Github repo."
+  (interactive)
+  (browse-url "https://github.com/jkitchin/scimax"))
+
+
+(defun scimax-github-issues ()
+  "Open the Github repo issues page."
+  (interactive)
+  (browse-url "https://github.com/jkitchin/scimax/issues"))
 
 
 

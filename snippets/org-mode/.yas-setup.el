@@ -52,7 +52,23 @@ $0
 		    (-flatten
 		     (mapcar (lambda (path)
 			       (setq path (replace-regexp-in-string "!" "" path))
-			       (when (file-directory-p path)
+			       ;; [2019-08-21 Wed] I added a check to only do
+			       ;; absolute paths. BSTINPUTS may contain "."
+			       ;; which might be a problem depending on when
+			       ;; this variable is defined, e.g. if it is in
+			       ;; your home, maybe it would search a lot of
+			       ;; directories. I don't see this, but issue #300
+			       ;; https://github.com/jkitchin/scimax/issues/300
+			       ;; inspired this addition.
+			       (when (and (not (file-symlink-p path))
+					  (file-name-absolute-p path)
+					  (file-directory-p path)
+					  ;; you probably do not want to do this
+					  ;; in your home path
+					  (not (string= (expand-file-name "~/") path)))
+				 ;; I am not super sure if this should be
+				 ;; recursive. I find more styles when it is
+				 ;; recursive.
 				 (f-entries path (lambda (f) (f-ext? f "bst")) t)))
 			     (split-string
 			      ;; https://tex.stackexchange.com/questions/431948/get-a-list-of-installed-bibliography-styles-with-kpsewhich?noredirect=1#comment1082436_431948

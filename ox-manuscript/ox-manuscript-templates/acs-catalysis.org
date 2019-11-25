@@ -69,7 +69,7 @@ The png version is good for org-mode and presentations. The eps version is the o
 * Build manuscript                           :noexport:
 
 Click on this to see how the manuscript looks in pdf.
-[[elisp:ox-manuscript-build-manuscript-and-open]]
+[[elisp:ox-manuscript-export-and-build-and-open
 
 Click this to insert standalone bibliography code
 [[elisp:ox-manuscript-build-submission-manuscript-and-open]]

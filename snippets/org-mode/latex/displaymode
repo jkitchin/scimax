@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: latex displaymode
+# key: dm
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+\[${0}\]

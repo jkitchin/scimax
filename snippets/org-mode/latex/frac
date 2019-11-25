@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: latex frac
+# key: frac
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+\frac{$1}{$2}$0

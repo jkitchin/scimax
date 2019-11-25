@@ -21,7 +21,10 @@
  '(("b" (lambda (x)
 	  (bash x))  "Open bash here.")
    ("f" (lambda (x)
-	  (finder x))  "Open Finder here.")))
+	  (finder x))  "Open Finder here.")
+   ("g" (lambda (x)
+	  (let ((default-directory x))
+	    (magit-status)))  "Magit status")))
 
 
 ;; ** Find file actions

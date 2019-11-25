@@ -908,7 +908,7 @@ register/resume/replace
 Register                     Resume             Replace
 ------------------------------------------------------------------
 _j_: jump to register        _h_: helm resume   _q_: query replace
-_i_: insert regester         _v_: ivy resume    _x_: regexp replace
+_i_: insert register         _v_: ivy resume    _x_: regexp replace
 _c_: copy to register
 _a_: append to register
 _n_: number to register
@@ -938,7 +938,7 @@ _l_: list registers
   "search"
   ("a" counsel-ag "ag")
   ("g" counsel-git-grep "grep")
-  ("m" multioccur "moccur")
+  ("m" multi-moccur "moccur")
   ("o" occur "occur")
   ("p" projectile-grep "project grep")
   ("r" isearch-backward "search back")
@@ -1221,9 +1221,9 @@ _+_: strike
 
 (defhydra scimax-dired (:color blue :hint nil :inherit (scimax-base/heads))
   "
-Mark              Operate         Misc
-----              -------         ----
-_fd_: flag del    _C_: copy       _+_: mkdir
+Mark              Operate         Misc              Navigate
+----              -------         ----              --------
+_fd_: flag del    _C_: copy       _+_: mkdir        _<up>_: up directory
 _f#_: autosave    _R_: rename     _o_: open other
 _f~_: backups     _D_: delete
 _f&_: garbage     _F_: open marks
@@ -1268,7 +1268,9 @@ _t_: toggle marks _Q_: find/rep
   ("Q" dired-do-find-regexp-and-replace)
 
   ("+" dired-create-directory)
-  ("o" dired-find-file-other-window))
+  ("o" dired-find-file-other-window)
+
+  ("<up>" dired-up-directory))
 
 
 (defhydra scimax-item-hydra (:color red :inherit (scimax-base/heads))

@@ -215,6 +215,7 @@ them with the full version."
 (defcustom scimax-chemical-formula-abbreviations
   '(("co2" "CO_{2}")
     ("n2" "N_{2}")
+    ("h2" "H_{2}")
     ("h2o" "H_{2}O")
     ("ch4" "CH_{4}")
     ("c2h2" "C_{2}H_{2}")
@@ -398,6 +399,8 @@ define the definitions."
 (defcustom scimax-save-spellcheck-abbrevs t
   "If t save spellchecks as global-abbrevs.")
 
+;; Note this redefines an alias in flyspell-correct that points to
+;; `flyspell-correct-previous'.
 (defun flyspell-correct-previous-word-generic (position)
   "Correct the first misspelled word that occurs before point.
 But don't look beyond what's visible on the screen.
