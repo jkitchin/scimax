@@ -115,3 +115,11 @@ Alternatively, add scimax to your load path in your init file and just require w
 #+END_SRC
 
 It is not uncommon to have to restart emacs a few times while all the packages from MELPA are installed. Windows seems to be like that.
+* Funding for scimax
+
+=scimax= development has been partially supported by the following grants:
+
+- National Science Foundation (Award 1506770)
+- Department of Energy Early Career Award (DESC0004031)
+
+- You can sponsor =scimax= development at https://github.com/sponsors/jkitchin.
