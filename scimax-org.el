@@ -371,8 +371,18 @@ then exit them."
 	    (insert (cdr chars))
 	    (goto-char (region-beginning))
 	    (insert (car chars)))
-	(insert (concat  (car chars) (cdr chars)))
-	(backward-char (length (cdr chars)))))))
+	(cond
+	 ((thing-at-point 'word)
+	  (save-excursion
+	    (end-of-thing 'word)
+	    (insert (cdr chars)))
+	  (save-excursion
+	    (beginning-of-thing 'word)
+	    (insert (car chars)))
+	  (forward-char (length (car chars))))
+	 (t
+	  (insert (concat  (car chars) (cdr chars)))
+	  (backward-char (length (cdr chars)))))))))
 
 
 (defun helm-insert-org-entity ()
@@ -901,11 +911,13 @@ Use a prefix arg to get regular RET. "
 
 
 (use-package scimax-org-radio-checkbox
+  :ensure nil
   :load-path scimax-dir)
 
 
 (use-package scimax-org-latex
   :load-path scimax-dir
+  :ensure nil
   :config
   (scimax-toggle-org-latex-fragment-tooltip)
   (scimax-toggle-latex-fragment-justification)
@@ -914,6 +926,7 @@ Use a prefix arg to get regular RET. "
 
 
 (use-package scimax-org-images
+  :ensure nil
   :load-path scimax-dir)
 
 (use-package scimax-org-src-blocks
