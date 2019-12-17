@@ -71,7 +71,13 @@ the background. This function is in an override advice. You can
 remove this with `(advice-remove 'org-src-font-lock-fontify-block
 #'scimax-org-src-font-lock-fontify-block)'
 "
-  (let ((lang-mode (org-src--get-lang-mode lang)))
+  (let ((lang-mode (cond
+		    ;; this is for org 9.2
+		    ((fboundp 'org-src--get-lang-mode)
+		     (org-src--get-lang-mode lang))
+		    ;; this is for org 9.3
+		    ((fboundp 'org-src-get-lang-mode)
+		     (org-src-get-lang-mode lang)))))
     (when (fboundp lang-mode)
       (let ((string (buffer-substring-no-properties start end))
 	    (modified (buffer-modified-p))
