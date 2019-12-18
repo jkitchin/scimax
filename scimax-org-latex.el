@@ -5,6 +5,15 @@
 
 (require 'ox-latex)
 
+(defvar scimax-toggle-latex-fragment-func
+  (if (fboundp 'org-latex-preview)
+      'org-latex-preview
+    'org-toggle-latex-fragment)
+  "Function to toggle latex fragments.
+`org-toggle-latex-fragment' is obsolete in 9.3 and is replaced by
+`org-latex-preview'.")
+
+
 ;; * Font-lock
 ;; ** Latex fragments
 ;;; Code:
@@ -105,7 +114,9 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 	       (concat (buffer-substring beg end)
 		       "\nmouse-1 to toggle."))
   (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
-				    (define-key map (kbd "C-c C-x C-l") 'org-toggle-latex-fragment)
+				    (define-key map (kbd "C-c C-x C-l")
+				      (lambda (interactive)
+					(funcall scimax-toggle-latex-fragment-func)))
 				    (define-key map [mouse-1]
 				      `(lambda ()
 					 (interactive)
@@ -289,6 +300,7 @@ made into an image."
 
 
 (defun org-latex-fragment-toggle-auto ()
+  "Run an idle timer to toggle fragments."
   ;; Wait for the s
   (interactive)
   (while-no-input
@@ -315,7 +327,8 @@ made into an image."
                ;; go back to last one and put image back
                (save-excursion
                  (goto-char org-latex-fragment-last)
-                 (when (my/org-in-latex-fragment-p) (org-toggle-latex-fragment))
+                 (when (my/org-in-latex-fragment-p)
+		   (funcall scimax-toggle-latex-fragment-func))
                  ;; now remove current imagea
                  (goto-char begin)
                  (let ((ov (my/org-latex-fragment--get-current-latex-fragment)))
@@ -333,7 +346,8 @@ made into an image."
                ;; put image back on
                (save-excursion
                  (goto-char org-latex-fragment-last)
-                 (when (my/org-in-latex-fragment-p)(org-toggle-latex-fragment)))
+                 (when (my/org-in-latex-fragment-p)
+		   (funcall scimax-toggle-latex-fragment-func)))
 
                ;; unset last fragment
                (setq org-latex-fragment-last nil))
