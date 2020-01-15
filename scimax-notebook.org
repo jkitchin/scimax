@@ -557,6 +557,70 @@ Here is a function you can use to interactively search files by pattern. For exa
 #+RESULTS:
 : nb-search-all
 
+** Jump to an org file in the notebook / table of contents
+
+Issue [[https://github.com/jkitchin/scimax/issues/332][332]] requested a way to make something like a table of contents for the org files in a notebook. This function builds a list of candidates that show the title, date and filename for selection.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defun nb-search-title ()
+  "Select a notebook file by title, date or filename."
+  (interactive)
+  (let ((org-files (-filter (lambda (f) (f-ext? f "org"))
+			    (projectile-project-files (projectile-project-root))))
+	data
+	candidates
+	format-string
+	title
+	date)
+
+    ;; Get title, date and filename for each org-file. If there is no date, we
+    ;; use last modified time. It doesn't seem possible to get the file creation
+    ;; time. I am not sure this is robust for all things you might put into the
+    ;; DATE field. I assume it is something org can read and convert to a time.
+    (setq data (mapcar
+		(lambda (f)
+		  (with-temp-buffer
+		    (insert-file-contents f)
+		    (setq title (if (re-search-forward "#\\+TITLE: \\(.*\\)" nil t)
+				    (match-string 1)
+				  "No title"))
+
+
+		    (goto-char (point-min))
+		    (setq date (if (re-search-forward "#\\+DATE: \\(.*\\)" nil t)
+				   (format-time-string "%Y-%m-%d"
+						       (org-read-date nil t (match-string 1)))
+				 (format-time-string
+				  "mod-%Y-%m-%d"
+				  (file-attribute-modification-time
+				   (file-attributes f)))))
+
+		    (list title date f)))
+		org-files))
+
+    ;; Sort by date, more recent things will be first
+    (setq data (cl-sort (copy-sequence data)
+			(lambda (a b) (org-time> (nth 1 a) (nth 1 b)))))
+
+    ;; Now create a format string so the longest title fits and is aligned.
+    (setq format-string (format "%%%ss | %%16s | %%s"
+				(apply 'max (mapcar (lambda (e) (length (car e))) data))))
+    ;; These are the candidates we will choose from.
+    (setq candidates (cl-loop for (title date f) in data
+			      collect
+			      (list (format format-string title date f) f)))
+
+    ;; I use completing-read here so you can use your own backend. The only
+    ;; downside is I can't put many actions like in a dedicated ivy command.
+    (find-file (cadr (assoc
+		      (completing-read "Open: " candidates)
+		      candidates)))))
+#+END_SRC
+
+#+RESULTS:
+: nb-search-title
+
+
 
 ** Help
 
@@ -1165,6 +1229,7 @@ _D_: open root  _sb_: search bufs  _n_: new notebook      _y_: open with sys
   ("sa" nb-search-all "search all files")
   ("ss" nb-search "search some files")
   ("sb" projectile-multi-occur "search nb buffers")
+  ("st" nb-search-title "Search by title/date")
   ("o" nb-follow-other "open other window")
   ("O" nb-follow-other-frame "Open other frame")
   ("y" nb-follow-sys "Open with system program"))
