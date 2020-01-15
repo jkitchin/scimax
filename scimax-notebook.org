@@ -565,13 +565,16 @@ Issue [[https://github.com/jkitchin/scimax/issues/332][332]] requested a way to 
 (defun nb-search-title ()
   "Select a notebook file by title, date or filename."
   (interactive)
-  (let ((org-files (-filter (lambda (f) (f-ext? f "org"))
-			    (projectile-project-files (projectile-project-root))))
-	data
-	candidates
-	format-string
-	title
-	date)
+  (let* ((project-root (projectile-project-root))
+	 (org-files (mapcar (lambda (f)
+			      (expand-file-name f project-root))
+			    (-filter (lambda (f) (f-ext? f "org"))
+				     (projectile-project-files project-root))))
+	 data
+	 candidates
+	 format-string
+	 title
+	 date)
 
     ;; Get title, date and filename for each org-file. If there is no date, we
     ;; use last modified time. It doesn't seem possible to get the file creation
@@ -579,23 +582,24 @@ Issue [[https://github.com/jkitchin/scimax/issues/332][332]] requested a way to 
     ;; DATE field. I assume it is something org can read and convert to a time.
     (setq data (mapcar
 		(lambda (f)
-		  (with-temp-buffer
-		    (insert-file-contents f)
-		    (setq title (if (re-search-forward "#\\+TITLE: \\(.*\\)" nil t)
-				    (match-string 1)
-				  "No title"))
+		  (when (file-exists-p f)
+		    (with-temp-buffer
+		      (insert-file-contents f)
+		      (setq title (if (re-search-forward "#\\+TITLE: \\(.*\\)" nil t)
+				      (match-string 1)
+				    "No title"))
 
 
-		    (goto-char (point-min))
-		    (setq date (if (re-search-forward "#\\+DATE: \\(.*\\)" nil t)
-				   (format-time-string "%Y-%m-%d"
-						       (org-read-date nil t (match-string 1)))
-				 (format-time-string
-				  "mod-%Y-%m-%d"
-				  (file-attribute-modification-time
-				   (file-attributes f)))))
+		      (goto-char (point-min))
+		      (setq date (if (re-search-forward "#\\+DATE: \\(.*\\)" nil t)
+				     (format-time-string "%Y-%m-%d"
+							 (org-read-date nil t (match-string 1)))
+				   (format-time-string
+				    "mod-%Y-%m-%d"
+				    (file-attribute-modification-time
+				     (file-attributes f)))))
 
-		    (list title date f)))
+		      (list title date f))))
 		org-files))
 
     ;; Sort by date, more recent things will be first
