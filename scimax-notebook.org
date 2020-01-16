@@ -585,13 +585,13 @@ Issue [[https://github.com/jkitchin/scimax/issues/332][332]] requested a way to 
 		  (when (file-exists-p f)
 		    (with-temp-buffer
 		      (insert-file-contents f)
-		      (setq title (if (re-search-forward "#\\+TITLE: \\(.*\\)" nil t)
+		      (setq title (if (re-search-forward "#\\+TITLE:\\(.*\\)" nil t)
 				      (match-string 1)
 				    "No title"))
 
 
 		      (goto-char (point-min))
-		      (setq date (if (re-search-forward "#\\+DATE: \\(.*\\)" nil t)
+		      (setq date (if (re-search-forward "#\\+DATE:\\(.*\\)" nil t)
 				     (format-time-string "%Y-%m-%d"
 							 (org-read-date nil t (match-string 1)))
 				   (format-time-string
