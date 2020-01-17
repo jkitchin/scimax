@@ -5,7 +5,8 @@
 (require 'cl)
 (require 's)    ; for s-trim
 (require 'org)
-(require 'emacsql-sqlite)
+(use-package emacsql-sqlite)
+
 
 ;;; Code:
 
