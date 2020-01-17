@@ -15,7 +15,7 @@ I would like you to prepare a weekly report summarizing what you have accomplish
 
 This link will open the report each week elisp:kitchingroup-weekly-report
 
-When you have completed the report, please send Prof. Kitchin an email that it is ready for review. Then click this link: [[elisp:(org-todo "DONE")]] to mark it complete and set the due date forward a week.
+When you have completed the report, please send Prof. Kitchin an email that it is ready for review.
 
 * TODO Initial project plan
    DEADLINE: `(format-time-string "<%Y-%m-%d %a>" (iso-week-to-time year 4 4))`
