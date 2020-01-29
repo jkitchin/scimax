@@ -31,7 +31,8 @@
       '(("AUTO" "inputenc" t)
 	("" "lmodern" nil)
 	("T1" "fontenc" t)
-	("" "fixltx2e" nil)
+	;; this is supposedly no longer needed.
+	;; ("" "fixltx2e" nil)
 	("" "graphicx" t)
 	("" "longtable" nil)
 	("" "float" nil)
@@ -49,7 +50,7 @@
 	("numbers,super,sort&compress" "natbib" nil)
 	("" "natmove" nil)
 	("" "url" nil)
-	("" "minted" nil)
+	("cache=false" "minted" nil)
 	("strings" "underscore" nil)
 	("linktocpage,pdfstartview=FitH,colorlinks,
 linkcolor=blue,anchorcolor=blue,
