@@ -440,7 +440,7 @@ Uses `flyspell-correct-at-point' if installed or
 	      (let (bef aft)
 		(setq bef (word-at-point))
 		;; See issue https://github.com/jkitchin/scimax/issues/336
-		(if (boundp 'flyspell-correct-at-point)
+		(if (fboundp 'flyspell-correct-at-point)
 		    (flyspell-correct-at-point)
 		  (flyspell-correct-word-generic))
 		(goto-char incorrect-word-pos)
