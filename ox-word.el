@@ -41,7 +41,7 @@ Assumes the version command returns something like \"pandoc
   (let* ((pandoc-version (ox-export-get-pandoc-version))
          (pandoc-command-template
           (if (>= pandoc-version 2)
-              "%s -F pandoc-crossref -s %s%s\"%s\" --to=docx+smart -o \"%s\""
+              "%s -F pandoc-crossref -s %s%s\"%s\" --to=docx -o \"%s\""
             "%s -s -S %s%s\"%s\" -o \"%s\""))
 	 (pandoc-command (format pandoc-command-template ox-word-pandoc-executable biboption csl tex-file docx-file)))
     (message "Running %S" pandoc-command)
