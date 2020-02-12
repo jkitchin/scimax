@@ -2,13 +2,39 @@
 (require 'cal-iso)
 
 (defun iso-week-to-time(year week day)
-  "Convert ISO year, week, day to elisp time value."
+  "Convert ISO year, week, day to elisp time value.
+Day 0 = Sun
+Day 6 = Sat"
   (apply #'encode-time
          (append '(0 0 0)
                  (-select-by-indices
                   '(1 0 2)
                   (calendar-gregorian-from-absolute (calendar-iso-to-absolute
                                                      (list week day year)))))))
+
+(defun scimax-filter-days (year month day-of-week)
+  "For a year, filter all the days in MONTH that have DAY-OF-WEEK.
+MONTH is a string of the month of interest.
+DAY-OF-WEEK is a string for the day of interest.
+Returns a list of org time stamps."
+  (let* ((d (date-to-time (format "<%s-01-01 nil>" year)))
+	 (one-day (seconds-to-time (* 60 60 24)))
+	 (months '("January" "February" "March" "April" "May"
+		   "June" "July" "August" "September" "October"
+		   "November" "December"))
+	 (days-of-week '("Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday"))
+	 (month-index (+ 1 (cl-position month months :test 'string=))) ; months start at 1
+	 (day-of-week-index (cl-position day-of-week days-of-week :test 'string=))
+	 (all-days (cl-loop for i from 1 to 366 do
+			    (setq d (time-add d one-day))
+			    ;; (seconds minutes hour day month year dow dst utcoff)
+			    collect (decode-time d))))
+    (mapcar (lambda (dt) (format-time-string "<%Y-%m-%d %a>" (apply 'encode-time dt)))
+    	    (-filter (lambda (dt)
+    		       (and
+    			(= (nth 4 dt) month-index)
+    			(= (nth 6 dt) day-of-week-index)))
+    		     all-days))))
 
 (defun scimax-get-src-header-val-snippet ()
   "Returns a string for a header value snippet using completion."
