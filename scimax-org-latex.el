@@ -29,16 +29,23 @@
 
 (setq org-latex-default-packages-alist
       '(("AUTO" "inputenc" t)
+
+	;; this is for having good fonts
 	("" "lmodern" nil)
+
+	;; This is for handling accented characters
 	("T1" "fontenc" t)
-	;; this is supposedly no longer needed.
-	;; ("" "fixltx2e" nil)
+
+	;; This makes standard margins
+	("top=1in, bottom=1.in, left=1in, right=1in" "geometry" nil)
 	("" "graphicx" t)
 	("" "longtable" nil)
 	("" "float" nil)
-	("" "wrapfig" nil)
+	("" "wrapfig" nil)	  ;makes it possible to wrap text around figures
 	("" "rotating" nil)
 	("normalem" "ulem" t)
+
+	;; These provide math symbols
 	("" "amsmath" t)
 	("" "textcomp" t)
 	("" "marvosym" t)
@@ -46,17 +53,32 @@
 	("" "amssymb" t)
 	("" "amsmath" t)
 	("theorems, skins" "tcolorbox" t)
+
+	;; used for marking up chemical formulars
 	("version=3" "mhchem" t)
+
 	("numbers,super,sort&compress" "natbib" nil)
 	("" "natmove" nil)
+
 	("" "url" nil)
+	;; this is used for syntax highlighting of code
 	("cache=false" "minted" nil)
+
+	;; this allows you to use underscores in places like filenames. I still
+	;; wouldn't do it.
 	("strings" "underscore" nil)
 	("linktocpage,pdfstartview=FitH,colorlinks,
 linkcolor=blue,anchorcolor=blue,
 citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 	 "hyperref" nil)
-	("" "attachfile" nil)))
+
+	;; enables you to embed files in pdfs
+	("" "attachfile" nil)
+
+	;; set default spacing
+	("" "setspace" nil)
+
+	))
 
 ;; do not put in \hypersetup. Use your own if you want it e.g.
 ;; \hypersetup{pdfkeywords={%s},\n pdfsubject={%s},\n pdfcreator={%}}
