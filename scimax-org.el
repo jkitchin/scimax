@@ -1009,6 +1009,20 @@ Use a prefix arg to get regular RET. "
   :config (scimax-org-toggle-colored-src-blocks))
 
 
+(defun scimax-get-file-keyword (KEYWORD)
+  "Get the value for the file KEYWORD from a line like this
+#+KEYWORD: value
+in a file. The search for KEYWORD is not case-sensitive."
+  (interactive)
+  (let ((case-fold-search t)
+        (re (format "^#\\+%s:[ \t]+\\([^\t\n]+\\)" KEYWORD)))
+    (if (not (save-excursion
+               (or (re-search-forward re nil t)
+                   (re-search-backward re nil t))))
+        (error (format "No line containing #+%s: value found" KEYWORD)))
+    (match-string-no-properties 1)))
+
+
 ;; * The end
 (provide 'scimax-org)
 
