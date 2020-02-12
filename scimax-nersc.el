@@ -37,9 +37,42 @@
 
 (require 'scimax-jupyter)
 
+(defcustom scimax-nersc-username user-login-name
+  "User ID for NERSC. Defaults to `user-login-name'")
+
 
 (defcustom scimax-nersc-kernel "myenv"
   "Name of kernel to start at NERSC")
+
+;; check if you are setup
+(unless (file-exists-p "~/.ssh/nersc")
+  (browse-url "https://docs.nersc.gov/connect/mfa/#sshproxy")
+  (error "You do not have ~/.ssh/nersc. Follow the directions at the website that just opened."))
+
+(if (file-exists-p "~/.ssh/config")
+    (with-temp-buffer
+      (insert-file-contents "~/.ssh/config")
+      (goto-char (point-min))
+      (if (re-search-forward "IdentityFile ~/.ssh/nersc" nil t)
+	  nil
+	(error "No config found in your ~/.ssh/config file. Please add:\n%s"
+	       (format "HOST nersc
+     HostName cori.nersc.gov
+     User %s
+     IdentityFile ~/.ssh/nersc
+" scimax-nersc-username))))
+  ;; no file found, lets make one
+  (if (y-or-n-p "You don't have a config file. Create one? ")
+      (progn
+	(with-temp-file "~/.ssh/config"
+	  (insert
+	   (format "HOST nersc
+     HostName cori.nersc.gov
+     User %s
+     IdentityFile ~/.ssh/nersc
+" scimax-nersc-username)))
+	(chmod "~/.ssh/config" #o600))
+    (user-error "You do not have an ssh-config setup. You probably cannot login with \"ssh nersc\"")))
 
 
 (defun scimax-nersc-kernel ()
