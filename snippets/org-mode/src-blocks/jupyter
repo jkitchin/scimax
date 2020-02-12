@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: jupyter-python
+# key: <j
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+BEGIN_SRC jupyter-python :session python
+$0
+#+END_SRC
