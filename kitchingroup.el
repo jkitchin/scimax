@@ -4,7 +4,7 @@
 ;; This module is mostly for members of my research group.
 
 (use-package gitter)
-(require 'scimax-notebook)
+;; (require 'scimax-notebook)
 (require 'cal-iso)
 
 ;;; Code:
@@ -149,6 +149,82 @@ other day, you get the report due on the following Monday."
       (save-buffer)
       (goto-char (point-min))))))
 
+(defun kitchingroup-weekly-report-summary ()
+  "Insert a summary heading.
+You will be prompted with a calendar to pick a date. If you pick
+a Monday, you get the report due on that day. If you pick any
+other day, you get the report due on the following Monday."
+  (interactive)
+  (let* ((date (org-read-date nil t))
+	 kg-due-date kg-review-date
+	 dir
+	 full-dir
+	 fname)
+    (cond
+     ;; If you choose a monday, you get the previous week
+     ((string= "Mon" (format-time-string "%a" date))
+      (setq kg-due-date (iso-week-to-time
+			 (string-to-number
+			  (format-time-string
+			   "%Y" date))
+			 ;; This is current week
+			 (string-to-number
+			  (format-time-string
+			   "%V" date))
+			 ;; 1 is for Monday
+			 1)
+	    kg-review-date (iso-week-to-time
+			    (string-to-number
+			     (format-time-string
+			      "%Y" date))
+			    ;; This is current week
+			    (string-to-number
+			     (format-time-string
+			      "%V" date))
+			    ;; 2 is for Tuesday
+			    2)))
+     ;; Otherwise you get the report due the monday after the selected date.
+     (t
+      (setq kg-due-date (iso-week-to-time
+			 (string-to-number
+			  (format-time-string
+			   "%Y" date))
+			 ;; This is due next week
+			 (+ (string-to-number
+			     (format-time-string
+			      "%V" date))
+			    1)
+			 ;; 1 is for Monday
+			 1)
+	    kg-review-date (iso-week-to-time
+			    (string-to-number
+			     (format-time-string
+			      "%Y" date))
+			    ;; This is current week
+			    (string-to-number
+			     (format-time-string
+			      "%V" date))
+			    ;; 2 is for Tuesday
+			    2))))
+    (insert
+     (format "*** %s\n"
+	     (format-time-string "[%Y-%m-%d %a]" kg-due-date))
+     (s-join "\n"
+	     (loop for project in
+		   (let* ((KEYWORD "KITCHINGROUP")
+			  (case-fold-search t)
+			  (re (format "^#\\+%s:[ \t]+\\([^\t\n]+\\)" KEYWORD)))
+		     (if (not (save-excursion
+				(or (re-search-forward re nil t)
+				    (re-search-backward re nil t))))
+			 (error (format "No line containing #+%s: value found" KEYWORD)))
+		     (split-string  (match-string-no-properties 1) " " t))
+		   collect
+		   (format (concat "- [ ] nb:" "%s::reports/%s/weekly-report.org")
+			   project
+			   (format-time-string "%Y-%m-%d" kg-due-date))))
+     "\n")))
+
 
 (defun kitchingroup-calendar ()
   "Open the Kitchin Group Google calendar."
@@ -209,44 +285,72 @@ machine irc.gitter.im password your-token
 ;; time fixing merge conflicts for people. We are switching over to Box.com to
 ;; see if that works better using Box Drive for syncing.
 
-(defun kitchingroup-submit-weekly ()
-  "Submit the weekly report.
-This is a convenience method for committing and pushing the
-weekly report. It checks to make sure the directory size is below
-10MB, and makes a bibliography file if needed. This file exists
-so we can have a simple link to click for this action."
-  (interactive)
-  (message "We do not use this anymore. Please see Prof. Kitchin.")
-  ;; (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-push")))))
-  ;;   (org-babel-execute-src-block nil info))
-  )
+;; (defun kitchingroup-submit-weekly ()
+;;   "Submit the weekly report.
+;; This is a convenience method for committing and pushing the
+;; weekly report. It checks to make sure the directory size is below
+;; 10MB, and makes a bibliography file if needed. This file exists
+;; so we can have a simple link to click for this action."
+;;   (interactive)
+;;   (message "We do not use this anymore. Please see Prof. Kitchin.")
+;;   ;; (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-push")))))
+;;   ;;   (org-babel-execute-src-block nil info))
+;;   )
 
 
-(defun kitchingroup-pull-weekly ()
-  "Submit the weekly report.
-This is a convenience method for pulling. This file exists so we
-can have a simple link to click for this action."
-  (interactive)
-  (message "We do not use this anymore. Please see Prof. Kitchin.")
-  ;; (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-pull")))))
-  ;;   (org-babel-execute-src-block nil info))
-  )
+;; (defun kitchingroup-pull-weekly ()
+;;   "Submit the weekly report.
+;; This is a convenience method for pulling. This file exists so we
+;; can have a simple link to click for this action."
+;;   (interactive)
+;;   (message "We do not use this anymore. Please see Prof. Kitchin.")
+;;   ;; (let ((info (org-babel-lob-get-info '(babel-call (:call "kitchingroup-weekly-pull")))))
+;;   ;;   (org-babel-execute-src-block nil info))
+;;   )
 
-;; (defun kitchingroup-kitchinhub-repo ()
-;;   "Check for existence of your repo and get it if needed."
-;;   (when (null kitchingroup-github-id)
-;;     (error "`kitchingroup-github-id' is nil. Please set it in %s/user/preload.el"
-;; 	   scimax-dir))
 
-;;   (unless (file-directory-p kitchingroup-root)
-;;     (make-directory kitchingroup-root t))
 
-;;   (if (not (file-directory-p (expand-file-name kitchingroup-github-id kitchingroup-root)))
-;;       ;; get it
-;;       (let ((default-directory kitchingroup-root))
-;; 	(shell-command (format "git clone git@github.com:KitchinHUB/%s.git"
-;; 			       kitchingroup-github-id)))
-;;     0))
+;; * a box link?
+;; This could make it easier to link in kitchingroup, e.g. box:eeg-pitt/README.org
+
+;; I haven't stumbled on an easy way to do it that is fast for me, and the same
+;; as the students would need. Their box folders are not in the same place as
+;; mine, e.g. mine are in kitchingroup, and theirs are not.
+
+(defun kitchingroup-box-link-follow (path)
+  "Follow a kitchingroup box link PATH.
+PATH should be in `box-drive-root' and point to a file.
+org-links not supported yet."
+  (let* ((parts (s-split "::" path))
+	 (file-or-dir (nth 0 parts))
+	 default-directory)
+    (cond
+     ;; path exists in root, open it. This is where students will find their box
+     ;; folders usually.
+     ((file-exists-p (f-join box-drive-root file-or-dir))
+      (setq default-directory box-drive-root)
+      (org-open-link-from-string (format "[[file:%s]]" path)))
+
+     ;; path exists in my kitchingroup box folder. This folder is not visible to
+     ;; students/collaborators.
+     ((file-exists-p (f-join box-drive-root "kitchingroup" file-or-dir))
+      (setq default-directory box-drive-root)
+      (org-open-link-from-string
+       (format "[[file:%s]]" (f-join box-drive-root "kitchingroup" path))))
+
+     ;; Maybe in a student folder within my kitchingroup folder.
+     ((file-exists-p (f-join box-drive-root "kitchingroup" "students" file-or-dir))
+      (setq default-directory box-drive-root)
+      (org-open-link-from-string
+       (format "[[file:%s]]" (f-join box-drive-root "kitchingroup" "students" path))))
+     ;; This might be some file/folder buried in Box. We have to search for it.
+     ;; I have not implemented this yet.
+     (t
+      (message "%s not found." path)))))
+
+(org-link-set-parameters "box" :follow 'kitchingroup-box-link-follow)
+
+
 
 
 (provide 'kitchingroup)
