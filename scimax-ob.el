@@ -158,6 +158,7 @@ Defaults to 3."
 	 (header-start (sixth src-info)))
     (goto-char header-start)))
 
+
 (defun scimax-ob-jump-to-end ()
   "Jump to src block end."
   (interactive)
@@ -264,6 +265,54 @@ Defaults to 3."
     (goto-char (point-min))
     (while (org-babel-next-src-block)
       (org-babel-remove-result))))
+
+
+(defun scimax-ob-merge-blocks (r1 r2)
+  "Merge blocks that match the first block language in the region (R1 R2).
+This deletes the results from each block, and concatenates the
+code into a single block in the position of the first block.
+Currently no switches/parameters are preserved. It isn't clear
+what the right thing to do for those is, e.g. dealing with
+variables, etc."
+  (interactive "r")
+  ;; Expand the region to encompass the src blocks that the points might be in.
+  (let* ((R1 (save-excursion
+	       (goto-char r1)
+	       (if (org-in-src-block-p)
+		   (org-element-property :begin (org-element-context))
+		 r1)))
+	 (R2 (save-excursion
+	       (goto-char r2)
+	       (if (org-in-src-block-p)
+		   (org-element-property :end (org-element-context))
+		 r2))))
+    (save-restriction
+      (narrow-to-region R1 R2)
+      (let* ((blocks (org-element-map (org-element-parse-buffer) 'src-block 'identity))
+	     (first-start (org-element-property :begin (car blocks)))
+	     (lang (org-element-property :language (car blocks)))
+	     (params (org-element-property :parameters (car blocks)))
+	     ;; filter the blocks for the first lang
+	     (blocks (cl-loop for block in blocks
+			      if (string= (org-element-property :language block) lang)
+			      collect block))
+	     (merged-code (s-join "\n" (loop for src in blocks
+					     collect
+					     (org-element-property :value src)))))
+	;; Remove blocks that have been merged
+	(loop for src in (reverse blocks)
+	      do
+	      (goto-char (org-element-property :begin src))
+	      (org-babel-remove-result)
+	      (setf (buffer-substring (org-element-property :begin src)
+				      (org-element-property :end src))
+		    ""))
+	;; Now create the new big block.
+	(goto-char first-start)
+	(insert (format "#+BEGIN_SRC %s %s
+%s
+#+END_SRC\n\n" lang params (s-trim merged-code)))
+	(goto-char first-start)))))
 
 ;; * src keys
 
