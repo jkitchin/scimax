@@ -205,7 +205,6 @@ grestore
 
 ;; * Functions
 ;;;###autoload
-
 (defun ox-manuscript-toggle-interactive-build ()
   "Toggle state of `ox-manuscript-interactive-build'.
 When interactive you will see the output of every step, and be
@@ -348,7 +347,7 @@ references should go into a separate file."
 	  (when (file-exists-p fname)
 	    (delete-file fname)))
 
-    (org-open-file references-pdf)))
+    references-pdf))
 
 
 ;;;###autoload
