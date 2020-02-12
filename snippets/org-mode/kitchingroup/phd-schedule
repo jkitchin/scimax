@@ -1,0 +1,298 @@
+# -*- mode: snippet -*-
+# name: phd-schedule
+# key: kphd
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# expand-env: ((year (string-to-number (read-string "Start year: " (format-time-string "%Y" (current-time))))))
+# --
+#+title: PhD Schedule
+#+FILETAGS:
+
+
+[[elisp:(org-agenda nil "a" "<")]]
+
+* Weekly reports
+    DEADLINE: `(format-time-string "<%Y-%m-%d %a +1w>" (iso-week-to-time year 3 1))`
+
+Each week you should prepare a weekly report for your progress in the last week. This link will open the report template: elisp:kitchingroup-weekly-report. These are due on Mondays.
+
+Please do this even if you had a slow week. It helps us keep track of your progress, and priorities.
+
+
+* Semester schedule
+
+Here is a view of the events during your PhD by semester.
+
+** First year
+
+*** Fall Semester `(format "%s" year)`
+    :PROPERTIES:
+    :SEMESTER: 1
+    :END:
+
+  You should take four courses, two PhD core and two electives. You will also be a TA for some course.
+
+**** List courses taken here and their grades
+    DEADLINE: `(third (scimax-filter-days year "December" "Monday"))`
+
+*** Spring Semester `(format "%s" (+ 1 year))`
+    :PROPERTIES:
+    :SEMESTER: 2
+    :END:
+
+  You should take four courses, two PhD core and two electives. You will also be a TA for some course. You should make sure you have taken enough courses by the end of this semester to qualify you for an MS degree in the event that your qualifier exam goes badly.
+
+**** TODO Semester summary report
+    DEADLINE: `(second (scimax-filter-days (+ 1 year) "May" "Monday"))`
+
+This document should summarize your project accomplishments for the spring semester. It should also discuss the plans for the summer and fall.
+
+[[elisp:(kitchingroup-new-document "reports/spring-`(format "%s" (+ 1 year))`-semester-summary.org" "semester-report")]]
+
+
+**** TODO List courses taken here and their grades
+    DEADLINE: `(third (scimax-filter-days (+ 1 year) "May" "Monday"))`
+
+
+*** Summer `(format "%s" (+ 1 year))`
+    :PROPERTIES:
+    :SEMESTER: 3
+    :END:
+
+ The qualifying exam happens this semester usually towards the end of August `(format "%s" (+ 1 year))`. See [[#qualifier]].
+
+** Second year
+
+*** Fall Semester `(format "%s" (+ 1 year))`
+    :PROPERTIES:
+    :SEMESTER: 4
+    :END:
+
+You will probably be a TA in this semester.
+
+**** TODO List courses taken here and their grades
+    DEADLINE: `(third (scimax-filter-days (+ 1 year) "December" "Monday"))`
+
+
+**** TODO Annual report
+    DEADLINE: `(third (scimax-filter-days (+ 1 year) "December" "Monday"))`
+
+[[elisp:(kitchingroup-new-document "reports/`(format "%s" (+ 1 year))`-annual-report.org" "annual-report")]]
+
+*** Spring Semester `(format "%s" (+ 2 year))`
+    :PROPERTIES:
+    :SEMESTER: 5
+    :END:
+
+
+**** TODO Semester summary report
+    DEADLINE: `(second (scimax-filter-days (+ 2 year) "May" "Monday"))`
+
+[[elisp:(kitchingroup-new-document "reports/spring-`(format "%s" (+ 2 year))`-semester-summary.org" "semester-report")]]
+
+
+**** TODO List courses taken here and their grades
+    DEADLINE: `(third (scimax-filter-days (+ 2 year) "May" "Monday"))`
+
+*** Summer `(format "%s" (+ 2 year))`
+    :PROPERTIES:
+    :SEMESTER: 6
+    :END:
+
+You should begin preparing your proposal documents, and considering who to have on your committee. See [[#proposal]].
+
+** Third year
+
+*** Fall Semester `(format "%s" (+ 2 year))`
+    :PROPERTIES:
+    :SEMESTER: 7
+    :END:
+
+Your PhD proposal is due this semester.
+
+**** TODO Annual report
+    DEADLINE: `(third (scimax-filter-days (+ 2 year) "December" "Monday"))`
+
+[[elisp:(kitchingroup-new-document "reports/`(format "%s" (+ 2 year))`-annual-report.org" "annual-report")]]
+
+**** TODO List courses taken here and their grades
+    DEADLINE: `(third (scimax-filter-days (+ 2 year) "December" "Monday"))`
+
+
+*** Spring Semester `(format "%s" (+ 3 year))`
+    :PROPERTIES:
+    :SEMESTER: 8
+    :END:
+
+
+**** TODO Semester summary report
+     DEADLINE: `(third (scimax-filter-days (+ 3 year) "May" "Monday"))`
+
+[[elisp:(kitchingroup-new-document "reports/spring-`(format "%s" (+ 3 year))`-semester-summary.org" "semester-report")]]
+
+
+*** Summer `(format "%s" (+ 3 year))`
+    :PROPERTIES:
+    :SEMESTER: 9
+    :END:
+
+** Fourth year
+
+*** Fall Semester `(format "%s" (+ 3 year))`
+    :PROPERTIES:
+    :SEMESTER: 10
+    :END:
+
+You should plan to give a talk at CHEGSA this semester
+
+
+**** TODO Annual summary report
+    DEADLINE: `(third (scimax-filter-days (+ 3 year) "December" "Monday"))`
+
+[[elisp:(kitchingroup-new-document "reports/`(format "%s" (+ 3 year))`-annual-report.org" "annual-report")]]
+
+*** Spring Semester `(format "%s" (+ 4 year))`
+    :PROPERTIES:
+    :SEMESTER: 11
+    :END:
+
+**** TODO Semester summary report
+     DEADLINE: `(third (scimax-filter-days (+ 4 year) "May" "Monday"))`
+
+[[elisp:(kitchingroup-new-document "reports/spring-`(format "%s" (+ 4 year))`-semester-summary.org" "semester-report")]]
+
+
+*** Summer `(format "%s" (+ 4 year))`
+    :PROPERTIES:
+    :SEMESTER: 12
+    :END:
+
+** Fifth year
+
+*** Fall Semester `(format "%s" (+ 4 year))`
+    :PROPERTIES:
+    :SEMESTER: 13
+    :END:
+
+You should begin writing your dissertation at the beginning of this semester. See [[#defense]].
+
+**** TODO Annual summary report
+    DEADLINE: `(third (scimax-filter-days (+ 4 year) "December" "Monday"))`
+
+[[elisp:(kitchingroup-new-document "reports/`(format "%s" (+ 4 year))`-annual-report.org" "annual-report")]]
+
+*** Spring Semester `(format "%s" (+ 5 year))`
+    :PROPERTIES:
+    :SEMESTER: 14
+    :END:
+
+ You should defend your dissertation and graduate this semester.
+
+* Milestones
+
+These are major events that will happen during your PhD.
+
+** TODO Joined the Department - August `(format "%s" year)`
+
+
+** TODO Joined the Kitchin research group - December `(format "%s" year)`
+
+
+** Teaching assistant assignments
+
+*** TODO First assignment
+    DEADLINE: `(third (scimax-filter-days year "December" "Monday"))`
+
+This is usually in your first semester
+
+*** TODO Second assignment
+    DEADLINE: `(third (scimax-filter-days (+ 1 year) "January" "Monday"))`
+
+This is usually in your second semester
+
+*** TODO Third assignment
+    DEADLINE: `(third (scimax-filter-days (+ 1 year) "August" "Monday"))`
+
+This is usually in your third semester
+
+** Qualifying project - Spring `(format "%s" (+ 1 year))`
+
+ You will spend the Spring semester and summer working on your qualifier project. This project will be designed to build some of the technical skills required for a successful PhD. At the end, you will demonstrate you have achieved these skills by passing the qualifier exam.
+
+*** TODO Literature review
+    DEADLINE: `(car (last (scimax-filter-days (+ 1 year) "January" "Monday")))`
+
+Understanding what has been done in the literature, and how to cite it in technical writing is an important skill. You should perform a literature search relevant to your project, and prepare a summary document of what you find. This document should cover 5-10 papers/books with a paragraph on each reference that briefly summarizes the reference. Make sure to create a bibtex file with the references in them, and use cite links in this document.
+
+See elisp:org-ref-help for some help on citations and references.
+
+[[elisp:(kitchingroup-new-document "reports/initial-literature-review.org" "literature-review")]]
+
+
+*** TODO Project outline
+    DEADLINE: `(second (scimax-filter-days (+ 1 year) "February" "Monday"))`
+
+You should prepare a written document that outlines your plans for your project and what you want to accomplish in the spring semester. This should be done in consultation with me so we agree on what is in it. This is your opportunity to articulate in words your understanding of what we are trying to do, and to begin organizing and prioritizing your thoughts on the project. This document does not need to be long, but it needs to be helpful.
+
+Click this link to open the project-plan document
+[[elisp:(kitchingroup-new-document "reports/initial-project-plan.org" "project-plan")]]
+
+*** TODO Qualifier exam - End of Summer `(format "%s" (+ 1 year))`
+    :PROPERTIES:
+    :CUSTOM_ID: qualifier
+    :END:
+
+**** TODO First half of written report
+    DEADLINE: `(second (scimax-filter-days (+ 1 year) "June" "Monday"))`
+
+**** TODO First half of oral presentation
+    DEADLINE: `(second (scimax-filter-days (+ 1 year) "July" "Monday"))`
+
+**** TODO Completed written report
+    DEADLINE: `(car (last (scimax-filter-days (+ 1 year) "July" "Monday")))`
+
+**** TODO Completed presentation
+    DEADLINE: `(car (last (scimax-filter-days (+ 1 year) "July" "Monday")))`
+
+**** TODO Qualifying exam
+
+  This is scheduled near the end of August every year, but you should plan to be ready by mid August
+
+** Proposal - Fall of `(format "%s" (+ 3 year))`
+    :PROPERTIES:
+    :CUSTOM_ID: proposal
+    :END:
+
+*** TODO PhD Committee selection
+    DEADLINE: `(first (scimax-filter-days (+ 3 year) "September" "Monday"))`
+
+We should discuss this over the summer, and you should have a plan for it by the end of the summer.
+
+*** Outline of proposal
+    DEADLINE: `(first (scimax-filter-days (+ 3 year) "September" "Monday"))`
+
+You should have a clear outline of the proposal by the end of the summer, and have started working on writing the document. At this point, you should have all the preliminary work needed to defend the idea you plan to work on for the next two years.
+
+*** TODO Schedule your Proposal
+    DEADLINE: `(first (scimax-filter-days (+ 3 year) "October" "Monday"))`
+
+ Please try to finish your proposal defense before Thanksgiving. You need to give the committee at least two weeks to read your proposal.
+
+*** TODO Finish the proposal defense
+
+
+** Defense - Spring of `(format "%s" (+ 4 year))`
+    DEADLINE: `(first (scimax-filter-days (+ 4 year) "April" "Monday"))`
+    :PROPERTIES:
+    :CUSTOM_ID: defense
+    :END:
+
+ Plan to be ready to defend by the end of March in `(format "%s" (+ 5 year))`. You need to give the committee at least two weeks to read your dissertation.
+
+*** First chapter of dissertation - Fall `(format "%s" (+ 4 year))`
+
+  Plan on one chapter per month starting in September `(format "%s" (+ 4 year))`. This will help us maintain steady progress.
+
+*** Schedule your defense
+    DEADLINE: `(car (last (scimax-filter-days (+ 5 year) "January" "Monday")))`
+
+Please try to get your defense done by Apr 15.
