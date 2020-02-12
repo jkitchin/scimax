@@ -126,8 +126,8 @@ files.
 
 To make C-c C-c use this, try this.
  (add-to-list 'org-ctrl-c-ctrl-c-hook 'org-babel-async-execute:python)"
-  (interactive "P") 
-  (when (and (org-in-src-block-p) 
+  (interactive "P")
+  (when (and (org-in-src-block-p)
 	     (string= "python" (nth 0 (org-babel-get-src-block-info))))
     (let* ((current-file (buffer-file-name))
 	   (cb (current-buffer))
@@ -140,9 +140,9 @@ To make C-c C-c use this, try this.
 	   (file-line-regexp "File \"\\(.*\\)\",? line \\([0-9]*\\)")
 	   py-file
 	   md5-hash
-	   pbuffer 
+	   pbuffer
 	   process)
-      
+
       ;; First, check if something is running
       (let ((location (org-babel-where-is-src-block-result))
 	    results)
@@ -152,13 +152,13 @@ To make C-c C-c use this, try this.
 	    (when (looking-at (concat org-babel-result-regexp ".*$"))
 	      (setq results (buffer-substring-no-properties
 			     location
-			     (save-excursion 
+			     (save-excursion
 			       (forward-line 1) (org-babel-result-end)))))))
 	(with-temp-buffer (insert (or results ""))
 			  (goto-char (point-min))
 			  (when (re-search-forward "<async:\\(.*\\)>" nil t)
 			    (setq md5-hash (match-string 1))))
-	(when md5-hash 
+	(when md5-hash
 	  (if (and (get-process md5-hash) (not arg))
 	      (error "%s is running. Use prefix arg to kill it."
 		     (match-string 0 results))
@@ -171,13 +171,13 @@ To make C-c C-c use this, try this.
 
       ;; If there are numbered lines, we remove them, and the hook that was
       ;; updating them.
-      (when number-line-overlays 
+      (when number-line-overlays
 	(mapc 'delete-overlay
 	      number-line-overlays)
 	(setq number-line-overlays '())
 	(remove-hook 'post-command-hook 'number-line-src-block 'local)
 	nil)
-      
+
       ;; Get the md5 for the current block
       (with-temp-buffer
 	(dolist (cmd varcmds)
@@ -210,9 +210,9 @@ To make C-c C-c use this, try this.
 	(let ((map (make-sparse-keymap)))
 	  (define-key map [mouse-1]
 	    (lambda ()
-	      (interactive) 
-	      (org-babel-previous-src-block) 
-	      (org-babel-kill-async))) 
+	      (interactive)
+	      (org-babel-previous-src-block)
+	      (org-babel-kill-async)))
 	  (set-text-properties
 	   (match-beginning 0) (match-end 0)
 	   `(font-lock-face (:foreground "red")
@@ -235,14 +235,14 @@ To make C-c C-c use this, try this.
 				  (delete-window)))
 	       (local-set-key "k"
 			      #'(lambda ()
-				  (interactive) 
-				  (quit-window t) 
+				  (interactive)
+				  (quit-window t)
 				  (switch-to-buffer ,cb)
 				  (goto-char (point-min))
 				  (re-search-forward ,md5-hash)
-				  (org-babel-previous-src-block) 
+				  (org-babel-previous-src-block)
 				  (org-babel-kill-async)))))
-	  
+
 	  (set-text-properties
 	   (match-beginning 0) (match-end 0)
 	   `(font-lock-face (:foreground "green4")
@@ -268,10 +268,10 @@ To make C-c C-c use this, try this.
       ;; org-mode buffer.
       (set-process-sentinel
        process
-       `(lambda (process event) 
-	  (delete-file ,py-file) 
+       `(lambda (process event)
+	  (delete-file ,py-file)
 	  (let* ((line-number))
-	    (unless (string= "finished\n" event) 
+	    (unless (string= "finished\n" event)
 	      ;; Probably got an exception. Let's parse it and move
 	      ;; point to where it belongs in the code block.
 	      (with-current-buffer ,pbuffer
@@ -296,7 +296,7 @@ To make C-c C-c use this, try this.
 			       (format "<async:%s>" ,md5-hash)
 			       nil t)
 			  (org-babel-previous-src-block)
-			  (org-babel-remove-result) 
+			  (org-babel-remove-result)
 			  (org-babel-insert-result
 			   (with-current-buffer ,pbuffer
 			     (buffer-string))
@@ -312,17 +312,17 @@ To make C-c C-c use this, try this.
 	    ;; restore window configuration
 	    (set-window-configuration ,wc)
 	    (org-redisplay-inline-images)
-	    
+
 	    ;; Finally, if we got a line number, add click properties to file
 	    ;; lines, move point and shine beacon
 	    (when line-number
 	      (save-excursion
-		(while (re-search-forward ,file-line-regexp nil t) 
+		(while (re-search-forward ,file-line-regexp nil t)
 		  (let ((map (make-sparse-keymap))
 			(start (match-beginning 1))
 			(end (match-end 1))
 			(fname (match-string 1))
-			(ln (string-to-number (match-string 2)))) 
+			(ln (string-to-number (match-string 2))))
 		    (define-key map [mouse-1]
 		      `(lambda ()
 			 (interactive)
@@ -348,15 +348,15 @@ To make C-c C-c use this, try this.
 		    (flyspell-delete-region-overlays start end)
 		    (set-text-properties
 		     start
-		     end 
+		     end
 		     `(font-lock-face org-link
-				      mouse-face highlight 
+				      mouse-face highlight
 				      local-map ,map
 				      help-echo "Click to open")))))
 
 	      (goto-char (org-element-property :begin (org-element-context)))
 	      (forward-line (- line-number (length (org-babel-variable-assignments:python
-						    (nth 2 (org-babel-get-src-block-info)))))) 
+						    (nth 2 (org-babel-get-src-block-info))))))
 	      (message "%s" results)
 	      (let ((beacon-color "red")) (beacon--shine))
 	      (when org-babel-async-python-show-line-numbers
@@ -375,8 +375,8 @@ Run this in the code block that is running."
 	(when (looking-at (concat org-babel-result-regexp ".*$"))
 	  (setq results (buffer-substring-no-properties
 			 location
-			 (save-excursion 
-			   (forward-line 1) (org-babel-result-end))))))) 
+			 (save-excursion
+			   (forward-line 1) (org-babel-result-end)))))))
     (when (and results (string-match "<async:\\(.*\\)>" results))
       (interrupt-process (match-string 1 results)))))
 
@@ -391,7 +391,7 @@ Run this in the code block that is running."
       (shell-command "python -c \"from setuptools.command import easy_install; easy_install.main(['-U','autopep8'])\"")))
   (let* ((src (org-element-context))
 	 (beg (org-element-property :begin src))
-	 (value (org-element-property :value src))) 
+	 (value (org-element-property :value src)))
     (save-excursion
       (goto-char beg)
       (search-forward value)
@@ -450,7 +450,7 @@ Opens a buffer with links to what is found. This function installs pylint if nee
 	(n) ; for line number
 	(cn) ; column number
 	(content) ; error on line
-	(pb "*pylint*") 
+	(pb "*pylint*")
 	(link)
 	(tempfile))
 
@@ -471,7 +471,7 @@ Opens a buffer with links to what is found. This function installs pylint if nee
       ;; create code file
       (with-temp-file tempfile
 	(insert (org-element-property :value eop)))
-      
+
       ;; pylint
       (let ((status (shell-command
 		     (concat
@@ -536,6 +536,23 @@ Opens a buffer with links to what is found. This function installs pylint if nee
       ;; final cleanup and delete file
       (delete-file tempfile))))
 
+
+;; * better font lock on f-strings
+
+(setq python-font-lock-keywords
+      (append python-font-lock-keywords
+	      '(;; this is the full string.
+		;; group 1 is the quote type and a closing quote is matched
+		;; group 2 is the string part
+		("f\\(['\"]\\{1,3\\}\\)\\([^\\1]+?\\)\\1"
+		 ;; these are the {keywords}
+		 ("{[^}]*?}"
+		  ;; Pre-match form
+		  (progn (goto-char (match-beginning 0)) (match-end 0))
+		  ;; Post-match form
+		  (goto-char (match-end 0))
+		  ;; face for this match
+		  (0 font-lock-variable-name-face t))))))
 
 (provide 'scimax-org-babel-python)
 
