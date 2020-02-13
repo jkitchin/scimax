@@ -311,7 +311,10 @@ variables, etc."
 	(goto-char first-start)
 	(insert (format "#+BEGIN_SRC %s %s
 %s
-#+END_SRC\n\n" lang params (s-trim merged-code)))
+#+END_SRC\n\n"
+			lang
+			(or params "")
+			(s-trim merged-code)))
 	(goto-char first-start)))))
 
 ;; * src keys
