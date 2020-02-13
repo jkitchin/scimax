@@ -33,9 +33,11 @@
 ;; the org-buffer. If it does you can always clean up your you may need to run
 ;; this command, but it will kill them all. ssh nersc "pkill -9 -f
 ;; jupyter-kernel" to kill these. To fix this, I need to have the pid I think,
-;; so I can kill it.
+;; so I can kill it. It should also not leave jupyter repl buffers around.
 
+(require 's)
 (require 'scimax-jupyter)
+
 
 (defcustom scimax-nersc-username user-login-name
   "User ID for NERSC. Defaults to `user-login-name'")
@@ -44,7 +46,8 @@
 (defcustom scimax-nersc-kernel "myenv"
   "Name of kernel to start at NERSC")
 
-;; check if you are setup
+
+;; check if you are setup with ssh, and help if not.
 (unless (file-exists-p "~/.ssh/nersc")
   (browse-url "https://docs.nersc.gov/connect/mfa/#sshproxy")
   (error "You do not have ~/.ssh/nersc. Follow the directions at the website that just opened."))
@@ -118,12 +121,28 @@ Returns the string you need to put in the :session parameter of a src block."
 			     `(lambda ()
 				(interactive)
 				(save-window-excursion
-				  (kill-buffer ,nersc-buf))
+				  (kill-buffer ,nersc-buf)
+				  (cl-loop for buf in (buffer-list)
+					   if (s-ends-with-p
+					       (format "/ssh:nersc:%s*" ,kernel-file)
+					       (buffer-name buf))
+					   do
+					   (kill-buffer buf)))
 				(setq header-line-format nil)))
 
 	      ;; This local hook should also kill the remote kernel when you
 	      ;; kill this buffer
-	      (add-hook 'kill-buffer-hook `(lambda () (kill-buffer ,nersc-buf)) nil t))
+	      (setq-local jupyter-kernel-file kernel-file)
+	      (add-hook 'kill-buffer-hook `(lambda ()
+					     (kill-buffer ,nersc-buf)
+					     ;; kill repl buffer
+					     (cl-loop for buf in (buffer-list)
+						      if (s-ends-with-p
+							  (format "/ssh:nersc:%s*" ,kernel-file)
+							  (buffer-name buf))
+						      do
+						      (kill-buffer buf)))
+			nil t))
 	    (set-window-configuration cw)
 	    (message "%s running. Waiting 1 second for it to start up remotely."
 		     kernel-file)
@@ -138,15 +157,18 @@ Returns the string you need to put in the :session parameter of a src block."
   (interactive)
   (let ((nersc-buf (concat "nersc-"(buffer-name))))
     (when (get-buffer nersc-buf) (kill-buffer nersc-buf)))
+  ;; try killing the repl buffer
+  (cl-loop for buf in (buffer-list)
+	   if (s-ends-with-p
+	       (format "/ssh:nersc:%s*" jupyter-kernel-file)
+	       (buffer-name buf))
+	   do
+	   (message "Killing %s" buf)
+	   (kill-buffer buf))
   (setq header-line-format nil))
 
 
-(defun scimax-nersc-kill-all-kernels ()
-  "Kill all jupyter kernels at nersc"
-  (interactive)
-  (when
-      (y-or-n-p "Really kill all your kernels?")
-    (shell-command "ssh nersc \"pkill -9 -f jupyter-kernel\"")))
+
 
 
 (provide 'scimax-nersc)
