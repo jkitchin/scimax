@@ -1,9 +1,12 @@
 ;;; scimax-jupyter.el --- scimax customization for emacs-jupyter
 
 ;;; Commentary:
-;;
+;; This provides some fine-tuning of key bindings, and loads jupyter for scimax.
 
+(require 'scimax-ob)
 (require 'jupyter)
+
+
 (add-to-list 'org-babel-load-languages '(jupyter . t) t)
 (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
 
