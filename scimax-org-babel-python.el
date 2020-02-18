@@ -544,7 +544,9 @@ Opens a buffer with links to what is found. This function installs pylint if nee
 	      '(;; this is the full string.
 		;; group 1 is the quote type and a closing quote is matched
 		;; group 2 is the string part
-		("f\\(['\"]\\{1,3\\}\\)\\([^\\1]+?\\)\\1"
+		(
+		 ;; "f\\(['\"]\\{1,3\\}\\)\\([^\\1]+?\\)\\1"
+		 "f\\(['\"]\\{1,3\\}\\)\\(.+?\\)\\1"
 		 ;; these are the {keywords}
 		 ("{[^}]*?}"
 		  ;; Pre-match form
