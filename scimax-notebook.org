@@ -284,6 +284,26 @@ directory. You may want to make this a directory local variable."
 
 #+END_SRC
 
+This function allows you to search an agenda like you would use org-tags-view. =(nb-search-agenda t "jkitchin")= will find tasks marked TODO that are tagged jkitchin.
+
+#+BEGIN_SRC emacs-lisp :tangle yes :results silent
+(defun nb-search-agenda (&optional todo-only match)
+  "Search notebook agenda similar to `org-tags-vew'."
+  (interactive "P")
+  (let ((org-agenda-files (mapcar
+			   (lambda (f)
+			     (f-join (projectile-project-root) f))
+			   (-filter (lambda (f)
+				      (f-ext? f "org"))
+				    (projectile-project-files
+				     (projectile-ensure-project
+				      (projectile-project-root)))))))
+    (org-tags-view todo-only match)))
+
+
+#+END_SRC
+
+
 ** Notebook archive files
 
 The idea here is it is sometimes useful to create an archive file (e.g. a zip file) of your project, e.g. to upload to zenodo/figshare, or to share with a collaborator.
@@ -355,7 +375,7 @@ The type of archive is determined by `nb-archive-command'."
 
 
 
-** TODO List the tags in a notebook
+** List the tags in a notebook
 
 The notebook is just a collection of org-files, so it should be possible to use the agenda commands to search for things in it using tags and properties. That means it would be helpful to get a list of tags in the notebook, e.g. to help construct the queries, or to make sure you use them consistently. Here we loop through all the org-files and collect the tags in a list. This is lightly tested, and in a large project might be slow.
 
@@ -486,7 +506,7 @@ These commands will search for text in files in the current directory.
 | M-x projectile-multi-occur |   | H-p o |
 
 
-*** Limiting scope to some kinds of files
+*** TODO Limiting scope to some kinds of files
 
 Here is a function you can use to interactively search files by pattern. For example to find the string xref in org files you could do this:
 
