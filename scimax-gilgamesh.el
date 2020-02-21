@@ -116,7 +116,7 @@
       ;; we need a remote kernel
       (message "Starting remote notebook in %s" gilgamesh-buf)
       (async-shell-command
-       "ssh -t gilgamesh \"source ~/.bashrc; jupyter notebook --no-browser\""
+       "ssh gilgamesh \"source ~/.bashrc; jupyter notebook --no-browser\""
        gilgamesh-buf)
 
       (catch 'ready
@@ -134,6 +134,19 @@
       (async-shell-command (format "ssh -t -L localhost:%s:localhost:%s gilgamesh"
 				   port port)
 			   local-buf)
+
+      (with-current-buffer local-buf
+	(setq header-line-format
+	      (format "Running on gilgamesh. Kill this buffer to stop it."))
+	(add-hook 'kill-buffer-hook
+		  `(lambda ()
+		     ;; kill gilgamesh buffer
+		     (kill-buffer ,gilgamesh-buf)
+		     ;; kill the remote notebook
+		     (shell-command (format "ssh gilgamesh \"/usr/sbin/lsof -ti:%s | xargs kill\"" ,port)))
+		  nil t))
+
+      (pop-to-buffer local-buf)
 
       ;; Finally, open the notebook
       (browse-url (format "http://localhost:%s/?token=%s" port token)))))
