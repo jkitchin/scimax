@@ -9,7 +9,11 @@
 ;; :session ./gilgamesh-ssh.json
 
 (require 's)
-(require 'scimax-jupyter)
+
+
+(when (require 'jupyter nil 'noerror)
+  (require 'scimax-jupyter))
+
 
 
 (defcustom scimax-gilgamesh-username user-login-name
