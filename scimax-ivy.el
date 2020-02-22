@@ -16,15 +16,74 @@
 
 ;; ** Extra projectile actions
 ;; Here I can open bash or finder when switching projects
+
+(defun scimax-ivy-projectile-bash (x)
+  "Open bash at X chosen from `projectile-completing-read'."
+  (let* ((full-path (f-join (projectile-project-root) x))
+	 (dir (if (file-directory-p full-path)
+		  full-path
+		(file-name-directory full-path))))
+    (bash dir)
+    ;; I use this to just get out of whatever called this to avoid visiting a
+    ;; file for example.
+    (recursive-edit)
+    (ivy-quit-and-run)))
+
+
+(defun scimax-ivy-projectile-finder (x)
+  "Open finder at X chosen from `projectile-completing-read'."
+  (let* ((full-path (f-join (projectile-project-root) x))
+	 (dir (if (file-directory-p full-path)
+		  full-path
+		(file-name-directory full-path))))
+    (finder dir)
+    ;; I use this to just get out of whatever called this to avoid visiting a
+    ;; file for example.
+    (recursive-edit)
+    (ivy-quit-and-run)))
+
+
+(defun scimax-ivy-insert-link (x)
+  "Insert a relative path link to X chosen from `projectile-completing-read'."
+  (let* ((full-path (f-join (projectile-project-root) x))
+	 (current-path (file-name-directory (buffer-file-name)))
+	 (rel-path (file-relative-name full-path current-path)))
+    (insert (format "[[%s]]" rel-path)))
+  ;; I use this to just get out of whatever called this to avoid visiting a
+  ;; file for example.
+  (recursive-edit)
+  (ivy-quit-and-run))
+
+
+(defun scimax-ivy-magit-status (x)
+  "Run magit status from `projectile-completing-read'.
+Right now, it runs `magit-status' in the directory associated
+with the entry."
+  (cond
+   ;; A directory, we can just get the status
+   ((file-directory-p x)
+    (let ((default-directory x))
+      (magit-status)))
+   ;; something else?
+   (t
+    ;; What should we do on a file? show that file change? just do magit status?
+    (let* ((full-path (f-join (projectile-project-root) x))
+	   (dir (if (file-directory-p full-path)
+		    full-path
+		  (file-name-directory full-path))))
+
+      (let ((default-directory dir))
+	(magit-status)))
+    (recursive-edit)
+    (ivy-quit-and-run))))
+
+
 (ivy-add-actions
  'projectile-completing-read
- '(("b" (lambda (x)
-	  (bash x))  "Open bash here.")
-   ("f" (lambda (x)
-	  (finder x))  "Open Finder here.")
-   ("g" (lambda (x)
-	  (let ((default-directory x))
-	    (magit-status)))  "Magit status")))
+ '(("b" scimax-ivy-projectile-bash "Open bash here.")
+   ("f" scimax-ivy-projectile-finder  "Open Finder here.")
+   ("g" scimax-ivy-magit-status  "Magit status")
+   ("l" scimax-ivy-insert-link "Insert link")))
 
 
 ;; ** Find file actions
