@@ -2,17 +2,37 @@
 
 ;;; Commentary:
 ;;
+;; You need to have passwordless ssh setup with gilgamesh.
+;; Setup ~/.ssh/config like this:
 ;; HOST gilgamesh
 ;;     HostName gilgamesh.cheme.cmu.edu
-;;     User jkitchin
+;;     User {userid}
 ;;
-;; :session ./gilgamesh-ssh.json
+;; Then if you don't have ~/.ssh/id_rsa.pub run this command
+;; > ssh-keygen -t rsa
+;;
+;; Finally, copy the pub file to gilgamesh. This will require a password
+;; > cat .ssh/id_rsa.pub | ssh gilgamesh 'cat >> .ssh/authorized_keys'
+;;
+;; Now you should be able to run
+;; > ssh gilgamesh
+;; and login without a password.
+;;
+;; Use this in your ipython header:
+;; #+BEGIN_SRC ipython :session (scimax-gilgamesh-kernel)
+;;
+;; #+END_SRC
+;;
+;; All the ssh connections will be made for you, and should be closed when you
+;; kill the buffer.
+;; Limitations:
+;; 1. You can only run one kernel at a time.
+;; 2. This uses 4-5 ssh connections, and you are limited to 6 on gilgamesh.
+
+
 
 (require 's)
 
-
-(when (require 'jupyter nil 'noerror)
-  (require 'scimax-jupyter))
 
 
 
@@ -21,6 +41,7 @@
 
 
 (defun scimax-gilgamesh-kernel ()
+  "Open a remote kernel, make a local setup, and return the name of the kernel."
   (unless (eq major-mode 'org-mode)
     (error "You can only start a gilgamesh kernel in an org-file."))
 
@@ -79,14 +100,13 @@
     ;; make cleanup functions
     (with-current-buffer cb
       (setq header-line-format
-	    (format "Running on gilgamesh. Click to close."))
+	    (format "Running on gilgamesh. Click to end."))
       (local-set-key [header-line down-mouse-1]
 		     `(lambda ()
+			(interactive)
 			(kill-buffer ,gilgamesh-buf)
 			(kill-buffer ,local-buf)
 			(delete-file "gilgamesh.json")
-			;; kill repl buffer
-
 			(setq header-line-format nil)))
 
 
