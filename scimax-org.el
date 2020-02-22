@@ -802,6 +802,28 @@ Use a prefix arg FONTIFY for colored headlines."
    fontify))
 
 
+(defcustom scimax-ivy-jump-functions
+  '((heading . ivy-org-jump-to-heading)
+    (visible . ivy-org-jump-to-visible-headline)
+    (sentence . ivy-jump-to-visible-sentence)
+    (recent-org ivy-org-jump-to-recent-headline)
+    (directory . ivy-org-jump-to-heading-in-directory)
+    (project . ivy-org-jump-to-project-headline )
+    (agenda ivy-org-jump-to-agenda-heading))
+  "alist of jump functions. The first one is the default.")
+
+
+(defun ivy-org-jump (&optional arg)
+  "Jump to a location in org file. The default is the first entry
+in `scimax-ivy-jump-functions'. With a prefix arg, you can choose
+the scope."
+  (interactive "P")
+  (let ((jumpfn (if arg (cdr (assoc (intern-soft (ivy-read "Scope: " scimax-ivy-jump-functions)) scimax-ivy-jump-functions))
+		  ;; the default choice.
+		  (cdr (car scimax-ivy-jump-functions)))))
+    (funcall jumpfn)))
+
+
 (require 'scimax-org-babel-python)
 
 
