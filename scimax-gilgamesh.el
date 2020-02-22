@@ -29,11 +29,7 @@
 ;; 1. You can only run one kernel at a time.
 ;; 2. This uses 4-5 ssh connections, and you are limited to 6 on gilgamesh.
 
-
-
 (require 's)
-
-
 
 
 (defcustom scimax-gilgamesh-username user-login-name
