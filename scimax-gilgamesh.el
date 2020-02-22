@@ -100,15 +100,17 @@
       (local-set-key [header-line down-mouse-1]
 		     `(lambda ()
 			(interactive)
-			(kill-buffer ,gilgamesh-buf)
-			(kill-buffer ,local-buf)
-			(delete-file "gilgamesh.json")
+			(ignore-errors
+			  (kill-buffer ,gilgamesh-buf)
+			  (kill-buffer ,local-buf)
+			  (delete-file "gilgamesh.json"))
 			(setq header-line-format nil)))
 
 
       (add-hook 'kill-buffer-hook `(lambda ()
-				     (kill-buffer ,gilgamesh-buf)
-				     (kill-buffer ,local-buf)
+				     (ignore-errors
+				       (kill-buffer ,gilgamesh-buf)
+				       (kill-buffer ,local-buf))
 				     (delete-file "gilgamesh.json")
 				     ;; kill repl buffer
 
