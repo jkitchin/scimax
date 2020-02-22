@@ -168,6 +168,19 @@ Returns the string you need to put in the :session parameter of a src block."
   (setq header-line-format nil))
 
 
+;; * Link to open Jupyter notebooks at NERSC
+
+;; You can right-click on a notebook in the left tab to get a path that you can put here.
+;; nersc:global/cfs/projectdirs/m2755/HER/data/generation-1-data/02/BicolCorow/Plate-Summary.ipynb
+
+(org-link-set-parameters
+ "nersc"
+ :follow (lambda (path)
+	   (browse-url
+	    (concat
+	     (format "https://jupyter.nersc.gov/user/%s/cori-shared-node-cpu/lab/tree/"
+		     scimax-nersc-username)
+	     path))))
 
 
 
