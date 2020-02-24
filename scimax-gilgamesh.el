@@ -45,6 +45,8 @@
 	 (gilgamesh-buf (concat "gilgamesh-" (buffer-name)))
 	 (local-buf (concat "local-" (buffer-name)))
 	 (buf (get-buffer gilgamesh-buf))
+	 (kernel-file)
+	 (session-name)
 	 (cw (current-window-configuration)))
 
     ;; This launches the remote kernel.
@@ -52,44 +54,46 @@
     (unless (and (get-buffer gilgamesh-buf)
 		 (with-current-buffer (get-buffer gilgamesh-buf)
 		   (goto-char (point-min))
-		   (re-search-forward "--existing gilgamesh.json" nil t)))
+		   (re-search-forward "--existing .*?.json" nil t)))
       ;; we need a remote kernel
       (message "Starting remote kernerl in %s" gilgamesh-buf)
       (async-shell-command
-       "ssh -t gilgamesh \"source ~/.bashrc; ipython kernel -f gilgamesh.json\""
+       "ssh -t gilgamesh \"source ~/.bashrc; ipython kernel\""
        gilgamesh-buf)
 
-      (catch 'ready
-	(while t
-	  (with-current-buffer gilgamesh-buf
-	    (goto-char (point-min))
-	    (when (re-search-forward "--existing gilgamesh.json" nil t)
-	      (throw 'ready t))
-	    ;; little delay to not loop so fast
-	    (sleep-for 0.1))))
+      (setq kernel-file
+	    (catch 'ready
+	      (while t
+		(with-current-buffer gilgamesh-buf
+		  (goto-char (point-min))
+		  (when (re-search-forward "--existing \\(kernel-[0-9]+.json\\)" nil t)
+		    (throw 'ready (match-string 1)))
+		  ;; little delay to not loop so fast
+		  (sleep-for 0.1)))))
 
       ;; Then we copy the run file here.
-      (shell-command "scp gilgamesh:~/.local/share/jupyter/runtime/gilgamesh.json .")
+      (shell-command (format "scp gilgamesh:~/.local/share/jupyter/runtime/%s ." kernel-file))
       (message "copied remote run file to local."))
 
     ;; Now the local setup
     (unless (and (get-buffer local-buf)
 		 (with-current-buffer (get-buffer local-buf)
 		   (goto-char (point-min))
-		   (re-search-forward "--existing gilgamesh-ssh.json" nil t)))
+		   (re-search-forward "--existing .*?-ssh.json" nil t)))
       (message "Starting local connection in %s" local-buf)
       ;; This starts the local kernel we connect to
-      (async-shell-command "ipython console --existing ./gilgamesh.json --ssh gilgamesh"
+      (async-shell-command (format "ipython console --existing ./%s --ssh gilgamesh" kernel-file)
 			   local-buf)
 
-      (catch 'ready
-	(while t
-	  (with-current-buffer local-buf
-	    (goto-char (point-min))
-	    (when (re-search-forward "--existing gilgamesh-ssh.json" nil t)
-	      (throw 'ready t))
-	    ;; little delay to not loop so fast
-	    (sleep-for 0.1)))))
+      (setq session-name
+	    (catch 'ready
+	      (while t
+		(with-current-buffer local-buf
+		  (goto-char (point-min))
+		  (when (re-search-forward "--existing \\(.*?-ssh.json\\)" nil t)
+		    (throw 'ready (match-string 1)))
+		  ;; little delay to not loop so fast
+		  (sleep-for 0.1))))))
 
     (message "Ready for action.")
 
@@ -103,7 +107,7 @@
 			(ignore-errors
 			  (kill-buffer ,gilgamesh-buf)
 			  (kill-buffer ,local-buf)
-			  (delete-file "gilgamesh.json"))
+			  (delete-file ,kernel-file))
 			(setq header-line-format nil)))
 
 
@@ -111,13 +115,11 @@
 				     (ignore-errors
 				       (kill-buffer ,gilgamesh-buf)
 				       (kill-buffer ,local-buf))
-				     (delete-file "gilgamesh.json")
-				     ;; kill repl buffer
-
+				     (delete-file ,kernel-file)
 				     (setq header-line-format nil))
-		nil t)))
-  ;; return session name used. It is a constant
-  "./gilgamesh-ssh.json")
+		nil t))
+    ;; return session name used. It is a constant
+    session-name))
 
 (defun scimax-gilgamesh-jupyter ()
   "Open a browser running a jupyter notebook on gilgamesh."
