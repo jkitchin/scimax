@@ -228,7 +228,7 @@ Add new day if necessary, otherwise, add to current day."
 			   (format "%s-%s-%s.org" year month day)))
 	 ;; we only run hooks on new files. If the file exists, we do not want
 	 ;; to run hooks.
-	 (run-hooks (file-exists-p org-file))
+	 (run-hooks (not (file-exists-p org-file)))
 	 (tree (scimax-journal-entries)))
 
     (when (not (file-directory-p journal-entry-dir))
