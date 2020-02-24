@@ -56,7 +56,7 @@
 		   (goto-char (point-min))
 		   (re-search-forward "--existing .*?.json" nil t)))
       ;; we need a remote kernel
-      (message "Starting remote kernerl in %s" gilgamesh-buf)
+      (message "Starting remote kernel in %s" gilgamesh-buf)
       (async-shell-command
        "ssh -t gilgamesh \"source ~/.bashrc; ipython kernel\""
        gilgamesh-buf)
