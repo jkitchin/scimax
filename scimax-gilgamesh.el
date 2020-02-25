@@ -27,13 +27,31 @@
 ;; kill the buffer.
 ;; Limitations:
 ;; 1. You can only run one kernel at a time.
-;; 2. This uses 4-5 ssh connections, and you are limited to 6 on gilgamesh.
+;; 2. This uses quite a few ssh connections, and you are limited to 6 on
+;; gilgamesh.
+
 
 (require 's)
 
+(defvar scimax-gilgamesh-ssh-sockets '()
+  "List of ssh connections we need to clean up.
+Each entry has a (label :socket socket :buffer buffer).")
 
-(defcustom scimax-gilgamesh-username user-login-name
-  "User ID for gilgamesh. Defaults to `user-login-name'")
+
+(defun scimax-gilgamesh-kill-kernel ()
+  "Kill all the processes associated with ipython on gilgamesh."
+  (interactive)
+  (let (entry socket buffer kernel-file)
+    (while (setq entry (pop scimax-gilgamesh-ssh-sockets))
+      (setq socket (plist-get (cdr entry) :socket)
+	    buffer (plist-get (cdr entry) :buffer)
+	    kernel-file (plist-get (cdr entry) :kernel-file))
+      (when (and kernel-file (file-exists-p kernel-file))
+	(delete-file kernel-file))
+      (message "running %S" (format "ssh -S %s -O exit gilgamesh" socket))
+      (shell-command (format "ssh -S %s -O exit gilgamesh" socket))
+      (when (get-buffer buffer)
+	(kill-buffer buffer)))))
 
 
 (defun scimax-gilgamesh-kernel ()
@@ -42,84 +60,73 @@
     (error "You can only start a gilgamesh kernel in an org-file."))
 
   (let* ((cb (current-buffer))
-	 (gilgamesh-buf (concat "gilgamesh-" (buffer-name)))
-	 (local-buf (concat "local-" (buffer-name)))
-	 (buf (get-buffer gilgamesh-buf))
+	 (cw (current-window-configuration))
+	 (gilgamesh-buf (concat "*gilgamesh-" (buffer-name) "*"))
 	 (kernel-file)
-	 (session-name)
-	 (cw (current-window-configuration)))
-
-    ;; This launches the remote kernel.
-    ;; Check when it is ready
-    (unless (and (get-buffer gilgamesh-buf)
-		 (with-current-buffer (get-buffer gilgamesh-buf)
-		   (goto-char (point-min))
-		   (re-search-forward "--existing .*?.json" nil t)))
-      ;; we need a remote kernel
+	 (kernel-data))
+    ;; We check if we have a kernel running remotely
+    (if-let ((kernel-file (plist-get (cdr (assoc 'gilgamesh scimax-gilgamesh-ssh-sockets)) :kernel-file)))
+	kernel-file
+      ;; we don't have one, so we make one.
       (message "Starting remote kernel in %s" gilgamesh-buf)
       (async-shell-command
-       "ssh -t gilgamesh \"source ~/.bashrc; ipython kernel\""
+       (format	"ssh -t -M -S ~/gilgamesh-socket gilgamesh \"source ~/.bashrc; ipython kernel\"")
        gilgamesh-buf)
-
       (setq kernel-file
 	    (catch 'ready
 	      (while t
 		(with-current-buffer gilgamesh-buf
 		  (goto-char (point-min))
-		  (when (re-search-forward "--existing \\(kernel-[0-9]+.json\\)" nil t)
+		  (when (re-search-forward
+			 "--existing \\(kernel-[0-9]+.json\\)" nil t)
 		    (throw 'ready (match-string 1)))
 		  ;; little delay to not loop so fast
 		  (sleep-for 0.1)))))
+      (push (list 'gilgamesh
+		  :socket "~/gilgamesh-socket"
+		  :buffer gilgamesh-buf
+		  :kernel-file kernel-file)
+	    scimax-gilgamesh-ssh-sockets)
 
-      ;; Then we copy the run file here.
-      (shell-command (format "scp gilgamesh:~/.local/share/jupyter/runtime/%s ." kernel-file))
-      (message "copied remote run file to local."))
+      (shell-command (format
+		      "scp gilgamesh:~/.local/share/jupyter/runtime/%s ."
+		      kernel-file))
+      (message "copied remote run file to local.")
 
-    ;; Now the local setup
-    (unless (and (get-buffer local-buf)
-		 (with-current-buffer (get-buffer local-buf)
-		   (goto-char (point-min))
-		   (re-search-forward "--existing .*?-ssh.json" nil t)))
-      (message "Starting local connection in %s" local-buf)
-      ;; This starts the local kernel we connect to
-      (async-shell-command (format "ipython console --existing ./%s --ssh gilgamesh" kernel-file)
-			   local-buf)
+      ;; Now, we manually set up the tunnels. I don't need this on my Mac, but
+      ;; on Windows, it doesn't seem to work if we don't.
+      (setq kernel-data (json-read-file kernel-file))
+      (cl-loop for (key . val) in kernel-data
+	       when (s-contains? "_port" (symbol-name key))
+	       do
+	       (async-shell-command
+		(format
+		 "ssh -M -S ~/gilgamesh-port-%s -N -f -L localhost:%s:localhost:%s gilgamesh"
+		 val val val)
+		(format "*gilgamesh-port-%s*" val))
+	       (message "*gilgamesh-port-%s* is setup." val)
+	       (push (list (format "gilgamesh-port-%s" val)
+			   :socket (format "~/gilgamesh-port-%s" val)
+			   :buffer (format "*gilgamesh-port-%s*" val))
+		     scimax-gilgamesh-ssh-sockets))
 
-      (setq session-name
-	    (catch 'ready
-	      (while t
-		(with-current-buffer local-buf
-		  (goto-char (point-min))
-		  (when (re-search-forward "--existing \\(.*?-ssh.json\\)" nil t)
-		    (throw 'ready (match-string 1)))
-		  ;; little delay to not loop so fast
-		  (sleep-for 0.1))))))
+      (message "Ready to go with %s" kernel-file)
+      (with-current-buffer cb
+	(setq header-line-format
+	      (format "Running on gilgamesh %s. Click to end." kernel-file))
+	(local-set-key [header-line down-mouse-1]
+		       `(lambda ()
+			  (interactive)
+			  (scimax-gilgamesh-kill-kernel)
+			  (setq header-line-format nil)))
 
-    (message "Ready for action.")
-
-    ;; make cleanup functions
-    (with-current-buffer cb
-      (setq header-line-format
-	    (format "Running on gilgamesh. Click to end."))
-      (local-set-key [header-line down-mouse-1]
-		     `(lambda ()
-			(interactive)
-			(ignore-errors
-			  (kill-buffer ,gilgamesh-buf)
-			  (kill-buffer ,local-buf)
-			  (delete-file ,kernel-file))
-			(setq header-line-format nil)))
-
-
-      (add-hook 'kill-buffer-hook `(lambda ()
-				     (ignore-errors
-				       (kill-buffer ,gilgamesh-buf)
-				       (kill-buffer ,local-buf))
-				     (delete-file ,kernel-file)
-				     (setq header-line-format nil))
-		nil t))
-    ;; return session name used. It is a constant
-    session-name))
+	(add-hook 'kill-buffer-hook `(lambda ()
+				       (interactive)
+				       (scimax-gilgamesh-kill-kernel)
+				       (setq header-line-format nil))
+		  nil t))
+      (set-window-configuration cw)
+      kernel-file)))
 
 (defun scimax-gilgamesh-jupyter ()
   "Open a browser running a jupyter notebook on gilgamesh."
