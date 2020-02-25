@@ -392,16 +392,18 @@ Adapted from http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.h
 
 ;; * dubcaps
 (defun dcaps-to-scaps ()
-  "Convert word in DOuble CApitals to Single Capitals."
+  "Convert word in DOuble CApitals to Single Capitals.
+You can undo this if you do it right away."
   (interactive)
-  (and (= ?w (char-syntax (char-before)))
-       (save-excursion
-         (and (if (called-interactively-p)
-                  (skip-syntax-backward "w")
-                (= -3 (skip-syntax-backward "w")))
-              (let (case-fold-search)
-                (looking-at "\\b[[:upper:]]\\{2\\}[[:lower:]]"))
-              (capitalize-word 1)))))
+  (undo-boundary)
+  (save-excursion
+    (when (= ?w (char-syntax (char-before)))
+      (when (if (called-interactively-p)
+		(skip-syntax-backward "w")
+	      (= -3 (skip-syntax-backward "w")))
+	(when (let (case-fold-search)
+		(looking-at "\\b[[:upper:]]\\{2\\}[[:lower:]]"))
+	  (capitalize-word 1))))))
 
 (add-hook 'post-self-insert-hook #'dcaps-to-scaps nil 'local)
 
