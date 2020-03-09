@@ -18,11 +18,16 @@
 
 (use-package flyspell)
 
+(defcustom scimax-aspell-language-option "--lang=en_US"
+  "Option to use in `ispell-extra-args' to specify the default language."
+  :type 'string
+  :group 'scimax-aspell)
+
 (use-package flyspell-correct-ivy
   :ensure t
   :init
   (setq ispell-program-name "aspell"
-	ispell-extra-args '("--encoding=utf-8" "--sug-mode=ultra" "--lang=en_US")
+	ispell-extra-args `("--encoding=utf-8" "--sug-mode=ultra" ,scimax-aspell-language-option)
 	flyspell-correct-interface 'flyspell-correct-ivy)
 
   (add-hook 'flyspell-incorrect-hook
