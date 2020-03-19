@@ -3,5 +3,6 @@
 # key: tn
 # type: command
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# condition: (looking-back "^tn" 2)
 # --
 (yas-expand-snippet (scimax-insert-table-ncolumns))
