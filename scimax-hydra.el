@@ -845,7 +845,7 @@ _C-a_ Async export: %`hydra-ox/async-export
   _d_: dir             _,_: jump back
   ^ ^                _s-._: xref apropos
 "
-(defhydra hydra-projectile (:color teal :hint nil :inherit (scimax-base/heads))
+(defhydra hydra-projectile (:color teal :hint nil)
   "
      PROJECTILE: %(projectile-project-root)
 "
