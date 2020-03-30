@@ -78,9 +78,10 @@ Set to nil to avoid loading a theme."
 
 ;; * Programming
 ;; ** debugging
-(add-hook 'edebug-mode-hook
-	  (lambda ()
-	    (define-key edebug-mode-map (kbd "h") 'edebug-goto-here)))
+;; Ironically, this was preventing me from debugging some things...
+;; (add-hook 'edebug-mode-hook
+;; 	  (lambda ()
+;; 	    (define-key edebug-mode-map (kbd "h") 'edebug-goto-here)))
 
 ;; ** Emacs lisp
 ;; Setup pretty outlines in Emacs-lisp code
