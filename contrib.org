@@ -1,0 +1,24 @@
+#+title: User contributions
+
+* which-key
+
+There are /many/ key-bindings in scimax that can be hard to remember, or even know about. Shreyas Ragavan (shrysr) suggested in https://github.com/jkitchin/scimax/issues/344 that ~which-key~ could help with this, with this suggested implementation.
+
+#+BEGIN_SRC emacs-lisp
+(defcustom scimax-which-key 'nil
+  "Scimax option to enable or disable which-key. Defaults to `nil'.
+Set to 1 to install and enable which-key."
+  :group 'scimax)
+
+
+(when scimax-which-key
+  (use-package which-key
+  :ensure nil
+  :defer nil
+  :config
+  (which-key-mode)))
+#+END_SRC
+
+Then, when you type a key sequence that is only partially complete you get a minibuffer that pops up showing you all the possible completions. For example, if I type C-c in this buffer and wait a bit, this pops up:
+
+[[./which-key.png]]
