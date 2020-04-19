@@ -82,6 +82,13 @@ recent files and bookmarks. You can set a bookmark also."
   (delete-other-windows))
 
 
+(defun kill-buffer-no-hook ()
+  "Kill buffer with no kill-buffer-hook."
+  (interactive)
+  (let ((kill-buffer-hook '()))
+    (kill-buffer)))
+
+
 ;;;###autoload
 (defun unfill-paragraph ()
   "Unfill paragraph at or after point."
