@@ -1069,7 +1069,9 @@ compatibility with the other formatters."
   (when (not (string= "" output))
     (let (*ob-ipython-output-results-prefix*)
       (when (-contains?
-	     (s-split " " (cdr (assoc :results (caddr (org-babel-get-src-block-info t))))) "code")
+	     (s-split " "
+		      (or (cdr (assoc :results (caddr (org-babel-get-src-block-info t))))
+			  "")) "code")
 	(setq *ob-ipython-output-results-prefix* ""))
       (concat (s-join "\n"
 		      (mapcar (lambda (s)
