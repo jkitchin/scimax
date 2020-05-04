@@ -364,7 +364,8 @@ markdown headings _1_: _2_: _3_: _4_: _5_: _6_:
 TYPE is usually one of ipython, markdown, org
 Note: you will lose header arguments from this."
   (interactive (list (completing-read "Type: " '(ipython markdown org))))
-  (let* ((src-info (org-babel-get-src-block-info 'light))
+  (let* ((src-info (or (org-babel-get-src-block-info t)
+		       (org-babel-lob-get-info)))
 	 (header-start (sixth src-info))
 	 (header-end (save-excursion (goto-char header-start)
 				     (line-end-position))))
@@ -635,7 +636,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   "Return the default name of the session for a src block."
   (concat
    ;; this is the block language
-   (car (org-babel-get-src-block-info t))
+   (car (or (org-babel-get-src-block-info t) (org-babel-lob-get-info)))
    "-"
    (if-let (bf (buffer-file-name))
        (md5 (expand-file-name bf))
@@ -801,9 +802,11 @@ This function is called by `org-babel-execute-src-block'."
 	 ;; if these are equal, we use default, if not user defined session
 	 ;; unless they just used :session
 	 (not (null (cdr (assoc :session
-				(third (org-babel-get-src-block-info t))))))
+				(third (or (org-babel-get-src-block-info t)
+					   (org-babel-lob-get-info)))))))
 	 (eq (assoc :session org-babel-default-header-args:ipython)
-	     (assoc :session (third (org-babel-get-src-block-info t))))
+	     (assoc :session (third (or (org-babel-get-src-block-info t)
+					(org-babel-lob-get-info)))))
 	 ;; we want unique kernels
 	 ob-ipython-buffer-unique-kernel)
     (make-local-variable 'org-babel-default-header-args:ipython)
@@ -852,7 +855,8 @@ This function is called by `org-babel-execute-src-block'."
 
   ;; scimax feature to restart
   (when (assoc :restart params)
-    (let ((session (cdr (assoc :session (third (org-babel-get-src-block-info))))))
+    (let ((session (cdr (assoc :session (third (or (org-babel-get-src-block-info)
+						   (org-babel-lob-get-info)))))))
       (ob-ipython-kill-kernel
        (cdr (assoc session
 		   (ob-ipython--get-kernel-processes))))
@@ -928,7 +932,8 @@ This function is called by `org-babel-execute-src-block'."
 		(org-babel-remove-result)
 		(org-babel-insert-result
 		 (ob-ipython--process-response ret file result-type)
-		 (cdr (assoc :result-params (nth 2 (org-babel-get-src-block-info)))))
+		 (cdr (assoc :result-params (nth 2 (or (org-babel-get-src-block-info)
+						       (org-babel-lob-get-info))))))
 		(org-redisplay-inline-images))))))
 
      (list sentinel (current-buffer) file result-type))
@@ -1070,7 +1075,8 @@ compatibility with the other formatters."
     (let (*ob-ipython-output-results-prefix*)
       (when (-contains?
 	     (s-split " "
-		      (or (cdr (assoc :results (caddr (org-babel-get-src-block-info t))))
+		      (or (cdr (assoc :results (caddr (or (org-babel-get-src-block-info t)
+							  (org-babel-lob-get-info)))))
 			  "")) "code")
 	(setq *ob-ipython-output-results-prefix* ""))
       (concat (s-join "\n"
@@ -1085,7 +1091,9 @@ compatibility with the other formatters."
 FILE-OR-NIL is not used in this function."
   (let ((lines (s-lines value))
 	(raw (-contains?
-	      (s-split " " (cdr (assoc :results (caddr (org-babel-get-src-block-info t))))) "raw")))
+	      (s-split " " (cdr (assoc :results (caddr (or (org-babel-get-src-block-info t)
+							   (org-babel-lob-get-info))))))
+	      "raw")))
     ;; filter out uninteresting lines.
     (setq lines (-filter (lambda (line)
 			   (not (-any (lambda (regex)
@@ -1106,9 +1114,13 @@ FILE-OR-NIL is not used in this function."
 (defun ob-ipython-format-text/html (file-or-nil value)
   "Format VALUE for text/html mime-types.
 FILE-OR-NIL is not used in this function."
-  (s-join "\n"
-	  (list (if ob-ipython-show-mime-types "# text/html" "")
-		(format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value))))
+  ;; (s-join "\n"
+  ;; 	  (list (if ob-ipython-show-mime-types "# text/html" "")
+  ;; 		(format "#+BEGIN_EXPORT html\n%s\n#+END_EXPORT" value)))
+
+  (let ((tf (make-temp-file "ob-ipython-html" nil ".html" value)))
+    (browse-url tf)
+    (format "[[file:%s]]" tf)))
 
 
 (defun ob-ipython-html-font-lock (limit)
