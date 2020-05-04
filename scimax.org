@@ -50,6 +50,14 @@ For Windows you can use:
 (setq w32-apps-modifier 'hyper) ; Menu/App key
 #+END_SRC
 
+It was suggested [[https://github.com/jkitchin/scimax/issues/362][here]] that you can also make some seldom used keys like =<pause>= and =<scroll>= act like these extra modifiers. Here is a snippet that will do that.
+
+#+BEGIN_SRC emacs-lisp
+ (define-key function-key-map (kbd "<pause>") 'event-apply-super-modifier)
+ (define-key function-key-map (kbd "<scroll>") 'event-apply-hyper-modifier)
+#+END_SRC
+
+
 This does not work for all key combination with the Windows key because Windows intercepts some keys. The intercepted keys depend on the Windows version:
 
 | Key     | Windows 7 | Windows 10 |
