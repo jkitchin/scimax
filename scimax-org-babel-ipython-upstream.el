@@ -900,6 +900,7 @@ This function is called by `org-babel-execute-src-block'."
   (let* ((file (cdr (assoc :ipyfile params)))
          (session (cdr (assoc :session params)))
          (result-type (cdr (assoc :result-type params)))
+	 (result-params (cdr (assoc :result-params params)))
          (sentinel (ipython--async-gen-sentinel))
 	 ;; I added this. It is like the command in jupyter, but unfortunately
 	 ;; similar to :display in the results from jupyter. This is to specify
@@ -907,6 +908,7 @@ This function is called by `org-babel-execute-src-block'."
 	 (display-params (cdr (assoc :display params)))
 	 (display (when display-params (mapcar 'intern-soft
 					       (s-split " " display-params t)))))
+
     (ob-ipython--create-kernel (ob-ipython--normalize-session session)
                                (cdr (assoc :kernel params)))
     (ob-ipython--execute-request-async
@@ -922,6 +924,7 @@ This function is called by `org-babel-execute-src-block'."
 	  (setf (cdr (assoc :value (assoc :result ret)))
 		(-filter (lambda (el) (memq (car el) ',display))
 			 (cdr (assoc :value (assoc :result ret))))))
+
 	(save-window-excursion
 	  (save-excursion
 	    (save-restriction
@@ -932,8 +935,7 @@ This function is called by `org-babel-execute-src-block'."
 		(org-babel-remove-result)
 		(org-babel-insert-result
 		 (ob-ipython--process-response ret file result-type)
-		 (cdr (assoc :result-params (nth 2 (or (org-babel-get-src-block-info)
-						       (org-babel-lob-get-info))))))
+		 ',result-params)
 		(org-redisplay-inline-images))))))
 
      (list sentinel (current-buffer) file result-type))
