@@ -185,17 +185,18 @@ slide order."
          org-show-temp-images '()
          org-show-slide-list '())
 
-  (let ((n 0))
-    (org-map-entries
-     (lambda ()
-       (when (string-match-p ":slide:" (or (nth 5 (org-heading-components)) ""))
-	 (setq n (+ n 1))
+  (org-with-wide-buffer
+   (let ((n 0))
+     (org-map-entries
+      (lambda ()
+	(when (string-match-p ":slide:" (or (nth 5 (org-heading-components)) ""))
+	  (setq n (+ n 1))
 
-	 (add-to-list 'org-show-slide-titles
-		      (cons (nth 4 (org-heading-components)) n) t)
+	  (add-to-list 'org-show-slide-titles
+		       (cons (nth 4 (org-heading-components)) n) t)
 
-	 (add-to-list 'org-show-slide-list
-		      (cons n (set-marker (make-marker) (point))) t))))))
+	  (add-to-list 'org-show-slide-list
+		       (cons n (set-marker (make-marker) (point))) t)))))))
 
 
 (defun org-show-start-slideshow ()
