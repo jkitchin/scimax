@@ -15,6 +15,8 @@
 ;; to indicate the main file to get the LaTeX setup from.
 ;;
 ;; Use `sos-export-as-pdf-and-open' C-c C-e s o in any file to build the PDF.
+;;
+;; Inspired by personal correspondance with Nicky van Foreest.
 
 
 ;;; Code:
