@@ -1,0 +1,22 @@
+#+TITLE:  Example master file
+#+AUTHOR: Nicky van Foreest
+
+#+LATEX_CLASS_OPTIONS: [a4paper,12pt]
+#+LATEX_HEADER: \usepackage{a4wide}
+#+LATEX_HEADER: \usepackage{subfiles}
+#+LATEX_HEADER: \usepackage{mathpazo} % nice fonts
+
+
+* Introduction
+
+Here is the intro for the entire document
+
+And then we start loading the subfiles.
+
+subfile:section-1.org
+
+subfile:section-2.org
+
+* Summary and Conclusions
+
+And here is perhaps some finishing stuff.

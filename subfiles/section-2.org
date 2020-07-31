@@ -1,0 +1,17 @@
+#+TITLE: Second subfile illustration
+#+AUTHOR: Nicky van Foreest
+
+#+OPTIONS: toc:nil author:nil date:nil title:nil
+
+#+LATEX_CLASS: subfiles
+#+SUBFILE-MAIN: main.org
+
+
+
+* This is the second section of the subfile
+
+Here is some text in the  second  section
+
+** A subsection of the second subfile
+
+Some more text
