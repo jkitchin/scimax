@@ -7,7 +7,7 @@
 
 
 (require 'f)
-(require 'cl)
+(require 'cl-lib)
 
 (defvar scimax-lob-directory (directory-file-name (expand-file-name "scimax-lob" scimax-dir))
   "Directory where library of babel org files reside.")
