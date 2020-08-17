@@ -724,7 +724,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
       (require 'async)
       (async-start
        `(lambda ()
-	  (require 'cl)
+	  (require 'cl-lib)
 	  (mapcar
 	   (lambda (s)
 	     (second (split-string (first (split-string s ":")) " ")))
