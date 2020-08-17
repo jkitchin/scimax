@@ -143,7 +143,7 @@ This code was inspired by and adapted from https://gnu.support/gnu-emacs/emacs-l
 ;;
 
 ;;; Code
-(require 'cl)
+(require 'cl-lib)
 (require 'color)
 (require 'easymenu)
 
