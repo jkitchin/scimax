@@ -2,7 +2,7 @@
 
 ;;; Commentary:
 ;;
-(require 'cl)
+(require 'cl-lib)
 (require 's)    ; for s-trim
 (require 'org)
 (use-package emacsql-sqlite)
