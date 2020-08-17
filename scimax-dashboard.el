@@ -20,7 +20,7 @@
 
 ;;; Code:
 
-(require 'cl)
+(require 'cl-lib)
 (require 'avy)
 (require 'counsel)
 (require 'dashboard)
