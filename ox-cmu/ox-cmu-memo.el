@@ -211,8 +211,13 @@ Return PDF file's name."
 ;;;###autoload
 (defun cmu-memo-export-to-pdf-and-open
     (&optional async subtreep visible-only body-only ext-plist)
+  "Export a memo to PDF and open it.
+
+TEXINPUTS is augmented with the path to the cmumemo style file.
+This has worked before, but it does not seem to work on Mac
+Catalina."
   (interactive)
-  (let* ((*TEXINPUTS* (format "TEXINPUTS=%s%s/tex/latex/cmu:"
+  (let* ((*TEXINPUTS* (format "TEXINPUTS=%s%stex/latex/cmu/:"
 			      (or (getenv "TEXINPUTS") "")
 			      (file-name-directory (locate-library "ox-cmu-memo"))))
 	 (process-environment (cons *TEXINPUTS* process-environment)))
