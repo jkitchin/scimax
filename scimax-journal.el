@@ -543,7 +543,7 @@ _sy_: year   _gy_: year    _f_: file         ^ ^            _ay_: agenda year
   ("n" scimax-journal-next-entry "Next entry" :color red)
   ("p" scimax-journal-previous-entry "Previous entry" :color red)
 
-  ("j" (scimax-journal-open-entry (org-read-date nil nil "today")) "Open today")
+  ("j" (scimax-journal-open-entry (format-time-string "%Y-%m-%d" (current-time))) "Open today")
   ("f" (scimax-journal-go-to-file) "Open a journal file")
   ("e" scimax-journal-open-entry "Open entry")
   ("h" scimax-journal-open-heading "Open to heading")
