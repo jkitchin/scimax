@@ -96,7 +96,8 @@ Make a new file if needed."
   (unless (file-exists-p path)
     (with-temp-file path
       (insert scimax-inkscape-template-svg)))
-  (shell-command (format "inkscape %s &" path)))
+  (let ((display-buffer-alist '(("*Async Shell Command*" . (display-buffer-no-window . ())))))
+    (shell-command (format "inkscape %s &" path))))
 
 
 (defun scimax-inkscape-thumbnail (start end path bracketp)
@@ -118,7 +119,7 @@ Make a new file if needed."
       (setq ov (make-overlay start end))
       (overlay-put ov 'display img)
       (overlay-put ov 'face 'default)
-      (overlay-put ov 'before-string "inkscape:")
+      ;; (overlay-put ov 'before-string "inkscape:")
       (overlay-put ov 'org-image-overlay t)
       (overlay-put ov 'modification-hooks
 		   (list
@@ -149,11 +150,11 @@ Here are two examples:
 			  (lambda (link)
 			    (when (string= (org-element-property :type link) "inkscape")
 			      link))))))
-    (loop for link in links
-	  do
-	  (goto-char (org-element-property :begin link))
-	  (re-search-forward "inkscape:" (org-element-property :end link))
-	  (replace-match "file:"))))
+    (cl-loop for link in links
+	     do
+	     (goto-char (org-element-property :begin link))
+	     (re-search-forward "inkscape:" (org-element-property :end link))
+	     (replace-match "file:"))))
 
 
 (org-link-set-parameters
@@ -162,12 +163,14 @@ Here are two examples:
  :help-echo "Click to open in inkscape."
  :activate-func 'scimax-inkscape-thumbnail
  :export (lambda (path desc backend)
+	   ;;  You need to use the `scimax-inkscape-preprocess' function in a hook for
+	   ;; more advanced export options like captions.
 	   (cond
+	    ((eq 'latex backend)
+	     (format "\\includesvg{%s}" path))
 	    ((eq 'html backend)
-	     (format "<img src=\"%s\"" path))))
- ;;  You need to use the `scimax-inkscape-preprocess' function in a hook for
- ;; more advanced export options like captions.
- )
+	     (format "<img src=\"%s\"" path)))))
+
 
 (defun scimax-inkscape-insert-drawing (path)
   "Convenience function to insert a drawing with filename PATH."
