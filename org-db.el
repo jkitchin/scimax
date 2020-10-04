@@ -6,6 +6,7 @@
 (require 's)    ; for s-trim
 (require 'org)
 (use-package emacsql-sqlite)
+(eval-and-compile 'helm-source)  ; for helm-build-sync-source
 
 
 ;;; Code:
