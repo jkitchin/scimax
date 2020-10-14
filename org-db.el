@@ -6,6 +6,7 @@
 (require 's)    ; for s-trim
 (require 'org)
 (use-package emacsql-sqlite)
+(eval-and-compile (require 'helm-source))  ; for helm-build-sync-source
 
 
 ;;; Code:
@@ -616,6 +617,7 @@ Optional RECURSIVE is non-nil find files recursively."
 			     :begin begin)))))
     candidates))
 
+;;;###autoload
 (defun org-db-open-heading ()
   "Use helm to select and open a heading."
   (interactive)
