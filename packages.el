@@ -84,7 +84,7 @@
 
 (use-package swiper
   :bind
-  ("C-s" . counsel-grep-or-swiper)
+  ([remap isearch-forward] . counsel-grep-or-swiper)
   ("H-s" . swiper-all)
   :diminish ivy-mode
   :config
