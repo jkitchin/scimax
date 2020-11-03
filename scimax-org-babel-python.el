@@ -539,22 +539,22 @@ Opens a buffer with links to what is found. This function installs pylint if nee
 
 ;; * better font lock on f-strings
 
-(setq python-font-lock-keywords
-      (append python-font-lock-keywords
-	      '(;; this is the full string.
-		;; group 1 is the quote type and a closing quote is matched
-		;; group 2 is the string part
-		(
-		 ;; "f\\(['\"]\\{1,3\\}\\)\\([^\\1]+?\\)\\1"
-		 "f\\(['\"]\\{1,3\\}\\)\\(.+?\\)\\1"
-		 ;; these are the {keywords}
-		 ("{[^}]*?}"
-		  ;; Pre-match form
-		  (progn (goto-char (match-beginning 0)) (match-end 0))
-		  ;; Post-match form
-		  (goto-char (match-end 0))
-		  ;; face for this match
-		  (0 font-lock-variable-name-face t))))))
+;; (setq python-font-lock-keywords
+;;       (append python-font-lock-keywords
+;; 	      '(;; this is the full string.
+;; 		;; group 1 is the quote type and a closing quote is matched
+;; 		;; group 2 is the string part
+;; 		(
+;; 		 ;; "f\\(['\"]\\{1,3\\}\\)\\([^\\1]+?\\)\\1"
+;; 		 "f\\(['\"]\\{1,3\\}\\)\\(.+?\\)\\1"
+;; 		 ;; these are the {keywords}
+;; 		 ("{[^}]*?}"
+;; 		  ;; Pre-match form
+;; 		  (progn (goto-char (match-beginning 0)) (match-end 0))
+;; 		  ;; Post-match form
+;; 		  (goto-char (match-end 0))
+;; 		  ;; face for this match
+;; 		  (0 font-lock-variable-name-face t))))))
 
 (provide 'scimax-org-babel-python)
 
