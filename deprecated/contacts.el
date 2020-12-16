@@ -446,6 +446,8 @@ end tell" (cdr (assoc "PHONE" contact)))))
 
 (when (featurep 'mu4e)
   (define-key mu4e-compose-mode-map "\C-c]" 'ivy-contacts))
+(when (featurep 'mu4e)
+  (define-key mu4e-compose-mode-map "\C-c]" 'org-db-contacts))
 
 (define-key message-mode-map "\C-c]" 'ivy-contacts)
 
