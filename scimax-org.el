@@ -1025,10 +1025,10 @@ Use a prefix arg to get regular RET. "
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-org-src-blocks
-  :ensure nil
-  :load-path scimax-dir
-  :config (scimax-org-toggle-colored-src-blocks))
+;; (use-package scimax-org-src-blocks
+;;   :ensure nil
+;;   :load-path scimax-dir
+;;   :config (scimax-org-toggle-colored-src-blocks))
 
 
 (defun scimax-get-file-keyword (KEYWORD)
