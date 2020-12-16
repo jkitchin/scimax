@@ -753,10 +753,10 @@ Optional RECURSIVE is non-nil find files recursively."
 ;; ** geo link
 ;; eg. geo:40.442403,-79.943838
 ;; [[geo:40°26'32.6"N 79°56'37.8"W]]
-(org-link-set-parameters
- "geo"
- :follow (lambda (path)
-	   (browse-url (format "http://maps.google.com/maps?q=%s" path))))
+;; (org-link-set-parameters
+;;  "geo"
+;;  :follow (lambda (path)
+;; 	   (browse-url (format "http://maps.google.com/maps?q=%s" path))))
 
 
 
