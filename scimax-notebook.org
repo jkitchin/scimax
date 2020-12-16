@@ -253,7 +253,8 @@ directory. You may want to make this a directory local variable."
 (defun nb-org-files ()
   "Return a list of org files in the current notebook.
 You should manually invalidate the cache with
-`projectile-invalidate-cache' if it causes a problem."
+`projectile-invalidate-cache' if it causes a problem.
+For example, if you delete or rename an org-file you will get an error that it cannot be opened."
   (mapcar
    (lambda (f)
      (f-join (projectile-project-root) f))
@@ -405,6 +406,28 @@ Here are the tags in this project.
 
 #+RESULTS:
 | random | noexport | feature | slide | example | bug |
+
+
+If you want to consistently tag headlines, you might use that function to get a list.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defun nb-set-tags ()
+  "Set tags in current heading with tags from this project."
+  (interactive)
+  (save-excursion
+    (unless (org-at-heading-p)
+      (org-previous-visible-heading 1))
+    (org-set-tags (completing-read
+		   "Tag: "
+		   ;; nb-list-tags goes through files, and may change the active
+		   ;; buffer.
+		   (save-window-excursion (nb-list-tags))))))
+
+
+#+END_SRC
+
+#+RESULTS:
+: nb-set-tags
 
 
 
