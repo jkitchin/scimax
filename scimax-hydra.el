@@ -388,7 +388,7 @@ _p_: ffap
   ("e" end-of-line "End of line")
   ("c" (scimax-open-hydra scimax-jump-char/body) "Char")
   ("g" goto-line "Goto line")
-  ("h" org-db-open-heading "org-db-heading")
+  ("h" org-db-headings "org-db-heading")
   ("l" (scimax-open-hydra scimax-jump-line/body) "Line")
   ("k" ace-link "Link")
   ("o" (scimax-open-hydra scimax-jump-org/body) "Org")
@@ -758,10 +758,13 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
 
 (defhydra scimax-org-db (:color blue :inherit (scimax-base/heads) :columns 3)
   "org-db"
-  ("h" org-db-open-heading "heading")
-  ("f" org-db-open-file "file")
-  ("l" org-db-open-link-in-file "link")
-  ("r" org-db-open-recent-file "recent file"))
+  ("c" org-db-contacts "contact")
+  ("h" org-db-headings "heading")
+  ("f" org-db-files "file")
+  ("l" org-db-locations "location")
+  ("k" org-db-links "link")
+  ("r" org-db-recent-files "recent file")
+  ("t" org-db-hashtags "hashtag"))
 
 
 (defhydra scimax-org-toggle (:color blue :inherit (scimax-base/heads) :columns 3)
@@ -833,7 +836,6 @@ _C-a_ Async export: %`hydra-ox/async-export
 
 ;;** project
 ;; See also https://github.com/abo-abo/hydra/wiki/Projectile
-
 (defhydra hydra-projectile (:color teal :hint nil)
   "
      PROJECTILE: %(projectile-project-root)
@@ -868,7 +870,8 @@ _C-a_ Async export: %`hydra-ox/async-export
 
 
   ("p" projectile-switch-project "Switch" :column "projects")
-  ("q" projectile-switch-open-project "Switch to open" :column "projects")
+  ;; ("q" projectile-switch-open-project "Switch to open" :column "projects")
+  ("q" nil "quit")
   ("r" projectile-replace "Replace" :column "search")
 
   ("t" projectile-toggle-between-implementation-and-test)
@@ -876,6 +879,13 @@ _C-a_ Async export: %`hydra-ox/async-export
   ("v" projectile-vc "vc" :column "build")
 
   ("z" projectile-cache-current-file "Cache file" :column "projects")
+
+  ("<return>" (cl-loop for readme in '("readme.org"
+				       "README.org")
+		       when (file-exists-p readme)
+		       do
+		       (find-file readme)
+		       (cl-return)) "Open readme?")
 
   ("x1" projectile-run-shell-command-in-root "Run cmd" :column "cmd")
   ("x7" projectile-run-async-shell-command-in-root "Run async cmd" :column "cmd")
