@@ -1,15 +1,55 @@
 ;;; org-db.el --- An org database
 
 ;;; Commentary:
+;; org-db is used to index org-files into a sqlite database to make searching
+;; easier. It is complementary to things like `org-agenda-files'. I have found
+;; that `org-agenda' is too slow to deal with large (thousands+) of org-files
+;; that are spread all over your directories.
 ;;
+;; It works with a `save-buffer-hook' that runs a function that adds an org-file
+;; to a queue for indexing when you save it. The queue is processed whenever
+;; Emacs is idle. This is done for performance reasons.
+;; 1. org-db parses the org-file which can be slow for large files, and I don't want to wait while working.
+;; 2. sqlite can only have one process working on it at a time, so async updates is not a good idea.
+;;
+;; org-db balances performance and accuracy in a way that works "well enough"
+;; for me. There are a number of ways it can be out of sync and inaccurate
+;; though. The main way is if files get changed outside of emacs, e.g. by git,
+;; cloud drive sync programs, or other users in shared drives, files are moved
+;; or renamed, etc. org-db doesn't have a good way to keep up with these kinds
+;; of changes. You can use `M-x C-u org-db-refresh' to update all the files in
+;; the database.
+;;
+;; Similarly, org-db will generally not know about files you have never opened.
+;;
+;; The main entry points for you are:
+;; `org-db-headings' actions for headings in the database - default open
+;; `org-db-contacts' actions for headings with an EMAIL property - default open
+;; `org-db-locations' actions for headings with an ADDRESS property - default open
+;; `org-db-files'  open a file in the db
+;; `org-db-recentf' open a recent file in the db
+;; `org-db-links' actions for links in the db
+;; `org-db-hashtags' actions for hashtags
+;;
+;; `org-db-toggle-org-id' If you want to use org-db to jump to an org-id instead
+;; of `org-id-goto'. I find the built-in function to slow for me.
+;;
+;; Utilities
+;; `org-db-index' will prompt you for a directory and index the org-files in that directory. Use a prefix arg to make it recursive.
+;; `org-db-clean-db' will prune entries where the file no longer exists.
+;; `org-db-reset-db' will clear all the entries from org-db if you want to start over.
+;;
+;; Advanced usage
+;; you can build emacsql queries on org-db to do lots of things.
+
+
+;;; Code:
 (require 'cl-lib)
 (require 's)    ; for s-trim
 (require 'org)
 (use-package emacsql-sqlite)
-(eval-and-compile (require 'helm-source))  ; for helm-build-sync-source
+(require 'ivy)
 
-
-;;; Code:
 
 (defcustom org-db-root "~/org-db/"
   "Root directory for db files."
@@ -22,6 +62,7 @@
 (defcustom org-db-index-content nil
   "Controls if the content of headlines is saved."
   :group 'org-db)
+
 
 (unless (file-directory-p org-db-root)
   (make-directory org-db-root t))
