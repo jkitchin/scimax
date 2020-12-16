@@ -834,18 +834,6 @@ _C-a_ Async export: %`hydra-ox/async-export
 ;;** project
 ;; See also https://github.com/abo-abo/hydra/wiki/Projectile
 
-"
-     PROJECTILE: %(projectile-project-root)
-
-     Find File            Search/Tags          Buffers                Cache                      Projects
----------------------------------------------------------------------------------------------------------
- _ff_: file            _a_: ag/grep           _i_: Ibuffer           _c_: cache clear            _ww_: Switch project
- _fw_: file dwim       _g_: update gtags      _b_: switch to buffer  _x_: remove known project   _wo_: Switch open project
- _fd_: file curr dir   _m_: multi-occur       _K_: Kill all buffers  _X_: cleanup non-existing
-  _r_: recent file     _._: find definition                      ^^^^_z_: cache current
-  _d_: dir             _,_: jump back
-  ^ ^                _s-._: xref apropos
-"
 (defhydra hydra-projectile (:color teal :hint nil)
   "
      PROJECTILE: %(projectile-project-root)
@@ -876,14 +864,17 @@ _C-a_ Async export: %`hydra-ox/async-export
   ("j" projectile-find-tag "find tag" :column "search")
   ("k" projectile-kill-buffers "Kill buffers" :column "buffers")
   ("l" projectile-find-file-in-directory "Find in dir" :column "Files")
-  ("m" projectile-commander)
-  ("o" projectile-multi-occur "moccur" :column "search")
+  ("m" projectile-multi-occur "moccur" :column "search")
+
+
   ("p" projectile-switch-project "Switch" :column "projects")
   ("q" projectile-switch-open-project "Switch to open" :column "projects")
   ("r" projectile-replace "Replace" :column "search")
+
   ("t" projectile-toggle-between-implementation-and-test)
   ("u" projectile-run-project "Run" :column "build")
   ("v" projectile-vc "vc" :column "build")
+
   ("z" projectile-cache-current-file "Cache file" :column "projects")
 
   ("x1" projectile-run-shell-command-in-root "Run cmd" :column "cmd")
@@ -896,6 +887,7 @@ _C-a_ Async export: %`hydra-ox/async-export
   ("sg" projectile-grep "Grep" :column "search")
   ("sr" projectile-ripgrep "Ripgrep" :column "search")
   ("ss" projectile-ag "ag" :column "search")
+  ("so" ivy-org-jump-to-project-headline "org heading" :column "search")
   ("M-." xref-find-definitions "xref find" :column "search")
   ("M-," xref-pop-marker-stack "xref pop" :column "search")
   ("M-/" xref-find-apropos "xref apropos" :column "search"))
