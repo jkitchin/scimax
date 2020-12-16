@@ -519,7 +519,7 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 
 (defun org-db-process-queue (&optional now)
   "Update all the files in `org-db-queue'.
-Use a prefix ARG to process now."
+Use a prefix ARG to process NOW."
   (interactive "P")
   (org-db-connect)
   (catch 'done
@@ -547,10 +547,13 @@ Use a prefix ARG to process now."
   (org-db-log "Files in queue for update: %s" org-db-queue)
   (switch-to-buffer "*org-db-log*"))
 
+
+
 ;; * Update the whole database
 
 (defun org-db-refresh (&optional force)
   "Update all the files in the database.
+
 Use a prefix arg to FORCE updates."
   (interactive "P")
   (let* ((files (emacsql org-db [:select [filename] :from files :order-by rowid :asc]))
@@ -558,19 +561,21 @@ Use a prefix arg to FORCE updates."
 	 (enable-local-variables nil)
 	 (org-mode-hook '())
 	 buf already-open)
-    (loop for (fname) in files for i from 0 to N
-	  if (and fname (file-exists-p fname))
-	  do
-	  (org-db-log "Refreshing %s of %s (%s)" i N fname)
-	  (setq already-open (find-buffer-visiting fname))
-	  (setq buf (find-file-noselect fname))
-	  (with-current-buffer buf
-	    (condition-case err
-		(org-db-update-buffer force)
-	      (org-db-log "Error updating %s: %s" fname err)))
-	  (unless already-open (kill-buffer buf))
-	  else
-	  do (emacsql org-db [:delete :from files :where (= filename $s1)] fname))))
+    (cl-loop for (fname) in files for i from 0 to N
+	     if (and fname (file-exists-p fname))
+	     do
+	     (org-db-log "Refreshing %s of %s (%s)" i N fname)
+	     (setq already-open (find-buffer-visiting fname))
+	     (setq buf (find-file-noselect fname))
+	     (with-current-buffer buf
+	       (condition-case err
+		   (org-db-update-buffer force)
+		 (org-db-log "Error updating %s: %s" fname err)))
+	     (unless already-open (kill-buffer buf))
+	     else
+	     do
+	     (org-db-log "deleting %s from the database." fname)
+	     (emacsql org-db [:delete :from files :where (= filename $s1)] fname))))
 
 
 (defun org-db-index (path  &optional recursive)
@@ -636,7 +641,7 @@ Optional RECURSIVE is non-nil find files recursively."
   (let ((contacts (emacsql org-db
 			   [:select [headlines:title
 				     headline-properties:value
-				     headlines:tags files:filename headlines:begin]
+				     headlines:tags files:filename files:last-updated headlines:begin]
 				    :from headlines
 				    :inner :join headline-properties
 				    :on (=  headlines:rowid headline-properties:headline-id)
@@ -644,35 +649,67 @@ Optional RECURSIVE is non-nil find files recursively."
 				    :on (= properties:rowid headline-properties:property-id)
 				    :inner :join files :on (= files:rowid headlines:filename-id)
 				    :where (= properties:property "EMAIL")])))
-    (loop for (title email tags fname begin) in contacts
-	  collect
-	  (list (format "%30s | %40s | %s"
-			(s-pad-right 30 " " (s-trim title))
-			(s-pad-right 40 " " email)
-			(or tags ""))
-		:filename fname :begin begin))))
+    (cl-loop for (title email tags fname last-updated begin) in contacts
+	     collect
+	     (list (format "%30s | %40s | %s"
+			   (s-pad-right 30 " " (s-trim title))
+			   (s-pad-right 40 " " email)
+			   (or tags ""))
+		   :filename fname :last-updated last-updated :begin begin :email email :title (s-trim title)))))
+
+
+
+
+(defun org-db-insert-contact-link (x)
+  "Insert the contact associated with X."
+  (let ((link)
+	(candidate (cdr x)))
+    ;; check if the file is up-to-date
+    (let ((actual-mod-time (float-time (file-attribute-modification-time (file-attributes (plist-get candidate :filename))))))
+      (when (org-time<= (plist-get candidate :last-updated) actual-mod-time)
+	(error q"%s is not up to date in org-db.")))
+
+    (with-current-buffer
+	(find-file-noselect
+	 (plist-get candidate :filename))
+      (goto-char (plist-get candidate :begin))
+
+      ;; Check we are looking at the right place
+      (unless (and (looking-at org-heading-regexp)
+		   (string= (plist-get candidate :email) (org-entry-get (point) "EMAIL")))
+	(error "It does not appear we are looking at the right place:\n%s"))
+
+      (setq link (format
+		  "[[contact:%s][%s]]"
+		  (org-id-get-create)
+		  (nth 4 (org-heading-components))))
+      (save-buffer)
+      (org-db-update-buffer t))
+    (when (looking-back "]" 1)
+      (insert ", "))
+    (insert link)))
 
 
 (defun org-db-contacts ()
-  "Helm selector for an org-db-contact."
+  "Ivy command to select an `org-db' contact."
   (interactive)
-  (helm :sources `(((name . "contacts")
-		    (candidates . ,(org-db-contacts-candidates))
-		    (action . (("Open location" . (lambda (candidate)
-						    (find-file (plist-get candidate :filename))
-						    (goto-char (plist-get candidate :begin))))
-			       ("Insert link" . (lambda (candidate)
-						  (let ((link))
-						    (with-current-buffer
-							(find-file-noselect
-							 (plist-get candidate :filename))
-						      (goto-char (plist-get candidate :begin))
-						      (setq link (format
-								  "[[location:%s][%s]]" (org-id-get-create)
-								  (nth 4 (org-heading-components)))))
-						    (insert link))))))))))
+  (let ((candidates (org-db-contacts-candidates)))
+    (ivy-read "Contact: " candidates :action '(1
+					       ("i" (lambda (x)
+						      (unless (looking-back " " 1)
+							(insert ","))
+						      (insert
+						       (format "%s <%s>"
+							       (plist-get (cdr x) :title)
+							       (plist-get (cdr x) :email))))
+						"insert")
+					       ("o" (lambda (x)
+						      (find-file (plist-get (cdr x) :filename))
+						      (goto-char (plist-get (cdr x) :begin))
+						      (show-entry))
+						"open")
+					       ("l" org-db-insert-contact-link "Insert link")))))
 
-;; (ivy-read "Contact: " (org-db-contacts-candidates))
 
 ;; * org-db-locations
 
@@ -684,34 +721,34 @@ Optional RECURSIVE is non-nil find files recursively."
 					    :inner :join properties :on (= properties:rowid headline-properties:property-id)
 					    :inner :join files :on (= files:rowid headlines:filename-id)
 					    :where (= properties:property "ADDRESS")])))
-    (loop for (title address tags fname begin) in locations
-	  collect
-	  (list (format "%60s | %70s | %s"
-			(s-trim title)
-			address
-			(or tags ""))
-		:filename fname :begin begin))))
+    (cl-loop for (title address tags fname begin) in locations
+	     collect
+	     (list (format "%60s | %70s | %s"
+			   (s-trim title)
+			   address
+			   (or tags ""))
+		   :filename fname :begin begin))))
+
 
 
 (defun org-db-locations ()
-  "Helm selector for org-locations."
-  (interactive)
-  (helm :sources (helm-build-sync-source "locations"
-		   :candidates (org-db-locations-candidates)
-		   :fuzzy-match t
-		   :action '(("Open location" . (lambda (candidate)
-						  (find-file (plist-get candidate :filename))
-						  (goto-char (plist-get candidate :begin))))
-			     ("Insert link" . (lambda (candidate)
-						(let ((link))
-						  (with-current-buffer
-						      (find-file-noselect
-						       (plist-get candidate :filename))
-						    (goto-char (plist-get candidate :begin))
-						    (setq link (format
-								"[[location:%s][%s]]" (org-id-get-create)
-								(nth 4 (org-heading-components)))))
-						  (insert link))))))))
+  "Open a location in `org-db'."
+  (let ((candidates (org-db-locations-candidates)))
+    (ivy-read "Location: " candidates :action '(1
+						("o" (lambda (x)
+						       (find-file (plist-get (cdr x) :filename))
+						       (goto-char (plist-get (cdr x) :begin))))
+						("l" (lambda (x)
+						       (let ((link)
+							     (candidate (cdr x)))
+							 (with-current-buffer
+							     (find-file-noselect
+							      (plist-get candidate :filename))
+							   (goto-char (plist-get candidate :begin))
+							   (setq link (format
+								       "[[location:%s][%s]]" (org-id-get-create)
+								       (nth 4 (org-heading-components)))))
+							 (insert link))))))))
 
 ;; ** geo link
 ;; eg. geo:40.442403,-79.943838
@@ -728,58 +765,58 @@ Optional RECURSIVE is non-nil find files recursively."
 (defun org-db-heading-candidates ()
   "Return candidates for ivy or helm selection."
   (let* ((headings (emacsql org-db [:select [headlines:level headlines:title headlines:tags
-							     files:filename headlines:begin]
+							     files:filename headlines:begin
+							     files:last-updated]
 					    :from headlines
 					    :inner :join files
-					    :on (= files:rowid headlines:filename-id)]))
-	 (candidates (loop for (level title tags filename begin) in headings
-			   collect
-			   (cons
-			    (format "%100s|%20s|%s"
-				    (s-pad-right 100 " " (concat  (make-string level (string-to-char "*")) " " title))
-				    (s-pad-right 20 " " (or tags ""))
-				    filename)
-			    (list
-			     :file filename
-			     :begin begin)))))
+					    :on (= files:rowid headlines:filename-id)
+					    :order :by files:last-updated :desc]))
+	 (candidates (cl-loop for (level title tags filename begin last-updated) in headings
+			      collect
+			      (cons
+			       (format "%100s|%20s|%s|%s"
+				       (s-pad-right 100 " " (concat  (make-string level (string-to-char "*")) " " title))
+				       (s-pad-right 20 " " (or tags ""))
+				       filename last-updated)
+			       (list
+				:file filename
+				:last-updated last-updated
+				:begin begin)))))
     candidates))
 
+
 ;;;###autoload
-(defun org-db-open-heading ()
-  "Use helm to select and open a heading."
+(defun org-db-headings ()
+  "Use ivy to open a heading with completion."
   (interactive)
-  (helm :sources (helm-build-sync-source "org-db-headlines"
-		   :candidates (org-db-heading-candidates)
-		   :fuzzy-match nil
-		   :action '(("Open" . (lambda (x)
-					 (find-file (plist-get x :file))
-					 (goto-char (plist-get x :begin))
-					 (org-show-entry)))
-			     ("Collect in buffer" . (lambda (_)
-						      (switch-to-buffer (get-buffer-create "*org-db*"))
-						      (org-mode)
-						      (loop for hl in (helm-marked-candidates) do
-							    (save-excursion
-							      (with-current-buffer (find-file-noselect (plist-get hl :file))
-								(goto-char (plist-get hl :begin))
-								(org-copy-subtree)))
-							    (org-yank)
-							    (insert "\n"))))
-			     ("Save to org-db-marked-candidates" . (lambda (_)
-								     "This saves the marked candidates so you could use them in another code."
-								     (setq org-db-marked-candidates (helm-marked-candidates))))))))
+  (let* ((candidates (org-db-heading-candidates)))
+    (ivy-read "heading: " candidates
+	      :action
+	      '(1
+		("o" (lambda (candidate)
+		       (find-file (plist-get (cdr candidate) :file))
+		       (goto-char (plist-get (cdr candidate) :begin))
+		       (org-show-context))
+		 "Open to heading.")
+		("l" (lambda (candidate)
+		       "Store link"
+		       (find-file (plist-get (cdr candidate) :file))
+		       (goto-char (plist-get (cdr candidate) :begin))
+		       (org-store-link))
+		 "Store link to heading.")))))
 
 
 ;; * org-db files
 
-(defun org-db-open-file ()
+(defun org-db-files ()
   "Open a file in ‘org-db’ with completion."
   (interactive)
   (find-file (completing-read "File: " (mapcar 'car (emacsql org-db [:select [filename]
 									     :from files
 									     :order :by filename])))))
 
-(defun org-db-open-recent-file ()
+
+(defun org-db-recentf ()
   "Open a recent file in ‘org-db’ with completion."
   (interactive)
   (let ((candidates (mapcar (lambda (x)
