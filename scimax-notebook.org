@@ -578,7 +578,11 @@ Here is a function you can use to interactively search files by pattern. For exa
 #+RESULTS:
 : nb-search-all
 
-** Jump to an org file in the notebook / table of contents
+
+
+** Jump to places in an org file in the notebook / table of contents
+
+*** By title, date, author of file
 
 Issue [[https://github.com/jkitchin/scimax/issues/332][332]] requested a way to make something like a table of contents for the org files in a notebook. This function builds a list of candidates that show the title, date and filename for selection.
 
@@ -645,6 +649,9 @@ Issue [[https://github.com/jkitchin/scimax/issues/332][332]] requested a way to 
 #+RESULTS:
 : nb-search-title
 
+*** Other ways to jump to a headline
+
+See ivy-org-jump-to-project-headline.
 
 
 ** Help
