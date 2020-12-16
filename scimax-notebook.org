@@ -511,12 +511,14 @@ These commands will search for text in files in the current directory.
 | M-x projectile-multi-occur |   | H-p o |
 
 
-*** TODO Limiting scope to some kinds of files
+*** Limiting scope to some kinds of files
 
 Here is a function you can use to interactively search files by pattern. For example to find the string xref in org files you could do this:
 
 #+BEGIN_SRC emacs-lisp
-(nb-search ".org$" "xref")
+(nb-search "*.org" "xref")
+
+(nb-search "*.el" "xref")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -530,21 +532,12 @@ Here is a function you can use to interactively search files by pattern. For exa
 (defun nb-search (file-pattern regexp)
   "Search files matching FILE-PATTERN for REGEXP and show matches."
   (interactive "sfile pattern: \nsSearch for: ")
-  (let* ((files (projectile-project-files (projectile-project-root)))
-	 (ignores (nconc (mapcar
-                          (lambda (s) (concat s "/"))
-                          grep-find-ignored-directories)
-                         grep-find-ignored-files))
-	 (xrefs (cl-mapcan
-                 (lambda (file)
-		   (when (file-exists-p file)
-                     (xref-collect-matches regexp "*" file
-                                           (and (file-directory-p file)
-						ignores))))
-                 files)))
-    (unless xrefs
-      (user-error "No matches for: %s" regexp))
-    (xref--show-xrefs xrefs nil t)))
+  (ivy-xref-show-xrefs
+   (lambda ()
+     (xref-matches-in-directory regexp file-pattern (projectile-project-root)
+				nil))
+   nil))
+
 
 
 (defun nb-search-all (regexp)
@@ -574,7 +567,10 @@ Here is a function you can use to interactively search files by pattern. For exa
                  files)))
     (unless xrefs
       (user-error "No matches for: %s" regexp))
-    (xref--show-xrefs xrefs nil t)))
+    (ivy-xref-show-xrefs
+     (lambda ()
+       xrefs)
+     nil)))
 
 
 #+END_SRC
