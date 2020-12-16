@@ -404,4 +404,4 @@ mail the body of each heading using
 
 (provide 'scimax-email)
 
-;;; email.el ends here
+;;; scimax-email.el ends here
