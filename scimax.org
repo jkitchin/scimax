@@ -1379,12 +1379,13 @@ This is a simple library to make simple presentations in org-mode. See `org-show
 
 This becomes useful because you can then search all of your org-files and jump to different locations.
 
-- `org-db-open-heading' :: Jump to a heading
+- `org-db-headings' :: Jump to a heading
 - `org-db-contacts' :: jump to a heading with an email property
-- `org-db-open-file' :: open a file in the db
-- `org-db-open-recent-file' :: open a list of recent files from the db
+- `org-db-files' :: open a file in the db
+- `org-db-recent-files' :: open a list of recent files from the db
 - `org-db-locations' :: open a heading with an address property
-
+- `org-db-hashtags' :: open a hashtag.
+-  ::
 You can add a lot of files with `org-db-index'.
 
 When active, every time you save an org-file it will be added to a queue to be indexed during idle time.
