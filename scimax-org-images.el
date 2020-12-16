@@ -179,6 +179,52 @@ boundaries."
     (put 'scimax-org-display-inline-images 'enabled nil)
     (message "Scimax image advice disabled.")))
 
+
+;; * Copy images to the clipboard
+;; This only works for Macs.
+
+;; Adapted from https://apple.stackexchange.com/questions/15318/using-terminal-to-copy-a-file-to-clipboard/15542#15542
+;;
+;; The idea is if I click on an image it is copied to the clipboard so I can paste it somewhere.
+
+(defun scimax-org-copy-image ()
+  "Copy the image at point to the clipboard.
+Run this on a link"
+  (interactive)
+  (unless (string= system-type "darwin")
+    (error "`scimax-org-copy-image' only works on a Mac."))
+  (let* ((oe (org-element-context))
+	 ;; I do not know how to set this to a PNG picture. So far JPEG works.
+	 ;; TIFF also works. I would really like a PNG, but this is so hacky it
+	 ;; is fine for now.
+	 (applescript "set the clipboard to (read (POSIX file \"%s\") as JPEG picture)")
+	 (path (cond
+		((eq 'link (car oe))
+		 (setq path (org-element-property :path oe)))
+		;; we can handle overlays
+		((and (ov-at (point))
+		      (eq 'image (car (overlay-get (ov-at) 'display))))
+		 (setq path (plist-get (cdr (overlay-get (ov-at) 'display)) :file)))
+		(t
+		 (error "Unable to copy %s." oe)))))
+    (if (null path)
+	(error "No image path found.")
+
+      ;; we need absolute paths for the applescript
+      (if (not (file-name-absolute-p path))
+	  (setq path (expand-file-name path)))
+
+      ;; Finally let's check that we have a path with an image extension. I
+      ;; think this will work on all kinds of images.
+      (if (member (f-ext path) image-file-name-extensions)
+	  (prog1 (do-applescript (format applescript path))
+	    (message "Copied %s to the clipboard" path))
+	(error "%s cannot be copied. Maybe it is not an image?" path)))))
+
+;; This lets me click on an image to copy it to the clipboard.
+(when (string= system-type "darwin")
+  (define-key image-map (kbd "<mouse-1>") #'scimax-org-copy-image))
+
 (provide 'scimax-org-images)
 
 ;;; scimax-org-images.el ends here
