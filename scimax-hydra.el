@@ -217,10 +217,11 @@ _k_: list packages _m_: compose mail
 
 (defhydra scimax-gsuite (:color blue)
   "GSuite"
-  ("v" (browse-url "https://drive.google.com/drive/u/0/my-drive"))
-  ("d" (browse-url "https://docs.google.com/document/u/0/"))
-  ("h" (browse-url "https://docs.google.com/spreadsheets/u/0/"))
-  ("s" (browse-url "https://docs.google.com/presentation/u/0/")))
+  ("v" (browse-url "https://drive.google.com/drive/u/0/my-drive") "GDrive")
+  ("d" (browse-url "https://docs.google.com/document/u/0/" "GDoc"))
+  ("h" (browse-url "https://docs.google.com/spreadsheets/u/0/" "GSheet"))
+  ("s" (browse-url "https://docs.google.com/presentation/u/0/" "GSlides"))
+  ("j" (browse-url "https://jamboard.google.com/" "Jamboard")))
 
 ;;** buffers
 
