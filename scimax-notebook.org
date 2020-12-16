@@ -71,6 +71,8 @@ Our concept of a notebook is that it is a directory that is a project as defined
 (when (executable-find "ag")
   (use-package ag))
 
+(use-package org-ql)
+
 (require 'scimax-apps)
 #+END_SRC
 
@@ -248,6 +250,21 @@ directory. You may want to make this a directory local variable."
   :type '(string list function))
 
 
+(defun nb-org-files ()
+  "Return a list of org files in the current notebook.
+You should manually invalidate the cache with
+`projectile-invalidate-cache' if it causes a problem."
+  (mapcar
+   (lambda (f)
+     (f-join (projectile-project-root) f))
+   (-filter (lambda (f)
+	      (and (f-ext? f "org")
+		   (not (s-contains? "#" f))))
+	    (projectile-project-files
+	     (projectile-ensure-project
+	      (projectile-project-root))))))
+
+
 ;;;###autoload
 (defun nb-agenda (project &optional all-org-files)
   "Show org-agenda for org-files in the notebook."
@@ -262,14 +279,7 @@ directory. You may want to make this a directory local variable."
 		     current-prefix-arg))
   (let ((org-agenda-files (if (or all-org-files
 				  (null nb-agenda-files))
-			      (mapcar
-			       (lambda (f) (expand-file-name
-					    f (projectile-project-root)))
-			       (-filter (lambda (f)
-					  (and
-					   (f-ext? f "org")
-					   (not (s-contains? "#" f))))
-					(projectile-current-project-files)))
+			      (nb-org-files)
 			    (cond
 			     ((listp nb-agenda-files)
 			      nb-agenda-files)
@@ -290,14 +300,7 @@ This function allows you to search an agenda like you would use org-tags-view. =
 (defun nb-search-agenda (&optional todo-only match)
   "Search notebook agenda similar to `org-tags-vew'."
   (interactive "P")
-  (let ((org-agenda-files (mapcar
-			   (lambda (f)
-			     (f-join (projectile-project-root) f))
-			   (-filter (lambda (f)
-				      (f-ext? f "org"))
-				    (projectile-project-files
-				     (projectile-ensure-project
-				      (projectile-project-root)))))))
+  (let ((org-agenda-files (nb-org-files)))
     (org-tags-view todo-only match)))
 
 
@@ -377,38 +380,17 @@ The type of archive is determined by `nb-archive-command'."
 
 ** List the tags in a notebook
 
-The notebook is just a collection of org-files, so it should be possible to use the agenda commands to search for things in it using tags and properties. That means it would be helpful to get a list of tags in the notebook, e.g. to help construct the queries, or to make sure you use them consistently. Here we loop through all the org-files and collect the tags in a list. This is lightly tested, and in a large project might be slow.
+The notebook is just a collection of org-files, so it should be possible to use the agenda commands to search for things in it using tags and properties. That means it would be helpful to get a list of tags in the notebook, e.g. to help construct the queries, or to make sure you use them consistently. Here we loop through all the org-files and collect the tags in a list. Note, this can result in too many open files in a project with a
 
 #+BEGIN_SRC emacs-lisp  :tangle yes :results silent
 (defun nb-list-tags ()
   "Get a list of tags in the notebook."
   (interactive)
-  (let ((tags '())
-	(already-open nil)
-	(org-files (mapcar
-		    (lambda (f) (expand-file-name
-				 f (projectile-project-root)))
-		    (-filter (lambda (f)
-			       (and
-				(f-ext? f "org")
-				(not (s-contains? "#" f))))
-			     (projectile-current-project-files))))
-	(inhibit-local-variables-regexps))
-    ;; Ignore local variables for this.
-    (push "\\.org\\'" inhibit-local-variables-regexps)
-    (cl-loop for org-file in org-files do
-	     (setq already-open (find-buffer-visiting org-file))
-	     (with-current-buffer (find-file-noselect org-file)
-	       (save-excursion
-		 (save-restriction
-		   (widen)
-		   (goto-char (point-min))
-		   (while (re-search-forward org-heading-regexp nil t)
-		     (setq tags (append tags (org-get-tags)))))))
-	     (unless already-open
-	       (kill-buffer already-open)
-	       (setq already-open nil)))
-    (-uniq tags)))
+  (-uniq
+   (-flatten
+    (org-ql-query
+      :select #'org-get-tags-at
+      :from (nb-org-files)))))
 
 
 #+END_SRC
