@@ -1001,12 +1001,14 @@ I am not sure how to do multiple hashtag matches right now."
   "Search org-db for entries where PROPERTY matches PATTERN.
 PATTERN follows sql patterns, so % is a wildcard."
   (interactive (list (completing-read "Property: "
-				      (-flatten (emacsql org-db [:select properties:property :from properties])))
+				      (-flatten (emacsql org-db
+							 [:select properties:property
+								  :from properties])))
 		     (read-string "Pattern: ")))
   (let* ((results (emacsql org-db
 			   [:select [headlines:title
 				     headline-properties:value
-				     headlines:tags files:filename files:last-updated headlines:begin]
+				     files:filename files:last-updated headlines:begin]
 				    :from headlines
 				    :inner :join headline-properties
 				    :on (=  headlines:rowid headline-properties:headline-id)
@@ -1016,11 +1018,16 @@ PATTERN follows sql patterns, so % is a wildcard."
 				    :where (and (= properties:property $s1)
 						(like headline-properties:value $s2))]
 			   property pattern))
-	 (candidates (cl-loop for (title value tags fname last-updated begin) in results
+	 (candidates (cl-loop for (title value fname last-updated begin) in results
 			      collect
-			      (list (format "%s | %s" fname value) :filename fname :begin begin))))
+			      (list (format "%s | %s" fname value)
+				    :filename fname :begin begin))))
 
-    (ivy-read "Choose: " candidates)))
+    (ivy-read "Choose: " candidates
+	      :action (lambda (x)
+			(let ((candidate (cdr x)))
+			  (find-file (plist-get candidate :filename))
+			  (goto-char (plist-get candidate :begin)))))))
 
 
 ;; * org-db-macro
