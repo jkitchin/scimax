@@ -78,12 +78,32 @@ with the entry."
     (ivy-quit-and-run))))
 
 
+(defun scimax-ivy-projectile-ag (x)
+  "Run projectile-ag in the selected project X."
+  (let ((default-directory x))
+    (call-interactively #'projectile-ag)))
+
+(defun scimax-ivy-projectile-ripgrep (x)
+  "Run projectile-ag in the selected project X."
+  (let ((default-directory x))
+    (call-interactively #'projectile-ripgrep)))
+
+
+(defun scimax-ivy-projectile-org-heading (x)
+  "Open a heading in the project X"
+  (let ((default-directory x))
+    (call-interactively #'ivy-org-jump-to-project-headline)))
+
+
 (ivy-add-actions
  'projectile-completing-read
- '(("b" scimax-ivy-projectile-bash "Open bash here.")
+ '(("a" scimax-ivy-projectile-ag  "Run ag here")
+   ("b" scimax-ivy-projectile-bash "Open bash here.")
    ("f" scimax-ivy-projectile-finder  "Open Finder here.")
    ("g" scimax-ivy-magit-status  "Magit status")
-   ("l" scimax-ivy-insert-link "Insert link")))
+   ("h" scimax-ivy-projectile-org-heading "Open project heading")
+   ("l" scimax-ivy-insert-link "Insert link")
+   ("r" scimax-ivy-projectile-ripgrep  "Run ripgrep here")))
 
 
 ;; ** Find file actions
@@ -215,7 +235,7 @@ TODO: sorting, actions."
     (ivy-read "process: " candidates
 	      :action
 	      '(1
-		("k" (lambda (cand) (message "%s" (ivy-ps-pid cand))))))))
+		("k" (lambda (cand) (message "%s" (ivy-ps-pid cand))) "kill")))))
 
 (provide 'scimax-ivy)
 
