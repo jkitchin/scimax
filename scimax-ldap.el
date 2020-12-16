@@ -56,36 +56,37 @@ Parse results into a list of p-lists for each entry returned."
     (-filter (lambda (x) (not (null x))) results)))
 
 
-(defun cmu-directory (name)
-  "Look up NAME in CMU directory.
-NAME can be partial name or andrewid."
-  (interactive "sNAme or AndrewID: ")
-  (let* ((url-request-method "POST")
-	 (url-request-data
-	  (mapconcat
-	   'identity
-	   `(,(format  "search[generic_search_terms]=%s" name)
-	     "authenticity_token=foGA4weA2fcDn3HIQ4eSeLUxss/g9pujB/zIIcnvl5U="
-	     "commit=Search")
-	   "&"))
-	 (url "https://directory.andrew.cmu.edu/search/basic/results"))
-    (with-current-buffer  (url-retrieve-synchronously url)
-      (let ((content (buffer-substring
-		      url-http-end-of-headers (point-max)))
-	    (fname (make-temp-file "cmu" nil ".html")))
-	(setq content
-	      (replace-regexp-in-string
-	       "href=\"/search"
-	       "href=\"https://directory.andrew.cmu.edu/search"
-               content))
-	(setq content
-	      (replace-regexp-in-string
-	       "action=\"/search"
-	       "action=\"https://directory.andrew.cmu.edu/search"
-               content))
-	(with-temp-file fname
-	  (insert content))
-	(browse-url fname)))))
+;; [2020-07-28 Tue] This seems to be broken now, commenting it out.
+;; (defun cmu-directory (name)
+;;   "Look up NAME in CMU directory.
+;; NAME can be partial name or andrewid."
+;;   (interactive "sNAme or AndrewID: ")
+;;   (let* ((url-request-method "POST")
+;; 	 (url-request-data
+;; 	  (mapconcat
+;; 	   'identity
+;; 	   `(,(format  "search[generic_search_terms]=%s" name)
+;; 	     "authenticity_token=foGA4weA2fcDn3HIQ4eSeLUxss/g9pujB/zIIcnvl5U="
+;; 	     "commit=Search")
+;; 	   "&"))
+;; 	 (url "https://directory.andrew.cmu.edu/search/basic/results"))
+;;     (with-current-buffer  (url-retrieve-synchronously url)
+;;       (let ((content (buffer-substring
+;; 		      url-http-end-of-headers (point-max)))
+;; 	    (fname (make-temp-file "cmu" nil ".html")))
+;; 	(setq content
+;; 	      (replace-regexp-in-string
+;; 	       "href=\"/search"
+;; 	       "href=\"https://directory.andrew.cmu.edu/search"
+;;                content))
+;; 	(setq content
+;; 	      (replace-regexp-in-string
+;; 	       "action=\"/search"
+;; 	       "action=\"https://directory.andrew.cmu.edu/search"
+;;                content))
+;; 	(with-temp-file fname
+;; 	  (insert content))
+;; 	(browse-url fname)))))
 
 
 (defun helm-ldap (query-string)
