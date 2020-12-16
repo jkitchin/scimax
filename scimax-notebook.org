@@ -658,10 +658,82 @@ See ivy-org-jump-to-project-headline.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 (defun nb-help ()
-  "Open the org-file describing the notebook."
+  "Open the org-file describing how to use scimax-notebook."
   (interactive)
   (find-file (expand-file-name "scimax-notebook.org" scimax-dir)))
 #+END_SRC
+
+* TODO Project management tools
+  DEADLINE: <2020-12-16 Wed>
+  :PROPERTIES:
+  :ASSIGNEDTO: jkitchin@andrew.cmu.edu
+  :END:
+
+
+If you share a notebook, you have collaborators. If you store them as headlines with an EMAIL property, you can use nb functions to find them.
+
+To assign a task to a participant, you use nb-assign-task.
+
+#+BEGIN_SRC emacs-lisp :tangle yes :results silent
+(defun nb-assign-task ()
+  "Mark current headline with TODO, set a deadline and add set ASSIGNEDTO property with email.
+You will be prompted for contacts in the project.
+
+TODO: add a time stamp or log entry or date assigned property?"
+  (interactive)
+  (save-excursion
+    (unless (org-at-heading-p)
+      (org-previous-visible-heading 1))
+    (org-todo "TODO")
+    (let* ((participants (org-ql-query
+			   :select '(cons (fifth (org-heading-components))
+					  (org-entry-get (point) "EMAIL"))
+			   :from (nb-org-files)
+			   :where '(and (property "EMAIL"))))
+	   (emails (org-entry-get-multivalued-property (point) "ASSIGNEDTO")))
+      (ivy-read "Assign to: " participants
+		:action '(1
+			  ("a"
+			   (lambda (participant)
+			     (setq emails (append emails (list (cdr participant))))
+			     (with-ivy-window
+			       (apply 'org-entry-put-multivalued-property (point)
+				      "ASSIGNEDTO" emails)
+			       (unless (org-get-deadline-time nil)
+				 (org-deadline nil))
+			       ;; Maybe this should not be hard-coded, in case
+			       ;; you want it to be something else, like a TASK
+			       (unless (string= "TODO" (org-get-todo-state))
+				 (org-todo "TODO"))))
+			   "Assign"))))))
+
+
+
+(defun nb-contacts ()
+  "Jump to a contact in the notebook.
+Maybe I should add more actions."
+  (interactive)
+  (let* ((participants (org-ql-query
+			 :select '(list
+				   ;; contact heading
+				   (fifth (org-heading-components))
+				   ;; buffer the contact is in
+				   (buffer-name)
+				   (point))
+			 :from (nb-org-files)
+			 :where '(and (property "EMAIL")))))
+    (ivy-read "Jump to: " participants
+	      :action '(1
+			("o" (lambda (choice)
+			       (pop-to-buffer (second choice))
+			       (goto-char (third choice))
+			       (show-entry)))))))
+#+END_SRC
+
+** John Kitchin
+   :PROPERTIES:
+   :EMAIL:    jkitchin@andrew.cmu.edu
+   :END:
 
 * Notebook/project links
 
