@@ -206,8 +206,9 @@ other day, you get the report due on the following Monday."
 			      "%V" date))
 			    ;; 2 is for Tuesday
 			    2))))
+    (org-insert-subheading nil)
     (insert
-     (format "*** %s\n"
+     (format "%s\n"
 	     (format-time-string "[%Y-%m-%d %a]" kg-due-date))
      (s-join "\n"
 	     (loop for project in
