@@ -99,13 +99,13 @@ Parse results into a list of p-lists for each entry returned."
 		      (lambda (x)
 			(cons
 			 (format
-			  "%20s|%30s|%30s|%20s|%s"
+			  "%20s|%40s|%30s|%20s|%s"
 			  (s-truncate
 			   20
 			   (or (plist-get x :title) " "))
-			  (plist-get x :cn)
-			  (plist-get x :mail)
-			  (plist-get x :cmuDisplayAddress)
+			  (or (plist-get x :cn) "")
+			  (or (plist-get x :mail) "")
+			  (or (plist-get x :cmuDisplayAddress) "")
 			  (or (plist-get x :telephoneNumber) " "))
 			 x))
 		      (ldap-query
