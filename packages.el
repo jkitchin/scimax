@@ -207,7 +207,7 @@
 (use-package helm
   :init (setq helm-command-prefix-key "C-c h")
   :bind
-  ("<f7>" . helm-recentf)
+  ;; ("<f7>" . helm-recentf)
   ;; ("M-x" . helm-M-x)
   ;; ("M-y" . helm-show-kill-ring)
   ;; ("C-x b" . helm-mini)
@@ -243,7 +243,7 @@
 
 (use-package helm-bibtex)
 
-(use-package helm-projectile)
+;; (use-package helm-projectile)
 
 (use-package help-fns+
   :load-path scimax-dir)
