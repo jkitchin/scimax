@@ -356,10 +356,14 @@
 	      projectile-known-projects-file
 	      (expand-file-name "user/projectile-bookmarks.eld" scimax-dir))
   :bind
-  ("C-c pp" . projectile-switch-project)
-  ("C-c pb" . projectile-switch-to-buffer)
-  ("C-c pf" . projectile-find-file)
-  ("C-c pg" . projectile-grep)
+  ("C-c pp" . counsel-projectile-switch-project)
+  ("C-c pn" . counsel-projectile-switch-project-by-name)
+  ("C-c pb" . counsel-projectile-switch-to-buffer)
+  ("C-c pf" . counsel-projectile-find-file)
+  ("C-c pd" . counsel-projectile-find-dir)
+  ("C-c pg" . counsel-projectile-grep)
+  ("C-c pa" . counsel-projectile-ag)
+  ("C-c pr" . counsel-projectile-rg)
   ("C-c pk" . projectile-kill-buffers)
   ;; nothing good in the modeline to keep.
   :diminish ""
