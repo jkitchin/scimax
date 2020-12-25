@@ -452,9 +452,6 @@
   :load-path scimax-dir)
 
 (org-babel-load-file (expand-file-name "scimax-notebook.org" scimax-dir))
-;; (use-package scimax-notebook
-;;   :ensure nil
-;;   :load-path scimax-dir)
 
 (use-package scimax-utils
   :ensure nil
@@ -473,10 +470,6 @@
   :ensure nil
   :load-path (lambda () (expand-file-name "org-show" scimax-dir)))
 
-;; (use-package techela
-;;   :ensure nil
-;;   :load-path (lambda () (expand-file-name "techela" scimax-dir)))
-
 (use-package words
   :ensure nil
   :load-path scimax-dir
@@ -486,10 +479,6 @@
   :ensure nil
   :load-path scimax-dir
   :bind ("H-o" . ore))
-
-;; (use-package org-editmarks
-;;   :ensure nil
-;;   :load-path scimax-dir)
 
 (use-package scimax-ivy
   :ensure nil
@@ -527,15 +516,6 @@
 (use-package kitchingroup
   :ensure nil
   :load-path scimax-dir)
-
-;; (use-package ov-highlight
-;;   :ensure nil
-;;   :load-path (lambda () (expand-file-name "ov-highlight" scimax-dir))
-;;   :bind ("H-h" . ov-highlight/body)
-;;   :init
-;;   (add-to-list 'load-path
-;; 	       (expand-file-name "ov-highlight" scimax-dir))
-;;   (require 'ov-highlight))
 
 (let ((enable-local-variables nil))
   (org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir)))
