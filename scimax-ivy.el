@@ -43,7 +43,7 @@
     (ivy-quit-and-run)))
 
 
-(defun scimax-ivy-insert-link (x)
+(defun scimax-ivy-insert-project-link (x)
   "Insert a relative path link to X chosen from `projectile-completing-read'."
   (let* ((full-path (f-join (projectile-project-root) x))
 	 (current-path (file-name-directory (buffer-file-name)))
@@ -102,7 +102,7 @@ with the entry."
    ("f" scimax-ivy-projectile-finder  "Open Finder here.")
    ("g" scimax-ivy-magit-status  "Magit status")
    ("h" scimax-ivy-projectile-org-heading "Open project heading")
-   ("l" scimax-ivy-insert-link "Insert link")
+   ("l" scimax-ivy-insert-project-link "Insert project link")
    ("r" scimax-ivy-projectile-ripgrep  "Run ripgrep here")))
 
 
