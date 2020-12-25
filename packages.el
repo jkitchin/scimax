@@ -149,7 +149,7 @@
 	      (ivy--exhibit))
 	(exit-minibuffer)))
 
-    ;; s-RET to quit
+    ;; s-RET to quit (super)
     (define-key ivy-minibuffer-map (kbd "s-<return>")
       (lambda ()
 	"Exit with no action."
