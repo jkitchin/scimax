@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: plotly graph objects
+# key: go
+# --
+import plotly.graph_objects as go
