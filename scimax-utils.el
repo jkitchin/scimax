@@ -44,7 +44,9 @@ recent files and bookmarks. You can set a bookmark also."
 
 
 (add-to-list 'safe-local-eval-forms
-	     '(progn (require 'emacs-keybinding-command-tooltip-mode) (emacs-keybinding-command-tooltip-mode +1)))
+	     '(progn (require 'emacs-keybinding-command-tooltip-mode)
+		     (emacs-keybinding-command-tooltip-mode +1)))
+
 
 ;;;###autoload
 (defun scimax-help ()
@@ -143,6 +145,7 @@ sentence in the region."
 	 (reverse p)))
      (avy--style-fn avy-style))))
 
+
 (defun avy-jump-to-sentence ()
   "Jump to a sentence with avy."
   (interactive)
@@ -160,6 +163,7 @@ sentence in the region."
 	     (push (point) p)))
 	 (reverse p)))
      (avy--style-fn avy-style))))
+
 
 (defun avy-jump-to-paragraph ()
   "Jump to a paragraph with avy."
@@ -187,7 +191,6 @@ sentence in the region."
     (interactive)
     (require 'esup)
     (esup (expand-file-name "init.el" scimax-dir))))
-
 
 
 (defmacro with-no-new-buffers (&rest body)
@@ -329,7 +332,6 @@ You can also try putting expressions in for formatting, e.g.:
   "Open the Github repo issues page."
   (interactive)
   (browse-url "https://github.com/jkitchin/scimax/issues"))
-
 
 
 ;; * The end
