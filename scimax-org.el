@@ -661,14 +661,14 @@ F5 inserts the entity code."
 
 
 ;; * ivy navigation
-(defun ivy-org-jump-to-visible-headline ()
+(defun avy-org-jump-to-visible-headline ()
   "Jump to visible headline in the buffer."
   (interactive)
   (org-mark-ring-push)
   (avy-with avy-goto-line (avy--generic-jump org-heading-regexp nil)))
 
 
-(defun ivy-jump-to-visible-sentence ()
+(defun avy-jump-to-visible-sentence ()
   "Jump to visible sentence in the buffer."
   (interactive)
   (org-mark-ring-push)
@@ -812,8 +812,8 @@ Use a prefix arg FONTIFY for colored headlines."
 
 (defcustom scimax-ivy-jump-functions
   '((heading . ivy-org-jump-to-heading)
-    (visible . ivy-org-jump-to-visible-headline)
-    (sentence . ivy-jump-to-visible-sentence)
+    (visible . avy-org-jump-to-visible-headline)
+    (sentence . avy-jump-to-visible-sentence)
     (recent-org ivy-org-jump-to-recent-headline)
     (directory . ivy-org-jump-to-heading-in-directory)
     (project . ivy-org-jump-to-project-headline )
