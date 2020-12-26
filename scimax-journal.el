@@ -365,8 +365,8 @@ T1 and T2 are org-dates in string form."
 (defun scimax-journal-swiper-range (t1 t2)
   "Run Swiper on entries between T1 and T2."
   (interactive (list
-		(org-read-date)
-		(org-read-date)))
+		(org-read-date nil nil nil "First date: ")
+		(org-read-date nil nil nil "Second date: ")))
   (let* ((swiper-multi-buffers nil)
 	 (swiper-multi-candidates nil)
 	 (this-command 'ivy-done))
