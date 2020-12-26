@@ -549,7 +549,7 @@ _sy_: year   _gy_: year    _f_: file         ^ ^            _ay_: agenda year
   ("h" scimax-journal-open-heading "Open to heading")
   ("d" scimax-journal-delete-entry "Delete entry")
 
-  ("sr" scimax-journal-swiper-last-week "Swiper date range")
+  ("sr" scimax-journal-swiper-range  "Swiper date range")
   ("sw" scimax-journal-swiper-last-week "Swiper last week")
   ("sm" scimax-journal-swiper-last-month "Swiper last month")
   ("sy" scimax-journal-swiper-last-year "Swiper last year")
