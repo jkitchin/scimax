@@ -714,6 +714,17 @@ Optional RECURSIVE is non-nil find files recursively."
     (insert link)))
 
 
+(defun org-db-assign-contact (x)
+  "Assign current heading to contact X."
+  (interactive)
+  (unless (string= "TODO" (org-get-todo-state))
+    (org-todo "TODO"))
+  (let ((emails (org-entry-get-multivalued-property (point) "ASSIGNEDTO")))
+    (setq emails (append emails (list (plist-get (cdr x) :email))))
+    (apply 'org-entry-put-multivalued-property (point)
+	   "ASSIGNEDTO" emails)))
+
+
 (defun org-db-contacts ()
   "Ivy command to select an `org-db' contact."
   (interactive)
@@ -732,7 +743,8 @@ Optional RECURSIVE is non-nil find files recursively."
 						      (goto-char (plist-get (cdr x) :begin))
 						      (show-entry))
 						"open")
-					       ("l" org-db-insert-contact-link "Insert link")))))
+					       ("l" org-db-insert-contact-link "Insert link")
+					       ("a" org-db-assign-contact "Assign to heading")))))
 
 
 ;; * org-db-locations
