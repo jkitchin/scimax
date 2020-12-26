@@ -262,10 +262,20 @@ languages you will get see the definition line."
 	  tangle-files)
     (unless open (kill-buffer open))))
 
-(advice-add 'org-babel-load-file :after #'scimax-lp-modify-load-history)
 
-;; (advice-remove 'org-babel-load-file  'scimax-lp-modify-load-history)
+(defun scimax-lp-toggle-modify-load-history ()
+  "Toggle `scimax-lp-modify-load-history' advice."
+  (interactive)
+  (if (not (get 'scimax-lp-toggle-modify-load-history 'enabled))
+      (progn
+	(advice-add 'org-babel-load-file :after #'scimax-lp-modify-load-history)
+	(put 'scimax-lp-toggle-modify-load-history 'enabled t)
+	(message "scimax-lp-toggle-modify-load-history advice enabled."))
+    (advice-remove 'org-babel-load-file #'scimax-lp-modify-load-history)
+    (put 'scimax-lp-toggle-modify-load-history 'enabled nil)
+    (message "scimax-lp-toggle-modify-load-history advice disabled.")))
 
+(scimax-lp-toggle-modify-load-history)
 
 (provide 'scimax-literate-programming)
 
