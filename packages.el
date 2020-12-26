@@ -362,6 +362,7 @@
   ("C-c pf" . counsel-projectile-find-file)
   ("C-c pd" . counsel-projectile-find-dir)
   ("C-c pg" . counsel-projectile-grep)
+  ("C-c pG" . counsel-projectile-git-grep)
   ("C-c pa" . counsel-projectile-ag)
   ("C-c pr" . counsel-projectile-rg)
   ("C-c pk" . projectile-kill-buffers)
