@@ -518,8 +518,6 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 		(format-time-string "%Y-%m-%d %H:%M:%S") filename-id)))))
 
 
-
-
 ;; * the hooks
 (defun org-db-hook-function ()
   "Function to run after starting ‘org-mode’."
