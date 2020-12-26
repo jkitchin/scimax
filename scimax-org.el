@@ -47,11 +47,15 @@
 (add-to-list 'org-speed-commands-user (cons "S" 'widen))
 
 ;; kill a subtree
-(add-to-list 'org-speed-commands-user (cons "k" (lambda ()
-						  (org-mark-subtree)
-						  (kill-region
-						   (region-beginning)
-						   (region-end)))))
+(defun scimax-org-kill-subtree ()
+  "Kill current subtree."
+  (interactive)
+  (org-mark-subtree)
+  (kill-region
+   (region-beginning)
+   (region-end)))
+
+(add-to-list 'org-speed-commands-user (cons "k" 'scimax-org-kill-subtree))
 
 ;; Jump to headline
 (add-to-list 'org-speed-commands-user
