@@ -223,7 +223,16 @@
 				   (begin integer)]
 				  (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
 				  (:foreign-key [hashtag-id] :references hashtags [rowid]
-						:on-delete :cascade))]))
+						:on-delete :cascade))])
+
+  ;; editmarks
+  (emacsql org-db [:create-table :if :not :exists file-editmarks
+				 ([(rowid integer :primary-key)
+				   (filename-id integer)
+				   (type text)
+				   (content text)
+				   (begin integer)]
+				  (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade))]))
 
 
 (defun org-db-connect ()
@@ -489,10 +498,26 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 						  :values [nil $s1 $s2 $s3]]
 				  headline-id
 				  property-id
-				  (org-no-properties value))))
+				  (org-no-properties value)))
+		;; editmarks
+		(when (fboundp 'sem-get-editmarks)
+		  (emacsql org-db [:delete :from file-editmarks
+					   :where (= file-editmarks:filename-id $s1)]
+			   filename-id)
+		  (cl-loop for (em-type buffer (start . end) em-content) in (sem-get-editmarks)
+			   do
+			   (message "%s" em-content)
+			   (emacsql org-db [:insert :into file-editmarks
+						    :values [nil $s1 $s2 $s3 $s4]]
+				    filename-id
+				    em-type
+				    em-content
+				    start))))
 
        (emacsql org-db [:update files :set (= last-updated $s1) :where (= rowid $s2)]
 		(format-time-string "%Y-%m-%d %H:%M:%S") filename-id)))))
+
+
 
 
 ;; * the hooks
@@ -631,6 +656,7 @@ Optional RECURSIVE is non-nil find files recursively."
   (emacsql org-db [:delete :from links])
   (emacsql org-db [:delete :from hashtags])
   (emacsql org-db [:delete :from file-hashtags])
+  (emacsql org-db [:delete :from file-editmarks])
   (message "everything should be reset."))
 
 
@@ -995,6 +1021,12 @@ I am not sure how to do multiple hashtag matches right now."
     (message "org-db-goto-id advice disabled.")))
 
 
+;; * tag search
+;; We don't really need a special tag search. You can do it with
+;; `org-db-headings' by adding : into your search. I am leaving this note here
+;; in case I ever think of trying to write this again!
+
+
 ;; * property search
 
 (defun org-db-property-search (property pattern)
@@ -1028,6 +1060,28 @@ PATTERN follows sql patterns, so % is a wildcard."
 			(let ((candidate (cdr x)))
 			  (find-file (plist-get candidate :filename))
 			  (goto-char (plist-get candidate :begin)))))))
+
+
+;; * search editmarks
+(defun org-db-editmarks ()
+  "Search the editmarks table in org-db."
+  (interactive)
+
+  (let* ((results (emacsql org-db
+			   [:select  [files:filename file-editmarks:begin file-editmarks:content file-editmarks:type]
+				     :from file-editmarks
+				     :inner :join files :on (= files:rowid file-editmarks:filename-id)]))
+	 (candidates (cl-loop for (fname begin content type) in results
+			      collect
+			      (list
+			       (format "%s | %s | %s" type fname (s-trim content))
+			       :filename fname
+			       :begin begin))))
+
+    (ivy-read "Choose: " candidates :action (lambda (x)
+					      (find-file (plist-get (cdr x) :filename))
+					      (goto-char (plist-get (cdr x) :begin))))))
+
 
 
 ;; * org-db-macro
