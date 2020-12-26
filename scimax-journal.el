@@ -409,8 +409,8 @@ This may be very slow."
 (defun scimax-journal-agenda-range (t1 t2)
   "Show an agenda for journal entries for the range T1 to T2."
   (interactive (list
-		(org-read-date)
-		(org-read-date)))
+		(org-read-date nil nil nil "First date: ")
+		(org-read-date nil nil nil "Second date: ")))
   (let ((org-agenda-files (scimax-journal-get-entries
 			   (org-read-date nil nil t1)
 			   (org-read-date nil nil t2))))
