@@ -588,7 +588,7 @@ Issue [[https://github.com/jkitchin/scimax/issues/332][332]] requested a way to 
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 (defun nb-search-title ()
-  "Select a notebook file by title, date or filename."
+  "Select a notebook file by title, author, date or filename."
   (interactive)
   (let* ((project-root (projectile-project-root))
 	 (org-files (mapcar (lambda (f)
@@ -599,9 +599,13 @@ Issue [[https://github.com/jkitchin/scimax/issues/332][332]] requested a way to 
 	 candidates
 	 format-string
 	 title
-	 date)
+	 author
+	 date
+	 ntitle
+	 nauthor
+	 ndate)
 
-    ;; Get title, date and filename for each org-file. If there is no date, we
+    ;; Get title, author date and filename for each org-file. If there is no date, we
     ;; use last modified time. It doesn't seem possible to get the file creation
     ;; time. I am not sure this is robust for all things you might put into the
     ;; DATE field. I assume it is something org can read and convert to a time.
@@ -613,31 +617,36 @@ Issue [[https://github.com/jkitchin/scimax/issues/332][332]] requested a way to 
 		      (setq title (if (re-search-forward "#\\+TITLE:\\(.*\\)" nil t)
 				      (match-string 1)
 				    "No title"))
-
-
 		      (goto-char (point-min))
 		      (setq date (if (re-search-forward "#\\+DATE:\\(.*\\)" nil t)
 				     (format-time-string "%Y-%m-%d"
 							 (org-read-date nil t (match-string 1)))
 				   (format-time-string
-				    "mod-%Y-%m-%d"
+				    "(last modified) %Y-%m-%d"
 				    (file-attribute-modification-time
 				     (file-attributes f)))))
-
-		      (list title date f))))
+		      (goto-char (point-min))
+		      (setq author (if (re-search-forward "#\\+AUTHOR:\\(.*\\)" nil t)
+				   (match-string 1)
+				 ""))
+		      (list title author date f))))
 		org-files))
 
     ;; Sort by date, more recent things will be first
     (setq data (cl-sort (copy-sequence data)
-			(lambda (a b) (org-time> (nth 1 a) (nth 1 b)))))
+			(lambda (a b) (org-time> (nth 2 a) (nth 2 b)))))
+
+    (setq ntitle (apply 'max (mapcar (lambda (e) (length (nth 0 e))) data))
+	  nauthor (apply 'max (mapcar (lambda (e) (length (nth 1 e))) data))
+	  ndate (apply 'max (mapcar (lambda (e) (length (nth 2 e))) data)))
 
     ;; Now create a format string so the longest title fits and is aligned.
-    (setq format-string (format "%%%ss | %%16s | %%s"
-				(apply 'max (mapcar (lambda (e) (length (car e))) data))))
+    (setq format-string (format "%%%ss | %%%ss | %%%ss | %%s"
+				ntitle nauthor ndate))
     ;; These are the candidates we will choose from.
-    (setq candidates (cl-loop for (title date f) in data
+    (setq candidates (cl-loop for (title author date f) in data
 			      collect
-			      (list (format format-string title date f) f)))
+			      (list (format format-string title author date f) f)))
 
     ;; I use completing-read here so you can use your own backend. The only
     ;; downside is I can't put many actions like in a dedicated ivy command.
