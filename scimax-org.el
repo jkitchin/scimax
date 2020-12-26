@@ -58,10 +58,14 @@
 (add-to-list 'org-speed-commands-user (cons "k" 'scimax-org-kill-subtree))
 
 ;; Jump to headline
+(defun scimax-avy-org-headline ()
+  "Jump to an org headline with avy."
+  (interactive)
+  (avy-with avy-goto-line
+    (avy--generic-jump org-heading-regexp nil)))
+
 (add-to-list 'org-speed-commands-user
-	     (cons "q" (lambda ()
-			 (avy-with avy-goto-line
-			   (avy--generic-jump "^\\*+" nil avy-style)))))
+	     (cons "q" 'scimax-avy-org-headline))
 
 
 (defun org-teleport (&optional arg)
@@ -74,7 +78,7 @@ is positive, move after, and if negative, move before."
   (org-mark-subtree)
   (kill-region (region-beginning) (region-end))
   ;; Jump to a visible headline
-  (avy-with avy-goto-line (avy--generic-jump "^\\*+" nil avy-style))
+  (avy-with avy-goto-line (avy--generic-jump org-heading-regexp nil))
   (cond
    ;; Move before  and change headline level
    ((and (numberp arg) (> 0 arg))
