@@ -665,14 +665,14 @@ F5 inserts the entity code."
   "Jump to visible headline in the buffer."
   (interactive)
   (org-mark-ring-push)
-  (avy-with avy-goto-line (avy--generic-jump "^\\*+" nil avy-style)))
+  (avy-with avy-goto-line (avy--generic-jump org-heading-regexp nil)))
 
 
 (defun ivy-jump-to-visible-sentence ()
   "Jump to visible sentence in the buffer."
   (interactive)
   (org-mark-ring-push)
-  (avy-with avy-goto-line (avy--generic-jump (sentence-end) nil avy-style))
+  (avy-with avy-goto-line (avy--generic-jump (sentence-end) nil))
   (forward-sentence))
 
 
