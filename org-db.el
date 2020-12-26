@@ -776,18 +776,9 @@ Optional RECURSIVE is non-nil find files recursively."
 								       (nth 4 (org-heading-components)))))
 							 (insert link))))))))
 
-;; ** geo link
-;; eg. geo:40.442403,-79.943838
-;; [[geo:40°26'32.6"N 79°56'37.8"W]]
-;; (org-link-set-parameters
-;;  "geo"
-;;  :follow (lambda (path)
-;; 	   (browse-url (format "http://maps.google.com/maps?q=%s" path))))
 
 
-
-
-;; * org-db headlines
+;; * org-db headings
 (defun org-db-heading-candidates ()
   "Return candidates for ivy or helm selection."
   (let* ((headings (emacsql org-db [:select [headlines:level headlines:title headlines:tags
