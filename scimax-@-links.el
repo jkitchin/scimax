@@ -171,7 +171,7 @@
   '(menu-item "maybe-@" nil
 	      :filter (lambda (&optional _)
                         (unless (looking-back "[a-zA-Z0-9]" 2)
-			  #' @-insert-link))))
+			  #'@-insert-link))))
 
 (provide 'scimax-@-links)
 
