@@ -30,21 +30,15 @@
 
 (setq org-src-tab-acts-natively t)
 
-;; * Speed commands
+
 (setq org-todo-keywords
       '((sequence "TODO(t)" "|" "DONE(d)")))
 
-
+;; * Speed commands
+;; These are single letter commands at headings
 (setq org-use-speed-commands t)
 
-(add-to-list 'org-speed-commands-user (cons "P" 'org-set-property))
-(add-to-list 'org-speed-commands-user (cons "d" 'org-deadline))
 
-;; Mark a subtree
-(add-to-list 'org-speed-commands-user (cons "m" 'org-mark-subtree))
-
-;; Widen
-(add-to-list 'org-speed-commands-user (cons "S" 'widen))
 
 ;; kill a subtree
 (defun scimax-org-kill-subtree ()
@@ -55,7 +49,6 @@
    (region-beginning)
    (region-end)))
 
-(add-to-list 'org-speed-commands-user (cons "k" 'scimax-org-kill-subtree))
 
 ;; Jump to headline
 (defun scimax-avy-org-headline ()
@@ -63,9 +56,6 @@
   (interactive)
   (avy-with avy-goto-line
     (avy--generic-jump org-heading-regexp nil)))
-
-(add-to-list 'org-speed-commands-user
-	     (cons "q" 'scimax-avy-org-headline))
 
 
 (defun org-teleport (&optional arg)
@@ -120,7 +110,17 @@ is positive, move after, and if negative, move before."
       (yank))))
   (outline-hide-leaves))
 
-(add-to-list 'org-speed-commands-user (cons "T" 'org-teleport))
+
+(setq org-speed-commands-user
+      (append org-speed-commands-user
+	      '(("P" . org-set-property)
+		("d" . org-deadline)
+		("m"  . org-mark-subtree)
+		("S" . widen)
+		("k" . scimax-org-kill-subtree)
+		("q" . scimax-avy-org-headline)
+		("T" . org-teleport))))
+
 
 ;; * Org-id
 
