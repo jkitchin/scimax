@@ -294,6 +294,8 @@ subscripts and superscripts."
 	   (start (apply 'min bounds))
 	   (end (apply 'max bounds))
 	   (lines))
+      ;; set some bounds here, unless it is a subscript/superscript
+      ;; Those start at point or region
       (unless (memq type '(subscript superscript))
 	(save-excursion
 	  (goto-char start)
@@ -305,6 +307,7 @@ subscripts and superscripts."
 		      (looking-back "\\>" 1))
 	    (forward-word)
 	    (setq end (point)))))
+
       (setq lines
 	    (s-join "\n" (mapcar
 			  (lambda (s)
@@ -329,6 +332,14 @@ subscripts and superscripts."
      ((looking-back "\\>" 1)
       (insert (concat beginning-marker end-marker))
       (backward-char (length end-marker)))
+
+     ;; looking back at closing char
+     ((and (memq type '(subscript superscript))
+	   (looking-back end-marker 1))
+      (delete-backward-char 1)
+      (forward-char)
+      (insert end-marker))
+
      ;; not at start or end so we just sub/sup the character at point
      ((memq type '(subscript superscript))
       (insert beginning-marker)
@@ -341,6 +352,11 @@ subscripts and superscripts."
       (insert beginning-marker)
       (re-search-forward "\\>")
       (insert end-marker))))
+   ;; looking back at end marker, slurp next word in
+   ((looking-back end-marker (length end-marker))
+    (delete-backward-char (length end-marker))
+    (forward-word)
+    (insert end-marker))
    ;; not at a word or region insert markers and put point between
    ;; them.
    (t
@@ -348,12 +364,35 @@ subscripts and superscripts."
     (backward-char (length end-marker)))))
 
 
+(defun org-double-quote-region-or-point ()
+  "Double quote the region, word or character at point.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
+  (interactive)
+  (org-markup-region-or-point 'italics "\"" "\""))
+
+
+(defun org-single-quote-region-or-point ()
+  "Single quote the region, word or character at point.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
+  (interactive)
+  (org-markup-region-or-point 'italics "'" "'"))
+
+
 (defun org-italics-region-or-point ()
   "Italicize the region, word or character at point.
 This function tries to do what you mean:
 1. If you select a region, markup the region.
 2. If in a word, markup the word.
-3. Otherwise wrap the character at point in the markup."
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
   (interactive)
   (org-markup-region-or-point 'italics "/" "/"))
 
@@ -363,7 +402,8 @@ This function tries to do what you mean:
 This function tries to do what you mean:
 1. If you select a region, markup the region.
 2. If in a word, markup the word.
-3. Otherwise wrap the character at point in the markup."
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
   (interactive)
   (org-markup-region-or-point 'bold "*" "*"))
 
@@ -373,7 +413,8 @@ This function tries to do what you mean:
 This function tries to do what you mean:
 1. If you select a region, markup the region.
 2. If in a word, markup the word.
-3. Otherwise wrap the character at point in the markup."
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
   (interactive)
   (org-markup-region-or-point 'underline "_" "_"))
 
@@ -383,7 +424,8 @@ This function tries to do what you mean:
 This function tries to do what you mean:
 1. If you select a region, markup the region.
 2. If in a word, markup the word.
-3. Otherwise wrap the character at point in the markup."
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
   (interactive)
   (org-markup-region-or-point 'underline "~" "~"))
 
@@ -393,7 +435,8 @@ This function tries to do what you mean:
 This function tries to do what you mean:
 1. If you select a region, markup the region.
 2. If in a word, markup the word.
-3. Otherwise wrap the character at point in the markup."
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
   (interactive)
   (org-markup-region-or-point 'underline "=" "="))
 
@@ -403,7 +446,8 @@ This function tries to do what you mean:
 This function tries to do what you mean:
 1. If you select a region, markup the region.
 2. If in a word, markup the word.
-3. Otherwise wrap the character at point in the markup."
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
   (interactive)
   (org-markup-region-or-point 'strikethrough "+" "+"))
 
@@ -413,7 +457,8 @@ This function tries to do what you mean:
 This function tries to do what you mean:
 1. If you select a region, markup the region.
 2. If in a word, markup the word.
-3. Otherwise wrap the character at point in the markup."
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
   (interactive)
   (org-markup-region-or-point 'subscript "_{" "}"))
 
@@ -423,7 +468,8 @@ This function tries to do what you mean:
 This function tries to do what you mean:
 1. If you select a region, markup the region.
 2. If in a word, markup the word.
-3. Otherwise wrap the character at point in the markup."
+3. Otherwise wrap the character at point in the markup.
+Repeated use of the function slurps the next word into the markup."
   (interactive)
   (org-markup-region-or-point 'superscript "^{" "}"))
 
@@ -462,6 +508,11 @@ then exit them."
 	    (beginning-of-thing 'word)
 	    (insert (car chars)))
 	  (forward-char (length (car chars))))
+	 ;; slurp next word if you call it again
+	 ((and (not (equal arg '(16))) (looking-back (regexp-quote (cdr chars)) (length (cdr chars))))
+	  (delete-backward-char (length (cdr chars)))
+	  (forward-word)
+	  (insert (cdr chars)))
 	 (t
 	  (insert (concat  (car chars) (cdr chars)))
 	  (backward-char (length (cdr chars)))))))))
