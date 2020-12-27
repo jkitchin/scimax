@@ -350,7 +350,7 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 			    ;; These are not always reliable as it relies on font-lock
 			    (when (and (not (org-in-src-block-p))
 				       (not (save-match-data (equal 'src-block (car (org-element-context))))))
-			      (push (cons (match-string 1) (match-beginning 0)) hashtags)))
+			      (push (cons (match-string-no-properties 1) (match-beginning 0)) hashtags)))
 			  hashtags)))
 	    hashtag-id
 	    hlv 			;; headline level
@@ -940,7 +940,8 @@ line and only return a match if it is around the current point."
   	(backward-char))
       (when (and (>= p (match-beginning 0))
   		 (<= p (match-end 0)))
-  	(match-string 1)))))
+  	(match-string-no-properties 1)))))
+
 
 
 (defun org-db-hashtags ()
