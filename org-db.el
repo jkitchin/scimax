@@ -684,12 +684,13 @@ Optional RECURSIVE is non-nil find files recursively."
 
 
 
-(defun org-db-insert-contact-link (x)
+(defun org-db--insert-contact-link (x)
   "Insert the contact associated with X."
   (let ((link)
 	(candidate (cdr x)))
     ;; check if the file is up-to-date
-    (let ((actual-mod-time (float-time (file-attribute-modification-time (file-attributes (plist-get candidate :filename))))))
+    (let ((actual-mod-time (float-time (file-attribute-modification-time
+					(file-attributes (plist-get candidate :filename))))))
       (when (org-time<= (plist-get candidate :last-updated) actual-mod-time)
 	(error q"%s is not up to date in org-db.")))
 
@@ -714,15 +715,37 @@ Optional RECURSIVE is non-nil find files recursively."
     (insert link)))
 
 
-(defun org-db-assign-contact (x)
-  "Assign current heading to contact X."
+(defun org-db--assign-contact (x)
+  "Assign current heading to contact X.
+Sets heading TODO state and prompts for deadline if there is not one."
   (interactive)
-  (unless (string= "TODO" (org-get-todo-state))
-    (org-todo "TODO"))
   (let ((emails (org-entry-get-multivalued-property (point) "ASSIGNEDTO")))
     (setq emails (append emails (list (plist-get (cdr x) :email))))
     (apply 'org-entry-put-multivalued-property (point)
-	   "ASSIGNEDTO" emails)))
+	   "ASSIGNEDTO" emails))
+
+  (unless (string= "TODO" (org-get-todo-state))
+    (org-todo "TODO"))
+
+  (unless (org-get-deadline-time (point))
+    (org-deadline nil)))
+
+
+(defun org-db--open-contact (x)
+  "Open contact X"
+  (find-file (plist-get (cdr x) :filename))
+  (goto-char (plist-get (cdr x) :begin))
+  (show-entry))
+
+
+(defun org-db--insert-contact (x)
+  "Insert \"name\" <email> for X at point."
+  (unless (looking-back " " 1)
+    (insert ","))
+  (insert
+   (format "\"%s\" <%s>"
+	   (plist-get (cdr x) :title)
+	   (plist-get (cdr x) :email))))
 
 
 (defun org-db-contacts ()
@@ -730,21 +753,10 @@ Optional RECURSIVE is non-nil find files recursively."
   (interactive)
   (let ((candidates (org-db-contacts-candidates)))
     (ivy-read "Contact: " candidates :action '(1
-					       ("i" (lambda (x)
-						      (unless (looking-back " " 1)
-							(insert ","))
-						      (insert
-						       (format "%s <%s>"
-							       (plist-get (cdr x) :title)
-							       (plist-get (cdr x) :email))))
-						"insert")
-					       ("o" (lambda (x)
-						      (find-file (plist-get (cdr x) :filename))
-						      (goto-char (plist-get (cdr x) :begin))
-						      (show-entry))
-						"open")
-					       ("l" org-db-insert-contact-link "Insert link")
-					       ("a" org-db-assign-contact "Assign to heading")))))
+					       ("i" org-db--insert-contact "insert")
+					       ("o" org-db--open-contact "open")
+					       ("l" org-db--insert-contact-link "Insert link")
+					       ("a" org-db--assign-contact "Assign to heading")))))
 
 
 ;; * org-db-locations
@@ -812,6 +824,21 @@ Optional RECURSIVE is non-nil find files recursively."
     candidates))
 
 
+(defun org-db-headings--open (x)
+  "Open the heading X."
+  (interactive)
+  (find-file (plist-get (cdr x) :file))
+  (goto-char (plist-get (cdr x) :begin))
+  (org-show-context))
+
+(defun org-db-headings--store-link (x)
+  "Store a link to X."
+  (interactive)
+  (find-file (plist-get (cdr x) :file))
+  (goto-char (plist-get (cdr x) :begin))
+  (org-store-link))
+
+
 ;;;###autoload
 (defun org-db-headings ()
   "Use ivy to open a heading with completion."
@@ -820,17 +847,8 @@ Optional RECURSIVE is non-nil find files recursively."
     (ivy-read "heading: " candidates
 	      :action
 	      '(1
-		("o" (lambda (candidate)
-		       (find-file (plist-get (cdr candidate) :file))
-		       (goto-char (plist-get (cdr candidate) :begin))
-		       (org-show-context))
-		 "Open to heading.")
-		("l" (lambda (candidate)
-		       "Store link"
-		       (find-file (plist-get (cdr candidate) :file))
-		       (goto-char (plist-get (cdr candidate) :begin))
-		       (org-store-link))
-		 "Store link to heading.")))))
+		("o" org-db-headings--open "Open to heading.")
+		("l" org-db-headings--store-link "Store link to heading.")))))
 
 
 ;; * org-db files
@@ -856,22 +874,28 @@ Optional RECURSIVE is non-nil find files recursively."
 
 ;; * org-db-links
 
+(defun org-db-links--open (x)
+  "Open the link X."
+  (interactive)
+  (find-file (plist-get (cdr x) :filename))
+  (goto-char (plist-get (cdr x) :begin))
+  (org-show-entry))
+
+
 (defun org-db-links ()
   "Open a link."
   (interactive)
-  (let ((candidates (cl-loop for (rl fn bg) in (emacsql org-db [:select [raw-link filename begin ]
-									:from links
-									:left :join files :on (= links:filename-id files:rowid)
-									:order :by filename])
-			     collect
-			     ;; (candidate :filename :begin)
-			     (list (format "%s | %s" rl fn) :filename fn :begin bg))))
+  (let ((candidates (cl-loop
+		     for (rl fn bg) in
+		     (emacsql org-db [:select [raw-link filename begin ]
+					      :from links
+					      :left :join files :on (= links:filename-id files:rowid)
+					      :order :by filename])
+		     collect
+		     ;; (candidate :filename :begin)
+		     (list (format "%s | %s" rl fn) :filename fn :begin bg))))
     (ivy-read "link: " candidates :action '(1
-					    ("o" (lambda (x)
-						   (find-file (plist-get (cdr x) :filename))
-						   (goto-char (plist-get (cdr x) :begin))
-						   (org-show-entry))
-					     "Open to link")))))
+					    ("o" org-db-links--open "Open to link")))))
 
 ;; * org-db-hashtags
 
@@ -943,11 +967,46 @@ line and only return a match if it is around the current point."
   	(match-string-no-properties 1)))))
 
 
+(defun org-db-hashtags--open (x)
+  "Open the hashtag entry X."
+  (interactive)
+  (find-file (plist-get (cdr x) :filename))
+  (goto-char (plist-get (cdr x) :begin))
+  (show-entry))
+
+
+(defun org-db-hashtags--insert (x)
+  "Insert the hashtag X."
+  (interactive)
+  (insert (concat "#" (plist-get (cdr x) :hashtag))))
+
+
+(defun org-db-hashtags--other-files (x)
+  "Open list of other files containing hashtag X."
+  (interactive)
+  (let* ((hashtag (org-no-properties (plist-get (cdr x) :hashtag)))
+	 (results (emacsql org-db [:select [hashtag file-hashtags:begin files:filename]
+					   :from hashtags
+					   :left :join file-hashtags :on (= hashtags:rowid file-hashtags:hashtag-id)
+					   :inner :join files
+					   :on (= files:rowid file-hashtags:filename-id)
+					   :where (= hashtag $s1)]
+			   hashtag))
+	 (candidates (cl-loop for (hashtag begin fname) in results
+			      collect fname)))
+    (find-file (ivy-read "File: " candidates))))
+
+
+(defun org-db-hashtags--delete (x)
+  "Delete entries for hashtag."
+  (let* ((hashtag (plist-get (cdr x) :hashtag)))
+    (org-db-delete-hashtag hashtag)))
+
 
 (defun org-db-hashtags ()
   "Open a #hashtag.
 If the cursor is on a hashtag, it uses that as the initial input.
-I am not sure how to do multiple hashtag matches right now."
+I am not sure how to do multiple hashtag matches right now, that needs a fancier query."
   (interactive)
   (let* ((tip (looking-at-hashtag))
 	 (hashtag-data (emacsql org-db [:select [hashtag file-hashtags:begin files:filename]
@@ -956,24 +1015,15 @@ I am not sure how to do multiple hashtag matches right now."
 						:inner :join files
 						:on (= files:rowid file-hashtags:filename-id)]))
 	 (candidates (cl-loop for (hashtag begin fname) in hashtag-data
-			      collect (list (format "%20s%8s  %s" hashtag begin fname)
-					    begin fname hashtag))))
+			      collect (list (format "%40s  %s" hashtag fname) :hashtag hashtag :begin begin :filename fname))))
 
     (ivy-read "#hashtag: " candidates :initial-input tip
 	      :action
 	      '(1
-		("o" (lambda (candidate)
-		       (find-file (third candidate))
-		       (goto-char (second candidate))
-		       (show-entry))
-		 "Open file at hashtag")
-		("i" (lambda (candidate)
-		       (insert (format "#%s" (fourth candidate))))
-		 "Insert hashtag at point.")
-		("D" (lambda (candidate)
-		       (let* ((hashtag (fourth candidate)))
-			 (org-db-delete-hashtag hashtag)))
-		 "Delete this hashtag")))))
+		("o" org-db-hashtags--open "Open file at hashtag")
+		("i" org-db-hashtags--insert "Insert hashtag at point.")
+		("O" org-db-hashtags--other-files "Other files with hashtag")
+		("D" org-db-hashtags--delete "Delete this hashtag")))))
 
 
 
@@ -1041,6 +1091,7 @@ PATTERN follows sql patterns, so % is a wildcard."
 		     (read-string "Pattern: ")))
   (let* ((results (emacsql org-db
 			   [:select [headlines:title
+				     properties:property
 				     headline-properties:value
 				     files:filename files:last-updated headlines:begin]
 				    :from headlines
@@ -1052,9 +1103,9 @@ PATTERN follows sql patterns, so % is a wildcard."
 				    :where (and (= properties:property $s1)
 						(like headline-properties:value $s2))]
 			   property pattern))
-	 (candidates (cl-loop for (title value fname last-updated begin) in results
+	 (candidates (cl-loop for (title property value fname last-updated begin) in results
 			      collect
-			      (list (format "%s | %s" fname value)
+			      (list (format "%s | %s=%s | %s" title property value fname)
 				    :filename fname :begin begin))))
 
     (ivy-read "Choose: " candidates
