@@ -683,6 +683,8 @@ If you share a notebook, you have collaborators. If you store them as headlines 
 
 To assign a task to a participant, you use nb-assign-task.
 
+Note that these commands will open all the contacts in the project, and that may not be what you want. These functions use org-ql to find and assign contacts. In big projects this may not be fast.
+
 #+BEGIN_SRC emacs-lisp :tangle yes :results silent
 (defun nb-assign-task ()
   "Mark current headline with TODO, set a deadline and add set ASSIGNEDTO property with email.
