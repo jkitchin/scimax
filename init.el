@@ -19,7 +19,7 @@
 (defconst scimax-dir (file-name-directory (or load-file-name (buffer-file-name)))
   "Directory where the scimax is installed.")
 
-(defvar scimax-user-dir (expand-file-name "user" scimax-dir)
+(defvar scimax-user-dir (file-name-as-directory (expand-file-name "user" scimax-dir))
   "User directory for personal code.")
 
 (setq user-emacs-directory scimax-user-dir)
