@@ -61,11 +61,6 @@
   :type 'string
   :group 'org-db)
 
-(defcustom org-db-index-content nil
-  "Controls if the content of headlines is saved."
-  :type 'boolean
-  :group 'org-db)
-
 
 (unless (file-directory-p org-db-root)
   (make-directory org-db-root t))
