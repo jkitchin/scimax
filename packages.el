@@ -517,7 +517,7 @@
 
 (use-package kitchingroup
   :ensure nil
-  :load-path scimax-dir)
+  :load-path (lambda () (expand-file-name "kitchingroup" scimax-dir)))
 
 (let ((enable-local-variables nil))
   (org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir)))
