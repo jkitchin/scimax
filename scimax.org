@@ -941,13 +941,6 @@ Alternatively, you may want to type org-mode directly in an email buffer. Use `o
 
 scimax provides some tools to do a mail merge in org-mode. The idea is to run `mail-merge-make-headings' with a template and data-source to generate a series of org-mode headings that are the messages. You can inspect these, edit them if needed, and then run `mail-merge' to actually send them. Each heading will be tagged as sent, and marked DONE.
 
-* Contacts
-
-scimax provides a emacs-lisp library to interface with a contact database written in org-mode.
-
-First, add some org-files to the variable `contacts-files'. Any headline in these files that has an EMAIL property will be considered a contact. Then, you can search your database with `ivy-contacts' or `helm-contacts'. There are a variety of actions to choose from ranging from inserting email addresses, copying properties, opening contact urls, etc...
-
-See `contacts-help' for more information.
 
 * Google
 
