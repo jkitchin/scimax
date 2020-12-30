@@ -1127,8 +1127,20 @@ https://github.com/bbatsov/projectile for project management. A project is basic
 
 Projectile makes it easy to jump to projects, find files in projects, search projects, etc...
 
-| C-c p p | Switch to a project  |
-| C-c p k | Kill project buffers |
+Scimax uses `counsel-projectile' integration as much as possible.
+
+| keybinding | action                      |
+|------------+-----------------------------|
+| C-c p p    | Switch to a project         |
+| C-c p n    | Switch project by name      |
+| C-c p b    | Switch to project buffer    |
+| C-c p k    | Kill project buffers        |
+| C-c p f    | Switch to project file      |
+| C-c p d    | Switch to project dir       |
+| C-c p a    | Search project with ag      |
+| C-c p g    | Search project with grep    |
+| C-c p r    | Search project with ripgrep |
+
 
 You can see all the key bindings with C-c p C-h.
 
