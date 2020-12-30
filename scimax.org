@@ -1530,7 +1530,7 @@ You are basically free to structure the notebook however you want. You have all 
 
 We leverage [[http://projectile.readthedocs.io/en/latest/][projectile]] for project management in the notebook. We use [[https://magit.vc][magit]] for version control.
 
-Use `nb-new' to create a new project. You will be prompted for a name, which must be a valid directory name. The directory will be created in `nb-notebook-directory'. Note that all git repos will be considered projects, so it is not necessary to use `nb-new'. It just automates a few things for you.
+Use `nb-new' to create a new project. You will be prompted for a name, which must be a valid directory name. The directory will be created in `nb-notebook-directory'. Note that all git repos will be considered projects, so it is not necessary to use `nb-new' to make a new notebook. It just automates a few things for you.
 
 Use `nb-open' to open a project. This will open the project to your master file. Previously visited projects are remembered by projectile and should be shown in an ivy completion minibuffer for selection.
 
