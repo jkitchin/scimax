@@ -396,11 +396,10 @@ There is limited support to convert these editmarks to LaTeX and html, and to ge
 There is also an experimental feature for track-change mode.
 
 
-Note: This library replaces several older attempts at this which are no longer maintained by me:
+Note: This library replaces several older attempts at this which are no longer maintained by me (you can find them still in ./deprecated/.
 1. ov-highlight
 2. org-editmarks.el
 3. cm-mods.el
-
 
 
 ** org-ref
