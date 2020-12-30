@@ -57,13 +57,10 @@ If you are in a contact heading we store a link."
 							     (= headline-properties:value $s1))]
 				       email)
 			      collect
-			      (list title :filename fname :begin begin))))
+			      (list (format "%40s | %s" title fname) :filename fname :begin begin))))
     (if (= 1 (length candidates))
 	(org-db--open-contact (car candidates))
-      (progn
-	(find-file (plist-get (cdr ) :filename))
-	(goto-char (plist-get (cdr (car candidates)) :begin)))
-      (ivy-read "Contact: " candidates :action org-db--open-contact))))
+      (ivy-read "Contact: " candidates :action 'org-db--open-contact))))
 
 
 (defun scimax-contact-complete (&optional arg)

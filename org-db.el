@@ -706,9 +706,7 @@ Optional RECURSIVE is non-nil find files recursively."
       (setq link (format
 		  "[[contact:%s][%s]]"
 		  (org-entry-get (point) "EMAIL")
-		  (nth 4 (org-heading-components))))
-      (save-buffer)
-      (org-db-update-buffer t))
+		  (nth 4 (org-heading-components)))))
     (when (looking-back "]" 1)
       (insert ", "))
     (insert link)))
