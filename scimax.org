@@ -117,6 +117,14 @@ The following keyboard shortcuts are defined:
 | $inline eqn$      | C-u s-4     |                                     |
 | @@latex:snippet@@ | C-u C-u 4   |                                     |
 | °                 | s-e         | `ivy-insert-org-entity'             |
+| "                 | s-"         | `org-double-quote-region-or-point'  |
+| '                 | s-'         | `org-single-quote-region-or-point'  |
+
+These commands try to do what you mean:
+1. If your cursor is on a space, insert balanced markers with cursor between them
+2. If you have highlighted a region, add markers around it
+3. If you are on a word, add markers around the word, unless you are sub/superscripting, and then do that on the character at point
+4. If the cursor is right after the end of a markup, you can press the key again to slurp the next word into the markup.
 
 Use `ivy-insert-org-entity' (s-e) for all accented characters.
 
