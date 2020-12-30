@@ -53,12 +53,17 @@
 
 (defcustom org-db-root "~/org-db/"
   "Root directory for db files."
-  :type 'string
+  :type 'directory
   :group 'org-db)
 
 (defcustom org-db-name "org-db.sqlite"
   "Name of the sqlite database file."
   :type 'string
+  :group 'org-db)
+
+(defcustom org-db-index-content nil
+  "Controls if the content of headlines is saved."
+  :type 'boolean
   :group 'org-db)
 
 
