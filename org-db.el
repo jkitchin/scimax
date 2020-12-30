@@ -703,10 +703,10 @@ Optional RECURSIVE is non-nil find files recursively."
       (unless (and (looking-at org-heading-regexp)
 		   (string= (plist-get candidate :email) (org-entry-get (point) "EMAIL")))
 	(error "It does not appear we are looking at the right place:\n%s"))
-
+      (org-id-get-create)
       (setq link (format
 		  "[[contact:%s][%s]]"
-		  (org-id-get-create)
+		  (org-entry-get (point) "EMAIL")
 		  (nth 4 (org-heading-components))))
       (save-buffer)
       (org-db-update-buffer t))
