@@ -404,7 +404,8 @@ Scimax will auto-format several things for you.
 These are controlled by the following variables you can customize (they default to t):
 - `scimax-autoformat-ordinals'
 - `scimax-autoformat-fractions'
-- `scimax-autoformat-superscript'
+- `scimax-autoformat-sentence-capitalization'
+- `scimax-autoformat-superscripts'
 - `scimax-autoformat-transposed-caps'
 
 To get the autoformatting you have to enable `scimax-autoformat-mode'. If you want it on all the time, add something like this to your init files:
