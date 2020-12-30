@@ -666,7 +666,7 @@ Optional RECURSIVE is non-nil find files recursively."
     ;; check if the file is up-to-date
     (let ((actual-mod-time (float-time (file-attribute-modification-time (file-attributes (plist-get candidate :filename))))))
       (when (org-time<= (plist-get candidate :last-updated) actual-mod-time)
-	(error q"%s is not up to date in org-db.")))
+	(error "%s is not up to date in org-db." (plist-get candidate :filename))))
 
     (with-current-buffer
 	(find-file-noselect
@@ -676,7 +676,7 @@ Optional RECURSIVE is non-nil find files recursively."
       ;; Check we are looking at the right place
       (unless (and (looking-at org-heading-regexp)
 		   (string= (plist-get candidate :email) (org-entry-get (point) "EMAIL")))
-	(error "It does not appear we are looking at the right place:\n%s"))
+	(error "It does not appear we are looking at the right place:\n%s" (plist-get candidate :filename)))
 
       (setq link (format
 		  "[[contact:%s][%s]]"
