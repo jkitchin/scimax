@@ -935,7 +935,7 @@ I am not sure how to do multiple hashtag matches right now."
 	      '(1
 		("o" (lambda (candidate)
 		       (find-file (third candidate))
-		       (goto-char (second candidate))
+		       (goto-char (cl-second candidate))
 		       (show-entry))
 		 "Open file at hashtag")
 		("i" (lambda (candidate)
@@ -967,9 +967,9 @@ I am not sure how to do multiple hashtag matches right now."
     (cond
      ((and result
 	   (= 1 (length result)))
-      (setq match (first result)
-	    fname (first match)
-	    p (second match))
+      (setq match (cl-first result)
+	    fname (cl-first match)
+	    p (cl-second match))
       (find-file fname)
       (goto-char p))
 
