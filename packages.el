@@ -435,6 +435,8 @@
   ("s-+" . org-strikethrough-region-or-point)
   ("s-4" . org-latex-math-region-or-point)
   ("s-e" . ivy-insert-org-entity)
+  ("s-\"" . org-double-quote-region-or-point)
+  ("s-'" . org-single-quote-region-or-point)
   :init
   (require 'scimax-org))
 
