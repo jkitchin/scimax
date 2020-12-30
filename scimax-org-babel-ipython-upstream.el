@@ -87,11 +87,14 @@ string to be formatted."
   :group 'ob-ipython)
 
 (defcustom ob-ipython-key-bindings
-  '(("<return>" . #'newline-and-indent)
-    ("C-<return>" . #'org-ctrl-c-ctrl-c)
-    ("M-<return>" . (lambda () (interactive) (scimax-execute-and-next-block t)))
-    ("S-<return>" . #'scimax-execute-and-next-block)
-    ("M-S-<return>" . #'scimax-execute-to-point)
+  '(
+    ;; commenting these out so they can be in any src block
+    ;; this seems to clobber the settings in scimax-ob.el
+    ;; ("<return>" . #'newline-and-indent)
+    ;; ("C-<return>" . #'org-ctrl-c-ctrl-c)
+    ;; ("M-<return>" . (lambda () (interactive) (scimax-ob-execute-and-next-block t)))
+    ;; ("S-<return>" . #'scimax-ob-execute-and-next-block)
+    ;; ("M-S-<return>" . #'scimax-ob-execute-to-point)
     ("s-<return>" . #'scimax-ob-ipython-restart-kernel-execute-block)
     ("M-s-<return>" . #'scimax-restart-ipython-and-execute-to-point)
     ("H-<return>" . #'scimax-ob-ipython-restart-kernel-execute-buffer)
@@ -117,7 +120,7 @@ string to be formatted."
     ("H-m" . #'scimax-merge-ipython-blocks)
     ("H-h" . #'scimax-ob-edit-header)
     ("H-M-l" . #'scimax-ob-toggle-line-numbers)
-    ("s-." . #'scimax-ob-ipython-complete-ivy)
+    ("s-?" . #'scimax-ob-ipython-complete-ivy)
     ("s-/" . #'ob-ipython-inspect)
 
     ;; the jupyter hydras
@@ -212,7 +215,7 @@ help is a string for a tooltip."
 Usually called in a hook function."
   (cl-loop for cell in ob-ipython-key-bindings
 	   do
-	   (eval `(scimax-define-src-key ipython ,(car cell) ,(cdr cell)))))
+	   (eval `(scimax-ob-define-src-key ipython ,(car cell) ,(cdr cell)))))
 
 (add-hook 'org-mode-hook 'ob-ipython-key-bindings t)
 

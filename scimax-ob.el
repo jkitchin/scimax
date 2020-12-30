@@ -1,9 +1,8 @@
-;;; scimax-ob.el --- New org-babel functions
+;;; scimax-ob.el --- New org-babel functions for src blocks
 
 ;;; Commentary:
-;;
-
-;;* Commands like the jupyter notebook has
+;; Inspired by some editing commands in Jupyter notebook I created these
+;; functions to make regular src blocks easier to work with.
 
 ;;; Code:
 
@@ -11,7 +10,9 @@
 (require 'dash)
 (require 'avy)
 
-(defun scimax-insert-src-block (&optional below)
+;; * create/modify blocks
+
+(defun scimax-ob-insert-src-block (&optional below)
   "Insert a src block above the current point.
 With prefix arg BELOW, insert it below the current point.
 
@@ -51,7 +52,7 @@ If point is in a block, copy the header to the new block"
     (forward-line -1)))
 
 
-(defun scimax-split-src-block (&optional below)
+(defun scimax-ob-split-src-block (&optional below)
   "Split the current src block with point in upper block.
 With a prefix BELOW move point to lower block."
   (interactive "P")
@@ -70,8 +71,58 @@ With a prefix BELOW move point to lower block."
       (forward-line -3)
       (forward-char -1))))
 
+;; * Navigating in block
 
-(defun scimax-execute-and-next-block (&optional new)
+(defun scimax-ob-edit-up ()
+  "Move to previous line, unless at the top.
+In that case first move to beginning of line, and then move to
+previous cell."
+  (interactive)
+  (let ((first-code-line-p (save-excursion
+			     (forward-line -1)
+			     (beginning-of-line)
+			     (looking-at "#\\+BEGIN_SRC")))
+	(lang (org-element-property :language (org-element-context))))
+    (cond
+     ((and (bolp) first-code-line-p)
+      (ignore-errors
+	(catch 'block
+	  (while (org-babel-previous-src-block)
+	    (when (string= lang
+			   (org-element-property :language (org-element-context)))
+	      (throw 'block t))))))
+     (first-code-line-p
+      (beginning-of-line))
+     (t
+      (previous-line)))))
+
+
+(defun scimax-ob-edit-down ()
+  "Move to next line, unless at the bottom.
+In that case first move to beginning of line, and then move to
+next cell."
+  (interactive)
+  (let ((last-code-line-p (save-excursion
+			    (forward-line 1)
+			    (beginning-of-line)
+			    (looking-at "#\\+END_SRC")))
+	(lang (org-element-property :language (org-element-context))))
+    (cond
+     ((and (eolp) last-code-line-p)
+      (ignore-errors
+	(catch 'block
+	  (while (org-babel-next-src-block)
+	    (when (string= (org-element-property :language (org-element-context))
+			   lang)
+	      (throw 'block t))))))
+     (last-code-line-p
+      (end-of-line))
+     (t
+      (next-line)))))
+
+;; * Executing blocks
+
+(defun scimax-ob-execute-and-next-block (&optional new)
   "Execute this block and either jump to the next block with the
 same language, or add a new one.
 With prefix arg NEW, always insert new cell."
@@ -87,11 +138,11 @@ With prefix arg NEW, always insert new cell."
 			     (when (string= lang (org-element-property :language (org-element-context)))
 			       (throw 'block next-block))))))))
     (if (or new (not next-block))
-	(scimax-insert-src-block t)
+	(scimax-ob-insert-src-block t)
       (goto-char (match-beginning 0)))))
 
 
-(defun scimax-execute-to-point ()
+(defun scimax-ob-execute-to-point ()
   "Execute all the src blocks that start before point."
   (interactive)
   (let ((p (point)))
@@ -100,15 +151,16 @@ With prefix arg NEW, always insert new cell."
       (while (and (org-babel-next-src-block) (< (point) p))
 	(org-babel-execute-src-block)))))
 
+;; * Jumping to blocks
 
-(defun scimax-jump-to-visible-block ()
+(defun scimax-ob-jump-to-visible-block ()
   "Jump to a visible src block with avy."
   (interactive)
-  (avy-with scimax-jump-to-block
-    (avy--generic-jump "#\\+BEGIN_SRC"  nil avy-style (point-min) (point-max))))
+  (avy-with scimax-ob-jump-to-block
+    (avy--generic-jump "#\\+BEGIN_SRC"  nil (point-min) (point-max))))
 
 
-(defun scimax-jump-to-block (&optional N)
+(defun scimax-ob-jump-to-block (&optional N)
   "Jump to a block in the buffer.
 If narrowing is in effect, only a block in the narrowed region.
 Use a numeric prefix N to specify how many lines of context to use.
@@ -136,7 +188,7 @@ Defaults to 3."
 			(recenter)))))
 
 
-(defun scimax-jump-to-inline-src ()
+(defun scimax-ob-jump-to-inline-src ()
   "Jump to an inline src element in the buffer."
   (interactive)
   (let ((p '()))
@@ -150,6 +202,7 @@ Defaults to 3."
 			(goto-char (second candidate))
 			(recenter)))))
 
+;; * Jump to positions in blocks
 
 (defun scimax-ob-jump-to-header ()
   "Jump to src header."
@@ -157,6 +210,22 @@ Defaults to 3."
   (let* ((src-info (org-babel-get-src-block-info 'light))
 	 (header-start (sixth src-info)))
     (goto-char header-start)))
+
+
+(defun scimax-ob-jump-to-first-line ()
+  "Move point to start of first line in the src block."
+  (interactive)
+  (org-edit-special)
+  (goto-char (point-min))
+  (org-edit-src-exit))
+
+
+(defun scimax-ob-jump-to-end-line ()
+  "Move point to end of last line in the src block."
+  (interactive)
+  (org-edit-special)
+  (goto-char (point-max))
+  (org-edit-src-exit))
 
 
 (defun scimax-ob-jump-to-end ()
@@ -170,18 +239,7 @@ Defaults to 3."
       (forward-line (* -1 (incf nlines))))
     (goto-char (line-end-position))))
 
-
-(defun scimax-ob-edit-header ()
-  "Edit the src-block header in the minibuffer."
-  (interactive)
-  (let* ((src-info (org-babel-get-src-block-info 'light))
-	 (header-start (sixth src-info))
-	 (header-end (save-excursion (goto-char header-start)
-				     (line-end-position))))
-    (setf (buffer-substring header-start header-end)
-	  (read-string "Header: "
-		       (buffer-substring-no-properties header-start header-end)))))
-
+;; * kill/copy/clone
 
 ;; kill block
 (defun scimax-ob-kill-block-and-results ()
@@ -225,7 +283,7 @@ Defaults to 3."
   (interactive "P")
   (let* ((src (org-element-context))
 	 (code (org-element-property :value src)))
-    (scimax-insert-src-block (not below))
+    (scimax-ob-insert-src-block (not below))
     (delete-char 1)
     (insert code)
     ;; jump back to start of new block
@@ -233,7 +291,8 @@ Defaults to 3."
     (org-babel-next-src-block)))
 
 
-;; Move blocks
+;; * Move blocks
+
 (defun scimax-ob-move-src-block-up ()
   "Move block before previous one."
   (interactive)
@@ -258,14 +317,7 @@ Defaults to 3."
   (org-yank))
 
 
-(defun scimax-ob-clear-all-results ()
-  "Clear all results in the buffer."
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (while (org-babel-next-src-block)
-      (org-babel-remove-result))))
-
+;; * Merging blocks
 
 (defun scimax-ob-merge-blocks (r1 r2)
   "Merge blocks that match the first block language in the region (R1 R2).
@@ -317,41 +369,146 @@ variables, etc."
 			(s-trim merged-code)))
 	(goto-char first-start)))))
 
-;; * src keys
 
-(defvar scimax-src-keys '()
+(defun scimax-ob-merge-previous ()
+  "Merge current block with previous one."
+  (interactive)
+  (let ((p (point))
+	(lang (org-element-property :language (org-element-context))))
+    (org-babel-previous-src-block)
+    (when (string= lang (org-element-property :language (org-element-context)))
+      (scimax-ob-merge-blocks (point) p))))
+
+
+(defun scimax-ob-merge-next ()
+  "Merge current block with next one."
+  (interactive)
+  (let ((p (point))
+	(lang (org-element-property :language (org-element-context))))
+    (org-babel-next-src-block)
+    (when (string= lang (org-element-property :language (org-element-context)))
+      (scimax-ob-merge-blocks p (point)))))
+
+;; * convenience functions
+
+(defun scimax-ob-edit-header ()
+  "Edit the src-block header in the minibuffer."
+  (interactive)
+  (let* ((src-info (org-babel-get-src-block-info 'light))
+	 (header-start (sixth src-info))
+	 (header-end (save-excursion (goto-char header-start)
+				     (line-end-position))))
+    (setf (buffer-substring header-start header-end)
+	  (read-string "Header: "
+		       (buffer-substring-no-properties header-start header-end)))))
+
+
+(defun scimax-ob-clear-all-results ()
+  "Clear all results in the buffer."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (org-babel-next-src-block)
+      (org-babel-remove-result))))
+
+
+(defun scimax-ob-toggle-output ()
+  "Toggle folded state of results if there are some."
+  (interactive)
+  (let ((loc (org-babel-where-is-src-block-result)))
+    (when loc
+      (save-excursion
+	(goto-char loc)
+	(org-cycle)))))
+
+
+(defun scimax-ob-mark-code ()
+  "Mark the code in the block."
+  (interactive)
+  (org-edit-special)
+  (let ((p0 (point-min))
+	(p1 (point-max)))
+    (goto-char p0)
+    (org-edit-src-exit)
+    (set-mark (point))
+    (goto-char (+ (point) (- p1 2)))))
+
+
+;; * src keys for specific languages
+;; These are used in scimax-org-babel-ipython-upstream.el
+;; See `ob-ipython-key-bindings'
+
+(defvar scimax-ob-src-keys '()
   "Keep a list of key definitions for each language.")
 
-(defmacro scimax-define-src-key (language key def)
+
+(defmacro scimax-ob-define-src-key (language key def)
   "For LANGUAGE (symbol) src blocks, define key sequence KEY as DEF.
 KEY should be a string sequence that will be used in a `kbd' sequence.
 This is like `define-key', except the definition only applies in
-src blocks for a specific LANGUAGE. Adapted from
+src blocks for a specific LANGUAGE.
+
+If language is nil apply to all src-blocks.
+
+Adapted from
 http://endlessparentheses.com/define-context-aware-keys-in-emacs.html"
   (declare (indent 3)
            (debug (form form form &rest sexp)))
   ;; store the key in scimax-src-keys
-  (unless (cdr (assoc language scimax-src-keys))
-    (cl-pushnew (list language '()) scimax-src-keys))
-  (cl-pushnew (cons key def) (cdr (assoc language scimax-src-keys)))
+  (unless (cdr (assoc language scimax-ob-src-keys))
+    (cl-pushnew (list language '()) scimax-ob-src-keys))
+
+  (cl-pushnew (cons key def) (cdr (assoc language scimax-ob-src-keys)))
+
   `(define-key org-mode-map ,(kbd key)
      '(menu-item
        ,(format "maybe-%s" (or (car (cdr-safe def)) def))
        nil
        :filter (lambda (&optional _)
-                 (when (and (org-in-src-block-p)
-			    (string= ,(symbol-name language)
-				     (car (org-babel-get-src-block-info t))))
-		   ,def)))))
+		 ,(if language
+		      `(when (and (org-in-src-block-p)
+				  (string= ,(symbol-name language)
+					   (car (org-babel-get-src-block-info t))))
+			 ,def)
+		    `(when (org-in-src-block-p)
+		       ,def))))))
+
+(defcustom scimax-ob-src-key-bindings
+  '(("<return>" . #'newline-and-indent)
+    ("C-<return>" . #'org-ctrl-c-ctrl-c)
+    ("S-<return>" . #'scimax-ob-execute-and-next-block)
+    ("M-<return>" . (lambda ()
+		      (interactive)
+		      (scimax-ob-execute-and-next-block t)))
+    ("M-S-<return>" . #'scimax-ob-execute-to-point)
+    ("C-M-<return>" . #'org-babel-execute-buffer)
+    ("s-." . #'scimax-ob/body))
+  "Keybindings for src-blocks."
+  :type '(alist :key-type string :value-type function)
+  :group 'scimax)
 
 
-(defun scimax-show-src-keys (language)
+(defun scimax-ob-src-key-bindings ()
+  "Function to define key-bindings.
+Usually called in a hook function."
+  ;; These should work in every src-block IMO.
+  (cl-loop for (key . cmd) in scimax-ob-src-key-bindings
+	   do
+	   (eval `(scimax-ob-define-src-key nil ,key ,cmd))))
+
+;; I think this hook needs to be run at the end.
+(add-hook 'org-mode-hook 'scimax-ob-src-key-bindings t)
+
+
+
+
+(defun scimax-ob-show-src-keys (language)
   "Show a reminder of the keys bound for LANGUAGE blocks."
-  (interactive (list (completing-read "Language: " (mapcar 'car scimax-src-keys))))
+  (interactive (list (completing-read "Language: " (mapcar 'car scimax-ob-src-keys))))
   (let* ((s (loop for (key . function) in  (cdr (assoc (if (stringp language)
 							   (intern-soft language)
 							 language)
-						       scimax-src-keys))
+						       scimax-ob-src-keys))
 		  collect
 		  (format "%10s  %40s" key function)))
 	 (n (length s))
@@ -362,9 +519,13 @@ http://endlessparentheses.com/define-context-aware-keys-in-emacs.html"
 					'("\n")))))))
 
 
-;;* Keymaps on src blocks
+;; * Language mode keymaps on src blocks
 
-(defcustom scimax-python-edit-mode-map
+;; The idea here is to get more src native editing in src blocks by combining
+;; their keymaps with org-mode.
+;; [2020-12-27 Sun] I am not sure this actually works right.
+
+(defcustom scimax-ob-python-edit-mode-map
   (cond
    ((boundp 'elpy-mode-map) elpy-mode-map)
    ((boundp 'anaconda-mode-map) anaconda-mode-map)
@@ -379,7 +540,7 @@ them."
 
 (defcustom scimax-src-block-keymaps
   `(("ipython" . ,(let ((map (copy-keymap (make-composed-keymap
-					   `(,scimax-python-edit-mode-map
+					   `(,scimax-ob-python-edit-mode-map
 					     ,python-mode-map
 					     ,pyvenv-mode-map)
 					   org-mode-map))))
@@ -388,7 +549,7 @@ them."
 		    (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
 		    map))
     ("python" . ,(let ((map (copy-keymap (make-composed-keymap
-					  `(,scimax-python-edit-mode-map
+					  `(,scimax-ob-python-edit-mode-map
 					    ,python-mode-map
 					    ,pyvenv-mode-map)
 					  org-mode-map))))
@@ -402,13 +563,17 @@ them."
 						,outline-minor-mode-map)
 					      org-mode-map))))
 		       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
-		       map)))
+		       map))
+    ("sh" . ,(let ((map (copy-keymap (make-composed-keymap
+				      `(,shell-mode-map)
+				      org-mode-map))))
+	       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+	       map)))
   "alist of custom keymaps for src blocks."
   :group :scimax)
 
 
-
-(defun scimax-add-keymap-to-src-blocks (limit)
+(defun scimax-ob-add-keymap-to-src-blocks (limit)
   "Add keymaps to src-blocks defined in `scimax-src-block-keymaps'.
 This is run by font-lock in `scimax-src-keymap-mode'."
   (let ((case-fold-search t)
@@ -440,24 +605,25 @@ It is for commands that depend on the major mode. One example is
     (apply orig-func args)))
 
 
-(define-minor-mode scimax-src-keymap-mode
+(define-minor-mode scimax-ob-src-keymap-mode
   "Minor mode to add mode keymaps to src-blocks."
   :init-value nil
-  (if scimax-src-keymap-mode
+  (if scimax-ob-src-keymap-mode
       (progn
-	(add-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks t)
+	(add-hook 'org-font-lock-hook #'scimax-ob-add-keymap-to-src-blocks t)
 	(add-to-list 'font-lock-extra-managed-props 'local-map)
+	(add-to-list 'font-lock-extra-managed-props 'keymap)
 	(add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
-	(advice-add 'lispy--eval :around 'scimax-spoof-mode)
+	(advice-add 'lispy--eval :around 'scimax-ob-spoof-mode)
 	(cursor-sensor-mode +1)
-	(message "scimax-src-keymap-mode enabled"))
-    (remove-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks)
-    (advice-remove 'lispy--eval 'scimax-spoof-mode)
+	(message "scimax-ob-src-keymap-mode enabled"))
+    (remove-hook 'org-font-lock-hook #'scimax-ob-add-keymap-to-src-blocks)
+    (advice-remove 'lispy--eval 'scimax-ob-spoof-mode)
     (cursor-sensor-mode -1))
   (font-lock-fontify-buffer))
 
 ;; (add-hook 'org-mode-hook (lambda ()
-;; 			   (scimax-src-keymap-mode +1)))
+;; 			   (scimax-ob-src-keymap-mode +1)))
 
 
 ;; * line numbers
@@ -695,6 +861,74 @@ With a prefix arg cycle backwards."
   ("<left>" (scimax-ob-cycle-header-1 t))
   ("<right>" (scimax-ob-cycle-header-1))
   ("q" nil))
+
+;; * a hydra for src blocks
+
+(defhydra scimax-ob (:color red :hint nil)
+  "
+        Execute                   Navigate                 Edit             Misc
+-----------------------------------------------------------------------------------------------------------------------------
+    _<return>_: current           _i_: previous src        _w_: move up       ^ ^                         _<up>_:
+  _S-<return>_: current and next  _k_: next src            _s_: move down     _l_: clear result  _<left>_:           _<right>_:
+  _M-<return>_: current and new   _q_: visible src         _x_: kill          _L_: clear all              _<down>_:
+_S-M-<return>_: to point          _Q_: any src             _n_: copy          _o_: toggle result folding
+_C-M-<return>_: buffer       _C-<up>_: goto src start      _c_: clone         _N_: toggle line numbers
+           ^ ^             _C-<down>_: goto src end        _mm_: merge region
+           ^ ^             _C-<left>_: word left           _mp_: merge prev
+           ^ ^            _C-<right>_: word right          _mn_: merge next
+           ^ ^                  _C-<_: src begin           _-_: split
+           ^ ^                  _C->_: src end             _+_: insert above
+           ^ ^                    _R_: results             _=_: insert below
+           ^ ^                    ^ ^                      _h_: header
+_;_: dwim comment  _z_: undo  _y_: redo _r_: Goto repl
+
+"
+  ("o" ob-ipython-toggle-output :color red)
+  ("<up>" scimax-ob-edit-up :color red)
+  ("<down>" scimax-ob-edit-down :color red)
+  ("<left>" left-char :color red)
+  ("<right>" right-char :color red)
+  ("C-<up>" scimax-ob-jump-to-first-line :color red)
+  ("C-<down>" scimax-ob-jump-to-end-line :color red)
+  ("C-<left>" left-word :color red)
+  ("C-<right>" right-word :color red)
+
+  ("z" undo-tree-undo :color red)
+  ("y" undo-tree-redo :color red)
+
+  ("<return>" org-ctrl-c-ctrl-c :color blue)
+  ("S-<return>" scimax-ob-execute-and-next-block :color red)
+  ("M-<return>" (lambda () (interactive)
+		  (scimax-ob-execute-and-next-block t)
+		  font-lock-fontify-block) :color red)
+  ("S-M-<return>" scimax-ob-execute-to-point :color blue)
+  ("C-M-<return>" org-babel-execute-buffer :color blue)
+  ("r" org-babel-switch-to-session)
+  ("N" scimax-ob-toggle-line-numbers)
+
+  ("i" org-babel-previous-src-block :color red)
+  ("k" org-babel-next-src-block :color red)
+  ("q" scimax-ob-jump-to-visible-block)
+  ("Q" scimax-ob-jump-to-block)
+  ("C-<" scimax-ob-jump-to-first-line)
+  ("C->" scimax-ob-jump-to-end-line)
+  ("R" (goto-char (org-babel-where-is-src-block-result)))
+
+  ("w" scimax-ob-move-src-block-up :color red)
+  ("s" scimax-ob-move-src-block-down :color red)
+  ("x" scimax-ob-kill-block-and-results)
+  ("n" scimax-ob-copy-block-and-results)
+  ("c" scimax-ob-clone-block)
+  ("mm" scimax-ob-merge-blocks)
+  ("mp" scimax-ob-merge-previous)
+  ("mn" scimax-ob-merge-next)
+  ("-" scimax-ob-split-src-block )
+  ("+" scimax-ob-insert-src-block)
+  ("=" (scimax-ob-insert-src-block t))
+  ("l" org-babel-remove-result)
+  ("L" scimax-ob-clear-all-results)
+  ("h" scimax-ob-edit-header)
+  (";" org-comment-dwim :color red))
 
 
 (provide 'scimax-ob)
