@@ -1580,7 +1580,7 @@ Scimax uses a central hydra to launch a key-driven menu of commonly used command
 
 #+RESULTS:
 #+begin_example
-scimax/body is an interactive Lisp closure in `scimax-hydra.el'.
+scimax/body is an interactive autoloaded Lisp closure in `scimax-hydra.el'.
 
 It is bound to <f12>.
 
@@ -1588,7 +1588,9 @@ It is bound to <f12>.
 
 For more information check the manuals.
 
-Create a hydra with no body and the heads:
+Call the body in the "scimax" hydra.
+
+The heads for the associated hydra are:
 
 "a":    ‘(scimax-open-hydra scimax-applications/body)’,
 "b":    ‘(scimax-open-hydra scimax-buffers/body)’,
@@ -1601,6 +1603,8 @@ Create a hydra with no body and the heads:
 "k":    ‘(scimax-open-hydra scimax-bookmarks/body)’,
 "l":    ‘(scimax-open-hydra scimax-lisp/body)’,
 "m":    ‘(scimax-open-hydra scimax-minor-modes/body)’,
+"M":    ‘(scimax-open-hydra scimax-smerge/body)’,
+"s-m":    ‘scimax-dispatch-mode-hydra’,
 "n":    ‘(scimax-open-hydra scimax-navigation/body)’,
 "o":    ‘(scimax-open-hydra scimax-org/body)’,
 "p":    ‘(scimax-open-hydra hydra-projectile/body)’,
@@ -1609,15 +1613,16 @@ Create a hydra with no body and the heads:
 "t":    ‘(scimax-open-hydra scimax-text/body)’,
 "v":    ‘(scimax-open-hydra scimax-version-control/body)’,
 "w":    ‘(scimax-open-hydra scimax-windows/body)’,
-"z":    ‘(scimax-open-hydra scimax-settings/body)’,
+"z":    ‘(scimax-open-hydra scimax-customize/body)’,
 ",":    ‘scimax-hydra-pop’,
 "x":    ‘counsel-M-x’,
-"<return>":    ‘save-buffer’,
+"C-s":    ‘save-buffer’,
 "/":    ‘undo-tree-undo’,
 "\":    ‘undo-tree-redo’,
-"*":    ‘(switch-to-buffer "*scratch*")’,
+"8":    ‘(switch-to-buffer "*scratch*")’,
 "?":    ‘scimax-hydra-help’,
 ".":    ‘scimax-dispatch-mode-hydra’,
+"u":    ‘(hydra--universal-argument current-prefix-arg)’,
 "q":    ‘nil’
 
 The body can be accessed via ‘scimax/body’.
