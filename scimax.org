@@ -1443,7 +1443,7 @@ Type C-c h C-h to see the helm key bindings. There are so many good things in th
 
 This is a powerful search tool in Emacs. See https://github.com/abo-abo/swiper
 
-C-s is bound to `counsel-grep-or-swiper' for searching.
+C-s is bound to `counsel-grep-or-swiper' for searching. Try H-s to run `swiper-all'.
 
 ** undo-tree
 
@@ -1473,7 +1473,7 @@ Here are some other interesting commands you may want to use.
 - `projectile-switch-to-buffer' :: switch to a project buffer
 - `projectile-kill-buffers' :: kill all the buffers associated with the project
 
-These commands help you navigate to a headline.
+These commands help you navigate to a headline at different scopes (e.g. file, directory or project).
 
 - `ivy-org-jump-to-heading' :: in the current file
 - `ivy-org-jump-to-heading-in-directory' :: in the current directory
@@ -1516,7 +1516,9 @@ I have extended the `ivy-minibuffer-map' to enable the following:
 3. s-RET quits the selection buffer with no action.
 4. ? shows you the keymap.
 
-In the ivy selection buffer
+In the ivy selection buffer you can use these commands:
+| keybinding    | action                                                     |
+|---------------+------------------------------------------------------------|
 | M-spc         | Show the actions                                           |
 | spc           | resume                                                     |
 | RET           | Default action and exit                                    |
@@ -1530,29 +1532,33 @@ In the ivy selection buffer
 
 I use Hyper-c as a prefix map for these commands.
 
-| H-c r | `ivy-resume'           |
-| H-c l | `counsel-load-library' |
-| H-c a | `counsel-ag'           |
+| keybinding | action                 |
+|------------+------------------------|
+| H-c r      | `ivy-resume'           |
+| H-c l      | `counsel-load-library' |
+| H-c a      | `counsel-ag'           |
 
 ** counsel-find-file
 
 Here are some additional actions we define for `counsel-find-file'.
 
-| a   | attach to email      |
-| c   | copy relative path   |
-| 4   | Open in new window   |
-| 5/f | Open in new frame    |
-| C   | Copy absolute path   |
-| d   | open in dired        |
-| D   | Delete file          |
-| e   | open in external app |
-| p   | insert relative path |
-| P   | insert absolute path |
-| l   | relative org link    |
-| L   | absolute org link    |
-| r   | rename file          |
-| b   | open in bash         |
-| F   | open in Finder       |
+| keybinding | action               |
+|------------+----------------------|
+| a          | attach to email      |
+| c          | copy relative path   |
+| 4          | Open in new window   |
+| 5/f        | Open in new frame    |
+| C          | Copy absolute path   |
+| d          | open in dired        |
+| D          | Delete file          |
+| e          | open in external app |
+| p          | insert relative path |
+| P          | insert absolute path |
+| l          | relative org link    |
+| L          | absolute org link    |
+| r          | rename file          |
+| b          | open in bash         |
+| F          | open in Finder       |
 
 * scimax-hydras
 
