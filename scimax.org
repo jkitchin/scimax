@@ -235,14 +235,23 @@ and in org-mode:
   - [[./snippets/org-mode/src-blocks/]] (src blocks)
   - [[./snippets/org-mode/blocks/]] (quotes, verses, etc.)
 
-
 ** Latex
 
-For numbered LaTeX equations, scimax will make sure that the overlays have correct numbers on them.
+For numbered LaTeX equations, scimax will make sure that the overlays have correct numbers on them. If you run `org-latex-preview' you should see (1) and (2) on these overlays.
+
+\begin{equation}
+f(x) = e^x
+\end{equation}
+
+
+\begin{equation}
+f(x) = 2 e^x
+\end{equation}
 
 *** Latex classes that scimax knows about
 
 Here is a list of installed latex classes.
+
 #+BEGIN_SRC emacs-lisp
 (mapcar 'car org-latex-classes)
 #+END_SRC
