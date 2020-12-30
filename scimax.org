@@ -314,7 +314,76 @@ The best way to see other speed commands is to put your cursor at the beginning 
 
 `ox-clip-formatted-copy' provides a way to copy org-mode with formatting so it can be pasted into other programs like MS Word and web browsers. It does this by copying the selected text to the HTML clipboard.
 
+** TODO Better src block tools
+
+scimax provides a lot of features on top of org-mode to work with src blocks. The usual stuff should work fine, e.g. C-c C-c to run a block.
+
+*** Customized keymaps by language inside src-blocks
+
+`scimax-ob-src-keymap-mode' adds minor mode keymaps to your src blocks. See `scimax-ob-src-block-keymaps' for a way to add your own custom maps.
+
+*** Better Execution
+
+- C-<return> is an alternative to C-c C-c to run a block
+- S-<return> will run a block and move to the next block or create one if needed
+- M-<return> will run a block and insert a new block after it
+- M-S-<return> runs all the blocks to the current point
+
+*** Insert new blocks
+
+See `scimax-ob-insert-src-block'.
+
+*** Split src block
+
+See `scimax-ob-split-src-block' which splits a block at the point with cursor in the upper block. Use a prefix arg to put cursor in the lower block.
+
+*** Navigate to src blocks
+
+- `scimax-ob-jump-to-visible-block' ::  use avy to jump to a visible block.
+- `scimax-ob-jump-to-block' :: use ivy to jump to a block in the buffer
+- `scimax-ob-jump-to-inline-src' :: use ivy to jump to an inline src
+
+- `scimax-ob-jump-to-header' :: move cursor to the header
+- `scimax-ob-jump-to-end' :: jump to the end
+
+
+*** Editing blocks
+
+You can clone, copy, kill and merge blocks now.
+
+`scimax-ob-clone-block'
+`scimax-ob-copy-block-and-results'
+`scimax-ob-kill-block-and-results'
+`scimax-ob-merge-blocks'
+
+It is also possible to move blocks up and down.
+
+`scimax-ob-move-src-block-up'
+`scimax-ob-move-src-block-down'
+
+*** Jump to or edit headers
+
+`scimax-ob-edit-header'
+`scimax-ob-avy-jump-to-header'
+`scimax-ob-replace-header-item-with-completion'
+
+*** visualizing blocks
+
+- `scimax-ob-toggle-line-numbers' :: show line numbers in a block
+
+*** Miscellaneous utilities
+
+`scimax-ob-clear-all-results'
+
+*** A hydra to bind them all
+
+It is hard to remember all those commands and/or keybindings. Use this convenient hydra instead!
+
+This should be bound to something convenient `scimax-ob/body'.
+
+
 * Writing tools
+
 ** Spell-checking
 
 scimax is configured with flyspell and flycheck on. When you misspell a word it will be underlined in red, and you will see a message in the minibuffer that tells you how to fix it (C-;). Type that, and you will be able to fix the word spelling without losing your place! Not only that, but the correction will be saved as an abbreviation so it will auto correct every time you make the mistake again! Note this only works for single word corrections (i.e. the correction cannot be a two word correction).
