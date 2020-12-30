@@ -411,7 +411,7 @@ Optional argument FORCE. if non-nil force the buffer to be added."
        (cl-loop for hl in headlines do
 		(save-excursion
 		  (goto-char (org-element-property :begin hl))
-		  (setq tags (mapcar 'org-no-properties (org-get-tags-at))
+		  (setq tags (mapcar 'org-no-properties (org-get-tags))
 			properties (org-entry-properties (org-element-property :begin hl) 'all)))
 
 		(setq hlv (vector
