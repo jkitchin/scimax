@@ -344,6 +344,7 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 	    hashtag-id
 	    hlv 			;; headline level
 	    headline-id
+            property-id
 	    tags
 	    properties
 	    tag-id)
