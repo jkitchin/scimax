@@ -194,9 +194,9 @@ Parse results into a list of p-lists for each entry returned."
 			 (s-truncate
 			  20
 			  (or (plist-get x :title) " "))
-			 (plist-get x :cn)
-			 (plist-get x :mail)
-			 (plist-get x :cmuDisplayAddress)
+			 (or (plist-get x :cn) "")
+			 (or (plist-get x :mail) "")
+			 (or (plist-get x :cmuDisplayAddress) "")
 			 (or (plist-get x :telephoneNumber) " "))
 			x))
 		     (ldap-query
@@ -216,6 +216,13 @@ Parse results into a list of p-lists for each entry returned."
 						"@andrew.cmu.edu")))
 			       (message-goto-subject))
 			 "Email")
+			("P" (lambda (x)
+			       (org-entry-put (point) "EMAIL" (or
+							       (plist-get (cdr x) :cmuPreferredMail)
+							       (plist-get (cdr x) :mail)
+							       (concat (plist-get (cdr x) :cmuAndrewID)
+								       "@andrew.cmu.edu"))))
+			 "Add EMAIL property")
 			("p" (lambda (x)
 			       (cisco-call
 				(plist-get x :telephoneNumber)))
@@ -243,7 +250,7 @@ Parse results into a list of p-lists for each entry returned."
 					     for key in x by #'cddr
 					     collect key))
 				 (insert (format "|%s | %s|\n"
-						 key (plist-get x key)))) 
+						 key (plist-get x key))))
 			       (previous-line)
 			       (org-ctrl-c-ctrl-c)
 
