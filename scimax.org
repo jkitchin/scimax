@@ -829,16 +829,17 @@ Scimax provides hotkeys for when your cursor is on the @ at the beginning of an 
 
 #+BEGIN_SRC emacs-lisp
 (require 'bibtex-hotkeys)
-(loop for (key . desc) in bibtex-hotkeys collect (list key desc))
+(cl-loop for (key . desc) in bibtex-hotkeys collect (list key desc))
 #+END_SRC
 
 #+RESULTS:
 | y | Paste last entry       |
+| U | Update entry           |
 | w | Move entry down        |
 | T | Title-case article     |
 | S | Sentence-case title    |
 | s | Move entry up          |
-| F | Jump to field with avy |
+| q | Jump to field with avy |
 | ? | Show hotkeys           |
 | p | Jump to previous entry |
 | n | Jump to next entry     |
