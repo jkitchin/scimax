@@ -1625,6 +1625,159 @@ The body can be accessed via ‘scimax/body’.
 
 So, instead of C-x C-f to open a file (which still works by the way) you can simply type: f12 ff. Or instead of C-x C-s to save the file, type f12 RET. Each hydra will show you a hint in the minibuffer on which keys do what.
 
+* Searching in scimax
+
+Search is a complicated thing because you often have to balance speed, completeness and accuracy. For example, for completeness you would search your whole hard drive, but that would be slow. Scimax offers several ways to search with different scopes.
+
+You also have to consider what to do with the results you find. This is somewhat related to navigation, with the subtle difference being you use a search criteria before you jump to that location.
+
+You are not likely to remember all these. You can access a lot of them from `scimax-search/body'.
+
+
+** Search the current buffer
+
+Use `counsel-grep-or-swiper' to search the current buffer. You start typing the pattern you are looking for, and when you see it, press enter to jump to that position.
+
+** Search all open buffers
+
+Use `swiper-all' to search all open buffers. You start typing the pattern you are looking for, and when you see it, press enter to jump to that position.
+
+** Searching for headings in org buffers or files
+
+These functions provide ivy search interfaces to find headings in org-files with different scopes.
+
+- `ivy-org-jump-to-heading' :: Jump to heading in the current buffer
+- `ivy-org-jump-to-heading-in-directory' :: Search headings of org-files in current directory
+- `ivy-org-jump-to-recent-headline' :: Jump to org heading in recently opened files
+- `ivy-org-jump-to-agenda-heading' :: Jump to a heading in your agenda files
+- `ivy-org-jump-to-project-headline' :: Jump to a heading in your current project
+
+** Searching files that contain patterns
+
+We use a variety of tools to search files for a pattern. These are full text searches of files
+
+- `ag' :: Use ag to search
+- `lgrep' :: Search for pattern in matching files in dir
+- `rgrep' :: Recursive search for pattern in matching files in dir
+
+- `counsel-git-grep' :: search for a string in the current git repo
+- `counsel-pt' :: Search current directory using pt
+- `counsel-ag' :: Search current directory using ag
+- `counsel-rg' :: Search current directory using ripgrep
+
+** Searching files that are in a project
+
+- `counsel-projectile-pt' :: Search current project using pt
+- `counsel-projectile-ag' :: Search current project using ag
+- `counsel-projectile-rg' :: Search current project using ripgrep
+
+- `projectile-grep' :: Run rgrep in a project
+- `projectile-ripgrep' :: Run ripgrep in a project
+- `projectile-ag' :: Run ag in a project
+
+=scimax-notebook= provides some additional search tools. It is not super clear these are better than the options above.
+- `nb-search' :: like grep, search for pattern in files matching a pattern
+- `nb-search-all' :: search all notebook files
+- `nb-search-title' :: Search org-files by title, author, date or filename
+
+** searching journal entries
+
+`scimax-journal' provides some ways to limit the search of journal entries by date. There are `swiper' commands. These will open the journal entries and use swiper to search them. The implied range here is the last week, month or year from today.
+
+- `scimax-journal-swiper-range'
+- `scimax-journal-swiper-last-week'
+- `scimax-journal-swiper-last-month'
+- `scimax-journal-swiper-last-year'
+
+There are also grep based commands
+- `scimax-journal-grep'
+- `scimax-journal-find-regexp-last-week'
+- `scimax-journal-find-regexp-last-month'
+- `scimax-journal-find-regexp-last-year'
+
+** search org-files anywhere
+
+`org-db' is an org-mode database. When it is active every org-mode file you visit will be indexed into a sqlite database. In each file, each headline with its title, tags and properties are stored, and every link in each file is stored.
+
+This becomes useful because you can then search all of your org-files and jump to different locations.
+
+- `org-db-headings' :: Jump to a heading
+- `org-db-contacts' :: jump to a heading with an email property
+- `org-db-files' :: open a file in the db
+- `org-db-recent-files' :: open a list of recent files from the db
+- `org-db-locations' :: open a heading with an address property
+- `org-db-hashtags' :: open a hashtag.
+- `org-db-property-search' :: search for entries with a property that matches a pattern
+- `org-db-editmarks' :: Search editmarks in your org-files
+
+You can add a lot of files with `org-db-index'.
+
+When active, every time you save an org-file it will be added to a queue to be indexed during idle time.
+
+
+** Structured queries of org-files
+
+If you need sophisticated structured searches,  check out `org-ql-select' and `org-ql-query' from https://github.com/alphapapa/org-ql.
+
+For example, this searches the current buffer for a heading matching "queries", and it returns a data structure.
+
+#+BEGIN_SRC emacs-lisp
+(org-ql-select (current-buffer) '(heading "queries"))
+#+END_SRC
+
+#+RESULTS:
+| headline | (:raw-value Structured queries of org-files :begin 57974 :end 58008 :pre-blank 0 :contents-begin 58009 :contents-end 58009 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 57974 :title (Structured queries of org-files)) |
+
+Or from a file
+
+#+BEGIN_SRC emacs-lisp
+(org-ql-select "scimax.org" '(heading "queries"))
+#+END_SRC
+
+#+RESULTS:
+| headline | (:raw-value Structured queries of org-files :begin 57974 :end 58008 :pre-blank 0 :contents-begin 58009 :contents-end 58009 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 57974 :title (Structured queries of org-files)) |
+
+Or from a list of files.
+
+#+BEGIN_SRC emacs-lisp
+(org-ql-select '("scimax.org" "README.org") '(or (heading "queries") (heading "users")))
+#+END_SRC
+
+#+RESULTS:
+| headline | (:raw-value Structured queries of org-files :begin 57974 :end 58008 :pre-blank 0 :contents-begin 58009 :contents-end 58009 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 57974 :title (Structured queries of org-files))                                            |
+| headline | (:raw-value Windows users :begin 1310 :end 1326 :pre-blank 0 :contents-begin 1327 :contents-end 1327 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 1310 :title (Windows users))                                                                                     |
+| headline | (:raw-value Mac users :begin 1682 :end 1694 :pre-blank 0 :contents-begin 1695 :contents-end 1695 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 1682 :title (Mac users))                                                                                             |
+| headline | (:raw-value Alternative manual installation of scimax for Mac users :begin 2268 :end 2327 :pre-blank 0 :contents-begin 2328 :contents-end 2328 :level 3 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 2268 :title (Alternative manual installation of scimax for Mac users)) |
+| headline | (:raw-value Linux users :begin 3249 :end 3263 :pre-blank 0 :contents-begin 3264 :contents-end 3264 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 3249 :title (Linux users))                                                                                         |
+
+I don't use this library enough.
+
+* Navigation in scimax
+Navigation is almost as complex as searching, and it means moving your cursor to the place you want it to be. Yes, you can use a mouse or arrow keys. There are often faster ways to get what you want though. In scimax see `scimax-navigation/body' which provides ways to navigate by:
+
+- character
+- word
+- sentence
+- paragraph
+- line
+- buffer
+
+See also `scimax-jump/body' which provides ways to jump to all kinds of things like:
+
+- chars
+- words
+- sentences
+- paragraphs
+- org headings
+- links
+- recent files
+- windows
+- buffers and buffer positions
+- lines
+- symbols
+
+Many of those open hydra menus that further refine where those things are, e.g. below or above the current position.
+
 * Appendix
 
 `scimax-help' will open this document.
