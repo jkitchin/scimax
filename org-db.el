@@ -53,14 +53,17 @@
 
 (defcustom org-db-root "~/org-db/"
   "Root directory for db files."
+  :type 'directory
   :group 'org-db)
 
 (defcustom org-db-name "org-db.sqlite"
   "Name of the sqlite database file."
+  :type 'string
   :group 'org-db)
 
 (defcustom org-db-index-content nil
   "Controls if the content of headlines is saved."
+  :type 'boolean
   :group 'org-db)
 
 
@@ -355,6 +358,7 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 	    hashtag-id
 	    hlv 			;; headline level
 	    headline-id
+            property-id
 	    tags
 	    properties
 	    tag-id)
@@ -421,7 +425,7 @@ Optional argument FORCE. if non-nil force the buffer to be added."
        (cl-loop for hl in headlines do
 		(save-excursion
 		  (goto-char (org-element-property :begin hl))
-		  (setq tags (mapcar 'org-no-properties (org-get-tags-at))
+		  (setq tags (mapcar 'org-no-properties (org-get-tags))
 			properties (org-entry-properties (org-element-property :begin hl) 'all)))
 
 		(setq hlv (vector
@@ -692,7 +696,7 @@ Optional RECURSIVE is non-nil find files recursively."
     (let ((actual-mod-time (float-time (file-attribute-modification-time
 					(file-attributes (plist-get candidate :filename))))))
       (when (org-time<= (plist-get candidate :last-updated) actual-mod-time)
-	(error q"%s is not up to date in org-db.")))
+	(error "%s is not up to date in org-db." (plist-get candidate :filename))))
 
     (with-current-buffer
 	(find-file-noselect
@@ -702,8 +706,8 @@ Optional RECURSIVE is non-nil find files recursively."
       ;; Check we are looking at the right place
       (unless (and (looking-at org-heading-regexp)
 		   (string= (plist-get candidate :email) (org-entry-get (point) "EMAIL")))
-	(error "It does not appear we are looking at the right place:\n%s"))
-      (org-id-get-create)
+	(error "It does not appear we are looking at the right place here:\n%s" (plist-get candidate :filename)))
+
       (setq link (format
 		  "[[contact:%s][%s]]"
 		  (org-entry-get (point) "EMAIL")
@@ -1046,9 +1050,9 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
     (cond
      ((and result
 	   (= 1 (length result)))
-      (setq match (first result)
-	    fname (first match)
-	    p (second match))
+      (setq match (cl-first result)
+	    fname (cl-first match)
+	    p (cl-second match))
       (find-file fname)
       (goto-char p))
 
