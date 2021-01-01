@@ -18,24 +18,29 @@
 
 (defcustom ob-ipython-eldoc-integration nil
   "If non-nil use eldoc to show signatures."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'boolean)
 
 (defcustom ob-ipython-buffer-unique-kernel t
   "If non-nil use a unique kernel for each buffer."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'boolean)
 
 (defcustom ob-ipython-show-mime-types t
   "If non-nil show mime-types in output."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'boolean)
 
 (defcustom ob-ipython-exception-results t
   "If non-nil put the contents of the traceback buffer as results."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'boolean)
 
 (defcustom ob-ipython-suppress-execution-count nil
   "Deprecated. See `ob-ipython-execution-count'.
 If non-nil do not show the execution count in output."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'boolean)
 
 (defcustom ob-ipython-execution-count
   #'ob-ipython-execution-count-output
@@ -55,11 +60,13 @@ The function takes one argument, the execution count. It should return a string 
 
 (defcustom ob-ipython-kill-kernel-on-exit t
   "If non-nil, prompt user to kill kernel when killing a buffer."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'boolean)
 
 (defcustom ob-ipython-delete-stale-images t
   "If non-nil remove images that will be replaced."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'boolean)
 
 (defcustom ob-ipython-mime-formatters
   '((text/plain . ob-ipython-format-text/plain)
@@ -74,7 +81,8 @@ The function takes one argument, the execution count. It should return a string 
   "An alist of (mime-type . format-func) for mime-types.
 Each function takes two arguments, which is file-or-nil and a
 string to be formatted."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type '(alist :key-type symbol :key-value function))
 
 (defcustom ob-ipython-plain-text-filter-regexps
   '(
@@ -84,7 +92,8 @@ string to be formatted."
     "^<.*at 0x.*>"
     )
   "A list of regular expressions to filter out of text/plain results."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'regexp)
 
 (defcustom ob-ipython-key-bindings
   '(
@@ -132,7 +141,8 @@ string to be formatted."
     ("<mouse-3>" . #'scimax-ob-ipython-popup-command))
   "An alist of key bindings and commands.
 These are activated in function `ob-ipython-key-bindings'."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type '(alist :key-type string :value-type function))
 
 (defcustom ob-ipython-menu-items
   '(("Execute"
@@ -168,7 +178,8 @@ These are activated in function `ob-ipython-key-bindings'."
     ["Kill kernel" scimax-ob-ipython-kill-kernel t]
     ["Switch to repl" org-babel-switch-to-session t])
   "Items for the menu bar and popup menu."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type '(repeat (list string (repeat (vector string function boolean)))))
 
 (defcustom ob-ipython-buttons
   '(("<run>"  org-ctrl-c-ctrl-c "Click to run")
@@ -187,13 +198,15 @@ These are activated in function `ob-ipython-key-bindings'."
 text is regexp/string that will become a button.
 cmd is run when you click on the button.
 help is a string for a tooltip."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type '(repeat (list string function string)))
 
 
 (defcustom ob-ipython-html-to-image-program
   (executable-find "wkhtmltoimage")
   "Path to wkhtmltoimage, and any additional options you want."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type '(file :must-match t))
 
 
 (unless ob-ipython-html-to-image-program
@@ -202,12 +215,14 @@ help is a string for a tooltip."
 
 (defcustom ob-ipython-preview-html t
   "if non-nil try previewing html."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'boolean)
 
 
 (defcustom ob-ipython-preview-html-size 800
   "Size in pixels to make the html previews."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'integer)
 
 
 (defun ob-ipython-key-bindings ()
@@ -1431,7 +1446,7 @@ Note, this does not work if you run the block async."
 		nil))
 	    ;; get rid of this so we don't accidently show old results later
 	    (with-current-buffer "*ob-ipython-inspect*"
-	      (toggle-read-only)
+	      (read-only-mode -1)
 	      (erase-buffer))))))))
 
 
