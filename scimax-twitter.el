@@ -90,15 +90,15 @@ _k_: copy  _o_: open"
     (make-directory (f-join scimax-twitter-directory "whois") t))
 
   ;; Here we download the files if necessary.
-  (loop for username in scimax-twitter-usernames
-	do
-	(let ((userfile (expand-file-name username
-					  (f-join scimax-twitter-directory "whois"))))
-	  (when (or reload (not (f-exists? userfile)))
-	    (message "Getting user %s" username)
-	    (with-temp-file userfile
-	      (insert (shell-command-to-string
-		       (format "t whois %s" username))))))))
+  (cl-loop for username in scimax-twitter-usernames
+	   do
+	   (let ((userfile (expand-file-name username
+					     (f-join scimax-twitter-directory "whois"))))
+	     (when (or reload (not (f-exists? userfile)))
+	       (message "Getting user %s" username)
+	       (with-temp-file userfile
+		 (insert (shell-command-to-string
+			  (format "t whois %s" username))))))))
 
 
 (defvar scimax-twitter-usernames nil
