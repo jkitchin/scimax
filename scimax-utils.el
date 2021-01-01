@@ -131,7 +131,7 @@ sentence in the region."
   "Jump to a word in the current line."
   (interactive)
   (avy-with word-jump
-    (avy--process
+    (avy-process
      (let ((p '())
 	   (e (line-end-position)))
        (save-excursion
@@ -150,7 +150,7 @@ sentence in the region."
   "Jump to a sentence with avy."
   (interactive)
   (avy-with my-jumper
-    (avy--process
+    (avy-process
      (let (p
 	   (e (window-end)))
        (save-excursion
@@ -169,7 +169,7 @@ sentence in the region."
   "Jump to a paragraph with avy."
   (interactive)
   (avy-with my-jumper
-    (avy--process
+    (avy-process
      (let (p
 	   (e (window-end)))
        (save-excursion
