@@ -283,7 +283,7 @@ You need this for tweeting from multiple accounts."
 It is if the previous heading has TWITTER_MSGID property, and the
 current headline is tagged as part of a tweet thread. Returns the
 id to reply to if those conditions are met."
-  (let ((tags (mapcar 'org-no-properties (org-get-tags-at))))
+  (let ((tags (mapcar 'org-no-properties (org-get-tags))))
     (or (org-entry-get nil "TWITTER_IN_REPLY_TO")
 	(and (-contains?  tags "tweet")
 	     (-contains? tags "thread")
@@ -292,7 +292,7 @@ id to reply to if those conditions are met."
 		 (org-back-to-heading))
 	       (org-previous-visible-heading 1)
 	       ;; Make sure previous heading is part of the thread
-	       (let ((tags (mapcar 'org-no-properties (org-get-tags-at))))
+	       (let ((tags (mapcar 'org-no-properties (org-get-tags))))
 		 (and (-contains?  tags "tweet")
 		      (-contains? tags "thread")
 		      (org-entry-get nil "TWITTER_MSGID"))))))))
@@ -420,13 +420,13 @@ Use a prefix arg to make it actually tweet."
 
     (save-excursion
       (goto-char (point-min))
-      (unless (-contains?  (mapcar 'org-no-properties (org-get-tags-at)) "tweet")
-	(let ((current-tags (org-get-tags-at)))
-	  (org-set-tags-to (append current-tags '("tweet")))))
+      (unless (-contains?  (mapcar 'org-no-properties (org-get-tags)) "tweet")
+	(let ((current-tags (org-get-tags)))
+	  (org-set-tags (append current-tags '("tweet")))))
 
-      (unless (-contains?  (mapcar 'org-no-properties (org-get-tags-at)) "thread")
-	(let ((current-tags (org-get-tags-at)))
-	  (org-set-tags-to (append current-tags '("thread")))))
+      (unless (-contains?  (mapcar 'org-no-properties (org-get-tags)) "thread")
+	(let ((current-tags (org-get-tags)))
+	  (org-set-tags (append current-tags '("thread")))))
 
       (while (looking-at org-heading-regexp)
 	(if tweet
