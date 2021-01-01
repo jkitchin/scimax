@@ -227,7 +227,7 @@ Code:
 	   (t
 	    result)))))
     ;; finally jump to Requires section
-    (org-open-link-from-string "[[*Requires]]")))
+    (org-link-open-from-string "[[*Requires]]")))
 
 
 (provide 'scimax-org-eldoc)

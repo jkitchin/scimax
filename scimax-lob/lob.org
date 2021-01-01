@@ -149,7 +149,7 @@ example usage
 :   (flet ((fib (m) (if (< m 2) 1 (+ (fib (- m 1)) (fib (- m 2))))))
 :     (mapcar (lambda (el) (list el (fib el))) (number-sequence 0 (- n 1))))
 : #+end_src
-: 
+:
 : #+call: gdoc-write(title="fibs", data=fibs(n=10))
 
 * Plotting code
@@ -185,7 +185,7 @@ plot(data)
 #+BEGIN_SRC emacs-lisp :var headline=top :var file='()
 (save-excursion
   (when file (get-file-buffer file))
-  (org-open-link-from-string (org-make-link-string headline))
+  (org-link-open-from-string (org-make-link-string headline))
   (save-restriction
     (org-narrow-to-subtree)
     (buffer-string)))
@@ -361,7 +361,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
 (apply #'mapcar* #'list table)
 #+END_SRC
 
-#+NAME: 
+#+NAME:
 | 1 | 4 |
 | 2 | 5 |
 | 3 | 6 |
@@ -387,7 +387,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
 (mapcar (lambda (row) (mapcar (lambda (cell) (stringp cell)) row)) tbl)
 #+END_SRC
 
-#+NAME: 
+#+NAME:
 | nil | nil | nil |
 | t   | t   | t   |
 
@@ -395,7 +395,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
 (mapcar (lambda (row) (mapcar (lambda (cell) (stringp cell)) row)) tbl)
 #+END_SRC
 
-#+NAME: 
+#+NAME:
 | t | t | t |
 | t | t | t |
 

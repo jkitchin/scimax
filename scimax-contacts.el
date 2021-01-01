@@ -161,7 +161,7 @@ If FROM is non-nil, emails from the contact."
   (interactive)
   (unless (fboundp 'mu4e)
     (error "mu4e does not seem to be available."))
-  (org-open-link-from-string
+  (org-link-open-from-string
    (if FROM
        (format "[[mu4e:query:from:%s]]"
 	       (org-element-property :path (org-element-context)))

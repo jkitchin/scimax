@@ -368,12 +368,12 @@ end tell"
 			     (message-goto-subject))
 		       "Email contact")
 		      ("t" (lambda (contact)
-			     (org-open-link-from-string
+			     (org-link-open-from-string
 			      (format "[[mu4e:query:to:%s]]"
 				      (cdr (assoc "EMAIL" contact)))))
 		       "Emails to contact")
 		      ("f" (lambda (contact)
-			     (org-open-link-from-string
+			     (org-link-open-from-string
 			      (format "[[mu4e:query:from:%s]]"
 				      (cdr (assoc "EMAIL" contact)))))
 		       "Emails from contact")
@@ -611,12 +611,12 @@ end tell" (cdr (assoc "PHONE" contact)))))
 
 	      ("Find emails to contact" . (lambda (candidate)
 					    (let ((contact (helm-contacts-get-contact candidate)))
-					      (org-open-link-from-string
+					      (org-link-open-from-string
 					       (format "[[mu4e:query:to:%s]]"
 						       (cdr (assoc "EMAIL" contact)))))))
 	      ("Find emails from contact" . (lambda (candidate)
 					      (let ((contact (helm-contacts-get-contact candidate)))
-						(org-open-link-from-string
+						(org-link-open-from-string
 						 (format "[[mu4e:query:from:%s]]"
 							 (cdr (assoc "EMAIL" contact)))))))
 	      ("Call" . (lambda (candidate)

@@ -839,7 +839,7 @@ Following a link means opening the file it points to.
 	   ((string-match "\\<c\\([0-9]+\\)\\>" link-target)
 	    (goto-char (string-to-number (match-string 1 link-target))))
 	   (t
-	    (org-open-link-from-string (format "[[%s]]" link-target)))))
+	    (org-link-open-from-string (format "[[%s]]" link-target)))))
 	(org-show-entry))
        ;; everything else
        (t
@@ -900,7 +900,7 @@ Following a link means opening the file it points to.
 	   ((string-match "\\<c\\([0-9]+\\)\\>" link-target)
 	    (goto-char (string-to-number (match-string 1 link-target))))
 	   (t
-	    (org-open-link-from-string (format "[[%s]]" link-target)))))
+	    (org-link-open-from-string (format "[[%s]]" link-target)))))
 	(org-show-entry))
        ;; everything else
        (t
