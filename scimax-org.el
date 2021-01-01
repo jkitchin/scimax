@@ -670,7 +670,7 @@ F5 inserts the entity code."
 		   (buffer-substring (point-min) (point))))
 	   (link (concat "man:" page))
 	   (description (format "Manpage for %s" page)))
-      (org-store-link-props
+      (org-link-store-props
        :type "man"
        :link link
        :description description))))
