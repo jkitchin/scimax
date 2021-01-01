@@ -7,22 +7,25 @@
 (require 'elfeed)
 
 ;;; Code:
-(loop for feed in '(("http://planetpython.org/rss20.xml" python)
-		    ("http://planet.scipy.org/rss20.xml" python)
-		    ("http://planet.emacsen.org/atom.xml" emacs)
-		    ;; Stackoverflow questions on emacs
-		    ("http://emacs.stackexchange.com/feeds" emacs))
-      do
-      (add-to-list 'elfeed-feeds feed t))
+(cl-loop for feed in '(("http://planetpython.org/rss20.xml" python)
+		       ("http://planet.scipy.org/rss20.xml" python)
+		       ("http://planet.emacsen.org/atom.xml" emacs)
+		       ;; Stackoverflow questions on emacs
+		       ("http://emacs.stackexchange.com/feeds" emacs))
+	 do
+	 (add-to-list 'elfeed-feeds feed t))
 
 
 (defface python-elfeed-entry
   '((t :background "Darkseagreen1"))
-  "Marks a python Elfeed entry.")
+  "Marks a python Elfeed entry."
+  :group 'scimax-elfeed)
 
 (defface emacs-elfeed-entry
   '((t :background "Lightblue1"))
-  "Marks a python Elfeed entry.")
+  "Marks a python Elfeed entry."
+
+  :group 'scimax-elfeed)
 
 (push '(python python-elfeed-entry)
       elfeed-search-face-alist)
@@ -186,7 +189,7 @@
 				 "|"
 				 url))
 	   (org-link (concat "elfeed:entry-id:" entry-id-str)))
-      (org-store-link-props
+      (org-link-store-props
        :description title
        :type "elfeed"
        :link org-link
