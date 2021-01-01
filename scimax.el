@@ -400,7 +400,7 @@ You can undo this if you do it right away."
   (undo-boundary)
   (save-excursion
     (when (= ?w (char-syntax (char-before)))
-      (when (if (called-interactively-p)
+      (when (if (called-interactively-p 'interactive)
 		(skip-syntax-backward "w")
 	      (= -3 (skip-syntax-backward "w")))
 	(when (let (case-fold-search)
