@@ -19,27 +19,32 @@
 
 (defface org-block-emacs-lisp
   `((t (:background "LightCyan1")))
-  "Face for elisp src blocks")
+  "Face for elisp src blocks"
+  :group 'scimax-src-blocks)
 
 
 (defface org-block-python
   `((t (:background "DarkSeaGreen1")))
-  "Face for python blocks")
+  "Face for python blocks"
+  :group 'scimax-src-blocks)
 
 
 (defface org-block-ipython
   `((t (:background "thistle1")))
-  "Face for python blocks")
+  "Face for python blocks"
+  :group 'scimax-src-blocks)
 
 
 (defface org-block-jupyter-hy
   `((t (:background "light goldenrod yellow")))
-  "Face for hylang blocks")
+  "Face for hylang blocks"
+  :group 'scimax-src-blocks)
 
 
 (defface org-block-sh
   `((t (:background "gray90")))
-  "Face for python blocks")
+  "Face for python blocks"
+  :group 'scimax-src-blocks)
 
 
 (defun scimax-org-toggle-colored-src-blocks ()
