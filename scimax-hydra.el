@@ -771,7 +771,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   "toggle"
   ("e" org-toggle-pretty-entities "pretty entities")
   ("i" org-toggle-inline-images "images")
-  ("l" org-toggle-latex-fragment "latex"))
+  ("l" org-latex-preview "latex"))
 
 ;; *** export
 
@@ -1098,7 +1098,7 @@ _k_: down      _a_: combine
   ("n" smerge-next)
   ("p" smerge-prev)
   ("c" smerge-keep-current)
-  ("m" smerge-keep-mine)
+  ("m" smerge-keep-upper)
   ("o" smerge-keep-other)
   ("b" smerge-keep-base)
   ("a" smerge-keep-all)
@@ -1170,7 +1170,7 @@ doesn't move, it means you were at the beginning of a paragraph."
 		   (scimax-open-hydra scimax-org-headline/body))
 
 		  ((memq (car el) '(latex-fragment latex-environment))
-		   (org-toggle-latex-fragment))
+		   (org-latex-preview))
 
 		  ;; match most specific first then more general
 		  ((and (eql (car el) 'link)
