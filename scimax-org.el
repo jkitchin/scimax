@@ -512,7 +512,7 @@ then exit them."
 	  (forward-char (length (car chars))))
 	 ;; slurp next word if you call it again
 	 ((and (not (equal arg '(16))) (looking-back (regexp-quote (cdr chars)) (length (cdr chars))))
-	  (delete-backward-char (length (cdr chars)))
+	  (delete-char (* -1 (length (cdr chars))))
 	  (forward-word)
 	  (insert (cdr chars)))
 	 (t
