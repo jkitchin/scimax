@@ -542,34 +542,33 @@ F5 inserts the entity code."
 	     (when (and (stringp element)
 			(s-starts-with? "** " element))
 	       (setq secondlevel element)
-	       (add-to-list
-		'sources
-		`((name . ,(concat
-			    toplevel
-			    (replace-regexp-in-string
-			     "\\*\\*" " - " secondlevel)))
-		  (candidates . nil)
-		  (action . (("insert utf-8 char" . (lambda (x)
+	       (push `((name . ,(concat
+				 toplevel
+				 (replace-regexp-in-string
+				  "\\*\\*" " - " secondlevel)))
+		       (candidates . nil)
+		       (action . (("insert utf-8 char" . (lambda (x)
+							   (mapc (lambda (candidate)
+								   (insert (nth 6 candidate)))
+								 (helm-marked-candidates))))
+				  ("insert org entity" . (lambda (x)
+							   (mapc (lambda (candidate)
+								   (insert
+								    (concat "\\" (car candidate))))
+								 (helm-marked-candidates))))
+				  ("insert latex" . (lambda (x)
 						      (mapc (lambda (candidate)
-							      (insert (nth 6 candidate)))
+							      (insert (nth 1 candidate)))
 							    (helm-marked-candidates))))
-			     ("insert org entity" . (lambda (x)
-						      (mapc (lambda (candidate)
-							      (insert
-							       (concat "\\" (car candidate))))
-							    (helm-marked-candidates))))
-			     ("insert latex" . (lambda (x)
-						 (mapc (lambda (candidate)
-							 (insert (nth 1 candidate)))
-						       (helm-marked-candidates))))
-			     ("insert html" . (lambda (x)
-						(mapc (lambda (candidate)
-							(insert (nth 3 candidate)))
-						      (helm-marked-candidates))))
-			     ("insert code" . (lambda (x)
-						(mapc (lambda (candidate)
-							(insert (format "%S" candidate)))
-						      (helm-marked-candidates)))))))))
+				  ("insert html" . (lambda (x)
+						     (mapc (lambda (candidate)
+							     (insert (nth 3 candidate)))
+							   (helm-marked-candidates))))
+				  ("insert code" . (lambda (x)
+						     (mapc (lambda (candidate)
+							     (insert (format "%S" candidate)))
+							   (helm-marked-candidates)))))))
+		     sources))
 	     (when (and element (listp element))
 	       (setf (cdr (assoc 'candidates (car sources)))
 		     (append
