@@ -519,7 +519,7 @@ Any link will count 23 characters."
       (goto-char (point-min))
       (while (re-search-forward "http" nil t)
 	(setq nurls (+ 1 nurls))
-	(setq url-string (url-get-url-at-point))
+	(setq url-string (thing-at-point-url-at-point))
 	(setq nurl-chars (+ nurl-chars (length url-string)))))
 
     (setq twitter-length (+ (- (length text) nurl-chars) (* 23 nurls)))
