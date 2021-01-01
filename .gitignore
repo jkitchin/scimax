@@ -17,3 +17,5 @@ ltximg
 scimax-notebook.el
 /scimax-editmarks.el
 /usermicrofts
+/userorg-fts.db
+/userorg-fts.db-lock

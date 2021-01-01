@@ -152,7 +152,7 @@ open their twitter page or url."
 		      ("d" (lambda (cand)
 			     (let* ((info (cadr cand))
 				    (user (cdr (assoc "Screen name" info)))
-				    (msg (read-input "Msg: ")))
+				    (msg (read-string "Msg: ")))
 			       (message (s-join "\n" (process-lines "t" "dm" user msg)))))
 		       "direct message")
 		      ("f" (lambda (cand)
@@ -488,7 +488,7 @@ Use a prefix arg to make it actually tweet."
   (interactive
    (list
     (completing-read "User: " scimax-twitter-usernames)
-    (read-input "Msg: ")))
+    (read-string "Msg: ")))
   (message (shell-command-to-string
 	    (format "t dm %s \"%s\"" user msg))))
 
