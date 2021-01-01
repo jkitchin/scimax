@@ -63,7 +63,7 @@ with the entry."
    ;; A directory, we can just get the status
    ((file-directory-p x)
     (let ((default-directory x))
-      (magit-status)))
+      (magit-status-setup-buffer)))
    ;; something else?
    (t
     ;; What should we do on a file? show that file change? just do magit status?
@@ -73,7 +73,7 @@ with the entry."
 		  (file-name-directory full-path))))
 
       (let ((default-directory dir))
-	(magit-status)))
+	(magit-status-setup-buffer)))
     (recursive-edit)
     (ivy-quit-and-run))))
 
