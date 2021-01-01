@@ -803,11 +803,11 @@ With a prefix arg, delete the thing you jumped to."
     (unless delete
       (setq new-value
 	    (if new-header
-		(ob-create-header-string)
+		(scimax-ob-create-header-string)
 	      (cond
 	       ;; any thing is ok
 	       ((and (stringp header-vals) (string= ":any" header-vals))
-		(read-input "any: " choice))
+		(read-string "any: " choice))
 	       ;; a list of values (although sometimes :any is in the
 	       ((and (listp header-vals)
 		     (not (listp (car header-vals))))
