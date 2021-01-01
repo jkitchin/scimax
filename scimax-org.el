@@ -871,7 +871,9 @@ Use a prefix arg FONTIFY for colored headlines."
     (directory . ivy-org-jump-to-heading-in-directory)
     (project . ivy-org-jump-to-project-headline )
     (agenda ivy-org-jump-to-agenda-heading))
-  "alist of jump functions. The first one is the default.")
+  "alist of jump functions. The first one is the default."
+  :group 'scimax
+  :type '(alist :key-type symbol ::value-type function))
 
 
 (defun ivy-org-jump (&optional arg)
