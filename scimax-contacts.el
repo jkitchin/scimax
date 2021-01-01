@@ -31,7 +31,7 @@ If you are in a contact heading we store a link."
   (let* ((email (org-entry-get (point) "EMAIL"))
 	 (link (concat "contact:" email)))
     (when email
-      (org-store-link-props
+      (org-link-store-props
        :type "contact"
        :link link
        :description (or (org-entry-get (point) "NAME")
@@ -130,10 +130,10 @@ Argument POSITION is where the mouse cursor is."
   (interactive)
   (save-window-excursion
     (scimax-contact-open-link)
-    (org-set-tags-to
+    (org-set-tags
      (-uniq
       (append
-       (org-get-tags-at)
+       (org-get-tags)
        (list (ivy-read "Tag: "
 		       (-flatten (emacsql org-db [:select [tags:tag]
 							  :from tags ])))))))
