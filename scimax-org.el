@@ -1000,7 +1000,8 @@ Use a prefix arg to get regular RET. "
 
 (defcustom scimax-return-dwim t
   "When t redefine the Ret behavior to add items, headings and table rows."
-  :group 'scimax)
+  :group 'scimax
+  :type 'boolean)
 
 
 (when scimax-return-dwim
