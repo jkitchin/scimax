@@ -171,7 +171,8 @@ We create a popup menu and keymaps for the markers and content here.
     ["Jump to visible" sem-jump-to-visible-editmark t]
     ["Jump to editmark" sem-jump-to-editmark t])
   "Items for the menu bar and popup menu."
-  :group 'sem)
+  :group 'sem
+  :type '(repeat (vector string function boolean)))
 
 
 (defun sem-popup-command (event)
@@ -532,7 +533,7 @@ Another potential idea is an md5 hash, so you can tell if the file has changed s
     (if other
 	(find-file-other-window fname)
       (find-file fname))
-    (goto-line (plist-get plist :line))
+    (forward-line (plist-get plist :line))
     (when-let  (col (plist-get plist :column))
       (move-to-column col))))
 
@@ -717,10 +718,10 @@ we go with the font color."
 	    (mapconcat
 	     (lambda (s)
 	       (format "@@html:<span style=\"color: %s; background-color: %s\">%s</span>@@"
-		       fg-hex bg-hex s)
-	       (s-split "\n" (buffer-substring-no-properties (car content-bounds)
-							     (cdr content-bounds)))
-	       "@@html:<br>@@")))))))
+		       fg-hex bg-hex s))
+	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
+							   (cdr content-bounds)))
+	     "@@html:<br>@@"))))))
 #+END_SRC
 
 #+RESULTS:
@@ -813,7 +814,7 @@ A minor mode is an easy way to turn font-locking on and off. All we do here is t
      nil
      (sem-font-lock-keywords))
     (add-hook 'org-export-before-processing-hook 'sem-editmarks-to-org nil t))
-  (font-lock-fontify-buffer))
+  (font-lock-ensure))
 
 
  #+END_SRC
@@ -1260,7 +1261,7 @@ Another nice way to move around to visible editmarks is with avy.
   "Use avy to jump to a visible editmark."
   (interactive)
   (avy-with sem-editmark-jumper
-    (avy--process
+    (avy-process
      ;; These are the points to process.
      (let ((editmarks '())
 	   (start (window-start))
@@ -2027,7 +2028,7 @@ of the affected text."
 						      (lambda (em)
 							(plist-get (cdr em) :close-marker))
 						      sem-editmarks)))))
-	      (delete-backward-char 1)
+	      (delete-char -1)
 	    ;; put char back
 	    (forward-char (length
 			   (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker)))
