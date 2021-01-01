@@ -731,7 +731,7 @@ Sets heading TODO state and prompts for deadline if there is not one."
   "Open contact X"
   (find-file (plist-get (cdr x) :filename))
   (goto-char (plist-get (cdr x) :begin))
-  (show-entry))
+  (outline-show-entry))
 
 
 (defun org-db--insert-contact (x)
@@ -1053,7 +1053,7 @@ line and only return a match if it is around the current point."
   (interactive)
   (find-file (plist-get (cdr x) :filename))
   (goto-char (plist-get (cdr x) :begin))
-  (show-entry))
+  (outline-show-entry))
 
 
 (defun org-db-hashtags--insert (x)

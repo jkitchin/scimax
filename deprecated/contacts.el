@@ -670,7 +670,7 @@ end tell" (cdr (assoc "PHONE" contact)))))))
 					     (find-file (cdr (assoc "FILE" contact)))
 					     (goto-char (cdr (assoc "POSITION" contact)))
 					     (org-set-tags-to
-					      (-uniq (append (org-get-tags-at) tags)))
+					      (-uniq (append (org-get-tags) tags)))
 					     (save-buffer)
 					     (contacts-update-cache))))))
 	      ("Find contact in open buffers" . (lambda (candidate)

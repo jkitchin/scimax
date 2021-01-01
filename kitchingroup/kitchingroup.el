@@ -330,19 +330,19 @@ org-links not supported yet."
      ;; folders usually.
      ((file-exists-p (f-join box-drive-root file-or-dir))
       (setq default-directory box-drive-root)
-      (org-open-link-from-string (format "[[file:%s]]" path)))
+      (org-link-open-from-string (format "[[file:%s]]" path)))
 
      ;; path exists in my kitchingroup box folder. This folder is not visible to
      ;; students/collaborators.
      ((file-exists-p (f-join box-drive-root "kitchingroup" file-or-dir))
       (setq default-directory box-drive-root)
-      (org-open-link-from-string
+      (org-link-open-from-string
        (format "[[file:%s]]" (f-join box-drive-root "kitchingroup" path))))
 
      ;; Maybe in a student folder within my kitchingroup folder.
      ((file-exists-p (f-join box-drive-root "kitchingroup" "students" file-or-dir))
       (setq default-directory box-drive-root)
-      (org-open-link-from-string
+      (org-link-open-from-string
        (format "[[file:%s]]" (f-join box-drive-root "kitchingroup" "students" path))))
      ;; This might be some file/folder buried in Box. We have to search for it.
      ;; I have not implemented this yet.

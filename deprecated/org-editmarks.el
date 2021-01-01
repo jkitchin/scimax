@@ -89,7 +89,7 @@
 		 (format "\\textcolor{red}{%s}" (em-escape-tex path)))
 		((eq format 'html)
 		 (format "<font color=\"red\">%s</font>" path))))
-     :face 'em-delete-face) 
+     :face 'em-delete-face)
   (org-add-link-type
    "delete"
    (lambda (path)
@@ -110,7 +110,7 @@
 		 (format "\\textcolor{blue}{%s}" (em-escape-tex path)))
 		((eq format 'html)
 		 (format "<font color=\"blue\">%s</font>" path))))
-     :face 'em-insert-face) 
+     :face 'em-insert-face)
   (org-add-link-type
    "insert"
    (lambda (path)
@@ -192,16 +192,16 @@
 (unless (fboundp 'org-link-set-parameters)
   (defun em-activate-links (link-type face limit)
     "Add text properties for editmark bracketed links."
-    (while (and (re-search-forward org-bracket-link-regexp limit t)
+    (while (and (re-search-forward org-link-bracket-re limit t)
 		(not (org-in-src-block-p)))
       (let* ((hl (org-match-string-no-properties 1))
 	     (type (save-match-data
 		     (and (string-match org-plain-link-re hl)
 			  (match-string-no-properties 1 hl))))
 	     help ip vp)
-	
+
 	(when (string= type link-type)
-	  (setq help (concat "LINK: " (save-match-data (org-link-unescape hl))) 
+	  (setq help (concat "LINK: " (save-match-data (org-link-unescape hl)))
 		ip (org-maybe-intangible
 		    (list 'invisible 'org-link
 			  'face face
@@ -275,7 +275,7 @@
   "Finish a comment indirect buffer.
 This replaces the text with a link, or if there is a line break
 in the comment a block."
-  (interactive "b") 
+  (interactive "b")
   (let ((comment (buffer-string)))
     (kill-ring-save (point-min) (point-max))
     (setf (buffer-substring (point-min) (point-max))
@@ -283,8 +283,8 @@ in the comment a block."
 	   (if (string-match "\n" comment)
 	       "#+BEGIN_COMMENT\n%s\n#+END_COMMENT\n"
 	     "[[comment:%s]]")
-	   comment)) 
-    (kill-buffer) 
+	   comment))
+    (kill-buffer)
     (set-window-configuration *em-window-configuration*)))
 
 
@@ -314,10 +314,10 @@ is active, it is wrapped in the comment."
   (if (region-active-p)
       (setf (buffer-substring (region-beginning)
 			      (region-end))
-	    (format "[[comment:%s][%s]] " 
+	    (format "[[comment:%s][%s]] "
 		    comment
 		    (buffer-substring (region-beginning) (region-end))))
-    (insert (format "[[comment:%s]] " 
+    (insert (format "[[comment:%s]] "
 		    comment))))
 
 
@@ -344,7 +344,7 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
   (if (region-active-p)
       (setf (buffer-substring (region-beginning)
 			      (region-end))
-	    (format "[[insert:%s]] " 
+	    (format "[[insert:%s]] "
 		    (buffer-substring (region-beginning) (region-end))))
     (insert "[[insert:]] ")
     (backward-char 3)))
@@ -355,7 +355,7 @@ If the region is active, enclose it in the link, otherwise wrap the word at poin
   (interactive "r")
   (setf (buffer-substring (region-beginning)
 			  (region-end))
-	(format "[[delete:%s]] " 
+	(format "[[delete:%s]] "
 		(buffer-substring (region-beginning) (region-end))))
   (goto-char (org-element-property :end (org-element-context))))
 
@@ -426,7 +426,7 @@ For delete, comment, and typo it means delete the link."
 				 (org-element-property :post-blank link)))
 	    ""))
      ;; accept means take the insert path.
-     ((string= (org-element-property :type link) "insert") 
+     ((string= (org-element-property :type link) "insert")
       (setf (buffer-substring (org-element-property :begin link)
 			      (- (org-element-property :end link)
 				 (org-element-property :post-blank link)))
@@ -452,7 +452,7 @@ For insert, comment, and typo it means delete the link."
 				 (org-element-property :post-blank link)))
 	    ""))
      ;; reject means take the delete path.
-     ((string= (org-element-property :type link) "delete") 
+     ((string= (org-element-property :type link) "delete")
       (setf (buffer-substring (org-element-property :begin link)
 			      (- (org-element-property :end link)
 				 (org-element-property :post-blank link)))
@@ -606,7 +606,7 @@ commits. Returns the buffer."
 
     ;; get the wdiff. we do this in git-root so the paths are all correct.
     (let ((default-directory git-root))
-      (insert (shell-command-to-string cmd))) 
+      (insert (shell-command-to-string cmd)))
     (goto-char (point-min))
     buf))
 
