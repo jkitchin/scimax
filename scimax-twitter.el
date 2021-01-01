@@ -46,11 +46,12 @@
   `((t (:inherit org-link
                  :foreground "DarkOrange1"
 		 :weight bold)))
-  "Color for twitter handles.")
+  "Color for twitter handles."
+  :group 'scimax-twitter)
 
 (scimax-functional-text
  "\\(^\\|[[:punct:]]\\|[[:space:]]\\)\\(?2:@\\(?1:[[:alnum:]]+\\)\\)"
- scimax-twitter-handle-hydra/body
+ 'scimax-twitter-handle-hydra/body
  :grouping 2
  :face (list 'scimax-twitter-handle-face)
  :help-echo "Click me to open username.")
