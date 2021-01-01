@@ -445,6 +445,10 @@
   :load-path (lambda () (expand-file-name "ox-clip" scimax-dir))
   :bind ("H-k" . ox-clip-formatted-copy))
 
+(use-package scimax-contacts
+  :ensure nil
+  :load-path scimax-dir)
+
 (use-package scimax-email
   :ensure nil
   :load-path scimax-dir)
