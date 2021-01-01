@@ -612,83 +612,53 @@ F5 inserts the entity code."
 
 ;; * New org links
 
-(if (fboundp 'org-link-set-parameters)
-    (org-link-set-parameters
-     "pydoc"
-     :follow (lambda (path)
-	       (pydoc path))
-     :export (lambda (path desc format)
-	       "Generate a url"
-	       (let (url)
-		 (setq url (cond
-			    ((s-starts-with? "scipy" path)
-			     (format
-			      "https://docs.scipy.org/doc/scipy/reference/generated/%s.html"
-			      path))
-			    ((s-starts-with? "numpy" path)
-			     (format
-			      "https://docs.scipy.org/doc/numpy/reference/generated/%s.html"
-			      path))
-			    (t
-			     (format
-			      "https://www.google.com/#safe=off&q=%s"
-			      path))))
+(org-link-set-parameters
+ "pydoc"
+ :follow (lambda (path)
+	   (pydoc path))
+ :export (lambda (path desc format)
+	   "Generate a url"
+	   (let (url)
+	     (setq url (cond
+			((s-starts-with? "scipy" path)
+			 (format
+			  "https://docs.scipy.org/doc/scipy/reference/generated/%s.html"
+			  path))
+			((s-starts-with? "numpy" path)
+			 (format
+			  "https://docs.scipy.org/doc/numpy/reference/generated/%s.html"
+			  path))
+			(t
+			 (format
+			  "https://www.google.com/#safe=off&q=%s"
+			  path))))
 
 
-		 (cond
-		  ((eq format 'md)
-		   (format "[%s](%s)" (or desc path) url))))))
-  (org-add-link-type
-   "pydoc"
-   (lambda (path)
-     (pydoc path))))
+	     (cond
+	      ((eq format 'md)
+	       (format "[%s](%s)" (or desc path) url))))))
 
-(if (fboundp 'org-link-set-parameters)
-    (org-link-set-parameters
-     "attachfile"
-     :follow (lambda (link-string) (org-open-file link-string))
-     :export (lambda (keyword desc format)
-	       (cond
-		((eq format 'html) (format ""))	; no output for html
-		((eq format 'latex)
-		 ;; write out the latex command
-		 (format "\\attachfile{%s}" keyword)))))
+(org-link-set-parameters
+ "attachfile"
+ :follow (lambda (link-string) (org-open-file link-string))
+ :export (lambda (keyword desc format)
+	   (cond
+	    ((eq format 'html) (format ""))	; no output for html
+	    ((eq format 'latex)
+	     ;; write out the latex command
+	     (format "\\attachfile{%s}" keyword)))))
 
-  (org-add-link-type
-   "attachfile"
-   (lambda (link-string) (org-open-file link-string))
-   ;; formatting
-   (lambda (keyword desc format)
-     (cond
-      ((eq format 'html) (format ""))	; no output for html
-      ((eq format 'latex)
-       ;; write out the latex command
-       (format "\\attachfile{%s}" keyword))))))
-
-(if (fboundp 'org-link-set-parameters)
-    (org-link-set-parameters
-     "altmetric"
-     :follow (lambda (doi)
-	       (browse-url (format  "http://dx.doi.org/%s" doi)))
-     :export (lambda (keyword desc format)
-	       (cond
-		((eq format 'html)
-		 (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
+(org-link-set-parameters
+ "altmetric"
+ :follow (lambda (doi)
+	   (browse-url (format  "http://dx.doi.org/%s" doi)))
+ :export (lambda (keyword desc format)
+	   (cond
+	    ((eq format 'html)
+	     (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
 <div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword))
-		((eq format 'latex)
-		 ""))))
-
-  (org-add-link-type
-   "altmetric"
-   (lambda (doi)
-     (browse-url (format  "http://dx.doi.org/%s" doi)))
-   (lambda (keyword desc format)
-     (cond
-      ((eq format 'html)
-       (format "<script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
-<div data-badge-type='medium-donut' class='altmetric-embed' data-badge-details='right' data-doi='%s'></div>" keyword))
-      ((eq format 'latex)
-       "")))))
+	    ((eq format 'latex)
+	     ""))))
 
 
 (defun org-man-store-link ()
@@ -705,12 +675,11 @@ F5 inserts the entity code."
        :link link
        :description description))))
 
-(if (fboundp 'org-link-set-parameters)
-    (org-link-set-parameters
-     "man"
-     :follow (lambda (path)
-	       (man path))
-     :store 'org-man-store-link))
+(org-link-set-parameters
+ "man"
+ :follow (lambda (path)
+	   (man path))
+ :store 'org-man-store-link)
 
 
 ;; * ivy navigation
