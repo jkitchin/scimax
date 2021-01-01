@@ -6,7 +6,8 @@
 
 (defcustom org-file-thumbnail-width 300
   "Width of a thumbnail on file links."
-  :group 'scimax-org)
+  :group 'scimax-org
+  :type 'integer)
 
 
 (defun org-file-link-image-thumbnail (start end path bracketp)
@@ -14,7 +15,7 @@
   (when bracketp
     (let ((s (buffer-substring-no-properties start end))
 	  img ov)
-      (when (and s (string-match org-bracket-link-regexp s))
+      (when (and s (string-match org-link-bracket-re s))
 	(setq imgfile (match-string 3 s))
 	(when (and
 	       ;; got a match
@@ -57,7 +58,7 @@
 This just makes images show up if they already exist."
   (interactive)
   (insert "]")
-  (when (looking-back org-bracket-link-regexp (line-beginning-position))
+  (when (looking-back org-link-bracket-re (line-beginning-position))
     (org-redisplay-inline-images)))
 
 
