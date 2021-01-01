@@ -170,6 +170,7 @@ If FROM is non-nil, emails from the contact."
 
 
 (defun scimax-contact-related ()
+  "Select related contacts at point."
   (interactive)
   (let* ((email (org-element-property :path (org-element-context)))
 	 (link-candidates (cl-loop
@@ -229,18 +230,23 @@ If FROM is non-nil, emails from the contact."
 			  (find-file (plist-get candidate :filename))
 			  (goto-char (plist-get candidate :begin)))))))
 
-(defhydra scimax-contact (:color blue :hint nil)
-  "
-contact:
-"
-  ("o" scimax-contact-open-link "Open contact")
-  ("e" scimax-contact-email "Email contact")
-  ("c" scimax-contact-copy-email  "Copy email address")
-  ("C" (scimax-contact-copy-email t) "Copy \"name\" <email>")
-  ("r" scimax-contact-related "Related items")
-  ("t" scimax-contact-add-tag "Add tags")
-  ("F" (scimax-contact-to-from t) "Emails from contact")
-  ("T" scimax-contact-to-from "Emails to contact"))
+
+(use-package pretty-hydra)
+
+(pretty-hydra-define scimax-contact
+  (:title "contacts" :quit-key "q")
+  ("actions"
+   (("o" scimax-contact-open-link "Open contact")
+    ("e" scimax-contact-email "Email contact")
+    ("c" scimax-contact-copy-email  "Copy email address")
+    ("C" (scimax-contact-copy-email t) "Copy \"name\" <email>"))
+   "Edit"
+   (("g" scimax-contact-add-tag "Add tags"))
+   "Related"
+   (("r" scimax-contact-related "Related items")
+    ("f" (scimax-contact-to-from t) "Emails from contact")
+    ("t" scimax-contact-to-from "Emails to contact"))))
+
 
 
 (defun scimax-contact-follow-link (&optional path)
@@ -339,10 +345,11 @@ Optional argument PATH is ignored."
 (defun scimax-message-get-emails ()
   "Captures emails in a message."
   (interactive)
-  (let* ((captured-results (mapcar 's-trim (append
-					    (s-split "," (message-field-value "To"))
-					    (s-split "," (message-field-value "From"))
-					    (s-split "," (or (message-field-value "CC") "")))))
+  (let* ((captured-results (mapcar 's-trim
+				   (append
+				    (s-split "," (message-field-value "To"))
+				    (s-split "," (message-field-value "From"))
+				    (s-split "," (or (message-field-value "CC") "")))))
 	 (emails (cl-loop for s in captured-results
 			  if (string-match
 			      ;; adapted from thing-at-point-email-regexp to add group
@@ -373,7 +380,7 @@ Optional argument PATH is ignored."
 
 ;; I want to make sure if I reply, I have contacts.
 (when with-mu4e
-  (advice-add #'mu4e-compose-reply :before #'scimax-mu4e-get-emails)
+  (advice-add #'mu4e-compose-reply :before #'scimax-message-get-emails)
 
   (define-key mu4e-compose-mode-map "\C-c]" 'scimax-contacts)
   (define-key message-mode-map "\C-c]" 'scimax-contacts))
