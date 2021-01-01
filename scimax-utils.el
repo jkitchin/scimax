@@ -17,7 +17,8 @@ These are shortcut to commands.
 \(\"label\" . \"Path to file\").
 
 These are like bookmarks."
-  :group 'scimax)
+  :group 'scimax
+  :type '(alist :key-type string :value-type file))
 
 
 ;;;###autoload
