@@ -23,9 +23,11 @@
 
 (defcustom scimax-use-org-bullets nil
   "Whether to use org-bullets-mode or not."
-  :group 'scimax)
+  :group 'scimax
+  :type 'boolean)
 
 (when scimax-use-org-bullets
+  (use-package org-bullets)
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode))))
 
 (setq org-src-tab-acts-natively t)
@@ -1058,7 +1060,7 @@ Use a prefix arg to get regular RET. "
 	  (font-lock-add-keywords
 	   nil
 	   `((fl-noh 0 nil)))
-	  (font-lock-fontify-buffer))
+	  (font-lock-ensure))
       (ov-clear 'numbered-heading)
       (font-lock-remove-keywords
        nil
