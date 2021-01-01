@@ -502,7 +502,11 @@ Default to killing the word at point"
 
 
 ;; * garbage-collect when you switch out of Emacs
-(add-hook 'focus-out-hook #'garbage-collect)
+(if (and (>= 27 emacs-major-version)
+	 (>= emacs-minor-version 1))
+    (setq after-focus-change-function #'garbage-collect)
+  ;; This should be ok for older emacs still.
+  (add-hook 'focus-out-hook #'garbage-collect))
 
 ;; * The end
 (provide 'scimax)
