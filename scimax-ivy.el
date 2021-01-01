@@ -199,7 +199,8 @@ with the entry."
 (defcustom ivy-top-command
   "top -stats pid,command,user,cpu,mem,pstate,time -l 1"
   "Top command for `ivy-top'."
-  :group 'scimax-ivy)
+  :group 'scimax-ivy
+  :type 'string)
 
 (defun ivy-top ()
   (interactive)
