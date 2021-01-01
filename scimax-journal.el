@@ -59,12 +59,16 @@
   "Directory for journal entries.
 This is the default, system journal. See
 `scimax-journal-make-directory-local' to setup a local, project
-journal.")
+journal."
+  :group 'scimax-journal
+  :type 'directory)
 
 
 (defcustom scimax-journal-cache ".scimax-journal-cache"
   "File name for the cache.
-It will be expanded in `scimax-journal-root-dir'.")
+It will be expanded in `scimax-journal-root-dir'."
+  :group 'scimax-journal
+  :type 'file)
 
 
 (defface scimax-journal-calendar-entry-face
@@ -77,7 +81,9 @@ It will be expanded in `scimax-journal-root-dir'.")
   '()
   "List of functions to run in a new entry.
 These functions take no arguments and they are run in the buffer
-of the new entry.")
+of the new entry."
+  :group 'scimax-journal
+  :type '(repeat function))
 
 
 ;; this creates the journal directory and makes it a projectile project. This is
@@ -185,6 +191,8 @@ Use an optional prefix arg REFRESH to force refresh the cache."
   (interactive)
   (scimax-journal-write-cache (scimax-journal-entries-tree)))
 
+
+(defvar scimax-journal-tree)
 
 (defun scimax-journal-mark-entries ()
   "Mark entries in a calendar when there are journal entries."
@@ -452,7 +460,7 @@ Use a numeric prefix arg N to go N months back (Default=1)."
 ;; ** grep regexp searching
 
 (defun scimax-journal-find-regexp-range (regexp t1 t2)
-  "Find all matches for REGEXP in journal entries between T1 and T2.
+  "Find all match for REGEXP in journal entries between T1 and T2.
 Adapted from `dired-do-find-regexp'.
 
 REGEXP should use constructs supported by your local `grep' command."
@@ -471,13 +479,13 @@ REGEXP should use constructs supported by your local `grep' command."
                          grep-find-ignored-files))
          (xrefs (cl-mapcan
                  (lambda (file)
-                   (xref-collect-matches regexp "*" file
-                                         (and (file-directory-p file)
-                                              ignores)))
+                   (xref-matches-in-directory regexp "*" file
+					      (and (file-directory-p file)
+						   ignores)))
                  files)))
     (unless xrefs
       (user-error "No matches for: %s" regexp))
-    (xref--show-xrefs xrefs nil t)))
+    (xref--show-xrefs xrefs nil)))
 
 
 (defun scimax-journal-find-regexp-last-week (regexp)
@@ -510,7 +518,8 @@ REGEXP should use constructs supported by your local `grep' command."
 ;; * Directory local journals
 ;; To have a project specific journal, we have to use directory local variables.
 (defun scimax-journal-make-directory-local (journal-root-name)
-  "Setup directory local variables so you can have a project specific journal."
+  "Setup directory local variables so you can have a project specific journal.
+Argument JOURNAL-ROOT-NAME Name of journal directory."
   (interactive (list (read-string "Journal root name:" "journal")))
   (let* ((project-root (projectile-project-root))
 	 (journal-root (file-name-as-directory (f-join project-root journal-root-name)))
