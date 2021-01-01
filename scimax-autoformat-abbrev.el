@@ -97,7 +97,7 @@
     scimax-org-autoformat-sentence-capitalization)
   "List of functions to call for autoformatting."
   :group 'scimax-autoformat
-  :type (repeat function))
+  :type '(repeat function))
 
 (defcustom scimax-abbrev-function
   (lambda ()
