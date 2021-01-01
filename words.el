@@ -426,7 +426,7 @@ _q_: quit
   ("W" words-wos "Web of Science")
   ("G" words-google-scholar "Google scholar")
   ("c" words-crossref "CrossRef")
-  ("S" words-scopus "Scopus") 
+  ("S" words-scopus "Scopus")
   ("o" words-semantic-scholar "Semantic Scholar")
   ("p" words-pubmed "Pubmed")
   ("a" words-arxiv "Arxiv")
