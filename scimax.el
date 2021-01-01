@@ -6,7 +6,8 @@
 (defcustom scimax-theme 'leuven
   "Theme to use for scimax. Defaults to `leuven'.
 Set to nil to avoid loading a theme."
-  :group 'scimax)
+  :group 'scimax
+  :type 'symbol)
 
 
 (when scimax-theme
