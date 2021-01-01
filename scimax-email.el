@@ -73,7 +73,7 @@ Removes unsent tag if there, and adds sent to tags"
   (org-set-property "TO" (mapconcat 'identity  *email-to-addresses* ", "))
   (org-set-property "Message-ID" *email-mu4e-link-to-message*)
   ;; remove unsent tag if it is there, and add sent
-  (let ((tags (org-get-tags-at)))
+  (let ((tags (org-get-tags)))
     (add-to-list 'tags "sent")
     (setq tags (-remove-item "unsent" tags))
     (org-set-tags-to tags)))
@@ -167,7 +167,7 @@ overwritten on subsequent sends."
 		       (nth 4 (org-heading-components))))
           (OTHER-HEADERS (eval (org-entry-get (point) "OTHER-HEADERS")))
 	  (content (progn
-                     (unless (org-on-heading-p) (outline-previous-heading))
+                     (unless (org-at-heading-p) (outline-previous-heading))
                      (let ((headline (org-element-at-point)))
 		       (org-end-of-meta-data)
                        (buffer-substring
@@ -302,7 +302,7 @@ Example usage:
 		   (org-entry-put (point) "TO" (cdr (assoc "TO" data)))
 		   (when (cdr (assoc "SUBJECT" data))
 		     (org-entry-put (point) "SUBJECT" (cdr (assoc "SUBJECT" data))))
-		   (org-set-tags-to (-uniq (append '("unsent") (org-get-tags-at))))))))))
+		   (org-set-tags-to (-uniq (append '("unsent") (org-get-tags))))))))))
 
 
 ;;;###autoload
@@ -313,7 +313,7 @@ With prefix arg, also send the message and move to the next one."
   (setq *email-heading-point* (set-marker (make-marker) (point)))
   (save-excursion
     (let ((content (progn
-		     (unless (org-on-heading-p) (outline-previous-heading))
+		     (unless (org-at-heading-p) (outline-previous-heading))
 		     (let ((headline (org-element-at-point)))
 		       (buffer-substring
 			(progn (org-end-of-meta-data t) (point))
@@ -351,7 +351,7 @@ With prefix arg, also send the message and move to the next one."
 
   (let ((tags (-remove
 	       (lambda (x) (string= x "unsent"))
-	       (org-get-tags-at))))
+	       (org-get-tags))))
     (add-to-list 'tags "sent")
     (org-set-tags-to tags))
   (message  (format "sent to %s" (org-entry-get (point) "TO")))
