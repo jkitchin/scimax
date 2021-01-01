@@ -68,7 +68,9 @@ _k_: copy  _o_: open"
 ;; * Twitter usernames
 
 (defcustom scimax-twitter-directory "~/.scimax-twitter/"
-  "Directory to cache scimax-twitter data.")
+  "Directory to cache scimax-twitter data."
+  :group 'scimax
+  :type 'directory)
 
 
 (unless (f-dir? scimax-twitter-directory)
