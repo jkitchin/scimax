@@ -898,9 +898,11 @@ _;_: dwim comment  _z_: undo  _y_: redo _r_: Goto repl
 
   ("<return>" org-ctrl-c-ctrl-c :color blue)
   ("S-<return>" scimax-ob-execute-and-next-block :color red)
-  ("M-<return>" (lambda () (interactive)
+  ("M-<return>" (lambda ()
+		  "Execute and insert new block."
+		  (interactive)
 		  (scimax-ob-execute-and-next-block t)
-		  font-lock-fontify-block) :color red)
+		  (font-lock-fontify-block)) :color red)
   ("S-M-<return>" scimax-ob-execute-to-point :color blue)
   ("C-M-<return>" org-babel-execute-buffer :color blue)
   ("r" org-babel-switch-to-session)
