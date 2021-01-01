@@ -14,7 +14,9 @@
 (require 'yasnippet)
 
 (defcustom scimax-snippet-dir (expand-file-name "snippets" scimax-dir)
-  "Directory to store snippets in.")
+  "Directory to store snippets in."
+  :group 'scimax
+  :type 'directory)
 
 (unless (file-directory-p scimax-snippet-dir)
   (make-directory scimax-snippet-dir t))
@@ -49,19 +51,19 @@ Adapted from helm-c-yasnippet.
 						 (cdr where)
 						 (yas--template-expand-env yas--current-template))))
 			 "Expand selected template")
-			
+
 			("v"
 			 (lambda (candidate)
 			   (find-file (yas--template-get-file (cdr candidate))))
 			 "Visit template file")
-			
+
 			("d"
 			 (lambda (candidate)
 			   (when (y-or-n-p "Delete?")
 			     (delete-file (yas--template-get-file (cdr candidate)))
 			     (yas-reload-all)))
 			 "Delete snippet")
-			
+
 			("n"
 			 (lambda (candidate)
 			   (yas-new-snippet))
