@@ -968,16 +968,17 @@ You can also enter a contact link with completion, e.g. type C-x C-l and select 
 We also define several org heading speed commands for contacts.
 
 #+BEGIN_SRC emacs-lisp
-scimax-contacts-speed-commands
+(cl-loop for (key . cmd) in scimax-contacts-speed-commands
+	 collect (list key (documentation cmd)))
 #+END_SRC
 
 #+RESULTS:
-| b | lambda | nil | If contact has a URL open it in a browser. | (when (org-entry-get (point) URL) (browse-url (org-entry-get (point) URL)))                                          |                      |
-| c | lambda | nil | Copy the email address to the clipboard.   | (message (kill-new (org-entry-get (point) EMAIL)))                                                                   |                      |
-| e | lambda | nil | Send an email to the contact.              | (let ((email (org-entry-get (point) EMAIL))) (compose-mail) (message-goto-to) (insert email) (message-goto-subject)) |                      |
-| l | lambda | nil | Store and copy a link to the contact.      | (message (kill-new (format [[contact:%s][%s]] (org-entry-get (point) EMAIL) (nth 4 (org-heading-components)))))                      | (org-store-link nil) |
-| m | lambda | nil | Copy "name<email>"                         | (message (kill-new (format "%s" <%s> (nth 4 (org-heading-components)) (org-entry-get (point) EMAIL))))               |                      |
-| ? | lambda | nil | Print contacts speed key help.             | (with-output-to-temp-buffer *Help* (princ Contacts Speed commands                                                    |                      |
+| b | If contact has a URL open it in a browser. |
+| c | Copy the email address to the clipboard.   |
+| e | Send an email to the contact.              |
+| l | Store and copy a link to the contact.      |
+| m | Copy "name<email>"                         |
+| ? | Print contacts speed key help.             |
 
 ** Capturing contacts
 
