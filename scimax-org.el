@@ -338,7 +338,7 @@ subscripts and superscripts."
      ;; looking back at closing char
      ((and (memq type '(subscript superscript))
 	   (looking-back end-marker 1))
-      (delete-backward-char 1)
+      (delete-char -1)
       (forward-char)
       (insert end-marker))
 
@@ -356,7 +356,7 @@ subscripts and superscripts."
       (insert end-marker))))
    ;; looking back at end marker, slurp next word in
    ((looking-back end-marker (length end-marker))
-    (delete-backward-char (length end-marker))
+    (delete-char (* -1 (length end-marker)))
     (forward-word)
     (insert end-marker))
    ;; not at a word or region insert markers and put point between
