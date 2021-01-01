@@ -205,7 +205,7 @@ default name based on the url is suggested."
     (when (file-exists-p path)
       (error "%S already exists" path))
     (make-directory path t)
-    (shell-command-to-string (format "git clone %s \"%s\"" urlg path))
+    (shell-command-to-string (format "git clone %s \"%s\"" url path))
     (dired path)))
 
 
@@ -396,7 +396,7 @@ The notebook is just a collection of org-files, so it should be possible to use 
   (-uniq
    (-flatten
     (org-ql-query
-      :select #'org-get-tags-at
+      :select #'org-get-tags
       :from (nb-org-files)))))
 
 
@@ -567,7 +567,7 @@ Here is a function you can use to interactively search files by pattern. For exa
 	 (xrefs (cl-mapcan
                  (lambda (file)
 		   (when (file-exists-p file)
-                     (xref-collect-matches regexp "*" file
+                     (xref-matches-in-directory regexp "*" file
                                            (and (file-directory-p file)
 						ignores))))
                  files)))
@@ -744,7 +744,7 @@ Maybe I should add more actions."
 			("o" (lambda (choice)
 			       (pop-to-buffer (second choice))
 			       (goto-char (third choice))
-			       (show-entry)))))))
+			       (outline-show-entry)))))))
 #+END_SRC
 
 ** John Kitchin
@@ -981,7 +981,7 @@ This adds a capability for using C-c l to store a link in org-mode. It creates a
 	   (relpath (file-relative-name current-file root))
 	   (link-target (format "c%s" (point))))
 
-      (org-store-link-props
+      (org-link-store-props
        :type "nb"
        ;; Note I use the concat here just to avoid fontifying errors in the link
        ;; in the org file.
@@ -1111,7 +1111,7 @@ START and END are the positions of the link.
 PATH is the link PATH.
 BRACKETP is non-nil for bracketed links."
   (destructuring-bind (project fpath link-target) (nb-parse-path path)
-    (if (and (string-match (org-image-file-name-regexp) fpath)
+    (if (and (string-match (image-file-name-regexp) fpath)
   	     (not (ov-at start)))
   	;; Find the image
   	(let* ((projects (remove nil (append (projectile-relevant-known-projects)
