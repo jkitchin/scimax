@@ -29,7 +29,8 @@
 (defface scimax-twitter-hashtag-face
   `((t (:inherit org-link
 		 :weight bold)))
-  "Color for twitter hashtags.")
+  "Color for twitter hashtags."
+  :group 'scimax-twitter)
 
 (scimax-functional-text
  "\\(^\\|[[:punct:]]\\|[[:space:]]\\)\\(?2:#\\(?1:[[:alnum:]]+\\)\\)"
@@ -49,7 +50,7 @@
 
 (scimax-functional-text
  "\\(^\\|[[:punct:]]\\|[[:space:]]\\)\\(?2:@\\(?1:[[:alnum:]]+\\)\\)"
- 'scimax-twitter-handle-hydra/body
+ scimax-twitter-handle-hydra/body
  :grouping 2
  :face (list 'scimax-twitter-handle-face)
  :help-echo "Click me to open username.")
@@ -246,9 +247,7 @@ Returns the msgid for the posted tweet or the output from t."
 					 ,@(when file `(,file)))))
 	 (last-line (car (last output))))
     (if (string-match "`t delete status \\([0-9]*\\)`" last-line)
-	(prog1
-	    (match-string-no-properties 1 last-line)
-	  (match-string-no-properties 1 last-line))
+	(match-string-no-properties 1 last-line)
       last-line)))
 
 
@@ -273,9 +272,9 @@ last one."
 (defmacro scimax-twitter-save-account (&rest body)
   "Execute body but save and restore the current account.
 You need this for tweeting from multiple accounts."
-  (let ((current-account (scimax-twitter-active-account))))
-  ,@body
-  (scimax-twitter-set-account current-account))
+  (let ((current-account (scimax-twitter-active-account)))
+    `,@body
+    (scimax-twitter-set-account current-account)))
 
 
 ;; * Twitter - org integration
@@ -350,8 +349,8 @@ the msg."
 	  (add-to-list 'org-latex-default-packages-alist '("theorems, skins" "tcolorbox" t) t)
 	  (add-to-list 'org-latex-default-packages-alist '("" "fourier" t) t)
 	  (plist-put org-format-latex-options :latex-fragment-pre-body "\\mathversion{bold}\n")
-	  (org-remove-latex-fragment-image-overlays)
-	  (org-toggle-latex-fragment))
+	  (org-clear-latex-preview)
+	  (org-latex-preview))
 	(setq file (plist-get (cdr (overlay-get (ov-at) 'display)) :file)))
 
       ;; src-blocks
