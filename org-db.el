@@ -659,6 +659,7 @@ Optional RECURSIVE is non-nil find files recursively."
 
 
 ;; * org-db contacts
+
 (defun org-db-contacts-candidates ()
   "List of headings with EMAIL properties."
   (let ((contacts (emacsql org-db
@@ -679,8 +680,6 @@ Optional RECURSIVE is non-nil find files recursively."
 			   (s-pad-right 40 " " email)
 			   (or tags ""))
 		   :filename fname :last-updated last-updated :begin begin :email email :title (s-trim title)))))
-
-
 
 
 (defun org-db--insert-contact-link (x)
@@ -745,15 +744,100 @@ Sets heading TODO state and prompts for deadline if there is not one."
 	   (plist-get (cdr x) :email))))
 
 
+(defun org-db--email-contact (x)
+  "Open an email to the contact"
+  (interactive)
+  (compose-mail)
+  (message-goto-to)
+  (insert (plist-get (cdr x) :email))
+  (message-goto-subject))
+
+(defun org-db--multi-contact (candidates)
+  "Act on CANDIDATES with choice of actions"
+  (let ((action (ivy-read "Action: " '(("insert")
+				       ("links")
+				       ("email"))
+			  :initial-input "^")))
+    (cond
+     ((string= action "insert")
+      (unless (or (bolp)
+		  (looking-back " " 1))
+	(insert ","))
+      (insert (mapconcat (lambda (x)
+			   (format "\"%s\" <%s>"
+				   (plist-get (cdr x) :title)
+				   (plist-get (cdr x) :email)))
+			 candidates
+			 ",")))
+     ((string= action "email")
+      (compose-mail)
+      (message-goto-to)
+      (insert (mapconcat (lambda (x)
+			   (plist-get (cdr x) :email))
+			 candidates
+			 ","))
+      (message-goto-subject))
+     ((string= action "links")
+      (mapcar 'org-db--insert-contact-link candidates)))))
+
+
+(defvar org-db-contacts-keymap
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-<SPC>") (lambda ()
+				      "Toggle mark."
+				      (interactive)
+				      (if (ivy--marked-p)
+					  (ivy-unmark)
+					(ivy-mark))))
+
+    (define-key map (kbd "C-s") (lambda ()
+				  "Show marked candidates"
+				  (interactive)
+				  (with-help-window "*ivy-marked-candidates*"
+				    (cl-loop for cand in ivy-marked-candidates
+					     do
+					     (princ cand)))))
+
+    (define-key map (kbd "M-<SPC>") (lambda ()
+				      "Mark and clear selection."
+				      (interactive)
+				      (ivy-mark)
+				      (delete-backward-char (length ivy-text))))
+    (define-key map (kbd "C-<return>")
+      (lambda ()
+        "Apply action and move to next/previous candidate."
+        (interactive)
+        (ivy-call)
+        (ivy-next-line)))
+    map))
+
+
 (defun org-db-contacts ()
   "Ivy command to select an `org-db' contact."
   (interactive)
+  ;; start with no marked candidates. I am not sure how this works with ivy resume.
+  (setq org-db-contacts-marked-candidates '())
   (let ((candidates (org-db-contacts-candidates)))
-    (ivy-read "Contact: " candidates :action '(1
-					       ("i" org-db--insert-contact "insert")
-					       ("o" org-db--open-contact "open")
-					       ("l" org-db--insert-contact-link "Insert link")
-					       ("a" org-db--assign-contact "Assign to heading")))))
+    (ivy-read "Contact: " candidates
+	      :keymap org-db-contacts-keymap
+	      :caller 'org-db-contacts
+	      :multi-action 'org-db--multi-contact
+	      :action '(1
+			("i" org-db--insert-contact "insert")
+			("o" org-db--open-contact "open")
+			("l" org-db--insert-contact-link "Insert link")
+			("a" org-db--assign-contact "Assign to heading")
+			("e" org-db--email-contact "Email contact")))))
+
+(defun org-db-contact-transformer (s)
+  "Make marked candidates look red."
+  (if (s-starts-with? ">" s)
+      (propertize s 'face 'font-lock-warning-face)
+    s))
+
+(ivy-set-display-transformer
+ 'org-db-contacts
+ 'org-db-contact-transformer)
 
 
 ;; * org-db-locations
