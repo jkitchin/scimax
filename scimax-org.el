@@ -758,7 +758,7 @@ function does not open the files."
 	      (insert-file-contents file)
 	      (when fontify
 		(org-mode)
-		(font-lock-fontify-buffer))
+		(font-lock-ensure))
 	      (goto-char (point-min))
 	      (while (re-search-forward org-heading-regexp nil t)
 		(cl-pushnew (list
