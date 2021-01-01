@@ -45,6 +45,9 @@
 
 (setq hydra-is-helpful t)
 
+;; to quiet byte-compile error
+(defvar url-http-end-of-headers)
+
 ;; * Dictionary/thesaurus/grammar
 (defun words-dictionary ()
   "Look up word at point in an online dictionary."
