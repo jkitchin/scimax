@@ -57,7 +57,7 @@
   "Jump to an org headline with avy."
   (interactive)
   (avy-with avy-goto-line
-    (avy--generic-jump org-heading-regexp nil)))
+    (avy-jump org-heading-regexp nil)))
 
 
 (defun org-teleport (&optional arg)
@@ -70,7 +70,7 @@ is positive, move after, and if negative, move before."
   (org-mark-subtree)
   (kill-region (region-beginning) (region-end))
   ;; Jump to a visible headline
-  (avy-with avy-goto-line (avy--generic-jump org-heading-regexp nil))
+  (avy-with avy-goto-line (avy-jump org-heading-regexp nil))
   (cond
    ;; Move before  and change headline level
    ((and (numberp arg) (> 0 arg))
@@ -718,14 +718,14 @@ F5 inserts the entity code."
   "Jump to visible headline in the buffer."
   (interactive)
   (org-mark-ring-push)
-  (avy-with avy-goto-line (avy--generic-jump org-heading-regexp nil)))
+  (avy-with avy-goto-line (avy-jump org-heading-regexp nil)))
 
 
 (defun avy-jump-to-visible-sentence ()
   "Jump to visible sentence in the buffer."
   (interactive)
   (org-mark-ring-push)
-  (avy-with avy-goto-line (avy--generic-jump (sentence-end) nil))
+  (avy-with avy-goto-line (avy-jump (sentence-end) nil))
   (forward-sentence))
 
 

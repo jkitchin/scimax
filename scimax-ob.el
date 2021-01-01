@@ -157,7 +157,7 @@ With prefix arg NEW, always insert new cell."
   "Jump to a visible src block with avy."
   (interactive)
   (avy-with scimax-ob-jump-to-block
-    (avy--generic-jump "#\\+BEGIN_SRC"  nil (point-min) (point-max))))
+    (avy-jump "#\\+BEGIN_SRC"  nil (point-min) (point-max))))
 
 
 (defun scimax-ob-jump-to-block (&optional N)

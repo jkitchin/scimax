@@ -98,7 +98,7 @@
 		      (fields (mapcar 'car e))
 		      (regex (concat (regexp-opt fields) " +=")))
 		 (avy-with bibtex-goto-field
-		   (avy--generic-jump regex nil avy-style beg end))))
+		   (avy-jump regex nil avy-style beg end))))
 
 
 (bibtex-hotkey "s"
