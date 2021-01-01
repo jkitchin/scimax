@@ -703,7 +703,7 @@ It is for commands that depend on the major mode. One example is
       (push (line-end-position) posns))
     (org-mark-ring-push)
     (avy-with ob-header
-      (avy--process (reverse posns) (avy--style-fn avy-style)))))
+      (avy-process (reverse posns) (avy--style-fn avy-style)))))
 
 
 (defun scimax-ob-create-header-string ()
@@ -779,7 +779,7 @@ With a prefix arg, delete the thing you jumped to."
 		     (push (1+ (match-beginning 0)) posns))
 		   (push (line-end-position) posns)
 		   (avy-with ob-header
-		     (avy--process (reverse posns) (avy--style-fn avy-style)))
+		     (avy-process (reverse posns) (avy--style-fn avy-style)))
 		   (when (eolp) (setq new-header t))
 		   (setq point-choice (point))
 		   ;; get the header we are in
