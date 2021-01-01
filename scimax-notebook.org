@@ -83,7 +83,7 @@ Our concept of a notebook is that it is a directory that is a project as defined
   "~/vc/projects/"
   "Directory where projects are stored."
   :group 'scimax-notebook
-  :type '(directory))
+  :type 'directory)
 
 
 (unless (file-directory-p nb-notebook-directory)
@@ -99,7 +99,8 @@ name. This function will be run in the root directory of the
 project. The function should return a string of the master file
 name. See `nb-example-master' for an example of a computed master
 file."
-  :group 'scimax-notebook)
+  :group 'scimax-notebook
+  :type 'function)
 
 
 #+END_SRC
@@ -111,7 +112,8 @@ When I started this project, I made everything a git repo. That has some benefit
   "Symbol for what type of project to make.
 projectile will just put a .projectile file in the directory
 git will initialize the directory as a git repo."
-  :group 'scimax-notebook)
+  :group 'scimax-notebook
+  :type 'symbol)
 
 
 (defun nb-example-master (&optional name)
@@ -128,7 +130,8 @@ to the top of the directory with ls."
   (lambda ()
     (find-file (read-file-name "File: " "." (funcall nb-master-file))))
   "Function to run after switching projects with `nb-open'."
-  :group 'scimax-notebook)
+  :group 'scimax-notebook
+  :type 'function)
 
 
 #+END_SRC
@@ -342,7 +345,8 @@ This function works for all the notebooks and relies on external programs like z
 (defcustom nb-archive-command "zip"
   "Command to make archives.
 An alternative is tar."
-  :group 'scimax-notebook)
+  :group 'scimax-notebook
+  :type 'string)
 
 
 (defcustom nb-archive-command-options "-r"
@@ -350,14 +354,16 @@ An alternative is tar."
 For tar you want -czf for a tar.gz
 or tar -cjf for a bzipped file
 For bzip2 you want "
-  :group 'scimax-notebook)
+  :group 'scimax-notebook
+  :type 'string)
 
 
 (defcustom nb-archive-extension ".zip"
   "Default extension for the archive.
 For tar with -czf I recommend .tar.gz
 For tar with -cjf I recommend .tbz2"
-  :group 'scimax-notebook)
+  :group 'scimax-notebook
+  :type 'string)
 
 
 (defun nb-archive (zip-file project)
@@ -953,7 +959,8 @@ We may want to open this link with a system program, e.g. if it is an ipynb or s
        ((and (= 1 (length candidates))
 	     (file-exists-p (expand-file-name fpath (car candidates))))
 	(org-mark-ring-push)
-	(org-open-file-with-system (expand-file-name fpath (car candidates))))
+	;; use system if possible.
+	(org-open-file (expand-file-name fpath (car candidates)) '(16)))
        ;; multiple matches, select project interactively
        (t
 	(error "no match found"))))))
