@@ -10,9 +10,10 @@
   '(@-links-this-buffer
     @-links-org-buffers
     @-links-stored-links
-    org-db-contacts-candidates
-    )
-  "List of functions that generate candidates")
+    org-db-contacts-candidates)
+  "List of functions that generate candidates"
+  :group 'scimax-@-link
+  :type '(repeat function))
 
 (defcustom scimax-insert-link-functions
   `(counsel-find-file
@@ -20,7 +21,9 @@
     counsel-projectile-switch-project
     ,org-ref-insert-cite-function
     org-db-contacts)
-  "Other commands with link actions.")
+  "Other commands with link actions."
+  :group 'scimax-@-link
+  :type '(repeat function))
 
 ;; * Augment some projectile functions with links
 (defun scimax-projectile-insert-file-link (f)
