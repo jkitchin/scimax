@@ -79,7 +79,7 @@
 	       (when (overlay-get ov 'button)
 		 (push (ov-beg ov) marks))))
     (avy-with scimax-dashboard-link
-      (avy--process
+      (avy-process
        (reverse marks)
        (avy--style-fn avy-style)))))
 
