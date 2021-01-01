@@ -95,7 +95,9 @@
     scimax-org-autoformat-transposed-caps
     scimax-org-autoformat-superscripts
     scimax-org-autoformat-sentence-capitalization)
-  "List of functions to call for autoformatting.")
+  "List of functions to call for autoformatting."
+  :group 'scimax-autoformat
+  :type (repeat function))
 
 (defcustom scimax-abbrev-function
   (lambda ()
@@ -107,7 +109,8 @@
   "Function that determines if scimax abbrevs are expanded.
 The function should take no args and return non-nil if an
 abbreviation should be expanded at the current point."
-  :group 'scimax)
+  :group 'scimax
+  :type 'function)
 
 ;;** Months
 ;; Note: I disabled the May abbrev. I found I use the word may a lot, and it was too annoying to undo.
@@ -138,7 +141,7 @@ abbreviation should be expanded at the current point."
     ("dec" "Dec."))
   "Months should be expanded as abbrevs."
   :group 'scimax-autoformat
-  :type 'boolean)
+  :type '(repeat (list string string)))
 
 ;;** Weekdays
 
@@ -160,7 +163,7 @@ abbreviation should be expanded at the current point."
     ("sun" "Sun."))
   "Weekdays that should be expanded."
   :group 'scimax-autoformat
-  :type 'boolean)
+  :type '(repeat (list string string)))
 
 
 ;;** Contractions
@@ -186,7 +189,7 @@ abbreviation should be expanded at the current point."
 We do not use contractions in technical writing so this replaces
 them with the full version."
   :group 'scimax-autoformat
-  :type 'boolean)
+  :type '(repeat (list string string)))
 
 
 ;;** transposed letter words
@@ -207,7 +210,7 @@ them with the full version."
     ("wehn" "when"))
   "Common transpositions that should be fixed."
   :group 'scimax-autoformat
-  :type 'boolean)
+  :type '(repeat (list string string)))
 
 
 ;;** Common Chemical Formulas
@@ -223,7 +226,7 @@ them with the full version."
     ("c2h6" "C_{2}H_{6}"))
   "List of (abbrev expansion) for defining abbreviations."
   :group 'scimax-autoformat
-  :type 'boolean)
+  :type '(repeat (list string string)))
 
 
 ;;** Misc. abbreviations
@@ -238,7 +241,7 @@ them with the full version."
     ("schrodinger" "Schrödinger"))
   "Miscellaneous abbreviations"
   :group 'scimax-autoformat
-  :type 'boolean)
+  :type '(repeat (list string string)))
 
 
 
