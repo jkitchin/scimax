@@ -727,7 +727,7 @@ It is for commands that depend on the major mode. One example is
      ((null vals)
       nil)
      ((eq vals :any)
-      (setq header-string (concat header-string " " (read-input "Value: "))))
+      (setq header-string (concat header-string " " (read-string "Value: "))))
      ((and (listp vals) (not (listp (car vals))))
       (setq header-string (concat header-string
 				  (let ((s (ivy-read

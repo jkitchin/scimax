@@ -206,7 +206,7 @@ open their twitter page or url."
 (defun scimax-twitter-update (msg &optional file)
   "Post MSG as a tweet with an optional media FILE.
 Returns the msgid for the posted tweet or the output from t."
-  (interactive (list (read-input "Msg: ")
+  (interactive (list (read-string "Msg: ")
 		     (read-file-name "File: ")))
 
   (unless (and file (f-ext? file "png"))
