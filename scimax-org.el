@@ -883,7 +883,7 @@ Use a prefix arg to get regular RET. "
     (cond
 
      ((eq 'line-break (car (org-element-context)))
-      (org-return-indent))
+      (org-return t))
 
      ;; Open links like usual, unless point is at the end of a line.
      ;; and if at beginning of line, just press enter.
