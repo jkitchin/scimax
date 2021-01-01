@@ -178,7 +178,7 @@ is positive, move after, and if negative, move before."
 ;; enable prompt-free code running
 (setq org-confirm-babel-evaluate nil
       org-confirm-elisp-link-function nil
-      org-confirm-shell-link-function nil)
+      org-link-shell-confirm-function nil)
 
 ;; register languages in org-mode
 (org-babel-do-load-languages
