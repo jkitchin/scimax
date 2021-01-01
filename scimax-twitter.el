@@ -23,7 +23,7 @@
 ;;
 (require 'f)
 (require 'scimax-functional-text)
-
+(use-package gist)
 
 ;; * Hashtag functional text
 (defface scimax-twitter-hashtag-face
