@@ -11,6 +11,8 @@
 
 (require 'org-db)
 
+(defalias 'scimax-contacts 'org-db-contacts "An alias for inserting contacts.")
+
 ;; * contact link
 ;; I have struggled with what the link should use for a path. There are two options in my opinion:
 ;; 1. An org-id - this is the most unambiguous, but least readable.
@@ -58,23 +60,35 @@ If you are in a contact heading we store a link."
 				       email)
 			      collect
 			      (list (format "%40s | %s" title fname) :filename fname :begin begin))))
-    (if (= 1 (length candidates))
-	(org-db--open-contact (car candidates))
-      (ivy-read "Contact: " candidates :action 'org-db--open-contact))))
+    (cond
+     ((s-contains? "@" email)
+      (cond
+       ((= 1 (length candidates))
+	(org-db--open-contact (car candidates)))
+       ((> (length candidates) 1)
+	(ivy-read "Contact: " candidates :action 'org-db--open-contact))
+       (t
+	(error "No matching candidates found for %s" email))))
+     ;; assume it is an id
+     (t
+      (org-db-goto-id email)))))
 
 
 (defun scimax-contact-complete (&optional arg)
   "Completion function for a scimax-contact.
-Optional argument ARG is ingored.
-TODO: I don't know what to do for the description yet"
+Optional argument ARG is ingored."
   (let* ((contacts (org-db-contacts-candidates))
-	 (contact (cdr (assoc (completing-read "Contact: " contacts) contacts)))
-	 contact-id desc)
-    (with-current-buffer (find-file-noselect (plist-get contact :filename))
-      (goto-char (plist-get contact :begin))
-      (setq contact-id (org-id-get-create)
-	    desc (nth 4 (org-heading-components))))
-    (format "contact:%s" (org-entry-get (point) "EMAIL"))))
+	 (contact (cdr (assoc (completing-read "Contact: " contacts) contacts))))
+    (org-link-store-props
+     :type "contact"
+     :link (format "contact:%s" (plist-get contact :email))
+     :description (plist-get contact :title)
+     :email (plist-get contact :email))
+    (format "contact:%s" (plist-get contact :email))))
+
+(setq org-link-make-description-function
+      (lambda (link desc)
+	(plist-get org-store-link-plist :description)))
 
 
 (defun scimax-contact-help-echo (window object position)
@@ -82,7 +96,23 @@ TODO: I don't know what to do for the description yet"
 Argument WINDOW is ignored.
 Argument OBJECT is ignored.
 Argument POSITION is where the mouse cursor is."
-  "A contact")
+  (let* ((email (org-element-property :path (org-element-context))))
+    (cl-loop for (title value tags fname lup begin) in
+	     (emacsql org-db
+		      [:select [headlines:title
+				headline-properties:value
+				headlines:tags files:filename files:last-updated headlines:begin]
+			       :from headlines
+			       :inner :join headline-properties
+			       :on (=  headlines:rowid headline-properties:headline-id)
+			       :inner :join properties
+			       :on (= properties:rowid headline-properties:property-id)
+			       :inner :join files :on (= files:rowid headlines:filename-id)
+			       :where (and  (= properties:property "EMAIL")
+					    (= headline-properties:value $s1))]
+		      email)
+	     concat
+	     (format "%40s | %s | %s\n" email title fname))))
 
 
 (defun scimax-contact-email ()
@@ -139,13 +169,75 @@ If FROM is non-nil, emails from the contact."
 	     (org-element-property :path (org-element-context))))))
 
 
+(defun scimax-contact-related ()
+  (interactive)
+  (let* ((email (org-element-property :path (org-element-context)))
+	 (link-candidates (cl-loop
+			   for (rl fn bg) in
+			   (emacsql org-db [:select [raw-link filename begin ]
+						    :from links
+						    :left :join files :on (= links:filename-id files:rowid)
+						    :where (and
+							    (= links:type "contact")
+							    (= links:path $s1))
+						    :order :by filename]
+				    email)
+			   collect
+			   ;; (candidate :filename :begin)
+			   (list (format "%s | %s" rl fn) :filename fn :begin bg)))
+
+	 (results (emacsql org-db
+			   [:select [headlines:title
+				     properties:property
+				     headline-properties:value
+				     files:filename files:last-updated headlines:begin]
+				    :from headlines
+				    :inner :join headline-properties
+				    :on (=  headlines:rowid headline-properties:headline-id)
+				    :inner :join properties
+				    :on (= properties:rowid headline-properties:property-id)
+				    :inner :join files :on (= files:rowid headlines:filename-id)
+				    :where (and (= properties:property "ASSIGNEDTO")
+						(like headline-properties:value $s1))]
+			   email))
+
+	 (assigned-candidates (cl-loop for (title property value fname last-updated begin) in results
+				       collect
+				       (list (format "%s | %s=%s | %s" title property value fname)
+					     :filename fname :begin begin)))
+	 (results (emacsql org-db
+			   [:select [headlines:title
+				     properties:property
+				     headline-properties:value
+				     files:filename files:last-updated headlines:begin]
+				    :from headlines
+				    :inner :join headline-properties
+				    :on (=  headlines:rowid headline-properties:headline-id)
+				    :inner :join properties
+				    :on (= properties:rowid headline-properties:property-id)
+				    :inner :join files :on (= files:rowid headlines:filename-id)
+				    :where (and (= properties:property "EMAIL")
+						(like headline-properties:value $s1))]
+			   email))
+	 (email-candidates (cl-loop for (title property value fname last-updated begin) in results
+				    collect
+				    (list (format "%s | %s=%s | %s" title property value fname)
+					  :filename fname :begin begin))))
+    (ivy-read "Choose: " (append assigned-candidates email-candidates link-candidates)
+	      :action (lambda (x)
+			(let ((candidate (cdr x)))
+			  (find-file (plist-get candidate :filename))
+			  (goto-char (plist-get candidate :begin)))))))
+
 (defhydra scimax-contact (:color blue :hint nil)
-  "contact:"
+  "
+contact:
+"
   ("o" scimax-contact-open-link "Open contact")
   ("e" scimax-contact-email "Email contact")
   ("c" scimax-contact-copy-email  "Copy email address")
   ("C" (scimax-contact-copy-email t) "Copy \"name\" <email>")
-  ("r" nil "Related items")
+  ("r" scimax-contact-related "Related items")
   ("t" scimax-contact-add-tag "Add tags")
   ("F" (scimax-contact-to-from t) "Emails from contact")
   ("T" scimax-contact-to-from "Emails to contact"))
@@ -281,7 +373,10 @@ Optional argument PATH is ignored."
 
 ;; I want to make sure if I reply, I have contacts.
 (when with-mu4e
-  (advice-add #'mu4e-compose-reply :before #'scimax-mu4e-get-emails))
+  (advice-add #'mu4e-compose-reply :before #'scimax-mu4e-get-emails)
+
+  (define-key mu4e-compose-mode-map "\C-c]" 'scimax-contacts)
+  (define-key message-mode-map "\C-c]" 'scimax-contacts))
 
 (provide 'scimax-contacts)
 
