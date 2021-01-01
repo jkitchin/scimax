@@ -12,6 +12,9 @@
 (require 'erc)
 (require 'ox-md)
 
+;; silence byte-compile
+(defvar url-http-end-of-headers)
+
 ;; Customized markdown exporter to handle some cases different than the regular
 ;; md exporter.
 (org-export-define-derived-backend 'sg-md 'md
