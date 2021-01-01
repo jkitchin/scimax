@@ -620,7 +620,7 @@ It is for commands that depend on the major mode. One example is
     (remove-hook 'org-font-lock-hook #'scimax-ob-add-keymap-to-src-blocks)
     (advice-remove 'lispy--eval 'scimax-ob-spoof-mode)
     (cursor-sensor-mode -1))
-  (font-lock-fontify-buffer))
+  (font-lock-ensure))
 
 ;; (add-hook 'org-mode-hook (lambda ()
 ;; 			   (scimax-ob-src-keymap-mode +1)))
