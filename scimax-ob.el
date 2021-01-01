@@ -94,7 +94,7 @@ previous cell."
      (first-code-line-p
       (beginning-of-line))
      (t
-      (previous-line)))))
+      (forward-line -1)))))
 
 
 (defun scimax-ob-edit-down ()
@@ -118,7 +118,7 @@ next cell."
      (last-code-line-p
       (end-of-line))
      (t
-      (next-line)))))
+      (forward-line)))))
 
 ;; * Executing blocks
 
@@ -678,7 +678,7 @@ It is for commands that depend on the major mode. One example is
 			       (format "%03s " (number-to-string i))
 			       'font-lock-face '(:foreground "black" :background "gray80")))
 	      (push ov scimax-ob-number-line-overlays))
-	    (next-line))))
+	    (forward-line))))
   ;; This allows you to update the numbers if you change the block, e.g. add/remove lines
   (add-hook 'post-command-hook 'scimax-ob-add-line-numbers nil 'local))
 
