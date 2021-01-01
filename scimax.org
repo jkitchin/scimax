@@ -941,6 +941,52 @@ Alternatively, you may want to type org-mode directly in an email buffer. Use `o
 
 scimax provides some tools to do a mail merge in org-mode. The idea is to run `mail-merge-make-headings' with a template and data-source to generate a series of org-mode headings that are the messages. You can inspect these, edit them if needed, and then run `mail-merge' to actually send them. Each heading will be tagged as sent, and marked DONE.
 
+* Contacts
+
+scimax defines its own contact management in org-mode. It is compatible with org-contacts, in the sense that  it defines a contact as a headline with an :EMAIL: property. It also defines a contact link that integrates with `org-db'.
+
+The principle idea is that `org-db' has all your contact information in it, where you put it. The contacts can be distributed. You use the command `scimax-contacts' to search them, and choose what to do with the one you select. The default action is to insert "name" <email> at point. You can also do these actions:
+- open the contact heading
+- insert a contact link
+- assign the contact to a heading task
+- Email a contact
+
+you can mark multiple entries with C-spc, and some commands support acting on the marked entries. Type C-s to see which candidates are marked. Press Enter to select an action on the marked candidates.
+
+** contact links
+
+You can insert functional contact links. They use an email as the path, although you can also use an org-id for backward compatibility.
+
+Here is an example contact link: [[contact:jkitchin@andrew.cmu.edu][Kitchin, John Robert]]
+
+If you click on a link you get a menu of options. On opening, if there is only one heading with that email it will open. If there are many candidates you will be prompted to choose which one to open.
+
+You can also enter a contact link with completion, e.g. type C-x C-l and select contact.
+
+** contact speed commands
+
+We also define several org heading speed commands for contacts.
+
+#+BEGIN_SRC emacs-lisp
+scimax-contacts-speed-commands
+#+END_SRC
+
+#+RESULTS:
+| b | lambda | nil | If contact has a URL open it in a browser. | (when (org-entry-get (point) URL) (browse-url (org-entry-get (point) URL)))                                          |                      |
+| c | lambda | nil | Copy the email address to the clipboard.   | (message (kill-new (org-entry-get (point) EMAIL)))                                                                   |                      |
+| e | lambda | nil | Send an email to the contact.              | (let ((email (org-entry-get (point) EMAIL))) (compose-mail) (message-goto-to) (insert email) (message-goto-subject)) |                      |
+| l | lambda | nil | Store and copy a link to the contact.      | (message (kill-new (format [[contact:%s][%s]] (org-entry-get (point) EMAIL) (nth 4 (org-heading-components)))))                      | (org-store-link nil) |
+| m | lambda | nil | Copy "name<email>"                         | (message (kill-new (format "%s" <%s> (nth 4 (org-heading-components)) (org-entry-get (point) EMAIL))))               |                      |
+| ? | lambda | nil | Print contacts speed key help.             | (with-output-to-temp-buffer *Help* (princ Contacts Speed commands                                                    |                      |
+
+** Capturing contacts
+
+It can be tedious to enter contacts by hand. You can use `scimax-message-get-emails' to extract contacts into a user file defined in `scimax-message-org-contacts-file'.
+
+
+** integration with mu4e
+
+If you have mu4e installed, the capture function will automatically capture emails when you reply to them. Also in a message you can type C-c-] to insert a contact.
 
 * Google
 
@@ -1757,6 +1803,8 @@ There are also grep based commands
 ** search org-files anywhere
 
 `org-db' is an org-mode database. When it is active every org-mode file you visit will be indexed into a sqlite database. In each file, each headline with its title, tags and properties are stored, and every link in each file is stored.
+
+`org-db' should be loaded by default in scimax.
 
 This becomes useful because you can then search all of your org-files and jump to different locations.
 
