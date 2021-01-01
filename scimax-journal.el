@@ -242,7 +242,10 @@ Add new day if necessary, otherwise, add to current day."
       (scimax-journal-write-cache tree))
 
     (when run-hooks
-      (run-hooks 'scimax-journal-new-entry-hook))))
+      (run-hooks 'scimax-journal-new-entry-hook))
+
+    (when (local-variable-p 'scimax-journal-root-dir)
+      (setq header-line-format (format "local in %s" scimax-journal-root-dir)))))
 
 
 (defun scimax-journal-delete-entry ()
