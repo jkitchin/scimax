@@ -6,9 +6,7 @@
 (require 'ox-latex)
 
 (defvar scimax-toggle-latex-fragment-func
-  (if (fboundp 'org-latex-preview)
-      'org-latex-preview
-    'org-toggle-latex-fragment)
+  'org-latex-preview
   "Function to toggle latex fragments.
 `org-toggle-latex-fragment' is obsolete in 9.3 and is replaced by
 `org-latex-preview'.")
