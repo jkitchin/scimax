@@ -18,7 +18,8 @@
 
 (defcustom scimax-inkscape-thumbnail-width 300
   "Width of thumbnails in pts."
-  :group 'scimax-inkscape)
+  :group 'scimax-inkscape
+  :type 'integer)
 
 (defcustom scimax-inkscape-template-svg
   "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
@@ -85,7 +86,9 @@
 </svg>
 "
   "Blank document for inkscape. You cannot create a file at the
-  command line, so we put this template in and open it. This one works for Inkscape 0.92.2")
+  command line, so we put this template in and open it. This one works for Inkscape 0.92.2"
+  :group 'scimax-inkscape
+  :type 'string)
 
 
 (defun scimax-inkscape-open (path)
