@@ -514,7 +514,7 @@ previous cell."
      (first-code-line-p
       (beginning-of-line))
      (t
-      (previous-line)))))
+      (forward-line -1)))))
 
 
 (defun ob-ipython-edit-down ()
@@ -763,7 +763,8 @@ variables, etc."
 ;;  driver.py I think).
 (defcustom scimax-create-kernel-max-wait 5
   "Maximum seconds to wait before kernel program starts."
-  :group 'ob-ipython)
+  :group 'ob-ipython
+  :type 'integer)
 
 (defun ob-ipython--create-kernel (name &optional kernel)
   (when (and (not (ignore-errors (process-live-p (get-process (format "kernel-%s" name)))))
