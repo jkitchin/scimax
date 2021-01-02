@@ -80,7 +80,7 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
 
 ;; do not put in \hypersetup. Use your own if you want it e.g.
 ;; \hypersetup{pdfkeywords={%s},\n pdfsubject={%s},\n pdfcreator={%}}
-(setq org-latex-with-hyperref nil)
+(setq org-latex-hyperref-template nil)
 
 ;; this is for code syntax highlighting in export. you need to use
 ;; -shell-escape with latex, and install pygments.
