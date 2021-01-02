@@ -809,7 +809,15 @@ Sets heading TODO state and prompts for deadline if there is not one."
         (interactive)
         (ivy-call)
         (ivy-next-line)))
+    (define-key map (kbd "C-h") 'org-db--contacts-help)
     map))
+
+(defun org-db--contacts-help ()
+  (interactive)
+  (org-link-open-from-string
+   (format
+    "[[%s::*Contacts]]"
+    (expand-file-name "scimax.org" scimax-dir))))
 
 
 (defun org-db-contacts ()
@@ -827,7 +835,8 @@ Sets heading TODO state and prompts for deadline if there is not one."
 			("o" org-db--open-contact "open")
 			("l" org-db--insert-contact-link "Insert link")
 			("a" org-db--assign-contact "Assign to heading")
-			("e" org-db--email-contact "Email contact")))))
+			("e" org-db--email-contact "Email contact")
+			("?" org-db--contacts-help "Help")))))
 
 (defun org-db-contact-transformer (s)
   "Make marked candidates look red."
