@@ -505,7 +505,6 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 			   filename-id)
 		  (cl-loop for (em-type buffer (start . end) em-content) in (sem-get-editmarks)
 			   do
-			   (message "%s" em-content)
 			   (emacsql org-db [:insert :into file-editmarks
 						    :values [nil $s1 $s2 $s3 $s4]]
 				    filename-id
