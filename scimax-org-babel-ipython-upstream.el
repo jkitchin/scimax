@@ -537,7 +537,7 @@ previous cell."
      (last-code-line-p
       (end-of-line))
      (t
-      (next-line)))))
+      (forward-line)))))
 
 
 ;; https://www.cheatography.com/weidadeyue/cheat-sheets/jupyter-notebook/
