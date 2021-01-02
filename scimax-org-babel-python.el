@@ -92,7 +92,7 @@
 					       (setq number-line-overlays '())))
 					   map))
               (add-to-list 'number-line-overlays ov))
-            (next-line))))
+            (forward-line))))
   (add-hook 'post-command-hook 'number-line-src-block nil 'local))
 
 
