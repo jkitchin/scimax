@@ -30,7 +30,7 @@ The editmarks are supposed to support multiline markup. This is hard to do right
 
 This document is the manual.
 
-* Known issues
+* Known issues and limitations
 
 There are things to do. Check them out here: [[elisp:(org-agenda nil "t" "<")]]
 
@@ -41,6 +41,10 @@ I have some concerns about using text properties exclusively for this project. I
 This note is about the fact that sometimes it seems like there are residual properties that mess up the fontification and addition of subsequent editmarks.
 
 ** TODO Need to disable editmark keymaps when in track change mode? It limits what you can type. Or, I need a prefix on all of them so that we don't collide with typing.
+
+** TODO Nested editmarks are not allowed
+
+This would require a more sophisticated parser. If you need this, you should probably look at a sexp based syntax, or a special block.
 
 * Features I would like to implement one day
 
@@ -53,6 +57,7 @@ It would be nice to have some metadata e.g. a timestamp, or who should be respon
 This should be general so it works with all editmarks.
 
 Note this is a partial feature in the file and audio editmarks.
+
 
 
 * Examples
@@ -406,7 +411,7 @@ this is it is not feasible to have a key without a value."
 #+END_SRC
 
 
-** audio editmark
+** audio editmark functions
 
 This editmark points to an audio file.
 
@@ -460,7 +465,7 @@ This editmark points to an audio file.
 #+RESULTS:
 : sem-audio-insert
 
-** file editmark
+** file editmark functions
 
 File editmarks are a different way to link to a file than an org-link. There is a finer resolution in these, where you can store the line and column number.
 
@@ -555,6 +560,56 @@ Another potential idea is an md5 hash, so you can tell if the file has changed s
 #+RESULTS:
 : sem-file-export
 
+** Create new editmarks
+
+You can create your own editmarks.
+
+#+BEGIN_SRC emacs-lisp
+(defun sem-set-editmark-parameters (type &rest parameters)
+  "Add or update an editmark.
+TYPE is a symbol for the name of the editmark
+PARAMETERS is a set of keyword value pairs
+"
+  (let ((data (assoc type sem-editmarks)))
+    (if data
+	;; update the editmark
+	(setcdr data (org-combine-plists (cdr data) parameters))
+      ;; New editmark
+      (pushnew `(,type ,@parameters) sem-editmarks)
+      (font-lock-remove-keywords nil (sem-font-lock-keywords))
+      (font-lock-add-keywords nil (sem-font-lock-keywords)))))
+#+END_SRC
+
+#+RESULTS:
+: sem-set-editmark-parameters
+
+Here we add a contact editmark.
+
+#+BEGIN_SRC emacs-lisp :results silent :tangle no
+(sem-set-editmark-parameters 'contact
+			     :open-marker "{@>" :close-marker "<@}"
+			     :marker-face '(:foreground "CadetBlue4" :weight ultra-light)
+			     :face '(:foreground "CadetBlue4" :weight bold)
+			     :keymap (let ((map (make-sparse-keymap)))
+				       (define-key map (kbd "C-<right>")
+					 (lambda ()
+					   (interactive)
+					   (message "%S"
+						    (sem-editmark-plist))))
+				       (define-key map (kbd "C-n") 'sem-next-editmark)
+				       (define-key map (kbd "C-p") 'sem-previous-editmark)
+				       map)
+			     :help-echo "Contact. Right-click, s-click or s-o for menu."
+			     :accept-func 'sem-delete-editmark
+			     :reject-func 'sem-clear-editmark
+			     :export nil)
+#+END_SRC
+
+*** TODO Needed features
+
+- [ ] a display function so we don't have to see the whole thing if we don't want to.
+- [ ] a validation function to tell you if it is ok, e.g. has required info
+- [ ] an insert function to help create complicated things.
 
 ** Export functions
    :PROPERTIES:
