@@ -13,6 +13,15 @@ See the [[./scimax.org][manual]] for more details.
 #+END_HTML
 
 * NEWS
+** [2021-01-02 Sat] new features
+
+It has been about two years since I noted the last new features. Here are few new features:
+
+1. org-db - index your org-files into sqlite and then be able to search them
+   1. scimax-contacts - an org-db add-on to help you find and use contacts
+2. scimax-editmarks - a new markup for editing org-files and more.
+3. scimax-@-links - use the @ key to easily insert a link from many different sources
+4. scimax-hydra - a leader key like menu to use scimax
 
 ** <2018-02-28 Wed> scimax 2.0
 
