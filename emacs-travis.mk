@@ -111,13 +111,13 @@ else
 	@echo "Install GnuTLS 3"
 	@sudo apt-get -qq update
 	@sudo apt-get install -y build-essential nettle-dev libgmp-dev
-	@wget https://www.gnupg.org/ftp/gcrypt/gnutls/v3.1/gnutls-3.1.23.tar.xz
-	@tar -xf gnutls-3.1.23.tar.xz
-	@cd gnutls-3.1.23 \
+	@wget https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/gnutls-3.7.0.tar.xz
+	@tar -xf gnutls-3.7.0.tar.xz
+	@cd gnutls-3.7.0 \
 	  && ./configure $(SILENT) \
 	  && make -j$(MAKE_JOBS) $(SILENT) \
 	  && sudo make install $(SILENT) \
-	  && sudo ln -s /usr/local/lib/libgnutls.so.28 /usr/lib/libgnutls.so.28
+	  && sudo ln -s /usr/local/lib/libgnutls.so.30 /usr/lib/libgnutls.so.30
 endif
 
 download_emacs_stable:
