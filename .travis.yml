@@ -1,17 +1,21 @@
-language: emacs-lisp
+# https://github.com/purcell/nix-emacs-ci
+language: nix
+
+os:
+  - linux
+  - osx
 
 env:
-  matrix:
-    - EVMVERSION=emacs-25.3-travis
-    - EVMVERSION=emacs-26.1-travis
-    - EVMVERSION=emacs-27.1-travis-linux-xenial
-    - EVMVERSION=emacs-git-snapshot-travis
+  - EMACS_CI=emacs-24-1
+  - EMACS_CI=emacs-24-5
+  - EMACS_CI=emacs-25-3
+  - EMACS_CI=emacs-26-3
+  - EMACS_CI=emacs-27-1
+  - EMACS_CI=emacs-snapshot
 
-before_install:
-  - source travis-evm-cask.sh
 install:
-  # Install our packages
-  - make compile
+  # The default "emacs" executable on the $PATH will now be the version named by $EMACS_CI
+  - bash <(curl https://raw.githubusercontent.com/purcell/nix-emacs-ci/master/travis-install)
+
 script:
-  # Run the unit tests
   - make test
