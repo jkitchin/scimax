@@ -163,7 +163,7 @@
 				 (functionp (second x)))
 			    (funcall (second x) (car x)))
 			   ((plist-get (cdr x) :email)
-			    (org-db-insert-contact-link x))
+			    (org-db--insert-contact-link x))
 			   (t
 			    (error "err: %S" x)))))))
 
