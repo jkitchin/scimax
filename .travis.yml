@@ -24,6 +24,7 @@ env:
 before_install:
   # Configure $PATH: Executables are installed to $HOME/bin
   - export PATH="$HOME/bin:$PATH"
+  - gnutls-cli --version
   # Download the makefile to emacs-travis.mk
   - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
   # Install Emacs (according to $EMACS_VERSION) and Cask
@@ -36,6 +37,5 @@ install:
   - cask install
 script:
   # Run your tests
-  - gnutls-cli --version
   - make build
   - make test
