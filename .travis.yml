@@ -34,6 +34,8 @@ before_install:
   - make -f emacs-travis.mk install_texinfo
 install:
   # Install your dependencies
+  - emacs --batch --eval "(pp system-configuration-features)"
+  - emacs --batch --eval "(pp (gnutls-available-p))"
   - cask install
 script:
   # Run your tests
