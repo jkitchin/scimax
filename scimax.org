@@ -1815,7 +1815,7 @@ This becomes useful because you can then search all of your org-files and jump t
 - `org-db-recent-files' :: open a list of recent files from the db
 - `org-db-locations' :: open a heading with an address property
 - `org-db-hashtags' :: open a hashtag.
-- `org-db-property-search' :: search for entries with a property that matches a pattern
+- `org-db-properties' :: search for entries with a property that matches a pattern
 - `org-db-editmarks' :: Search editmarks in your org-files
 
 You can add a lot of files with `org-db-index'.

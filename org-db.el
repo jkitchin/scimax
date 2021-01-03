@@ -1170,7 +1170,7 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
 
 ;; * property search
 
-(defun org-db-property-search (property pattern)
+(defun org-db-properties (property pattern)
   "Search org-db for entries where PROPERTY matches PATTERN.
 PATTERN follows sql patterns, so % is a wildcard."
   (interactive (list (completing-read "Property: "
