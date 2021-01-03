@@ -105,6 +105,10 @@ with the entry."
    ("l" scimax-ivy-insert-project-link "Insert project link")
    ("r" scimax-ivy-projectile-ripgrep  "Run ripgrep here")))
 
+(ivy-add-actions 'counsel-projectile-switch-project
+		 '(("l" (lambda (x)
+			  (insert (format "[[%s]]" x)))
+		    "Insert link to project")))
 
 ;; ** Find file actions
 (ivy-add-actions
