@@ -36,5 +36,6 @@ install:
   - cask install
 script:
   # Run your tests
+  - gnutls-cli --version
   - make build
   - make test
