@@ -1172,7 +1172,8 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
 
 (defun org-db-properties (property pattern)
   "Search org-db for entries where PROPERTY matches PATTERN.
-PATTERN follows sql patterns, so % is a wildcard."
+PATTERN follows sql patterns, so % is a wildcard.
+It is not currently possible to do multiple property searches."
   (interactive (list (completing-read "Property: "
 				      (-flatten (emacsql org-db
 							 [:select properties:property
