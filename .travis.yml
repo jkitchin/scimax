@@ -2,7 +2,7 @@ language: emacs-lisp
 
 sudo: required
 dist: trusty
-group: deprecated-2017Q4
+
 cache:
   - directories:
       # Cache stable Emacs binaries (saves 1min per job)
