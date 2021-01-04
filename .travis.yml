@@ -1,9 +1,8 @@
-# https://github.com/purcell/nix-emacs-ci
+# adapted from https://github.com/purcell/nix-emacs-ci
 language: nix
 
 os:
   - linux
-  - osx
 
 env:
   - EMACS_CI=emacs-25-3
