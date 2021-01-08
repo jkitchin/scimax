@@ -239,6 +239,19 @@
     (setq org-db (emacsql-sqlite (expand-file-name org-db-name org-db-root)))))
 
 
+(defun org-db-close ()
+  "Close the connection."
+  (interactive)
+  (when org-db
+    ;; It seems like you need to call this twice before org-db is nil
+    (emacsql-close org-db)
+    (emacsql-close org-db)))
+
+(add-hook 'kill-emacs-hook #'org-db-close)
+
+(set-process-query-on-exit-flag (emacsql-process org-db) nil)
+
+
 (defun org-db-get-filename-id (fname)
   "Return the rowid corresponding to FNAME.
 Adds FNAME to the database if it doesn't exist."
