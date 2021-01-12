@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: nbgrader autograder multiple choice question
+# key: nbgmcq
+# --
+# multiple choice question
+#+ATTR_IPYNB: :nbgrader ((grade_id . ${1$$(scimax-nbgrader-cell-id)}) (locked . t) (multiple_choice . t) (schema_version . 3))
+$0

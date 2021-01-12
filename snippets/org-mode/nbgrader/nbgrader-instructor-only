@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: nbgrader autograder instructor only
+# key: nbgio
+# --
+# instructor only
+#+ATTR_IPYNB: :nbgrader ((grade_id . ${1$$(scimax-nbgrader-cell-id)}$0) (remove . t) (schema_version . 3))
+#+BEGIN_SRC ipython
+
+#+END_SRC

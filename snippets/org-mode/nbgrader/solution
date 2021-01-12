@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: nbgrader solution
+# key: nbgs
+# --
+### BEGIN SOLUTION
+$0
+### END SOLUTION

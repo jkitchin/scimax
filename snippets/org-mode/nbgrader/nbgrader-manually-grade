@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: nbgrader autograder manually grade
+# key: nbgmg
+# --
+# manually grade
+#+ATTR_IPYNB: :nbgrader ((grade . t) (grade_id . ${1$$(scimax-nbgrader-cell-id)}) (points . ${2:1}) (schema_version . 3) (solution . t))
+#+BEGIN_SRC ipython
+
+#+END_SRC

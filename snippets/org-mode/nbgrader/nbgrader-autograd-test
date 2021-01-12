@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: nbgrader autograder test
+# key: nbgat
+# --
+# Autograder test
+#+ATTR_IPYNB: :nbgrader ((grade . t) (grade_id . ${1$$(scimax-nbgrader-cell-id)}) (locked . t) (points . ${2:1}) (schema_version . 3))
+#+BEGIN_SRC ipython
+# [Modify the tests below for your own problem]
+$0
+
+### BEGIN HIDDEN TESTS
+
+### END HIDDEN TESTS
+#+END_SRC

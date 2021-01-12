@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: nbgrader autograder readonly cell
+# key: nbgro
+# --
+# read-only
+#+ATTR_IPYNB: :nbgrader ((grade_id . ${1$$(scimax-nbgrader-cell-id)}$0) (locked . t) (schema_version . 3))
+#+BEGIN_SRC ipython
+
+#+END_SRC

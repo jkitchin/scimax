@@ -125,3 +125,8 @@ $0
 
    (lambda (result)
      (setq scimax-installed-latex-packages result))))
+
+(defun scimax-nbgrader-cell-id ()
+  "Generate a random 6 letter string."
+  (let ((s "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"))
+    (cl-loop for i to 6 concat (char-to-string (elt  s (random (length s)))))))

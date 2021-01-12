@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: nbgrader hidden
+# key: nbgh
+# --
+### BEGIN HIDDEN TESTS
+$0
+### END HIDDEN TESTS

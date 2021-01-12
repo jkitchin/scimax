@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: nbgrader autograder multiple choice answer
+# key: nbgmca
+# --
+# multiple choice answer
+#+ATTR_IPYNB: :nbgrader ((grade_id . ${1$$(scimax-nbgrader-cell-id)}) (multiple_choice . t) (schema_version . 3) (solution . t))
+#+BEGIN_SRC ipython
+$0
+#+END_SRC

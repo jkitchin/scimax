@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: nbgrader autograder multiple choice test
+# key: nbgmct
+# --
+# multiple choice test
+#+ATTR_IPYNB: :nbgrader ((grade . t) (grade_id . ${1$$(scimax-nbgrader-cell-id)}) (locked . t) (points . ${2:1}) (multiple_choice . t) (schema_version . 3))
+#+BEGIN_SRC ipython
+$0
+#+END_SRC
