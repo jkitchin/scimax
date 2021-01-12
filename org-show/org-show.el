@@ -28,6 +28,31 @@
 (require 'animate)
 (require 'easymenu)
 
+(defcustom org-show-org-meta-line-background 'unspecified
+  "Background for org-meta-line face during a show."
+  :group 'org-show)
+
+(defcustom org-show-org-meta-line-height 100
+  "Height of org-meta-line face during show."
+  :group 'org-show
+  :type 'number)
+
+(defcustom org-show-text-scale 4
+  "Scale for text in presentation."
+  :group 'org-show
+  :type 'number)
+
+(defcustom org-show-latex-scale 4.0
+  "Scale for latex preview."
+  :group 'org-show
+  :type 'number)
+
+(defcustom org-show-hide-tags 'slide
+  "If 'slide only hide slide tags.
+If 'all hide all tags."
+  :group 'org-show
+  :type 'symbol)
+
 ;;* Variables
 
 (defvar org-show-presentation-file nil
@@ -40,17 +65,13 @@
   (concat ":" (regexp-quote org-show-slide-tag) ":")
   "Regex to identify slide tags.")
 
-(defvar org-show-latex-scale 4.0
-  "Scale for latex preview.")
+
 
 (defvar org-show-original-latex-scale
   (if (boundp 'org-format-latex-options)
       (plist-get org-format-latex-options :scale)
     nil)
   "Original scale for latex preview, so we can reset it.")
-
-(defvar org-show-text-scale 4
-  "Scale for text in presentation.")
 
 (defvar org-show-current-slide-number 1
   "Holds current slide number.")
@@ -81,6 +102,13 @@ Used to reset the state after the show.")
 
 (defvar org-show-slide-titles '()
   "List of titles and slide numbers for each slide.")
+
+(defvar org-meta-line-background (face-attribute 'org-meta-line :background)
+  "Stores original value so we can restore it.")
+
+(defvar org-meta-line-height (face-attribute 'org-meta-line :height)
+  "Stores original value so we can restore it.")
+
 
 ;;* Functions
 (defvar org-show-temp-images '() "List of temporary images.")
@@ -208,13 +236,28 @@ slide order."
   (setq org-tags-column org-show-tags-column)
   (org-set-tags-command '(4))
 
+  (set-face-attribute 'org-meta-line nil :background org-show-org-meta-line-background)
+  (set-face-attribute 'org-meta-line nil :height org-show-org-meta-line-height)
+
   (org-show-initialize)
   ;; hide slide tags
   (save-excursion
-    (while (re-search-forward ":slide:" nil t)
-      (overlay-put
-       (make-overlay (match-beginning 0) (match-end 0))
-       'invisible 'slide)))
+    (cond
+     ((equal org-show-hide-tags 'all)
+      (org-map-entries
+       (lambda ()
+	 (let ((tag-string (cl-sixth (org-heading-components))))
+	   (when tag-string
+	     (re-search-forward tag-string (line-end-position) t)
+	     (overlay-put
+	      (make-overlay (match-beginning 0) (match-end 0))
+	      'invisible 'slide))))))
+
+     ((equal org-show-hide-tags 'slide)
+      (while (re-search-forward ":slide:" nil t)
+	(overlay-put
+	 (make-overlay (match-beginning 0) (match-end 0))
+	 'invisible 'slide)))))
   ;; hide emacs-lisp-slide blocks
   (save-excursion
     (goto-char (point-min))
@@ -245,6 +288,10 @@ Try to reset the state of your Emacs. It isn't perfect ;)"
   (interactive)
   ;; make slide tag visible again
   (remove-from-invisibility-spec 'slide)
+
+  (set-face-attribute 'org-meta-line nil :background org-meta-line-background)
+  (set-face-attribute 'org-meta-line nil :height org-meta-line-height)
+
 
   ;; Redisplay inline images
   (org-display-inline-images)
