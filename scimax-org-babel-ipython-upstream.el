@@ -117,8 +117,8 @@ string to be formatted."
     ("H-s-q" . #'scimax-jump-to-block)
 
     ;; editing commands
-    ("H-=" . #'scimax-insert-src-block)
-    ("H--" . #'scimax-split-src-block)
+    ("H-=" . #'scimax-ob-insert-src-block)
+    ("H--" . #'scimax-ob-split-src-block)
     ("H-n" . #'scimax-ob-copy-block-and-results)
     ("H-w" . #'scimax-ob-kill-block-and-results)
     ("H-o" . #'scimax-ob-clone-block)
@@ -158,7 +158,7 @@ These are activated in function `ob-ipython-key-bindings'."
      ["Kill block" scimax-ob-kill-block-and-results t]
      ["Copy block" scimax-ob-copy-block-and-results t]
      ["Clone block" scimax-ob-clone-block t]
-     ["Split block" scimax-split-src-block t]
+     ["Split block" scimax-ob-split-src-block t]
      ["Clear result" org-babel-remove-result t]
      ["Edit header" scimax-ob-edit-header t]
      ["Toggle line numbers" scimax-ob-toggle-line-numbers t])
@@ -363,9 +363,9 @@ markdown headings _1_: _2_: _3_: _4_: _5_: _6_:
   ("n" scimax-ob-copy-block-and-results)
   ("c" scimax-ob-clone-block)
   ("m" scimax-merge-ipython-blocks)
-  ("-" scimax-split-src-block)
-  ("+" scimax-insert-src-block)
-  ("=" (scimax-insert-src-block t))
+  ("-" scimax-ob-split-src-block)
+  ("+" scimax-ob-insert-src-block)
+  ("=" (scimax-ob-insert-src-block t))
   ("l" org-babel-remove-result)
   ("L" scimax-ob-clear-all-results)
   ("h" scimax-ob-edit-header)
@@ -489,7 +489,7 @@ _c_: command mode   _z_: undo   _y_: redo
   ("S-<return>" scimax-execute-and-next-block "run cell, select below" :color red)
   ("M-<return>" (scimax-execute-and-next-block t) "run cell, insert new" :color red)
 
-  ("-" scimax-split-src-block"split cell")
+  ("-" scimax-ob-split-src-block "split cell")
 
   ("/" org-comment-dwim "toggle comment on current or selected lines" :color red))
 
@@ -587,8 +587,8 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   ("<down>" org-babel-next-src-block "select cell below" :color red)
   ("j" org-babel-next-src-block "select cell below" :color red)
 
-  ("a" scimax-insert-src-block "insert cell above")
-  ("b" (scimax-insert-src-block t) "insert cell below")
+  ("a" scimax-ob-insert-src-block "insert cell above")
+  ("b" (scimax-ob-insert-src-block t) "insert cell below")
 
   ("x" scimax-ob-kill-block-and-results "cut cell")
   ("V" (scimax-ob-clone-block t) "paste cell above")

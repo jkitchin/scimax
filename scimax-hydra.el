@@ -705,7 +705,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   ("M-<return>" (scimax-execute-and-next-block t) "execute and new")
   ("n" org-next-block "next block")
   ("p" org-previous-block "previous block")
-  ("-" scimax-split-src-block "split block")
+  ("-" scimax-ob-split-src-block "split block")
   ("k" scimax-ob-kill-block-and-results "kill")
   ("w" scimax-ob-copy-block-and-results "copy")
   ("y" yank "paste")
