@@ -41,7 +41,7 @@
 (setq org-use-speed-commands t)
 
 
-
+;; I use these for convenience
 ;; kill a subtree
 (defun scimax-org-kill-subtree ()
   "Kill current subtree."
@@ -112,16 +112,28 @@ is positive, move after, and if negative, move before."
       (yank))))
   (outline-hide-leaves))
 
-
-(setq org-speed-commands-user
-      (append org-speed-commands-user
-	      '(("P" . org-set-property)
-		("d" . org-deadline)
-		("m"  . org-mark-subtree)
-		("S" . widen)
-		("k" . scimax-org-kill-subtree)
-		("q" . scimax-avy-org-headline)
-		("T" . org-teleport))))
+;; [2021-05-24 Mon] See https://github.com/jkitchin/scimax/issues/416#issuecomment-836802234
+(cond
+ ((version<= (org-version) "9.4")
+  (setq org-speed-commands-user
+	(append org-speed-commands-user
+		'(("P" . org-set-property)
+		  ("d" . org-deadline)
+		  ("m"  . org-mark-subtree)
+		  ("S" . widen)
+		  ("k" . scimax-org-kill-subtree)
+		  ("q" . scimax-avy-org-headline)
+		  ("T" . org-teleport)))))
+ ((version< "9.4" (org-version))
+  (setq org-speed-commands
+	(append org-speed-commands
+		'(("P" . org-set-property)
+		  ("d" . org-deadline)
+		  ("m"  . org-mark-subtree)
+		  ("S" . widen)
+		  ("k" . scimax-org-kill-subtree)
+		  ("q" . scimax-avy-org-headline)
+		  ("T" . org-teleport))))))
 
 
 ;; * Org-id
