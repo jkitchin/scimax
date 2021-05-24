@@ -8,22 +8,29 @@
 (use-package evil
   :ensure t
   :init
-  (setq evil-want-integration nil)
+  (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+  (setq evil-want-keybinding nil)
   :config
   (evil-mode 1))
 
-(use-package evil-collection)
-(use-package general
+(use-package evil-collection
+  :after evil
   :ensure t
   :config
-  (setq general-override-states '(emacs
-				  hybrid
-				  normal
-				  visual
-				  motion
-				  operator
-				  replace))
-  (general-override-mode)
+  (evil-collection-init))
+
+(use-package general
+  :ensure t
+  :init
+  (setq general-override-states '(insert
+                                  emacs
+                                  hybrid
+                                  normal
+                                  visual
+                                  motion
+                                  operator
+                                  replace))
+  :config
   (general-define-key
    :states '(normal visual motion)
    :keymaps 'override
