@@ -114,7 +114,8 @@ is positive, move after, and if negative, move before."
 
 ;; [2021-05-24 Mon] See https://github.com/jkitchin/scimax/issues/416#issuecomment-836802234
 (cond
- ((version<= (org-version) "9.4")
+ ;; This is for org versions less than 9.5
+ ((version< (org-version) "9.5")
   (setq org-speed-commands-user
 	(append org-speed-commands-user
 		'(("P" . org-set-property)
@@ -124,7 +125,7 @@ is positive, move after, and if negative, move before."
 		  ("k" . scimax-org-kill-subtree)
 		  ("q" . scimax-avy-org-headline)
 		  ("T" . org-teleport)))))
- ((version< "9.4" (org-version))
+ ((version<= "9.5" (org-version))
   (setq org-speed-commands
 	(append org-speed-commands
 		'(("P" . org-set-property)
