@@ -30,6 +30,10 @@
 ;; `org-db-recentf' open a recent file in the db
 ;; `org-db-links' actions for links in the db
 ;; `org-db-hashtags' actions for hashtags
+;; `org-db-@' actions for @-labels
+;; `org-db-properties' searches properties, although I don't find it that useful
+;; `org-db-editmarks' searches your editmarks
+;; `org-db-email-addresses' finds email addresses in your files.
 ;;
 ;; `org-db-toggle-org-id' If you want to use org-db to jump to an org-id instead
 ;; of `org-id-goto'. I find the built-in function to slow for me.
@@ -109,6 +113,31 @@
 			;; hashtags end at blanks, end of line or punctuation
 			(or blank eol punct)))
   "Regular expression to match hashtags.")
+
+(defvar @-rx (rx (:
+		  ;; @label begin at beginning of line, a blank, or
+		  ;; after these punctuations. I am not sure what the
+		  ;; "punctuation" group contains, so I am explicit here
+		  ;; to also include the brackets.
+		  (or bol blank (in ",.;:?!(){}[]<>")) (= 1 "@")
+		  (group-n 1
+			   ;; The rest of the chars cannot be a space or punctuation
+			   (one-or-more
+			    (one-or-more (not (in space punctuation)))
+			    ;; the words can be joined by - or _
+			    (zero-or-one (in "-_"))))
+		  ;; @labels end at blanks, end of line or punctuation
+		  (or blank eol punct)))
+  "Regular expression to match @labels.
+Maybe not surprisingly, there are a lot of false positives.
+Sometimes, this seems to match emails, it matches things like
+decorators in Python, etc.
+")
+
+
+(defvar email-rx "<?\\([-+_.~a-zA-Z][-+_.~:a-zA-Z0-9]*@[-.a-zA-Z0-9]+\\)>?"
+  "Regular expression for email addresses. Adapted from `thing-at-point-email-regexp'.")
+
 
 (defun org-db-log (format-string &rest args)
   "Insert the FORMAT-STRING formatted with ARGS into log buffer."
@@ -221,6 +250,37 @@
 				  (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
 				  (:foreign-key [hashtag-id] :references hashtags [rowid]
 						:on-delete :cascade))])
+
+  ;; @labels
+  (emacsql org-db [:create-table :if :not :exists atlabels
+				 ([(rowid integer :primary-key)
+				   (atlabel text :unique)])])
+
+
+  (emacsql org-db [:create-table :if :not :exists file-atlabels
+				 ([(rowid integer :primary-key)
+				   (filename-id integer)
+				   (atlabel-id integer)
+				   (begin integer)]
+				  (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
+				  (:foreign-key [atlabel-id] :references atlabels [rowid]
+						:on-delete :cascade))])
+
+  ;; emails
+  (emacsql org-db [:create-table :if :not :exists email-addresses
+				 ([(rowid integer :primary-key)
+				   (email-address text :unique)])])
+
+
+  (emacsql org-db [:create-table :if :not :exists file-email-addresses
+				 ([(rowid integer :primary-key)
+				   (filename-id integer)
+				   (email-address-id integer)
+				   (begin integer)]
+				  (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
+				  (:foreign-key [email-address-id] :references email-addresses [rowid]
+						:on-delete :cascade))])
+
 
   ;; editmarks
   (emacsql org-db [:create-table :if :not :exists file-editmarks
@@ -359,11 +419,39 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 			    ;; no src-blocks as these are often false matches for comments
 			    ;; These are not always reliable as it relies on font-lock
 			    (when (and (not (org-in-src-block-p))
+				       ;; these are formulas in org lines sometimes
+				       (not (eq 'org-meta-line (face-at-point)))
 				       (not (save-match-data (equal 'src-block (car (org-element-context))))))
 			      (push (cons (match-string-no-properties 1) (match-beginning 0)) hashtags)))
 			  hashtags)))
+	    (atlabels (save-excursion
+			(goto-char (point-min))
+			(let ((atlabels '()))
+			  (while (re-search-forward @-rx nil t)
+			    ;; there are many scenarios we do not want to count these.
+			    ;; no src-blocks as these are often false matches for comments
+			    ;; These are not always reliable as it relies on font-lock
+			    (when (and (not (org-in-src-block-p))
+				       ;; these are formulas in org lines sometimes
+				       (not (eq 'org-meta-line (face-at-point)))
+				       (not (save-match-data (equal 'src-block (car (org-element-context))))))
+			      (push (cons (match-string-no-properties 1) (match-beginning 0)) atlabels)))
+			  atlabels)))
+	    (emailaddresses (save-excursion
+			      (goto-char (point-min))
+			      (let ((emailaddresses '()))
+				(while (re-search-forward email-rx nil t)
+				  ;; there are many scenarios we do not want to count these.
+				  ;; no src-blocks as these are often false matches for comments
+				  ;; These are not always reliable as it relies on font-lock
+				  (when (and (not (org-in-src-block-p))
+					     (not (save-match-data (equal 'src-block (car (org-element-context))))))
+				    (push (cons (match-string-no-properties 1) (match-beginning 0)) emailaddresses)))
+				emailaddresses)))
 	    hashtag-id
-	    hlv 			;; headline level
+	    atlabel-id
+	    email-address-id
+	    hlv	;; headline level
 	    headline-id
             property-id
 	    tags
@@ -423,6 +511,44 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 
 		(emacsql org-db [:insert :into file-hashtags :values [nil $s1 $s2 $s3]]
 			 filename-id hashtag-id pos))
+
+       ;; @-labels
+       (emacsql org-db [:delete :from file-atlabels
+				:where (= file-atlabels:filename-id $s1)]
+		filename-id)
+
+
+       (cl-loop for (atlabel . pos) in atlabels do
+		;; get atlabel id
+		(setq atlabel-id (or (caar (emacsql org-db [:select rowid :from atlabels
+								    :where (= atlabel $s1)]
+						    atlabel))
+				     (emacsql org-db [:insert :into atlabels :values [nil $s1]]
+					      atlabel)
+				     (caar (emacsql org-db
+						    [:select (funcall last-insert-rowid)]))))
+
+		(emacsql org-db [:insert :into file-atlabels :values [nil $s1 $s2 $s3]]
+			 filename-id atlabel-id pos))
+
+       ;; email addresses
+       (emacsql org-db [:delete :from file-email-addresses
+				:where (= file-email-addresses:filename-id $s1)]
+		filename-id)
+
+       (cl-loop for (email-address . pos) in emailaddresses do
+		;; get email-address-id
+		(setq email-address-id (or (caar (emacsql org-db [:select rowid :from email-addresses
+									  :where (= email-address $s1)]
+							  email-address))
+					   (emacsql org-db [:insert :into email-addresses :values [nil $s1]]
+						    email-address)
+					   (caar (emacsql org-db
+							  [:select (funcall last-insert-rowid)]))))
+
+		(emacsql org-db [:insert :into file-email-addresses :values [nil $s1 $s2 $s3]]
+			 filename-id email-address-id pos))
+
 
        ;; * Headlines delete the headlines from this file. Should cascade delete
        ;; tags, properties and keywords.
@@ -767,6 +893,13 @@ Sets heading TODO state and prompts for deadline if there is not one."
   (insert (plist-get (cdr x) :email))
   (message-goto-subject))
 
+
+(defun org-db--insert-@-label (x)
+  "Insert an @ label"
+  (interactive)
+  (insert (format "@%s" (s-join "-" (s-split " " (plist-get (cdr x) :title))))))
+
+
 (defun org-db--multi-contact (candidates)
   "Act on CANDIDATES with choice of actions"
   (let ((action (ivy-read "Action: " '(("insert")
@@ -818,6 +951,15 @@ Sets heading TODO state and prompts for deadline if there is not one."
 				      (interactive)
 				      (ivy-mark)
 				      (delete-backward-char (length ivy-text))))
+    (define-key map "," (lambda ()
+			  "Insert email address and prompt for another."
+			  (interactive)
+			  (ivy-call)
+			  (with-ivy-window
+			    (insert ", "))
+			  (delete-minibuffer-contents)
+			  (setq ivy-text "")))
+
     (define-key map (kbd "C-<return>")
       (lambda ()
         "Apply action and move to next/previous candidate."
@@ -851,6 +993,7 @@ Sets heading TODO state and prompts for deadline if there is not one."
 			("l" org-db--insert-contact-link "Insert link")
 			("a" org-db--assign-contact "Assign to heading")
 			("e" org-db--email-contact "Email contact")
+			("2" org-db--insert-@-label "Insert @label")
 			("?" org-db--contacts-help "Help")))))
 
 (defun org-db-contact-transformer (s)
@@ -936,6 +1079,7 @@ Sets heading TODO state and prompts for deadline if there is not one."
   (goto-char (plist-get (cdr x) :begin))
   (org-show-context))
 
+
 (defun org-db-headings--store-link (x)
   "Store a link to X."
   (interactive)
@@ -967,7 +1111,8 @@ Sets heading TODO state and prompts for deadline if there is not one."
 
 
 (defun org-db-recentf ()
-  "Open a recent file in ‘org-db’ with completion."
+  "Open a recent file in ‘org-db’ with completion.
+Recent is sorted by last-updated in the database."
   (interactive)
   (let ((candidates (mapcar (lambda (x)
 			      (cons (format "%s %s" (cdr x) (car x)) (car x)))
@@ -1057,7 +1202,8 @@ line and only return a match if it is around the current point."
   ;; This is clunky to me, but it does work.
 
   ;; There are some other subtle points.
-  ;; 1. should we allow hashtags in src-blocks? This leads to many false hashtags in Python for example.
+  ;; 1. should we allow hashtags in src-blocks? This leads to many false hashtags
+  ;;    in Python for example for comments..
   ;; [2020-07-28 Tue] I am eliminating src-blocks for hash-tags.
   (let ((p (point))
   	(lbp (line-beginning-position)))
@@ -1131,8 +1277,33 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
 		("D" org-db-hashtags--delete "Delete this hashtag")))))
 
 
+;; * org-db-@
+(defun org-db-@ ()
+  "Jump to an @label."
+  (interactive)
+  (let* ((tip (looking-at-hashtag))
+	 (@-data (emacsql org-db [:select [atlabel file-atlabels:begin files:filename]
+					  :from atlabels
+					  :left :join file-atlabels :on (= atlabels:rowid file-atlabels:atlabel-id)
+					  :inner :join files
+					  :on (= files:rowid file-atlabels:filename-id)]))
+	 (candidates (cl-loop for (atlabel begin fname) in @-data
+			      collect (list (format "%40s  %s" atlabel fname)
+					    :@-label atlabel :begin begin :filename fname))))
 
-;; org-id integration
+    (ivy-read "@label: " candidates
+	      :action
+	      '(1
+		("o" (lambda (x)
+		       "Open the @label entry X."
+		       (interactive)
+		       (find-file (plist-get (cdr x) :filename))
+		       (goto-char (plist-get (cdr x) :begin))
+		       (unless (org-before-first-heading-p)
+			 (outline-show-entry)))
+		 "Open file at @label")))))
+
+;; * org-id integration
 ;; org-id-goto is very slow for me. This function can replace it.
 (defun org-db-goto-id (id)
   "Open an org file at ID."
@@ -1234,6 +1405,28 @@ It is not currently possible to do multiple property searches."
 			      collect
 			      (list
 			       (format "%s | %s | %s" type fname (s-trim content))
+			       :filename fname
+			       :begin begin))))
+
+    (ivy-read "Choose: " candidates :action (lambda (x)
+					      (find-file (plist-get (cdr x) :filename))
+					      (goto-char (plist-get (cdr x) :begin))))))
+
+
+;; * search emails
+
+(defun org-db-email-addresses ()
+  (interactive)
+  (let* ((results (emacsql org-db
+			   [:select  [files:filename file-email-addresses:begin email-addresses:email-address]
+				     :from file-email-addresses
+				     :inner :join files :on (= files:rowid file-email-addresses:filename-id)
+				     :inner :join email-addresses :on (= email-addresses:rowid
+									 file-email-addresses:email-address-id)]))
+	 (candidates (cl-loop for (fname begin email-address) in results
+			      collect
+			      (list
+			       (format "%s | %s " email-address fname)
 			       :filename fname
 			       :begin begin))))
 
