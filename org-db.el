@@ -122,8 +122,7 @@
 		    (fill-region (point-min) (point-max))
 		    (indent-region (point-min) (point-max) 4)
 		    (buffer-string))))
-	(insert msg)
-	(message (s-trim msg))))))
+	(insert msg)))))
 
 (org-db-log "Started org-db")
 
@@ -633,12 +632,12 @@ Optional RECURSIVE is non-nil find files recursively."
     (cl-loop for fname in files
 	     for i from 1
 	     do
-	     (message "%s of %s - %s" i N fname)
+	     (org-db-log "%s of %s - %s" i N fname)
 	     (setq already-open (find-buffer-visiting fname))
 	     (with-current-buffer (or already-open (setq buf (find-file-noselect fname)))
 	       (condition-case err
 		   (org-db-update-buffer)
-		 (message "Error updating %s: %s" fname err)))
+		 (org-db-log "Error updating %s: %s" fname err)))
 	     (unless already-open (kill-buffer buf)))))
 
 
@@ -665,8 +664,12 @@ Optional RECURSIVE is non-nil find files recursively."
   (emacsql org-db [:delete :from links])
   (emacsql org-db [:delete :from hashtags])
   (emacsql org-db [:delete :from file-hashtags])
+  (emacsql org-db [:delete :from atlabels])
+  (emacsql org-db [:delete :from file-atlabels])
+  (emacsql org-db [:delete :from email-addresses])
+  (emacsql org-db [:delete :from file-email-addresses])
   (emacsql org-db [:delete :from file-editmarks])
-  (message "everything should be reset."))
+  (org-db-log "Everything should be reset."))
 
 
 
@@ -1013,8 +1016,8 @@ Sets heading TODO state and prompts for deadline if there is not one."
 						    :where (= hashtag $s1)]
 				    hashtag))))
     (if (null hashtag-id)
-	(message "Weird. no hashtag id found for %s" hashtag)
-      (message "removing %s entries: %s" hashtag hashtag-id)
+	(org-db-log "Weird. no hashtag id found for %s" hashtag)
+      (org-db-log "removing %s entries: %s" hashtag hashtag-id)
 
       (emacsql org-db [:delete :from file-hashtags
 			       :where (= file-hashtags:hashtag-id $s1)]
@@ -1156,10 +1159,10 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
 
      ((> (length result) 1)
       ;; TODO maybe use ivy to select?
-      (message "(%s) matches: %s result" (length result) result))
+      (org-db-log "(%s) matches: %s result" (length result) result))
 
      (t
-      (message "No match found")))))
+      (org-db-log "No match found")))))
 
 
 (defun org-db-toggle-org-id ()
@@ -1169,10 +1172,10 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
       (progn
 	(advice-add 'org-id-goto :override #'org-db-goto-id)
 	(put 'org-db-goto-id 'enabled t)
-	(message "org-db-goto-id advice enabled."))
+	(org-db-log "org-db-goto-id advice enabled."))
     (advice-remove 'org-id-goto #'org-db-goto-id)
     (put 'org-db-goto-id 'enabled nil)
-    (message "org-db-goto-id advice disabled.")))
+    (org-db-log "org-db-goto-id advice disabled.")))
 
 
 ;; * tag search
