@@ -454,65 +454,6 @@ then exit them."
 	  (backward-char (length (cdr chars)))))))))
 
 
-(defun helm-insert-org-entity ()
-  "Helm interface to insert an entity from `org-entities'.
-F1 inserts utf-8 character
-F2 inserts entity code
-F3 inserts LaTeX code (does not wrap in math-mode)
-F4 inserts HTML code
-F5 inserts the entity code."
-  (interactive)
-  (helm :sources
-	(reverse
-	 (let ((sources '())
-	       toplevel
-	       secondlevel)
-	   (dolist (element (append
-			     '("* User" "** User entities")
-			     org-entities-user org-entities))
-	     (when (and (stringp element)
-			(s-starts-with? "* " element))
-	       (setq toplevel element))
-	     (when (and (stringp element)
-			(s-starts-with? "** " element))
-	       (setq secondlevel element)
-	       (push `((name . ,(concat
-				 toplevel
-				 (replace-regexp-in-string
-				  "\\*\\*" " - " secondlevel)))
-		       (candidates . nil)
-		       (action . (("insert utf-8 char" . (lambda (x)
-							   (mapc (lambda (candidate)
-								   (insert (nth 6 candidate)))
-								 (helm-marked-candidates))))
-				  ("insert org entity" . (lambda (x)
-							   (mapc (lambda (candidate)
-								   (insert
-								    (concat "\\" (car candidate))))
-								 (helm-marked-candidates))))
-				  ("insert latex" . (lambda (x)
-						      (mapc (lambda (candidate)
-							      (insert (nth 1 candidate)))
-							    (helm-marked-candidates))))
-				  ("insert html" . (lambda (x)
-						     (mapc (lambda (candidate)
-							     (insert (nth 3 candidate)))
-							   (helm-marked-candidates))))
-				  ("insert code" . (lambda (x)
-						     (mapc (lambda (candidate)
-							     (insert (format "%S" candidate)))
-							   (helm-marked-candidates)))))))
-		     sources))
-	     (when (and element (listp element))
-	       (setf (cdr (assoc 'candidates (car sources)))
-		     (append
-		      (cdr (assoc 'candidates (car sources)))
-		      (list (cons
-			     (format "%10s %s" (nth 6 element) element)
-			     element))))))
-	   sources))))
-
-
 (defun ivy-insert-org-entity ()
   "Insert an org-entity using ivy."
   (interactive)
@@ -521,9 +462,9 @@ F5 inserts the entity code."
 				collect
 				(cons
 				 (format "%20s | %20s | %20s | %s"
-					 (cl-first element) ;name
-					 (cl-second element) ; latex
-					 (cl-fourth element) ; html
+					 (cl-first element)    ;name
+					 (cl-second element)   ; latex
+					 (cl-fourth element)   ; html
 					 (cl-seventh element)) ;utf-8
 				 element))
 	    :require-match t
