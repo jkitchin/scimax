@@ -7,8 +7,18 @@
 ;; * Generic ivy actions
 (ivy-set-actions
  t
- '(("i" (lambda (x) (with-ivy-window
-		      (insert x))) "insert candidate")
+ '(("i" (lambda (x)
+	  (with-ivy-window
+	    (cond
+	     ;; x is a string, the only sensible thing is to insert it
+	     ((stringp x)
+	      (insert x))
+	     ;; x is a list where the first element is a string
+	     ((and (listp x) (stringp (first x)))
+	      (insert (first x)))
+	     (t
+	      (insert (format "%S" x))))))
+    "insert candidate")
    (" " (lambda (x) (ivy-resume)) "resume")
    ("?" (lambda (x)
 	  (interactive)
