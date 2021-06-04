@@ -319,7 +319,6 @@ Set to nil to avoid loading a theme."
    "sexp mode")
 
   ("a" swiper-all "swiper-all")
-  ("o" helm-org-agenda-files-headings "org headlines")
   ("r" counsel-git-grep "git grep")
   ("t" avy-goto-char-timer "char timer"))
 
