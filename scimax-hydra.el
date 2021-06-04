@@ -764,7 +764,8 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   ("l" org-db-locations "location")
   ("k" org-db-links "link")
   ("r" org-db-recent-files "recent file")
-  ("t" org-db-hashtags "hashtag"))
+  ("t" org-db-hashtags "hashtag")
+  ("2" org-db-@ "@-link"))
 
 
 (defhydra scimax-org-toggle (:color blue :inherit (scimax-base/heads) :columns 3)
