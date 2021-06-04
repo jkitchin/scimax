@@ -7,6 +7,48 @@
 ;;
 ;;
 
+;; * Babel settings
+;; enable prompt-free code running
+(setq org-confirm-babel-evaluate nil
+      org-confirm-elisp-link-function nil
+      org-link-shell-confirm-function nil)
+
+;; register languages in org-mode
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (latex . t)
+   (python . t)
+   (shell . t)
+   (matlab . t)
+   (sqlite . t)
+   (ruby . t)
+   (perl . t)
+   (org . t)
+   (dot . t)
+   (plantuml . t)
+   (R . t)
+   (fortran . t)
+   (C . t)))
+
+;; no extra indentation in the source blocks
+(setq org-src-preserve-indentation t)
+
+;; use syntax highlighting in org-file code blocks
+(setq org-src-fontify-natively t)
+
+(setq org-src-tab-acts-natively t)
+
+
+;; ** Jupyter see [[./scimax-jupyter.el]]
+
+
+;; ** Fortran
+(defalias 'org-babel-execute:f90 'org-babel-execute:fortran)
+
+
+
+
 ;; * Colored src blocks
 
 (setq  org-src-block-faces '(("emacs-lisp" (:background "LightCyan1" :extend t))

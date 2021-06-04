@@ -30,8 +30,6 @@
   (use-package org-bullets)
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode))))
 
-(setq org-src-tab-acts-natively t)
-
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "|" "DONE(d)")))
@@ -186,83 +184,6 @@ is positive, move after, and if negative, move before."
     ;; and last a global todo list
     (todo "TODO"))))
 
-
-;; * Babel settings
-;; enable prompt-free code running
-(setq org-confirm-babel-evaluate nil
-      org-confirm-elisp-link-function nil
-      org-link-shell-confirm-function nil)
-
-;; register languages in org-mode
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (latex . t)
-   (python . t)
-   (shell . t)
-   (matlab . t)
-   (sqlite . t)
-   (ruby . t)
-   (perl . t)
-   (org . t)
-   (dot . t)
-   (plantuml . t)
-   (R . t)
-   (fortran . t)
-   (C . t)))
-
-;; no extra indentation in the source blocks
-(setq org-src-preserve-indentation t)
-
-;; use syntax highlighting in org-file code blocks
-(setq org-src-fontify-natively t)
-
-(setq org-babel-default-header-args:python
-      '((:results . "output replace")
-	(:session . "none")
-	(:exports . "both")
-	(:cache .   "no")
-	(:noweb . "no")
-	(:hlines . "no")
-	(:tangle . "no")
-	(:eval . "never-export")))
-
-;; ** jupyter ipython blocks
-
-(require 'scimax-org-babel-ipython-upstream)
-
-;; ** jupyter-hy blocks
-;; make src blocks open in the right mode
-(add-to-list 'org-src-lang-modes '("jupyter-hy" . hy))
-(add-to-list 'org-latex-minted-langs '(jupyter-hy  "hylang"))
-
-;; set default headers for convenience
-(setq org-babel-default-header-args:jupyter-hy
-      '((:results . "output replace")
-	(:session . "hy")
-	(:kernel . "calysto_hy")
-	(:exports . "both")
-	(:eval . "never-export")
-	(:cache .   "no")
-	(:noweb . "no")
-	(:hlines . "no")
-	(:tangle . "no")))
-
-(defalias 'org-babel-execute:jupyter-hy 'org-babel-execute:ipython)
-(defalias 'org-babel-prep-session:jupyter-hy 'org-babel-prep-session:ipython)
-(defalias 'org-babel-jupyter-hy-initiate-session 'org-babel-ipython-initiate-session)
-
-;; (when (version< (org-version) "9.2")
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("hy" "#+BEGIN_SRC jupyter-hy\n?\n#+END_SRC"
-;; 		 "<src lang=\"hy\">\n?\n</src>")))
-
-;; (when (version<= "9.2" (org-version))
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("hy" . "src jupyter-hy")))
-
-;; ** Fortran
-(defalias 'org-babel-execute:f90 'org-babel-execute:fortran)
 
 ;; * Images in org-mode
 
@@ -1070,10 +991,9 @@ Use a prefix arg to get regular RET. "
   :ensure nil
   :load-path scimax-dir)
 
-;; (use-package scimax-org-src-blocks
-;;   :ensure nil
-;;   :load-path scimax-dir
-;;   :config (scimax-org-toggle-colored-src-blocks))
+(use-package scimax-org-src-blocks
+  :ensure nil
+  :load-path scimax-dir)
 
 
 (defun scimax-get-file-keyword (KEYWORD)
