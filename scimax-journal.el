@@ -211,27 +211,32 @@ Use an optional prefix arg REFRESH to force refresh the cache."
 		'scimax-journal-calendar-entry-face)))))
 
 
-(defun scimax-journal-open-entry (date-string)
+(defun scimax-journal-open-entry (date-string global)
   "Add new entry to journal for DATE-STRING.
-DATE-STRING should be in the form \"year-month-day\".
-Add new day if necessary, otherwise, add to current day."
+DATE-STRING should be in the form \"year-month-day\". Add new day
+if necessary, otherwise, add to current day. if GLOBAL is non-nil
+open in the default journal even if there is a local journal."
   (interactive (list
 		(let ((scimax-journal-tree (scimax-journal-entries))
 		      (calendar-today-visible-hook))
 		  (progn
 		    (add-hook 'calendar-today-visible-hook
 			      'scimax-journal-mark-entries)
-		    (org-read-date)))))
+		    (org-read-date)))
+		current-prefix-arg))
   (hack-dir-local-variables)
   (hack-dir-local-variables-non-file-buffer)
   (let* ((date (split-string date-string "-"))
 	 (year (elt date 0))
 	 (month (elt date 1))
 	 (day (elt date 2))
-	 (journal-entry-dir (f-join scimax-journal-root-dir
-				    year
-				    month
-				    day))
+	 (journal-entry-dir (f-join
+			     (if global
+				 (default-value 'scimax-journal-root-dir)
+			       scimax-journal-root-dir)
+			     year
+			     month
+			     day))
 	 (org-file (f-join journal-entry-dir
 			   (format "%s-%s-%s.org" year month day)))
 	 ;; we only run hooks on new files. If the file exists, we do not want
@@ -555,7 +560,7 @@ _sy_: year   _gy_: year    _f_: file         ^ ^            _ay_: agenda year
   ("n" scimax-journal-next-entry "Next entry" :color red)
   ("p" scimax-journal-previous-entry "Previous entry" :color red)
 
-  ("j" (scimax-journal-open-entry (format-time-string "%Y-%m-%d" (current-time))) "Open today")
+  ("j" (scimax-journal-open-entry (format-time-string "%Y-%m-%d" (current-time)) current-prefix-arg) "Open today")
   ("f" (scimax-journal-go-to-file) "Open a journal file")
   ("e" scimax-journal-open-entry "Open entry")
   ("h" scimax-journal-open-heading "Open to heading")
