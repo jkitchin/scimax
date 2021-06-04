@@ -1,8 +1,8 @@
-;;; scimax-ldap.el --- Helm and ivy interface to LDAP services
+;;; scimax-ldap.el --- An ivy interface to LDAP services
 
 
 ;;; Commentary:
-;; A Helm and ivy interface to an LDAP server
+;; An ivy interface to an LDAP server
 
 ;;; Code:
 
@@ -89,101 +89,6 @@ Parse results into a list of p-lists for each entry returned."
 ;; 	(browse-url fname)))))
 
 
-(defun helm-ldap (query-string)
-  "Run HELM to select results for a query."
-  (interactive "sLDAP query: ")
-  (helm
-   :sources
-   `(((name . "HELM ldap")
-      (candidates . ,(mapcar
-		      (lambda (x)
-			(cons
-			 (format
-			  "%20s|%40s|%30s|%20s|%s"
-			  (s-truncate
-			   20
-			   (or (plist-get x :title) " "))
-			  (or (plist-get x :cn) "")
-			  (or (plist-get x :mail) "")
-			  (or (plist-get x :cmuDisplayAddress) "")
-			  (or (plist-get x :telephoneNumber) " "))
-			 x))
-		      (ldap-query
-		       (if (string-match "=" query-string)
-			   query-string
-			 (concat "cn=*" query-string "*")))))
-      (action . (("Email" . (lambda (x)
-			      (compose-mail)
-			      (message-goto-to)
-			      (insert (or
-				       (plist-get x :cmuPreferredMail)
-				       (plist-get x :mail)
-				       (concat (plist-get x :cmuAndrewID)
-					       "@andrew.cmu.edu")))
-			      (message-goto-subject)))
-		 ("Call" . (lambda (x)
-			     (cisco-call
-			      (plist-get x :telephoneNumber))))
-		 ("Copy Name and email address" . (lambda (x)
-						    (kill-new
-						     (format
-						      "%s <%s>"
-						      (plist-get x :cn)
-						      (plist-get x :mail)))))
-		 ("Insert Name and email address" . (lambda (x)
-						      (insert
-						       (format
-							"%s <%s>"
-							(plist-get x :cn)
-							(plist-get x :mail)))))
-		 ("Information" . (lambda (x)
-				    (switch-to-buffer
-				     (get-buffer-create "*helm ldap*"))
-				    (erase-buffer)
-				    (dolist (key (cl-loop
-						  for key in x by #'cddr
-						  collect key))
-				      (insert (format "|%s | %s|\n"
-						      key (plist-get x key))))
-				    (org-mode)
-				    (goto-char 0)
-				    (org-ctrl-c-ctrl-c)
-
-				    (goto-char (point-max))
-
-				    (insert "\n")
-
-				    (when (plist-get x :telephoneNumber)
-				      (insert
-				       (format "[[elisp:(cisco-call \"%s\")][Call]]  "
-					       (plist-get x :telephoneNumber))))
-
-				    (when (or
-					   (plist-get x :cmuPreferredMail)
-					   (plist-get x :mail)
-					   (concat (plist-get x :cmuAndrewID)
-						   "@andrew.cmu.edu"))
-				      (insert
-				       (format "[[elisp:(progn (compose-mail) (message-goto-to) (insert \"%s\")(message-goto-subject))][Send email]]"
-					       (or
-						(plist-get x :cmuPreferredMail)
-						(plist-get x :mail)
-						(concat (plist-get x :cmuAndrewID)
-							"@andrew.cmu.edu")))))
-
-				    (insert "\n\npress q to quit.")
-				    (setq buffer-read-only t)
-				    (use-local-map (copy-keymap org-mode-map))
-				    (local-set-key "q"
-						   #'(lambda ()
-						       (interactive)
-						       (quit-window t))))))))
-     ;; fallback action
-     ((name . "New search")
-      (dummy)
-      (action . (lambda (x) (helm-ldap x)))))))
-
-
 (defun ivy-ldap (query-string)
   (interactive "sLDAP query: ")
   (let ((candidates (mapcar
@@ -223,23 +128,40 @@ Parse results into a list of p-lists for each entry returned."
 							       (concat (plist-get (cdr x) :cmuAndrewID)
 								       "@andrew.cmu.edu"))))
 			 "Add EMAIL property")
-			("p" (lambda (x)
-			       (cisco-call
-				(plist-get x :telephoneNumber)))
-			 "Call")
+			;; ("p" (lambda (x)
+			;;        (cisco-call
+			;; 	(plist-get (cdr x) :telephoneNumber)))
+			;;  "Call")
 			("c" (lambda (x)
+			       (org-insert-heading)
+			       (insert (plist-get (cdr x) :cn) "\n")
+			       (cl-loop for key in (plist-get-keys (cdr x))
+					do
+					(insert (format "- %s :: %s\n" key (plist-get (cdr x) key))))
+			       (org-entry-put (point) "EMAIL" (or
+							       (plist-get (cdr x) :cmuPreferredMail)
+							       (plist-get (cdr x) :mail)
+							       (concat (plist-get (cdr x) :cmuAndrewID)
+								       "@andrew.cmu.edu"))))
+			 "Insert contact heading")
+
+			("w" (lambda (x)
 			       (kill-new
 				(format
 				 "%s <%s>"
-				 (plist-get x :cn)
-				 (plist-get x :mail))))
+				 (plist-get (cdr x) :cn)
+				 (plist-get (cdr x) :mail))))
 			 "Copy name and email")
 			("n" (lambda (x)
-			       (kill-new
+			       (insert
 				(format
 				 "%s <%s>"
-				 (plist-get x :cn)
-				 (plist-get x :mail))))
+				 (plist-get (cdr x) :cn)
+				 (or
+				  (plist-get (cdr x) :cmuPreferredMail)
+				  (plist-get (cdr x) :mail)
+				  (concat (plist-get (cdr x) :cmuAndrewID)
+					  "@andrew.cmu.edu")))))
 			 "insert name and email")
 			("f" (lambda (x)
 			       (switch-to-buffer
@@ -250,7 +172,7 @@ Parse results into a list of p-lists for each entry returned."
 					     for key in x by #'cddr
 					     collect key))
 				 (insert (format "|%s | %s|\n"
-						 key (plist-get x key))))
+						 key (plist-get (cdr x) key))))
 			       (previous-line)
 			       (org-ctrl-c-ctrl-c)
 
@@ -264,16 +186,16 @@ Parse results into a list of p-lists for each entry returned."
 					  (plist-get x :telephoneNumber))))
 
 			       (when (or
-				      (plist-get x :cmuPreferredMail)
-				      (plist-get x :mail)
-				      (concat (plist-get x :cmuAndrewID)
+				      (plist-get (cdr x) :cmuPreferredMail)
+				      (plist-get (cdr x) :mail)
+				      (concat (plist-get (cdr x) :cmuAndrewID)
 					      "@andrew.cmu.edu"))
 				 (insert
 				  (format "[[elisp:(progn (compose-mail) (message-goto-to) (insert \"%s\")(message-goto-subject))][Send email]]"
 					  (or
-					   (plist-get x :cmuPreferredMail)
-					   (plist-get x :mail)
-					   (concat (plist-get x :cmuAndrewID)
+					   (plist-get (cdr x) :cmuPreferredMail)
+					   (plist-get (cdr x) :mail)
+					   (concat (plist-get (cdr x) :cmuAndrewID)
 						   "@andrew.cmu.edu")))))
 
 			       (insert "\n\npress q to quit.")
