@@ -861,7 +861,6 @@ _C-a_ Async export: %`hydra-ox/async-export
   ("e" projectile-recentf "Recentf" :column "Files")
   ("f" projectile-find-file "Find file" :column "Files")
   ("g" projectile-find-file-dwim "Find dwim" :column "Files")
-  ("h" helm-projectile "helm-projectile")
   ("i" projectile-invalidate-cache "invalidate cache" :column "projects")
   ("j" projectile-find-tag "find tag" :column "search")
   ("k" projectile-kill-buffers "Kill buffers" :column "buffers")
@@ -910,8 +909,8 @@ _C-a_ Async export: %`hydra-ox/async-export
 register/resume/replace
 Register                     Resume             Replace
 ------------------------------------------------------------------
-_j_: jump to register        _h_: helm resume   _q_: query replace
-_i_: insert register         _v_: ivy resume    _x_: regexp replace
+_j_: jump to register        _v_: ivy resume    _q_: query replace
+_i_: insert register         ^ ^                _x_: regexp replace
 _c_: copy to register
 _a_: append to register
 _n_: number to register
@@ -923,7 +922,6 @@ _l_: list registers
   ("a" append-to-register)
   ("c" copy-to-register)
   ("f" frameset-to-register)
-  ("h" helm-resume)
   ("i" insert-register)
   ("j" jump-to-register)
   ("l" list-registers)
@@ -1078,7 +1076,7 @@ _z_: Customize scimax   _f_: change font
 		 :action
 		 (lambda (font)
 		   (set-frame-font font 'keep-size t))))
-  ("t" helm-themes)
+  ("t" load-theme)
   ("u" scimax-customize-user)
   ("z" (customize-apropos "scimax")))
 
