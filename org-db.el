@@ -828,28 +828,34 @@ Optional RECURSIVE is non-nil find files recursively."
   (let ((link)
 	(candidate (cdr x)))
     ;; check if the file is up-to-date
-    (let ((actual-mod-time (float-time (file-attribute-modification-time
-					(file-attributes (plist-get candidate :filename))))))
-      (when (org-time<= (plist-get candidate :last-updated) actual-mod-time)
-	(error "%s is not up to date in org-db." (plist-get candidate :filename))))
+    ;; (let ((actual-mod-time (float-time (file-attribute-modification-time
+    ;; 					(file-attributes (plist-get candidate :filename))))))
+    ;;   (when (org-time<= (plist-get candidate :last-updated) actual-mod-time)
+    ;; 	(warn "%s is not up to date in org-db." (plist-get candidate :filename))
+    ;; 	(with-current-buffer (find-file-noselect (plist-get candidate :filename))
+    ;; 	  (save-buffer)
+    ;; 	  (org-db-update-buffer t))))
+    ;; (save-excursion
+    ;;   (with-current-buffer
+    ;; 	  (find-file-noselect
+    ;; 	   (plist-get candidate :filename))
+    ;; 	(goto-char (plist-get candidate :begin))
 
-    (with-current-buffer
-	(find-file-noselect
-	 (plist-get candidate :filename))
-      (goto-char (plist-get candidate :begin))
+    ;; 	;; Check we are looking at the right place
+    ;; 	(unless (and (looking-at org-heading-regexp)
+    ;; 		     (string= (plist-get candidate :email) (org-entry-get (point) "EMAIL")))
+    ;; 	  (error "It does not appear we are looking at the right place here:\n%s" (plist-get candidate :filename)))
 
-      ;; Check we are looking at the right place
-      (unless (and (looking-at org-heading-regexp)
-		   (string= (plist-get candidate :email) (org-entry-get (point) "EMAIL")))
-	(error "It does not appear we are looking at the right place here:\n%s" (plist-get candidate :filename)))
-
-      (setq link (format
-		  "[[contact:%s][%s]]"
-		  (org-entry-get (point) "EMAIL")
-		  (nth 4 (org-heading-components)))))
-    (when (looking-back "]" 1)
-      (insert ", "))
-    (insert link)))
+    ;; 	(setq link (format
+    ;; 		    "[[contact:%s][%s]]"
+    ;; 		    (org-entry-get (point) "EMAIL")
+    ;; 		    (nth 4 (org-heading-components))))))
+    ;; (when (looking-back "]" 1)
+    ;;   (insert ", "))
+    ;; (insert link)
+    (insert (format "[[contact:%s][%s]]"
+		    (plist-get candidate :email)
+		    (plist-get candidate :title)))))
 
 
 (defun org-db--assign-contact (x)
@@ -869,15 +875,20 @@ Sets heading TODO state and prompts for deadline if there is not one."
 
 
 (defun org-db--open-contact (x)
-  "Open contact X"
+  "Open contact X.
+This is a little flexible. Sometimes :begin is out of date so instead we use search."
   (find-file (plist-get (cdr x) :filename))
-  (goto-char (plist-get (cdr x) :begin))
+  (goto-char (car (org-ql-query :select #'point
+				:from (current-buffer)
+				:where `(property "EMAIL" ,(plist-get (cdr x) :email)))))
   (outline-show-entry))
 
 
 (defun org-db--insert-contact (x)
-  "Insert \"name\" <email> for X at point."
-  (unless (looking-back " " 1)
+  "Insert \"name\" <email> for X at point.
+If point is not looking back on a space insert a comma separator."
+  (unless (and (looking-back " " 1)
+	       (not (bolp)))
     (insert ","))
   (insert
    (format "\"%s\" <%s>"
@@ -931,41 +942,6 @@ Sets heading TODO state and prompts for deadline if there is not one."
 
 (defvar org-db-contacts-keymap
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-<SPC>") (lambda ()
-				      "Toggle mark."
-				      (interactive)
-				      (if (ivy--marked-p)
-					  (ivy-unmark)
-					(ivy-mark))))
-
-    (define-key map (kbd "C-s") (lambda ()
-				  "Show marked candidates"
-				  (interactive)
-				  (with-help-window "*ivy-marked-candidates*"
-				    (cl-loop for cand in ivy-marked-candidates
-					     do
-					     (princ cand)))))
-
-    (define-key map (kbd "M-<SPC>") (lambda ()
-				      "Mark and clear selection."
-				      (interactive)
-				      (ivy-mark)
-				      (delete-backward-char (length ivy-text))))
-    (define-key map "," (lambda ()
-			  "Insert email address and prompt for another."
-			  (interactive)
-			  (ivy-call)
-			  (with-ivy-window
-			    (insert ", "))
-			  (delete-minibuffer-contents)
-			  (setq ivy-text "")))
-
-    (define-key map (kbd "C-<return>")
-      (lambda ()
-        "Apply action and move to next/previous candidate."
-        (interactive)
-        (ivy-call)
-        (ivy-next-line)))
     (define-key map (kbd "C-h") 'org-db--contacts-help)
     map))
 
@@ -1413,7 +1389,7 @@ It is not currently possible to do multiple property searches."
 					      (goto-char (plist-get (cdr x) :begin))))))
 
 
-;; * search emails
+;; * search for email addresses
 
 (defun org-db-email-addresses ()
   (interactive)
