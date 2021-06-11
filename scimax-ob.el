@@ -541,8 +541,8 @@ them."
 (defcustom scimax-src-block-keymaps
   `(("ipython" . ,(let ((map (copy-keymap (make-composed-keymap
 					   `(,scimax-ob-python-edit-mode-map
-					     ,python-mode-map
-					     ,pyvenv-mode-map)
+					     ,(when (boundp 'python-mode-map) python-mode-map)
+					     ,(when (boundp 'pyvenv-mode-map) pyvenv-mode-map) )
 					   org-mode-map))))
 		    ;; In org-mode I define RET so we f
 		    (define-key map (kbd "<return>") 'newline)
@@ -550,8 +550,8 @@ them."
 		    map))
     ("python" . ,(let ((map (copy-keymap (make-composed-keymap
 					  `(,scimax-ob-python-edit-mode-map
-					    ,python-mode-map
-					    ,pyvenv-mode-map)
+					    ,(when (boundp 'python-mode-map) python-mode-map)
+					    ,(when (boundp 'pyvenv-mode-map) pyvenv-mode-map))
 					  org-mode-map))))
 		   ;; In org-mode I define RET so we f
 		   (define-key map (kbd "<return>") 'newline)
@@ -565,7 +565,7 @@ them."
 		       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
 		       map))
     ("sh" . ,(let ((map (copy-keymap (make-composed-keymap
-				      `(,shell-mode-map)
+				      `(,(when (boundp 'shell-mode-map) shell-mode-map))
 				      org-mode-map))))
 	       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
 	       map)))
