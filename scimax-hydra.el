@@ -1009,7 +1009,8 @@ _l_: list registers
   ("n" flyspell-correct-next "correct next")
   ("[" flyspell-goto-prev-error  "prev typo")
   ("]" flyspell-goto-next-error "next typo")
-  ("w" flyspell-correct-word-before-point "correct word"))
+  ("w" flyspell-correct-word-before-point "correct word")
+  ("a" scimax-ivy-jump-to-typo "Jump to visible typo"))
 
 
 (defhydra scimax-transpose (:color red :inherit (scimax-base/heads) :columns 3)

@@ -57,6 +57,14 @@
     (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)))
 
 
+(defun scimax-ivy-jump-to-typo ()
+  "Use AVY to jump to a typo"
+  (interactive)
+  (avy-with avy-goto-typo
+    (avy-process (cl-loop for ov in (ov-in 'flyspell-overlay) collect (overlay-start ov)))
+    (avy--style-fn avy-style)))
+
+
 ;;* flyspell save abbrevs
 
 ;; I adapted this idea to define abbreviations while spell-checking
