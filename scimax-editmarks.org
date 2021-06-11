@@ -28,7 +28,7 @@ You should avoid:
 
 The editmarks are supposed to support multiline markup. This is hard to do right in Emacs, so things are likely to work better if you stick  to single line editmarks. I like `visual-line-mode' for that purpose.
 
-This document is the manual.
+This document is the manual and the source..
 
 * Known issues and limitations
 
@@ -44,21 +44,35 @@ This note is about the fact that sometimes it seems like there are residual prop
 
 ** TODO Nested editmarks are not allowed
 
-This would require a more sophisticated parser. If you need this, you should probably look at a sexp based syntax, or a special block.
+This would require a more sophisticated parser. If you need this, you should probably look at a sexp based syntax, e.g. (@-insert "some text"), or a special block.
+
+** TODO disable flyspell/check in at least the typo editmarks.
+
 
 * Features I would like to implement one day
 
-** TODO Metadata in editmarks
+** DONE Metadata in editmarks
+   CLOSED: [2021-06-04 Fri 19:39]
 
 It would be nice to have some metadata e.g. a timestamp, or who should be responsible for a task, for example. This is most likely to look like a sexp plist. E.g. like this:
 
-{>*(:due-date [2019-06-16 Sun] :assigned-to user) Some task to be done*<}
+{>*Some task to be done :due-date [2019-06-16 Sun] :assigned-to user*<}
 
 This should be general so it works with all editmarks.
 
-Note this is a partial feature in the file and audio editmarks.
+Note this is a partial feature in the file and audio editmarks. This is basically done. Here is how the item above is parsed.
 
 
+#+BEGIN_SRC emacs-lisp :results code :tangle no
+(sem-editmark-plist-from-string "Some task to be done :due-date [2019-06-16 Sun] :assigned-to user ")
+#+END_SRC
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle no
+("Some \"task\" to be done" :due-date "[2019-06-16 Sun]" :assigned-to "user")
+#+end_src
+
+It is not super robust because the parsing is simple, and no quotes are required.
 
 * Examples
   :PROPERTIES:
@@ -132,12 +146,16 @@ This editmark has some limitations:
 
 ** Audio
 
-This is an audio annotation. {a> :file 2019-08-24-15-46-15.mp3 <a} It relies on http://sox.sourceforge.net/ to record and play the file.
+This is an audio annotation. {a> :file 2021-06-04-19-48-38.mp3 <a} It relies on http://sox.sourceforge.net/ to record and play the file.
 
 - sem-audio-insert :: will start a recording and insert the editmark when you are done. A local file will be saved as an mp3.
 - sem-audio-listen :: will play the editmark.
 
 This code was inspired by and adapted from https://gnu.support/gnu-emacs/emacs-lisp/Emacs-Lisp-Record-voice-notes-within-GNU-Emacs.html.
+
+** Contact
+
+This is mostly an experiment: {@>John Kitchin :email jkitchin@andrew.cmu.edu <@}
 
 * The code
 
@@ -358,7 +376,10 @@ Export functions should take one argument, the backend as a symbol, and they are
 		     (define-key map (kbd "C-n") 'sem-next-editmark)
 		     (define-key map (kbd "C-p") 'sem-previous-editmark)
 		     map)))
+
   "The default editmarks")
+
+
  #+END_SRC
 
  #+RESULTS:
@@ -368,10 +389,13 @@ Some editmarks can have a plist in them containing metadata. Here we define how 
 
 
 #+BEGIN_SRC emacs-lisp
-(defun sem-editmark-plist ()
-  "Read a plist in an editmark.
-Converts the content into a plist. If the contents are not a
-plist, this may not do what you want.
+(defun sem-editmark-plist-from-string (content)
+  "Convert CONTENT into a plist.
+We split the string into words, and reassemble it into a plist.
+This is a very minimal parser to get away with not quoting things
+inside editmarks.
+
+
 
 I assume the content of the edit mark is all a plist like this
 
@@ -383,31 +407,45 @@ plist above will end up as:
 
 Then, this gets read by elisp to make the plist. The downside of
 this is it is not feasible to have a key without a value."
+  (let* ((words (split-string content " " t "\s+"))
+	 (sexp '())
+	 (s '())
+	 (tempstr)
+	 this-word)
+    (while words
+      ;; pop words off one at a time
+      (setq this-word (pop words))
+      (if (not (s-starts-with? ":" this-word))
+	  ;; Accumulate in a list of words
+	  (push this-word s)
+	;; word is not a :keyword
+	(when s
+	  (setq tempstr (s-join " " (reverse  s)))
+	  (if (string= tempstr (format "%s" (string-to-number tempstr)))
+	      (push (string-to-number tempstr) sexp)
+	    (push tempstr sexp)))
+	(setq s '())
+	(push (intern this-word) sexp)))
+    ;; make sure we get the last s...
+    (when s
+      (setq tempstr (s-join " " (reverse  s)))
+      (if (string= tempstr (format "%s" (string-to-number tempstr)))
+	  (push (string-to-number tempstr) sexp)
+	(push tempstr sexp)))
+    (-flatten (reverse sexp))))
+
+
+(defun sem-editmark-plist ()
+  "Read a plist in an editmark.
+Converts the content into a plist. If the contents are not a
+plist, this may not do what you want."
   (let* ((bounds (sem-editmark-bounds))
 	 (content-bounds (sem-content-bounds))
 	 (content (s-trim (buffer-substring-no-properties
-			   (car content-bounds) (cdr content-bounds))))
-	 (splits (split-string content ":" t "\s+"))
-	 ;; This nonsense is so I don't have to quote these in text. It might be a bad idea.
-	 (data (mapcar (lambda (pair)
-			 (let ((fields (split-string pair " " t "\s+")))
-			   (if (= 1 (length (cdr fields)))
-			       (cond
-				;; number
-				((string-match "^[0-9]+$" (cadr fields))
-				 (list
-				  (format ":%s" (car fields))
-				  (cadr fields)))
-				(t
-				 (list
-				  (format ":%s" (car fields))
-				  (format "\"%s\"" (cadr fields)))))
-			     ;; it has to be quoted
-			     (list
-			      (format ":%s" (car fields))
-			      (format "\"%s\"" (s-join " " (cdr fields)))))))
-		       splits)))
-    (read (format "%s" (-flatten data)))))
+			   (car content-bounds) (cdr content-bounds)))))
+    (sem-editmark-plist-from-string content)))
+
+
 #+END_SRC
 
 
@@ -460,10 +498,13 @@ This editmark points to an audio file.
 			 (pop-to-buffer cb)
 			 (insert (format "{a> :file %s <a}" fname))))
     (recursive-edit)))
+
+
 #+END_SRC
 
 #+RESULTS:
 : sem-audio-insert
+
 
 ** file editmark functions
 
@@ -555,61 +596,12 @@ Another potential idea is an md5 hash, so you can tell if the file has changed s
 		    (plist-get plist :line)
 		    (plist-get plist :file)
 		    (file-name-nondirectory (plist-get plist :file))))))))
+
+
 #+END_SRC
 
 #+RESULTS:
 : sem-file-export
-
-** Create new editmarks
-
-You can create your own editmarks.
-
-#+BEGIN_SRC emacs-lisp
-(defun sem-set-editmark-parameters (type &rest parameters)
-  "Add or update an editmark.
-TYPE is a symbol for the name of the editmark
-PARAMETERS is a set of keyword value pairs
-"
-  (let ((data (assoc type sem-editmarks)))
-    (if data
-	;; update the editmark
-	(setcdr data (org-combine-plists (cdr data) parameters))
-      ;; New editmark
-      (pushnew `(,type ,@parameters) sem-editmarks)
-      (font-lock-remove-keywords nil (sem-font-lock-keywords))
-      (font-lock-add-keywords nil (sem-font-lock-keywords)))))
-#+END_SRC
-
-#+RESULTS:
-: sem-set-editmark-parameters
-
-Here we add a contact editmark.
-
-#+BEGIN_SRC emacs-lisp :results silent :tangle no
-(sem-set-editmark-parameters 'contact
-			     :open-marker "{@>" :close-marker "<@}"
-			     :marker-face '(:foreground "CadetBlue4" :weight ultra-light)
-			     :face '(:foreground "CadetBlue4" :weight bold)
-			     :keymap (let ((map (make-sparse-keymap)))
-				       (define-key map (kbd "C-<right>")
-					 (lambda ()
-					   (interactive)
-					   (message "%S"
-						    (sem-editmark-plist))))
-				       (define-key map (kbd "C-n") 'sem-next-editmark)
-				       (define-key map (kbd "C-p") 'sem-previous-editmark)
-				       map)
-			     :help-echo "Contact. Right-click, s-click or s-o for menu."
-			     :accept-func 'sem-delete-editmark
-			     :reject-func 'sem-clear-editmark
-			     :export nil)
-#+END_SRC
-
-*** TODO Needed features
-
-- [ ] a display function so we don't have to see the whole thing if we don't want to.
-- [ ] a validation function to tell you if it is ok, e.g. has required info
-- [ ] an insert function to help create complicated things.
 
 ** Export functions
    :PROPERTIES:
@@ -777,6 +769,8 @@ we go with the font color."
 	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
 							   (cdr content-bounds)))
 	     "@@html:<br>@@"))))))
+
+
 #+END_SRC
 
 #+RESULTS:
@@ -850,6 +844,180 @@ The standard font-lock uses regexps for font-locking. We construct the regexp an
 
  #+RESULTS:
  : sem-font-lock-keywords
+
+** Create new editmarks
+
+You can create your own editmarks.
+
+#+BEGIN_SRC emacs-lisp
+(defun sem-set-editmark-parameters (type &rest parameters)
+  "Add or update an editmark.
+TYPE is a symbol for the name of the editmark
+PARAMETERS is a set of keyword value pairs
+"
+  (let ((data (assoc type sem-editmarks)))
+    (if data
+	;; update the editmark
+	(setcdr data (org-combine-plists (cdr data) parameters))
+      ;; New editmark
+      (pushnew `(,type ,@parameters) sem-editmarks)
+      (font-lock-remove-keywords nil (sem-font-lock-keywords))
+      (font-lock-add-keywords nil (sem-font-lock-keywords)))))
+
+
+#+END_SRC
+
+#+RESULTS:
+: sem-set-editmark-parameters
+
+*** Creating a contact editmark.
+
+#+BEGIN_SRC emacs-lisp
+(defvar sem-editmark-contact-map
+  (let ((map (copy-keymap org-mode-map)))
+    (define-key map (kbd "<return>") 'sem-contact/body)
+    (define-key map (kbd "s-e") 'sem-contact-email)
+    (define-key map (kbd "s-t") 'sem-contact-email-to)
+    (define-key map (kbd "s-f") 'sem-contact-email-from)
+    (define-key map (kbd "s-r") 'sem-contact-related)
+    map)
+  "Map for actions on editmark contact.")
+
+
+(sem-set-editmark-parameters 'contact
+			     :open-marker "{@>" :close-marker "<@}"
+			     :marker-face '(:foreground "OrangeRed1" :weight ultra-light)
+			     :face '(:foreground "OrangeRed1" :weight bold)
+			     :keymap 'sem-editmark-contact-map
+			     :help-echo "An editmark contact."
+			     :export nil)
+
+
+(defun sem-contact-insert ()
+  "Insert a contact edit mark"
+  (interactive)
+  (let* ((contacts (org-db-contacts-candidates))
+	 (choice (cdr (assoc (ivy-read "Contact: "  contacts) contacts))))
+    (insert (format "%s %s :email %s %s"
+		    (plist-get (cdr (assoc 'contact sem-editmarks)) :open-marker)
+		    (plist-get choice :title)
+		    (plist-get choice :email)
+		    (plist-get (cdr (assoc 'contact sem-editmarks)) :close-marker)))))
+
+
+(defun sem-contact-email ()
+  "Open an email buffer to the contact."
+  (interactive)
+  (let* ((plist (sem-editmark-plist))
+	 (email (plist-get (cdr plist) :email)))
+    (compose-mail)
+    (message-goto-to)
+    (insert email)
+    (message-goto-subject)))
+
+
+(defun sem-contact-email-from ()
+  "Open mu4e showing emails from the candidate."
+  (interactive)
+  (let* ((plist (sem-editmark-plist))
+	 (email (plist-get (cdr plist) :email)))
+    (org-link-open-from-string
+     (format "[[mu4e:query:from:%s]]"
+	     email))))
+
+
+(defun sem-contact-email-to ()
+  "Open mu4e showing emails to the candidate."
+  (interactive)
+  (let* ((plist (sem-editmark-plist))
+	 (email (plist-get (cdr plist) :email)))
+    (org-link-open-from-string
+     (format "[[mu4e:query:tofrom:%s]]"
+	     email))))
+
+
+(defun sem-contact-related ()
+  "Completion to choose documents with this contact email in them.
+This uses org-db-contacts, not editmark contacts right now."
+  (interactive)
+  (let* ((plist (sem-editmark-plist))
+	 (email (plist-get (cdr plist) :email))
+
+	 (link-candidates (cl-loop
+			   for (rl fn bg) in
+			   (emacsql org-db [:select [raw-link filename begin ]
+						    :from links
+						    :left :join files :on (= links:filename-id files:rowid)
+						    :where (and
+							    (= links:type "contact")
+							    (= links:path $s1))
+						    :order :by filename]
+				    email)
+			   collect
+			   ;; (candidate :filename :begin)
+			   (list (format "%s | %s" rl fn) :filename fn :begin bg)))
+
+	 (results (emacsql org-db
+			   [:select [headlines:title
+				     properties:property
+				     headline-properties:value
+				     files:filename files:last-updated headlines:begin]
+				    :from headlines
+				    :inner :join headline-properties
+				    :on (=  headlines:rowid headline-properties:headline-id)
+				    :inner :join properties
+				    :on (= properties:rowid headline-properties:property-id)
+				    :inner :join files :on (= files:rowid headlines:filename-id)
+				    :where (and (= properties:property "ASSIGNEDTO")
+						(like headline-properties:value $s1))]
+			   email))
+
+	 (assigned-candidates (cl-loop for (title property value fname last-updated begin) in results
+				       collect
+				       (list (format "%s | %s=%s | %s" title property value fname)
+					     :filename fname :begin begin)))
+	 (results (emacsql org-db
+			   [:select [headlines:title
+				     properties:property
+				     headline-properties:value
+				     files:filename files:last-updated headlines:begin]
+				    :from headlines
+				    :inner :join headline-properties
+				    :on (=  headlines:rowid headline-properties:headline-id)
+				    :inner :join properties
+				    :on (= properties:rowid headline-properties:property-id)
+				    :inner :join files :on (= files:rowid headlines:filename-id)
+				    :where (and (= properties:property "EMAIL")
+						(like headline-properties:value $s1))]
+			   email))
+	 (email-candidates (cl-loop for (title property value fname last-updated begin) in results
+				    collect
+				    (list (format "%s | %s=%s | %s" title property value fname)
+					  :filename fname :begin begin))))
+    (ivy-read "Choose: " (append assigned-candidates email-candidates link-candidates)
+	      :action (lambda (x)
+			(let ((candidate (cdr x)))
+			  (find-file (plist-get candidate :filename))
+			  (goto-char (plist-get candidate :begin)))))))
+
+
+(defhydra sem-contact (:color blue :hint nil)
+  "Editmark contact"
+  ("o" sem-contact-open "open")
+  ("e" sem-contact-email "Email contact")
+  ("r" sem-contact-related "Related documents")
+  ("t" sem-contact-email-to "Open emails to contact")
+  ("f" sem-contact-email-from "Open emails from contact"))
+#+END_SRC
+
+#+RESULTS:
+: sem-contact/body
+
+*** TODO Needed features
+
+- [ ] a display function so we don't have to see the whole thing if we don't want to.
+- [ ] a validation function to tell you if it is ok, e.g. has required info
+- [ ] a video editmark
 
 ** Minor-mode for editmarks
 
@@ -928,9 +1096,19 @@ This adds a menu to scimax for the editmarks.
 Return nil if not on an editmark."
   (when (get-text-property (point) 'sem-editmark)
     (cond
-     ;; At the very beginning
+     ;; At the very beginning of the buffer
      ((bobp)
       (cons (point) (next-single-property-change (point) 'sem-editmark)))
+     ;; at beginning of an editmark
+     ((null (get-text-property (- (point) 1) 'sem-editmark))
+      (cons (point) (or (next-single-property-change (point) 'sem-editmark) (point))))
+
+     ;; at end
+     ((and (not (eobp))
+	   (null (get-text-property (+ (point) 1) 'sem-editmark)))
+      (cons (or (previous-single-property-change (point) 'sem-editmark) (point))
+	    (point)))
+     ;; in the middle
      (t
       (cons (or (previous-single-property-change (point) 'sem-editmark) (point))
 	    (or (next-single-property-change (point) 'sem-editmark) (point)))))))
@@ -961,8 +1139,8 @@ content: ${content}"
 			(cons "type" (get-text-property (point) 'sem-type))
 			(cons "start" (car bounds))
 			(cons "end" (cdr bounds))
-			(cons "editmark" (buffer-substring (car bounds) (cdr bounds)))
-			(cons "content" (buffer-substring (car cbounds) (cdr cbounds)))
+			(cons "editmark" (buffer-substring-no-properties (car bounds) (cdr bounds)))
+			(cons "content" (buffer-substring-no-properties (car cbounds) (cdr cbounds)))
 			(cons "content-start" (car cbounds))
 			(cons "content-end" (cdr cbounds)))))))
 
@@ -1107,6 +1285,8 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
   (when (not (member '(eval sem-mode) file-local-variables-alist))
     (save-excursion
       (add-file-local-variable 'eval '(sem-mode)))))
+
+
 #+END_SRC
 
 #+RESULTS:
@@ -1374,12 +1554,14 @@ editmark is the full text including the markers."
     (let ((editmarks '())
 	  bounds
 	  cem)
+      ;; when an editmark is at the beginning of the buffer
       (when (get-text-property (point) 'sem-type)
 	(push (list (get-text-property (point) 'sem-type)
 		    (current-buffer)
 		    (setq bounds (sem-editmark-bounds))
 		    (buffer-substring-no-properties (car bounds) (cdr bounds)))
 	      editmarks))
+
       (while (setq cem (sem-next-editmark))
 	(setq bounds (sem-editmark-bounds))
 	(push (list (get-text-property (point) 'sem-type)
@@ -1586,6 +1768,7 @@ Finally we define a minor mode for the list view.
   ("t" (sem-insert 'typo) "typo")
   ("k" (sem-insert 'task) "task")
   ("c" (insert "✓") "checkmark")
+  ("2" (sem-insert 'contact) "contact")
   ("hb" (sem-insert 'blue-highlight) "green")
   ("hg" (sem-insert 'green-highlight) "green")
   ("hy" (sem-insert 'yellow-highlight) "yellow")
@@ -1682,6 +1865,7 @@ in a copy of the buffer."
 	(if export-func
 	    (funcall export-func backend)
 	  (sem-export-default backend))))))
+
 
  #+END_SRC
 
@@ -1960,8 +2144,6 @@ changed."
 
 
 #+BEGIN_SRC emacs-lisp
-
-
 (defun sem-after-change (beg end length)
   "Function to execute after a buffer change.
 This function marks deletions.  See `sem-before-change' for details.
@@ -2117,6 +2299,8 @@ of the affected text."
 	  (message "after: why aren't you caught?>")))))))
   (setq sem-current-deletion nil)
   (save-excursion (font-lock-fontify-region (line-beginning-position) (line-end-position))))
+
+
  #+END_SRC
 
  #+RESULTS:
