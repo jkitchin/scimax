@@ -792,8 +792,9 @@ The optional FILES keyword is a list of additional files to copy into the archiv
     (let ((default-directory (file-name-as-directory
 			      (expand-file-name tex-archive))))
       ;; I do not know why shell-command does not work here.
-      (call-process "pdflatex" nil nil nil "-shell-escape" base-tex-file)
-      (call-process "pdflatex" nil nil nil "-shell-escape" base-tex-file)
+      (message "Building %s in %s" base-tex-file default-directory)
+      (call-process "latexmk" nil nil nil "-f" "-pdf" "-shell-escape" base-tex-file)
+      ;; (call-process "pdflatex" nil nil nil "-shell-escape" base-tex-file)
       (ox-manuscript-cleanup))
     (org-open-file (concat
 		    (file-name-sans-extension
