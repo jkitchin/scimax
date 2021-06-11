@@ -60,13 +60,6 @@
   (use-package tex
     :ensure auctex))
 
-;; [2019-01-07 Mon] This also sometimes causes problems installing scimax,
-;; especially on Windows.
-;; Make cursor more visible when you move a long distance
-;; (use-package beacon
-;;   :config
-;;   (beacon-mode 1))
-
 
 (use-package bookmark
   :init
