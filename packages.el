@@ -285,47 +285,6 @@
   :config
   (google-this-mode 1))
 
-(use-package helm
-  :init (setq helm-command-prefix-key "C-c h")
-  :bind
-  ;; ("<f7>" . helm-recentf)
-  ;; ("M-x" . helm-M-x)
-  ;; ("M-y" . helm-show-kill-ring)
-  ;; ("C-x b" . helm-mini)
-  ;; ("C-x C-f" . helm-find-files)
-  ;; ("C-h C-f" . helm-apropos)
-  :config
-  (add-hook 'helm-find-files-before-init-hook
-	    (lambda ()
-	      (helm-add-action-to-source
-	       "Insert path"
-	       (lambda (target)
-		 (insert (file-relative-name target)))
-	       helm-source-find-files)
-
-	      (helm-add-action-to-source
-	       "Insert absolute path"
-	       (lambda (target)
-		 (insert (expand-file-name target)))
-	       helm-source-find-files)
-
-	      (helm-add-action-to-source
-	       "Attach file to email"
-	       (lambda (candidate)
-		 (mml-attach-file candidate))
-	       helm-source-find-files)
-
-	      (helm-add-action-to-source
-	       "Make directory"
-	       (lambda (target)
-		 (make-directory target))
-	       helm-source-find-files))))
-
-
-(use-package helm-bibtex)
-
-;; (use-package helm-projectile)
-
 (use-package help-fns+
   :load-path scimax-dir)
 
