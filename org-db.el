@@ -575,7 +575,7 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 			   (org-element-property :footnote-section-p hl)
 			   (org-element-property :begin hl)
 			   ;; this is really a tag string for easy searching in
-			   ;; helm/ivy because it seems tricky to build this from a
+			   ;; ivy because it seems tricky to build this from a
 			   ;; query
 			   (when tags
 			     (concat ":" (mapconcat
@@ -676,14 +676,14 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 
 ;; * Idle timer to update
 
-(defun org-db-process-queue (&optional now)
+(defun org-db-process-queue (&optional force)
   "Update all the files in `org-db-queue'.
-Use a prefix ARG to process NOW."
+Use a prefix ARG to FORCE the process instead of waiting for idle time."
   (interactive "P")
   (org-db-connect)
   (catch 'done
     (while org-db-queue
-      (unless (or now (current-idle-time))
+      (unless (or force (current-idle-time))
 	(throw 'done nil))
       (org-db-log "Updating org-db for files %s." org-db-queue)
       (let* ((filename (pop org-db-queue))
@@ -693,7 +693,7 @@ Use a prefix ARG to process NOW."
 	     (buf (find-file-noselect filename)))
 	(org-db-log "Updating %s" filename)
 	(with-current-buffer buf
-	  (org-db-update-buffer))
+	  (org-db-update-buffer force))
 	(unless already-open (kill-buffer buf)))))
   (org-db-log "Done processing org-db queue."))
 
