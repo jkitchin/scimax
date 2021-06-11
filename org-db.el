@@ -972,6 +972,7 @@ If point is not looking back on a space insert a comma separator."
 			("2" org-db--insert-@-label "Insert @label")
 			("?" org-db--contacts-help "Help")))))
 
+
 (defun org-db-contact-transformer (s)
   "Make marked candidates look red."
   (if (s-starts-with? ">" s)
@@ -1023,10 +1024,9 @@ If point is not looking back on a space insert a comma separator."
 							 (insert link))))))))
 
 
-
 ;; * org-db headings
 (defun org-db-heading-candidates ()
-  "Return candidates for ivy or helm selection."
+  "Return heading candidates completion."
   (let* ((headings (emacsql org-db [:select [headlines:level headlines:title headlines:tags
 							     files:filename headlines:begin
 							     files:last-updated]
@@ -1044,7 +1044,8 @@ If point is not looking back on a space insert a comma separator."
 			       (list
 				:file filename
 				:last-updated last-updated
-				:begin begin)))))
+				:begin begin
+				:title title)))))
     candidates))
 
 
@@ -1064,6 +1065,15 @@ If point is not looking back on a space insert a comma separator."
   (org-store-link))
 
 
+(defun org-db-headings--insert-link (x)
+  "Insert a link to X"
+  (interactive)
+  (insert (format "[[file:%s::*%s][%s]]"
+		  (plist-get (cdr x) :file)
+		  (plist-get (cdr x) :title)
+		  (plist-get (cdr x) :title))))
+
+
 ;;;###autoload
 (defun org-db-headings ()
   "Use ivy to open a heading with completion."
@@ -1073,7 +1083,8 @@ If point is not looking back on a space insert a comma separator."
 	      :action
 	      '(1
 		("o" org-db-headings--open "Open to heading.")
-		("l" org-db-headings--store-link "Store link to heading.")))))
+		("l" org-db-headings--insert-link "Insert link to heading")
+		("s" org-db-headings--store-link "Store link to heading.")))))
 
 
 ;; * org-db files
