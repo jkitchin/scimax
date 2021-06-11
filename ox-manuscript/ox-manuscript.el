@@ -938,30 +938,6 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 			  (font-lock-fontify-buffer))))))
 
 ;;;###autoload
-(defun ox-manuscript-new-helm (template-key)
-  "Create a new manuscript file from TEMPLATE-KEY."
-  (interactive
-   (list
-    (helm :sources
-	  `((name . "Manuscript")
-	    (candidates . ,(loop for entry in (ox-manuscript-candidates)
-				 collect (cons (plist-get entry :template)
-					       (plist-get entry :key))))
-	    (action . (lambda (key)
-			key))))))
-  (let* ((entry (loop for entry in (ox-manuscript-candidates)
-		      if (string= template-key (plist-get entry :key))
-		      return entry))
-	 (new-fname (plist-get entry :default-filename)))
-    (if (file-exists-p new-fname)
-	(find-file new-fname)
-      (find-file new-fname)
-      (insert-file-contents (plist-get entry :filename))
-      (goto-char (point-min))
-      (font-lock-fontify-buffer))))
-
-
-;;;###autoload
 (defun ox-manuscript-texcount ()
   "Use texcount to estimate words in an org-file if it exists.
 Fall back to `tex-count-words'"
