@@ -1422,6 +1422,51 @@ It is not currently possible to do multiple property searches."
 					      (goto-char (plist-get (cdr x) :begin))))))
 
 
+;; * backlinks
+(defun org-db-backlink-candidates ()
+  (let* ((buffer-name (buffer-file-name))
+	 (fname (file-name-nondirectory buffer-name))
+	 ;; I am assuming we only want to match on file links
+	 (potential-matches (emacsql org-db [:select [filename path begin]
+						     :from links
+						     :left :join files :on (= links:filename-id files:rowid)
+						     :where (and (= links:type "file")
+								 (like path $s1))]
+				     (concat "%" fname "%")))
+	 (matches (cl-loop for (src-filename path begin) in potential-matches collect
+			   (cond
+			    ;; path is absolute and points to file
+			    ((and (file-name-absolute-p path)
+				  (string= path buffer-name))
+			     (list src-filename begin))
+			    ;; path is relative but expands to buffer-name relative to src-filename
+			    ((string= (expand-file-name path (file-name-directory src-filename)) buffer-name)
+			     (list src-filename begin))
+			    (t
+			     nil)))))
+    (cl-loop for match in matches
+	     if (not (null match))
+	     collect
+	     (list
+	      (format "%s | %s"
+		      (first match)
+		      (with-temp-buffer
+			(insert-file-contents (first match))
+			(goto-char (second match))
+			(buffer-substring (line-beginning-position) (line-end-position))))
+	      (first match)
+	      (second match)))))
+
+
+(defun org-db-backlinks ()
+  "Find backlinks to the current file.
+This finds other files with links in them to this file."
+  (interactive)
+  (ivy-read "Backlink: " (org-db-backlink-candidates) :action (lambda (match)
+								(find-file (second match))
+								(goto-char (third match)))))
+
+
 
 ;; * org-db-macro
 
