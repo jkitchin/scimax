@@ -364,16 +364,18 @@ _p_: ffap
 (defhydra scimax-insert (:color blue :inherit (scimax-base/heads) :columns 3)
   "insert stuff"
   ("b" insert-buffer "Buffer")
-  ("c" insert-char "Char")
+  ("c" org-db-contacts "Contact")
   ("e" ivy-insert-org-entity "Org-entity")
   ("f" insert-file "File")
-  ("l" lorem-ipsum-insert-paragraphs "Lorem ipsum" :color red)
+  ("k" org-inlinetask-insert-task "org task")
+  ;; ("l" ) a link function...
+  ("L" lorem-ipsum-insert-paragraphs "Lorem ipsum" :color red)
+  ("n" insert-char "Unicode char")
   ("p" insert-parentheses "Parentheses")
   ("r" insert-register "Register")
   ("s" screenshot "org screenshot")
   ("t" org-time-stamp-inactive "Inactive [timestamp]")
   ("T" org-time-stamp "Active <timestamp>")
-  ("k" org-inlinetask-insert-task "org task")
   ("y" yas-insert-snippet "yasnippet"))
 
 ;;** jump
@@ -938,13 +940,17 @@ _l_: list registers
 
 (defhydra scimax-search (:color blue :inherit (scimax-base/heads) :columns 3)
   "search"
-  ("a" counsel-ag "ag")
+  ("a" swiper-all "swiper-all")
+  ("cg" counsel-ag "counsel ag")
   ("g" counsel-git-grep "grep")
   ("m" multi-moccur "moccur")
   ("o" occur "occur")
-  ("p" projectile-grep "project grep")
+  ("pa" projectile-ag "project ag")
+  ("pg" projectile-grep "project grep")
+  ("pr" projectile-ripgrep "project-ripgrep")
+  ("po" projectile-multi-occur "project multi-occur")
   ("r" isearch-backward "search back")
-  ("s" counsel-grep-or-swiper "search")
+  ("s" counsel-grep-or-swiper "grep-or-swiper")
   ("t" counsel-pt "pt"))
 
 
@@ -998,10 +1004,12 @@ _l_: list registers
 
 (defhydra scimax-spellcheck (:color red :inherit (scimax-base/heads) :columns 3)
   "spell"
-  ("b" ispell-buffer "buffer")
-  ("p" flyspell-correct-previous-word-generic "previous correct")
-  ("n" flyspell-correct-next-word-generic "next correct")
-  ("w" ispell-word "word"))
+  ("b" flyspell-buffer "buffer")
+  ("p" flyspell-correct-previous-word-generic "correct previous")
+  ("n" flyspell-correct-next "correct next")
+  ("[" flyspell-goto-prev-error  "prev typo")
+  ("]" flyspell-goto-next-error "next typo")
+  ("w" flyspell-correct-word-before-point "correct word"))
 
 
 (defhydra scimax-transpose (:color red :inherit (scimax-base/heads) :columns 3)
