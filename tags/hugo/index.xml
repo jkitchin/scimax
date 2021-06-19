@@ -2,19 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>hugo on Scimax</title>
-    <link>https://kitchingroup.cheme.cmu.edu/scimax/tags/hugo/</link>
+    <link>https://kitchingroup.cheme.cmu.edu/tags/hugo/</link>
     <description>Recent content in hugo on Scimax</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 19 Jun 2021 00:00:00 -0400</lastBuildDate><atom:link href="https://kitchingroup.cheme.cmu.edu/scimax/tags/hugo/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 19 Jun 2021 00:00:00 -0400</lastBuildDate><atom:link href="https://kitchingroup.cheme.cmu.edu/tags/hugo/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Practicing with ox-hugo</title>
-      <link>https://kitchingroup.cheme.cmu.edu/scimax/posts/2021-06-19/</link>
+      <link>https://kitchingroup.cheme.cmu.edu/posts/2021-06-19/</link>
       <pubDate>Sat, 19 Jun 2021 00:00:00 -0400</pubDate>
       
-      <guid>https://kitchingroup.cheme.cmu.edu/scimax/posts/2021-06-19/</guid>
-      <description>A basic post An image inline from srsc
-import matplotlib.pyplot as plt plt.plot([1, 2, 4, 8, 12]);  def func(x): return 2 * x func(3) 6 &amp;quot;What about a really really long line ----------------------------------------------------------------------&amp;gt;&amp;quot; # It seems to have a scrollbar at least. testing line highlighting. Line 2 should be highlighted and numbered.
+      <guid>https://kitchingroup.cheme.cmu.edu/posts/2021-06-19/</guid>
+      <description>A basic post An image inline from src. There should be a caption, but I don&amp;rsquo;t see it?
+import matplotlib.pyplot as plt plt.plot([1, 2, 4, 8, 12]);  why doesn&amp;rsquo;t that image show now?
+def func(x): return 2 * x func(3) 6 &amp;quot;What about a really really long line ----------------------------------------------------------------------&amp;gt;&amp;quot; # It seems to have a scrollbar at least. testing line highlighting. Line 2 should be highlighted and numbered.
 1 2 3  (message &amp;#34;This is line 1&amp;#34;) (message &amp;#34;This is line 2&amp;#34;) (message &amp;#34;This is line 3&amp;#34;)   citations A reference (Kitchin 2015).</description>
     </item>
     

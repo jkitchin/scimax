@@ -2,28 +2,28 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://kitchingroup.cheme.cmu.edu/scimax/categories/</loc>
+    <loc>https://kitchingroup.cheme.cmu.edu/categories/</loc>
     <lastmod>2021-06-19T00:00:00-04:00</lastmod>
   </url><url>
-    <loc>https://kitchingroup.cheme.cmu.edu/scimax/categories/emacs/</loc>
+    <loc>https://kitchingroup.cheme.cmu.edu/categories/emacs/</loc>
     <lastmod>2021-06-19T00:00:00-04:00</lastmod>
   </url><url>
-    <loc>https://kitchingroup.cheme.cmu.edu/scimax/tags/hugo/</loc>
+    <loc>https://kitchingroup.cheme.cmu.edu/tags/hugo/</loc>
     <lastmod>2021-06-19T00:00:00-04:00</lastmod>
   </url><url>
-    <loc>https://kitchingroup.cheme.cmu.edu/scimax/categories/post/</loc>
+    <loc>https://kitchingroup.cheme.cmu.edu/categories/post/</loc>
     <lastmod>2021-06-19T00:00:00-04:00</lastmod>
   </url><url>
-    <loc>https://kitchingroup.cheme.cmu.edu/scimax/posts/</loc>
+    <loc>https://kitchingroup.cheme.cmu.edu/posts/</loc>
     <lastmod>2021-06-19T00:00:00-04:00</lastmod>
   </url><url>
-    <loc>https://kitchingroup.cheme.cmu.edu/scimax/posts/2021-06-19/</loc>
+    <loc>https://kitchingroup.cheme.cmu.edu/posts/2021-06-19/</loc>
     <lastmod>2021-06-19T00:00:00-04:00</lastmod>
   </url><url>
-    <loc>https://kitchingroup.cheme.cmu.edu/scimax/</loc>
+    <loc>https://kitchingroup.cheme.cmu.edu/</loc>
     <lastmod>2021-06-19T00:00:00-04:00</lastmod>
   </url><url>
-    <loc>https://kitchingroup.cheme.cmu.edu/scimax/tags/</loc>
+    <loc>https://kitchingroup.cheme.cmu.edu/tags/</loc>
     <lastmod>2021-06-19T00:00:00-04:00</lastmod>
   </url>
 </urlset>
