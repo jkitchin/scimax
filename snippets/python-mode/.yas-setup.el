@@ -20,9 +20,9 @@ This should be run in a python function."
 	      (cl-loop for (arg val) in arg-tuples collect
 		       (if val
 			   (format "%s : ${%s:type} optional, default=%s\n${%s:description}"
-				   arg (incf i) val (incf i))
+				   arg (cl-incf i) val (cl-incf i))
 			 (format "%s : ${%s:type}\n${%s:description}"
-				 arg (incf i) (incf i)))))
+				 arg (cl-incf i) (cl-incf i)))))
 	(format "\"\"\"${1:One line description}
 
 Parameters
@@ -33,7 +33,7 @@ Parameters
 Returns
 -------
 ${%s:return}
-\"\"\"" (s-join "\n\n" results) (incf i))))))
+\"\"\"" (s-join "\n\n" results) (cl-incf i))))))
 
 
 (defun scimax-get-google-docstring-snippet ()
@@ -58,9 +58,9 @@ This should be run in a python function."
 	      (cl-loop for (arg val) in arg-tuples collect
 		       (if val
 			   (format "$>%s (${%s:type}, optional): ${%s:description}. Defaults to %s."
-				   arg (incf i) (incf i) val)
+				   arg (cl-incf i) (cl-incf i) val)
 			 (format "%s (${%s:type}): ${%s:description}"
-				 arg (incf i) (incf i)))))
+				 arg (cl-incf i) (cl-incf i)))))
 	(format "\"\"\"${1:One line description}
 
 Args:
@@ -68,7 +68,7 @@ Args:
 
 Returns:
 ${%s:return}
-\"\"\"" (s-join "\n" results) (incf i))))))
+\"\"\"" (s-join "\n" results) (cl-incf i))))))
 
 
 

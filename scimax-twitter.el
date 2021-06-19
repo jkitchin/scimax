@@ -541,7 +541,7 @@ Any link will count 23 characters."
 						 (setq i (s-index-of
 							  (char-to-string letter)
 							  plain))
-						 (if i (substring ubold  i (incf i))
+						 (if i (substring ubold  i (cl-incf i))
 						   (char-to-string letter))))))))
 
 
@@ -555,7 +555,7 @@ Any link will count 23 characters."
 						 (setq i (s-index-of
 							  (char-to-string letter)
 							  plain))
-						 (if i (substring uitalic  i (incf i))
+						 (if i (substring uitalic  i (cl-incf i))
 						   (char-to-string letter))))))))
 
 
@@ -570,7 +570,7 @@ Any link will count 23 characters."
 			(setq i (s-index-of
 				 (char-to-string letter)
 				 plain))
-			(if i (substring uverbatim  i (incf i))
+			(if i (substring uverbatim  i (cl-incf i))
 			  (char-to-string letter))))))))
 
 

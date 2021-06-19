@@ -543,8 +543,8 @@ _j_: jump to mark
 (defun scimax-hydra-cycle-navigation-mode (&optional arg)
   (interactive "P")
   (if arg
-      (decf scimax-hydra-mode-counter)
-    (incf scimax-hydra-mode-counter))
+      (cl-decf scimax-hydra-mode-counter)
+    (cl-incf scimax-hydra-mode-counter))
   (eval `(scimax-open-hydra ,(ring-ref scimax-hydra-modes scimax-hydra-mode-counter))))
 
 

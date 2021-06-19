@@ -340,12 +340,12 @@ references should go into a separate file."
     (ox-manuscript-latex references-tex-file)
 
     ;; now clean up
-    (loop for ext in '(".aux" ".out" ".pyg" ".log")
-	  with fname = (concat (file-name-sans-extension references-tex-file)
-			       ext)
-	  do
-	  (when (file-exists-p fname)
-	    (delete-file fname)))
+    (cl-loop for ext in '(".aux" ".out" ".pyg" ".log")
+	     with fname = (concat (file-name-sans-extension references-tex-file)
+				  ext)
+	     do
+	     (when (file-exists-p fname)
+	       (delete-file fname)))
 
     references-pdf))
 
@@ -900,18 +900,18 @@ The templates are just org-files that can be inserted into a
 These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 '((name . data))."
   (append
-   (loop for template-file in (f-entries ox-manuscript-templates-dir
-					 (lambda (f)
-					   (f-ext? f "org")))
-	 with data = nil
-	 do (setq data (ox-manuscript-parse-template-file template-file))
-	 collect data)
-   (loop for template-file in (f-entries ox-manuscript-user-template-dir
-					 (lambda (f)
-					   (f-ext? f "org")))
-	 with data = nil
-	 do (setq data (ox-manuscript-parse-template-file template-file))
-	 collect data)))
+   (cl-loop for template-file in (f-entries ox-manuscript-templates-dir
+					    (lambda (f)
+					      (f-ext? f "org")))
+	    with data = nil
+	    do (setq data (ox-manuscript-parse-template-file template-file))
+	    collect data)
+   (cl-loop for template-file in (f-entries ox-manuscript-user-template-dir
+					    (lambda (f)
+					      (f-ext? f "org")))
+	    with data = nil
+	    do (setq data (ox-manuscript-parse-template-file template-file))
+	    collect data)))
 
 
 ;;;###autoload
@@ -944,14 +944,14 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
    (list
     (helm :sources
 	  `((name . "Manuscript")
-	    (candidates . ,(loop for entry in (ox-manuscript-candidates)
-				 collect (cons (plist-get entry :template)
-					       (plist-get entry :key))))
+	    (candidates . ,(cl-loop for entry in (ox-manuscript-candidates)
+				    collect (cons (plist-get entry :template)
+						  (plist-get entry :key))))
 	    (action . (lambda (key)
 			key))))))
-  (let* ((entry (loop for entry in (ox-manuscript-candidates)
-		      if (string= template-key (plist-get entry :key))
-		      return entry))
+  (let* ((entry (cl-loop for entry in (ox-manuscript-candidates)
+			 if (string= template-key (plist-get entry :key))
+			 return entry))
 	 (new-fname (plist-get entry :default-filename)))
     (if (file-exists-p new-fname)
 	(find-file new-fname)

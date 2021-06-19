@@ -302,7 +302,7 @@ Slow when you have a large journal or many files."
 	 (i (cl-position (buffer-file-name)  entries
 			 :test (lambda (item entry) (string= item entry))))
 	 (next (when i
-		 (nth (min (incf i) n) entries))))
+		 (nth (min (cl-incf i) n) entries))))
     (if next
 	(find-file next)
       ;; If you aren't in an entry there is no match so we just go to the last entry.
@@ -315,7 +315,7 @@ Slow when you have a large journal or many files."
   (let* ((entries (avl-tree-flatten (scimax-journal-entries)))
 	 (i (cl-position (buffer-file-name)  entries
 			 :test (lambda (item entry) (string= item entry))))
-	 (prev (when i (nth (max (decf i) 0) entries))))
+	 (prev (when i (nth (max (cl-decf i) 0) entries))))
     (if prev
 	(find-file prev)
       ;; If you aren't in an entry there is no match so we just go to the second

@@ -211,19 +211,19 @@ other day, you get the report due on the following Monday."
      (format "%s\n"
 	     (format-time-string "[%Y-%m-%d %a]" kg-due-date))
      (s-join "\n"
-	     (loop for project in
-		   (let* ((KEYWORD "KITCHINGROUP")
-			  (case-fold-search t)
-			  (re (format "^#\\+%s:[ \t]+\\([^\t\n]+\\)" KEYWORD)))
-		     (if (not (save-excursion
-				(or (re-search-forward re nil t)
-				    (re-search-backward re nil t))))
-			 (error (format "No line containing #+%s: value found" KEYWORD)))
-		     (split-string  (match-string-no-properties 1) " " t))
-		   collect
-		   (format (concat "- [ ] nb:" "%s::reports/%s/weekly-report.org")
-			   project
-			   (format-time-string "%Y-%m-%d" kg-due-date))))
+	     (cl-loop for project in
+		      (let* ((KEYWORD "KITCHINGROUP")
+			     (case-fold-search t)
+			     (re (format "^#\\+%s:[ \t]+\\([^\t\n]+\\)" KEYWORD)))
+			(if (not (save-excursion
+				   (or (re-search-forward re nil t)
+				       (re-search-backward re nil t))))
+			    (error (format "No line containing #+%s: value found" KEYWORD)))
+			(split-string  (match-string-no-properties 1) " " t))
+		      collect
+		      (format (concat "- [ ] nb:" "%s::reports/%s/weekly-report.org")
+			      project
+			      (format-time-string "%Y-%m-%d" kg-due-date))))
      "\n")))
 
 

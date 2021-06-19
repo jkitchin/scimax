@@ -119,7 +119,7 @@ Assumes the version command returns something like \"pandoc
       (with-current-buffer buf
     	(goto-char (point-min))
     	(while (re-search-forward table-regex nil t)
-    	  (incf i)
+    	  (cl-incf i)
     	  (push (cons (match-string 3) i) labels)
     	  (replace-match (format "Table %d. \\2" i) nil nil nil 1))
 	;; Now replace the refs.
@@ -142,7 +142,7 @@ Assumes the version command returns something like \"pandoc
       (with-current-buffer buf
 	(goto-char (point-min))
 	(while (re-search-forward fig-regex nil t)
-	  (incf i)
+	  (cl-incf i)
 	  (push (cons (match-string 3) i) labels)
 	  (replace-match (format "Figure %d. \\1" i) nil nil nil 3))
     	;; Now replace the refs.

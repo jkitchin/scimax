@@ -382,9 +382,9 @@ Adapted from http://ergoemacs.org/emacs/elisp_dired_rename_space_to_underscore.h
 		(dired-get-marked-files))
 	  (revert-buffer)
 	  (when (not (eq 1 number-marked-files))
-	    (loop for f in new-names do
-		  (dired-goto-file f)
-		  (dired-mark nil))))
+	    (cl-loop for f in new-names do
+		     (dired-goto-file f)
+		     (dired-mark nil))))
 	(goto-char p))
     (user-error "Not in dired")))
 

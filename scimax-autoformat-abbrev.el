@@ -364,21 +364,21 @@ define the definitions."
     current-prefix-arg))
 
   (let ((currently-enabled (get sym 'enabled)))
-    (loop for (abbrev expansion) in (symbol-value sym)
-	  do
-	  (define-abbrev org-mode-abbrev-table
-	    abbrev
-	    (cond
-	     ((member state '(1 (4)))
-	      expansion)
-	     ((member state '(-1 (16)))
-	      nil)
-	     (t
-	      (if currently-enabled
-		  nil
-		expansion)))
-	    nil
-	    :enable-function scimax-abbrev-function))
+    (cl-loop for (abbrev expansion) in (symbol-value sym)
+	     do
+	     (define-abbrev org-mode-abbrev-table
+	       abbrev
+	       (cond
+		((member state '(1 (4)))
+		 expansion)
+		((member state '(-1 (16)))
+		 nil)
+		(t
+		 (if currently-enabled
+		     nil
+		   expansion)))
+	       nil
+	       :enable-function scimax-abbrev-function))
     (put sym 'enabled (cond
 		       ((member state '(1 (4)))
 			t)
