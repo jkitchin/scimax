@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>3 on Scimax</title>
+    <link>http://example.org/categories/3/</link>
+    <description>Recent content in 3 on Scimax</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 19 Jun 2021 00:00:00 -0400</lastBuildDate><atom:link href="http://example.org/categories/3/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>why Testing ox-hugo</title>
+      <link>http://example.org/posts/2021-06-19/</link>
+      <pubDate>Sat, 19 Jun 2021 00:00:00 -0400</pubDate>
+      
+      <guid>http://example.org/posts/2021-06-19/</guid>
+      <description>Let&amp;rsquo;s try some tags where do they go?
+tags are ignored here, they are properties.
+is auto-save working?
+An image
+%matplotlib inline import matplotlib.pyplot as plt plt.plot([1, 2, 4, 8]);  def func(x): return 2 * x func(3) 6 (message &amp;#34;This is line 1&amp;#34;) (message &amp;#34;This is line 2&amp;#34;) (message &amp;#34;This is line 3&amp;#34;) CH4is fire. bold and code is not like verbatim. changed my mind.
+ one two  three    is this all in memory?</description>
+    </item>
+    
+  </channel>
+</rss>
