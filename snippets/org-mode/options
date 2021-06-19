@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: org-mode options keyword
-# key: o
-# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# condition: (looking-back "^o" 2)
-# --
-#+options: $0

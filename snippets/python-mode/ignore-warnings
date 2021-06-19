@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: ignore warnings
-# key: ignore
-# --
-import warnings
-warnings.filterwarnings("ignore")

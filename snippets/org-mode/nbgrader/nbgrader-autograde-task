@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: nbgrader autograder task
-# key: nbgak
-# --
-# Autograder task - actually just a regular cell
-$0

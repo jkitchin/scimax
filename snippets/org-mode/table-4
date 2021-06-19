@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: table with four columns
-# key: tttt
-# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# condition: (looking-back "^tttt" 5)
-# --
-| $0 |  |  |  |

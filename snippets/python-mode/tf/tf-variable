@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: tf.Variable
-# key: tfv
-# group: tensorflow
-# --
-tf.Variable($1, $2)

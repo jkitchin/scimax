@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: date keyword
-# key: dt
-# --
-#+date: ${1:`(with-temp-buffer (org-insert-time-stamp nil nil t) (buffer-string))`}$0

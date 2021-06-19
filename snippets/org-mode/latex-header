@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: latex header
-# key: lh
-# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# --
-#+latex_header: $0

@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: go.Scatter
-# key: gos
-# --
-fig = go.Figure(data=go.Scatter(x=$1, y=$2))$0

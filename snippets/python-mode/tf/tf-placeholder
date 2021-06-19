@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: tf.placeholder
-# key: tfp
-# --
-${1:var} = tf.placeholder($2, ${3:msg}${3:$(message ", ")}$4)

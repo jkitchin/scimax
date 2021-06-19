@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: latex integral
-# key: int
-# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# --
-\int_{$1}^{$2} $3d$4$0

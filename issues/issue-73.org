@@ -1,9 +1,0 @@
-https://github.com/jkitchin/scimax/issues/73
-
-#+begin_src elisp
-(defun myfun ()
-    (message "Do something."))
-#+end_src
-
-#+RESULTS:
-: myfun

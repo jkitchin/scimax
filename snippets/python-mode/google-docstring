@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: google docstring
-# key: gds
-# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# type: command
-# --
-(yas-expand-snippet (scimax-get-google-docstring-snippet))

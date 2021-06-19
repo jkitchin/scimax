@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: title keyword
-# key: ti
-# --
-#+title: $0

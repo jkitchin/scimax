@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: table with one column
-# key: t
-# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# condition: (looking-back "^t" 2)
-# --
-| $0 |

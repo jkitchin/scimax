@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: tf.name_scope
-# key: tfns
-# --
-with tf.name_scope('${1:name}'):
-$>    $0

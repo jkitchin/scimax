@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: make an Icosahedron instance
-# key: ico
-# --
-atoms = Icosahedron('${1:sym}', noshells=${2:2})

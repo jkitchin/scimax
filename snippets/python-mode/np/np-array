@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: numpy array
-# key: npa
-# --
-np.array($0)
