@@ -5,16 +5,6 @@
     <link>http://example.org/tags/</link>
     <description>Recent content in Tags on Scimax</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <lastBuildDate>Sat, 19 Jun 2021 00:00:00 -0400</lastBuildDate><atom:link href="http://example.org/tags/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>2</title>
-      <link>http://example.org/tags/2/</link>
-      <pubDate>Sat, 19 Jun 2021 00:00:00 -0400</pubDate>
-      
-      <guid>http://example.org/tags/2/</guid>
-      <description></description>
-    </item>
-    
+    <language>en-us</language><atom:link href="http://example.org/tags/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

@@ -13,12 +13,12 @@
       <pubDate>Sat, 19 Jun 2021 00:00:00 -0400</pubDate>
       
       <guid>http://example.org/posts/2021-06-19/</guid>
-      <description>Let&amp;rsquo;s try some tags where do they go?
+      <description>A basic post where do they go?
 tags are ignored here, they are properties.
-is auto-save working?
-An image
-%matplotlib inline import matplotlib.pyplot as plt plt.plot([1, 2, 4, 8]);  def func(x): return 2 * x func(3) 6 (message &amp;#34;This is line 1&amp;#34;) (message &amp;#34;This is line 2&amp;#34;) (message &amp;#34;This is line 3&amp;#34;) CH4is fire. bold and code is not like verbatim. changed my mind.
- one two  three    is this all in memory?</description>
+is auto-save working? yes
+An image inline
+%matplotlib inline import matplotlib.pyplot as plt plt.plot([1, 2, 4, 8]);  def func(x): return 2 * x func(3) 6 testing line highlighting. Line 2 should be highlighted and numbered.
+1 2 3  (message &amp;#34;This is line 1&amp;#34;) (message &amp;#34;This is line 2&amp;#34;) (message &amp;#34;This is line 3&amp;#34;)   citations A reference (Kitchin 2015).</description>
     </item>
     
   </channel>
