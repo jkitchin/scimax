@@ -5,6 +5,25 @@
     <link>https://kitchingroup.cheme.cmu.edu/scimax/categories/</link>
     <description>Recent content in Categories on Scimax</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language><atom:link href="https://kitchingroup.cheme.cmu.edu/scimax/categories/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language>
+    <lastBuildDate>Sat, 19 Jun 2021 00:00:00 -0400</lastBuildDate><atom:link href="https://kitchingroup.cheme.cmu.edu/scimax/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>emacs</title>
+      <link>https://kitchingroup.cheme.cmu.edu/scimax/categories/emacs/</link>
+      <pubDate>Sat, 19 Jun 2021 00:00:00 -0400</pubDate>
+      
+      <guid>https://kitchingroup.cheme.cmu.edu/scimax/categories/emacs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>post</title>
+      <link>https://kitchingroup.cheme.cmu.edu/scimax/categories/post/</link>
+      <pubDate>Sat, 19 Jun 2021 00:00:00 -0400</pubDate>
+      
+      <guid>https://kitchingroup.cheme.cmu.edu/scimax/categories/post/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>

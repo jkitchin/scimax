@@ -5,6 +5,16 @@
     <link>https://kitchingroup.cheme.cmu.edu/scimax/tags/</link>
     <description>Recent content in Tags on Scimax</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language><atom:link href="https://kitchingroup.cheme.cmu.edu/scimax/tags/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language>
+    <lastBuildDate>Sat, 19 Jun 2021 00:00:00 -0400</lastBuildDate><atom:link href="https://kitchingroup.cheme.cmu.edu/scimax/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>hugo</title>
+      <link>https://kitchingroup.cheme.cmu.edu/scimax/tags/hugo/</link>
+      <pubDate>Sat, 19 Jun 2021 00:00:00 -0400</pubDate>
+      
+      <guid>https://kitchingroup.cheme.cmu.edu/scimax/tags/hugo/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>
