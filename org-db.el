@@ -375,11 +375,12 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 		   (not (string-match (regexp-opt org-db-ignore-file-regexps)
 				      (buffer-file-name))))
 	      ;; file is in database and it has changed
-	      (not (string= (md5 (buffer-string))
-			    (caar (emacsql org-db [:select [md5] :from files
-							   :where (= filename $s1)]
-					   (buffer-file-name)))))
-	      (org-db-log "%s has changed." (buffer-file-name))))
+	      (prog1
+		  (not (string= (md5 (buffer-string))
+				(caar (emacsql org-db [:select [md5] :from files
+							       :where (= filename $s1)]
+					       (buffer-file-name)))))
+		(org-db-log "%s has changed." (buffer-file-name)))))
      (let* ((filename-id (org-db-get-filename-id (buffer-file-name)))
 	    (parse-tree (org-element-parse-buffer))
 	    (links (org-element-map parse-tree 'link
