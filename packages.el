@@ -1,4 +1,4 @@
-;;; packages.el --- Install and configure scimax packages
+;;; packages.el --- Install and configure scimax packages -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;
 ;; This is a starter kit for scimax. This package provides a
@@ -60,13 +60,6 @@
   (use-package tex
     :ensure auctex))
 
-;; [2019-01-07 Mon] This also sometimes causes problems installing scimax,
-;; especially on Windows.
-;; Make cursor more visible when you move a long distance
-;; (use-package beacon
-;;   :config
-;;   (beacon-mode 1))
-
 
 (use-package bookmark
   :init
@@ -89,6 +82,10 @@
   :diminish ivy-mode
   :config
   (ivy-mode))
+
+(use-package multiple-cursors
+  :config
+  (add-to-list 'mc/cmds-to-run-once 'swiper-mc))
 
 (use-package counsel
   :init
@@ -125,47 +122,125 @@
   :config
   (progn
     (counsel-mode)
-    (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
-    (define-key ivy-minibuffer-map (kbd "M-<SPC>") 'ivy-dispatching-done)
 
+    ;; these are mostly for navigating directories with find file. I find it
+    ;; convenient to use the right arrow to "go into" a directory, and the left
+    ;; arrow or delete to go up a directory. I have commented out the left arrow
+    ;; though so it can be used to go backwards into the input. This is not
+    ;; critical though, the right-arrow does the same thing as S-ret below.
+
+    ;; (define-key ivy-minibuffer-map (kbd "<left>") 'ivy-backward-delete-char)
+    (define-key ivy-minibuffer-map (kbd "<right>") 'ivy-alt-done)
+
+    ;; single candidate
+    ;; default action on the current candidate
+    (define-key ivy-minibuffer-map (kbd "M-<return>") #'ivy-dispatching-done)
+    (define-key ivy-minibuffer-map (kbd "S-<return>") #'ivy-alt-done)
+
+    ;; multiple candidates
     ;; C-RET call and go to next
-    (define-key ivy-minibuffer-map (kbd "C-<return>")
-      (lambda ()
-	"Apply action and move to next/previous candidate."
-	(interactive)
-	(ivy-call)
-	(ivy-next-line)))
 
-    ;; M-RET calls action on all candidates to end.
-    (define-key ivy-minibuffer-map (kbd "M-<return>")
-      (lambda ()
-	"Apply default action to all candidates."
-	(interactive)
-	(ivy-beginning-of-buffer)
-	(loop for i from 0 to (- ivy--length 1)
-	      do
-	      (ivy-call)
-	      (ivy-next-line)
-	      (ivy--exhibit))
-	(exit-minibuffer)))
+    (defun scimax-ivy-default-action-continue ()
+      "Apply default action and move to next/previous candidate."
+      (interactive)
+      (ivy-call)
+      (ivy-next-line))
+
+    (define-key ivy-minibuffer-map (kbd "C-<return>") #'scimax-ivy-default-action-continue)
+
+    ;; choose action on current candidate and continue
+    (define-key ivy-minibuffer-map (kbd "C-M-<return>") #'ivy-dispatching-call)
 
     ;; s-RET to quit (super)
-    (define-key ivy-minibuffer-map (kbd "s-<return>")
-      (lambda ()
-	"Exit with no action."
-	(interactive)
+    (defun scimax-ivy-exit-no-action ()
+      "Exit with no action."
+      (interactive)
+      (ivy-exit-with-action
+       (lambda (x) nil)))
+
+    (define-key ivy-minibuffer-map (kbd "s-<return>") 'scimax-ivy-exit-no-action)
+
+    (defun scimax-ivy-become ()
+      "Change the command and reuse the current input.
+    You will be prompted to enter a new key sequence which can be a
+    shortcut or M-x. Then it will put the current input in the
+    minibuffer for the command.
+
+    Applications:
+    1. start with swiper, C-M-b H-s to transfer the current input to swiper-all
+    2. C-xC -b to switch-buffer, C-M-b C-x C-f to transfer input to find-file."
+      (interactive)
+      (let* ((input ivy-text)
+             (transfer-input (lambda () (insert input))))
 	(ivy-exit-with-action
-	 (lambda (x) nil))))
+	 (lambda (x)
+	   (minibuffer-with-setup-hook
+	       (:append transfer-input)
+	     (call-interactively (key-binding (read-key-sequence "Switch to key sequence: ") t)))))))
+
+    (define-key ivy-minibuffer-map (kbd "C-M-b") 'scimax-ivy-become)
 
     ;; Show keys
-    (define-key ivy-minibuffer-map (kbd "?")
-      (lambda ()
-	(interactive)
-	(describe-keymap ivy-minibuffer-map)))
+    (defun scimax-show-marked-candidates ()
+      "Show keys in the map"
+      (interactive)
+      (describe-keymap ivy-minibuffer-map))
 
-    (define-key ivy-minibuffer-map (kbd "<left>") 'ivy-backward-delete-char)
-    (define-key ivy-minibuffer-map (kbd "<right>") 'ivy-alt-done)
-    (define-key ivy-minibuffer-map (kbd "C-d") 'ivy-backward-delete-char)))
+    (define-key ivy-minibuffer-map (kbd "C-h") #'scimax-show-marked-candidates)
+
+    (defun scimax-ivy-show-marked-candidates ()
+      "Show marked candidates"
+      (interactive)
+      (with-help-window "*ivy-marked-candidates*"
+	(cl-loop for cand in ivy-marked-candidates
+		 do
+		 (princ (s-trim cand))
+		 (princ "\n"))))
+
+    (define-key ivy-minibuffer-map (kbd "C-s") #'scimax-ivy-show-marked-candidates)
+
+    (defun scimax-ivy-comma-insert ()
+      "Insert current candidate with comma separation. and clear minibuffer."
+      (interactive)
+      (let ((x (ivy-state-current ivy-last))
+	    cand)
+	(setq cand (cond
+		    ;; x is a string, the only sensible thing is to insert it
+		    ((stringp x)
+		     x)
+		    ;; x is a list where the first element is a string
+		    ((and (listp x) (stringp (first x)))
+		     (first x))
+		    (t
+		     (format "%S" x))))
+
+	(with-ivy-window
+	  (cond
+	   ;; at beginning of line, looking back at space, or comma insert
+	   ((or (bolp) (looking-back  " " 1) (looking-back  "," 1))
+	    (insert cand))
+	   ((word-at-point)
+	    ;; jump to first space? first word?
+	    (re-search-forward " " nil t)
+	    (insert ", " cand))
+	   (t
+	    (insert ", " cand)))))
+      (delete-minibuffer-contents)
+      (setq ivy-text ""))
+
+    (define-key ivy-minibuffer-map  ","  #'scimax-ivy-comma-insert)
+
+    ;; Marking candidates
+    (defun scimax-ivy-toggle-mark ()
+      "Toggle the mark"
+      (interactive)
+      (if (ivy--marked-p)
+	  (ivy-unmark)
+	(ivy-mark))
+      (ivy-previous-line))
+
+    (define-key ivy-minibuffer-map (kbd "M-TAB")
+      #'scimax-ivy-toggle-mark)))
 
 ;; Provides functions for working on lists
 (use-package dash)
@@ -202,47 +277,6 @@
 (use-package google-this
   :config
   (google-this-mode 1))
-
-(use-package helm
-  :init (setq helm-command-prefix-key "C-c h")
-  :bind
-  ;; ("<f7>" . helm-recentf)
-  ;; ("M-x" . helm-M-x)
-  ;; ("M-y" . helm-show-kill-ring)
-  ;; ("C-x b" . helm-mini)
-  ;; ("C-x C-f" . helm-find-files)
-  ;; ("C-h C-f" . helm-apropos)
-  :config
-  (add-hook 'helm-find-files-before-init-hook
-	    (lambda ()
-	      (helm-add-action-to-source
-	       "Insert path"
-	       (lambda (target)
-		 (insert (file-relative-name target)))
-	       helm-source-find-files)
-
-	      (helm-add-action-to-source
-	       "Insert absolute path"
-	       (lambda (target)
-		 (insert (expand-file-name target)))
-	       helm-source-find-files)
-
-	      (helm-add-action-to-source
-	       "Attach file to email"
-	       (lambda (candidate)
-		 (mml-attach-file candidate))
-	       helm-source-find-files)
-
-	      (helm-add-action-to-source
-	       "Make directory"
-	       (lambda (target)
-		 (make-directory target))
-	       helm-source-find-files))))
-
-
-(use-package helm-bibtex)
-
-;; (use-package helm-projectile)
 
 (use-package help-fns+
   :load-path scimax-dir)

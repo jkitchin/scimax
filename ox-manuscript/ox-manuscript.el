@@ -706,7 +706,8 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 	 (bbl-file (replace-regexp-in-string "tex$" "bbl" tex-file))
 	 (tex-contents (with-temp-buffer
 			 (insert-file-contents tex-file)
-			 (buffer-string))))
+			 (buffer-string)))
+	 (figure-count 0))
 
     ;; Make sure we have a tex-file and it is newer
     (unless (and  (file-exists-p tex-file)
@@ -733,8 +734,12 @@ The optional FILES keyword is a list of additional files to copy into the archiv
       (insert tex-contents)
       (goto-char (point-min))
       (while (re-search-forward
+	      ;; group 1 is the whole string
+	      ;; group 2 is the file name
+	      ;; group 3 is the extension
 	      "\\(?1:\\includegraphics\\(?2:[?[^].*]?\\)?\\){\\(?3:[^}].*\\)}"
 	      nil t)
+	(incf figure-count)
 	(let* ((eps-file (concat (match-string 3) ".eps"))
 	       (pdf-file (concat (match-string 3) ".pdf"))
 	       (png-file (concat (match-string 3) ".png"))
@@ -755,15 +760,19 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 	   ((file-exists-p png-file)
 	    (copy-file png-file (expand-file-name
 				 (concat fname ".png") tex-archive)
+		       t)
+	    (copy-file png-file (expand-file-name
+				 (format "%02d-%s.png" figure-count fname)
+				 tex-archive)
 		       t))
-     ((file-exists-p jpg-file)
-      (copy-file jpg-file (expand-file-name
-         (concat fname ".jpg") tex-archive)
-           t))
-     ((file-exists-p jpeg-file)
-      (copy-file jpeg-file (expand-file-name
-         (concat fname ".jpeg") tex-archive)
-           t))
+	   ((file-exists-p jpg-file)
+	    (copy-file jpg-file (expand-file-name
+				 (concat fname ".jpg") tex-archive)
+		       t))
+	   ((file-exists-p jpeg-file)
+	    (copy-file jpeg-file (expand-file-name
+				  (concat fname ".jpeg") tex-archive)
+		       t))
 	   (t
 	    (error "No file found: %s (%s %s %s)"
 		   (match-string 3)
@@ -771,7 +780,7 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 		   pdf-file
 		   png-file)))
 	  ;; flatten the filename in the tex-file
-	  (replace-match (format "\\1{%s}" fname)))))
+	  (replace-match (format "\\1{%02d-%s}" figure-count fname)))))
 
     ;; the tex-file is no longer valid in the current directory
     ;; because the paths to images are wrong. So we move it to where
@@ -792,8 +801,9 @@ The optional FILES keyword is a list of additional files to copy into the archiv
     (let ((default-directory (file-name-as-directory
 			      (expand-file-name tex-archive))))
       ;; I do not know why shell-command does not work here.
-      (call-process "pdflatex" nil nil nil "-shell-escape" base-tex-file)
-      (call-process "pdflatex" nil nil nil "-shell-escape" base-tex-file)
+      (message "Building %s in %s" base-tex-file default-directory)
+      (call-process "latexmk" nil nil nil "-f" "-pdf" "-shell-escape" base-tex-file)
+      ;; (call-process "pdflatex" nil nil nil "-shell-escape" base-tex-file)
       (ox-manuscript-cleanup))
     (org-open-file (concat
 		    (file-name-sans-extension
@@ -937,31 +947,6 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 			  (goto-char (point-min))
 			  (font-lock-fontify-buffer))))))
 
-;;;###autoload
-(defun ox-manuscript-new-helm (template-key)
-  "Create a new manuscript file from TEMPLATE-KEY."
-  (interactive
-   (list
-    (helm :sources
-	  `((name . "Manuscript")
-	    (candidates . ,(cl-loop for entry in (ox-manuscript-candidates)
-				    collect (cons (plist-get entry :template)
-						  (plist-get entry :key))))
-	    (action . (lambda (key)
-			key))))))
-  (let* ((entry (cl-loop for entry in (ox-manuscript-candidates)
-			 if (string= template-key (plist-get entry :key))
-			 return entry))
-	 (new-fname (plist-get entry :default-filename)))
-    (if (file-exists-p new-fname)
-	(find-file new-fname)
-      (find-file new-fname)
-      (insert-file-contents (plist-get entry :filename))
-      (goto-char (point-min))
-      (font-lock-fontify-buffer))))
-
-
-;;;###autoload
 (defun ox-manuscript-texcount ()
   "Use texcount to estimate words in an org-file if it exists.
 Fall back to `tex-count-words'"

@@ -134,11 +134,6 @@
 
 (bibtex-hotkey "y" "Paste last entry" (bibtex-yank))
 
-
-(bibtex-hotkey "/" "helm-bibtex" (helm-bibtex))
-
-
-
 (provide 'bibtex-hotkeys)
 
 ;;; bibtex-hotkeys.el ends here

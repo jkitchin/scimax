@@ -112,43 +112,78 @@
 	  action)
 	 ;; Multiple DOIs found
 	 ((> (length dois) 1)
-	  (helm :sources
-		`((name . "Select a DOI")
-		  (candidates . ,(let ((dois '()))
-				   (with-current-buffer (url-retrieve-synchronously url)
-				     (loop for doi-pattern in org-ref-doi-regexps
-					   do
-					   (goto-char (point-min))
-					   (while (re-search-forward doi-pattern nil t)
-					     (pushnew
-					      ;; Cut off the doi, sometimes
-					      ;; false matches are long.
-					      (cons (format "%40s | %s"
-							    (substring
-							     (match-string 1)
-							     0 (min
-								(length (match-string 1))
-								40))
-							    doi-pattern)
-						    (match-string 1))
-					      dois
-					      :test #'equal)))
-				     (reverse dois))))
-		  (action . (lambda (candidates)
-			      (let ((bibfile (ido-completing-read
-					      "Bibfile: "
-					      (append (f-entries "." (lambda (f)
-								       (and (not (string-match "#" f))
-									    (f-ext? f "bib"))))
-						      org-ref-default-bibliography))))
-				(loop for doi in (helm-marked-candidates)
-				      do
-				      (doi-utils-add-bibtex-entry-from-doi
-				       doi
-				       bibfile)
-				      ;; this removes two blank lines before each entry.
-				      (bibtex-beginning-of-entry)
-				      (delete-char -2)))))))))))))
+	  (ivy-read "Select a DOI" (let ((dois '()))
+				     (with-current-buffer (url-retrieve-synchronously url)
+				       (loop for doi-pattern in org-ref-doi-regexps
+					     do
+					     (goto-char (point-min))
+					     (while (re-search-forward doi-pattern nil t)
+					       (pushnew
+						;; Cut off the doi, sometimes
+						;; false matches are long.
+						(cons (format "%40s | %s"
+							      (substring
+							       (match-string 1)
+							       0 (min
+								  (length (match-string 1))
+								  40))
+							      doi-pattern)
+						      (match-string 1))
+						dois
+						:test #'equal)))
+				       (reverse dois)))
+		    :action
+		    (lambda (x)
+		      (let ((bibfile (completing-read
+				      "Bibfile: "
+				      (append (f-entries "." (lambda (f)
+							       (and (not (string-match "#" f))
+								    (f-ext? f "bib"))))
+					      org-ref-default-bibliography))))
+			(doi-utils-add-bibtex-entry-from-doi
+			 doi
+			 bibfile)
+			;; this removes two blank lines before each entry.
+			(bibtex-beginning-of-entry)
+			(delete-char -2))))
+	  ;; (helm :sources
+	  ;; 	`((name . "Select a DOI")
+	  ;; 	  (candidates . ,(let ((dois '()))
+	  ;; 			   (with-current-buffer (url-retrieve-synchronously url)
+	  ;; 			     (loop for doi-pattern in org-ref-doi-regexps
+	  ;; 				   do
+	  ;; 				   (goto-char (point-min))
+	  ;; 				   (while (re-search-forward doi-pattern nil t)
+	  ;; 				     (pushnew
+	  ;; 				      ;; Cut off the doi, sometimes
+	  ;; 				      ;; false matches are long.
+	  ;; 				      (cons (format "%40s | %s"
+	  ;; 						    (substring
+	  ;; 						     (match-string 1)
+	  ;; 						     0 (min
+	  ;; 							(length (match-string 1))
+	  ;; 							40))
+	  ;; 						    doi-pattern)
+	  ;; 					    (match-string 1))
+	  ;; 				      dois
+	  ;; 				      :test #'equal)))
+	  ;; 			     (reverse dois))))
+	  ;; 	  (action . (lambda (candidates)
+	  ;; 		      (let ((bibfile (ido-completing-read
+	  ;; 				      "Bibfile: "
+	  ;; 				      (append (f-entries "." (lambda (f)
+	  ;; 							       (and (not (string-match "#" f))
+	  ;; 								    (f-ext? f "bib"))))
+	  ;; 					      org-ref-default-bibliography))))
+	  ;; 			(loop for doi in (helm-marked-candidates)
+	  ;; 			      do
+	  ;; 			      (doi-utils-add-bibtex-entry-from-doi
+	  ;; 			       doi
+	  ;; 			       bibfile)
+	  ;; 			      ;; this removes two blank lines before each entry.
+	  ;; 			      (bibtex-beginning-of-entry)
+	  ;; 			      (delete-char -2)))))))
+	  ))))))
 
 
 (define-key elfeed-show-mode-map (kbd "e") 'email-elfeed-entry)

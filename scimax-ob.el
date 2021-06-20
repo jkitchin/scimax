@@ -535,46 +535,47 @@ Use `anaconda-mode-map' if you prefer `anaconda-mode'. This
 keymap is combined with some other keymaps in
 `scimax-src-block-keymaps' to enable native edit commands in
 them."
-				:group :scimax)
+  :group :scimax)
 
 
-			      (defcustom scimax-src-block-keymaps
-				`(("ipython" . ,(let ((map (copy-keymap (make-composed-keymap
-									 `(,scimax-ob-python-edit-mode-map
-									   ,python-mode-map
-									   ,pyvenv-mode-map)
-									 org-mode-map))))
-						  ;; In org-mode I define RET so we f
-						  (define-key map (kbd "<return>") 'newline)
-						  (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
-						  map))
-				  ("python" . ,(let ((map (copy-keymap (make-composed-keymap
-									`(,scimax-ob-python-edit-mode-map
-									  ,python-mode-map
-									  ,pyvenv-mode-map)
-									org-mode-map))))
-						 ;; In org-mode I define RET so we f
-						 (define-key map (kbd "<return>") 'newline)
-						 (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
-						 map))
-				  ("emacs-lisp" . ,(let ((map (copy-keymap (make-composed-keymap
-									    `(,lispy-mode-map
-									      ,emacs-lisp-mode-map
-									      ,outline-minor-mode-map)
-									    org-mode-map))))
-						     (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
-						     map))
-				  ("sh" . ,(let ((map (copy-keymap (make-composed-keymap
-								    `(,shell-mode-map)
-								    org-mode-map))))
-					     (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
-					     map)))
-				"alist of custom keymaps for src blocks."
-				:group :scimax)
+(defcustom scimax-src-block-keymaps
+  `(("ipython" . ,(let ((map (copy-keymap (make-composed-keymap
+					   `(,scimax-ob-python-edit-mode-map
+					     ,(when (boundp 'python-mode-map) python-mode-map)
+					     ,(when (boundp 'pyvenv-mode-map) pyvenv-mode-map) )
+					   org-mode-map))))
+		    ;; In org-mode I define RET so we f
+		    (define-key map (kbd "<return>") 'newline)
+		    (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+		    map))
+    ("python" . ,(let ((map (copy-keymap (make-composed-keymap
+					  `(,scimax-ob-python-edit-mode-map
+					    ,(when (boundp 'python-mode-map) python-mode-map)
+					    ,(when (boundp 'pyvenv-mode-map) pyvenv-mode-map))
+					  org-mode-map))))
+		   ;; In org-mode I define RET so we f
+		   (define-key map (kbd "<return>") 'newline)
+		   (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+		   map))
+    ("emacs-lisp" . ,(let ((map (copy-keymap (make-composed-keymap
+					      `(,lispy-mode-map
+						,emacs-lisp-mode-map
+						,outline-minor-mode-map)
+					      org-mode-map))))
+		       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+		       map))
+    ("sh" . ,(let ((map (copy-keymap (make-composed-keymap
+				      `(,(when (boundp 'shell-mode-map) shell-mode-map))
+				      org-mode-map))))
+	       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+	       map)))
+  "alist of custom keymaps for src blocks."
+  :group :scimax)
 
 
-			      (defun scimax-ob-add-keymap-to-src-blocks (limit)
-				"Add keymaps to src-blocks defined in `scimax-src-block-keymaps'.
+(defun scimax-ob-add-keymap-to-src-blocks (limit)
+  "Add keymaps to src-blocks defined in `scimax-src-block-keymaps'.
+
 This is run by font-lock in `scimax-src-keymap-mode'."
 				(let ((case-fold-search t)
 				      lang)

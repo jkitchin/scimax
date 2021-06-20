@@ -5,10 +5,25 @@
 (require 'counsel)
 
 ;; * Generic ivy actions
+
 (ivy-set-actions
  t
- '(("i" (lambda (x) (with-ivy-window
-		      (insert x))) "insert candidate")
+ '(("i" (lambda (x)
+	  (with-ivy-window
+	    (let (cand)
+	      (setq cand (cond
+			  ;; x is a string, the only sensible thing is to insert it
+			  ((stringp x)
+			   x)
+			  ;; x is a list where the first element is a string
+			  ((and (listp x) (stringp (first x)))
+			   (first x))
+			  (t
+			   (format "%S" x))))
+	      (unless (looking-at  " ") (insert " "))
+	      (insert cand))))
+    "insert candidate")
+   ("B" switch-command "Become")
    (" " (lambda (x) (ivy-resume)) "resume")
    ("?" (lambda (x)
 	  (interactive)

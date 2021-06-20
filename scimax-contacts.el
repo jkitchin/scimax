@@ -15,10 +15,11 @@
 
 ;; * contact link
 ;; I have struggled with what the link should use for a path. There are two options in my opinion:
-;; 1. An org-id - this is the most unambiguous, but least readable.
+;; 1. An org-id - this is the most unambiguous, and should refer to a single heading but least readable.
 ;; 2. An email address - this is the most readable, but there may be many headings with this property.
 ;;
-;; 3. A third possibility is to use a more complex syntax like [[contact:jkitchin@andrew.cmu :id some-uuid]]
+;; 3. A third possibility is to use a more complex syntax like
+;; [[contact:jkitchin@andrew.cmu :id some-uuid]], which might be an editmark.
 ;;
 ;; I favor readability over correctness, so I will use an email address. If
 ;; there is more than one heading with that address, you will just have to
@@ -59,12 +60,13 @@ If you are in a contact heading we store a link."
 							     (= headline-properties:value $s1))]
 				       email)
 			      collect
-			      (list (format "%40s | %s" title fname) :filename fname :begin begin))))
+			      (list (format "%40s | %s" title fname) :filename fname :begin begin :email email)))
+	 candidate)
     (cond
      ((s-contains? "@" email)
       (cond
        ((= 1 (length candidates))
-	(org-db--open-contact (car candidates)))
+	(org-db--open-contact (first candidates)))
        ((> (length candidates) 1)
 	(ivy-read "Contact: " candidates :action 'org-db--open-contact))
        (t
@@ -85,6 +87,7 @@ Optional argument ARG is ingored."
      :description (plist-get contact :title)
      :email (plist-get contact :email))
     (format "contact:%s" (plist-get contact :email))))
+
 
 (setq org-link-make-description-function
       (lambda (link desc)
@@ -154,7 +157,6 @@ With NAME-MAIL copy name <email> instead."
        (org-entry-get (point) "EMAIL")))))
 
 
-
 (defun scimax-contact-to-from (&optional FROM)
   "Open mu4e with emails to contact at point.
 If FROM is non-nil, emails from the contact."
@@ -170,7 +172,7 @@ If FROM is non-nil, emails from the contact."
 
 
 (defun scimax-contact-related ()
-  "Select related contacts at point."
+  "Show documents that have the contact linked in it."
   (interactive)
   (let* ((email (org-element-property :path (org-element-context)))
 	 (link-candidates (cl-loop
@@ -234,7 +236,7 @@ If FROM is non-nil, emails from the contact."
 (use-package pretty-hydra)
 
 (pretty-hydra-define scimax-contact
-  (:title "contacts" :quit-key "q")
+  (:title "contacts" :quit-key "q" :color blue)
   ("actions"
    (("o" scimax-contact-open-link "Open contact")
     ("e" scimax-contact-email "Email contact")

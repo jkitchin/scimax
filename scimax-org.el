@@ -30,8 +30,6 @@
   (use-package org-bullets)
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode))))
 
-(setq org-src-tab-acts-natively t)
-
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "|" "DONE(d)")))
@@ -186,83 +184,6 @@ is positive, move after, and if negative, move before."
     ;; and last a global todo list
     (todo "TODO"))))
 
-
-;; * Babel settings
-;; enable prompt-free code running
-(setq org-confirm-babel-evaluate nil
-      org-confirm-elisp-link-function nil
-      org-link-shell-confirm-function nil)
-
-;; register languages in org-mode
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (latex . t)
-   (python . t)
-   (shell . t)
-   (matlab . t)
-   (sqlite . t)
-   (ruby . t)
-   (perl . t)
-   (org . t)
-   (dot . t)
-   (plantuml . t)
-   (R . t)
-   (fortran . t)
-   (C . t)))
-
-;; no extra indentation in the source blocks
-(setq org-src-preserve-indentation t)
-
-;; use syntax highlighting in org-file code blocks
-(setq org-src-fontify-natively t)
-
-(setq org-babel-default-header-args:python
-      '((:results . "output replace")
-	(:session . "none")
-	(:exports . "both")
-	(:cache .   "no")
-	(:noweb . "no")
-	(:hlines . "no")
-	(:tangle . "no")
-	(:eval . "never-export")))
-
-;; ** jupyter ipython blocks
-
-(require 'scimax-org-babel-ipython-upstream)
-
-;; ** jupyter-hy blocks
-;; make src blocks open in the right mode
-(add-to-list 'org-src-lang-modes '("jupyter-hy" . hy))
-(add-to-list 'org-latex-minted-langs '(jupyter-hy  "hylang"))
-
-;; set default headers for convenience
-(setq org-babel-default-header-args:jupyter-hy
-      '((:results . "output replace")
-	(:session . "hy")
-	(:kernel . "calysto_hy")
-	(:exports . "both")
-	(:eval . "never-export")
-	(:cache .   "no")
-	(:noweb . "no")
-	(:hlines . "no")
-	(:tangle . "no")))
-
-(defalias 'org-babel-execute:jupyter-hy 'org-babel-execute:ipython)
-(defalias 'org-babel-prep-session:jupyter-hy 'org-babel-prep-session:ipython)
-(defalias 'org-babel-jupyter-hy-initiate-session 'org-babel-ipython-initiate-session)
-
-;; (when (version< (org-version) "9.2")
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("hy" "#+BEGIN_SRC jupyter-hy\n?\n#+END_SRC"
-;; 		 "<src lang=\"hy\">\n?\n</src>")))
-
-;; (when (version<= "9.2" (org-version))
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("hy" . "src jupyter-hy")))
-
-;; ** Fortran
-(defalias 'org-babel-execute:f90 'org-babel-execute:fortran)
 
 ;; * Images in org-mode
 
@@ -533,65 +454,6 @@ then exit them."
 	  (backward-char (length (cdr chars)))))))))
 
 
-(defun helm-insert-org-entity ()
-  "Helm interface to insert an entity from `org-entities'.
-F1 inserts utf-8 character
-F2 inserts entity code
-F3 inserts LaTeX code (does not wrap in math-mode)
-F4 inserts HTML code
-F5 inserts the entity code."
-  (interactive)
-  (helm :sources
-	(reverse
-	 (let ((sources '())
-	       toplevel
-	       secondlevel)
-	   (dolist (element (append
-			     '("* User" "** User entities")
-			     org-entities-user org-entities))
-	     (when (and (stringp element)
-			(s-starts-with? "* " element))
-	       (setq toplevel element))
-	     (when (and (stringp element)
-			(s-starts-with? "** " element))
-	       (setq secondlevel element)
-	       (push `((name . ,(concat
-				 toplevel
-				 (replace-regexp-in-string
-				  "\\*\\*" " - " secondlevel)))
-		       (candidates . nil)
-		       (action . (("insert utf-8 char" . (lambda (x)
-							   (mapc (lambda (candidate)
-								   (insert (nth 6 candidate)))
-								 (helm-marked-candidates))))
-				  ("insert org entity" . (lambda (x)
-							   (mapc (lambda (candidate)
-								   (insert
-								    (concat "\\" (car candidate))))
-								 (helm-marked-candidates))))
-				  ("insert latex" . (lambda (x)
-						      (mapc (lambda (candidate)
-							      (insert (nth 1 candidate)))
-							    (helm-marked-candidates))))
-				  ("insert html" . (lambda (x)
-						     (mapc (lambda (candidate)
-							     (insert (nth 3 candidate)))
-							   (helm-marked-candidates))))
-				  ("insert code" . (lambda (x)
-						     (mapc (lambda (candidate)
-							     (insert (format "%S" candidate)))
-							   (helm-marked-candidates)))))))
-		     sources))
-	     (when (and element (listp element))
-	       (setf (cdr (assoc 'candidates (car sources)))
-		     (append
-		      (cdr (assoc 'candidates (car sources)))
-		      (list (cons
-			     (format "%10s %s" (nth 6 element) element)
-			     element))))))
-	   sources))))
-
-
 (defun ivy-insert-org-entity ()
   "Insert an org-entity using ivy."
   (interactive)
@@ -600,9 +462,9 @@ F5 inserts the entity code."
 				collect
 				(cons
 				 (format "%20s | %20s | %20s | %s"
-					 (cl-first element) ;name
-					 (cl-second element) ; latex
-					 (cl-fourth element) ; html
+					 (cl-first element)    ;name
+					 (cl-second element)   ; latex
+					 (cl-fourth element)   ; html
 					 (cl-seventh element)) ;utf-8
 				 element))
 	    :require-match t
@@ -1070,10 +932,9 @@ Use a prefix arg to get regular RET. "
   :ensure nil
   :load-path scimax-dir)
 
-;; (use-package scimax-org-src-blocks
-;;   :ensure nil
-;;   :load-path scimax-dir
-;;   :config (scimax-org-toggle-colored-src-blocks))
+(use-package scimax-org-src-blocks
+  :ensure nil
+  :load-path scimax-dir)
 
 
 (defun scimax-get-file-keyword (KEYWORD)

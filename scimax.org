@@ -532,7 +532,6 @@ We have templates prepared for the following manuscripts, proposals and document
 | Wiley - Int. J. Quantum Chemistry                         |
 
 - `ox-manuscript-new-ivy'
-- `ox-manuscript-new-helm'
 
 * Bibliography management
 
@@ -581,8 +580,6 @@ In a bibtex file, `org-ref-bibtex-hydra/body' will give you a menu of options to
 
 ** Searching your bibliography files
 
-I like `helm-bibtex'. You type C-SPC to mark multiple entries. Type TAB to see what actions you can perform on the entries.
-
 See `org-ref-help' for information on using org-ref to insert citations.
 
 
@@ -590,7 +587,7 @@ See `org-ref-help' for information on using org-ref to insert citations.
 
 Here are the bibtex entry types and fields you should use. You can add extra fields like keywords, doi, url, notes, etc... to each entry. Usually they will be ignored by bibtex, but they are useful for you. Note that [[https://www.ctan.org/pkg/biblatex?lang=en][biblatex]] is considered a more powerful bibliography formatting tool, but we use bibtex because that is what most of the publishers we use support.
 
-#+BEGIN_SRC emacs-lisp :results output drawer org raw
+#+BEGIN_SRC emacs-lisp
 (loop for (type doc required crossref optional) in bibtex-BibTeX-entry-alist
       do
       (princ (format "\n*** %s (%s)\n" type doc))
@@ -1256,7 +1253,7 @@ You can see all the key bindings with C-c p C-h.
 
 While in a project, you may want to try:
 
-`helm-projectile-grep' or `counsel-git-grep' to search all project files for a phrase.
+`counsel-git-grep' to search all project files for a phrase.
 
 * Programming
 ** Python
@@ -1336,7 +1333,7 @@ Hello world!
 
 It also works with :results set to value.
 
-#+BEGIN_SRC ipython :session :results value drawer
+#+BEGIN_SRC ipython
 %matplotlib inline
 import matplotlib.pyplot as plt
 import numpy as np
@@ -1362,7 +1359,7 @@ a + b
 
 We also support HTML and Latex outputs like this. The results will contain an HTML or LaTeX block. As with the Jupyter notebook
 
-#+BEGIN_SRC ipython :session :results output drawer
+#+BEGIN_SRC ipython
 from IPython.display import HTML, Latex
 
 HTML('H<sub>2</sub>O')
@@ -1377,7 +1374,7 @@ H<sub>2</sub>O
 
 and
 
-#+BEGIN_SRC ipython :session :results output drawer
+#+BEGIN_SRC ipython
 Latex('H$_2$O')
 #+END_SRC
 
@@ -1395,7 +1392,7 @@ As with the Jupyter notebook, only the last returned cell is rendered.
 
 We finally have asynchronous execution of ipython blocks. This allows you to run a block, and keep working in Emacs. A temporary string is inserted into the results which is replaced when the code is done running. This command will make a clickable link to interrupt the kernel, or cancel the cell running. This will put names on every src block if they are not already named.
 
-#+BEGIN_SRC ipython :async
+#+BEGIN_SRC ipython
 import time
 time.sleep(5)
 #print(8)
@@ -1446,10 +1443,6 @@ scimax provides the jupyter-hy src block to run hylang in src blocks. The requir
 (import time)
 (print (time.asctime))
 #+END_SRC
-
-#+RESULTS:
-: hello world
-: Fri Jun 10 10:21:24 2016
 
 
 ** Emacs-lisp
@@ -1543,11 +1536,6 @@ In particular, scimax sets these keybindings:
 ("H-c a" . counsel-ag)
 ("H-c p" . counsel-pt)
 
-** helm
-
-Helm is another completion tool. See https://github.com/emacs-helm/helm
-
-Type C-c h C-h to see the helm key bindings. There are so many good things in there!
 
 ** swiper
 
@@ -1913,11 +1901,11 @@ org-mode manual: info:org
 
 To get help on functions use: `counsel-describe-function' and on variables use `counsel-describe-variable'.
 
-If you do not know exactly what you are looking for try: `helm-apropos'. This covers commands, functions, variables, faces, classes, and some other things.
+If you do not know exactly what you are looking for try: `counsel-apropos'. This covers commands, functions, variables, faces, classes, and some other things.
 
 *** Getting help on system commands
 
-If you have man pages installed (Linux/Mac for sure, maybe on windows) you can access them easily via Emacs. I like to read man pages in Emacs with `helm-man-woman' although `man' is also good.
+If you have man pages installed (Linux/Mac for sure, maybe on windows) you can access them easily via Emacs. I like to read man pages in Emacs with `woman' although `man' is also good.
 
 Note while on a man page you can use these keys:
 
@@ -1993,31 +1981,8 @@ Note that a lot of packages are installed in [[./packages.el]] and you may have 
 
  There are some useful bindings in `navy' also.
  | r | counsel-git-grep               |
- | o | helm-org-agenda-files-headings |
  | a | swiper-all                     |
 
-** Hotspots
-
-`hotspots' is a helm command that provides easy access to a variety of locations including user-defined commands, locations, org-agenda files, recent files, and bookmarks.
-
-You customize `scimax-user-hotspot-commands' and `scimax-user-hotspot-locations'.
-
-I bind this to a key like "f9" and set it up to easily open my mail, calendar and other things. For example, here is part of my setup.
-
-#+BEGIN_SRC emacs-lisp
-(setq scimax-user-hotspot-commands
-      '(("Mail" . (lambda ()
-		    (browse-url "https://www.google.com/gmail")))
-	("Calendar" . (lambda ()
-			(browse-url "https://www.google.com/calendar/render")))
-	("Contacts" . ivy-contacts)
-	("RSS" . elfeed)
-	("Twitter" . twit)
-	("Agenda" . (lambda () (org-agenda "" "w")))
-	("CV" . (lambda ()
-		  (org-open-file
-		   "/Users/jkitchin/Dropbox/CMU/CV and bios/kitchin_cv.docx" '(16))))))
-#+END_SRC
 
 * Export the info manual                                           :noexport:
 

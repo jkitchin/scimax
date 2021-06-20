@@ -179,7 +179,7 @@ Right now, this setting does not really work. At all.")
   (replace-regexp-in-string "\033\\[2K" "" str))
 
 (defun pianobar-output-filter (str)
-  "Output filter for pianobar-mode." 
+  "Output filter for pianobar-mode."
   (setq pianobar-current-output str)
   (pianobar-set-is-prompting (string-match pianobar-prompt-regex str))
 
@@ -284,63 +284,63 @@ Returns t on success, nil on error."
 	    (if (not pianobar-run-in-background)
 		(set-window-buffer (selected-window) buffer)))))))
 
-(defun helm-pandora ()
-  "A helm interface to Pandora via pianobar."
-  (interactive)
-  (unless (process-status "*pianobar*") 
-    (let ((pianobar-run-in-background t))
-      (pianobar)))
-  (helm :sources `(((name . ,(format "%s - playing %s by %s."
-				     pianobar-current-station
-				     pianobar-current-song
-				     pianobar-current-artist))
-		    (candidates . (("Next song" . pianobar-next-song)
-				   ("Love song" . pianobar-love-current-song)
-				   ("Ban song" . pianobar-ban-current-song)
-				   ("Song information" . (lambda ()
-							   (message "%s - playing %s by %s."
-								    pianobar-current-station
-								    pianobar-current-song
-								    pianobar-current-artist)))
-				   ("Upcoming songs" . (lambda ()
-							 (pianobar-send-command ?u)
-							 (sleep-for 0.2)
-							 (with-current-buffer "*pianobar*"
-							   (goto-char (point-max))
-							   (re-search-backward "	 0\)")
-							   (buffer-substring-no-properties
-							    (point) (point-max)))))
-				   ("Toggle play/pause" . pianobar-play-or-pause)
-				   ("Increase volume" . (lambda ()
-							  (pianobar-send-command ?\))))
-				   ("Decrease volume" . (lambda ()
-							  (pianobar-send-command ?\()))
-				   ("*pianobar* buffer" . (lambda () (switch-to-buffer "*pianobar*")))
-				   ("Delete this station" . (lambda ()
-							      (comint-send-string "*pianobar*" "d\n\n")))
-				   ("Quit" . (lambda ()
-					       (pianobar-send-command ?q)
-					       (kill-buffer "*pianobar*")))))
-		    (action . (lambda (f) (funcall f))))
-		   ((name . "Stations")
-		    (candidates . ,(progn
-				     (comint-send-string "*pianobar*" "s\n\n")
-				     (sleep-for 0.2)
-				     (delq nil (mapcar
-						(lambda (s)
-						  (when (string-match "\\([0-9]+\\))" s)
-						    (cons s (match-string 1 s))))
-						(split-string (with-current-buffer "*pianobar*"
-								(goto-char (point-max))
-								(while (not (re-search-backward "	 0\)" nil t))
-								  (goto-char (point-max))
-								  (sleep-for 0.1)) 
-								(buffer-substring-no-properties
-								 (point) (point-max)))
-							      "\n" t)))))
-		    (action . (lambda (channel) 
-				(comint-send-string "*pianobar*" "\n\ns")
-				(comint-send-string "*pianobar*" (concat channel "\n"))))))))
+;; (defun helm-pandora ()
+;;   "A helm interface to Pandora via pianobar."
+;;   (interactive)
+;;   (unless (process-status "*pianobar*")
+;;     (let ((pianobar-run-in-background t))
+;;       (pianobar)))
+;;   (helm :sources `(((name . ,(format "%s - playing %s by %s."
+;; 				     pianobar-current-station
+;; 				     pianobar-current-song
+;; 				     pianobar-current-artist))
+;; 		    (candidates . (("Next song" . pianobar-next-song)
+;; 				   ("Love song" . pianobar-love-current-song)
+;; 				   ("Ban song" . pianobar-ban-current-song)
+;; 				   ("Song information" . (lambda ()
+;; 							   (message "%s - playing %s by %s."
+;; 								    pianobar-current-station
+;; 								    pianobar-current-song
+;; 								    pianobar-current-artist)))
+;; 				   ("Upcoming songs" . (lambda ()
+;; 							 (pianobar-send-command ?u)
+;; 							 (sleep-for 0.2)
+;; 							 (with-current-buffer "*pianobar*"
+;; 							   (goto-char (point-max))
+;; 							   (re-search-backward "	 0\)")
+;; 							   (buffer-substring-no-properties
+;; 							    (point) (point-max)))))
+;; 				   ("Toggle play/pause" . pianobar-play-or-pause)
+;; 				   ("Increase volume" . (lambda ()
+;; 							  (pianobar-send-command ?\))))
+;; 				   ("Decrease volume" . (lambda ()
+;; 							  (pianobar-send-command ?\()))
+;; 				   ("*pianobar* buffer" . (lambda () (switch-to-buffer "*pianobar*")))
+;; 				   ("Delete this station" . (lambda ()
+;; 							      (comint-send-string "*pianobar*" "d\n\n")))
+;; 				   ("Quit" . (lambda ()
+;; 					       (pianobar-send-command ?q)
+;; 					       (kill-buffer "*pianobar*")))))
+;; 		    (action . (lambda (f) (funcall f))))
+;; 		   ((name . "Stations")
+;; 		    (candidates . ,(progn
+;; 				     (comint-send-string "*pianobar*" "s\n\n")
+;; 				     (sleep-for 0.2)
+;; 				     (delq nil (mapcar
+;; 						(lambda (s)
+;; 						  (when (string-match "\\([0-9]+\\))" s)
+;; 						    (cons s (match-string 1 s))))
+;; 						(split-string (with-current-buffer "*pianobar*"
+;; 								(goto-char (point-max))
+;; 								(while (not (re-search-backward "	 0\)" nil t))
+;; 								  (goto-char (point-max))
+;; 								  (sleep-for 0.1))
+;; 								(buffer-substring-no-properties
+;; 								 (point) (point-max)))
+;; 							      "\n" t)))))
+;; 		    (action . (lambda (channel)
+;; 				(comint-send-string "*pianobar*" "\n\ns")
+;; 				(comint-send-string "*pianobar*" (concat channel "\n"))))))))
 
 
 

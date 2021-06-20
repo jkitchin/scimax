@@ -276,24 +276,22 @@ a PDF."
 
 (defun cm-git-commit-selector ()
   "Return list of commits."
-  (helm :sources `((name . "commits")
-		   (candidates . ,(mapcar (lambda (s)
-					    (let ((commit
-						   (nth
-						    0
-						    (split-string s))))
-					      (cons s
-						    commit)))
-					  (split-string
-					   (shell-command-to-string
-					    "git log --pretty=format:\"%h %ad | %s%d [%an]\" --date=relative") "\n")))
-		   (action . (lambda (candidate)
-			       (helm-marked-candidates))))))
+  (let* ((candidates (mapcar (lambda (s)
+			       (let ((commit
+				      (nth
+				       0
+				       (split-string s))))
+				 (cons s
+				       commit)))
+			     (split-string
+			      (shell-command-to-string
+			       "git log --pretty=format:\"%h %ad | %s%d [%an]\" --date=relative") "\n")))
+	 (choices (completing-read-multiple "Commits: " candidates)))
+    (mapcar (lambda (x) (cdr (assoc x candidates))) choices)))
 
 
 (defun cm-wdiff-git (commits)
   "Perform a wdiff between git commits.
-a helm selection buffer is used to choose commits.
 
 If you choose one commit, the wdiff is between that commit and
 the current version.

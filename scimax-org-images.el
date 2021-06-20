@@ -222,8 +222,8 @@ Run this on a link"
 	(error "%s cannot be copied. Maybe it is not an image?" path)))))
 
 ;; This lets me click on an image to copy it to the clipboard.
-(when (string= system-type "darwin")
-  (define-key image-map (kbd "<mouse-1>") #'scimax-org-copy-image))
+;; (when (string= system-type "darwin")
+;;   (define-key image-map (kbd "<mouse-1>") #'scimax-org-copy-image))
 
 (provide 'scimax-org-images)
 
