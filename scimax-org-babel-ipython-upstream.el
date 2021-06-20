@@ -1018,7 +1018,7 @@ The overlays are not persistent, and are not saved."
 	ov)
     (save-excursion
       (scimax-ob-jump-to-header)
-      (setq ov (or (ov-at) (make-overlay (point) (incf (point)))))
+      (setq ov (or (ov-at) (make-overlay (point) (cl-incf (point)))))
       (overlay-put ov 'ob-ipython-execution-count t)
       (overlay-put ov
 		   'before-string

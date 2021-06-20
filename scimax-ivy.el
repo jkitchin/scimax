@@ -185,11 +185,11 @@ with the entry."
     (list-colors-display))
   (with-current-buffer (get-buffer "*Colors*")
     (prog1
-	(loop for line in (s-split "\n" (buffer-string))
-	      collect
-	      (append (list line)
-		      (mapcar 's-trim
-			      (mapcar 'substring-no-properties (s-split "  " line t)))))
+	(cl-loop for line in (s-split "\n" (buffer-string))
+		 collect
+		 (append (list line)
+			 (mapcar 's-trim
+				 (mapcar 'substring-no-properties (s-split "  " line t)))))
       (kill-buffer "*Colors*"))))
 
 (defun ivy-colors ()

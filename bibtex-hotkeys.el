@@ -86,10 +86,10 @@
 				  (string< (car c1) (car c2))))))
 		      (n (length s))
 		      (m (floor (/ n 3))))
-		 (message "%s" (loop for i to m concat
-				     (s-join " | "
-					     (append (-slice s (* i 3) (* 3 (+ i 1)))
-						     '("\n")))))))
+		 (message "%s" (cl-loop for i to m concat
+					(s-join " | "
+						(append (-slice s (* i 3) (* 3 (+ i 1)))
+							'("\n")))))))
 
 (bibtex-hotkey "q" "Jump to field with avy"
 	       (let* ((beg (point))

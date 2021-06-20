@@ -2444,7 +2444,7 @@ anything else (default): `inherit'
 
 VARIABLE's current value cannot satisfy a regexp type: it is
 impossible to know which concrete types a value must match."
-  (case mode
+  (cl-case mode
     ((nil inherit)     (help-var-inherits-type-p variable types))
     (inherit-or-value  (or (help-var-inherits-type-p variable types)
                            (help-var-val-satisfies-type-p variable types)))

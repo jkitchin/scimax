@@ -877,14 +877,14 @@ Use a prefix arg to get regular RET. "
 				      ;; no level change or increase, increment level counter
 				      ((or (= last-level current-level)
 					   (> current-level last-level))
-				       (incf (nth current-level counters)))
+				       (cl-incf (nth current-level counters)))
 
 				      ;; decrease in level
 				      (t
 				       (loop for i from (+ 1 current-level) below (length counters)
 					     do
 					     (setf (nth i counters) 0))
-				       (incf (nth current-level counters))))
+				       (cl-incf (nth current-level counters))))
 
 				     (list (point) (-slice counters 1)))))))
 	do

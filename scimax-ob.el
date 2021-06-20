@@ -236,7 +236,7 @@ Defaults to 3."
 
     (goto-char (org-element-property :end src))
     (when (numberp nlines)
-      (forward-line (* -1 (incf nlines))))
+      (forward-line (* -1 (cl-incf nlines))))
     (goto-char (line-end-position))))
 
 ;; * kill/copy/clone
@@ -348,26 +348,26 @@ variables, etc."
 	     (blocks (cl-loop for block in blocks
 			      if (string= (org-element-property :language block) lang)
 			      collect block))
-	     (merged-code (s-join "\n" (loop for src in blocks
-					     collect
-					     (org-element-property :value src)))))
-	;; Remove blocks that have been merged
-	(loop for src in (reverse blocks)
-	      do
-	      (goto-char (org-element-property :begin src))
-	      (org-babel-remove-result)
-	      (setf (buffer-substring (org-element-property :begin src)
-				      (org-element-property :end src))
-		    ""))
-	;; Now create the new big block.
-	(goto-char first-start)
-	(insert (format "#+BEGIN_SRC %s %s
+	     collect
+	     (org-element-property :value src)))))
+  (merged-code (s-join "\n" (cl-loop for src in blocks
+				     ;; Remove blocks that have been merged
+				     do
+				     (goto-char (org-element-property :begin src))
+				     (org-babel-remove-result)
+				     (setf (buffer-substring (org-element-property :begin src)
+							     (org-element-property :end src))
+					   ""))
+		       (cl-loop for src in (reverse blocks)
+				;; Now create the new big block.
+				(goto-char first-start)
+				(insert (format "#+BEGIN_SRC %s %s
 %s
 #+END_SRC\n\n"
-			lang
-			(or params "")
-			(s-trim merged-code)))
-	(goto-char first-start)))))
+						lang
+						(or params "")
+						(s-trim merged-code)))
+				(goto-char first-start)))))
 
 
 (defun scimax-ob-merge-previous ()
@@ -453,7 +453,7 @@ If language is nil apply to all src-blocks.
 Adapted from
 http://endlessparentheses.com/define-context-aware-keys-in-emacs.html"
   (declare (indent 3)
-           (debug (form form form &rest sexp)))
+	   (debug (form form form &rest sexp)))
   ;; store the key in scimax-src-keys
   (unless (cdr (assoc language scimax-ob-src-keys))
     (cl-pushnew (list language '()) scimax-ob-src-keys))
@@ -505,32 +505,32 @@ Usually called in a hook function."
 (defun scimax-ob-show-src-keys (language)
   "Show a reminder of the keys bound for LANGUAGE blocks."
   (interactive (list (completing-read "Language: " (mapcar 'car scimax-ob-src-keys))))
-  (let* ((s (loop for (key . function) in  (cdr (assoc (if (stringp language)
-							   (intern-soft language)
-							 language)
-						       scimax-ob-src-keys))
-		  collect
-		  (format "%10s  %40s" key function)))
-	 (n (length s))
-	 (m (floor (/ n 2))))
-    (message "%s" (loop for i to m concat
-			(s-join " | "
-				(append (-slice s (* i 3) (* 3 (+ i 1)))
-					'("\n")))))))
+  (intern-soft language)
+  language)
+scimax-ob-src-keys))
+collect
+(format "%10s  %40s" key function)))
+(let* ((s (cl-loop for (key . function) in  (cdr (assoc (if (stringp language)
+							    (n (length s))
+							  (m (floor (/ n 2))))
+							(s-join " | "
+								(append (-slice s (* i 3) (* 3 (+ i 1)))
+									'("\n")))))))
+       (message "%s" (cl-loop for i to m concat
 
 
-;; * Language mode keymaps on src blocks
+			      ;; * Language mode keymaps on src blocks
 
-;; The idea here is to get more src native editing in src blocks by combining
-;; their keymaps with org-mode.
-;; [2020-12-27 Sun] I am not sure this actually works right.
+			      ;; The idea here is to get more src native editing in src blocks by combining
+			      ;; their keymaps with org-mode.
+			      ;; [2020-12-27 Sun] I am not sure this actually works right.
 
-(defcustom scimax-ob-python-edit-mode-map
-  (cond
-   ((boundp 'elpy-mode-map) elpy-mode-map)
-   ((boundp 'anaconda-mode-map) anaconda-mode-map)
-   (t nil))
-  "Keymap used in editing Python blocks. Defaults to `elpy-mode-map'.
+			      (defcustom scimax-ob-python-edit-mode-map
+				(cond
+				 ((boundp 'elpy-mode-map) elpy-mode-map)
+				 ((boundp 'anaconda-mode-map) anaconda-mode-map)
+				 (t nil))
+				"Keymap used in editing Python blocks. Defaults to `elpy-mode-map'.
 Use `anaconda-mode-map' if you prefer `anaconda-mode'. This
 keymap is combined with some other keymaps in
 `scimax-src-block-keymaps' to enable native edit commands in
@@ -575,364 +575,365 @@ them."
 
 (defun scimax-ob-add-keymap-to-src-blocks (limit)
   "Add keymaps to src-blocks defined in `scimax-src-block-keymaps'.
+
 This is run by font-lock in `scimax-src-keymap-mode'."
-  (let ((case-fold-search t)
-	lang)
-    (while (re-search-forward org-babel-src-block-regexp limit t)
-      (let ((lang (match-string 2))
-	    (beg (match-beginning 0))
-	    (end (match-end 0)))
-	(if (assoc (org-no-properties lang) scimax-src-block-keymaps)
-	    (progn
-	      (add-text-properties
-	       beg end `(local-map ,(cdr (assoc
-					  (org-no-properties lang)
-					  scimax-src-block-keymaps))))
-	      (add-text-properties
-	       beg end `(cursor-sensor-functions
-			 ((lambda (win prev-pos sym)
-			    ;; This simulates a mouse click and makes a menu change
-			    (org-mouse-down-mouse nil)))))))))))
+				(let ((case-fold-search t)
+				      lang)
+				  (while (re-search-forward org-babel-src-block-regexp limit t)
+				    (let ((lang (match-string 2))
+					  (beg (match-beginning 0))
+					  (end (match-end 0)))
+				      (if (assoc (org-no-properties lang) scimax-src-block-keymaps)
+					  (progn
+					    (add-text-properties
+					     beg end `(local-map ,(cdr (assoc
+									(org-no-properties lang)
+									scimax-src-block-keymaps))))
+					    (add-text-properties
+					     beg end `(cursor-sensor-functions
+						       ((lambda (win prev-pos sym)
+							  ;; This simulates a mouse click and makes a menu change
+							  (org-mouse-down-mouse nil)))))))))))
 
 
-(defun scimax-spoof-mode (orig-func &rest args)
-  "Advice function to spoof commands in org-mode src blocks.
+			      (defun scimax-spoof-mode (orig-func &rest args)
+				"Advice function to spoof commands in org-mode src blocks.
 It is for commands that depend on the major mode. One example is
 `lispy--eval'."
-  (if (org-in-src-block-p)
-      (let ((major-mode (intern (format "%s-mode" (first (org-babel-get-src-block-info))))))
-	(apply orig-func args))
-    (apply orig-func args)))
+				(if (org-in-src-block-p)
+				    (let ((major-mode (intern (format "%s-mode" (first (org-babel-get-src-block-info))))))
+				      (apply orig-func args))
+				  (apply orig-func args)))
 
 
-(define-minor-mode scimax-ob-src-keymap-mode
-  "Minor mode to add mode keymaps to src-blocks."
-  :init-value nil
-  (if scimax-ob-src-keymap-mode
-      (progn
-	(add-hook 'org-font-lock-hook #'scimax-ob-add-keymap-to-src-blocks t)
-	(add-to-list 'font-lock-extra-managed-props 'local-map)
-	(add-to-list 'font-lock-extra-managed-props 'keymap)
-	(add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
-	(advice-add 'lispy--eval :around 'scimax-ob-spoof-mode)
-	(cursor-sensor-mode +1)
-	(message "scimax-ob-src-keymap-mode enabled"))
-    (remove-hook 'org-font-lock-hook #'scimax-ob-add-keymap-to-src-blocks)
-    (advice-remove 'lispy--eval 'scimax-ob-spoof-mode)
-    (cursor-sensor-mode -1))
-  (font-lock-ensure))
+			      (define-minor-mode scimax-ob-src-keymap-mode
+				"Minor mode to add mode keymaps to src-blocks."
+				:init-value nil
+				(if scimax-ob-src-keymap-mode
+				    (progn
+				      (add-hook 'org-font-lock-hook #'scimax-ob-add-keymap-to-src-blocks t)
+				      (add-to-list 'font-lock-extra-managed-props 'local-map)
+				      (add-to-list 'font-lock-extra-managed-props 'keymap)
+				      (add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
+				      (advice-add 'lispy--eval :around 'scimax-ob-spoof-mode)
+				      (cursor-sensor-mode +1)
+				      (message "scimax-ob-src-keymap-mode enabled"))
+				  (remove-hook 'org-font-lock-hook #'scimax-ob-add-keymap-to-src-blocks)
+				  (advice-remove 'lispy--eval 'scimax-ob-spoof-mode)
+				  (cursor-sensor-mode -1))
+				(font-lock-ensure))
 
-;; (add-hook 'org-mode-hook (lambda ()
-;; 			   (scimax-ob-src-keymap-mode +1)))
-
-
-;; * line numbers
-(defvar scimax-ob-number-line-overlays '()
-  "List of overlays for line numbers.")
-
-(make-variable-buffer-local 'scimax-ob-number-line-overlays)
-
-(defun scimax-ob-toggle-line-numbers ()
-  (interactive)
-  (if scimax-ob-number-line-overlays
-      (scimax-ob-remove-line-numbers)
-    (scimax-ob-add-line-numbers)))
+			      ;; (add-hook 'org-mode-hook (lambda ()
+			      ;; 			   (scimax-ob-src-keymap-mode +1)))
 
 
-(defun scimax-ob-remove-line-numbers ()
-  "Remove line numbers from "
-  (interactive)
-  (mapc 'delete-overlay
-	scimax-ob-number-line-overlays)
-  (setq-local scimax-ob-number-line-overlays '())
-  (remove-hook 'post-command-hook 'scimax-ob-add-line-numbers t))
+			      ;; * line numbers
+			      (defvar scimax-ob-number-line-overlays '()
+				"List of overlays for line numbers.")
+
+			      (make-variable-buffer-local 'scimax-ob-number-line-overlays)
+
+			      (defun scimax-ob-toggle-line-numbers ()
+				(interactive)
+				(if scimax-ob-number-line-overlays
+				    (scimax-ob-remove-line-numbers)
+				  (scimax-ob-add-line-numbers)))
 
 
-(defun scimax-ob-add-line-numbers ()
-  "Add line numbers to an org src-block."
-  (interactive)
-  (save-excursion
-    (let* ((src-block (org-element-context))
-	   (nlines (- (length
-		       (s-split
-			"\n"
-			(org-element-property :value src-block)))
-		      1)))
-      ;; clear any existing overlays
-      (scimax-ob-remove-line-numbers)
-
-      (goto-char (org-element-property :begin src-block))
-      ;; the beginning may be header, so we move forward to get the #+BEGIN
-      ;; line. Then jump one more to get in the code block
-      (while (not (looking-at "#\\+BEGIN"))
-	(forward-line))
-      (forward-line)
-      (loop for i from 1 to nlines
-	    do
-	    (beginning-of-line)
-	    (let (ov)
-	      (setq ov (make-overlay (point)(point)))
-	      (overlay-put
-	       ov
-	       'before-string (propertize
-			       (format "%03s " (number-to-string i))
-			       'font-lock-face '(:foreground "black" :background "gray80")))
-	      (push ov scimax-ob-number-line-overlays))
-	    (forward-line))))
-  ;; This allows you to update the numbers if you change the block, e.g. add/remove lines
-  (add-hook 'post-command-hook 'scimax-ob-add-line-numbers nil 'local))
+			      (defun scimax-ob-remove-line-numbers ()
+				"Remove line numbers from "
+				(interactive)
+				(mapc 'delete-overlay
+				      scimax-ob-number-line-overlays)
+				(setq-local scimax-ob-number-line-overlays '())
+				(remove-hook 'post-command-hook 'scimax-ob-add-line-numbers t))
 
 
-;; * Header editing
+			      (defun scimax-ob-add-line-numbers ()
+				"Add line numbers to an org src-block."
+				(interactive)
+				(save-excursion
+				  (let* ((src-block (org-element-context))
+					 (nlines (- (length
+						     (s-split
+						      "\n"
+						      (org-element-property :value src-block)))
+						    1)))
+				    ;; clear any existing overlays
+				    (scimax-ob-remove-line-numbers)
 
-(defun scimax-ob-avy-jump-to-header ()
-  "Jump to a position in the header using avy."
-  (interactive)
-  (unless (org-in-src-block-p) (user-error "Not in src-block"))
-  (let* ((src (org-element-context))
-	 (begin (org-element-property :begin src))
-	 (header-end (save-excursion
-		       (goto-char (org-element-property :post-affiliated src))
-		       (line-end-position)))
-	 (posns '()))
-    (save-excursion
-      (goto-char begin)
-      (while (re-search-forward " " header-end t)
-	(push (1+ (match-beginning 0)) posns))
-      ;; put last point in too so we can add new args
-      (push (line-end-position) posns))
-    (org-mark-ring-push)
-    (avy-with ob-header
-      (avy-process (reverse posns) (avy--style-fn avy-style)))))
-
-
-(defun scimax-ob-create-header-string ()
-  "Build up an org-babel header argument string with completion and return it."
-  (interactive)
-  (unless (org-in-src-block-p) (user-error "Not in src-block"))
-  (let* ((info (org-babel-get-src-block-info 'light))
-	 (lang (car info))
-	 (begin (nth 5 info))
-	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
-	 (header-vals (org-babel-combine-header-arg-lists
-		       org-babel-common-header-args-w-values
-		       (when (boundp lang-headers) (eval lang-headers t))))
-	 (headers (mapcar 'car header-vals))
-	 (header (completing-read
-		  "Header (C-M-j to finish): "
-		  headers nil nil "^"))
-	 (vals (cdr (assoc (intern-soft header) header-vals)))
-	 (header-string (concat ":" header " ")))
-    (cond
-     ((null vals)
-      nil)
-     ((eq vals :any)
-      (setq header-string (concat header-string " " (read-string "Value: "))))
-     ((and (listp vals) (not (listp (car vals))))
-      (setq header-string (concat header-string
-				  (let ((s (ivy-read
-					    "choose (C-M-j for none): " vals
-					    :initial-input "^")))
-				    (if (string= "^" s)
-					""
-				      s)))))
-     ;; list of lists
-     (t
-      (setq header-string (concat header-string
-				  (s-join " " (-filter
-					       (lambda (s)
-						 (not
-						  (s-blank? s)))
-					       (loop for lst in vals
-						     collect
-						     (let ((s (ivy-read
-							       "choose (C-M-j for none): "
-							       lst
-							       :initial-input "^")))
-						       (if (string= "^" s)
-							   ""
-							 s)))))))))
-
-    header-string))
+				    (goto-char (org-element-property :begin src-block))
+				    ;; the beginning may be header, so we move forward to get the #+BEGIN
+				    ;; line. Then jump one more to get in the code block
+				    (while (not (looking-at "#\\+BEGIN"))
+				      (forward-line))
+				    (forward-line)
+				    do
+				    (beginning-of-line)
+				    (let (ov)
+				      (setq ov (make-overlay (point)(point)))
+				      (overlay-put
+				       ov
+				       'before-string (propertize
+						       (format "%03s " (number-to-string i))
+						       'font-lock-face '(:foreground "black" :background "gray80")))
+				      (push ov scimax-ob-number-line-overlays))
+				    (forward-line))))
+			      (cl-loop for i from 1 to nlines
+				       ;; This allows you to update the numbers if you change the block, e.g. add/remove lines
+				       (add-hook 'post-command-hook 'scimax-ob-add-line-numbers nil 'local))
 
 
-(defun scimax-ob-replace-header-item-with-completion (&optional delete)
-  "Jump to a position in the header with avy, then replace it with completion.
+			      ;; * Header editing
+
+			      (defun scimax-ob-avy-jump-to-header ()
+				"Jump to a position in the header using avy."
+				(interactive)
+				(unless (org-in-src-block-p) (user-error "Not in src-block"))
+				(let* ((src (org-element-context))
+				       (begin (org-element-property :begin src))
+				       (header-end (save-excursion
+						     (goto-char (org-element-property :post-affiliated src))
+						     (line-end-position)))
+				       (posns '()))
+				  (save-excursion
+				    (goto-char begin)
+				    (while (re-search-forward " " header-end t)
+				      (push (1+ (match-beginning 0)) posns))
+				    ;; put last point in too so we can add new args
+				    (push (line-end-position) posns))
+				  (org-mark-ring-push)
+				  (avy-with ob-header
+				    (avy-process (reverse posns) (avy--style-fn avy-style)))))
+
+
+			      (defun scimax-ob-create-header-string ()
+				"Build up an org-babel header argument string with completion and return it."
+				(interactive)
+				(unless (org-in-src-block-p) (user-error "Not in src-block"))
+				(let* ((info (org-babel-get-src-block-info 'light))
+				       (lang (car info))
+				       (begin (nth 5 info))
+				       (lang-headers (intern (concat "org-babel-header-args:" lang)))
+				       (header-vals (org-babel-combine-header-arg-lists
+						     org-babel-common-header-args-w-values
+						     (when (boundp lang-headers) (eval lang-headers t))))
+				       (headers (mapcar 'car header-vals))
+				       (header (completing-read
+						"Header (C-M-j to finish): "
+						headers nil nil "^"))
+				       (vals (cdr (assoc (intern-soft header) header-vals)))
+				       (header-string (concat ":" header " ")))
+				  (cond
+				   ((null vals)
+				    nil)
+				   ((eq vals :any)
+				    (setq header-string (concat header-string " " (read-string "Value: "))))
+				   ((and (listp vals) (not (listp (car vals))))
+				    (setq header-string (concat header-string
+								(let ((s (ivy-read
+									  "choose (C-M-j for none): " vals
+									  :initial-input "^")))
+								  (if (string= "^" s)
+								      ""
+								    s)))))
+				   ;; list of lists
+				   (t
+				    (setq header-string (concat header-string
+								(s-join " " (-filter
+									     (lambda (s)
+									       (not
+										(s-blank? s)))
+									     collect
+									     (let ((s (ivy-read
+										       "choose (C-M-j for none): "
+										       lst
+										       :initial-input "^")))
+									       (if (string= "^" s)
+										   ""
+										 s)))))))))
+				(cl-loop for lst in vals
+
+					 header-string))
+
+
+			      (defun scimax-ob-replace-header-item-with-completion (&optional delete)
+				"Jump to a position in the header with avy, then replace it with completion.
 With a prefix arg, delete the thing you jumped to."
-  (interactive "P")
-  (unless (org-in-src-block-p) (user-error "Not in src-block"))
-  (let* ((info (org-babel-get-src-block-info 'light))
-	 (lang (car info))
-	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
-	 (headers (org-babel-combine-header-arg-lists
-		   org-babel-common-header-args-w-values
-		   (when (boundp lang-headers) (eval lang-headers t))))
-	 (begin (sixth info))
-	 (posns '())
-	 header
-	 (point-choice)
-	 new-header
-	 (choice (save-excursion
-		   (goto-char begin)
-		   (re-search-forward lang)
-		   (while (re-search-forward " [a-zA-Z0-9]" (line-end-position) t)
-		     (push (1+ (match-beginning 0)) posns))
-		   (push (line-end-position) posns)
-		   (avy-with ob-header
-		     (avy-process (reverse posns) (avy--style-fn avy-style)))
-		   (when (eolp) (setq new-header t))
-		   (setq point-choice (point))
-		   ;; get the header we are in
-		   (save-excursion
-		     (re-search-backward ":\\(.*\\) ")
-		     (setq header (intern-soft (match-string 1))))
-		   ;; now get the value we are on
-		   (let ((p (point)))
-		     (re-search-forward ":" (line-end-position) 'mv)
-		     (s-trim
-		      (buffer-substring-no-properties p (if (looking-back ":" 1)
-							    (1- (point))
-							  (point)))))))
-	 ;; these are the possible values for the header
-	 (header-vals (cdr (assoc header headers)))
-	 new-value)
+				(interactive "P")
+				(unless (org-in-src-block-p) (user-error "Not in src-block"))
+				(let* ((info (org-babel-get-src-block-info 'light))
+				       (lang (car info))
+				       (lang-headers (intern (concat "org-babel-header-args:" lang)))
+				       (headers (org-babel-combine-header-arg-lists
+						 org-babel-common-header-args-w-values
+						 (when (boundp lang-headers) (eval lang-headers t))))
+				       (begin (sixth info))
+				       (posns '())
+				       header
+				       (point-choice)
+				       new-header
+				       (choice (save-excursion
+						 (goto-char begin)
+						 (re-search-forward lang)
+						 (while (re-search-forward " [a-zA-Z0-9]" (line-end-position) t)
+						   (push (1+ (match-beginning 0)) posns))
+						 (push (line-end-position) posns)
+						 (avy-with ob-header
+						   (avy-process (reverse posns) (avy--style-fn avy-style)))
+						 (when (eolp) (setq new-header t))
+						 (setq point-choice (point))
+						 ;; get the header we are in
+						 (save-excursion
+						   (re-search-backward ":\\(.*\\) ")
+						   (setq header (intern-soft (match-string 1))))
+						 ;; now get the value we are on
+						 (let ((p (point)))
+						   (re-search-forward ":" (line-end-position) 'mv)
+						   (s-trim
+						    (buffer-substring-no-properties p (if (looking-back ":" 1)
+											  (1- (point))
+											(point)))))))
+				       ;; these are the possible values for the header
+				       (header-vals (cdr (assoc header headers)))
+				       new-value)
 
-    ;; now we have the symbol for the header and the current value. We have to
-    ;; get a new value. There are three types of vals possible, :any, an item in
-    ;; a list, or a list of lists
-    (unless delete
-      (setq new-value
-	    (if new-header
-		(scimax-ob-create-header-string)
-	      (cond
-	       ;; any thing is ok
-	       ((and (stringp header-vals) (string= ":any" header-vals))
-		(read-string "any: " choice))
-	       ;; a list of values (although sometimes :any is in the
-	       ((and (listp header-vals)
-		     (not (listp (car header-vals))))
-		(ivy-read "Value: " header-vals))
-	       ;; this probably means it is a list of lists
-	       (t
-		;; get the list that
-		(ivy-read "Value: " (catch 'collection
-				      (loop for lst in header-vals
-					    do (message "%s" lst)
-					    (when (-contains? lst (intern-soft choice))
-					      (throw 'collection lst))))))))))
-    (save-excursion
-      (goto-char point-choice)
-      (when (eolp)
-	(skip-chars-backward " ")
-	(delete-region (point) (line-end-position)))
-      (unless (looking-back " " 1) (insert " "))
-      (setf (buffer-substring (point) (or (re-search-forward " " (line-end-position) 'mv)
-					  (line-end-position)))
-	    (if delete ""
-	      (concat new-value " "))))))
+				  ;; now we have the symbol for the header and the current value. We have to
+				  ;; get a new value. There are three types of vals possible, :any, an item in
+				  ;; a list, or a list of lists
+				  (unless delete
+				    (setq new-value
+					  (if new-header
+					      (scimax-ob-create-header-string)
+					    (cond
+					     ;; any thing is ok
+					     ((and (stringp header-vals) (string= ":any" header-vals))
+					      (read-string "any: " choice))
+					     ;; a list of values (although sometimes :any is in the
+					     ((and (listp header-vals)
+						   (not (listp (car header-vals))))
+					      (ivy-read "Value: " header-vals))
+					     ;; this probably means it is a list of lists
+					     (t
+					      ;; get the list that
+					      (ivy-read "Value: " (catch 'collection
+								    do (message "%s" lst)
+								    (when (-contains? lst (intern-soft choice))
+								      (throw 'collection lst))))))))))
+				(cl-loop for lst in header-vals
+					 (save-excursion
+					   (goto-char point-choice)
+					   (when (eolp)
+					     (skip-chars-backward " ")
+					     (delete-region (point) (line-end-position)))
+					   (unless (looking-back " " 1) (insert " "))
+					   (setf (buffer-substring (point) (or (re-search-forward " " (line-end-position) 'mv)
+									       (line-end-position)))
+						 (if delete ""
+						   (concat new-value " "))))))
 
 
-(defun scimax-ob-cycle-header-1 (&optional arg)
-  "Cycle the header string through the list of headers.
+			      (defun scimax-ob-cycle-header-1 (&optional arg)
+				"Cycle the header string through the list of headers.
 The strings are defined in SRC-HEADERS file tags.
 With a prefix arg cycle backwards."
-  (interactive "P")
-  (let* ((lang (car (org-babel-get-src-block-info t)))
-	 (headers (org-element-map (org-element-parse-buffer) 'keyword
-		    (lambda (key)
-		      (when (string= (org-element-property :key key) "SRC-HEADERS")
-			(org-element-property :value key)))))
-	 header index)
-    (save-excursion
-      (org-babel-goto-src-block-head)
-      (re-search-forward lang)
-      (setq header (buffer-substring-no-properties (point) (line-end-position))
-	    index (-find-index (lambda (s) (string= (s-trim s) (s-trim header))) headers))
-      (delete-region (point) (line-end-position))
-      (insert " " (if index
-		      (if arg
-			  (nth (mod (1- index) (length headers)) headers)
-			(nth (mod (1+ index) (length headers)) headers))
-		    (car headers))))))
+				(interactive "P")
+				(let* ((lang (car (org-babel-get-src-block-info t)))
+				       (headers (org-element-map (org-element-parse-buffer) 'keyword
+						  (lambda (key)
+						    (when (string= (org-element-property :key key) "SRC-HEADERS")
+						      (org-element-property :value key)))))
+				       header index)
+				  (save-excursion
+				    (org-babel-goto-src-block-head)
+				    (re-search-forward lang)
+				    (setq header (buffer-substring-no-properties (point) (line-end-position))
+					  index (-find-index (lambda (s) (string= (s-trim s) (s-trim header))) headers))
+				    (delete-region (point) (line-end-position))
+				    (insert " " (if index
+						    (if arg
+							(nth (mod (1- index) (length headers)) headers)
+						      (nth (mod (1+ index) (length headers)) headers))
+						  (car headers))))))
 
 
-(defhydra scimax-ob-cycle-header-strings (:color red)
-  "cycle header args"
-  ("<left>" (scimax-ob-cycle-header-1 t))
-  ("<right>" (scimax-ob-cycle-header-1))
-  ("q" nil))
+			      (defhydra scimax-ob-cycle-header-strings (:color red)
+				"cycle header args"
+				("<left>" (scimax-ob-cycle-header-1 t))
+				("<right>" (scimax-ob-cycle-header-1))
+				("q" nil))
 
-;; * a hydra for src blocks
+			      ;; * a hydra for src blocks
 
-(defhydra scimax-ob (:color red :hint nil)
-  "
-        Execute                   Navigate                 Edit             Misc
+			      (defhydra scimax-ob (:color red :hint nil)
+				"
+	Execute                   Navigate                 Edit             Misc
 -----------------------------------------------------------------------------------------------------------------------------
     _<return>_: current           _i_: previous src        _w_: move up       ^ ^                         _<up>_:
   _S-<return>_: current and next  _k_: next src            _s_: move down     _l_: clear result  _<left>_:           _<right>_:
   _M-<return>_: current and new   _q_: visible src         _x_: kill          _L_: clear all              _<down>_:
 _S-M-<return>_: to point          _Q_: any src             _n_: copy          _o_: toggle result folding
 _C-M-<return>_: buffer       _C-<up>_: goto src start      _c_: clone         _N_: toggle line numbers
-           ^ ^             _C-<down>_: goto src end        _mm_: merge region
-           ^ ^             _C-<left>_: word left           _mp_: merge prev
-           ^ ^            _C-<right>_: word right          _mn_: merge next
-           ^ ^                  _C-<_: src begin           _-_: split
-           ^ ^                  _C->_: src end             _+_: insert above
-           ^ ^                    _R_: results             _=_: insert below
-           ^ ^                    ^ ^                      _h_: header
+	   ^ ^             _C-<down>_: goto src end        _mm_: merge region
+	   ^ ^             _C-<left>_: word left           _mp_: merge prev
+	   ^ ^            _C-<right>_: word right          _mn_: merge next
+	   ^ ^                  _C-<_: src begin           _-_: split
+	   ^ ^                  _C->_: src end             _+_: insert above
+	   ^ ^                    _R_: results             _=_: insert below
+	   ^ ^                    ^ ^                      _h_: header
 _;_: dwim comment  _z_: undo  _y_: redo _r_: Goto repl
 
 "
-  ("o" ob-ipython-toggle-output :color red)
-  ("<up>" scimax-ob-edit-up :color red)
-  ("<down>" scimax-ob-edit-down :color red)
-  ("<left>" left-char :color red)
-  ("<right>" right-char :color red)
-  ("C-<up>" scimax-ob-jump-to-first-line :color red)
-  ("C-<down>" scimax-ob-jump-to-end-line :color red)
-  ("C-<left>" left-word :color red)
-  ("C-<right>" right-word :color red)
+				("o" ob-ipython-toggle-output :color red)
+				("<up>" scimax-ob-edit-up :color red)
+				("<down>" scimax-ob-edit-down :color red)
+				("<left>" left-char :color red)
+				("<right>" right-char :color red)
+				("C-<up>" scimax-ob-jump-to-first-line :color red)
+				("C-<down>" scimax-ob-jump-to-end-line :color red)
+				("C-<left>" left-word :color red)
+				("C-<right>" right-word :color red)
 
-  ("z" undo-tree-undo :color red)
-  ("y" undo-tree-redo :color red)
+				("z" undo-tree-undo :color red)
+				("y" undo-tree-redo :color red)
 
-  ("<return>" org-ctrl-c-ctrl-c :color blue)
-  ("S-<return>" scimax-ob-execute-and-next-block :color red)
-  ("M-<return>" (lambda ()
-		  "Execute and insert new block."
-		  (interactive)
-		  (scimax-ob-execute-and-next-block t)
-		  (font-lock-fontify-block)) :color red)
-  ("S-M-<return>" scimax-ob-execute-to-point :color blue)
-  ("C-M-<return>" org-babel-execute-buffer :color blue)
-  ("r" org-babel-switch-to-session)
-  ("N" scimax-ob-toggle-line-numbers)
+				("<return>" org-ctrl-c-ctrl-c :color blue)
+				("S-<return>" scimax-ob-execute-and-next-block :color red)
+				("M-<return>" (lambda ()
+						"Execute and insert new block."
+						(interactive)
+						(scimax-ob-execute-and-next-block t)
+						(font-lock-fontify-block)) :color red)
+				("S-M-<return>" scimax-ob-execute-to-point :color blue)
+				("C-M-<return>" org-babel-execute-buffer :color blue)
+				("r" org-babel-switch-to-session)
+				("N" scimax-ob-toggle-line-numbers)
 
-  ("i" org-babel-previous-src-block :color red)
-  ("k" org-babel-next-src-block :color red)
-  ("q" scimax-ob-jump-to-visible-block)
-  ("Q" scimax-ob-jump-to-block)
-  ("C-<" scimax-ob-jump-to-first-line)
-  ("C->" scimax-ob-jump-to-end-line)
-  ("R" (goto-char (org-babel-where-is-src-block-result)))
+				("i" org-babel-previous-src-block :color red)
+				("k" org-babel-next-src-block :color red)
+				("q" scimax-ob-jump-to-visible-block)
+				("Q" scimax-ob-jump-to-block)
+				("C-<" scimax-ob-jump-to-first-line)
+				("C->" scimax-ob-jump-to-end-line)
+				("R" (goto-char (org-babel-where-is-src-block-result)))
 
-  ("w" scimax-ob-move-src-block-up :color red)
-  ("s" scimax-ob-move-src-block-down :color red)
-  ("x" scimax-ob-kill-block-and-results)
-  ("n" scimax-ob-copy-block-and-results)
-  ("c" scimax-ob-clone-block)
-  ("mm" scimax-ob-merge-blocks)
-  ("mp" scimax-ob-merge-previous)
-  ("mn" scimax-ob-merge-next)
-  ("-" scimax-ob-split-src-block )
-  ("+" scimax-ob-insert-src-block)
-  ("=" (scimax-ob-insert-src-block t))
-  ("l" org-babel-remove-result)
-  ("L" scimax-ob-clear-all-results)
-  ("h" scimax-ob-edit-header)
-  (";" org-comment-dwim :color red))
+				("w" scimax-ob-move-src-block-up :color red)
+				("s" scimax-ob-move-src-block-down :color red)
+				("x" scimax-ob-kill-block-and-results)
+				("n" scimax-ob-copy-block-and-results)
+				("c" scimax-ob-clone-block)
+				("mm" scimax-ob-merge-blocks)
+				("mp" scimax-ob-merge-previous)
+				("mn" scimax-ob-merge-next)
+				("-" scimax-ob-split-src-block )
+				("+" scimax-ob-insert-src-block)
+				("=" (scimax-ob-insert-src-block t))
+				("l" org-babel-remove-result)
+				("L" scimax-ob-clear-all-results)
+				("h" scimax-ob-edit-header)
+				(";" org-comment-dwim :color red))
 
 
-(provide 'scimax-ob)
+			      (provide 'scimax-ob)
 
 ;;; scimax-ob.el ends here

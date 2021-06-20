@@ -23,26 +23,26 @@
 	(lambda (link)
 	  (when (-contains? org-ref-cite-types (org-element-property :type link))
 	    (setq keys (s-split "," (org-element-property :path link)))
-	    (loop for key in keys
-		  do
-		  (setq bibfile
-			(cdr (org-ref-get-bibtex-key-and-file key)))
-		  (with-current-buffer (find-file-noselect bibfile)
-		    (bibtex-search-entry key)
-		    (save-excursion
-		      (bibtex-beginning-of-entry)
-		      (setq p1 (point))
-		      (bibtex-end-of-entry)
-		      (setq p2 (point)))
-		    (add-to-list 'bib-entries (buffer-substring-no-properties p1 p2))))))))
+	    (cl-loop for key in keys
+		     do
+		     (setq bibfile
+			   (cdr (org-ref-get-bibtex-key-and-file key)))
+		     (with-current-buffer (find-file-noselect bibfile)
+		       (bibtex-search-entry key)
+		       (save-excursion
+			 (bibtex-beginning-of-entry)
+			 (setq p1 (point))
+			 (bibtex-end-of-entry)
+			 (setq p2 (point)))
+		       (add-to-list 'bib-entries (buffer-substring-no-properties p1 p2))))))))
 
     (compose-mail)
     (message-goto-body)
     (insert content)
     (insert "\n\n% Bibtex Entries:\n\n")
-    (loop for bib-entry in bib-entries
-	  do
-	  (insert bib-entry))
+    (cl-loop for bib-entry in bib-entries
+	     do
+	     (insert bib-entry))
     (message-goto-to)))
 
 ;;;###autoload
@@ -276,33 +276,33 @@ Example usage:
 	(setq this-id (org-id-get-create)))
 
       ;; create Message entries
-      (loop for data in data-source
-	    do (save-excursion
-		 (save-restriction
-		   (org-narrow-to-subtree)
-		   (goto-char (cdr (org-id-find this-id)))
-		   (org-insert-heading-after-current)
-		   (org-do-demote)
-		   (setq data (add-to-list 'data
-					   (cons "ID" (org-id-get-create))))
-		   (outline-previous-heading)
-		   (end-of-line)
-		   (insert (or (cdr (assoc "HEADLINE" data))
-			       (cdr (assoc "SUBJECT" data))))
-		   (org-end-of-meta-data)
-		   (insert (s-format s-template 'aget data))
-		   ;; refill now that it is expanded
-		   (outline-previous-heading)
-		   (save-restriction
-		     (org-narrow-to-subtree)
-		     (goto-char (point-min))
-		     (fill-region (point-min) (or (re-search-forward "^--"
-								     nil t)
-						  (point-max))))
-		   (org-entry-put (point) "TO" (cdr (assoc "TO" data)))
-		   (when (cdr (assoc "SUBJECT" data))
-		     (org-entry-put (point) "SUBJECT" (cdr (assoc "SUBJECT" data))))
-		   (org-set-tags-to (-uniq (append '("unsent") (org-get-tags))))))))))
+      (cl-loop for data in data-source
+	       do (save-excursion
+		    (save-restriction
+		      (org-narrow-to-subtree)
+		      (goto-char (cdr (org-id-find this-id)))
+		      (org-insert-heading-after-current)
+		      (org-do-demote)
+		      (setq data (add-to-list 'data
+					      (cons "ID" (org-id-get-create))))
+		      (outline-previous-heading)
+		      (end-of-line)
+		      (insert (or (cdr (assoc "HEADLINE" data))
+				  (cdr (assoc "SUBJECT" data))))
+		      (org-end-of-meta-data)
+		      (insert (s-format s-template 'aget data))
+		      ;; refill now that it is expanded
+		      (outline-previous-heading)
+		      (save-restriction
+			(org-narrow-to-subtree)
+			(goto-char (point-min))
+			(fill-region (point-min) (or (re-search-forward "^--"
+									nil t)
+						     (point-max))))
+		      (org-entry-put (point) "TO" (cdr (assoc "TO" data)))
+		      (when (cdr (assoc "SUBJECT" data))
+			(org-entry-put (point) "SUBJECT" (cdr (assoc "SUBJECT" data))))
+		      (org-set-tags-to (-uniq (append '("unsent") (org-get-tags))))))))))
 
 
 ;;;###autoload

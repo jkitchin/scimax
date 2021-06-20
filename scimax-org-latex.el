@@ -229,20 +229,20 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
 			(cond
 			 ((and (string-match "\\\\begin{equation}" env)
 			       (not (string-match "\\\\tag{" env)))
-			  (incf counter)
+			  (cl-incf counter)
 			  (cons begin counter))
 			 ((string-match "\\\\begin{align}" env)
 			  (prog2
-			      (incf counter)
+			      (cl-incf counter)
 			      (cons begin counter)
 			    (with-temp-buffer
 			      (insert env)
 			      (goto-char (point-min))
 			      ;; \\ is used for a new line. Each one leads to a number
-			      (incf counter (count-matches "\\\\$"))
+			      (cl-incf counter (count-matches "\\\\$"))
 			      ;; unless there are nonumbers.
 			      (goto-char (point-min))
-			      (decf counter (count-matches "\\nonumber")))))
+			      (cl-decf counter (count-matches "\\nonumber")))))
 			 (t
 			  (cons begin nil)))))
 
