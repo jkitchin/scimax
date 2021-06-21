@@ -807,7 +807,7 @@ Following a link means opening the file it points to.
 (defun nb-follow (path)
   "Open the project at PATH."
   (interactive (list (org-element-property :path (org-element-context))))
-  (destructuring-bind (project fpath link-target) (nb-parse-path path)
+  (cl-destructuring-bind (project fpath link-target) (nb-parse-path path)
     (let* ((projects (remove nil (append (projectile-relevant-known-projects)
 					 (list
 					  (when (projectile-project-p)
@@ -864,7 +864,7 @@ Following a link means opening the file it points to.
   "Open the project at PATH in other window."
   (interactive (list (org-element-property :path (org-element-context))
 		     current-prefix-arg))
-  (destructuring-bind (project fpath link-target) (nb-parse-path path)
+  (cl-destructuring-bind (project fpath link-target) (nb-parse-path path)
     (let* ((projects (remove nil (append (projectile-relevant-known-projects)
 					 (list
 					  (when (projectile-project-p)
@@ -937,7 +937,7 @@ We may want to open this link with a system program, e.g. if it is an ipynb or s
 (defun nb-follow-sys (path)
   "Open the project at PATH with a system program."
   (interactive (list (org-element-property :path (org-element-context))))
-  (destructuring-bind (project fpath link-target) (nb-parse-path path)
+  (cl-destructuring-bind (project fpath link-target) (nb-parse-path path)
     (let* ((projects (remove nil (append (projectile-relevant-known-projects)
 					 (list
 					  (when (projectile-project-p)
@@ -1067,7 +1067,7 @@ The links have a tooltip that tells you the path that will be opened, or helpful
     (save-excursion
       (goto-char position)
       (let ((path (org-element-property :path (org-element-context))))
-  	(destructuring-bind (project fpath follow) (nb-parse-path path)
+  	(cl-destructuring-bind (project fpath follow) (nb-parse-path path)
   	  (let* ((projects (append (projectile-relevant-known-projects)
 				   (list (projectile-project-root))))
   		 (project-candidates (-filter (lambda (p)
@@ -1110,7 +1110,7 @@ This is used to put image overlays on links.
 START and END are the positions of the link.
 PATH is the link PATH.
 BRACKETP is non-nil for bracketed links."
-  (destructuring-bind (project fpath link-target) (nb-parse-path path)
+  (cl-destructuring-bind (project fpath link-target) (nb-parse-path path)
     (if (and (string-match (image-file-name-regexp) fpath)
   	     (not (ov-at start)))
   	;; Find the image
@@ -1173,7 +1173,7 @@ We have to get the link path and then open it.
 	 (path (org-element-property :path link)))
     (when (and (eq 'link (car link))
 	       (string= "nb" (org-element-property :type link)))
-      (destructuring-bind (project fpath link-target) (nb-parse-path path)
+      (cl-destructuring-bind (project fpath link-target) (nb-parse-path path)
 	(let* ((projects (remove nil (append (projectile-relevant-known-projects)
 					     (list
 					      (when (projectile-project-p)
@@ -1202,7 +1202,7 @@ Here is a function to open the link in explorer.
 	 (path (org-element-property :path link)))
     (when (and (eq 'link (car link))
 	       (string= "nb" (org-element-property :type link)))
-      (destructuring-bind (project fpath link-target) (nb-parse-path path)
+      (cl-destructuring-bind (project fpath link-target) (nb-parse-path path)
 	(let* ((projects (remove nil (append (projectile-relevant-known-projects)
 					     (list
 					      (when (projectile-project-p)
@@ -1232,7 +1232,7 @@ This function lets you get to the file or another one using projectile.
 	 (path (org-element-property :path link)))
     (when (and (eq 'link (car link))
 	       (string= "nb" (org-element-property :type link)))
-      (destructuring-bind (project fpath link-target) (nb-parse-path path)
+      (cl-destructuring-bind (project fpath link-target) (nb-parse-path path)
 	(let* ((projects (remove nil (append (projectile-relevant-known-projects)
 					     (list
 					      (when (projectile-project-p)

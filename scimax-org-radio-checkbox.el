@@ -87,7 +87,7 @@
 (defun scimax-get-radio-list-value (name)
   "Return the value of the checked item in a radio list named NAME."
   (save-excursion
-    (loop for el in (org-element-property
+    (cl-loop for el in (org-element-property
                      :structure
                      (scimax-org-get-plain-list name))
           if (string= (nth 4 el) "[X]")

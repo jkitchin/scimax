@@ -860,7 +860,7 @@ PARAMETERS is a set of keyword value pairs
 	;; update the editmark
 	(setcdr data (org-combine-plists (cdr data) parameters))
       ;; New editmark
-      (pushnew `(,type ,@parameters) sem-editmarks)
+      (cl-pushnew `(,type ,@parameters) sem-editmarks)
       (font-lock-remove-keywords nil (sem-font-lock-keywords))
       (font-lock-add-keywords nil (sem-font-lock-keywords)))))
 
