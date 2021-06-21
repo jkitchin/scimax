@@ -63,7 +63,7 @@
       (while (not (looking-at "#\\+BEGIN"))
 	(forward-line))
       (forward-line)
-      (loop for i from 1 to nlines
+      (cl-loop for i from 1 to nlines
             do
             (beginning-of-line)
             (let (ov)

@@ -599,7 +599,7 @@ then exit them."
   (interactive)
   (let ((headlines '()))
     ;; these files should be open already since they are agenda files.
-    (loop for file in (org-agenda-files) do
+    (cl-loop for file in (org-agenda-files) do
 	  (with-current-buffer (find-file-noselect file)
 	    (save-excursion
 	      (goto-char (point-min))
@@ -626,7 +626,7 @@ Optional FONTIFY colors the headlines. It might slow things down
 a lot with large numbers of org-files or long org-files. This
 function does not open the files."
   (let ((headlines '()))
-    (loop for file in files do
+    (cl-loop for file in files do
 	  (when (file-exists-p file)
 	    (with-temp-buffer
 	      (insert-file-contents file)
@@ -857,7 +857,7 @@ Use a prefix arg to get regular RET. "
 (defun scimax-overlay-numbered-headings ()
   "Put numbered overlays on the headings."
   (interactive)
-  (loop for (p lv) in (let ((counters (copy-list '(0 0 0 0 0 0 0 0 0 0)))
+  (cl-loop for (p lv) in (let ((counters (copy-list '(0 0 0 0 0 0 0 0 0 0)))
 			    (current-level 1)
 			    last-level)
 			(mapcar (lambda (x)
@@ -881,7 +881,7 @@ Use a prefix arg to get regular RET. "
 
 				      ;; decrease in level
 				      (t
-				       (loop for i from (+ 1 current-level) below (length counters)
+				       (cl-loop for i from (+ 1 current-level) below (length counters)
 					     do
 					     (setf (nth i counters) 0))
 				       (cl-incf (nth current-level counters))))

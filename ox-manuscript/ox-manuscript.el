@@ -739,7 +739,7 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 	      ;; group 3 is the extension
 	      "\\(?1:\\includegraphics\\(?2:[?[^].*]?\\)?\\){\\(?3:[^}].*\\)}"
 	      nil t)
-	(incf figure-count)
+	(cl-incf figure-count)
 	(let* ((eps-file (concat (match-string 3) ".eps"))
 	       (pdf-file (concat (match-string 3) ".pdf"))
 	       (png-file (concat (match-string 3) ".png"))

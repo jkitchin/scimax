@@ -219,7 +219,7 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
   (let ((results '())
 	(counter -1)
 	(numberp))
-    (setq results (loop for (begin .  env) in
+    (setq results (cl-loop for (begin .  env) in
 			(org-element-map (org-element-parse-buffer) 'latex-environment
 			  (lambda (env)
 			    (cons
