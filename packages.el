@@ -242,6 +242,8 @@
     (define-key ivy-minibuffer-map (kbd "M-TAB")
       #'scimax-ivy-toggle-mark)))
 
+(use-package counsel-projectile)
+
 ;; Provides functions for working on lists
 (use-package dash)
 
