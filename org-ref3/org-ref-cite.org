@@ -1,0 +1,132 @@
+#+title: org-cite with org-ref (sort of)
+
+This directory contains oc-bibtex.el (which I may rename to something like org-ref-cite.el if it is confusing). It is a setup derived from oc-natbib.el that is more similar to what I am used to with org-ref. The features include:
+
+1. Use ivy-bibtex to insert references
+2. cite styles that look more like natbib (see [[*Do we need to make cites look more like the LaTeX styles?]])
+3. cites are green similar to how they are in org-ref.
+4. In theory, flyspell should ignore cites
+5. Navigation functions for moving around in cites
+6. Editing functions for manipulating cites (shifting the order, sorting, deleting, copying, etc)
+7. Keymap on cites to make those things (4, 5) easy
+8. A hydra follow menu to do lots of useful things on a cite
+9. A bibliographystyle keyword
+
+
+* setup
+
+Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded paths that you will have to adjust for where you have these.
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy-bibtex
+  :init
+  (setq bibtex-completion-bibliography '("./org-ref-cite.bib")
+	bibtex-completion-notes-path "~/Dropbox/emacs/bibliography/notes/"
+	bibtex-completion-notes-template-multiple-files "#+TITLE: Notes on: ${author-or-editor} (${year}): ${title}\n\nSee [cite/t:@${=key=}]\n"
+	bibtex-completion-library-path '("/Users/jkitchin/Dropbox/emacs/bibliography/bibtex-pdfs/")
+	bibtex-completion-additional-search-fields '(keywords)
+	bibtex-completion-display-formats
+	'((article       . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${journal:40}")
+	  (inbook        . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} Chapter ${chapter:32}")
+	  (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+	  (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+	  (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))))
+
+
+
+(use-package citeproc)
+
+
+
+(use-package org-cite
+  :load-path "/Users/jkitchin/Dropbox/emacs/tests/org-mode-git/lisp"
+  :config
+  (require 'oc-bibtex "/Users/jkitchin/Dropbox/emacs/scimax/org-ref3/oc-bibtex.el")
+  (require 'oc-csl)
+  (require 'doi-utils) ;; this is in org-ref still
+  (setq
+   org-cite-global-bibliography bibtex-completion-bibliography
+   org-cite-csl-styles-dir "/Users/jkitchin/Dropbox/emacs/tests/org-mode-git/csl-styles"
+   org-cite-insert-processor 'bibtex
+   org-cite-follow-processor 'bibtex
+   org-cite-activate-processor 'bibtex
+   org-cite-export-processors '((html csl)
+				(latex bibtex)
+				(t (basic numeric))))
+
+  (define-key org-mode-map (kbd "C-c \\") 'org-cite-insert))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Do we need to make cites look more like the LaTeX styles?
+
+This library is primarily written for writing scientific papers that use bibtex (not biblatex) and natbib. The ultimate goal is eventually a LaTeX file that will be submitted to publishers. I think it is better to stay close to the way these files will look, and not to have mentally map a universal style to the natbib commands. I could be wrong about this.
+
+
+* Examples
+
+** Basic insertion
+
+I use C-c \ to insert a citation: [cite/t:@rose-2019-pybliom].
+
+The default cite type I use is cite/t, which I recommend to avoid conflicts with the cite links of org-ref.
+
+** Multiple insertions
+
+With ivy-bibtex open, you type C-M-m to insert the current candidate, keeping ivy open to select another candidate. Remember to press RET to select the last one and exit, or just type C-g.
+
+[cite/t:@rose-2019-pybliom;@kitchin-2015-examp-effec]
+
+** Inserting on an existing citation
+
+If your point is on a citation the following rules apply:
+1. If you are at the beginning of a reference, insert before it.
+2. If you are the end of a reference, insert after it.
+3. If you are in a reference, replace it.
+4. If you are in the style part, insert at beginning.
+
+[cite/t:@kitchin-2018-machin-learn-catal;@rose-2019-pybliom;]
+
+You can select the style for a new cite if you use a prefix arg with the insert cite command.
+
+You can delete a cite with a double prefix arg on the insert cite command. If point is on a reference, it will delete the reference, and if it is in the style part it will delete the whole citation.
+
+** Following a citation
+
+You follow a citation by clicking on it, pressing RET on it, or C-c C-o on it. All of these open a hydra that has many other actions you can choose for the citation or reference at point, unless you are on the style part of the cite, then you will be prompted for a reference to act on.
+
+[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal;@kitchin-2018-machin-learn-catal]
+
+** Editing the citation at point
+
+There are many ways you might want to edit a citation. In addition to the ways you can edit by insertion described in [[*Inserting on an existing citation]], the following options are available:
+
+- S-<left> and S-<right> to shift a reference to the left or right.
+- S-<up> to sort the keys by year
+- C-d to delete the thing at point
+- C-k to kill the thing at point
+- M-p will prompt you for prefix text and suffix text for the reference at point.
+
+[cite/t:@rose-2019-pybliom;one @kitchin-2018-machin-learn-catal two;@kitchin-2018-machin-learn-catal]
+
+** Navigation
+
+You can use C-<left> and C-<right> to navigate around in the citation and between citations. Use C-a to go to the beginning and C-e to go to the end of the citations.
+
+** Convenience
+
+- M-w copy the thing at point
+- M-m mark the thing at point
+
+
+** export
+
+The bibliography will be printed where you put the print_bibliography keyword. You can also use a bibliographystyle keyword to specify the style.
+
+A citet should get moved past punctuation if you also use natmove a textual citation like this one will move past punctuation on export [cite/t:@rose-2019-pybliom], but a parenthetical one like this will not [cite/p:@rose-2019-pybliom]. I usually use superscripted citations, and if you want them in line, you should use the citenum style like this: Ref. [cite/num:@rose-2019-pybliom].
+
+# You need these to get a bibliography in a PDF
+#+bibliographystyle: unsrtnat
+#+print_bibliography:
