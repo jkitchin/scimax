@@ -90,17 +90,14 @@ Defaults to citet"
 ;; * Flyspell setup
 ;; keys are often misspelled, so we turn that off here.
 
-(defun oc-bibtex-flyspell-skip-citations (begin _end _ignore)
-  "Skip region if it is in a citation.
-This looks for a citation face at BEGIN."
-  (let ((ignore (not (memq 'org-cite (get-text-property begin 'face)))))))
+(defun oc-bibtex-flyspell-predicate ()
+  (interactive)
+  (let ((faces (get-text-property (point) 'face)))
+    (when (not (listp faces))
+      (setq faces (list faces)))
+    (and (org-mode-flyspell-verify) (not (memq 'org-cite faces)))))
 
-(defun oc-bibtex-config-flyspell ()
-  "Configure flyspell for `org-mode' to avoid citations."
-  (add-hook 'flyspell-incorrect-hook #'oc-bibtex-flyspell-skip-citations nil t))
-
-(add-hook 'org-mode-hook #'oc-bibtex-config-flyspell)
-
+(put 'org-mode 'flyspell-mode-predicate 'oc-bibtex-flyspell-predicate)
 
 ;; * Navigation functions
 
