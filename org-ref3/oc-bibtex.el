@@ -146,6 +146,8 @@ Defaults to citet"
       (goto-char (org-element-property :begin (nth (max (- index 1) 0) refs)))))))
 
 
+;; * Editing
+
 (defun oc-bibtex-swap (i j lst)
   "Swap index I and J in the list LST."
   (let ((tempi (nth i lst)))
@@ -153,25 +155,40 @@ Defaults to citet"
     (setf (nth j lst) tempi))
   lst)
 
+
 (defun oc-bibtex-shift-left ()
-  "Shift the reference at point to the left.
-Keep point on the ref."
+  "Shift the reference at point to the left."
   (interactive)
   (let* ((datum (org-element-context))
 	 (current-citation (if (eq 'citation (org-element-type datum)) datum
 			     (org-element-property :parent datum)))
 	 (current-ref (when (eq 'citation-reference (org-element-type datum)) datum))
-	 (current-key (org-element-property :key current-ref))
 	 (refs (org-cite-get-references current-citation))
-	 (keys (mapcar (lambda (ref) (org-element-property :key ref)) refs))
-	 (index (seq-position keys current-key)))
+	 (index (seq-position refs current-ref
+			      (lambda (r1 r2)
+				(and (string= (org-element-property :key r1)
+					      (org-element-property :key r2))
+				     (equal (org-element-property :prefix r1)
+					    (org-element-property :prefix r2))
+				     (equal (org-element-property :suffix r1)
+					    (org-element-property :sufffix r2)))))))
     (when (= 1 (length refs))
       (error "You only have one reference. You cannot shift this"))
     (setf (buffer-substring (org-element-property :contents-begin current-citation)
 			    (org-element-property :contents-end current-citation))
 	  (org-element-interpret-data (oc-bibtex-swap index (- index 1) refs)))
-    (re-search-forward (concat "@" current-key))
-    (goto-char (match-beginning 0))))
+    ;; Now get on the original ref.
+    (let* ((newrefs (org-cite-get-references current-citation))
+	   (index (seq-position newrefs current-ref
+				(lambda (r1 r2)
+				  (and (string= (org-element-property :key r1)
+						(org-element-property :key r2))
+				       (equal (org-element-property :prefix r1)
+					      (org-element-property :prefix r2))
+				       (equal (org-element-property :suffix r1)
+					      (org-element-property :sufffix r2)))))))
+      (unless index (error "nothing found"))
+      (goto-char (org-element-property :begin (nth index newrefs))))))
 
 
 (defun oc-bibtex-shift-right ()
@@ -181,17 +198,35 @@ Keep point on the ref."
 	 (current-citation (if (eq 'citation (org-element-type datum)) datum
 			     (org-element-property :parent datum)))
 	 (current-ref (when (eq 'citation-reference (org-element-type datum)) datum))
-	 (current-key (org-element-property :key current-ref))
 	 (refs (org-cite-get-references current-citation))
-	 (keys (mapcar (lambda (ref) (org-element-property :key ref)) refs))
-	 (index (seq-position keys current-key)))
+	 (index (seq-position refs current-ref
+			      (lambda (r1 r2)
+				(and (string= (org-element-property :key r1)
+					      (org-element-property :key r2))
+				     (equal (org-element-property :prefix r1)
+					    (org-element-property :prefix r2))
+				     (equal (org-element-property :suffix r1)
+					    (org-element-property :sufffix r2)))))))
     (when (= 1 (length refs))
       (error "You only have one reference. You cannot shift this"))
-    (setf (buffer-substring (org-element-property :contents-begin current-citation)
-			    (org-element-property :contents-end current-citation))
-	  (org-element-interpret-data (oc-bibtex-swap index (+ index 1) refs)))
-    (re-search-forward (concat "@" current-key))
-    (goto-char (match-beginning 0))))
+
+    ;; Don't go past the end.
+    (unless (= index (-  (length refs) 1))
+      (setf (buffer-substring (org-element-property :contents-begin current-citation)
+			      (org-element-property :contents-end current-citation))
+	    (org-element-interpret-data (oc-bibtex-swap index (+ index 1) refs)))
+      ;; Now get on the original ref.
+      (let* ((newrefs (org-cite-get-references current-citation))
+	     (index (seq-position newrefs current-ref
+				  (lambda (r1 r2)
+				    (and (string= (org-element-property :key r1)
+						  (org-element-property :key r2))
+					 (equal (org-element-property :prefix r1)
+						(org-element-property :prefix r2))
+					 (equal (org-element-property :suffix r1)
+						(org-element-property :sufffix r2)))))))
+	(unless index (error "nothing found"))
+	(goto-char (org-element-property :begin (nth index newrefs)))))))
 
 
 (defun oc-bibtex-sort-year-ascending ()
