@@ -171,7 +171,7 @@ Defaults to citet"
 				     (equal (org-element-property :prefix r1)
 					    (org-element-property :prefix r2))
 				     (equal (org-element-property :suffix r1)
-					    (org-element-property :sufffix r2)))))))
+					    (org-element-property :suffix r2)))))))
     (when (= 1 (length refs))
       (error "You only have one reference. You cannot shift this"))
     (setf (buffer-substring (org-element-property :contents-begin current-citation)
@@ -186,7 +186,7 @@ Defaults to citet"
 				       (equal (org-element-property :prefix r1)
 					      (org-element-property :prefix r2))
 				       (equal (org-element-property :suffix r1)
-					      (org-element-property :sufffix r2)))))))
+					      (org-element-property :suffix r2)))))))
       (unless index (error "nothing found"))
       (goto-char (org-element-property :begin (nth index newrefs))))))
 
@@ -206,7 +206,7 @@ Defaults to citet"
 				     (equal (org-element-property :prefix r1)
 					    (org-element-property :prefix r2))
 				     (equal (org-element-property :suffix r1)
-					    (org-element-property :sufffix r2)))))))
+					    (org-element-property :suffix r2)))))))
     (when (= 1 (length refs))
       (error "You only have one reference. You cannot shift this"))
 
@@ -224,7 +224,7 @@ Defaults to citet"
 					 (equal (org-element-property :prefix r1)
 						(org-element-property :prefix r2))
 					 (equal (org-element-property :suffix r1)
-						(org-element-property :sufffix r2)))))))
+						(org-element-property :suffix r2)))))))
 	(unless index (error "nothing found"))
 	(goto-char (org-element-property :begin (nth index newrefs)))))))
 
