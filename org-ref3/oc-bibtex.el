@@ -48,38 +48,58 @@
 ;; compatible with things like csl, but this library is pretty specific for
 ;; scientific papers, so for now it is ok with me.
 (defcustom oc-bibtex-styles
-  '(("p" . "\\citep")
-    ;; In principle, this should map to \citet, but we use natmove alot, and it
+  '(;; In principle, this should map to \citet, but we use natmove alot, and it
     ;; only works on \cite. So, I am making it be \cite here.
     ("t" . "\\cite")
+    ("p" . "\\citep")
     ("num" . "\\citenum")
     ("author" . "\\citeauthor")
+    ;; We can't use * in the style, so I spell it out here
     ("author-star" . "\\citeauthor*")
+    ;; I use capitalization on Author to mean the capitalized version of \Cite
     ("Author" . "\\Citeauthor")
     ("Author-star" . "\\Citeauthor*")
     ("year" . "\\citeyear")
     ("yearpar" . "\\citeyearpar")
     ("nocite" . "\\nocite")
     ("t-star" . "\\citet*")
-    ("T" . "\\CiteT")
-    ("T-star" . "\\citeT*")
+    ("T" . "\\Citet")
+    ("T-star" . "\\Citet*")
     ("alt" . "\\citealt")
-    ("alt-star" . "\\citealt")
+    ("alt-star" . "\\citealt*")
     ("Alt" . "\\Citealt")
     ("Alt-star" . "\\Citealt*")
     ("alp" . "\\citealp")
     ("alp-star" . "\\citealp*")
     ("Alp" . "\\Citealp")
     ("Alp-star" . "\\Citealp*")
-    ("p/star" . "\\citep*")
+    ("p-star" . "\\citep*")
     ("P" . "\\Citep")
     ("P-star" . "\\Citep*")
+    ;; I am not sure this will work, citetext doesnt take a key.
+    ;; ("text" . "\\citetext")
+
+    ;; note with these alias commands you have to define the alias before,
+    ;; e.g. \defcitealias{key}{alias}
     ("talias" . "\\citetalias")
     ("palias" . "\\citepalias"))
-  "Styles for citations.
-I recommend against using a bare cite style if you also use
-`org-ref' because it matches an `org-ref' cite link, so I have not
-included one here.")
+  "Styles for natbib citations.
+See http://tug.ctan.org/macros/latex/contrib/natbib/natnotes.pdf")
+
+
+(defcustom oc-bibtex-alternate-insert-actions
+  '(("p" ivy-bibtex-open-pdf "Open PDF file (if present)")
+    ("u" ivy-bibtex-open-url-or-doi "Open URL or DOI in browser")
+    ("c" ivy-bibtex-insert-citation "Insert citation")
+    ("r" ivy-bibtex-insert-reference "Insert reference")
+    ("k" ivy-bibtex-insert-key "Insert BibTeX key")
+    ("b" ivy-bibtex-insert-bibtex "Insert BibTeX entry")
+    ("a" ivy-bibtex-add-PDF-attachment "Attach PDF to email")
+    ("e" ivy-bibtex-edit-notes "Edit notes")
+    ("s" ivy-bibtex-show-entry "Show entry")
+    ("l" ivy-bibtex-add-pdf-to-library "Add PDF to library")
+    ("f" (lambda (_candidate) (ivy-bibtex-fallback ivy-text)) "Fallback options"))
+  "Atlternate actions to do instead of inserting.")
 
 
 (defun org-cite-bibtex--style-to-command (style)
