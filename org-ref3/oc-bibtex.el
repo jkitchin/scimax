@@ -355,7 +355,8 @@ If at the end, use `org-end-of-line' instead."
     (define-key map (kbd "C-k") 'oc-bibtex-kill-cite)
     (define-key map (kbd "M-w") 'oc-bibtex-copy-cite)
     (define-key map (kbd "M-m") 'oc-bibtex-mark-cite)
-    (define-key map (kbd "M-p") ' oc-bibtex-update-pre/post)
+    (define-key map (kbd "M-s") 'oc-bibtex-update-style)
+    (define-key map (kbd "M-p") 'oc-bibtex-update-pre/post)
 
     (define-key map (kbd "RET") (lambda ()
 				  (interactive)
