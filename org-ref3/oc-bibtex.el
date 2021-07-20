@@ -107,6 +107,20 @@ See http://tug.ctan.org/macros/latex/contrib/natbib/natnotes.pdf")
 Defaults to citet"
   (or (cdr (assoc style oc-bibtex-styles)) "\\citet"))
 
+;; modified so it only uses
+(defun org-cite-list-bibliography-files ()
+  "List all bibliography files defined in the buffer."
+  (delete-dups
+   (or
+    (mapcar (lambda (value)
+	      (pcase value
+		(`(,f . ,d)
+                 (expand-file-name (org-strip-quotes f) d))))
+	    (pcase (org-collect-keywords
+                    '("BIBLIOGRAPHY") nil '("BIBLIOGRAPHY"))
+	      (`(("BIBLIOGRAPHY" . ,pairs)) pairs)))
+    org-cite-global-bibliography)))
+
 ;; * Flyspell setup
 ;; keys are often misspelled, so we turn that off here.
 
