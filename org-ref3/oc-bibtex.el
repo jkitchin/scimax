@@ -627,6 +627,22 @@ Argument ARG prefix arg."
     (message-goto-to)))
 
 
+(defun oc-bibtex-ivy-select-style ()
+  "Select a style with completion."
+  (interactive)
+  (ivy-read "Style: " oc-bibtex-styles
+	    :caller 'oc-bibtex-ivy-select-style))
+
+
+(defun oc-bibtex-ivy-style-transformer (candidate)
+  "Transform CANDIDATE for selection."
+  (format "%-20s%s" candidate
+	  (propertize (cdr (assoc candidate oc-bibtex-styles)) 'face  '(:foreground "forest green"))))
+
+
+(ivy-set-display-transformer 'oc-bibtex-ivy-select-style 'oc-bibtex-ivy-style-transformer)
+
+
 (defun oc-bibtex-update-style ()
   "Change the style of the citation at point."
   (interactive)
@@ -634,7 +650,7 @@ Argument ARG prefix arg."
 	 (current-citation (if (eq 'citation (org-element-type datum)) datum
 			     (org-element-property :parent datum)))
 	 (refs (org-cite-get-references current-citation))
-	 (style (completing-read "Style: " (mapcar 'car oc-bibtex-styles)))
+	 (style (oc-bibtex-ivy-select-style))
 	 (cp (point)))
     (setf (buffer-substring (org-element-property :begin current-citation)
 			    (org-element-property :end current-citation))
