@@ -543,10 +543,17 @@ Argument ARG prefix arg."
     (kill-new (buffer-substring (org-element-property :begin parent)
 				(org-element-property :end parent)))))
 
+
+;; TODO: I probably need to do what I did here in all these functions. The issue
+;; this solves is that `(org-cite-list-bibliography-files)' lists local and
+;; global files, and these commands should only use what is defined locally if
+;; it is, and globally otherwise. There is a lot of repetition, and maybe an
+;; anophoric macro would simplify it?
 (defun oc-bibtex-copy-formatted-reference ()
   "Copy a formatted version of the reference at point."
   (interactive)
-  (kill-new (bibtex-completion-apa-format-reference (org-element-property :key (org-element-context)))))
+  (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
+    (kill-new (bibtex-completion-apa-format-reference (org-element-property :key (org-element-context))))))
 
 
 (defun oc-bibtex-doi (key)
