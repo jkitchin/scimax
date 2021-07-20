@@ -388,7 +388,13 @@ With two prefix ARG delete reference/cite at point.
 Argument CONTEXT is an org element at point, usually a citation
 or citation-reference.
 This is called by `org-cite-insert'."
-  (interactive)
+  (interactive (list (org-element-context) current-prefix-arg))
+
+  ;; I do this here in case you change the actions after loading this, so that
+  ;; it should be up to date.
+  (ivy-set-actions
+   'org-cite-insert
+   oc-bibtex-alternate-insert-actions)
 
   (cond
    ;; the usual case where we insert a ref
