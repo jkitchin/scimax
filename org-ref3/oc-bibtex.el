@@ -134,20 +134,24 @@ Defaults to citet"
 (put 'org-mode 'flyspell-mode-predicate 'oc-bibtex-flyspell-predicate)
 
 ;; * Navigation functions
-
+;; There can be some subtle failures when there are duplicate keys sometimes.
 (defun oc-bibtex-next-reference ()
   "Move point to the next reference."
   (interactive)
   (let* ((datum (org-element-context))
 	 (current-citation (if (eq 'citation (org-element-type datum)) datum
 			     (org-element-property :parent datum)))
-	 (current-ref (when (eq 'citation-reference (org-element-type datum)) datum))
-	 (current-key (org-element-property :key current-ref))
+	 (current-ref (when (eq 'citation-reference (org-element-type datum))
+			datum))
 	 (refs (org-cite-get-references current-citation))
-	 (keys (mapcar (lambda (ref) (org-element-property :key ref)) refs))
-	 (index (seq-position keys current-key)))
+	 (index (when current-ref (seq-position refs current-ref
+						(lambda (r1 r2)
+						  (= (org-element-property :begin r1)
+						     (org-element-property :begin r2)))))))
     (cond
-     ;;
+     ;; ((null current-ref)
+     ;;  (goto-char (org-element-property :begin (first (org-cite-get-references  datum)))))
+     ;; this means it was not found.
      ((null index)
       (goto-char (org-element-property :begin (first refs))))
      ;; on last reference, try to jump to next one
@@ -159,6 +163,7 @@ Defaults to citet"
       (goto-char
        (org-element-property :begin (nth (min (+ index 1) (- (length refs) 1)) refs)))))))
 
+
 (defun oc-bibtex-previous-reference ()
   "Move point to previous reference."
   (interactive)
@@ -166,16 +171,17 @@ Defaults to citet"
 	 (current-citation (if (eq 'citation (org-element-type datum)) datum
 			     (org-element-property :parent datum)))
 	 (current-ref (when (eq 'citation-reference (org-element-type datum)) datum))
-	 (current-key (org-element-property :key current-ref))
 	 (refs (org-cite-get-references current-citation))
-	 (keys (mapcar (lambda (ref) (org-element-property :key ref)) refs))
-	 (index (seq-position keys current-key)))
+	 (index (when current-ref (seq-position refs current-ref
+						(lambda (r1 r2)
+						  (= (org-element-property :begin r1)
+						     (org-element-property :begin r2)))))))
     (cond
-     ((null index)
-      (goto-char (org-element-property :begin (first refs))))
-     ((= index 0)
+     ;; not found or on style part
+     ((or (= index 0) (null index))
       (when (re-search-backward "\\[cite" nil t 2)
 	(goto-char (org-element-property :begin (car (last (org-cite-get-references (org-element-context))))))))
+
      (t
       (goto-char (org-element-property :begin (nth (max (- index 1) 0) refs)))))))
 
