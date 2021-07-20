@@ -784,16 +784,55 @@ OUTPUT is the final output of the export process."
 (defun org-cite-bibtex-export-bibliography (_keys files &rest _)
   "Print references from bibliography FILES.
 FILES is a list of absolute file names.  STYLE is the bibliography style, as
-a string or nil."
-  (let ((style (cadr (assoc "BIBLIOGRAPHYSTYLE"
-			    (org-collect-keywords '("BIBLIOGRAPHYSTYLE"))))))
-    (concat
+a string or nil.
 
+The actual bibliography command is determined by the
+PRINT_BIBLIOGRAPHY keyword. If it contains a non-nil value for
+:nobibliography then the command is \\nobibliography otherwise it
+is \\bibliography.
+
+You can use a :title option to set the title of the bibliography. The default is Bibliography.
+You can use a :numbered option to set if the Bibliography section should be numbered. The default is not numbered.
+"
+  (let* ((bibtitle (or (plist-get (org-export-read-attribute
+				   :attr
+				   `(nil (:attr (,(cadr (assoc "PRINT_BIBLIOGRAPHY"
+							       (org-collect-keywords
+								'("PRINT_BIBLIOGRAPHY"))))))))
+				  :title)))
+	 (numbered (plist-get (org-export-read-attribute
+			       :attr
+			       `(nil (:attr (,(cadr (assoc "PRINT_BIBLIOGRAPHY"
+							   (org-collect-keywords
+							    '("PRINT_BIBLIOGRAPHY"))))))))
+			      :numbered))
+
+	 (bibcmd (if  (plist-get (org-export-read-attribute
+				  :attr
+				  `(nil (:attr (,(cadr (assoc "PRINT_BIBLIOGRAPHY"
+							      (org-collect-keywords
+							       '("PRINT_BIBLIOGRAPHY"))))))))
+				 :nobibliography)
+		     "nobibliography"
+		   "bibliography"))
+	 (style (cadr (assoc "BIBLIOGRAPHYSTYLE"
+			     (org-collect-keywords '("BIBLIOGRAPHYSTYLE"))))))
+
+    (when (and (string= "nobibliography" bibcmd)
+	       (or bibtitle numbered))
+      (error "You cannot combine nobibliography and title/numbered yet."))
+
+    (concat
      (and style (format "\\bibliographystyle{%s}\n" style))
-     (format "\\bibliography{%s}"
+     (and bibtitle (format "\\renewcommand{\\bibsection}{\\section%s{%s}}\n"
+			   (if numbered  "" "*")
+			   (org-strip-quotes bibtitle)))
+     (format "\\%s{%s}"
+	     bibcmd
              (mapconcat #'file-name-sans-extension
 			(mapcar #'expand-file-name files)
 			",")))))
+
 
 
 ;;; Register `bibtex' processor
