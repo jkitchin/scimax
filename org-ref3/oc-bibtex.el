@@ -406,15 +406,18 @@ This is called by `org-cite-insert'."
 			  (oc-bibtex-insert-citation
 			   (cdr (assoc "=key=" (cdr candidate))) arg)))))
 
-   ((= (prefix-numeric-value  current-prefix-arg) 4)
+   ;; Here you are either updating the style, or inserting a new ref with a selected style.
+   ((= (prefix-numeric-value  arg) 4)
     (if context
 	(oc-bibtex-update-style)
       (bibtex-completion-init)
       (let* ((candidates (bibtex-completion-candidates)))
 	(ivy-read "BibTeX entries: " candidates
-		  :action (lambda (candidate)
-			    (oc-bibtex-insert-citation
-			     (cdr (assoc "=key=" (cdr candidate))) arg))))))
+		  :caller 'org-cite-insert
+		  :action '(1
+			    ("i" (lambda (candidate)
+				   (oc-bibtex-insert-citation
+				    (cdr (assoc "=key=" (cdr candidate))) current-prefix-arg)) "insert"))))))
 
    ;; delete thing at point, either ref or citation
    ((= (prefix-numeric-value  current-prefix-arg) 16)
