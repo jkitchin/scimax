@@ -773,13 +773,14 @@ These are the cite keys"
                      ",")))
 
 
-(defun org-cite-bibtex-export-citation (citation style _ info)
+(defun org-cite-bibtex-export-citation (citation _style _ info)
   "Export CITATION object.
-STYLE is the citation style, as a pair of strings or nil.  INFO is the export
-state, as a property list."
-  (concat (cdr (assoc (car style) oc-bibtex-styles))
-	  (org-cite-bibtex--build-optional-arguments citation info)
-	  (org-cite-bibtex--build-arguments citation)))
+We ignore _STYLE here for the simpler way of getting it from the
+citation. INFO is the export state, as a property list."
+  (let ((style (org-element-property :style citation)))
+    (concat (cdr (assoc style oc-bibtex-styles))
+	    (org-cite-bibtex--build-optional-arguments citation info)
+	    (org-cite-bibtex--build-arguments citation))))
 
 
 (defun org-cite-bibtex-use-package (output &rest _)
