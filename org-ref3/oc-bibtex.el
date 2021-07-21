@@ -124,6 +124,7 @@ Defaults to citet"
 	      (`(("BIBLIOGRAPHY" . ,pairs)) pairs)))
     org-cite-global-bibliography)))
 
+
 ;; * Flyspell setup
 ;; keys are often misspelled, so we turn that off here.
 
@@ -427,11 +428,13 @@ This is called by `org-cite-insert'."
 		  :action '(1
 			    ("i" (lambda (candidate)
 				   (oc-bibtex-insert-citation
-				    (cdr (assoc "=key=" (cdr candidate))) current-prefix-arg)) "insert"))))))
+				    (cdr (assoc "=key=" (cdr candidate)))
+				    current-prefix-arg)) "insert"))))))
 
    ;; delete thing at point, either ref or citation
    ((= (prefix-numeric-value  current-prefix-arg) 16)
-    (org-cite-delete-citation context))))
+    (when (memq (org-element-type context) '(citation citation-reference))
+      (org-cite-delete-citation context)))))
 
 
 (defun oc-bibtex-insert-citation (select-key arg)
@@ -710,7 +713,8 @@ Argument ARG prefix arg."
     (setf (buffer-substring (org-element-property :begin ref)
 			    (org-element-property :end ref))
 	  (org-element-interpret-data `(citation-reference
-					(:key ,key :prefix ,(concat pre " ") :suffix ,(concat  " " post)))))))
+					(:key ,key :prefix ,(concat pre " ")
+					      :suffix ,(concat  " " post)))))))
 
 
 (pretty-hydra-define oc-bibtex-citation-reference (:color blue)
@@ -845,22 +849,25 @@ You can use a :numbered option to set if the Bibliography section should be numb
 "
   (let* ((bibtitle (or (plist-get (org-export-read-attribute
 				   :attr
-				   `(nil (:attr (,(cadr (assoc "PRINT_BIBLIOGRAPHY"
-							       (org-collect-keywords
-								'("PRINT_BIBLIOGRAPHY"))))))))
+				   `(nil (:attr (,(cadr (assoc
+							 "PRINT_BIBLIOGRAPHY"
+							 (org-collect-keywords
+							  '("PRINT_BIBLIOGRAPHY"))))))))
 				  :title)))
 	 (numbered (plist-get (org-export-read-attribute
 			       :attr
-			       `(nil (:attr (,(cadr (assoc "PRINT_BIBLIOGRAPHY"
-							   (org-collect-keywords
-							    '("PRINT_BIBLIOGRAPHY"))))))))
+			       `(nil (:attr (,(cadr (assoc
+						     "PRINT_BIBLIOGRAPHY"
+						     (org-collect-keywords
+						      '("PRINT_BIBLIOGRAPHY"))))))))
 			      :numbered))
 
 	 (bibcmd (if  (plist-get (org-export-read-attribute
 				  :attr
-				  `(nil (:attr (,(cadr (assoc "PRINT_BIBLIOGRAPHY"
-							      (org-collect-keywords
-							       '("PRINT_BIBLIOGRAPHY"))))))))
+				  `(nil (:attr (,(cadr (assoc
+							"PRINT_BIBLIOGRAPHY"
+							(org-collect-keywords
+							 '("PRINT_BIBLIOGRAPHY"))))))))
 				 :nobibliography)
 		     "nobibliography"
 		   "bibliography"))
