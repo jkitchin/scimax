@@ -102,15 +102,23 @@ author.")
     ("s" ivy-bibtex-show-entry "Show entry")
     ("l" ivy-bibtex-add-pdf-to-library "Add PDF to library")
     ("f" (lambda (_candidate) (ivy-bibtex-fallback ivy-text)) "Fallback options"))
-  "Atlternate actions to do instead of inserting.")
+  "Alternate actions to do instead of inserting.")
+
+
+(defcustom oc-bibtex-default-citation-command "\\citet"
+  "Default command for citations.")
 
 
 (defun org-cite-bibtex--style-to-command (style)
   "Return command name to use according to STYLE pair.
-Defaults to citet"
-  (or (cdr (assoc style oc-bibtex-styles)) "\\citet"))
+Defaults to `oc-bibtex-default-style'"
+  (or (cdr (assoc style oc-bibtex-styles)) oc-bibtex-default-citation-command))
 
-;; modified so it only uses
+
+;; TODO probably use around advice for this or remove
+;; modified to give local files precedence.
+;; there an alternative to put #+org-cite-global-bibliography: nil in the file
+;; but I don't like it.
 (defun org-cite-list-bibliography-files ()
   "List all bibliography files defined in the buffer."
   (delete-dups
