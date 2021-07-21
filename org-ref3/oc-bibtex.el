@@ -391,12 +391,20 @@ Argument CITATION is an org-element holding the references."
   (pcase-let ((`(,beg . ,end) (org-cite-boundaries citation)))
     ;; Put the keymap on a citation
     (put-text-property beg end 'keymap oc-bibtex-keymap)
-
     ;; put a rendered tooltip on the style part. Note that this assumes a latex
     ;; export.
     (put-text-property
      beg (1- (org-with-point-at beg (search-forward ":")))
-     'help-echo (org-trim (org-export-string-as (buffer-substring beg end) 'latex t)))))
+     ;; Running this export results in running the org-mode hooks. I use this
+     ;; function to delay getting the string until you mouse over.
+     'help-echo (lambda (window object position)
+		  (save-excursion
+		    (goto-char position)
+		    (let ((context (org-element-context)))
+		      (org-trim (org-export-string-as (buffer-substring
+						       (org-element-property :begin context)
+						       (org-element-property :end context))
+						      'latex t))))))))
 
 
 ;; * Inserting
