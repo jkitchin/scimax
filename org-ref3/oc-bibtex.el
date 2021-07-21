@@ -128,6 +128,7 @@ Defaults to citet"
 ;; keys are often misspelled, so we turn that off here.
 
 (defun oc-bibtex-flyspell-predicate ()
+  "Predicate function to ignore flyspell on citations."
   (interactive)
   (let ((faces (get-text-property (point) 'face)))
     (when (not (listp faces))
