@@ -178,3 +178,36 @@ Not all of the natbib or biblatex cite commands are supported.
 - citenum is supported in oc-bibtex, but it doesn't seem to have a general style in other exporters
 - citetext doesn't currently seem possible because it doesn't use a key
 - =\\nocite{*}= also does not currently seem possible for the same reason
+
+* testing the styles
+#+BEGIN_SRC emacs-lisp :results org raw
+(cl-loop for (s . cmd) in oc-bibtex-styles concat
+	 (format "- =[cite/%s:@rose-2019-pybliom]= :: [cite/%s:@rose-2019-pybliom]\n" s s))
+#+END_SRC
+
+#+RESULTS:
+- =[cite/t:@rose-2019-pybliom]= :: [cite/t:@rose-2019-pybliom]
+- =[cite/p:@rose-2019-pybliom]= :: [cite/p:@rose-2019-pybliom]
+- =[cite/num:@rose-2019-pybliom]= :: [cite/num:@rose-2019-pybliom]
+- =[cite/a:@rose-2019-pybliom]= :: [cite/a:@rose-2019-pybliom]
+- =[cite/a/f:@rose-2019-pybliom]= :: [cite/a/f:@rose-2019-pybliom]
+- =[cite/a/c:@rose-2019-pybliom]= :: [cite/a/c:@rose-2019-pybliom]
+- =[cite/a/cf:@rose-2019-pybliom]= :: [cite/a/cf:@rose-2019-pybliom]
+- =[cite/na/b:@rose-2019-pybliom]= :: [cite/na/b:@rose-2019-pybliom]
+- =[cite/na:@rose-2019-pybliom]= :: [cite/na:@rose-2019-pybliom]
+- =[cite/nocite:@rose-2019-pybliom]= :: [cite/nocite:@rose-2019-pybliom]
+- =[cite/t/b:@rose-2019-pybliom]= :: [cite/t/b:@rose-2019-pybliom]
+- =[cite/t/f:@rose-2019-pybliom]= :: [cite/t/f:@rose-2019-pybliom]
+- =[cite/t/bf:@rose-2019-pybliom]= :: [cite/t/bf:@rose-2019-pybliom]
+- =[cite/t/c:@rose-2019-pybliom]= :: [cite/t/c:@rose-2019-pybliom]
+- =[cite/t/cf:@rose-2019-pybliom]= :: [cite/t/cf:@rose-2019-pybliom]
+- =[cite/t/bc:@rose-2019-pybliom]= :: [cite/t/bc:@rose-2019-pybliom]
+- =[cite/t/bcf:@rose-2019-pybliom]= :: [cite/t/bcf:@rose-2019-pybliom]
+- =[cite//b:@rose-2019-pybliom]= :: [cite//b:@rose-2019-pybliom]
+- =[cite//bf:@rose-2019-pybliom]= :: [cite//bf:@rose-2019-pybliom]
+- =[cite//bc:@rose-2019-pybliom]= :: [cite//bc:@rose-2019-pybliom]
+- =[cite//bcf:@rose-2019-pybliom]= :: [cite//bcf:@rose-2019-pybliom]
+- =[cite//f:@rose-2019-pybliom]= :: [cite//f:@rose-2019-pybliom]
+- =[cite//c:@rose-2019-pybliom]= :: [cite//c:@rose-2019-pybliom]
+- =[cite//cf:@rose-2019-pybliom]= :: [cite//cf:@rose-2019-pybliom]
+- =[cite/num:@rose-2019-pybliom]= :: [cite/num:@rose-2019-pybliom]
