@@ -20,13 +20,12 @@ This directory contains oc-bibtex.el (which I may rename to something like org-r
 
 This document on its own is not as useful as the video that shows how I used it. You can see a video of this in action here: https://www.youtube.com/watch?v=4ta4J20kpmM
 
-cite:huo-2019-semi-super
 
 * setup
 
 Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded paths that you will have to adjust for where you have these.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results silent
 (use-package ivy-bibtex
   :init
   (setq bibtex-completion-bibliography '("/Users/jkitchin/Dropbox/emacs/scimax/org-ref3/org-ref-cite.bib")
@@ -42,7 +41,7 @@ Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded pa
 	  (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
 	bibtex-completion-pdf-open-function
 	(lambda (fpath)
-	  (call-process "open" nil 0 nil fpath)))))
+	  (call-process "open" nil 0 nil fpath))))
 
 (use-package citeproc)
 
@@ -65,16 +64,19 @@ Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded pa
 				(t (basic numeric))))
 
   (define-key org-mode-map (kbd "C-c \\") 'org-cite-insert))
+
+
+(setq  flyspell-duplicate-distance 0
+       flyspell-mark-duplications-flag nil
+       warning-minimum-level :error)
 #+END_SRC
 
-#+RESULTS:
+* Examples of usage
 
-
-* Examples
 
 ** Basic insertion
 
-I use C-c \ to insert a citation: [cite/t:@rose-2019-pybliom].
+I use C-c \ to insert a citation: [cite/t:@rose-2019-pybliom]
 
 The default cite type I use is cite/t, which I recommend to avoid conflicts with the cite links of org-ref. At the moment, org-mode will recognize a bare citation as an org link if you have installed org-ref.
 
@@ -85,13 +87,13 @@ With a single prefix arg, you will be prompted to choose a reference and a style
 With ivy-bibtex open, you have these default options for making multiple insertions:
 
 | C-M-m | insert current entry and stay open on current entry |
-| C-M-n | insert current entry and goto next                  |
-| C-M-p | insert current entry and goto previous entry        |
-| C-M-o | act on current entry with alternate action   |
+| C-M-n | insert current entry and go to next                 |
+| C-M-p | insert current entry and go to previous entry       |
+| C-M-o | act on current entry with alternate action          |
 
 Or, you can type C-o to get to the hydra menu of actions for ivy. Then, you can press m to mark entries, and finally press RET to insert them.
 
-Scimax offers the following "enhancements" that are inspired from keybindings in running src blocks.
+Scimax offers the following "enhancements" that are inspired from keybindings in running src blocks (these should work in all ivy commands).
 
 | C-RET | insert current entry and continue                                     |
 | S-RET | insert current entry and next (or with prefix arg the previous) entry |
@@ -101,9 +103,9 @@ Scimax offers the following "enhancements" that are inspired from keybindings in
 | C-s   | show marked entries                                                   |
 
 
-There are two kinds of tooltips on citations. If you hover over the style portion, you will see how the citation is rendered in full. If you hover over a citation-reference key, you will see the bibliographic information for that key.
+There are two kinds of tooltips on citations. If you hover over the style portion, you will see how the citation is rendered in export. If you hover over a citation-reference key, you will see the bibliographic information for that key.
 
-[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal;]
+[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal;@kitchin-2018-machin-learn-catal;]
 
 ** Inserting on an existing citation
 
@@ -179,6 +181,7 @@ If you do not want a bibliography printed, but still want a pdf, you use =#+prin
 
 # This is where the bibliography will be printed in your document
 #+print_bibliography:
+
 
 
 * What is left?
