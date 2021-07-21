@@ -381,12 +381,14 @@ If at the end, use `org-end-of-line' instead."
 Argument CITATION is an org-element holding the references."
   (org-cite-basic-activate citation)
   (pcase-let ((`(,beg . ,end) (org-cite-boundaries citation)))
+    ;; Put the keymap on a citation
     (put-text-property beg end 'keymap oc-bibtex-keymap)
+
+    ;; put a rendered tooltip on the style part. Note that this assumes a latex
+    ;; export.
     (put-text-property
      beg (1- (org-with-point-at beg (search-forward ":")))
      'help-echo (org-trim (org-export-string-as (buffer-substring beg end) 'latex t)))))
-
-
 
 
 ;; * Inserting
