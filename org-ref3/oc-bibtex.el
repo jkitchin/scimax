@@ -166,17 +166,20 @@ ELEMENT is the element at point."
       (otherwise t))))
 
 (advice-add 'org--flyspell-object-check-p :override 'oc-bibtex--flyspell-object-check-p)
+;; (advice-remove 'org--flyspell-object-check-p 'oc-bibtex--flyspell-object-check-p)
+
 
 ;; This does not reliably do what I want, and I don't understand why. Maybe org
 ;; is doing some check elsewhere and not just relying on the predicate function.
 ;; (defun oc-bibtex-flyspell-predicate ()
 ;;   "Predicate function to ignore flyspell on citations."
 ;;   (interactive)
-;;   (and (org-mode-flyspell-verify)
-;;        (not (memq (org-element-type (org-element-context)) '(citation citation-reference)))))
+;;   (and (not (memq (org-element-type (org-element-context)) '(citation citation-reference)))
+;;        (org-mode-flyspell-verify)))
 
 
 ;; (put 'org-mode 'flyspell-mode-predicate 'oc-bibtex-flyspell-predicate)
+;; (get 'org-mode 'flyspell-mode-predicate)
 
 ;; * Navigation functions
 ;; There can be some subtle failures when there are duplicate keys sometimes.
