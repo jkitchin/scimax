@@ -1,4 +1,4 @@
-#+title: org-cite with org-ref (sort of)
+#+title: org-cite with org-ref
 #+options: toc:nil
 
 #+latex_header: \usepackage{bibentry}
@@ -8,8 +8,8 @@
 This directory contains oc-bibtex.el (which I may rename to something like org-ref-cite.el if it is confusing). It is a setup derived from oc-natbib.el that is more similar to what I am used to with org-ref. The features include:
 
 1. Use ivy-bibtex to insert references
-2. cite styles that look more like natbib (see [[*Do we need to make cites look more like the LaTeX styles?]])
-3. cites are green similar to how they are in org-ref.
+2. cite styles that are as consistent with oc-csl as feasible
+3. cites are green similar to how they are in org-ref
 4. flyspell should ignore cites
 5. Navigation functions for moving around in cites
 6. Editing functions for manipulating cites (shifting the order, sorting, deleting, copying, etc)
@@ -20,15 +20,17 @@ This directory contains oc-bibtex.el (which I may rename to something like org-r
 
 This document on its own is not as useful as the video that shows how I used it. You can see a video of this in action here: https://www.youtube.com/watch?v=4ta4J20kpmM
 
+cite:huo-2019-semi-super
+
 * setup
 
 Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded paths that you will have to adjust for where you have these.
-[cite/t:@rose-2019-pybliom]
+
 #+BEGIN_SRC emacs-lisp
 (use-package ivy-bibtex
   :init
   (setq bibtex-completion-bibliography '("/Users/jkitchin/Dropbox/emacs/scimax/org-ref3/org-ref-cite.bib")
-	bibtex-completion-notes-path "~/Dropbox/emacs/bibliography/notes/"
+	bibtex-completion-notes-path "/Users/jkitchin/Dropbox/emacs/scimax/org-ref3/notes"
 	bibtex-completion-notes-template-multiple-files "#+TITLE: Notes on: ${author-or-editor} (${year}): ${title}\n\nSee [cite/t:@${=key=}]\n"
 	bibtex-completion-library-path '("/Users/jkitchin/Dropbox/emacs/bibliography/bibtex-pdfs/")
 	bibtex-completion-additional-search-fields '(keywords)
@@ -37,13 +39,12 @@ Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded pa
 	  (inbook        . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} Chapter ${chapter:32}")
 	  (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
 	  (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
-	  (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))))
-
-
+	  (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
+	bibtex-completion-pdf-open-function
+	(lambda (fpath)
+	  (call-process "open" nil 0 nil fpath)))))
 
 (use-package citeproc)
-
-
 
 (use-package org-cite
   :load-path "/Users/jkitchin/Dropbox/emacs/tests/org-mode-git/lisp"
@@ -53,11 +54,13 @@ Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded pa
   (require 'doi-utils) ;; this is in org-ref still
   (setq
    org-cite-global-bibliography bibtex-completion-bibliography
+   ;; https://github.com/citation-style-language/styles
+   ;; or https://www.zotero.org/styles
    org-cite-csl-styles-dir "/Users/jkitchin/Dropbox/emacs/scimax/org-ref3/csl-styles"
    org-cite-insert-processor 'bibtex
    org-cite-follow-processor 'bibtex
    org-cite-activate-processor 'bibtex
-   org-cite-export-processors '((html csl)
+   org-cite-export-processors '((html csl "chicago-author-date-16th-edition.csl")
 				(latex bibtex)
 				(t (basic numeric))))
 
@@ -65,15 +68,7 @@ Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded pa
 #+END_SRC
 
 #+RESULTS:
-: t
 
-** Do we need to make cites look more like the LaTeX styles?
-
-This library is primarily written for writing scientific papers that use bibtex (not biblatex) and natbib. The ultimate goal is eventually a LaTeX file that will be submitted to publishers. I think it is better to stay close to the way these files will look, and not to have mentally map a universal style to the natbib commands. I could be wrong about this.
-
-Bruce D'Arcus suggested that we could show translations in the insert and as tooltips on the cites to ease the burden. This has potential indeed.
-
-A general limitation (that is more extreme for biblatex) is the generic, cross-exporter styles do not fully map onto the capabilities of natbib and biblatex. So, if we define styles here that provide full coverage of those, they will not be portable to CSL for example. Similarly, if we define styles here that more closely resemble the natbib commands, they will not be compatible with the ones defined in CSL (at least not without some additional mapping).
 
 * Examples
 
@@ -81,26 +76,47 @@ A general limitation (that is more extreme for biblatex) is the generic, cross-e
 
 I use C-c \ to insert a citation: [cite/t:@rose-2019-pybliom].
 
- default cite type I use is cite/t, which I recommend to avoid conflicts with the cite links of org-ref. At the moment, org-mode will recognize a bare citation as an org link if you have installed org-ref.
+The default cite type I use is cite/t, which I recommend to avoid conflicts with the cite links of org-ref. At the moment, org-mode will recognize a bare citation as an org link if you have installed org-ref.
+
+With a single prefix arg, you will be prompted to choose a reference and a style.
 
 ** Multiple insertions
 
-With ivy-bibtex open, you type C-M-m to insert the current candidate, keeping ivy open to select another candidate. Remember to press RET to select the last one and exit, or just type C-g.
+With ivy-bibtex open, you have these default options for making multiple insertions:
 
-[cite/t:@rose-2019-pybliom;@kitchin-2015-examp-effec]
+| C-M-m | insert current entry and stay open on current entry |
+| C-M-n | insert current entry and goto next                  |
+| C-M-p | insert current entry and goto previous entry        |
+| C-M-o | act on current entry with alternate action   |
+
+Or, you can type C-o to get to the hydra menu of actions for ivy. Then, you can press m to mark entries, and finally press RET to insert them.
+
+Scimax offers the following "enhancements" that are inspired from keybindings in running src blocks.
+
+| C-RET | insert current entry and continue                                     |
+| S-RET | insert current entry and next (or with prefix arg the previous) entry |
+| M-RET | alternate action on current entry and continue                        |
+| s-RET | quit with no action (and no beep like C-g)                            |
+| M-TAB | mark current entry                                                    |
+| C-s   | show marked entries                                                   |
+
+
+There are two kinds of tooltips on citations. If you hover over the style portion, you will see how the citation is rendered in full. If you hover over a citation-reference key, you will see the bibliographic information for that key.
+
+[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal;]
 
 ** Inserting on an existing citation
 
 If your point is on a citation the following rules apply:
+
 1. If you are at the beginning of a reference, insert before it.   [cite/t:@rose-2019-pybliom]
 2. If you are the end of a reference, insert after it. [cite/t:@rose-2019-pybliom]
 3. If you are in a reference, replace it. [cite/t:@rose-2019-pybliom]
-4. If you are in the style part, insert at beginning. [cite/t:@rose-2019-pybliom]
+4. If you are in the style part, insert at the beginning. [cite/t:@rose-2019-pybliom]
 
-You can select the style for a new cite if you use a prefix arg with the insert cite command.  [cite/t:@rose-2019-pybliom]
+You can select the style for a new cite if you use a prefix arg with the insert cite command.
 
-You can delete a cite with a double prefix arg on the insert cite command. If point is on a reference, it will delete the reference, and if it is in the style part it will delete the whole citation.
-
+You can delete a cite with a double prefix arg on the insert cite command. If point is on a reference, it will delete the reference, and if it is in the style part it will delete the whole citation. See also [[*Editing the citation at point]].
 
 ** Following a citation
 
@@ -123,6 +139,8 @@ There are many ways you might want to edit a citation. In addition to the ways y
 - M-s to update the style
 
 [cite/t:@rose-2019-pybliom; @kitchin-2018-machin-learn-catal;]
+
+Check out the tooltips with prefix/suffix text: [cite/t:This is before @rose-2019-pybliom and after;]
 
 ** Navigation
 
@@ -163,9 +181,6 @@ If you do not want a bibliography printed, but still want a pdf, you use =#+prin
 #+print_bibliography:
 
 
-
-
-
 * What is left?
 
 1. So far this only handles citations. I am planning to add something like org-ref-crossref.el to handle the ref and label links.
@@ -175,39 +190,39 @@ If you do not want a bibliography printed, but still want a pdf, you use =#+prin
 
 
 Not all of the natbib or biblatex cite commands are supported.
-- citenum is supported in oc-bibtex, but it doesn't seem to have a general style in other exporters
+- I am not sure if citenum is supported in other exporters
 - citetext doesn't currently seem possible because it doesn't use a key
 - =\\nocite{*}= also does not currently seem possible for the same reason
 
 * testing the styles
+
 #+BEGIN_SRC emacs-lisp :results org raw
 (cl-loop for (s . cmd) in oc-bibtex-styles concat
-	 (format "- =[cite/%s:@rose-2019-pybliom]= :: [cite/%s:@rose-2019-pybliom]\n" s s))
+	 (format "- =[cite/%s:@rose-2019-pybliom]= (%s) [cite/%s:@rose-2019-pybliom]\n" s (substring cmd 1) s))
 #+END_SRC
 
 #+RESULTS:
-- =[cite/t:@rose-2019-pybliom]= :: [cite/t:@rose-2019-pybliom]
-- =[cite/p:@rose-2019-pybliom]= :: [cite/p:@rose-2019-pybliom]
-- =[cite/num:@rose-2019-pybliom]= :: [cite/num:@rose-2019-pybliom]
-- =[cite/a:@rose-2019-pybliom]= :: [cite/a:@rose-2019-pybliom]
-- =[cite/a/f:@rose-2019-pybliom]= :: [cite/a/f:@rose-2019-pybliom]
-- =[cite/a/c:@rose-2019-pybliom]= :: [cite/a/c:@rose-2019-pybliom]
-- =[cite/a/cf:@rose-2019-pybliom]= :: [cite/a/cf:@rose-2019-pybliom]
-- =[cite/na/b:@rose-2019-pybliom]= :: [cite/na/b:@rose-2019-pybliom]
-- =[cite/na:@rose-2019-pybliom]= :: [cite/na:@rose-2019-pybliom]
-- =[cite/nocite:@rose-2019-pybliom]= :: [cite/nocite:@rose-2019-pybliom]
-- =[cite/t/b:@rose-2019-pybliom]= :: [cite/t/b:@rose-2019-pybliom]
-- =[cite/t/f:@rose-2019-pybliom]= :: [cite/t/f:@rose-2019-pybliom]
-- =[cite/t/bf:@rose-2019-pybliom]= :: [cite/t/bf:@rose-2019-pybliom]
-- =[cite/t/c:@rose-2019-pybliom]= :: [cite/t/c:@rose-2019-pybliom]
-- =[cite/t/cf:@rose-2019-pybliom]= :: [cite/t/cf:@rose-2019-pybliom]
-- =[cite/t/bc:@rose-2019-pybliom]= :: [cite/t/bc:@rose-2019-pybliom]
-- =[cite/t/bcf:@rose-2019-pybliom]= :: [cite/t/bcf:@rose-2019-pybliom]
-- =[cite//b:@rose-2019-pybliom]= :: [cite//b:@rose-2019-pybliom]
-- =[cite//bf:@rose-2019-pybliom]= :: [cite//bf:@rose-2019-pybliom]
-- =[cite//bc:@rose-2019-pybliom]= :: [cite//bc:@rose-2019-pybliom]
-- =[cite//bcf:@rose-2019-pybliom]= :: [cite//bcf:@rose-2019-pybliom]
-- =[cite//f:@rose-2019-pybliom]= :: [cite//f:@rose-2019-pybliom]
-- =[cite//c:@rose-2019-pybliom]= :: [cite//c:@rose-2019-pybliom]
-- =[cite//cf:@rose-2019-pybliom]= :: [cite//cf:@rose-2019-pybliom]
-- =[cite/num:@rose-2019-pybliom]= :: [cite/num:@rose-2019-pybliom]
+- =[cite/t:@rose-2019-pybliom]= (cite) [cite/t:@rose-2019-pybliom]
+- =[cite/p:@rose-2019-pybliom]= (citep) [cite/p:@rose-2019-pybliom]
+- =[cite/num:@rose-2019-pybliom]= (citenum) [cite/num:@rose-2019-pybliom]
+- =[cite/a:@rose-2019-pybliom]= (citeauthor) [cite/a:@rose-2019-pybliom]
+- =[cite/a/f:@rose-2019-pybliom]= (citeauthor*) [cite/a/f:@rose-2019-pybliom]
+- =[cite/a/c:@rose-2019-pybliom]= (Citeauthor) [cite/a/c:@rose-2019-pybliom]
+- =[cite/a/cf:@rose-2019-pybliom]= (Citeauthor*) [cite/a/cf:@rose-2019-pybliom]
+- =[cite/na/b:@rose-2019-pybliom]= (citeyear) [cite/na/b:@rose-2019-pybliom]
+- =[cite/na:@rose-2019-pybliom]= (citeyearpar) [cite/na:@rose-2019-pybliom]
+- =[cite/nocite:@rose-2019-pybliom]= (nocite) [cite/nocite:@rose-2019-pybliom]
+- =[cite/t/b:@rose-2019-pybliom]= (citealt) [cite/t/b:@rose-2019-pybliom]
+- =[cite/t/f:@rose-2019-pybliom]= (citet*) [cite/t/f:@rose-2019-pybliom]
+- =[cite/t/bf:@rose-2019-pybliom]= (citealt*) [cite/t/bf:@rose-2019-pybliom]
+- =[cite/t/c:@rose-2019-pybliom]= (Citet) [cite/t/c:@rose-2019-pybliom]
+- =[cite/t/cf:@rose-2019-pybliom]= (Citet*) [cite/t/cf:@rose-2019-pybliom]
+- =[cite/t/bc:@rose-2019-pybliom]= (Citealt) [cite/t/bc:@rose-2019-pybliom]
+- =[cite/t/bcf:@rose-2019-pybliom]= (Citealt*) [cite/t/bcf:@rose-2019-pybliom]
+- =[cite//b:@rose-2019-pybliom]= (citealp) [cite//b:@rose-2019-pybliom]
+- =[cite//bf:@rose-2019-pybliom]= (citealp*) [cite//bf:@rose-2019-pybliom]
+- =[cite//bc:@rose-2019-pybliom]= (Citealp) [cite//bc:@rose-2019-pybliom]
+- =[cite//bcf:@rose-2019-pybliom]= (Citealp*) [cite//bcf:@rose-2019-pybliom]
+- =[cite//f:@rose-2019-pybliom]= (citep*) [cite//f:@rose-2019-pybliom]
+- =[cite//c:@rose-2019-pybliom]= (Citep) [cite//c:@rose-2019-pybliom]
+- =[cite//cf:@rose-2019-pybliom]= (Citep*) [cite//cf:@rose-2019-pybliom]
