@@ -18,8 +18,10 @@ This directory contains oc-bibtex.el (which I may rename to something like org-r
 9. A bibliographystyle keyword
 10. Customizable print_bibliography keyword to enable nobibliography
 
-This document on its own is not as useful as the video that shows how I used it. You can see a video of this in action here: https://www.youtube.com/watch?v=4ta4J20kpmM
+This document on its own is not as useful as the video that shows how I used it. You can see a video of this in action here:
 
+Version 1: https://www.youtube.com/watch?v=4ta4J20kpmM
+Version 2: https://www.youtube.com/watch?v=3TBYg1MZ6iY
 
 * setup
 
@@ -80,7 +82,7 @@ I use C-c \ to insert a citation: [cite/t:@rose-2019-pybliom]
 
 The default cite type I use is cite/t, which I recommend to avoid conflicts with the cite links of org-ref. At the moment, org-mode will recognize a bare citation as an org link if you have installed org-ref.
 
-With a single prefix arg, you will be prompted to choose a reference and a style.
+With a single prefix arg, you will be prompted to choose a reference and a style. [cite/num:@rose-2019-pybliom]
 
 ** Multiple insertions
 
@@ -90,6 +92,8 @@ With ivy-bibtex open, you have these default options for making multiple inserti
 | C-M-n | insert current entry and go to next                 |
 | C-M-p | insert current entry and go to previous entry       |
 | C-M-o | act on current entry with alternate action          |
+
+[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal]
 
 Or, you can type C-o to get to the hydra menu of actions for ivy. Then, you can press m to mark entries, and finally press RET to insert them.
 
@@ -102,6 +106,7 @@ Scimax offers the following "enhancements" that are inspired from keybindings in
 | M-TAB | mark current entry                                                    |
 | C-s   | show marked entries                                                   |
 
+[cite/t:@rose-2019-pybliom;@kitchin-2015-examp-effec]
 
 There are two kinds of tooltips on citations. If you hover over the style portion, you will see how the citation is rendered in export. If you hover over a citation-reference key, you will see the bibliographic information for that key.
 
@@ -111,10 +116,10 @@ There are two kinds of tooltips on citations. If you hover over the style portio
 
 If your point is on a citation the following rules apply:
 
-1. If you are at the beginning of a reference, insert before it.   [cite/t:@rose-2019-pybliom]
-2. If you are the end of a reference, insert after it. [cite/t:@rose-2019-pybliom]
-3. If you are in a reference, replace it. [cite/t:@rose-2019-pybliom]
-4. If you are in the style part, insert at the beginning. [cite/t:@rose-2019-pybliom]
+1. If you are at the beginning of a reference, insert before it.   [cite/t:@kitchin-2018-machin-learn-catal;@rose-2019-pybliom]
+2. If you are the end of a reference, insert after it. [cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal]
+3. If you are in a reference, replace it. [cite/t:@kitchin-2018-machin-learn-catal]
+4. If you are in the style part, insert at the beginning. [cite/num:@kitchin-2018-machin-learn-catal;]
 
 You can select the style for a new cite if you use a prefix arg with the insert cite command.
 
@@ -124,10 +129,7 @@ You can delete a cite with a double prefix arg on the insert cite command. If po
 
 You follow a citation by clicking on it, pressing RET on it, or C-c C-o on it. All of these open a hydra that has many other actions you can choose for the citation or reference at point, unless you are on the style part of the cite, then you will be prompted for a reference to act on.
 
-[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal;]
-
-Another way to insert multiple references is to type C-o in ivy-bibtex, and then you can mark entries by pressing m. When done press RET to add them all at once.
-
+[cite/num:@kitchin-2018-machin-learn-catal;@rose-2019-pybliom;]
 
 ** Editing the citation at point
 
@@ -140,7 +142,7 @@ There are many ways you might want to edit a citation. In addition to the ways y
 - M-p will prompt you for prefix text and suffix text for the reference at point.
 - M-s to update the style
 
-[cite/t:@rose-2019-pybliom; @kitchin-2018-machin-learn-catal;]
+[cite/t:See @rose-2019-pybliom Ch. 5;]
 
 Check out the tooltips with prefix/suffix text: [cite/t:This is before @rose-2019-pybliom and after;]
 
@@ -190,7 +192,7 @@ If you do not want a bibliography printed, but still want a pdf, you use =#+prin
 2. This still relies on some functions in org-ref (mostly related to DOIs from
    doi-utils.el). I will probably move these here.
 
-
+[cite/t:@rose-2019-pybliom]
 
 Not all of the natbib or biblatex cite commands are supported.
 - I am not sure if citenum is supported in other exporters
