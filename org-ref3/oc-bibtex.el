@@ -740,13 +740,15 @@ Optional argument DATUM The element at point."
   (interactive)
   (if (eq 'citation-reference (org-element-type datum))
       (oc-bibtex-citation-reference/body)
-    ;; at style part.
-    (let* ((refs (org-cite-get-references datum))
-	   (keys (mapcar (lambda (ref) (org-element-property :key ref)) refs))
-	   (key (completing-read "Key: " keys)))
-      (search-forward (concat "@" key))
-      (goto-char (match-beginning 0))
-      (oc-bibtex-citation-reference/body))))
+    ;; at style part or end part
+    (if (= (point) (org-element-property :end datum))
+	( org-return)
+      (let* ((refs (org-cite-get-references datum))
+	     (keys (mapcar (lambda (ref) (org-element-property :key ref)) refs))
+	     (key (completing-read "Key: " keys)))
+	(search-forward (concat "@" key))
+	(goto-char (match-beginning 0))
+	(oc-bibtex-citation-reference/body)))))
 
 ;; * Exporting
 
