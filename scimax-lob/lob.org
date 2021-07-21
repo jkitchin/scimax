@@ -575,3 +575,33 @@ Fraga.  It was modified slightly by Tom Dye.
 
 - ob-oz.el, by Torsten Anders and Eric Schulte
 - ob-fomus.el, by Torsten Anders
+
+
+
+
+* Names, captions and attributes
+
+#+name: attributes
+#+BEGIN_SRC emacs-lisp :var name="" :var caption="" :var attr="" :var data="" :results value
+(concat
+ (if (string= "" attr) "" (concat attr "\n"))
+ (if (string= "" name) "" (format "#+name: %s\n" name))
+ (if (string= "" caption) "" (format "#+caption: %s\n" caption))
+ (if (string= "" data) *this* data))
+#+END_SRC
+
+
+
+Here we have a block that outputs a latex string, for example.
+
+#+BEGIN_SRC emacs-lisp :results value drawer :post attributes(name="eq-lab", caption="This is an equation", attr="#+attr_org: :width 300")
+"$\int_0^2 e^x dx$"
+#+END_SRC
+
+#+RESULTS:
+:results:
+#+attr_org: :width 300
+#+name: eq-lab
+#+caption: This is an equation
+$int_0^2 e^x dx$
+:end:
