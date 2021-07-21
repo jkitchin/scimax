@@ -176,15 +176,18 @@ Defaults to citet"
 			     (org-element-property :parent datum)))
 	 (current-ref (when (eq 'citation-reference (org-element-type datum)) datum))
 	 (refs (org-cite-get-references current-citation))
-	 (index (when current-ref (seq-position refs current-ref
-						(lambda (r1 r2)
-						  (= (org-element-property :begin r1)
-						     (org-element-property :begin r2)))))))
+	 (index (when current-ref (seq-position
+				   refs current-ref
+				   (lambda (r1 r2)
+				     (= (org-element-property :begin r1)
+					(org-element-property :begin r2)))))))
     (cond
      ;; not found or on style part
      ((or (= index 0) (null index))
       (when (re-search-backward "\\[cite" nil t 2)
-	(goto-char (org-element-property :begin (car (last (org-cite-get-references (org-element-context))))))))
+	(goto-char (org-element-property
+		    :begin
+		    (car (last (org-cite-get-references (org-element-context))))))))
 
      (t
       (goto-char (org-element-property :begin (nth (max (- index 1) 0) refs)))))))
@@ -412,7 +415,8 @@ This is called by `org-cite-insert'."
 			  (oc-bibtex-insert-citation
 			   (cdr (assoc "=key=" (cdr candidate))) arg)))))
 
-   ;; Here you are either updating the style, or inserting a new ref with a selected style.
+   ;; Here you are either updating the style, or inserting a new ref with a
+   ;; selected style.
    ((= (prefix-numeric-value  arg) 4)
     (if context
 	(oc-bibtex-update-style)
