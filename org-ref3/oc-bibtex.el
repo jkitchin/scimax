@@ -344,6 +344,12 @@ If at the end, use `org-end-of-line' instead."
 
 ;; * Keymap
 
+(defun oc-bibtex-describe-keymap ()
+  "Describe the keymap"
+  (interactive)
+  (describe-keymap oc-bibtex-keymap))
+
+
 (defcustom oc-bibtex-keymap
   (let ((map (copy-keymap org-mouse-map)))
     (define-key map (kbd "C-<right>") 'oc-bibtex-next-reference)
@@ -353,18 +359,14 @@ If at the end, use `org-end-of-line' instead."
     (define-key map (kbd "S-<up>") 'oc-bibtex-sort-year-ascending)
     (define-key map (kbd "C-a") 'oc-bibtex-goto-cite-beginning)
     (define-key map (kbd "C-e") 'oc-bibtex-goto-cite-end)
-    (define-key map (kbd "C-d") (lambda ()
-				  (interactive)
-				  (org-cite-delete-citation (org-element-context))))
+    (define-key map (kbd "C-d") 'oc-bibtex-delete)
+    (define-key map (kbd "C-/") 'oc-bibtex-describe-keymap)
     (define-key map (kbd "C-k") 'oc-bibtex-kill-cite)
     (define-key map (kbd "M-w") 'oc-bibtex-copy-cite)
     (define-key map (kbd "M-m") 'oc-bibtex-mark-cite)
     (define-key map (kbd "M-s") 'oc-bibtex-update-style)
     (define-key map (kbd "M-p") 'oc-bibtex-update-pre/post)
-
-    (define-key map (kbd "RET") (lambda ()
-				  (interactive)
-				  (oc-bibtex-follow (org-element-context))))
+    (define-key map (kbd "RET") 'oc-bibtex-follow)
 
     map)
   "A keymap for cite objects.")
@@ -739,6 +741,7 @@ Argument ARG prefix arg."
   "Follow function consistent with the org-cite API.
 Optional argument DATUM The element at point."
   (interactive)
+  (when (null datum) (setq datum (org-element-context)))
   (if (eq 'citation-reference (org-element-type datum))
       (oc-bibtex-citation-reference/body)
     ;; at style part or end part
