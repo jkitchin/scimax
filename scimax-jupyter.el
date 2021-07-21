@@ -78,6 +78,18 @@
 	(:tangle . "no")
 	(:eval . "never-export")))
 
+(setq org-babel-default-header-args:jupyter-julia
+      '((:results . "value")
+	(:session . "jupyter")
+	(:kernel . "julia-1.6")
+	(:pandoc . t)
+	(:exports . "both")
+	(:cache .   "no")
+	(:noweb . "no")
+	(:hlines . "no")
+	(:tangle . "no")
+	(:eval . "never-export")))
+
 
 (add-to-list 'org-babel-load-languages '(jupyter . t) t)
 
