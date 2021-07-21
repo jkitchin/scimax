@@ -43,48 +43,51 @@
 (set-face-attribute 'org-cite-key nil
                     :foreground "forest green")
 
+
 ;; org-cite uses (style . option) for styles, but that is more complicated than
-;; I need. I use simple strings here. That will make some of these not
-;; compatible with things like csl, but this library is pretty specific for
-;; scientific papers, so for now it is ok with me.
+;; I need. I use simple strings here.
 (defcustom oc-bibtex-styles
   '(;; In principle, this should map to \citet, but we use natmove alot, and it
     ;; only works on \cite. So, I am making it be \cite here.
     ("t" . "\\cite")
     ("p" . "\\citep")
-    ("num" . "\\citenum")
-    ("author" . "\\citeauthor")
-    ;; We can't use * in the style, so I spell it out here
-    ("author-star" . "\\citeauthor*")
-    ;; I use capitalization on Author to mean the capitalized version of \Cite
-    ("Author" . "\\Citeauthor")
-    ("Author-star" . "\\Citeauthor*")
-    ("year" . "\\citeyear")
-    ("yearpar" . "\\citeyearpar")
+    ("num" . "\\citenum")  		;this may not be csl compatible
+    ("a" . "\\citeauthor")
+    ("a/f" . "\\citeauthor*")
+    ("a/c" . "\\Citeauthor")
+    ("a/cf" . "\\Citeauthor*")
+    ;; Suppress author
+    ("na/b" . "\\citeyear")
+    ("na" . "\\citeyearpar")
     ("nocite" . "\\nocite")
-    ("t-star" . "\\citet*")
-    ("T" . "\\Citet")
-    ("T-star" . "\\Citet*")
-    ("alt" . "\\citealt")
-    ("alt-star" . "\\citealt*")
-    ("Alt" . "\\Citealt")
-    ("Alt-star" . "\\Citealt*")
-    ("alp" . "\\citealp")
-    ("alp-star" . "\\citealp*")
-    ("Alp" . "\\Citealp")
-    ("Alp-star" . "\\Citealp*")
-    ("p-star" . "\\citep*")
-    ("P" . "\\Citep")
-    ("P-star" . "\\Citep*")
-    ;; I am not sure this will work, citetext doesnt take a key.
-    ;; ("text" . "\\citetext")
-
-    ;; note with these alias commands you have to define the alias before,
-    ;; e.g. \defcitealias{key}{alias}
-    ("talias" . "\\citetalias")
-    ("palias" . "\\citepalias"))
+    ;; text styles
+    ("t/b" . "\\citealt")
+    ("t/f" . "\\citet*")
+    ("t/bf" . "\\citealt*")
+    ("t/c" . "\\Citet")
+    ("t/cf" . "\\Citet*")
+    ("t/bc" . "\\Citealt")
+    ("t/bcf" . "\\Citealt*")
+    ;; bare styles
+    ("/b" . "\\citealp")
+    ("/bf" . "\\citealp*")
+    ("/bc" . "\\Citealp")
+    ("/bcf" . "\\Citealp*")
+    ("/f" . "\\citep*")
+    ("/c" . "\\Citep")
+    ("/cf" . "\\Citep*"))
   "Styles for natbib citations.
-See http://tug.ctan.org/macros/latex/contrib/natbib/natnotes.pdf")
+See http://tug.ctan.org/macros/latex/contrib/natbib/natnotes.pdf
+
+\citetext is not supported as it does not use a key, and doesn't
+seem to do anything in the bibliography. citetalias and
+citepalias are also not supported. Otherwise I think this covers
+the natbib types, and these styles are compatible with csl styles
+that look similar.
+
+`oc-natbib.el' chooses \citep as default. This library uses
+\citet because it is more common in the scientific writing of the
+author.")
 
 
 (defcustom oc-bibtex-alternate-insert-actions
