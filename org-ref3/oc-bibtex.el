@@ -548,7 +548,7 @@ Argument ARG prefix arg."
 	(format "[cite%s:%s]"
 		;; this is the style. with arg, choose it
 		(if arg
-		    (concat "/" (completing-read "Style: " (mapcar 'car oc-bibtex-styles)))
+		    (concat "/" (oc-bibtex-ivy-select-style))
 		  "/t")
 		(concat "@" select-key)))))))
 
@@ -934,9 +934,9 @@ You can use a :numbered option to set if the Bibliography section should be numb
 
     (concat
      (and style (format "\\bibliographystyle{%s}\n" style))
-     (and bibtitle (format "\\renewcommand{\\bibsection}{\\section%s{%s}}\n"
-			   (if numbered  "" "*")
-			   (org-strip-quotes bibtitle)))
+     (format "\\renewcommand{\\bibsection}{\\section%s{%s}}\n"
+	     (if numbered  "" "*")
+	     (if bibtitle (org-strip-quotes bibtitle) "References"))
      (format "\\%s{%s}"
 	     bibcmd
              (mapconcat #'file-name-sans-extension
