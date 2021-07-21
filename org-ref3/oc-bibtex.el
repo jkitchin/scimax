@@ -498,7 +498,15 @@ Argument ARG prefix arg."
 
 
 ;; * Following
-;; These need to be more robust. It is implied you are on a reference, butI don't check this.
+
+
+(defun oc-bibtex-copy-formatted-reference ()
+  "Copy a formatted version of the reference at point."
+  (interactive)
+  (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
+    (kill-new (bibtex-completion-apa-format-reference (org-element-property
+						       :key (org-element-context))))))
+
 
 (defun oc-bibtex-info ()
   "Show information about the element at point."
@@ -509,25 +517,42 @@ Argument ARG prefix arg."
 (defun oc-bibtex-open-pdf ()
   "Open the pdf of the reference at point (if it exists)."
   (interactive)
-  (bibtex-completion-open-pdf (list (org-element-property :key (org-element-context)))))
+  (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
+    (bibtex-completion-open-pdf (list (org-element-property
+				       :key (org-element-context))))))
 
 
 (defun oc-bibtex-open-url-or-doi ()
   "Open the url or doi of a reference if it exists."
   (interactive)
-  (bibtex-completion-open-url-or-doi (list (org-element-property :key (org-element-context)))))
+  (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
+    (bibtex-completion-open-url-or-doi (list (org-element-property
+					      :key (org-element-context))))))
 
 
 (defun oc-bibtex-show-entry ()
   "Open the entry for the reference at point."
   (interactive)
-  (bibtex-completion-show-entry (list (org-element-property :key (org-element-context)))))
+  (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
+    (bibtex-completion-show-entry (list (org-element-property
+					 :key (org-element-context))))))
 
 
 (defun oc-bibtex-open-notes ()
   "Open the notes for the reference at point."
   (interactive)
-  (bibtex-completion-edit-notes (list (org-element-property :key (org-element-context)))))
+  (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
+    (bibtex-completion-edit-notes (list (org-element-property
+					 :key (org-element-context))))))
+
+
+(defun oc-bibtex-open-notes-other-frame ()
+  "Open the notes for the reference at point in another frame."
+  (interactive)
+  (with-selected-frame (make-frame)
+    (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
+      (bibtex-completion-edit-notes (list (org-element-property
+					   :key (org-element-context)))))))
 
 
 (defun oc-bibtex-copy-key ()
@@ -539,11 +564,12 @@ Argument ARG prefix arg."
 (defun oc-bibtex-copy-bibtex-entry ()
   "Copy the bibtex entry for the reference at point."
   (interactive)
-  (save-window-excursion
-    (bibtex-completion-show-entry (list (org-element-property :key (org-element-context))))
-    (bibtex-beginning-of-entry)
-    (bibtex-copy-entry-as-kill)
-    (kill-new (pop bibtex-entry-kill-ring))))
+  (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
+    (save-window-excursion
+      (bibtex-completion-show-entry (list (org-element-property :key (org-element-context))))
+      (bibtex-beginning-of-entry)
+      (bibtex-copy-entry-as-kill)
+      (kill-new (pop bibtex-entry-kill-ring)))))
 
 
 (defun oc-bibtex-copy-citation ()
@@ -554,24 +580,15 @@ Argument ARG prefix arg."
 				(org-element-property :end parent)))))
 
 
-;; TODO: I probably need to do what I did here in all these functions. The issue
-;; this solves is that `(org-cite-list-bibliography-files)' lists local and
-;; global files, and these commands should only use what is defined locally if
-;; it is, and globally otherwise. There is a lot of repetition, and maybe an
-;; anophoric macro would simplify it?
-(defun oc-bibtex-copy-formatted-reference ()
-  "Copy a formatted version of the reference at point."
-  (interactive)
-  (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
-    (kill-new (bibtex-completion-apa-format-reference (org-element-property :key (org-element-context))))))
-
-
 (defun oc-bibtex-doi (key)
   "Get the DOI associated with the KEY."
-  (save-window-excursion
-    (bibtex-completion-show-entry (list (org-element-property :key (org-element-context))))
-    (bibtex-beginning-of-entry)
-    (replace-regexp-in-string "^http\\(s\\)?://dx.doi.org/" "" (bibtex-autokey-get-field "doi"))))
+  (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
+    (save-window-excursion
+      (bibtex-completion-show-entry (list (org-element-property
+					   :key (org-element-context))))
+      (bibtex-beginning-of-entry)
+      (replace-regexp-in-string "^http\\(s\\)?://dx.doi.org/" ""
+				(bibtex-autokey-get-field "doi")))))
 
 
 (defun oc-bibtex-wos ()
@@ -611,7 +628,8 @@ Argument ARG prefix arg."
    (url-encode-url
     (format
      "http://scholar.google.com/scholar?q=%s"
-     (let* ((key (org-element-property :key (org-element-context)))
+     (let* ((bibtex-completion-bibliography (org-cite-list-bibliography-files))
+	    (key (org-element-property :key (org-element-context)))
 	    (entry (bibtex-completion-get-entry key)))
        (cdr (assoc "title" entry)))))))
 
@@ -619,7 +637,8 @@ Argument ARG prefix arg."
 (defun oc-bibtex-email ()
   "Email the reference at point with attached PDFs."
   (interactive)
-  (let* ((key (org-element-property :key (org-element-context)))
+  (let* ((bibtex-completion-bibliography (org-cite-list-bibliography-files))
+	 (key (org-element-property :key (org-element-context)))
 	 (pdfs (bibtex-completion-find-pdf-in-library key)))
     (save-window-excursion
       (bibtex-completion-show-entry (list key))
