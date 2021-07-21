@@ -725,6 +725,7 @@ Argument ARG prefix arg."
     ("b" oc-bibtex-show-entry  "open bibtex")
     ("u" oc-bibtex-open-url-or-doi  "open url")
     ("n" oc-bibtex-open-notes "open notes")
+    ("N" oc-bibtex-open-notes-other-frame "open notes in other frame")
     ("I" oc-bibtex-info "Info"))
 
    "Edit"
