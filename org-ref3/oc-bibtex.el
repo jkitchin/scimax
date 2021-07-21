@@ -134,17 +134,49 @@ Defaults to `oc-bibtex-default-style'"
 
 
 ;; * Flyspell setup
-;; keys are often misspelled, so we turn that off here.
+;; keys are often misspelled, so we try to turn that off here.
+;; It does not seem to work reliably. I don't know if we can be smart about
+;; prefix/suffix text
 
-(defun oc-bibtex-flyspell-predicate ()
-  "Predicate function to ignore flyspell on citations."
-  (interactive)
-  (let ((faces (get-text-property (point) 'face)))
-    (when (not (listp faces))
-      (setq faces (list faces)))
-    (and (org-mode-flyspell-verify) (not (memq 'org-cite faces)))))
+;; I don't understand why I have to do this, but it is the only reliable way I
+;; have gotten flyspell to work. I don't know if we can get spell-checking on
+;; the prefix/suffix with this approach though.
+(defun oc-bibtex--flyspell-object-check-p (element)
+  "Non-nil when Flyspell can check object at point.
+ELEMENT is the element at point."
+  (let ((object (save-excursion
+		  (when (looking-at-p "\\>") (backward-char))
+		  (org-element-context element))))
+    (cl-case (org-element-type object)
+      ;; Prevent checks in links due to keybinding conflict with
+      ;; Flyspell.
+      ((code entity export-snippet inline-babel-call
+	     inline-src-block line-break latex-fragment link macro
+	     statistics-cookie target timestamp verbatim
+	     ;; add these for oc-bibtex
+	     citation citation-reference)
+       nil)
+      (footnote-reference
+       ;; Only in inline footnotes, within the definition.
+       (and (eq (org-element-property :type object) 'inline)
+	    (< (save-excursion
+		 (goto-char (org-element-property :begin object))
+		 (search-forward ":" nil t 2))
+	       (point))))
+      (otherwise t))))
 
-(put 'org-mode 'flyspell-mode-predicate 'oc-bibtex-flyspell-predicate)
+(advice-add 'org--flyspell-object-check-p :override 'oc-bibtex--flyspell-object-check-p)
+
+;; This does not reliably do what I want, and I don't understand why. Maybe org
+;; is doing some check elsewhere and not just relying on the predicate function.
+;; (defun oc-bibtex-flyspell-predicate ()
+;;   "Predicate function to ignore flyspell on citations."
+;;   (interactive)
+;;   (and (org-mode-flyspell-verify)
+;;        (not (memq (org-element-type (org-element-context)) '(citation citation-reference)))))
+
+
+;; (put 'org-mode 'flyspell-mode-predicate 'oc-bibtex-flyspell-predicate)
 
 ;; * Navigation functions
 ;; There can be some subtle failures when there are duplicate keys sometimes.
