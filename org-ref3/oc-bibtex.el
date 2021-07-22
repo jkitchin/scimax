@@ -33,15 +33,8 @@
 
 ;;; Code:
 (require 'oc)
-(require 'ivy-bibtex)
+(require 'bibtex-completion)
 (require 'pretty-hydra)
-
-;; I like green links
-(set-face-attribute 'org-cite nil
-                    :foreground "DarkSeaGreen4")
-
-(set-face-attribute 'org-cite-key nil
-                    :foreground "forest green")
 
 
 ;; org-cite uses (style . option) for styles, but that is more complicated than
@@ -110,16 +103,15 @@ author.")
 
 
 (defun org-cite-bibtex--style-to-command (style)
-  "Return command name to use according to STYLE pair.
-Defaults to `oc-bibtex-default-style'"
+  "Return command name to use according to STYLE.
+Defaults to `oc-bibtex-default-style' if STYLE is not found"
   (or (cdr (assoc style oc-bibtex-styles)) oc-bibtex-default-citation-command))
 
 
-;; TODO probably use around advice for this or remove
-;; modified to give local files precedence.
-;; there an alternative to put #+org-cite-global-bibliography: nil in the file
-;; but I don't like it.
-(defun org-cite-list-bibliography-files ()
+;; there is an alternative to put #+org-cite-global-bibliography: nil in the
+;; file but I don't like it. I think this is more consistent with using local
+;; properties to supercede higher level properties.
+(defun oc-bibtex-list-bibliography-files ()
   "List all bibliography files defined in the buffer."
   (delete-dups
    (or
@@ -132,15 +124,18 @@ Defaults to `oc-bibtex-default-style'"
 	      (`(("BIBLIOGRAPHY" . ,pairs)) pairs)))
     org-cite-global-bibliography)))
 
+(advice-add 'org-cite-list-bibliography-files :override 'oc-bibtex-list-bibliography-files)
 
 ;; * Flyspell setup
-;; keys are often misspelled, so we try to turn that off here.
-;; It does not seem to work reliably. I don't know if we can be smart about
-;; prefix/suffix text
+
+;; keys are often misspelled, so we try to turn that off here so they don't get
+;; flagged by flyspell.. I don't know if we can be smart about prefix/suffix
+;; text
 
 ;; I don't understand why I have to do this, but it is the only reliable way I
 ;; have gotten flyspell to work. I don't know if we can get spell-checking on
 ;; the prefix/suffix with this approach though.
+
 (defun oc-bibtex--flyspell-object-check-p (element)
   "Non-nil when Flyspell can check object at point.
 ELEMENT is the element at point."
@@ -181,6 +176,8 @@ ELEMENT is the element at point."
 ;; (put 'org-mode 'flyspell-mode-predicate 'oc-bibtex-flyspell-predicate)
 ;; (get 'org-mode 'flyspell-mode-predicate)
 
+
+
 ;; * Navigation functions
 ;; There can be some subtle failures when there are duplicate keys sometimes.
 (defun oc-bibtex-next-reference ()
@@ -192,10 +189,11 @@ ELEMENT is the element at point."
 	 (current-ref (when (eq 'citation-reference (org-element-type datum))
 			datum))
 	 (refs (org-cite-get-references current-citation))
-	 (index (when current-ref (seq-position refs current-ref
-						(lambda (r1 r2)
-						  (= (org-element-property :begin r1)
-						     (org-element-property :begin r2)))))))
+	 (index (when current-ref (seq-position
+				   refs current-ref
+				   (lambda (r1 r2)
+				     (= (org-element-property :begin r1)
+					(org-element-property :begin r2)))))))
     (cond
      ;; ((null current-ref)
      ;;  (goto-char (org-element-property :begin (first (org-cite-get-references  datum)))))
@@ -205,7 +203,9 @@ ELEMENT is the element at point."
      ;; on last reference, try to jump to next one
      ((= index (- (length refs) 1))
       (when  (re-search-forward "\\[cite" nil t)
-	(goto-char (org-element-property :begin (first (org-cite-get-references (org-element-context)))))))
+	(goto-char
+	 (org-element-property :begin (first (org-cite-get-references
+					      (org-element-context)))))))
      ;; otherwise jump to the next one
      (t
       (goto-char
@@ -321,7 +321,7 @@ ELEMENT is the element at point."
 
 
 (defun oc-bibtex-sort-year-ascending ()
-  "Sort the references at point by year (from early to later)."
+  "Sort the references at point by year (from earlier to later)."
   (interactive)
   (let* ((datum (org-element-context))
 	 (current-citation (if (eq 'citation (org-element-type datum)) datum
@@ -334,8 +334,10 @@ ELEMENT is the element at point."
 			    (org-element-property :contents-end current-citation))
 	  (org-element-interpret-data
 	   (sort refs (lambda (ref1 ref2)
-			(let* ((e1 (bibtex-completion-get-entry (org-element-property :key ref1)))
-			       (e2 (bibtex-completion-get-entry (org-element-property :key ref2)))
+			(let* ((e1 (bibtex-completion-get-entry
+				    (org-element-property :key ref1)))
+			       (e2 (bibtex-completion-get-entry
+				    (org-element-property :key ref2)))
 			       (y1 (string-to-number (or (cdr (assoc "year" e1)) "0")))
 			       (y2 (string-to-number (or (cdr (assoc "year" e2)) "0"))))
 			  (> y2 y1))))))
@@ -436,13 +438,15 @@ Argument CITATION is an org-element holding the references."
 		  (save-excursion
 		    (goto-char position)
 		    (let ((context (org-element-context)))
-		      (org-trim (org-export-string-as (buffer-substring
-						       (org-element-property :begin context)
-						       (org-element-property :end context))
-						      'latex t))))))))
+		      (org-trim (org-export-string-as
+				 (buffer-substring
+				  (org-element-property :begin context)
+				  (org-element-property :end context))
+				 'latex t))))))))
 
 
 ;; * Inserting
+
 
 (defun oc-bibtex-insert-processor (context arg)
   "Function for inserting a citation.
@@ -554,7 +558,8 @@ Argument ARG prefix arg."
 
 
 ;; * Following
-
+;;
+;; Most of these rely on bibtex completion functions
 
 (defun oc-bibtex-copy-formatted-reference ()
   "Copy a formatted version of the reference at point."
@@ -622,7 +627,9 @@ Argument ARG prefix arg."
   (interactive)
   (let ((bibtex-completion-bibliography (org-cite-list-bibliography-files)))
     (save-window-excursion
-      (bibtex-completion-show-entry (list (org-element-property :key (org-element-context))))
+      (bibtex-completion-show-entry (list (org-element-property
+					   :key
+					   (org-element-context))))
       (bibtex-beginning-of-entry)
       (bibtex-copy-entry-as-kill)
       (kill-new (pop bibtex-entry-kill-ring)))))
@@ -712,20 +719,20 @@ Argument ARG prefix arg."
     (message-goto-to)))
 
 
+(defun oc-bibtex-annotate-style (s)
+  "Annotation function for selecting style."
+  (let* ((w (+  (- 5 (length s)) 20)))
+    (concat (make-string w ? )
+	    (propertize
+	     (cdr (assoc s oc-bibtex-styles))
+	     'face '(:foreground "forest green")))))
+
+
 (defun oc-bibtex-ivy-select-style ()
   "Select a style with completion."
   (interactive)
-  (ivy-read "Style: " oc-bibtex-styles
-	    :caller 'oc-bibtex-ivy-select-style))
-
-
-(defun oc-bibtex-ivy-style-transformer (candidate)
-  "Transform CANDIDATE for selection."
-  (format "%-20s%s" candidate
-	  (propertize (cdr (assoc candidate oc-bibtex-styles)) 'face  '(:foreground "forest green"))))
-
-
-(ivy-set-display-transformer 'oc-bibtex-ivy-select-style 'oc-bibtex-ivy-style-transformer)
+  (let ((completion-extra-properties '(:annotation-function  oc-bibtex-annotate-style)))
+    (completing-read "Style: " oc-bibtex-styles)))
 
 
 (defun oc-bibtex-update-style ()
@@ -878,7 +885,11 @@ OUTPUT is the final output of the export process."
     (when (search-forward "\\begin{document}" nil t)
       ;; Ensure there is a \usepackage{natbib} somewhere or add one.
       (goto-char (match-beginning 0))
-      (let ((re (rx "\\usepackage" (opt "[" (*? nonl) "]") "{natbib}")))
+      (let ((re (rx "\\usepackage" (opt "[" (*? nonl) "]") "{natbib}"))
+	    (natbib-options (cadr (assoc
+				   "NATBIB_OPTIONS"
+				   (org-collect-keywords
+				    '("NATBIB_OPTIONS"))))))
         (unless (re-search-backward re nil t)
           (insert
            (format "\\usepackage%s{natbib}\n"
@@ -955,6 +966,44 @@ You can use a :numbered option to set if the Bibliography section should be numb
   :export-finalizer #'org-cite-bibtex-use-package
   :cite-styles (mapcar 'car oc-bibtex-styles))
 
-(provide 'org-cite-bibtex)
+
+;; * Compatibility functions
+
+(defun org-ref-to-org-cite ()
+  "Convert org-ref links to orc-cite syntax in the current buffer."
+  (interactive)
+  (let ((cites (reverse (org-element-map (org-element-parse-buffer) 'link
+			  (lambda (lnk)
+			    (when (member (org-element-property :type lnk)
+					  org-ref-cite-types)
+			      lnk))))))
+    (cl-loop for cite in cites do
+	     (setf (buffer-substring (org-element-property :begin cite)
+				     (org-element-property :end cite))
+		   (let* ((type (org-element-property :type cite))
+			  (style (or (car (rassoc (concat "\\" type) oc-bibtex-styles)) "t"))
+			  (keys (split-string (org-element-property :path cite) ","))
+			  (desc (when (org-element-property :contents-begin cite)
+				  (buffer-substring-no-properties
+				   (org-element-property :contents-begin cite)
+				   (org-element-property :contents-end cite))))
+			  (pre-post (when desc (split-string desc "::")))
+			  (pre (car pre-post))
+			  (post (or (second pre-post) "")))
+		     (if pre-post
+			 ;; we only have a description on single keys
+			 (format "[cite/%s:%s]" style
+				 (org-element-interpret-data `(citation-reference
+							       (:key ,(first keys)
+								     :prefix ,(concat pre " ")
+								     :suffix ,(concat  " " post)))))
+		       ;; these are multiple keys
+		       (format "[cite/%s:%s]" style
+			       (org-element-interpret-data
+				(cl-loop for key in keys collect
+					 `(citation-reference
+					   (:key ,key)))))))))))
+
+
 (provide 'oc-bibtex)
 ;;; oc-bibtex.el ends here
