@@ -33,6 +33,7 @@
 
 ;;; Code:
 (require 'oc)
+(require 'ivy)
 (require 'bibtex-completion)
 (require 'pretty-hydra)
 
@@ -447,7 +448,6 @@ Argument CITATION is an org-element holding the references."
 
 ;; * Inserting
 
-
 (defun oc-bibtex-insert-processor (context arg)
   "Function for inserting a citation.
 With one prefix ARG, set style
@@ -552,7 +552,7 @@ Argument ARG prefix arg."
 	(format "[cite%s:%s]"
 		;; this is the style. with arg, choose it
 		(if arg
-		    (concat "/" (oc-bibtex-ivy-select-style))
+		    (concat "/" (oc-bibtex-select-style))
 		  "/t")
 		(concat "@" select-key)))))))
 
@@ -728,7 +728,7 @@ Argument ARG prefix arg."
 	     'face '(:foreground "forest green")))))
 
 
-(defun oc-bibtex-ivy-select-style ()
+(defun oc-bibtex-select-style ()
   "Select a style with completion."
   (interactive)
   (let ((completion-extra-properties '(:annotation-function  oc-bibtex-annotate-style)))
@@ -742,7 +742,7 @@ Argument ARG prefix arg."
 	 (current-citation (if (eq 'citation (org-element-type datum)) datum
 			     (org-element-property :parent datum)))
 	 (refs (org-cite-get-references current-citation))
-	 (style (oc-bibtex-ivy-select-style))
+	 (style (oc-bibtex-select-style))
 	 (cp (point)))
     (setf (buffer-substring (org-element-property :begin current-citation)
 			    (org-element-property :end current-citation))
@@ -834,7 +834,7 @@ Optional argument DATUM The element at point."
       (oc-bibtex-citation-reference/body)
     ;; at style part or end part
     (if (= (point) (org-element-property :end datum))
-	( org-return)
+	(org-return)
       (let* ((refs (org-cite-get-references datum))
 	     (keys (mapcar (lambda (ref) (org-element-property :key ref)) refs))
 	     (key (completing-read "Key: " keys)))
