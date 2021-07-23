@@ -36,7 +36,7 @@
 (require 'ivy)
 (require 'bibtex-completion)
 (require 'pretty-hydra)
-
+(require 'transient)
 
 ;; org-cite uses (style . option) for styles, but that is more complicated than
 ;; I need. I use simple strings here.
@@ -823,6 +823,61 @@ Argument ARG prefix arg."
 
    "Misc"
    (("e" oc-bibtex-email "Email entry"))))
+
+
+
+
+
+;; adapted from https://gist.github.com/bdarcus/f03a60ec8994f06cbd4b9733b25b7782
+(transient-define-prefix oc-bibtex-citation-transient  ()
+  ["Citation reference actions\n"
+   ["Actions"
+    ("p" "open pdf" oc-bibtex-open-pdf)
+    ("b" "open bibtex"  oc-bibtex-show-entry)
+    ("u" "open url"  oc-bibtex-open-url-or-doi)
+    ("n" "open notes" oc-bibtex-open-notes)
+    ("N" "open notes in other frame" oc-bibtex-open-notes-other-frame)
+    ("I" "Info" oc-bibtex-info)]
+
+   ["Edit"
+    ("ii" "Insert" org-cite-insert)
+    ("ib" "Insert before"  (lambda ()
+			     (interactive)
+			     (let ((context (org-element-context)))
+			       (unless (eq (point) (org-element-property :begin context))
+				 (oc-bibtex-previous-reference)))
+			     (org-cite-insert nil)))
+    ("ia" "Insert after"  (lambda ()
+			    (interactive)
+			    (oc-bibtex-next-reference)
+			    (org-cite-insert nil)))
+    ("s" "Change style" oc-bibtex-update-style)
+    ("P" "Update pre/post" oc-bibtex-update-pre/post)
+    ("d" "Delete key/citation" oc-bibtex-delete)
+    ("y" "Sort year" oc-bibtex-sort-year-ascending)
+    ("J" "Shift left" oc-bibtex-shift-left)
+    ("K" "Shift left" oc-bibtex-shift-right)]
+
+   ["Navigation"
+    ("j" "Previous reference" oc-bibtex-previous-reference)
+    ("k" "Next reference" oc-bibtex-next-reference)]
+
+   ["Copy"
+    ("ck" "Copy key" oc-bibtex-copy-key)
+    ("cc" "Copy citation" oc-bibtex-copy-citation)
+    ("cf" "Copy formatted entry" oc-bibtex-copy-formatted-reference)
+    ("ce" "Copy bibtex entry" oc-bibtex-copy-bibtex-entry)]
+
+   ["WWW"
+    ("ww" "WOS" oc-bibtex-wos)
+    ("wr" "WOS related" oc-bibtex-wos-related)
+    ("wc" "WOS citing" oc-bibtex-wos-citing)
+    ("wg" "Google Scholar" oc-bibtex-google-scholar)
+    ("wc" "Crossref" oc-bibtex-crossref)
+    ("wp" "Pubmed" oc-bibtex-pubmed)]
+
+   ["Misc"
+    ("e" "Email entry" oc-bibtex-email)]])
 
 
 (defun oc-bibtex-follow (&optional datum _)
