@@ -356,6 +356,8 @@ If at the end, use `org-end-of-line' instead."
 This is intended for use in fixing bad keys, but would work for similar keys."
   (interactive)
   (let* ((datum (org-element-context))
+	 (prefix (org-element-property :prefix datum))
+	 (suffix (org-element-property :suffix datum))
 	 (beg (org-element-property :begin datum))
 	 (end (org-element-property :end datum))
 	 (key (org-element-property :key datum))
@@ -366,7 +368,9 @@ This is intended for use in fixing bad keys, but would work for similar keys."
 	 (choice (if (= 1 (length suggestions))
 		     (car suggestions)
 		   (cdr (assoc (completing-read "Replace with: " suggestions) suggestions)))))
-    (setf (buffer-substring beg end) choice)))
+    (setf (buffer-substring beg end)
+	  (org-element-interpret-data
+	   `(citation-reference (:key ,choice :prefix ,prefix :suffix ,suffix))))))
 
 
 ;; * miscellaneous utilities
