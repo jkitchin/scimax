@@ -70,7 +70,7 @@ Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded pa
    org-cite-insert-processor 'org-ref-cite
    org-cite-follow-processor 'org-ref-cite
    org-cite-activate-processor 'org-ref-cite
-   org-cite-export-processors '((html csl "chicago-author-date-16th-edition.csl")
+   org-cite-export-processor '((html csl "chicago-author-date-16th-edition.csl")
 				(latex org-ref-cite)
 				(t (basic numeric))))
 
@@ -132,7 +132,7 @@ With ivy-bibtex open, you have these default options for making multiple inserti
 [cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal]
 
 It is super nice that only the bad key is made red!
-(setq org-support-shift-select nil)
+
 [cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-ctal;]
 
 
@@ -153,7 +153,7 @@ There are two kinds of tooltips on citations. If you hover over the style portio
 
 [cite/t:why @rose-2019-pybliom;@kitchin-2018-machin-learn-catal;@kitchin-2018-machin-learn-catal;]
 
-(completing-read-multiple "cite: " (bibtex-completion-candidates))
+
 ** Inserting on an existing citation
 
 If your point is on a citation the following rules apply:
