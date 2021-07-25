@@ -21,7 +21,13 @@
 ;;
 ;;; Commentary:
 ;;
-;; TODO: document the keywords
+;; The following org-keywords fine tune the export:
+;;
+;; You need to use the natbib package with this exporter. The export processor will check to make sure you have
+;; NATBIB_OPTIONS:
+;;  If you want to overwrite the defaults in `org-latex-packages-alist' you can set them in the keywords
+;;
+;; PRINT_BIBLIOGRAPHY:
 
 ;;; Code:
 (require 'oc)
@@ -64,24 +70,30 @@ citation. INFO is the export state, as a property list."
 
 (defun org-ref-cite-use-package (output &rest _)
   "Ensure output requires \"natbib\" package.
-OUTPUT is the final output of the export process."
-  (with-temp-buffer
-    (save-excursion (insert output))
-    (when (search-forward "\\begin{document}" nil t)
-      ;; Ensure there is a \usepackage{natbib} somewhere or add one.
-      (goto-char (match-beginning 0))
-      (let ((re (rx "\\usepackage" (opt "[" (*? nonl) "]") "{natbib}"))
-	    (natbib-options (cadr (assoc
-				   "NATBIB_OPTIONS"
-				   (org-collect-keywords
-				    '("NATBIB_OPTIONS"))))))
-        (unless (re-search-backward re nil t)
-          (insert
-           (format "\\usepackage%s{natbib}\n"
-                   (if (null natbib-options)
-		       ""
-		     (format "[%s]" natbib-options)))))))
-    (buffer-string)))
+OUTPUT is the final output of the export process.
+Use the keyword NATBIB_OPTIONS to overwrite any default put in."
+  (let* ((re (rx "\\usepackage" (opt "[" (*? nonl) "]") "{natbib}"))
+	 (natbib-options (cadr (assoc
+				"NATBIB_OPTIONS"
+				(org-collect-keywords
+				 '("NATBIB_OPTIONS")))))
+	 (usepackage (format "\\usepackage%s{natbib}\n"
+			     (if (null natbib-options)
+				 ""
+			       (format "[%s]" natbib-options)))))
+    (with-temp-buffer
+      (save-excursion (insert output))
+      (when (search-forward "\\begin{document}" nil t)
+	;; Ensure there is a \usepackage{natbib} somewhere or add one.
+	(goto-char (match-beginning 0))
+	(if (re-search-backward re nil t)
+	    ;; with a local setup replace what is there
+	    (when natbib-options
+	      (setf (buffer-substring (line-beginning-position) (line-end-position))
+		    usepackage))
+	  ;; it was not found, insert the package line.
+          (insert usepackage)))
+      (buffer-string))))
 
 
 (defun org-ref-cite-export-bibliography (_keys files &rest _)
