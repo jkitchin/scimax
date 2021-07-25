@@ -287,6 +287,17 @@ If you follow on the style part you will be prompted for a key to act on."
 	(goto-char (match-beginning 0))
 	(org-ref-cite-citation-reference/body)))))
 
+
+(defun org-ref-cite-Cc-Cc ()
+  "Function to follow a cite with C-c C-c."
+  (interactive)
+  (let ((context (org-element-context)))
+    (when (member (org-element-type context) '(citation citation-reference))
+      (org-ref-cite-follow context)
+      t)))
+
+(add-hook 'org-ctrl-c-ctrl-c-hook 'org-ref-cite-Cc-Cc)
+
 (provide 'org-ref-cite-follow)
 
 ;;; org-ref-cite-follow.el ends here
