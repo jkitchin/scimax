@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+(require 'oc)
+(require 'oc-basic)
+(require 'bibtex-completion)
 
 ;; org-cite uses (style . option) for styles, but that is more complicated than
 ;; I need. I use simple strings here.
@@ -67,19 +70,22 @@ that look similar.
 
 `oc-natbib.el' chooses \citep as default. This library uses
 \citet because it is more common in the scientific writing of the
-author.")
+author."
+  :group 'org-ref-cite)
 
 
 (defcustom org-ref-cite-default-citation-command "\\citet"
-  "Default command for citations.")
+  "Default command for citations."
+  :group 'org-ref-cite)
 
 
 ;; * Style
 
 (defun org-ref-cite--style-to-command (style)
   "Return command name to use according to STYLE.
-Defaults to `org-ref-cite-default-style' if STYLE is not found"
+Defaults to `org-ref-cite-default-citation-command' if STYLE is not found"
   (or (cdr (assoc style org-ref-cite-styles)) org-ref-cite-default-citation-command))
+
 
 (defun org-ref-cite-annotate-style (s)
   "Annotation function for selecting style.
@@ -97,6 +103,7 @@ Argument S The candidate string."
   (let ((completion-extra-properties '(:annotation-function  org-ref-cite-annotate-style)))
     (completing-read "Style: " org-ref-cite-styles)))
 
+
 (defun org-ref-cite-update-style ()
   "Change the style of the citation at point."
   (interactive)
@@ -113,8 +120,6 @@ Argument S The candidate string."
 				  (concat "/" style))
 		  (org-element-interpret-data refs)))
     (goto-char cp)))
-
-
 
 
 
@@ -176,6 +181,7 @@ Argument S The candidate string."
      (t
       (goto-char (org-element-property :begin (nth (max (- index 1) 0) refs)))))))
 
+
 (defun org-ref-cite-goto-cite-beginning ()
   "Move to the beginning of the citation."
   (interactive)
@@ -200,8 +206,6 @@ If at the end, use `org-end-of-line' instead."
 
       (goto-char (- (org-element-property :end current-citation)
 		    (org-element-property :post-blank current-citation))))))
-
-
 
 
 ;; * Editing
@@ -347,9 +351,6 @@ If at the end, use `org-end-of-line' instead."
     (kill-region (org-element-property :begin datum) (org-element-property :end datum))))
 
 
-
-
-
 (defun org-ref-cite-replace-key-with-suggestions ()
   "Replace key at point with suggestions.
 This is intended for use in fixing bad keys, but would work for similar keys."
@@ -369,8 +370,6 @@ This is intended for use in fixing bad keys, but would work for similar keys."
 
 
 ;; * miscellaneous utilities
-
-
 
 (defun org-ref-cite-copy-cite ()
   "Copy the reference/citation at point."
