@@ -8,23 +8,23 @@ This directory contains org-ref-cite. It is a setup derived from oc-natbib.el th
 
 1. Use bibtex-completion candidates and ivy to insert references
 2. cite styles that are as consistent with oc-csl as feasible
-3. cites are green similar to how they are in org-ref
-4. flyspell should ignore cites
-5. Navigation functions for moving around in cites
-6. Editing functions for manipulating cites (shifting the order, sorting, deleting, copying, etc)
-7. Keymap on cites to make those things (5, 6) easy
-8. A hydra follow menu to do lots of useful things on a cite
-9. A bibliographystyle keyword
-10. Customizable print_bibliography keyword to enable nobibliography
+3. flyspell should ignore cites
+4. Navigation functions for moving around in cites
+5. Editing functions for manipulating cites (shifting the order, sorting, deleting, copying, etc)
+6. Keymap on cites to make those things (4, 5) easy
+7. A hydra follow menu to do lots of useful things on a cite
+8. A bibliographystyle keyword
+9. Customizable print_bibliography keyword
 
 This document on its own is not as useful as the video that shows how I used it. You can see a video of this in action here:
 
+These videos are from the version of this library that was oc-bibtex.
 Version 1: https://www.youtube.com/watch?v=4ta4J20kpmM
 Version 2: https://www.youtube.com/watch?v=3TBYg1MZ6iY
 
 * setup
 
-Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded paths that you will have to adjust for where you have these.
+Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded paths that you will have to adjust for where you have these. One day you will probably install this with MELPA.
 
 #+BEGIN_SRC emacs-lisp :results silent
 (use-package ivy-bibtex
@@ -151,7 +151,7 @@ Scimax offers the following "enhancements" that are inspired from keybindings in
 
 There are two kinds of tooltips on citations. If you hover over the style portion, you will see how the citation is rendered in export. If you hover over a citation-reference key, you will see the bibliographic information for that key.
 
-[cite/t:why @rose-2019-pybliom;@kitchin-2018-machin-learn-catal;@kitchin-2018-machin-learn-catal;]
+[cite/t:pwhy @rose-2019-pybliom;@kitchin-2018-machin-learn-catal;@kitchin-2018-machin-learn-catal;]
 
 
 ** Inserting on an existing citation
@@ -183,6 +183,7 @@ There are many ways you might want to edit a citation. In addition to the ways y
 - C-k to kill the thing at point
 - M-p will prompt you for prefix text and suffix text for the reference at point.
 - M-s to update the style
+- M-r will prompt you to replace the key at point with a similar key (e.g. if it is red because one character is wrong).
 
 [cite/t:See @rose-2019-pybliom Ch. 5;]
 
@@ -192,7 +193,7 @@ Check out the tooltips with prefix/suffix text: [cite/t:This is before @rose-201
 
 You can use C-<left> and C-<right> to navigate around in the citation and between citations. Use C-a to go to the beginning and C-e to go to the end of the citations.
 
-An embedded cite [cite/t:@rose-2019-pybliom; @kitchin-2018-machin-learn-catal;] in a sentence.
+An embedded cite [cite/t:pre @rose-2019-pybliom; @kitchin-2018-machin-learn-catal;] in a sentence.
 
 ** Convenience
 
@@ -201,14 +202,13 @@ An embedded cite [cite/t:@rose-2019-pybliom; @kitchin-2018-machin-learn-catal;] 
 
 [cite/t: @kitchin-2018-machin-learn-catal;@rose-2019-pybliom; ]
 
-
 ** export
 
 The bibliography will be printed where you put the print_bibliography keyword. You can also use a bibliographystyle keyword to specify the style.
 
 A citet should get moved past punctuation if you also use natmove a textual citation like this one will move past punctuation on export [cite/t:@rose-2019-pybliom], but a parenthetical one like this will not [cite/p:@rose-2019-pybliom]. I usually use superscripted citations, and if you want them in line, you should use the citenum style like this: Ref. [cite/num:@rose-2019-pybliom].
 
-After that, you just do a regular export, e.g. C-c C-e lo to make and open a pdf. Of course you need your LaTeX setup working. Mine is customized for scimax, but as long as yours calls pdflatex and bibtex in the right order, and the right number of times it should work for you too.
+After that, you just do a regular export, e.g. C-c C-e lo to make and open a pdf. Of course you need your LaTeX setup working. Mine is customized for scimax, but as long as yours calls pdflatex and bibtex in the right order, and the right number of times it should work for you too, and it also handles building the bibliography when nobibliography is used.
 
 #+BEGIN_SRC emacs-lisp
  org-latex-pdf-process
@@ -219,13 +219,15 @@ After that, you just do a regular export, e.g. C-c C-e lo to make and open a pdf
 
 That setup is necessary to get the convenient and automatic handling of nobibliography described next. This is handled in `ox-manuscript-nobibliography'.  Note, however, that you cannot change the title or numbering of the section if you use nobibliography at this time. If you need that, I recommend using the raw LaTeX commands.
 
-If you do not want a bibliography printed, but still want a pdf, you use =#+print_bibliography: :nobibliography t= instead, and make sure you use bibentry in your file. I use this, for example, when writing proposals that require the bibliography to be in a different pdf file than the project description. You can also specify a :title for the Bibliography section, and use =:numbered t= to indicate if it should be numbered (the default is not numbered). These options are specific to oc-bibtex.el.
+If you do not want a bibliography printed, but still want a pdf, you use =#+print_bibliography: :nobibliography t= instead, and make sure you use bibentry in your file. I use this, for example, when writing proposals that require the bibliography to be in a different pdf file than the project description. You can also specify a :title for the Bibliography section, and use =:numbered t= to indicate if it should be numbered (the default is not numbered). These options are specific to org-ref-cite.
+
+
 
 # You need these to get a bibliography in a PDF
 #+bibliographystyle: unsrtnat
 
 # This is where the bibliography will be printed in your document
-#+print_bibliography:
+#+print_bibliography: :title "References cited" :numbered t
 
 
 
@@ -234,10 +236,10 @@ If you do not want a bibliography printed, but still want a pdf, you use =#+prin
 1. So far this only handles citations.
 2. I am debating how to handle cross-references and labels. They are still covered in org-ref for now, and there is no new syntax for them. I do not think I will duplicate that here, there won't be a way to support two different definitions of links, which I think will be confusing. Maybe this will coexist with org-ref, and I will just leave the old cite links there for people who want to keep using older org-mode for some reason. It is kind of a pickle.
 
-Not all of the natbib or biblatex cite commands are supported.
+Most but not all of the natbib cite commands are supported. I don't plan to make this support all the biblatex styles. See oc-biblatex for that.
 - I am not sure if citenum is supported in other exporters
-- citetext doesn't currently seem possible because it doesn't use a key
-- =\\nocite{*}= also does not currently seem possible for the same reason
+- citetext doesn't currently seem possible because it doesn't use a key, but it also not a style I would use often since it is a light wrapper around text, and not for the bibliography.
+- =\\nocite{*}= also does not currently seem possible for the same reason, but this is also an infrequently used style for me.
 
 * testing the styles
 
@@ -270,4 +272,4 @@ Not all of the natbib or biblatex cite commands are supported.
 - =[cite//bcf:@rose-2019-pybliom]= (Citealp*) [cite//bcf:@rose-2019-pybliom]
 - =[cite//f:@rose-2019-pybliom]= (citep*) [cite//f:@rose-2019-pybliom]
 - =[cite//c:@rose-2019-pybliom]= (Citep) [cite//c:@rose-2019-pybliom]
-- =[cite//cf:@rose-2019-pybliom]= (Citep*) [cite//cf:@rose-2019-pybliom]
+- =[cite//cf:@rose-2019-pybliom]= (Citep*) [cite//cf:@rose-2019-pybliom;]
