@@ -20,9 +20,29 @@
 ;; Boston, MA 02111-1307, USA.
 ;;
 ;;; Commentary:
+;;
 ;; Provides an insert processor for `org-cite' that is based on
 ;; `bibtex-completion' for the candidates, and `ivy' for completion. It also
 ;; provides `ivy-bibtex' actions.
+;;
+;; I spent a long time trying to find a way to avoid the dependency on `ivy-read'
+;; here, and concluded that is is not possible. The issue is that I want to be
+;; able to insert one or more citations from a single call to `org-cite-insert',
+;; with the following behavior:
+;;
+;; 1. RET always inserts the current or marked entries and ends the completion.
+;; 2. You can sequentially insert entries one at a time without ending
+;; completion using keys like C-M-m/n/p
+;; 3. You can mark entries without inserting them, and insert at the end when you
+;; press RET.
+;; 4. If you need an alternate action instead of inserting, you should be able
+;; to be able to call it, with or without closing completion. For example, if
+;; you want to open the notes/pdf/url of a candidate to check something before
+;; inserting it.
+;;
+;; All four are necessary (IMO) and that can only reasonably be accomplished
+;; with `ivy-read'. I do not see a way to use `completing-read' to get the
+;; behavior described above.
 ;;
 ;;; Code:
 
