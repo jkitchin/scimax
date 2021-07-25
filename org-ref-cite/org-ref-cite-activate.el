@@ -22,6 +22,7 @@
 ;;; Commentary:
 ;; This adds a keymap to citation objects, and a tooltip that shows how they export to LaTeX.
 
+(require oc-basic)
 (require 'org-ref-cite-core)
 
 ;; * Activation

@@ -105,7 +105,7 @@ No dependencies I can think of.
 
 ** I don't want all these pieces...
 
-You do not have to use them all. Just don't require org-ref-cite, and import what you want and use them how you want.
+You do not have to use them all. Just don't require org-ref-cite, and import what you want and use them how you want instead.
 
 * Examples of usage
 

@@ -166,7 +166,8 @@
   (interactive)
   (browse-url
    (format
-    "http://search.crossref.org/?q=%s" (org-ref-cite-doi (org-element-property :key (org-element-context))))))
+    "http://search.crossref.org/?q=%s"
+    (org-ref-cite-doi (org-element-property :key (org-element-context))))))
 
 
 (defun org-ref-cite-google-scholar ()
