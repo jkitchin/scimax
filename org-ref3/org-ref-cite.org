@@ -71,6 +71,8 @@ Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded pa
 (setq  flyspell-duplicate-distance 0
        flyspell-mark-duplications-flag nil
        warning-minimum-level :error)
+
+
 #+END_SRC
 
 * Examples of usage
@@ -79,6 +81,8 @@ Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded pa
 ** Basic insertion
 
 I use C-c \ to insert a citation: [cite/t:@rose-2019-pybliom]
+
+This key does not exist, so the key is red:  [cite/t:@rose-2019-pybli]
 
 The default cite type I use is cite/t, which I recommend to avoid conflicts with the cite links of org-ref. At the moment, org-mode will recognize a bare citation as an org link if you have installed org-ref.
 
@@ -95,6 +99,11 @@ With ivy-bibtex open, you have these default options for making multiple inserti
 
 [cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal]
 
+It is super nice that only the bad key is made red!
+(setq org-support-shift-select nil)
+[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-ctal;]
+
+
 Or, you can type C-o to get to the hydra menu of actions for ivy. Then, you can press m to mark entries, and finally press RET to insert them.
 
 Scimax offers the following "enhancements" that are inspired from keybindings in running src blocks (these should work in all ivy commands).
@@ -110,8 +119,9 @@ Scimax offers the following "enhancements" that are inspired from keybindings in
 
 There are two kinds of tooltips on citations. If you hover over the style portion, you will see how the citation is rendered in export. If you hover over a citation-reference key, you will see the bibliographic information for that key.
 
-[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal;@kitchin-2018-machin-learn-catal;]
+[cite/t:why @rose-2019-pybliom;@kitchin-2018-machin-learn-catal;@kitchin-2018-machin-learn-catal;]
 
+(completing-read-multiple "cite: " (bibtex-completion-candidates))
 ** Inserting on an existing citation
 
 If your point is on a citation the following rules apply:
@@ -157,7 +167,8 @@ An embedded cite [cite/t:@rose-2019-pybliom; @kitchin-2018-machin-learn-catal;] 
 - M-w copy the thing at point
 - M-m mark the thing at point
 
-[cite/t:@rose-2019-pybliom; @kitchin-2018-machin-learn-catal ]
+[cite/t: @kitchin-2018-machin-learn-catal;@rose-2019-pybliom; ]
+
 
 ** export
 
@@ -231,3 +242,10 @@ Not all of the natbib or biblatex cite commands are supported.
 - =[cite//f:@rose-2019-pybliom]= (citep*) [cite//f:@rose-2019-pybliom]
 - =[cite//c:@rose-2019-pybliom]= (Citep) [cite//c:@rose-2019-pybliom]
 - =[cite//cf:@rose-2019-pybliom]= (Citep*) [cite//cf:@rose-2019-pybliom]
+
+
+
+
+[cite:see @kohn2001;@ali2020 p23;@berlet2000]
+
+[cite:see @kohn2001;@berlet2000;@ali2020 p23;]

@@ -266,6 +266,8 @@ ELEMENT is the element at point."
 					    (org-element-property :suffix r2)))))))
     (when (= 1 (length refs))
       (error "You only have one reference. You cannot shift this"))
+    (when (null index)
+      (error "Nothing to shift here"))
     (setf (buffer-substring (org-element-property :contents-begin current-citation)
 			    (org-element-property :contents-end current-citation))
 	  (org-element-interpret-data (oc-bibtex-swap index (- index 1) refs)))
@@ -279,7 +281,7 @@ ELEMENT is the element at point."
 					      (org-element-property :prefix r2))
 				       (equal (org-element-property :suffix r1)
 					      (org-element-property :suffix r2)))))))
-      (unless index (error "nothing found"))
+
       (goto-char (org-element-property :begin (nth index newrefs))))))
 
 
@@ -301,6 +303,9 @@ ELEMENT is the element at point."
 					    (org-element-property :suffix r2)))))))
     (when (= 1 (length refs))
       (error "You only have one reference. You cannot shift this"))
+
+    (when (null index)
+      (error "Nothing to shift here"))
 
     ;; Don't go past the end.
     (unless (= index (-  (length refs) 1))
@@ -392,7 +397,7 @@ If at the end, use `org-end-of-line' instead."
   (oc-bibtex-mark-cite)
   (call-interactively 'kill-ring-save))
 
-;; * Keymap
+;; * Activation
 
 (defun oc-bibtex-describe-keymap ()
   "Describe the keymap"
@@ -497,7 +502,7 @@ This is called by `org-cite-insert'."
 (defun oc-bibtex-insert-citation (select-key arg)
   "Insert a citation.
 If you are not on a citation, insert one.
-If you are the beginning (on @) i3nsert before the current cite
+If you are the beginning (on @) insert before the current cite
 If you at the end of a reference or the citation (on ; or ] or post blanks)
  insert after  the current cite
 If you are in the middle of a cite, replace it.
