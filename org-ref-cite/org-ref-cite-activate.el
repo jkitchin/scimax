@@ -51,6 +51,7 @@
     (define-key map (kbd "M-m") 'org-ref-cite-mark-cite)
     (define-key map (kbd "M-s") 'org-ref-cite-update-style)
     (define-key map (kbd "M-p") 'org-ref-cite-update-pre/post)
+    (define-key map (kbd "M-r") 'org-ref-cite-replace-key-with-suggestions)
     map)
   "A keymap for `org-cite' citation elements.")
 

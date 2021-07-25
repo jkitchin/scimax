@@ -244,7 +244,8 @@
     ("s" org-ref-cite-update-style "Change style")
     ("P" org-ref-cite-update-pre/post "Update pre/post")
     ("d" org-ref-cite-delete "Delete key/citation" :color red)
-    ("y" org-ref-cite-sort-year-ascending "Sort year"))
+    ("y" org-ref-cite-sort-year-ascending "Sort year")
+    ("r" org-ref-cite-replace-key-with-suggestions "Replace key with suggestions"))
 
    "Navigation"
    (("j" org-ref-cite-previous-reference "Previous reference" :color red)
@@ -288,6 +289,7 @@ If you follow on the style part you will be prompted for a key to act on."
 	(org-ref-cite-citation-reference/body)))))
 
 
+;; If this is integrated into org-mode I will remove this.
 (defun org-ref-cite-Cc-Cc ()
   "Function to follow a cite with C-c C-c."
   (interactive)

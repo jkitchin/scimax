@@ -347,6 +347,27 @@ If at the end, use `org-end-of-line' instead."
     (kill-region (org-element-property :begin datum) (org-element-property :end datum))))
 
 
+
+
+
+(defun org-ref-cite-replace-key-with-suggestions ()
+  "Replace key at point with suggestions.
+This is intended for use in fixing bad keys, but would work for similar keys."
+  (interactive)
+  (let* ((datum (org-element-context))
+	 (beg (org-element-property :begin datum))
+	 (end (org-element-property :end datum))
+	 (key (org-element-property :key datum))
+	 (bibtex-completion-bibliography (org-cite-list-bibliography-files))
+	 (keys (cl-loop for cand in (bibtex-completion-candidates) collect
+			(cdr (assoc "=key=" (cdr cand)))))
+	 (suggestions (org-cite-basic--close-keys key keys))
+	 (choice (if (= 1 (length suggestions))
+		     (car suggestions)
+		   (cdr (assoc (completing-read "Replace with: " suggestions) suggestions)))))
+    (setf (buffer-substring beg end) choice)))
+
+
 ;; * miscellaneous utilities
 
 
