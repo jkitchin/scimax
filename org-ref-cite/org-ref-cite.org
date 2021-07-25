@@ -1,0 +1,283 @@
+#+title: org-ref-cite
+#+options: toc:nil
+#+latex_header: \usepackage{bibentry}
+
+\maketitle
+
+This directory contains org-ref-cite. It is a setup derived from oc-natbib.el that is more similar to what I am used to with org-ref. The features include:
+
+1. Use bibtex-completion candidates and ivy to insert references
+2. cite styles that are as consistent with oc-csl as feasible
+3. cites are green similar to how they are in org-ref
+4. flyspell should ignore cites
+5. Navigation functions for moving around in cites
+6. Editing functions for manipulating cites (shifting the order, sorting, deleting, copying, etc)
+7. Keymap on cites to make those things (5, 6) easy
+8. A hydra follow menu to do lots of useful things on a cite
+9. A bibliographystyle keyword
+10. Customizable print_bibliography keyword to enable nobibliography
+
+This document on its own is not as useful as the video that shows how I used it. You can see a video of this in action here:
+
+Version 1: https://www.youtube.com/watch?v=4ta4J20kpmM
+Version 2: https://www.youtube.com/watch?v=3TBYg1MZ6iY
+
+* setup
+
+Here is my setup for ivy-bibtex and org-cite. These currently have hard-coded paths that you will have to adjust for where you have these.
+
+#+BEGIN_SRC emacs-lisp :results silent
+(use-package ivy-bibtex
+  :init
+  (setq bibtex-completion-bibliography '("/Users/jkitchin/Dropbox/emacs/scimax/org-ref-cite/org-ref-cite.bib")
+	bibtex-completion-notes-path "/Users/jkitchin/Dropbox/emacs/scimax/org-ref-cite/notes"
+	bibtex-completion-notes-template-multiple-files "#+TITLE: Notes on: ${author-or-editor} (${year}): ${title}\n\nSee [cite/t:@${=key=}]\n"
+	bibtex-completion-library-path '("/Users/jkitchin/Dropbox/emacs/bibliography/bibtex-pdfs/")
+	bibtex-completion-additional-search-fields '(keywords)
+	bibtex-completion-display-formats
+	'((article       . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${journal:40}")
+	  (inbook        . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} Chapter ${chapter:32}")
+	  (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+	  (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+	  (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
+	bibtex-completion-pdf-open-function
+	(lambda (fpath)
+	  (call-process "open" nil 0 nil fpath))))
+
+(use-package citeproc)
+
+(use-package org-cite
+  :load-path "/Users/jkitchin/Dropbox/emacs/tests/org-mode-git/lisp"
+  :config
+  (require 'oc-csl))
+
+(add-to-list 'load-path "/Users/jkitchin/Dropbox/emacs/scimax/org-ref-cite/")
+
+(use-package org-ref-cite
+  :load-path "/Users/jkitchin/Dropbox/emacs/scimax/org-ref-cite/"
+  :config
+  ;; I like green links
+  (set-face-attribute 'org-cite nil
+                      :foreground "DarkSeaGreen4")
+
+  (set-face-attribute 'org-cite-key nil
+                      :foreground "forest green")
+  (setq
+   org-cite-global-bibliography bibtex-completion-bibliography
+   ;; https://github.com/citation-style-language/styles
+   ;; or https://www.zotero.org/styles
+   org-cite-csl-styles-dir "/Users/jkitchin/Dropbox/emacs/scimax/org-ref-cite/csl-styles"
+   org-cite-insert-processor 'org-ref-cite
+   org-cite-follow-processor 'org-ref-cite
+   org-cite-activate-processor 'org-ref-cite
+   org-cite-export-processors '((html csl "chicago-author-date-16th-edition.csl")
+				(latex org-ref-cite)
+				(t (basic numeric))))
+
+  (define-key org-mode-map (kbd "C-c \\") 'org-cite-insert))
+
+(setq  flyspell-duplicate-distance 0
+       flyspell-mark-duplications-flag nil
+       warning-minimum-level :error)
+#+END_SRC
+
+** Dependencies
+
+*** Activate
+
+Technically, this depends on bibtex-completion because of the =org-ref-cite-sort-year-ascending= function. Nothing will break if you don't use that. I don't see a way around this, I want to be able to use a key press (Shift-up) and have an action in the follow processor for this. You can always remove that key binding in the map if it bugs you.
+
+*** Insert
+
+- I use bibtex-completion to get the candidates.
+- ivy is required for this, and there is not a good way around that. completing-read is too limited to use in this.
+
+*** Follow
+
+- Many follow functions depend on bibtex-completion functions
+- One depends on biblio
+
+I don't think anything will break if you don't use those.
+
+*** Export
+
+No dependencies I can think of.
+
+** I don't want all these pieces...
+
+You do not have to use them all. Just don't require org-ref-cite, and import what you want and use them how you want.
+
+* Examples of usage
+
+
+** Basic insertion
+
+I use C-c \ to insert a citation: [cite/t:@rose-2019-pybliom]
+
+This key does not exist, so the key is red:  [cite/t:@rose-2019-pybli]
+
+The default cite type I use is cite/t, which I recommend to avoid conflicts with the cite links of org-ref. At the moment, org-mode will recognize a bare citation as an org link if you have installed org-ref.
+
+With a single prefix arg, you will be prompted to choose a reference and a style. [cite/num:@rose-2019-pybliom]
+
+** Multiple insertions
+
+With ivy-bibtex open, you have these default options for making multiple insertions:
+
+| C-M-m | insert current entry and stay open on current entry |
+| C-M-n | insert current entry and go to next                 |
+| C-M-p | insert current entry and go to previous entry       |
+| C-M-o | act on current entry with alternate action          |
+
+[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal]
+
+It is super nice that only the bad key is made red!
+(setq org-support-shift-select nil)
+[cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-ctal;]
+
+
+Or, you can type C-o to get to the hydra menu of actions for ivy. Then, you can press m to mark entries, and finally press RET to insert them.
+
+Scimax offers the following "enhancements" that are inspired from keybindings in running src blocks (these should work in all ivy commands).
+
+| C-RET | insert current entry and continue                                     |
+| S-RET | insert current entry and next (or with prefix arg the previous) entry |
+| M-RET | alternate action on current entry and continue                        |
+| s-RET | quit with no action (and no beep like C-g)                            |
+| M-TAB | mark current entry                                                    |
+| C-s   | show marked entries                                                   |
+
+[cite/t:@rose-2019-pybliom;@kitchin-2015-examp-effec]
+
+There are two kinds of tooltips on citations. If you hover over the style portion, you will see how the citation is rendered in export. If you hover over a citation-reference key, you will see the bibliographic information for that key.
+
+[cite/t:why @rose-2019-pybliom;@kitchin-2018-machin-learn-catal;@kitchin-2018-machin-learn-catal;]
+
+(completing-read-multiple "cite: " (bibtex-completion-candidates))
+** Inserting on an existing citation
+
+If your point is on a citation the following rules apply:
+
+1. If you are at the beginning of a reference, insert before it.   [cite/t:@kitchin-2018-machin-learn-catal;@rose-2019-pybliom]
+2. If you are the end of a reference, insert after it. [cite/t:@rose-2019-pybliom;@kitchin-2018-machin-learn-catal]
+3. If you are in a reference, replace it. [cite/t:@kitchin-2018-machin-learn-catal]
+4. If you are in the style part, insert at the beginning. [cite/num:@kitchin-2018-machin-learn-catal;]
+
+You can select the style for a new cite if you use a prefix arg with the insert cite command.
+
+You can delete a cite with a double prefix arg on the insert cite command. If point is on a reference, it will delete the reference, and if it is in the style part it will delete the whole citation. See also [[*Editing the citation at point]].
+
+** Following a citation
+
+You follow a citation by clicking on it, pressing RET on it, or C-c C-o on it. All of these open a hydra that has many other actions you can choose for the citation or reference at point, unless you are on the style part of the cite, then you will be prompted for a reference to act on.
+
+[cite/num:@kitchin-2018-machin-learn-catal;@rose-2019-pybliom;]
+
+** Editing the citation at point
+
+There are many ways you might want to edit a citation. In addition to the ways you can edit by insertion described in [[*Inserting on an existing citation]], and that are shown in the hydra from [[*Following a citation]], the following options are available as keyboard commands:
+
+- S-<left> and S-<right> to shift a reference to the left or right.
+- S-<up> to sort the keys by year
+- C-d to delete the thing at point (reference or citation)
+- C-k to kill the thing at point
+- M-p will prompt you for prefix text and suffix text for the reference at point.
+- M-s to update the style
+
+[cite/t:See @rose-2019-pybliom Ch. 5;]
+
+Check out the tooltips with prefix/suffix text: [cite/t:This is before @rose-2019-pybliom and after;]
+
+** Navigation
+
+You can use C-<left> and C-<right> to navigate around in the citation and between citations. Use C-a to go to the beginning and C-e to go to the end of the citations.
+
+An embedded cite [cite/t:@rose-2019-pybliom; @kitchin-2018-machin-learn-catal;] in a sentence.
+
+** Convenience
+
+- M-w copy the thing at point
+- M-m mark the thing at point
+
+[cite/t: @kitchin-2018-machin-learn-catal;@rose-2019-pybliom; ]
+
+
+** export
+
+The bibliography will be printed where you put the print_bibliography keyword. You can also use a bibliographystyle keyword to specify the style.
+
+A citet should get moved past punctuation if you also use natmove a textual citation like this one will move past punctuation on export [cite/t:@rose-2019-pybliom], but a parenthetical one like this will not [cite/p:@rose-2019-pybliom]. I usually use superscripted citations, and if you want them in line, you should use the citenum style like this: Ref. [cite/num:@rose-2019-pybliom].
+
+After that, you just do a regular export, e.g. C-c C-e lo to make and open a pdf. Of course you need your LaTeX setup working. Mine is customized for scimax, but as long as yours calls pdflatex and bibtex in the right order, and the right number of times it should work for you too.
+
+#+BEGIN_SRC emacs-lisp
+ org-latex-pdf-process
+#+END_SRC
+
+#+RESULTS:
+: ox-manuscript-latex-pdf-process
+
+That setup is necessary to get the convenient and automatic handling of nobibliography described next. This is handled in `ox-manuscript-nobibliography'.  Note, however, that you cannot change the title or numbering of the section if you use nobibliography at this time. If you need that, I recommend using the raw LaTeX commands.
+
+If you do not want a bibliography printed, but still want a pdf, you use =#+print_bibliography: :nobibliography t= instead, and make sure you use bibentry in your file. I use this, for example, when writing proposals that require the bibliography to be in a different pdf file than the project description. You can also specify a :title for the Bibliography section, and use =:numbered t= to indicate if it should be numbered (the default is not numbered). These options are specific to oc-bibtex.el.
+
+# You need these to get a bibliography in a PDF
+#+bibliographystyle: unsrtnat
+
+# This is where the bibliography will be printed in your document
+#+print_bibliography:
+
+
+
+* What is left?
+
+1. So far this only handles citations. I am planning to add something like org-ref-crossref.el to handle the ref and label links.
+2. This still relies on some functions in org-ref (mostly related to DOIs from
+   doi-utils.el). I will probably move these here.
+
+[cite/t:@rose-2019-pybliom]
+
+Not all of the natbib or biblatex cite commands are supported.
+- I am not sure if citenum is supported in other exporters
+- citetext doesn't currently seem possible because it doesn't use a key
+- =\\nocite{*}= also does not currently seem possible for the same reason
+
+* testing the styles
+
+#+BEGIN_SRC emacs-lisp :results org raw
+(cl-loop for (s . cmd) in oc-bibtex-styles concat
+	 (format "- =[cite/%s:@rose-2019-pybliom]= (%s) [cite/%s:@rose-2019-pybliom]\n" s (substring cmd 1) s))
+#+END_SRC
+
+#+RESULTS:
+- =[cite/t:@rose-2019-pybliom]= (cite) [cite/t:@rose-2019-pybliom]
+- =[cite/p:@rose-2019-pybliom]= (citep) [cite/p:@rose-2019-pybliom]
+- =[cite/num:@rose-2019-pybliom]= (citenum) [cite/num:@rose-2019-pybliom]
+- =[cite/a:@rose-2019-pybliom]= (citeauthor) [cite/a:@rose-2019-pybliom]
+- =[cite/a/f:@rose-2019-pybliom]= (citeauthor*) [cite/a/f:@rose-2019-pybliom]
+- =[cite/a/c:@rose-2019-pybliom]= (Citeauthor) [cite/a/c:@rose-2019-pybliom]
+- =[cite/a/cf:@rose-2019-pybliom]= (Citeauthor*) [cite/a/cf:@rose-2019-pybliom]
+- =[cite/na/b:@rose-2019-pybliom]= (citeyear) [cite/na/b:@rose-2019-pybliom]
+- =[cite/na:@rose-2019-pybliom]= (citeyearpar) [cite/na:@rose-2019-pybliom]
+- =[cite/nocite:@rose-2019-pybliom]= (nocite) [cite/nocite:@rose-2019-pybliom]
+- =[cite/t/b:@rose-2019-pybliom]= (citealt) [cite/t/b:@rose-2019-pybliom]
+- =[cite/t/f:@rose-2019-pybliom]= (citet*) [cite/t/f:@rose-2019-pybliom]
+- =[cite/t/bf:@rose-2019-pybliom]= (citealt*) [cite/t/bf:@rose-2019-pybliom]
+- =[cite/t/c:@rose-2019-pybliom]= (Citet) [cite/t/c:@rose-2019-pybliom]
+- =[cite/t/cf:@rose-2019-pybliom]= (Citet*) [cite/t/cf:@rose-2019-pybliom]
+- =[cite/t/bc:@rose-2019-pybliom]= (Citealt) [cite/t/bc:@rose-2019-pybliom]
+- =[cite/t/bcf:@rose-2019-pybliom]= (Citealt*) [cite/t/bcf:@rose-2019-pybliom]
+- =[cite//b:@rose-2019-pybliom]= (citealp) [cite//b:@rose-2019-pybliom]
+- =[cite//bf:@rose-2019-pybliom]= (citealp*) [cite//bf:@rose-2019-pybliom]
+- =[cite//bc:@rose-2019-pybliom]= (Citealp) [cite//bc:@rose-2019-pybliom]
+- =[cite//bcf:@rose-2019-pybliom]= (Citealp*) [cite//bcf:@rose-2019-pybliom]
+- =[cite//f:@rose-2019-pybliom]= (citep*) [cite//f:@rose-2019-pybliom]
+- =[cite//c:@rose-2019-pybliom]= (Citep) [cite//c:@rose-2019-pybliom]
+- =[cite//cf:@rose-2019-pybliom]= (Citep*) [cite//cf:@rose-2019-pybliom]
+
+
+
+
+[cite:see @kohn2001;@ali2020 p23;@berlet2000]
+
+[cite:see @kohn2001;@berlet2000;@ali2020 p23;]

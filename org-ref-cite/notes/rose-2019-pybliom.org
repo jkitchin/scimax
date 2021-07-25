@@ -1,0 +1,5 @@
+#+TITLE: Notes on: Rose, M. E., & Kitchin, J. R. (2019): Pybliometrics: scriptable bibliometrics using a python interface to scopus
+
+See [cite/t:@rose-2019-pybliom]
+
+Add your notes here.
