@@ -20,6 +20,13 @@
 ;; Boston, MA 02111-1307, USA.
 ;;
 ;;; Commentary:
+;; prefix and suffix text on single citations works fine, for example [cite/t:See @kitchin-2015-examp-effec last page]
+;;  exports to \cite[See][last page]{kitchin-2015-examp-effec}.
+;;
+;; Multiple cites work well: [cite/t: @kitchin-2018-machin-learn-catal;@rose-2019-pybliom;]
+;; exports to \cite{kitchin-2018-machin-learn-catal,rose-2019-pybliom}
+;;
+;; It is somewhat unclear what multiple citations with prefix/suffix should export to.
 ;;
 ;; The following org-keywords fine tune the export:
 ;;

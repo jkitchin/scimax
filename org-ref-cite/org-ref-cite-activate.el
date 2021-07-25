@@ -29,7 +29,7 @@
 
 ;;; Code:
 
-(defcustom org-ref-cite-keymap
+(defcustom org-ref-cite-citation-keymap
   (let ((map (copy-keymap org-mouse-map)))
     (define-key map (kbd "C-<right>") 'org-ref-cite-next-reference)
     (define-key map (kbd "C-<left>") 'org-ref-cite-previous-reference)
@@ -52,9 +52,9 @@
 
 
 (defun org-ref-cite-describe-keymap ()
-  "Describe the `org-ref-cite-describe-keymap' keymap."
+  "Describe the `org-ref-cite-citation-keymap' keymap."
   (interactive)
-  (describe-keymap org-ref-cite-keymap))
+  (describe-keymap org-ref-cite-citation-keymap))
 
 
 (defun org-ref-cite-activate (citation)
@@ -63,7 +63,7 @@ Argument CITATION is an org-element holding the references."
   (org-cite-basic-activate citation)
   (pcase-let ((`(,beg . ,end) (org-cite-boundaries citation)))
     ;; Put the keymap on a citation
-    (put-text-property beg end 'keymap org-ref-cite-keymap)
+    (put-text-property beg end 'keymap org-ref-cite-citation-keymap)
     ;; put a rendered tooltip on the style part. Note that this assumes a latex
     ;; export.
     (put-text-property

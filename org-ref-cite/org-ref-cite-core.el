@@ -365,12 +365,12 @@ This is intended for use in fixing bad keys, but would work for similar keys."
 	 (keys (cl-loop for cand in (bibtex-completion-candidates) collect
 			(cdr (assoc "=key=" (cdr cand)))))
 	 (suggestions (org-cite-basic--close-keys key keys))
-	 (choice (if (= 1 (length suggestions))
-		     (car suggestions)
-		   (cdr (assoc (completing-read "Replace with: " suggestions) suggestions)))))
+	 (choice (completing-read "Replace with: " suggestions))
+	 (cp (point)))
     (setf (buffer-substring beg end)
 	  (org-element-interpret-data
-	   `(citation-reference (:key ,choice :prefix ,prefix :suffix ,suffix))))))
+	   `(citation-reference (:key ,choice :prefix ,prefix :suffix ,suffix))))
+    (goto-char cp)))
 
 
 ;; * miscellaneous utilities
