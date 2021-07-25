@@ -27,7 +27,18 @@
 ;; NATBIB_OPTIONS:
 ;;  If you want to overwrite the defaults in `org-latex-packages-alist' you can set them in the keywords
 ;;
+;; BIBLIOGRAPHYSTYLE:
+;;  Use this keyword to specify the bibliography style.
+;;
 ;; PRINT_BIBLIOGRAPHY:
+;;
+;; You can use :title "References Cited" to change the title of the references section
+;; You can use :numbered t to change the section from unnumbered to numbered
+;;
+;; You can use :nobibliography t to turn off the bibliography in the output, but
+;; have correct citations. The best way to get to the bibliography is in the
+;; `ox-manuscript' library in scimax. This option does not currently work with
+;; the :title or :numbered options.
 
 ;;; Code:
 (require 'oc)
@@ -135,10 +146,6 @@ You can use a :numbered option to set if the Bibliography section should be numb
 	 (style (cadr (assoc "BIBLIOGRAPHYSTYLE"
 			     (org-collect-keywords '("BIBLIOGRAPHYSTYLE"))))))
 
-    (when (and (string= "nobibliography" bibcmd)
-	       (or bibtitle numbered))
-      (error "You cannot combine nobibliography and title/numbered yet"))
-
     (concat
      (and style (format "\\bibliographystyle{%s}\n" style))
      (format "\\renewcommand{\\bibsection}{\\section%s{%s}}\n"
@@ -149,6 +156,9 @@ You can use a :numbered option to set if the Bibliography section should be numb
              (mapconcat #'file-name-sans-extension
 			(mapcar #'expand-file-name files)
 			",")))))
+
+
+
 
 (provide 'org-ref-cite-export)
 
