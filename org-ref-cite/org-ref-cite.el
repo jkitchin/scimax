@@ -44,7 +44,7 @@
   :follow #'org-ref-cite-follow
   :insert #'org-ref-cite-insert-processor
   :export-bibliography #'org-ref-cite-bibtex-export-bibliography
-  :export-citation #'org-ref-cite-bibtex-export-citation
+  :export-citation #'org-ref-cite-export-citation
   :export-finalizer #'org-ref-cite-use-package
   :cite-styles (mapcar 'car org-ref-cite-styles))
 
