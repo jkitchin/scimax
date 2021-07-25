@@ -231,11 +231,8 @@ If you do not want a bibliography printed, but still want a pdf, you use =#+prin
 
 * What is left?
 
-1. So far this only handles citations. I am planning to add something like org-ref-crossref.el to handle the ref and label links.
-2. This still relies on some functions in org-ref (mostly related to DOIs from
-   doi-utils.el). I will probably move these here.
-
-[cite/t:@rose-2019-pybliom]
+1. So far this only handles citations.
+2. I am debating how to handle cross-references and labels. They are still covered in org-ref for now, and there is no new syntax for them. I do not think I will duplicate that here, there won't be a way to support two different definitions of links, which I think will be confusing. Maybe this will coexist with org-ref, and I will just leave the old cite links there for people who want to keep using older org-mode for some reason. It is kind of a pickle.
 
 Not all of the natbib or biblatex cite commands are supported.
 - I am not sure if citenum is supported in other exporters
