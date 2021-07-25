@@ -29,12 +29,6 @@
 
 ;;; Code:
 
-(defun org-ref-cite-describe-keymap ()
-  "Describe the `org-ref-cite-describe-keymap' keymap."
-  (interactive)
-  (describe-keymap org-ref-cite-keymap))
-
-
 (defcustom org-ref-cite-keymap
   (let ((map (copy-keymap org-mouse-map)))
     (define-key map (kbd "C-<right>") 'org-ref-cite-next-reference)
@@ -53,7 +47,14 @@
     (define-key map (kbd "M-p") 'org-ref-cite-update-pre/post)
     (define-key map (kbd "M-r") 'org-ref-cite-replace-key-with-suggestions)
     map)
-  "A keymap for `org-cite' citation elements.")
+  "A keymap for `org-cite' citation elements."
+  :group 'org-ref-cite)
+
+
+(defun org-ref-cite-describe-keymap ()
+  "Describe the `org-ref-cite-describe-keymap' keymap."
+  (interactive)
+  (describe-keymap org-ref-cite-keymap))
 
 
 (defun org-ref-cite-activate (citation)
