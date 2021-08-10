@@ -60,7 +60,7 @@
 
 (defun cmu-dissertation-template (contents info)
   "return complete document string for export"
-    (concat
+  (concat
    ;; Time-stamp.
    (and (plist-get info :time-stamp-file)
         (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
@@ -112,12 +112,12 @@
 \\begin{center}
 \\setstretch{1.667}
 \\vspace*{15mm}
-\\bf{" (org-export-data (plist-get info :title) info) "}
+\\textbf{" (org-export-data (plist-get info :title) info) "}
 
 \\par\\vspace{15mm}
 
 \\begin{center}
-\\emph{Submitted in partial fulfillment of the requirements for\\\\ 
+\\emph{Submitted in partial fulfillment of the requirements for\\\\
 the degree of\\\\
 "
 (org-export-data (plist-get info :degree) info) "\\\\}
@@ -128,13 +128,14 @@ the degree of\\\\
 " (org-export-data (plist-get info :author) info) "
 
 \\singlespacing
-" (org-export-data (plist-get info :priordegree) info) "
+" (format "%s" (plist-get info :priordegree) info)
+"
 \\end{center}
 
 \\vspace{40mm}
 \\singlespacing
-Carnegie Mellon University\\\\ 
-Pittsburgh, Pennsylvania 
+Carnegie Mellon University\\\\
+Pittsburgh, Pennsylvania
 
 \\vspace{5mm}"
 (org-export-data (plist-get info :date) info) "
@@ -145,8 +146,8 @@ Pittsburgh, Pennsylvania
 "
 (when (plist-get info :acknowledgements)
   (concat
-  "
-\\begin{center}\\emph{Acknowledgments}
+   "
+\\begin{center}\\textbf{Acknowledgments}
 \\end{center}
 " (org-export-data (plist-get info :acknowledgements) info)))
 "
@@ -177,7 +178,7 @@ Pittsburgh, Pennsylvania
 
 ;;;###autoload
 (defun cmu-dissertation-export-as-latex
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a CMU dissertation letter.
 
 If narrowing is active in the current buffer, only export its
@@ -285,7 +286,7 @@ Return PDF file's name."
       (lambda (file) (org-latex-compile file)))))
 
 ;;;###autoload
-(defun cmu-dissertation-export-to-pdf-and-open 
+(defun cmu-dissertation-export-to-pdf-and-open
   (&optional async subtreep visible-only body-only ext-plist)
   (interactive)
 
