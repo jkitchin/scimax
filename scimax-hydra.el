@@ -1046,12 +1046,12 @@ _l_: list registers
 (defhydra scimax-windows (:color blue :inherit (scimax-base/heads) :columns 4 :hint nil)
   "
 Windows:
-Switch              Delete                Split
-------------------------------------------------------------------
-_a_: ace-window     _do_: delete window   _sb_: split below
-_ow_: other window  _do_: delete others   _sr_: split right
-_of_: other frame   _y_: bury buffer
-_b_: buffers        _df_: delete frame
+Switch              Delete                Split                 Size
+----------------------------------------------------------------------
+_a_: ace-window     _do_: delete window   _sb_: split below    _[_: enlarge horizontally
+_ow_: other window  _do_: delete others   _sr_: split right    _]_: shrink horizontally
+_of_: other frame   _y_: bury buffer      ^ ^                  _=_: enlarge
+_b_: buffers        _df_: delete frame    ^ ^                  _-_: shrink
 ------------------------------------------------------------------
 "
   ("a" ace-window)
@@ -1063,7 +1063,11 @@ _b_: buffers        _df_: delete frame
   ("ow" other-window)
   ("of" other-frame)
   ("df" delete-frame)
-  ("y" bury-buffer))
+  ("y" bury-buffer)
+  ("[" (shrink-window-horizontally 1) :color red)
+  ("]" (enlarge-window-horizontally 1) :color red)
+  ("=" (enlarge-window 1) :color red)
+  ("-" (enlarge-window -1) :color red))
 
 
 ;;** Customize
