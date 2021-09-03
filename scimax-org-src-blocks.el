@@ -73,27 +73,28 @@ This fixes an issue in src-blocks where <>, {}, [] are considered
 open/close brackets. That causes some confusion if you use <, >
 in comparison operators, because they never close. This function
 makes these characters regular symbols, except in strings, where
-they are still open/close brackets."
-  ;; I think this gets run in a special edit buffer for src-blocks. For now I
-  ;; only run this in the src blocks, so that outside the src-blocks these still
-  ;; act like b=open/close brackets.
-  (when (org-src-edit-buffer-p)
-    (let ((case-fold-search t))
-      (goto-char start)
-      ;; this "fixes" <>, {} and [] that fixes some issues in src blocks, but
-      ;; makes some new issues, which is now you cannot use them as brackets.
-      ;; this tries to be fancy and not change the syntax in strings.
-      (while (re-search-forward "[[<{]\\|[]>}]" end t)
+they are still open/close brackets.
+
+I don't understand this completely, it seems like this function
+is called twice, once in the src-block mode, and once in
+org-mode. That is why there is the conditional branch here, that
+seems to do the same thing. Without it though, you don't get the
+behavior described above.
+"
+  (when (eq 'org-mode major-mode)
+    (goto-char start)
+    (while (re-search-forward "<\\|>" end 'mv)
+      (cond
+       ((member (car (org-babel-get-src-block-info 'light)) '("jupyter-python" "python" "emacs-lisp"))
 	(unless (ppss-string-terminator (syntax-ppss (point)))
-	  (put-text-property (point) (1- (point))
-                             'syntax-table (string-to-syntax "_")))))))
+	  (put-text-property (point) (- (point) 1)
+			     'syntax-table (string-to-syntax "_"))))))))
 
-
-(defun scimax-fix-<>-syntax ()
-  "Fix syntax of <> in code blocks.
+  (defun scimax-fix-<>-syntax ()
+    "Fix syntax of <> in code blocks.
 This function should be added to `org-mode-hook' to make it work."
-  (setq syntax-propertize-function 'scimax-org-mode-<>-syntax-fix)
-  (syntax-propertize (point-max)))
+    (setq syntax-propertize-function 'scimax-org-mode-<>-syntax-fix)
+    (syntax-propertize (point-max)))
 
 (add-hook 'org-mode-hook
 	  #'scimax-fix-<>-syntax)
