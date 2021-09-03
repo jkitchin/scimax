@@ -64,24 +64,29 @@
 ;; parens matching.
 
 ;; https://emacs.stackexchange.com/questions/50216/org-mode-code-block-parentheses-mismatch
+
 (defun scimax-org-mode-<>-syntax-fix (start end)
-  "Change syntax of characters ?< and ?> to symbol within source code blocks."
-  (let ((case-fold-search t))
-    (when (eq major-mode 'org-mode)
-      (save-excursion
-        (goto-char start)
-	;; this "fixes" <>, {} and [] that fixes some issues in src blocks, but
-	;; makes some new issues, which is now you cannot use them as brackets.
-	;; I guess a fancier solution is needed for when these chars are in a
-	;; character or string, and should not be considered part of a bracket.
-        (while (re-search-forward "[[<{]\\|[]>}]" end t)
-          (when (save-excursion
-                  (and
-                   (re-search-backward "[[:space:]]*#\\+\\(begin\\|end\\)_src\\_>" nil t)
-                   (string-equal (match-string 1) "begin")))
-	    ;; removes open/close syntax
-            (put-text-property (point) (1- (point))
-                               'syntax-table (string-to-syntax "_"))))))))
+  "Change syntax of characters <>, {} and [] within source code blocks.
+It changes to symbol unless in a string, then it stays the same.
+
+This fixes an issue in src-blocks where <>, {}, [] are considered
+open/close brackets. That causes some confusion if you use <, >
+in comparison operators, because they never close. This function
+makes these characters regular symbols, except in strings, where
+they are still open/close brackets."
+  ;; I think this gets run in a special edit buffer for src-blocks. For now I
+  ;; only run this in the src blocks, so that outside the src-blocks these still
+  ;; act like b=open/close brackets.
+  (when (org-src-edit-buffer-p)
+    (let ((case-fold-search t))
+      (goto-char start)
+      ;; this "fixes" <>, {} and [] that fixes some issues in src blocks, but
+      ;; makes some new issues, which is now you cannot use them as brackets.
+      ;; this tries to be fancy and not change the syntax in strings.
+      (while (re-search-forward "[[<{]\\|[]>}]" end t)
+	(unless (ppss-string-terminator (syntax-ppss (point)))
+	  (put-text-property (point) (1- (point))
+                             'syntax-table (string-to-syntax "_")))))))
 
 
 (defun scimax-fix-<>-syntax ()
