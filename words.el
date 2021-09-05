@@ -14,6 +14,7 @@
 
 ;; - `words-dictionary'
 ;; - `words-thesaurus'
+;; - `words-gramma' uses gramma to do a grammar check.
 
 ;; These functions search various online search spaces
 ;; - `words-google'
@@ -124,6 +125,18 @@ See http://www.iana.org/assignments/language-subtag-registry/language-subtag-reg
    (format
     "http://www.thesaurus.com/browse/%s"
     (url-hexify-string text))))
+
+
+(defun words-gramma (text)
+  "Check TEXT grammar with gramma.
+This pops to *gramma* with the output."
+  (interactive (list (words-at-point)))
+
+  (unless (executable-find "gramma")
+    (error "gramma was not found. Go to https://caderek.github.io/gramma/"))
+
+  (pop-to-buffer "*gramma*")
+  (insert (shell-command-to-string (format "gramma listen -p %S" text))))
 
 
 ;; * Web functions
@@ -450,6 +463,7 @@ words"
 
   ("d" words-dictionary "dictionary" :column "Lookup")
   ("t" words-thesaurus "thesaurus" :column "Lookup")
+  ("g" words-gramma "grammar" :column "Lookup")
 
   ("wg" words-google "google" :column "WWW")
   ("wt" words-twitter "Twitter" :column "WWW")
