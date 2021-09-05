@@ -1,10 +1,10 @@
 ;;; words.el --- Functions to operate on word at point or region  -*- lexical-binding: t -*-
 
-;; Copyright(C) 2014,2015 John Kitchin
+;; Copyright(C) 2014-2021 John Kitchin
 
 ;; Author: John Kitchin  <jkitchin@andrew.cmu.edu>
 
-;; Version: 0.1.0
+;; Version: 0.2.0
 ;; Package-Requires: ((hydra "0"))
 
 ;;; Commentary:
@@ -12,31 +12,37 @@
 ;; These functions mostly provide easy access to web-based searches of the word
 ;; at point, or the selected words. The following functions are available.
 
-;; - words-dictionary
-;; - words-thesaurus
-;; - words-atd :: a spell/grammar checker
+;; - `words-dictionary'
+;; - `words-thesaurus'
 
-;; - words-google
-;; - words-twitter
+;; These functions search various online search spaces
+;; - `words-google'
+;; - `words-twitter'
+;; - `words-google-scholar'
+;; - `words-scopus'
+;; - `words-wos' :: Search Web of Science
+;; - `words-crossref'
+;; - `words-pubmed'
+;; - `words-arxiv'
+;; - `words-semantic-scholar'
 
-;; - words-google-scholar
-;; - words-scopus
-;; - words-wos :: Search Web of Science
-;; - words-crossref
-;; - words-pubmed
+;; - `words-bibtex' :: search for words in your bibtex files
 
-;; - words-bibtex :: search default bibtex file
-
-;; - words-mdfind :: search local computer with mdfind (Mac)
-;; - words-finder :: search local computer with finder (Mac)
+;; - `words-mdfind' :: search local computer with mdfind (Mac)
+;; - `words-finder' :: search local computer with finder (Mac)
+;; - `words-swiper-all' :: search all open buffers
 
 ;; These functions just open websites for convenience.
-;; - wos :: open Web of Science
-;; - pubmed :: open pubmed
-;; - scopus :: open Scopus
+;; - `wos' :: open Web of Science
+;; - `pubmed' :: open pubmed
+;; - `scopus' :: open Scopus
 
-;; - words :: offers a menu of functions for word at point or region
-;; - words/body will open a "hydra" menu.
+;; Speaking and translating: - `words-speak' will use a speech program to read the
+;; selection out loud. See `words-speech-program' and
+;; `words-speech-program-options' for configuration.
+
+
+;; - `words/body' will open a "hydra" menu.
 
 ;;; Code:
 (require 'hydra)
@@ -48,183 +54,161 @@
 ;; to quiet byte-compile error
 (defvar url-http-end-of-headers)
 
+
+(defcustom words-speech-program "say"
+  "Program to speak words out loud.
+Mac options include \"say\", but you can use homebrew to install
+espeak too."
+  :group 'words)
+
+
+(defcustom words-speech-program-options "-v Samantha -r 180"
+  "Options specific to `words-speech-program'.
+It is assumed the text to be spoken will be the last argument."
+  :group 'words)
+
+
+(defcustom words-translate-shell-program "trans"
+  "Name of the translate-shell executable."
+  :group 'words)
+
+
+(defcustom words-translate-shell-native-language "en"
+  "Two letter code for the default native language to translate
+from. Defaults to English (en).
+See http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry."
+  :group 'words)
+
+
+(defcustom words-translate-shell-options "-p"
+  "Options for the translate shell executable.
+-p makes it speak the translation out loud.
+Do not include the translate language here, it is added in
+`words-translate-shell'."
+  :group 'words)
+
+
+(defcustom words-translate-preferred-language nil
+  "A two letter language code for the preferred languate to translate to.
+See http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry."
+  :group 'words)
+
+
+(defcustom words-translate-speak nil
+  "If non-nil use `words-speak' to read the translation out loud in `words-translate-shell'."
+  :group 'words)
+
+
+(defun words-at-point ()
+  "The active region, or word at point."
+  (if (region-active-p)
+      (buffer-substring-no-properties (region-beginning) (region-end))
+    (thing-at-point 'word)))
+
+
 ;; * Dictionary/thesaurus/grammar
-(defun words-dictionary ()
-  "Look up word at point in an online dictionary."
-  (interactive)
+
+(defun words-dictionary (text)
+  "Look up TEXT in an online dictionary."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "http://dictionary.reference.com/browse/%s?s=t"
-    (thing-at-point 'word))))
+    (url-hexify-string text))))
 
 
-(defun words-thesaurus ()
-  "Look up word at point in an online thesaurus."
-  (interactive)
+(defun words-thesaurus (text)
+  "Look up TEXT in an online thesaurus."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "http://www.thesaurus.com/browse/%s"
-    (thing-at-point 'word))))
-
-
-(defun words-atd ()
-  "Send paragraph at point to After the deadline for spell and grammar checking."
-  (interactive)
-
-  (let* ((url-request-method "POST")
-	 (text (if (region-active-p)
-		   (buffer-substring (region-beginning) (region-end))
-		 (thing-at-point 'paragraph)))
-	 (url-request-data (format
-			    "key=some-random-text-&data=%s"
-			    (url-hexify-string
-			     text)))
-	 (xml  (with-current-buffer
-		   (url-retrieve-synchronously
-		    "http://service.afterthedeadline.com/checkDocument")
-		 (xml-parse-region url-http-end-of-headers (point-max))))
-	 (results (car xml))
-	 (errors (xml-get-children results 'error)))
-
-    (pop-to-buffer "*ATD*")
-    (erase-buffer)
-    (dolist (err errors)
-      (let* ((children (xml-node-children err))
-	     ;; for some reason I could not get the string out, and had to do this.
-	     (s (car (last (nth 1 children))))
-	     ;; the last/car stuff doesn't seem right. there is probably
-	     ;; a more idiomatic way to get this
-	     (desc (last (car (xml-get-children children 'description))))
-	     (type (last (car (xml-get-children children 'type))))
-	     (suggestions (xml-get-children children 'suggestions))
-	     (options (xml-get-children (xml-node-name suggestions) 'option))
-	     (opt-string  (mapconcat
-			   (lambda (el)
-			     (when (listp el)
-			       (car (last el))))
-			   options
-			   " ")))
-
-	(insert (format "** %s ** %s
-Description: %s
-Suggestions: %s
-
-" s type desc opt-string))))))
+    (url-hexify-string text))))
 
 
 ;; * Web functions
-(defun words-google ()
-  "Google the word at point or selection."
-  (interactive)
+
+(defun words-google (text)
+  "Google TEXT."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "http://www.google.com/search?q=%s"
-    (if (region-active-p)
-	(url-hexify-string (buffer-substring (region-beginning)
-					     (region-end)))
-      (thing-at-point 'word)))))
+    (url-hexify-string text))))
 
-(defun words-twitter ()
-  "Search twitter for word at point or selection."
-  (interactive)
+
+(defun words-twitter (text)
+  "Search twitter for TEXT."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "https://twitter.com/search?q=%s"
-    (if (region-active-p)
-	(url-hexify-string (buffer-substring (region-beginning)
-					     (region-end)))
-      (thing-at-point 'word)))))
+    (url-hexify-string text))))
 
 
 ;; * Scientific search functions
-(defun words-google-scholar ()
-  "Google scholar the word at point or selection."
-  (interactive)
+
+(defun words-google-scholar (text)
+  "Search TEXT in Google scholar."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "http://scholar.google.com/scholar?q=%s"
-    (if (region-active-p)
-	(url-hexify-string (buffer-substring (region-beginning)
-					     (region-end)))
-      (thing-at-point 'word)))))
+    (url-hexify-string text))))
 
 
-(defun words-wos ()
-  "Open the word at point or selection in Web of Science."
+(defun words-wos (text)
+  "Search TEXT in Web of Science."
   ;; the url was derived from this page: http://wokinfo.com/webtools/searchbox/
-  (interactive)
+  (interactive (list (words-at-point)))
   (browse-url
    (format "http://gateway.webofknowledge.com/gateway/Gateway.cgi?topic=%s&GWVersion=2&SrcApp=WEB&SrcAuth=HSB&DestApp=UA&DestLinkType=GeneralSearchSummary"
-    (if (region-active-p)
-	(mapconcat 'identity (split-string
-			      (buffer-substring (region-beginning)
-						(region-end))) "+")
-      (thing-at-point 'word)))))
+	   (mapconcat 'identity (split-string text) "+"))))
 
 
-(defun words-scopus ()
-  "Scopus the word at point or selection."
-  (interactive)
+(defun words-scopus (text)
+  "Search TEXT in Scopus."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "http://www.scopus.com//search/submit/basic.url?field1=TITLE-ABS-KEY&searchterm1=%s"
-    (if (region-active-p)
-	(mapconcat 'identity (split-string
-			      (buffer-substring (region-beginning)
-						(region-end))) "+")
-      (thing-at-point 'word)))))
+    (mapconcat 'identity (split-string text) "+"))))
 
 
-(defun words-crossref ()
-  "Search region or word at point in CrossRef."
-  (interactive)
+(defun words-crossref (text)
+  "Search TEXT in CrossRef."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "http://search.crossref.org/?q=%s"
-    (if (use-region-p)
-	(url-hexify-string (buffer-substring
-			    (region-beginning)
-			    (region-end)))
-      (thing-at-point 'word)))))
+    (url-hexify-string text))))
 
 
-(defun words-pubmed ()
-  "Search region or word at point in pubmed."
-  (interactive)
+(defun words-pubmed (text)
+  "Search TEXT in pubmed."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "http://www.ncbi.nlm.nih.gov/pubmed/?term=%s"
-    (if (use-region-p)
-	(url-hexify-string (buffer-substring
-			    (region-beginning)
-			    (region-end)))
-      (thing-at-point 'word)))))
+    (url-hexify-string text))))
 
 
-(defun words-arxiv ()
-  "Search region or word at point in arxiv.org."
-  (interactive)
+(defun words-arxiv (text )
+  "Search TEXT in arxiv.org."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "http://arxiv.org/find/all/1/all:+AND+%s/0/1/0/all/0/1"
-    (if (use-region-p)
-	(url-hexify-string (buffer-substring
-			    (region-beginning)
-			    (region-end)))
-      (thing-at-point 'word)))))
+    (url-hexify-string text))))
 
 
-(defun words-semantic-scholar ()
-  "Search region or word at point in www.semanticscholar.org."
-  (interactive)
+(defun words-semantic-scholar (text)
+  "Search TEXT in www.semanticscholar.org."
+  (interactive (list (words-at-point)))
   (browse-url
    (format
     "https://www.semanticscholar.org/search?q=%s"
-    (if (use-region-p)
-	(url-hexify-string (buffer-substring
-			    (region-beginning)
-			    (region-end)))
-      (thing-at-point 'word)))))
+    (url-hexify-string text))))
 
 
 ;; ** Convenience functions for scientific queries
@@ -256,187 +240,235 @@ Suggestions: %s
 
 ;; * Bibtex search
 
-(defun words-bibtex ()
-  "Find selected region or word at point in variable `reftex-default-bibliography'."
-  (interactive)
+(defun words-bibtex (text)
+  "Find TEXT in files listed in `bibtex-completion-bibliography'."
+  (interactive (list (words-at-point)))
   (multi-occur
-   (mapcar (lambda (f) (find-file-noselect f))
-	   reftex-default-bibliography)
-   (if (use-region-p)
-       (buffer-substring
-	(region-beginning)
-	(region-end))
-     (thing-at-point 'word))))
+   (mapcar (lambda (f)
+	     (find-file-noselect f))
+	   (if (listp bibtex-completion-bibliography)
+	       bibtex-completion-bibliography
+	     (list bibtex-completion-bibliography)))
+   text))
 
-;; * Search functions for Mac
-(defvar words-voice "Samantha"
-  "Mac voice to use for speaking.")
+;; * Speech
 
-(defun words-speak (&optional text speed)
-  "Speak word at point or region or TEXT.  Mac only."
-  (interactive)
-  (setq speed (number-to-string (or speed 180)))
-  (unless text
-    (setq text (if (use-region-p)
-		   (buffer-substring
-		    (region-beginning) (region-end))
-		 (thing-at-point 'word))))
-  ;; escape some special applescript chars
-  (setq text (replace-regexp-in-string "\\\\" "\\\\\\\\" text))
-  (setq text (replace-regexp-in-string "\"" "\\\\\"" text))
-  ;; (do-applescript
-  ;;  (format
-  ;;   "say \"%s\" using \"%s\""
-  ;;   text
-  ;;   words-voice))
-  ;; (start-process "my-thing" "foo" "say" "-v" words-voice text "-r" speed)
-  ;; (call-process "say" nil nil nil (mapconcat 'identity (list "-v" words-voice text "-r" speed) " "))
-  (shell-command (format "say -v %s \"%s\" -r %s" words-voice text speed)))
+(defun words-speak (&optional text)
+  "Speak TEXT.
+Uses `words-speech-program' and `words-speech-program-options'."
+  (interactive (list (words-at-point)))
 
-(defvar words-languages
-  '()
-  "List of cons cells (language . code).")
+  (shell-command
+   (concat words-speech-program " "
+	   words-speech-program-options " "
+	   (format "\"%s\"" text))))
 
-(defvar words-speakers
-  '(("German" . "Anna")
-    ("Chinese" . "Ting-Ting"))
-  "Speakers for different languages.")
 
-(setq words-languages  '(("German" . "de")
-			 ("Italian" . "it")
-			 ("Chinese" . "zh")
-			 ("Spanish" . "es")))
+;; * Translation functions
 
-(defun words-translate (to-language)
-  "Translate word at point or selection TO-LANGUAGE.
-http://mymemory.translated.net TO-LANGUAGE is the code, see
-http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry.
-Assumes selected code is in English."
-  (interactive
-   (list
-    (ido-completing-read
-     "Language: "
-     (mapcar 'car words-languages) nil t)))
-  (let* ((text (if (use-region-p)
-		   (buffer-substring
-		    (region-beginning)
-		    (region-end))
-		 (thing-at-point 'word)))
+(defun words-get-language-data ()
+  "Retrieve a list of languages.
+This is a list of lists ((tag value)...) for each language."
+  (with-current-buffer (url-retrieve-synchronously
+			"http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry")
+    (goto-char (point-min))
+    (search-forward "%%")
+    (forward-line)
+    (let ((languages '())
+	  (language))
+      (while (not (eobp))
+	(catch 'block
+	  (when (looking-at "%%")
+	    (push language languages)
+	    (setq language '())
+	    (forward-line)
+	    (throw 'block t))
+	  (let ((fields (split-string (buffer-substring
+				       (line-beginning-position)
+				       (line-end-position))
+				      ":")))
+	    (when (= 2 (length fields))
+	      (push (cons (cl-first fields)
+			  (string-trim (cl-second fields)))
+		    language)))
+	  (forward-line)))
+      languages)))
+
+
+(defun words-language-candidates ()
+  "Returns an a-list of (language . two-letter code) for languages.
+Some languages have multiple mappings of language name to code.
+This captures them all."
+  (let ((candidates '()))
+    (cl-loop for language in (words-get-language-data)
+	     do
+	     ;; collect all the descriptions
+	     (cl-loop for (tag . value) in language
+		      if (string= tag "Description")
+		      do
+		      (push (cons value (cdr (assoc "Subtag" language))) candidates)))
+    candidates))
+
+
+(defun words-choose-translate-language ()
+  "Use completion to choose a translation language."
+  (let ((candidates (words-language-candidates)))
+    (cdr (assoc (completing-read "Translate to: " candidates) candidates))))
+
+
+(defun words-translate (&optional text arg)
+  "Translate TEXT to `words-translate-preferred-language'.
+
+If words-translate-preferred-language is nil or there is a prefix
+ARG, use completion to choose the language.
+
+Translation is done with http://mymemory.translated.net.
+Not every language is supported.
+
+The translation will appear as a message.
+
+If `words-translate-speak' is non-nil, or a double prefix arg is
+used the translation will be read outloud by `words-speak'.
+
+Note: there are usage limits of 1000
+words/day (https://mymemory.translated.net/doc/usagelimits.php)."
+  (interactive (list (words-at-point) current-prefix-arg))
+  (let* ((to-language (if (or arg (null words-translate-preferred-language))
+			  (words-choose-translate-language)
+			words-translate-preferred-language))
 	 (url (format "http://mymemory.translated.net/api/get?q=%s!&langpair=en|%s"
 		      text
-		      (cdr (assoc to-language words-languages))))
+		      to-language))
 	 (json (with-current-buffer
 		   (url-retrieve-synchronously url)
 		 (json-read-from-string
 		  (buffer-substring url-http-end-of-headers (point-max))))))
-    (let ((words-voice (or (cdr (assoc to-language words-speakers))
-			   "Vicki")))
+
+    (when (or words-translate-speak
+	      (equal '(16) arg))
       (words-speak
        (cdr (assoc 'translatedText (cdr (assoc 'responseData json))))))
 
-    (message "Translation: %s"
-	     (cdr (assoc 'translatedText (cdr (assoc 'responseData json)))))))
-
-
-(defun words-mdfind ()
-  "Search for file names matching word or selection at point using mdfind.
-Opens an org-buffer with links to results.  Mac only."
-  (interactive)
-  (let ((query (if (use-region-p)
-		   (buffer-substring
-		    (region-beginning)
-		    (region-end))
-		 (thing-at-point 'word))))
-    (switch-to-buffer-other-window "*mdfind*")
+    (pop-to-buffer "*words-translate*")
     (erase-buffer)
-    (insert
-     (mapconcat
-      (lambda (x)
-	(format "[[%s]]" x))
-      (split-string
-       (shell-command-to-string
-	(format "mdfind -name %s"
-		(shell-quote-argument query)))
-       "\n")
-      "\n"))
-    (org-mode)))
-
-(defun words-swiper-all ()
-  "Run swiper-all on the word at point or region."
-  (interactive)
-  (let ((query (if (use-region-p)
-		   (buffer-substring
-		    (region-beginning)
-		    (region-end))
-		 (thing-at-point 'word))))
-    (let ((ivy-initial-inputs-alist `((swiper-multi . ,query))))
-      (swiper-all))))
+    (insert (cdr (assoc 'translatedText (cdr (assoc 'responseData json)))))))
 
 
+;; ** using translate-shell
 
-(defun words-finder ()
-  "Open Mac Finder with search of word at point or selection."
-  (interactive)
-  (let* ((query (if (use-region-p)
-		    (buffer-substring
-		     (region-beginning)
-		     (region-end))
-		  (thing-at-point 'word)))
-	 (applescript (concat
-		       "tell application \"Finder\" to activate
+(defun words-translate-shell (&optional text arg)
+  "Use translate-shell to translate the TEXT.
+TEXT is translated to `words-translate-preferred-language',
+unless you use a prefix ARG, then choose the language instead.
+
+Assumes the TEXT is in `words-translate-shell-native-language'.
+Use a double prefix arg to select the TEXT language.
+
+
+https://github.com/soimort/translate-shell
+On Mac: brew reinstall translate-shell"
+  (interactive (list
+		(words-at-point)
+		current-prefix-arg))
+
+
+  (let (translate-from translate-to candidates)
+    (cond
+
+     ;; Here you choose the to language if you didn't set one or use a single prefix.
+     ((or (null words-translate-preferred-language) (equal '(4) arg))
+      (setq translate-from words-translate-shell-native-language
+	    translate-to (words-choose-translate-language)))
+
+     ;; Here you choose the from and to target
+     ((equal '(16) arg)
+      (setq candidates (words-language-candidates)
+	    translate-from (cdr (assoc (completing-read "Translate from: " candidates) candidates))
+	    translate-to (cdr (assoc (completing-read "Translate to: " candidates) candidates)))))
+
+    (shell-command (string-join
+		    (list
+		     words-translate-shell-program
+		     words-translate-shell-options
+		     (format "%s:%s" translate-from translate-to)
+		     (shell-quote-argument text))
+		    " "))))
+
+
+;; * Search functions for Mac
+
+(defun words-swiper-all (text)
+  "Run `swiper-all' on TEXT."
+  (interactive (list (words-at-point)))
+  (let ((ivy-initial-inputs-alist `((swiper-all . ,text))))
+    (swiper-all)))
+
+
+(defun words-mdfind (query)
+  "Search mdfind with QUERY.
+Opens an org-buffer with links to results.  Mac only."
+  (interactive (list (words-at-point)))
+  (switch-to-buffer-other-window "*mdfind*")
+  (erase-buffer)
+  (insert
+   (mapconcat
+    (lambda (x)
+      (format "[[%s]]" x))
+    (split-string
+     (shell-command-to-string
+      (format "mdfind -name %s"
+	      (shell-quote-argument query)))
+     "\n")
+    "\n"))
+  (org-mode))
+
+
+(defun words-finder (query)
+  "Open Mac Finder with QUERY."
+  (interactive (list (words-at-point)))
+  ;; from org-mac-link
+  (do-applescript (concat
+		   "tell application \"Finder\" to activate
 tell application \"System Events\"
 	tell process \"Finder\"
 		click menu item \"Find\" of menu \"File\" of menu bar 1
-		keystroke " (format "\"%s\"" query )
-		"
+		keystroke " (format "\"%s\"" query)
+		   "
 	end tell
 end tell")))
-    (message "%s" applescript)
-
-    ;; from org-mac-link
-    (do-applescript applescript)))
 
 
 ;; * A hydra interface to words
 
-;; hydra (http://oremacs.com/2015/01/20/introducing-hydra/) is a relatively new
-;; menu type interface to select actions with single key strokes. It is a nicer
-;; implementation than what I setup in the words function above.
-
-;; https://github.com/abo-abo/hydra
 
 (defhydra words-hydra (:color blue :hint nil)
   "
-words
-_d_: Dictionary  _g_: Google           _T_: Twitter _b_: Bibtex      _k_: Speak
-_t_: Thesaurus   _G_: Google Scholar   ^ ^          _f_: Mac finder  _r_: Translate
-_s_: Spell       _c_: Crossref         ^ ^          _w_: swiper-all
-^ ^              _S_: Scopus           ^ ^          _M_: Mac mdfind
-^ ^              _W_: Web Of Science
-^ ^              _p_: Pubmed
-^ ^              _a_: Arxiv
-^ ^              _o_: Semantic Scholar
-_q_: quit
-"
-  ("d" words-dictionary "dictionary")
-  ("t" words-thesaurus "thesaurus")
-  ("s" words-atd "spell/grammar")
-  ("g" words-google "google")
-  ("T" words-twitter "Twitter")
-  ("W" words-wos "Web of Science")
-  ("G" words-google-scholar "Google scholar")
-  ("c" words-crossref "CrossRef")
-  ("S" words-scopus "Scopus")
-  ("o" words-semantic-scholar "Semantic Scholar")
-  ("p" words-pubmed "Pubmed")
-  ("a" words-arxiv "Arxiv")
-  ("b" words-bibtex "bibtex")
-  ("f" words-finder "Mac Finder")
-  ("w" words-swiper-all "swiper-all")
-  ("M" words-mdfind "mdfind")
-  ("k" words-speak "Speak")
-  ("r" words-translate "Translate")
-  ("q" nil "cancel"))
+words"
+
+  ("d" words-dictionary "dictionary" :column "Lookup")
+  ("t" words-thesaurus "thesaurus" :column "Lookup")
+
+  ("wg" words-google "google" :column "WWW")
+  ("wt" words-twitter "Twitter" :column "WWW")
+  ("ww" words-wos "Web of Science" :column "WWW")
+  ("ws" words-google-scholar "Google scholar" :column "WWW")
+  ("wc" words-crossref "CrossRef" :column "WWW")
+  ("wu" words-scopus "Scopus" :column "WWW")
+  ("wh" words-semantic-scholar "Semantic Scholar" :column "WWW")
+  ("wp" words-pubmed "Pubmed" :column "WWW")
+  ("wa" words-arxiv "Arxiv" :column "WWW")
+
+  ("sb" words-bibtex "bibtex" :column "search")
+  ("sf" words-finder "Mac Finder" :column "search")
+  ("sa" words-swiper-all "swiper-all" :colum "search")
+  ("sm" words-mdfind "mdfind" :column "search")
+
+  ("k" words-speak "Speak" :column "audio")
+
+  ("l" words-translate-shell "Translate-shell" :column "translate")
+  ("L" words-translate "Translate" :column "translate")
+
+  ("q" nil "quit"))
 
 
 ;;; End:
