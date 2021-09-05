@@ -384,7 +384,10 @@ On Mac: brew reinstall translate-shell"
      ((equal '(16) arg)
       (setq candidates (words-language-candidates)
 	    translate-from (cdr (assoc (completing-read "Translate from: " candidates) candidates))
-	    translate-to (cdr (assoc (completing-read "Translate to: " candidates) candidates)))))
+	    translate-to (cdr (assoc (completing-read "Translate to: " candidates) candidates))))
+     (t
+      (setq translate-from words-translate-shell-native-language
+	    translate-to words-translate-preferred-language)))
 
     (shell-command (string-join
 		    (list
