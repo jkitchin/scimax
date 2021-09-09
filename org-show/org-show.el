@@ -140,7 +140,7 @@ If it contains an Emacs Lisp source block, evaluate it.
 			    (cdr (assoc heading-text org-show-slide-titles))))
 
     ;; preview equations in the current subtree
-    (org-preview-latex-fragment '(4))
+    (org-latex-preview)
 
     ;; setup the text
     (switch-to-buffer (current-buffer))

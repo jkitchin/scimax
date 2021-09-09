@@ -89,7 +89,7 @@ It is. Maybe you prefer equation environments?
 e^x = 55
 \end{equation}
 
-Want to see the equation source? elisp:org-toggle-latex-overlays
+Want to see the equation source? Click here:  [[elisp:(org-latex-preview '(4))]]
 
 Back to equations: C-c C-x C-l
 ** Figures                                                            :slide:
@@ -249,7 +249,7 @@ We get it. Everyone loves interactivity.
    :END:
 
 Use this table as a data source.
-#+tblname: tab-data
+#+name: tab-data
 | x |  y |
 |---+----|
 | 1 |  1 |
@@ -288,5 +288,5 @@ Yes, org-mode is amazing.
 That is the end!
 
 #+BEGIN_SRC emacs-lisp-slide
-(org-show-animate '("That's the end of the org-show." "Thank you for your attention!" "http://github.com/jkitchin/jmax"))
+(org-show-animate '("That's the end of the org-show." "Thank you for your attention!" "http://github.com/jkitchin/scimax"))
 #+END_SRC
