@@ -99,6 +99,127 @@ This function should be added to `org-mode-hook' to make it work."
 (add-hook 'org-mode-hook
 	  #'scimax-fix-<>-syntax)
 
+
+;; * Language mode keymaps on src blocks
+
+;; The idea here is to get more src native editing in src blocks by combining
+;; their keymaps with org-mode.
+;; [2020-12-27 Sun] I am not sure this actually works right.
+;; [2021-09-05 Sun] It kind of works
+
+(defcustom scimax-src-block-python-edit-mode-map
+  (cond
+   ((boundp 'elpy-mode-map) elpy-mode-map)
+   ((boundp 'anaconda-mode-map) anaconda-mode-map)
+   (t nil))
+  "Keymap used in editing Python blocks. Defaults to `elpy-mode-map'.
+Use `anaconda-mode-map' if you prefer `anaconda-mode'. This
+keymap is combined with some other keymaps in
+`scimax-src-block-keymaps' to enable native edit commands in
+them."
+  :group :scimax)
+
+
+(defcustom scimax-src-block-keymaps
+  `(("ipython" . ,(let ((map (copy-keymap (make-composed-keymap
+					   `(,scimax-src-block-python-edit-mode-map
+					     ,(when (boundp 'python-mode-map) python-mode-map)
+					     ,(when (boundp 'pyvenv-mode-map) pyvenv-mode-map) )
+					   org-mode-map))))
+		    ;; In org-mode I define RET so we f
+		    (define-key map (kbd "<return>") 'newline)
+		    (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+		    map))
+    ("python" . ,(let ((map (copy-keymap (make-composed-keymap
+					  `(,scimax-src-block-python-edit-mode-map
+					    ,(when (boundp 'python-mode-map) python-mode-map)
+					    ,(when (boundp 'pyvenv-mode-map) pyvenv-mode-map))
+					  org-mode-map))))
+		   ;; In org-mode I define RET so we f
+		   (define-key map (kbd "<return>") 'newline)
+		   (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+		   map))
+    ("emacs-lisp" . ,(let ((map (copy-keymap (make-composed-keymap
+					      `(,lispy-mode-map
+						,emacs-lisp-mode-map
+						,outline-minor-mode-map)
+					      org-mode-map))))
+		       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+		       map))
+    ("sh" . ,(let ((map (copy-keymap (make-composed-keymap
+				      `(,(when (boundp 'shell-mode-map) shell-mode-map))
+				      org-mode-map))))
+	       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
+	       map)))
+  "alist of custom keymaps for src blocks."
+  :group :scimax)
+
+
+(defun scimax-src-block-add-keymap (limit)
+  "Add keymaps to src-blocks defined in `scimax-src-block-keymaps'.
+
+This is run by font-lock in `scimax-src-keymap-mode'."
+  (let ((case-fold-search t)
+	lang)
+    (while (re-search-forward org-babel-src-block-regexp limit t)
+      (let ((lang (match-string 2))
+	    (beg (match-beginning 0))
+	    (end (match-end 0)))
+	(if (assoc (org-no-properties lang) scimax-src-block-keymaps)
+	    (progn
+	      (add-text-properties
+	       beg end `(local-map ,(cdr (assoc
+					  (org-no-properties lang)
+					  scimax-src-block-keymaps))))
+	      (add-text-properties
+	       beg end `(cursor-sensor-functions
+			 ((lambda (win prev-pos sym)
+			    ;; This simulates a mouse click and makes a menu change
+			    (org-mouse-down-mouse nil)))))))))))
+
+
+(defun scimax-src-block-spoof-mode (orig-func &rest args)
+  "Advice function to spoof commands in org-mode src blocks.
+It is for commands that depend on the major mode. One example is
+`lispy--eval'. This simply let-binds the major-mode while running the command."
+  (if (org-in-src-block-p)
+      (let ((major-mode (intern (format "%s-mode" (first (org-babel-get-src-block-info))))))
+	(apply orig-func args))
+    (apply orig-func args)))
+
+
+(defcustom scimax-src-block-spoof-commands '(lispy--eval)
+  "List of commands to advise with `scimax-spoof-mode'.
+`lispy--eval' is the only one I know of, but in case there are others, you can add them here."
+  :group 'scimax)
+
+
+(define-minor-mode scimax-src-block-src-keymap-mode
+  "Minor mode to add mode keymaps to src-blocks."
+  :init-value nil
+  (if scimax-src-block-src-keymap-mode
+      (progn
+	(add-hook 'org-font-lock-hook #'scimax-src-block-add-keymap t)
+	(add-to-list 'font-lock-extra-managed-props 'local-map)
+	(add-to-list 'font-lock-extra-managed-props 'keymap)
+	(add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
+	(cl-loop for cmd in scimax-src-block-spoof-commands do
+		 (advice-add cmd :around 'scimax-src-block-spoof-mode))
+
+	(cursor-sensor-mode +1)
+	(message "scimax-src-block-src-keymap-mode enabled"))
+    ;; Leaving the mode
+    (remove-hook 'org-font-lock-hook #'scimax-src-block-add-keymap)
+    (cl-loop for cmd in scimax-src-block-spoof-commands do
+	     (advice-remove cmd 'scimax-src-block-spoof-mode))
+    (cursor-sensor-mode -1))
+  (font-lock-ensure))
+
+;; (add-hook 'org-mode-hook (lambda ()
+;; 			   (scimax-src-block-src-keymap-mode +1)))
+
+
+
 (provide 'scimax-org-src-blocks)
 
 ;;; scimax-org-src-blocks.el ends here
