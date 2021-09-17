@@ -71,6 +71,7 @@
   '(org-db-update-headlines
     org-db-update-links
     org-db-update-keywords
+    org-db-update-src-blocks
     org-db-update-hashtags
     org-db-update-@-labels
     org-db-update-email-addresses
@@ -314,6 +315,15 @@ decorators in Python, etc.
 				 (begin integer)]
 				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade))])
 
+;; src-blocks
+(emacsql org-db [:create-table :if :not :exists src-blocks
+			       ([(rowid integer :primary-key)
+				 (filename-id integer)
+				 (language text)
+				 (contents text)
+				 (begin integer)]
+				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade))])
+
 
 (defun org-db-connect ()
   "Make sure we are connected."
@@ -378,6 +388,17 @@ Adds FNAME to the database if it doesn't exist."
 ;;
 ;; [2021-09-14 Tue] I refactored this into a sequence of functions that are run
 ;; in each buffer.
+
+(defun org-db-update-src-blocks (filename-id parse-tree)
+  "Update the src blocks in the buffer."
+  ;; delete old entries
+  (emacsql org-db [:delete :from src-blocks
+			   :where (= src-blocks:filename-id $s1)]
+	   filename-id)
+  (org-babel-map-src-blocks nil
+
+    (emacsql org-db [:insert :into src-blocks :values [nil $s1 $s2 $s3 %s4]]
+	     filename-id lang body beg-block)))
 
 (defun org-db-update-keywords (filename-id parse-tree)
   "Updates the keyword table for the org-buffer.
@@ -1090,6 +1111,25 @@ If point is not looking back on a space insert a comma separator."
 							 (insert link))))))))
 
 
+;; * org-db src-blocks
+(defun org-db-src-blocks ()
+  "Search src blocks."
+  (interactive)
+  (let* ((src-blocks (emacsql org-db [:select [src-blocks:language
+					       src-blocks:contents
+					       src-blocks:begin
+					       files:filename]
+					      :from src-blocks
+					      :inner  :join files
+					      :on (= files:rowid src-blocks:filename-id)]))
+	 (candidates (cl-loop for (language contents begin filename) in src-blocks collect
+			      (list (format "%s: %s" language contents)
+				    :filename filename :begin begin))))
+
+    (ivy-read "query: " candidates :action (lambda (candidate)
+					     (find-file (plist-get (cdr candidate) :filename))
+					     (goto-char (plist-get (cdr candidate) :begin))))))
+
 ;; * org-db headings
 (defun org-db-heading-candidates ()
   "Return heading candidates completion."
@@ -1551,7 +1591,8 @@ This finds other files with links in them to this file."
   ("k" org-db-links "links")
   ("b" org-db-backlinks "backlinks")
   ("2" org-db-@ "@-labels")
-  ("i" org-db-images "images"))
+  ("i" org-db-images "images")
+  ("s" org-db-src-blocks "src-blocks"))
 
 
 
