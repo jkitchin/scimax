@@ -1,0 +1,187 @@
+* Formatted string options in emacs-lisp
+
+See [[https://www.youtube.com/watch?v=kk2W9krvNVg][the video]] for commentary.
+
+When constructing strings, it is often helpful to insert variables into them. I call this formatting strings, but it is also called variable interpolation, or string templates by some.
+
+Our goal today is looking at how to take data like:
+
+#+BEGIN_SRC emacs-lisp
+'(("title" . "A nice web page")
+  ("users" . ((("url" . "https://clarete.li")
+               ("name" . "link"))
+              (("url" . "https://gnu.org")
+               ("name" . "Gnu!!")))))
+#+END_SRC
+
+and generate text like:
+
+#+BEGIN_EXAMPLE
+<h1>A nice web page</h1>
+<ul>
+  <li><a href="https://clarete.li">link</a></li>
+  <li><a href="https://gnu.org">Gnu!!</a></li>
+</ul>
+#+END_EXAMPLE
+
+This example is motivated by https://github.com/clarete/templatel, which we discuss at the end.
+
+** format
+
+#+BEGIN_SRC emacs-lisp
+(setq data '(("title" . "A nice web page")
+	     ("users" . ((("url" . "https://clarete.li")
+			  ("name" . "link"))
+			 (("url" . "https://gnu.org")
+			  ("name" . "Gnu!!"))))))
+#+END_SRC
+
+#+RESULTS:
+: ((title . A nice web page) (users ((url . https://clarete.li) (name . link)) ((url . https://gnu.org) (name . Gnu!!))))
+
+#+BEGIN_SRC emacs-lisp
+(format "<h1>%s</h1>
+<ul>
+%s
+</ul>"
+	(cdr (assoc "title" data))
+	(string-join
+	 (cl-loop for user in (cdr (assoc "users" data)) collect
+		  (format "  <li><a href=\"%s\">%s</a></li>"
+			  (cdr (assoc "url" user))
+			  (cdr (assoc "name" user))))
+	 "\n"))
+#+END_SRC
+
+#+RESULTS:
+: <h1>A nice web page</h1>
+: <ul>
+:   <li><a href="https://clarete.li">link</a></li>
+:   <li><a href="https://gnu.org">Gnu!!</a></li>
+: </ul>
+
+** format-spec
+
+#+BEGIN_SRC emacs-lisp
+(format-spec "<h1>%t</h1>
+<ul>
+%u
+</ul>"
+	     `((?t . ,(cdr (assoc "title" data)))
+	       (?u . ,(string-join
+		       (cl-loop for user in (cdr (assoc "users" data)) collect
+				(format-spec "  <li><a href=\"%u\">%n</a></li>"
+					     `((?u . ,(cdr (assoc "url" user)))
+					       (?n . ,(cdr (assoc "name" user))))))
+		       "\n"))))
+#+END_SRC
+
+#+RESULTS:
+: <h1>A nice web page</h1>
+: <ul>
+:   <li><a href="https://clarete.li">link</a></li>
+:   <li><a href="https://gnu.org">Gnu!!</a></li>
+: </ul>
+
+
+** f-string
+
+#+BEGIN_SRC emacs-lisp
+(let ((title (cdr (assoc "title" data)))
+      (users (string-join
+		       (cl-loop for user in (cdr (assoc "users" data)) collect
+				(format-spec "  <li><a href=\"%u\">%n</a></li>"
+					     `((?u . ,(cdr (assoc "url" user)))
+					       (?n . ,(cdr (assoc "name" user))))))
+		       "\n")))
+  (f-string "<h1>${title}</h1>
+<ul>
+${users}
+</ul>"))
+#+END_SRC
+
+#+RESULTS:
+: <h1>A nice web page</h1>
+: <ul>
+:   <li><a href="https://clarete.li">link</a></li>
+:   <li><a href="https://gnu.org">Gnu!!</a></li>
+: </ul>
+
+
+** s-format
+
+#+BEGIN_SRC emacs-lisp
+(s-format "<h1>${title}</h1>
+<ul>
+${users}
+</ul>" 'aget `(("title" . ,(cdr (assoc "title" data)))
+	       ("users" . ,(string-join
+			    (cl-loop for user in (cdr (assoc "users" data)) collect
+				     (s-format "  <li><a href=\"${url}\">${name}</a></li>"
+					       'aget `(("url" . ,(cdr (assoc "url" user)))
+						       ("name" . ,(cdr (assoc "name" user))))))
+		       "\n"))))
+#+END_SRC
+
+#+RESULTS:
+: <h1>A nice web page</h1>
+: <ul>
+:   <li><a href="https://clarete.li">link</a></li>
+:   <li><a href="https://gnu.org">Gnu!!</a></li>
+: </ul>
+
+
+** mustache
+
+https://github.com/Wilfred/mustache.el
+
+#+BEGIN_SRC emacs-lisp
+(mustache-render "<h1>{{title}}</h1>
+<ul>
+{{& users}}
+</ul>" (ht ("title" (cdr (assoc "title" data)))
+	   ("users" (string-join
+			    (cl-loop for user in (cdr (assoc "users" data)) collect
+				     (s-format "  <li><a href=\"${url}\">${name}</a></li>"
+					       'aget `(("url" . ,(cdr (assoc "url" user)))
+						       ("name" . ,(cdr (assoc "name" user))))))
+		       "\n"))))
+#+END_SRC
+
+#+RESULTS:
+: <h1>A nice web page</h1>
+: <ul>
+:   <li><a href="https://clarete.li">link</a></li>
+:   <li><a href="https://gnu.org">Gnu!!</a></li>
+: </ul>
+
+
+** templatel
+
+https://github.com/clarete/templatel
+
+
+#+BEGIN_SRC emacs-lisp
+(use-package templatel)
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC emacs-lisp
+(templatel-render-string "<h1>{{ title }}</h1>
+<ul>  {% for user in users %}
+  <li><a href=\"{{ user.url }}\">{{ user.name }}</a></li>{% endfor %}
+</ul>"
+			 '(("title" . "A nice web page")
+                           ("users" . ((("url" . "https://clarete.li")
+					("name" . "link"))
+                                       (("url" . "https://gnu.org")
+					("name" . "Gnu!!"))))))
+#+END_SRC
+
+#+RESULTS:
+: <h1>A nice web page</h1>
+: <ul>
+:   <li><a href="https://clarete.li">link</a></li>
+:   <li><a href="https://gnu.org">Gnu!!</a></li>
+: </ul>
