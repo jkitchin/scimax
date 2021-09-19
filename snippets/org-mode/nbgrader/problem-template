@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: org-mode template for a problem
+# key: nbpr
+# --
+#+filetags: ${2:tags}
+
+* ${1:title}
+Created on:  {{{time(%Y-%m-%d %H:%M:%S)}}}
+
+#+ipynb-newcell
+Name: <font color="red">Put your name here</font>
+#+ipynb-newcell
+
+$0
+
+
+
+
+
+#+BEGIN_SRC jupyter-python
+!pip install git+git://github.com/jkitchin/pycse &> /dev/null
+from pycse.colab import pdf
+%pdf
+#+END_SRC

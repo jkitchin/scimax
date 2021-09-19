@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: import scipy.integrate.quad
+# key: iq
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# type: command
+# --
+from scipy.integrate import quad

@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: jupyter-julia
+# key: <jj
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+BEGIN_SRC jupyter-julia
+$0
+#+END_SRC

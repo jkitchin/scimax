@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: scipy.optimize.minimize
+# key: fs
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# type: command
+# --
+minimize(${1:func}, ${2:y0})$0

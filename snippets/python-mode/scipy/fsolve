@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: scipy.optimize.fsolve
+# key: fs
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# type: command
+# --
+fsolve(${1:func}, ${2:y0})$0
