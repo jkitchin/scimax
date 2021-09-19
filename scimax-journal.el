@@ -375,6 +375,15 @@ T1 and T2 are org-dates in string form."
 	   entry))
 
 
+(defun scimax-journal-deadgrep (query)
+  "Search journal with `deadgrep'."
+  (interactive (list (if (region-active-p)
+			 (buffer-substring (region-beginning) (region-end))
+		       (read-string "Query: "))))
+  (let ((default-directory  scimax-journal-root-dir))
+    (deadgrep query)))
+
+
 ;; ** Swiper searches
 ;; These can be slow.
 
@@ -542,40 +551,40 @@ Argument JOURNAL-ROOT-NAME Name of journal directory."
 ;; * Hydra for scimax journal
 (defhydra scimax-journal (:color blue :hint nil)
   "
-Scimax-Journal
-Swiper       Grep          Open              Navigate       Agenda
----------------------------------------------------------------------
-_sr_: range  _gr_: range   _j_: today        _n_: next      _ar_: agenda range
-_sw_: week   _gw_: week    _e_: entry        _p_: previous  _aw_: agenda week
-_sm_: month  _gm_: month   _h_: heading      ^ ^            _am_: agenda month
-_sy_: year   _gy_: year    _f_: file         ^ ^            _ay_: agenda year
-^ ^          _ga_: all     _d_: delete entry ^ ^            _aa_: agenda all
-"
-  ("aa" scimax-journal-agenda "agenda")
-  ("ar" scimax-journal-agenda-range "agenda range")
-  ("aw" scimax-journal-agenda-last-week "agenda last week")
-  ("am" scimax-journal-agenda-last-month "agenda last month")
-  ("ay" scimax-journal-agenda-last-year "agenda last year")
+Scimax-Journal"
+  ("sr" scimax-journal-swiper-range  "Swiper date range" :column "Swiper")
+  ("sw" scimax-journal-swiper-last-week "Swiper last week" :column "Swiper")
+  ("sm" scimax-journal-swiper-last-month "Swiper last month" :column "Swiper")
+  ("sy" scimax-journal-swiper-last-year "Swiper last year" :column "Swiper")
 
-  ("n" scimax-journal-next-entry "Next entry" :color red)
-  ("p" scimax-journal-previous-entry "Previous entry" :color red)
+  ("gg" scimax-journal-grep "grep journal" :column "Grep")
+  ("gd" scimax-journal-deadgrep "grep journal" :column "Grep")
+  ("gw" scimax-journal-find-regexp-last-week "grep last week" :column "Grep")
+  ("gm" scimax-journal-find-regexp-last-month "grep last month" :column "Grep")
+  ("gy" scimax-journal-find-regexp-last-year "grep last year" :column "Grep")
+  ("gr" scimax-journal-find-regexp-range "grep a date range" :column "Grep")
 
-  ("j" (scimax-journal-open-entry (format-time-string "%Y-%m-%d" (current-time)) current-prefix-arg) "Open today")
-  ("f" (scimax-journal-go-to-file) "Open a journal file")
-  ("e" scimax-journal-open-entry "Open entry")
-  ("h" scimax-journal-open-heading "Open to heading")
-  ("d" scimax-journal-delete-entry "Delete entry")
+  ("j" (scimax-journal-open-entry (format-time-string "%Y-%m-%d" (current-time)) current-prefix-arg) "Open today" :column "Open")
+  ("f" (scimax-journal-go-to-file) "Open a journal file" :column "Open")
+  ("e" scimax-journal-open-entry "Open entry" :column "Open")
+  ("h" scimax-journal-open-heading "Open to heading" :column "Open")
+  ("d" scimax-journal-delete-entry "Delete entry" :column "Open")
 
-  ("sr" scimax-journal-swiper-range  "Swiper date range")
-  ("sw" scimax-journal-swiper-last-week "Swiper last week")
-  ("sm" scimax-journal-swiper-last-month "Swiper last month")
-  ("sy" scimax-journal-swiper-last-year "Swiper last year")
+  ("n" scimax-journal-next-entry "Next entry" :color red :column "Navigation")
+  ("p" scimax-journal-previous-entry "Previous entry" :color red :column "Navigation")
 
-  ("ga" scimax-journal-grep "grep journal")
-  ("gw" scimax-journal-find-regexp-last-week "grep last week")
-  ("gm" scimax-journal-find-regexp-last-month "grep last month")
-  ("gy" scimax-journal-find-regexp-last-year "grep last year")
-  ("gr" scimax-journal-find-regexp-range "grep a date range"))
+  ("aa" scimax-journal-agenda "agenda" :column "Agenda")
+  ("ar" scimax-journal-agenda-range "agenda range" :column "Agenda")
+  ("aw" scimax-journal-agenda-last-week "agenda last week"  :column "Agenda")
+  ("am" scimax-journal-agenda-last-month "agenda last month"  :column "Agenda")
+  ("ay" scimax-journal-agenda-last-year "agenda last year"  :column "Agenda")
+
+
+
+  )
+
+
+
 
 (provide 'scimax-journal)
 
