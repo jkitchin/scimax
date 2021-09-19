@@ -1189,11 +1189,11 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
   (when (get-text-property (point) 'sem-type)
     (error "You are in an editmark. Nesting editmarks is not allowed."))
 
-  (let ((entry (assoc (intern-soft type) sem-editmarks)))
+  (let ((entry (assoc (intern-soft type) sem-editmarks))
+	(inhibit-modification-hooks t))
     ;; we do not track changes when inserting so we don't trigger nested
     ;; editmarks when editing editmarks.
-    (sem-without-following-changes
-      (cond
+    (cond
        ;; this is a special case
        ((eq type 'audio)
 	(sem-audio-insert))
@@ -1213,16 +1213,18 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 			     nil
 			     (region-end)))))
 	    (error "You are in an editmark. Nesting editmarks is not allowed."))
+
+	  ;; this messes up the region.
 	  ;; Make sure we are at word boundaries
-	  (save-excursion
-	    (goto-char start)
-	    (unless (looking-at " \\|\\<")
-	      (backward-word)
-	      (setq start (point)))
-	    (goto-char end)
-	    (unless (looking-at " \\|\>")
-	      (forward-word)
-	      (setq end (point))))
+	  ;; (save-excursion
+	  ;;   (goto-char start)
+	  ;;   (unless (looking-at " \\|\\<")
+	  ;;     (backward-word)
+	  ;;     (setq start (point)))
+	  ;;   (goto-char end)
+	  ;;   (unless (looking-at " \\|\>")
+	  ;;     (forward-word)
+	  ;;     (setq end (point))))
 
 	  (setf (buffer-substring start end)
 		(concat (plist-get (cdr entry) :open-marker)
@@ -1264,7 +1266,7 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 			  (concat " " (sem-author) " "))
 			(plist-get (cdr entry) :close-marker)))
 	;; goto middle
-	(backward-char (length (plist-get (cdr entry) :close-marker)))))))
+	(backward-char (length (plist-get (cdr entry) :close-marker))))))
   ;; Should we add a local variable so the file opens in sem-mode?
   (hack-local-variables)
   ;; This is more complicated than I thought it should be. When I try to just
