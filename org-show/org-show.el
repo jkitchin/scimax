@@ -1,5 +1,5 @@
 ;;; org-show.el --- Summary
-;; Copyright(C) 2014 John Kitchin
+;; Copyright(C) 2014-2021 John Kitchin
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
 ;; Contributions from Sacha Chua.
