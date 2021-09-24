@@ -19,3 +19,5 @@ scimax-notebook.el
 /usermicrofts
 /userorg-fts.db
 /userorg-fts.db-lock
+org-ref-cite/
+org-ref-v2/
