@@ -2,6 +2,5 @@
 # name: scipy.integrate.solve_bvp
 # key: bvp
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# type: command
 # --
 sol = solve_bvp(${1:func}, ${2:bc}, ${3:x}, ${4:y})$0

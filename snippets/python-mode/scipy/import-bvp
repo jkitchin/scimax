@@ -2,6 +2,5 @@
 # name: import scipy.integrate.bvp
 # key: ibvp
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# type: command
 # --
 from scipy.integrate import bvp

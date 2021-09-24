@@ -2,6 +2,5 @@
 # name: scipy.integrate.solve_ivp
 # key: ivp
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
-# type: command
 # --
 sol = solve_ivp(${1:func}, ${2:tspan}, ${3: y0})$0
