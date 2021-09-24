@@ -1,6 +1,6 @@
 ;;; ox-manuscript.el -- utilities to export scientific manuscripts,
 
-;; Copyright(C) 2014 John Kitchin
+;; Copyright(C) 2014-2021 John Kitchin
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
 ;; This file is not currently part of GNU Emacs.
@@ -414,7 +414,7 @@ will be prompted for a tex file name."
   "Run makeindex program on TEX-FILE."
   (interactive "fTex file: ")
   (let* ((basename (file-name-sans-extension tex-file))
-	 (output (shell-command-to-string (concat "makeindex " basename))))
+	 (output (shell-command-to-string (concat "makeindex " basename ".idx"))))
     (with-current-buffer (get-buffer-create "*makeindex*")
       (insert output))))
 
