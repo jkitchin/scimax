@@ -743,9 +743,9 @@ we go with the font color."
 	    (concat
 	     (format "@@latex:\\definecolor{%s}{rgb}{%s,%s,%s}%s{%s}{\\parbox{\\textwidth}{%s:@@"
 		     (or bg-color fg-color)
-		     (if bg-color (first bg-rgb) (first fg-rgb))
-		     (if bg-color (second bg-rgb) (second fg-rgb))
-		     (if bg-color (third bg-rgb) (third fg-rgb))
+		     (if bg-color (cl-first bg-rgb) (cl-first fg-rgb))
+		     (if bg-color (cl-second bg-rgb) (cl-second fg-rgb))
+		     (if bg-color (cl-third bg-rgb) (cl-third fg-rgb))
 		     (if bg-color
 			 "\\colorbox"
 		       "\\textcolor")
@@ -1609,13 +1609,13 @@ Next, we define a tabulated list view. There are a lot of moving parts here. We 
 				      (list
 				       nil ;id
 				       (vector
-					(cons (symbol-name (first em))
+					(cons (symbol-name (cl-first em))
 					      (list
-					       'face (plist-get (cdr (assoc (first em) sem-editmarks)) :face)
-					       'buffer (second em)
-					       'bounds (third em)))
-					(cons (fourth em)
-					      (list 'face (plist-get (cdr (assoc (first em) sem-editmarks)) :face)))))))))
+					       'face (plist-get (cdr (assoc (cl-first em) sem-editmarks)) :face)
+					       'buffer (cl-second em)
+					       'bounds (cl-third em)))
+					(cons (cl-fourth em)
+					      (list 'face (plist-get (cdr (assoc (cl-first em) sem-editmarks)) :face)))))))))
     (setq tabulated-list-entries entries
 	  tabulated-list-format (vector '("Type" 20 t) '("Content" 40 t)))
     (tabulated-list-init-header)
@@ -2130,13 +2130,13 @@ changed."
 
  For deletions, There are two categories I have observed:
 1. Deletions from C-d, kill [[(delete-1)]].
-   1. These are characterized by (second sem-current-deletion) being nil. There several cases to consider here too.
+   1. These are characterized by (cl-second sem-current-deletion) being nil. There several cases to consider here too.
       1. If not on an editmark, insert a delete mark [[(delete-1-add-mark)]].
       2. If you are on content, just let it happen. [[(delete-1-content)]]
       3. On an open-marker, ignore this. [[(delete-1-open)]]
       4. On a close-marker, ignore this. [[(delete-1-close)]]
 2. Deletions from backspace [[(delete-2)]]
-   1. These are characterized by (second sem-current-deletion) not being nil.
+   1. These are characterized by (cl-second sem-current-deletion) not being nil.
       1. You are in an empty editmark, we should delete it. [[(delete-2-empty)]]
       2. Fresh delete, insert markers and put content in them. [[(delete-2-new)]]
       3. At the beginning of a delete, and deleting. Push deletion to front of content. [[(delete-2-front)]].
@@ -2156,7 +2156,7 @@ of the affected text."
     (let ((inhibit-modification-hooks t))
       (cond
        ;; deletion by C-d, kill, etc. (ref:delete-1)
-       ((null (second sem-current-deletion))
+       ((null (cl-second sem-current-deletion))
 	(message "C-d, kill, delete")
 	(cond
 	 ;; just mark for deletion
@@ -2172,11 +2172,11 @@ of the affected text."
 
 	 ;; We are on an open marker. ignore. (ref:delete-1-open)
 	 ((eq (get-text-property (point) 'sem-marker) 'open)
-	  (insert (first sem-current-deletion)))
+	  (insert (cl-first sem-current-deletion)))
 
 	 ;; On a close marker, ignore (ref:delete-1-close)
 	 ((eq (get-text-property (point) 'sem-marker) 'close)
-	  (insert (first sem-current-deletion)))
+	  (insert (cl-first sem-current-deletion)))
 
 	 (t
 	  (message "Unhandled C-d/kill delete. did this make sense?"))))
@@ -2213,27 +2213,27 @@ of the affected text."
 	  (insert (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker))
 	  (backward-char (length (plist-get (cdr (assoc 'delete sem-editmarks))
 					    :close-marker)))
-	  (insert (first sem-current-deletion))
+	  (insert (cl-first sem-current-deletion))
 	  ;; now go back to front of the mark.
-	  (backward-char (length (first sem-current-deletion)))
+	  (backward-char (length (cl-first sem-current-deletion)))
 	  (backward-char (length (plist-get (cdr (assoc 'delete sem-editmarks))
 					    :open-marker))))
 
 	 ;; (ref:delete-2-front)
 	 ;; at the front of delete but not at the end of any other editmark
 	 ((and (looking-at (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
-	       (not (string= "}" (first sem-current-deletion))))
+	       (not (string= "}" (cl-first sem-current-deletion))))
 	  (forward-char (length (plist-get
 				 (cdr (assoc 'delete sem-editmarks)) :open-marker)))
-	  (insert (first sem-current-deletion))
-	  (backward-char (length (first sem-current-deletion)))
+	  (insert (cl-first sem-current-deletion))
+	  (backward-char (length (cl-first sem-current-deletion)))
 	  (backward-char (length (plist-get
 				  (cdr (assoc 'delete sem-editmarks)) :close-marker))))
 
 	 ;; between two delete edit marks, merge them and jump to the front
 	 ;; (ref:delete-2-merge)
 	 ((and (looking-at (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
-	       (string= "}" (first sem-current-deletion)))
+	       (string= "}" (cl-first sem-current-deletion)))
 	  (insert "}")
 	  (if (not (looking-back (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker)
 				 (length (plist-get
@@ -2256,7 +2256,7 @@ of the affected text."
 	 ;; At end of a mark, and beginning of delete. we should jump
 	 ;; to end of previous content? (ref:delete-2-end+mark)
 	 ((and (looking-at (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
-	       (string= "}" (first sem-current-deletion)))
+	       (string= "}" (cl-first sem-current-deletion)))
 	  (message "case 2 - front of delete and at end of a mark.")
 	  (insert "}")
 	  (if (not (looking-back (regexp-opt (mapcar (lambda (em)
@@ -2271,8 +2271,8 @@ of the affected text."
 	    ;; put char back
 	    (forward-char (length
 			   (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker)))
-	    (insert (first sem-current-deletion))
-	    (backward-char (length (first sem-current-deletion)))
+	    (insert (cl-first sem-current-deletion))
+	    (backward-char (length (cl-first sem-current-deletion)))
 	    (re-search-backward (regexp-opt (mapcar (lambda (em)
 						      (plist-get (cdr em) :open-marker))
 						    sem-editmarks)))))
@@ -2291,7 +2291,7 @@ of the affected text."
 					    (plist-get (cdr em) :open-marker))
 					  sem-editmarks)))
 	  (insert (plist-get (cdr (assoc 'delete sem-editmarks)) :open-marker))
-	  (insert (first sem-current-deletion))
+	  (insert (cl-first sem-current-deletion))
 	  (insert (plist-get (cdr (assoc 'delete sem-editmarks)) :close-marker))
 	  (re-search-backward (regexp-opt (mapcar (lambda (em)
 						    (plist-get (cdr em) :open-marker))
