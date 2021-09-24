@@ -1126,9 +1126,10 @@ If point is not looking back on a space insert a comma separator."
 			      (list (format "%s: %s" language contents)
 				    :filename filename :begin begin))))
 
-    (ivy-read "query: " candidates :action (lambda (candidate)
-					     (find-file (plist-get (cdr candidate) :filename))
-					     (goto-char (plist-get (cdr candidate) :begin))))))
+    (ivy-read "query: " candidates
+	      :action (lambda (candidate)
+			(find-file (plist-get (cdr candidate) :filename))
+			(goto-char (plist-get (cdr candidate) :begin))))))
 
 ;; * org-db headings
 (defun org-db-heading-candidates ()
