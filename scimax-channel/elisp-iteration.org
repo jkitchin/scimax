@@ -1,0 +1,245 @@
+* Iteration in emacs-lisp
+
+#+BEGIN_SRC emacs-lisp :results output
+(cl-loop for item in '(1 2 3 4) do
+	 (print item))
+
+#+END_SRC
+
+#+RESULTS:
+:
+: 1
+:
+: 2
+:
+: 3
+:
+: 4
+
+#+BEGIN_SRC emacs-lisp :results output
+(cl-loop for item across "1, 2, 3, 4" do (print (char-to-string item)))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+"1"
+
+","
+
+" "
+
+"2"
+
+","
+
+" "
+
+"3"
+
+","
+
+" "
+
+"4"
+#+end_example
+
+#+BEGIN_SRC emacs-lisp :results output
+(setq B '(a b c d))
+(cl-loop for i from 0 for item in '(1 2 3 4) do
+	 (print (format "%s. %s %s" i item (nth i B))))
+#+END_SRC
+
+#+RESULTS:
+:
+: "0. 1 a"
+:
+: "1. 2 b"
+:
+: "2. 3 c"
+:
+: "3. 4 d"
+
+#+BEGIN_SRC emacs-lisp :results output
+(setq A '(1  2 3 4)
+      B '(a b c d))
+(cl-loop for i from 0 for a in A for b in B do
+	 (print (list i a b)))
+#+END_SRC
+
+#+RESULTS:
+:
+: (0 1 a)
+:
+: (1 2 b)
+:
+: (2 3 c)
+:
+: (3 4 d)
+
+#+BEGIN_SRC emacs-lisp :results output
+(setq A '(1  2 3 4)
+      B '(a b c d)
+      i 42)
+(cl-loop for i from 0 for a in A for b in B do
+	 (print (list i a b)))
+
+(print i)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+(0 1 a)
+
+(1 2 b)
+
+(2 3 c)
+
+(3 4 d)
+
+42
+#+end_example
+
+#+BEGIN_SRC emacs-lisp
+(cl-loop for x in '(1 2 3 4) collect (* 2 x))
+#+END_SRC
+
+#+RESULTS:
+| 2 | 4 | 6 | 8 |
+
+#+BEGIN_SRC emacs-lisp :results output
+(cl-loop for i from 0 below 3 do (print i))
+#+END_SRC
+
+#+RESULTS:
+:
+: 0
+:
+: 1
+:
+: 2
+
+#+BEGIN_SRC emacs-lisp :results output
+(let ((a 10))
+  (while (> a 1)
+    (print (setq a (/ a 2.0)))))
+#+END_SRC
+
+#+RESULTS:
+:
+: 5.0
+:
+: 2.5
+:
+: 1.25
+:
+: 0.625
+
+
+
+#+BEGIN_SRC emacs-lisp  :results output
+(let ((a 10))
+  (catch 'exit
+    (while t
+      (print (setq a (/ a 2.0)))
+      (when (< a 1) (throw 'exit t)))))
+#+END_SRC
+
+#+RESULTS:
+:
+: 5.0
+:
+: 2.5
+:
+: 1.25
+:
+: 0.625
+
+
+#+BEGIN_SRC emacs-lisp  :results output
+(let ((a 10)
+      (i 0))
+  (catch 'exit
+    (while t
+      (when (or (= a 0) (>= i 10))
+	(throw 'exit t))
+      (print (setq a (* a 0.5)))
+      (incf i)))
+  (print i))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+5.0
+
+2.5
+
+1.25
+
+0.625
+
+0.3125
+
+0.15625
+
+0.078125
+
+0.0390625
+
+0.01953125
+
+0.009765625
+
+10
+#+end_example
+
+
+#+BEGIN_SRC emacs-lisp  :results output
+(catch 'exit
+  (cl-loop for i below 3 do
+	   (cl-loop for j below 3 do
+		    (print (list i j))
+		    (when (and (= i 1) (= j 1))
+		      (throw 'exit t)))))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+(0 0)
+
+(0 1)
+
+(0 2)
+
+(1 0)
+
+(1 1)
+#+end_example
+
+
+#+BEGIN_SRC emacs-lisp  :results output
+(condition-case var
+  (cl-loop for i below 3 do
+	   (cl-loop for j below 3 do
+		    (print (list i j))
+		    (when (and (= i 1) (= j 1))
+		      (error "huh"))))
+  (t nil))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+(0 0)
+
+(0 1)
+
+(0 2)
+
+(1 0)
+
+(1 1)
+#+end_example
