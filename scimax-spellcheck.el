@@ -23,8 +23,11 @@
   :type 'string
   :group 'scimax-aspell)
 
+
 (use-package flyspell-correct-ivy
   :ensure t
+  :bind ("C-;" . #'flyspell-correct-wrapper)
+  ("C-M-;" . #'scimax-ivy-jump-to-typo)
   :init
   (setq ispell-program-name "aspell"
 	ispell-extra-args `("--encoding=utf-8" "--sug-mode=ultra" ,scimax-aspell-language-option)
@@ -39,30 +42,19 @@
 			"\\[flyspell-correct-previous-word-generic]"))
 	      ;; return nil so word is still highlighted.
 	      nil))
+  (add-hook 'org-mode-hook 'turn-on-flyspell)
 
-  (add-hook 'org-mode-hook
-	    (lambda ()
-	      ;; do we need to start this? It seems like the first time your run
-	      ;; flyspell-mode you get a nil error, and the second time it
-	      ;; works.
-	      (ispell-init-process)
-	      (message "initializing spell-checkers!")
-	      (flyspell-mode +1)
-	      (flycheck-mode +1))
-	    t)
-
-  :after flyspell
-  :config
-  (progn
-    (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)))
+  :after flyspell)
 
 
 (defun scimax-ivy-jump-to-typo ()
   "Use AVY to jump to a typo"
   (interactive)
-  (avy-with avy-goto-typo
-    (avy-process (cl-loop for ov in (ov-in 'flyspell-overlay) collect (overlay-start ov)))
-    (avy--style-fn avy-style)))
+  (save-excursion
+    (avy-with avy-goto-typo
+      (avy-process (cl-loop for ov in (ov-in 'flyspell-overlay) collect (overlay-start ov)))
+      (avy--style-fn avy-style))
+    (flyspell-correct-wrapper)))
 
 
 ;;* flyspell save abbrevs
