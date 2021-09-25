@@ -279,7 +279,7 @@ Export functions should take one argument, the backend as a symbol, and they are
 	    :help-echo "Deletion. Right-click, s-click or s-o for menu."
 	    :accept-func sem-delete-editmark
 	    :reject-func sem-clear-editmark
-	    :export sem-export-delete )
+	    :export sem-export-delete)
 
     (insert :open-marker "{>+" :close-marker "+<}"
 	    :marker-face (:foreground "blue" :weight ultra-light)
@@ -394,8 +394,6 @@ Some editmarks can have a plist in them containing metadata. Here we define how 
 We split the string into words, and reassemble it into a plist.
 This is a very minimal parser to get away with not quoting things
 inside editmarks.
-
-
 
 I assume the content of the edit mark is all a plist like this
 
@@ -1180,6 +1178,8 @@ It is not so smart that it will prevent you from messing up a code block, or cro
 
 Here is a generic insert function. It offers completion on the types to insert.
 
+{>*I should use specific insert functions here if they exist.*<}
+
 #+BEGIN_SRC emacs-lisp
 (defun sem-insert (type)
   "Insert an editmark of TYPE.
@@ -1213,18 +1213,6 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 			     nil
 			     (region-end)))))
 	    (error "You are in an editmark. Nesting editmarks is not allowed."))
-
-	  ;; this messes up the region.
-	  ;; Make sure we are at word boundaries
-	  ;; (save-excursion
-	  ;;   (goto-char start)
-	  ;;   (unless (looking-at " \\|\\<")
-	  ;;     (backward-word)
-	  ;;     (setq start (point)))
-	  ;;   (goto-char end)
-	  ;;   (unless (looking-at " \\|\>")
-	  ;;     (forward-word)
-	  ;;     (setq end (point))))
 
 	  (setf (buffer-substring start end)
 		(concat (plist-get (cdr entry) :open-marker)
@@ -1741,7 +1729,7 @@ Finally we define a minor mode for the list view.
   (interactive)
   (let ((bounds (sem-content-bounds)))
     (goto-char (car bounds))
-    (flyspell-correct-word-generic)
+    (flyspell-correct-at-point)
     ;; This seems to be important to get the text properties fixed up before
     ;; clearing the editmark
     (save-excursion
@@ -1766,7 +1754,7 @@ Finally we define a minor mode for the list view.
   ("r" (sem-insert 'reply) "reply")
   ("i" (sem-insert 'insert) "insert")
   ("d" (sem-insert 'delete) "delete")
-  ("f" (sem-insert 'file) "file")
+  ("f" (sem-insert-file-editmark) "file")
   ("t" (sem-insert 'typo) "typo")
   ("k" (sem-insert 'task) "task")
   ("c" (insert "✓") "checkmark")
@@ -2012,6 +2000,8 @@ where it came from. Otherwise we just save the buffer."
 
 
  #+END_SRC
+
+
 
 ** Track changes mode
    :PROPERTIES:
