@@ -763,7 +763,7 @@ we go with the font color."
 	    (mapconcat
 	     (lambda (s)
 	       (format "@@html:<span style=\"color: %s; background-color: %s\">%s</span>@@"
-		       fg-hex bg-hex s))
+		       fg-hex bg-hex  s))
 	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
 							   (cdr content-bounds)))
 	     "@@html:<br>@@"))))))
@@ -1848,13 +1848,13 @@ in a copy of the buffer."
   ,#+latex_header: \\usepackage[normalem]{ulem}
   ,#+latex_header: \\usepackage{todonotes}
   ,#+latex_header: \\usepackage[usenames, dvipsnames]{color}
-  \\listoftodos\n")
+  \\listoftodos\n"))
 
-    (while (sem-next-editmark)
-      (let ((export-func (plist-get (cdr (assoc (get-text-property (point) 'sem-type) sem-editmarks)) :export)))
-	(if export-func
-	    (funcall export-func backend)
-	  (sem-export-default backend))))))
+  (while (sem-next-editmark)
+    (let ((export-func (plist-get (cdr (assoc (get-text-property (point) 'sem-type) sem-editmarks)) :export)))
+      (if export-func
+	  (funcall export-func backend)
+	(sem-export-default backend)))))
 
 
  #+END_SRC
