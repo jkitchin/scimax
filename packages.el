@@ -353,6 +353,10 @@
 							 :with-latex dvipng)))
 
 ;; this is a git submodule
+(use-package parsebib)
+(use-package helm)
+(use-package helm-bibtex)
+(use-package ivy-bibtex)
 (use-package org-ref
   :ensure nil
   :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
