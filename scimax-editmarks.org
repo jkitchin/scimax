@@ -727,13 +727,14 @@ we go with the font color."
 	 (fg-color (or (plist-get (get-text-property (point) 'face) :foreground) "black"))
 	 (bg-color (plist-get (get-text-property (point) 'face) :background))
 	 (fg-rgb (color-name-to-rgb fg-color))
-	 (fg-hex (apply 'color-rgb-to-hex fg-rgb))
+	 ;; the append (2) makes it use 24-bit color I think
+	 (fg-hex (apply 'color-rgb-to-hex (append fg-rgb '(2))))
 	 bg-rgb
 	 ;; this is white
 	 (bg-hex "#ffffff"))
     (when bg-color
       (setq bg-rgb (color-name-to-rgb bg-color)
-	    bg-hex (apply 'color-rgb-to-hex bg-rgb)))
+	    bg-hex (apply 'color-rgb-to-hex (append bg-rgb '(2)))))
 
     (cond
      ((eq 'latex backend)
@@ -763,12 +764,12 @@ we go with the font color."
 	    (mapconcat
 	     (lambda (s)
 	       (format "@@html:<span style=\"color: %s; background-color: %s\">%s</span>@@"
-		       fg-hex bg-hex  s))
+		       fg-hex
+		       bg-hex
+		       s))
 	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
 							   (cdr content-bounds)))
 	     "@@html:<br>@@"))))))
-
-
 #+END_SRC
 
 #+RESULTS:
