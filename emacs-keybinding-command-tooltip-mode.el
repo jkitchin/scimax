@@ -1,20 +1,47 @@
 ;;; emacs-keybinding-command-tooltip-mode.el --- A minor mode for emacs commands and keybindings
 
 ;;; Commentary:
-;; Makes the syntax \\[some-command] and `some-command' functional in a buffer.
+;; Makes the syntax \\[some-command] and `some-command' and (kbd "key-sequence") functional in a buffer.
 
 
 ;;; Code:
+(defun match-next-keystroke (&optional limit)
+  "Fontify (kbd \"keystrokes\")."
+  (while (re-search-forward "(kbd \"\\(.*\\)\")" limit t)
+    (let* ((describe `(lambda ()
+			(interactive)
+			(describe-key (kbd ,(match-string-no-properties 1)))))
+	   (beg (match-beginning 0))
+	   (end (match-end 0))
+	   (description (save-window-excursion
+			  (describe-key (kbd (match-string-no-properties 1)))
+			  (with-current-buffer "*Help*"
+			    (buffer-string))))
+	   (map (make-sparse-keymap)))
+      
+      (define-key map [mouse-1] describe)
+      
+      (add-text-properties
+       beg end
+       `(local-map ,map
+		   emacs-keybinding-command t
+		   mouse-face highlight
+		   face font-lock-constant-face
+		   help-echo ,(format
+			       "%s\n\nClick for documentation on key binding."
+			       description))))))
+
 
 (defun match-next-keybinding (&optional limit)
   "Move point to the next expression matching a key binding.
-LIMIT is the maximum point to search to. Then, put properties on
-the match that shows the key sequence. Non-bound commands are not
-fontified."
-  (when (and (re-search-forward
-	      "\\\\\\[\\([[:ascii:]]*?[^ ]\\)\\]"
-	      limit t)
-	     (fboundp (intern (match-string 1))))
+The syntax is \\[some-function] which in a help window is
+replaced by the keybinding. LIMIT is the maximum point to search
+to. Then, put properties on the match that shows the key
+sequence. Non-bound commands are not fontified."
+  (while (and (re-search-forward
+	       "\\\\\\[\\([[:ascii:]]*?[^ ]\\)\\]"
+	       limit t)
+	      (fboundp (intern (match-string 1))))
     (let* ((mdata (match-data))
 	   (beg (match-beginning 1))
 	   (end (match-end 1))
@@ -37,7 +64,9 @@ fontified."
       (add-text-properties
        beg end
        `(local-map ,map
+		   emacs-keybinding-command t
 		   mouse-face highlight
+		   face font-lock-constant-face
 		   help-echo ,(format
 			       "%s\n\nClick for documentation.\ns-mouse-1 to find function."
 			       (substitute-command-keys s))))
@@ -50,12 +79,12 @@ fontified."
 LIMIT is the maximum point to look for a match. Then put a
 tooltip on the match that shows the key sequence. Works on
 commands and variables."
-  (when (and (re-search-forward
-	      "`\\([[:ascii:]]*?\\)'"
-	      limit t)
-	     ;; Make sure the match is a variable or function
-	     (or (boundp (intern (match-string 1)))
-		 (fboundp (intern (match-string 1)))))
+  (while (and (re-search-forward
+	       "`\\([[:ascii:]]*?\\)'"
+	       limit t)
+	      ;; Make sure the match is a variable or function
+	      (or (boundp (intern (match-string 1)))
+		  (fboundp (intern (match-string 1)))))
     (let* ((mdata (match-data))
 	   (beg (match-beginning 1))
 	   (end (match-end 1))
@@ -94,7 +123,9 @@ commands and variables."
       (add-text-properties
        beg end
        `(local-map ,map
+		   emacs-keybinding-command t
 		   mouse-face highlight
+		   face font-lock-constant-face
 		   help-echo ,(format
 			       "%s\n%s\nClick for documentation.%s"
 			       (if (fboundp (intern command))
@@ -113,6 +144,7 @@ commands and variables."
       (set-match-data mdata)
       t)))
 
+
 ;;;###autoload
 (define-minor-mode emacs-keybinding-command-tooltip-mode
   "Fontify on emacs keybinding syntax.
@@ -124,20 +156,18 @@ get to the documentation."
       (progn
 	(font-lock-add-keywords
 	 nil
-	 '((match-next-keybinding 1 font-lock-constant-face)
-	   (match-next-emacs-command 1 font-lock-constant-face)))
+	 '((match-next-keybinding  font-lock-constant-face)
+	   (match-next-emacs-command  font-lock-constant-face)
+	   (match-next-keystroke  font-lock-constant-face)))
 	(add-to-list 'font-lock-extra-managed-props 'local-map))
     ;; turn them off
     (font-lock-remove-keywords
      nil
-     '((match-next-keybinding 1 font-lock-constant-face)
-       (match-next-emacs-command 1 font-lock-constant-face))))
+     '((match-next-keybinding  font-lock-constant-face)
+       (match-next-emacs-command  font-lock-constant-face)
+       (match-next-keystroke  font-lock-constant-face))))
   (font-lock-fontify-buffer))
 
-
-;; (add-hook 'org-mode-hook
-;; 	  (lambda ()
-;; 	    (emacs-keybinding-command-tooltip-mode +1)))
 
 (provide 'emacs-keybinding-command-tooltip-mode)
 
