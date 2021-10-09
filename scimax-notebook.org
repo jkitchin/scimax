@@ -90,14 +90,14 @@ Our concept of a notebook is that it is a directory that is a project as defined
   (make-directory nb-notebook-directory t))
 
 
-(defcustom nb-master-file (lambda (&optional name)
-			    "Return the master file name for the project."
+(defcustom nb-main-file (lambda (&optional name)
+			    "Return the main file name for the project."
 			    "README.org")
-  "A function that returns the master file in each project.
+  "A function that returns the main file in each project.
 The function must take one optional argument that is a project
 name. This function will be run in the root directory of the
-project. The function should return a string of the master file
-name. See `nb-example-master' for an example of a computed master
+project. The function should return a string of the main file
+name. See `nb-example-main' for an example of a computed main
 file."
   :group 'scimax-notebook
   :type 'function)
@@ -116,10 +116,10 @@ git will initialize the directory as a git repo."
   :type 'symbol)
 
 
-(defun nb-example-master (&optional name)
-  "Return the master filename for the project of NAME.
+(defun nb-example-main (&optional name)
+  "Return the main filename for the project of NAME.
 NAME is optional, and if it is nil, compute the filename from the
-current directory. In this example the master file is an org-file
+current directory. In this example the main file is an org-file
 with the name of the root directory, with a @ prefix so it sorts
 to the top of the directory with ls."
   (concat "@"
@@ -128,7 +128,7 @@ to the top of the directory with ls."
 
 (defcustom nb-switch-project-action
   (lambda ()
-    (find-file (read-file-name "File: " "." (funcall nb-master-file))))
+    (find-file (read-file-name "File: " "." (funcall nb-main-file))))
   "Function to run after switching projects with `nb-open'."
   :group 'scimax-notebook
   :type 'function)
@@ -150,12 +150,16 @@ We store all projects by default in nb-notebook-directory. You can use nested di
   (when (file-directory-p name)
     (user-error "%s already exists." name))
   (let ((dir (file-name-as-directory (expand-file-name name nb-notebook-directory)))
-	(nb-master-file-name (funcall nb-master-file name)))
+	(nb-main-file-name (funcall nb-main-file name)))
     (unless (file-directory-p dir)
       (make-directory dir t)
       (cond ((eq 'git nb-project-type)
 	     (let ((default-directory dir))
-	       (shell-command "git init")))
+	       (shell-command "git init")
+	       ;; We also should have a .projectile. I think this will make some
+	       ;; searches work on files not committed to the git repo. In any
+	       ;; case, it should not hurt anythin.
+	       (shell-command "touch .projectile")))
 	    ((eq 'projectile nb-project-type)
 	     (let ((default-directory dir))
 	       (shell-command "touch .projectile")))
@@ -163,7 +167,7 @@ We store all projects by default in nb-notebook-directory. You can use nested di
 	     (error "Unknown kind of project: %s" nb-project-type))))
     (projectile-add-known-project dir)
     (projectile-save-known-projects)
-    (find-file (expand-file-name nb-master-file-name dir))))
+    (find-file (expand-file-name nb-main-file-name dir))))
 
 
 #+END_SRC
@@ -176,7 +180,7 @@ This just uses a custom switch project action for opening an existing project.
 ;;;###autoload
 (defun nb-open ()
   "Switch to a project and open the main file.
-This is a thin wrapper on `projectile-switch-project' that opens the master file."
+This is a thin wrapper on `projectile-switch-project' that opens the main file."
   (interactive)
   (let ((projectile-switch-project-action nb-switch-project-action))
     (projectile-switch-project)))
