@@ -1005,11 +1005,11 @@ _l_: list registers
 (defhydra scimax-spellcheck (:color red :inherit (scimax-base/heads) :columns 3)
   "spell"
   ("b" flyspell-buffer "buffer")
-  ("p" flyspell-correct-previous-word-generic "correct previous")
+  ("p" flyspell-correct-previous "correct previous")
   ("n" flyspell-correct-next "correct next")
-  ("[" flyspell-goto-prev-error  "prev typo")
+  ("[" scimax-flyspell-goto-prev-error  "prev typo")
   ("]" flyspell-goto-next-error "next typo")
-  ("w" flyspell-correct-word-before-point "correct word")
+  ("w" flyspell-correct-wrapper "correct word")
   ("a" scimax-ivy-jump-to-typo "Jump to visible typo"))
 
 
