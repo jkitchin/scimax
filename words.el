@@ -136,6 +136,7 @@ This pops to *gramma* with the output."
     (error "gramma was not found. Go to https://caderek.github.io/gramma/"))
 
   (pop-to-buffer "*gramma*")
+  (erase-buffer)
   (insert (shell-command-to-string (format "gramma listen -p %S" text))))
 
 
@@ -193,8 +194,9 @@ This pops to *gramma* with the output."
   (interactive (list (words-at-point)))
   (browse-url
    (format
-    "http://search.crossref.org/?q=%s"
-    (url-hexify-string text))))
+    "http://search.crossref.org/?q=%s&from_ui=yes"
+    (replace-regexp-in-string "%20" "+"
+			      (url-hexify-string text)))))
 
 
 (defun words-pubmed (text)
@@ -211,7 +213,7 @@ This pops to *gramma* with the output."
   (interactive (list (words-at-point)))
   (browse-url
    (format
-    "http://arxiv.org/find/all/1/all:+AND+%s/0/1/0/all/0/1"
+    "https://arxiv.org/search/?query=%s&searchtype=all&abstracts=show&order=-announced_date_first&size=50"
     (url-hexify-string text))))
 
 
@@ -270,7 +272,6 @@ This pops to *gramma* with the output."
   "Speak TEXT.
 Uses `words-speech-program' and `words-speech-program-options'."
   (interactive (list (words-at-point)))
-
   (shell-command
    (concat words-speech-program " "
 	   words-speech-program-options " "
@@ -420,23 +421,41 @@ On Mac: brew reinstall translate-shell"
     (swiper-all)))
 
 
+;; (defun words-mdfind (query)
+;;   "Search mdfind with QUERY.
+;; Opens an org-buffer with links to results.  Mac only."
+;;   (interactive (list (words-at-point)))
+;;   (switch-to-buffer-other-window "*mdfind*")
+;;   (erase-buffer)
+;;   (insert
+;;    (mapconcat
+;;     (lambda (x)
+;;       (format "[[%s]]" x))
+;;     (split-string
+;;      (shell-command-to-string
+;;       (format "mdfind -name %s"
+;; 	      (shell-quote-argument query)))
+;;      "\n")
+;;     "\n"))
+;;   (org-mode))
+
+(defun words-mdfind-function (str)
+  (or
+   (ivy-more-chars)
+   (progn
+     (counsel--async-command
+      (format "mdfind -name \"%s\"" str))
+     '("" "working..."))))
+
+
 (defun words-mdfind (query)
   "Search mdfind with QUERY.
 Opens an org-buffer with links to results.  Mac only."
   (interactive (list (words-at-point)))
-  (switch-to-buffer-other-window "*mdfind*")
-  (erase-buffer)
-  (insert
-   (mapconcat
-    (lambda (x)
-      (format "[[%s]]" x))
-    (split-string
-     (shell-command-to-string
-      (format "mdfind -name %s"
-	      (shell-quote-argument query)))
-     "\n")
-    "\n"))
-  (org-mode))
+  (ivy-read "mdfind: " #'words-mdfind-function
+	    :initial-input query
+	    :dynamic-collection t
+	    :action #'find-file))
 
 
 (defun words-finder (query)
