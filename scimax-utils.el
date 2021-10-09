@@ -295,6 +295,119 @@ You can also try putting expressions in for formatting, e.g.:
   (interactive)
   (browse-url "https://github.com/jkitchin/scimax/issues"))
 
+;; * screenshots
+
+;; adapted from [[https://vmtyler.com/applescript-markdown-ready-screenshots/][AppleScript Markdown-Ready Screenshots | VMTyler.com]]
+(defun screenshot (&optional arg)
+  "Take a screenshot and insert org link.
+with prefix arg, minimize emacs first.
+with double prefix arg, prompt for filename.
+Only works on Mac OSX."
+  (interactive "P")
+  (when arg
+    (suspend-frame))
+
+  (unless (f-directory? "screenshots")
+    (make-directory "screenshots"))
+  (sit-for 0.2)
+
+  (let ((fname (if (<= (prefix-numeric-value arg) 4)
+		   (concat (format-time-string "date-%d-%m-%Y-time-%H-%M-%S" (current-time)) ".png")
+		 (read-file-name "filename to save in: "))))
+    (do-applescript
+     (mapconcat
+      'identity
+      (list (format "set screenshotFilePath to \"%s\"" (expand-file-name fname "screenshots"))
+	    "do shell script \"screencapture \" & \"-s\" & \" \" & quoted form of screenshotFilePath"
+	    (concat "set result to \"[[./" fname "]]\"")
+	    "set the clipboard to result")
+      "\n"))
+    (insert (format "\n\n#+attr_org: :width %s\n[[./%s]]\n\n"
+		    (min 800 (string-to-number
+			      (cl-first
+			       (split-string 
+				(cl-third
+				 (split-string
+				  (string-trim
+				   (shell-command-to-string
+				    (format "identify %s" fname)))))
+				"x"))))
+		    (concat "screenshots/"
+			    fname)))
+    (org-redisplay-inline-images)
+    (raise-frame)))
+
+(global-set-key (kbd "<f10>") 'screenshot)
+
+
+(defun pngpaste (&optional arg)
+  "Paste the clipboard image into org-mode.
+Relies on https://github.com/jcsalterego/pngpaste. With prefix
+ARG prompt for filename, else generate one. images are saved in
+./screenshots. That directory is created if necessary. "
+  (interactive "P")
+  (setq png
+	(if arg
+	    (read-file-name "PNG: ")
+	  (format-time-string "./screenshots/%Y-%m-%d:%H:%M:%S.png" (current-time))))
+  (unless (file-directory-p "./screenshots")
+    (make-directory "./screenshots"))
+  (when (eq 0 (shell-command (format "pngpaste %s" png)))
+    (insert (format "#+attr_org: :width %s\n"
+		    (min 800 (string-to-number
+			      (cl-first
+			       (split-string 
+				(cl-third
+				 (split-string
+				  (string-trim
+				   (shell-command-to-string
+				    (format "identify %s" png)))))
+				"x"))))))
+    (insert (format "[[%s]]\n" (if (file-name-absolute-p png)
+				   png
+				 (concat "./" png))))
+    ;; redraw so you can see them
+    (org-redisplay-inline-images)))
+
+
+(defun tesseract (&optional arg)
+  "Take a screenshot and insert org link.
+with prefix arg, minimize emacs first.
+With a double prefix, prompt for the filename.
+Only works on Mac OSX."
+  (interactive "P")
+  (when arg
+    (suspend-frame))
+
+  (unless (f-directory? "screenshots")
+    (make-directory "screenshots"))
+  (sit-for 0.2)
+
+  (let* ((fname (if (<= (prefix-numeric-value arg) 4)
+		    (concat (format-time-string "./screenshots/date-%d-%m-%Y-time-%H-%M-%S" (current-time)) ".png")
+		  (read-file-name "filename to save in: ")))
+	 (tmptext (make-temp-file "tesseract-"))
+	 (applescript (mapconcat
+		       'identity
+		       (list (format "set screenshotFilePath to \"%s\"" (expand-file-name fname))
+			     "do shell script \"screencapture \" & \"-s\" & \" \" & quoted form of screenshotFilePath"
+			     (concat "set result to \"[[" fname "]]\"")
+			     "set the clipboard to result")
+		       "\n"))
+	 (cmd (format-spec "tesseract %s %f && cat %f.txt"
+			   `((?s . ,fname)
+			     (?f . ,tmptext)))))
+
+    (message "applescript:\n%s\n" applescript)
+    
+    (do-applescript applescript)
+
+    (message "CMD: %S" cmd)
+    (insert (s-trim (shell-command-to-string cmd)))
+
+    (insert (format "\n\n[[./%s]]\n\n" fname))
+    (org-redisplay-inline-images)
+    (raise-frame)))
 
 ;; * The end
 (provide 'scimax-utils)
