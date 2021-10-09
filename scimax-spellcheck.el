@@ -2,21 +2,11 @@
 
 ;;; Commentary:
 ;;
-;; I currently use hunspell, because it seems more up to date than aspell. It is
-;; a little irritating to install though. For the Windows scimax, it should be
-;; bundled in the installed files. On a mac, you can brew install hunspell, but
-;; you have to download your own dictionaries and put them in
-;; ~/Library/Spelling. These are not currently part of scimax.
+;; [2021-10-03 Sun] Updating the documentation. I am back to using aspell. It
+;; isn't ideal, and previously I had used hunspell, but aspell seems easier to
+;; get working on Windows.
 ;;
-
-;; Adapted from https://manuel-uberti.github.io/emacs/2016/06/06/spellchecksetup/
-
-;; [2019-08-10 Sat] I took out some mac/windows specific things. The plan is to
-;; get this to work generally as much as possible, and not to hack a special
-;; solution for windows.
-(use-package ispell)
-
-(use-package flyspell)
+;; This setup uses `flyspell-correct-ivy'
 
 (defcustom scimax-aspell-language-option "--lang=en_US"
   "Option to use in `ispell-extra-args' to specify the default language."
@@ -24,31 +14,43 @@
   :group 'scimax-aspell)
 
 
+(setq ispell-program-name "aspell"
+      ispell-extra-args `("--encoding=utf-8" "--sug-mode=ultra" ,scimax-aspell-language-option))
+
+
+(use-package flyspell-correct
+  :after flyspell) 
+
+
 (use-package flyspell-correct-ivy
-  :ensure t
-  :bind ("C-;" . #'flyspell-correct-wrapper)
-  ("C-M-;" . #'scimax-ivy-jump-to-typo)
-  :init
-  (setq ispell-program-name "aspell"
-	ispell-extra-args `("--encoding=utf-8" "--sug-mode=ultra" ,scimax-aspell-language-option)
-	flyspell-correct-interface 'flyspell-correct-ivy)
+  :after flyspell-correct
+  :bind (:map flyspell-mode-map
+	      ("C-;" . flyspell-correct-wrapper)
+	      ("M-C-;" . scimax-ivy-jump-to-typo)
+	      ("s-M-;" . scimax-spellcheck/body)))
 
-  (add-hook 'flyspell-incorrect-hook
-	    (lambda (beg end sym)
-	      "Show a message that reminds me how to correct a misspelled word."
-	      (message "%s misspelled. Type %s to fix it."
-		       (buffer-substring beg end)
-		       (substitute-command-keys
-			"\\[flyspell-correct-previous-word-generic]"))
-	      ;; return nil so word is still highlighted.
-	      nil))
-  (add-hook 'org-mode-hook 'turn-on-flyspell)
 
-  :after flyspell)
+(defun scimax-incorrect-word-tooltip (beg end sym)
+  "Show a message that reminds me how to correct a misspelled word.
+Used in `flyspell-incorrect-hook'."
+  (message "%s misspelled. Type %s to fix it."
+	   (buffer-substring beg end)
+	   (substitute-command-keys
+	    "\\[flyspell-correct-wrapper]"))
+  ;; return nil so word is still highlighted.
+  nil)
+
+
+(defun scimax-flsypell-region-or-buffer (r1 r2)
+  "Run flyspell on region defined by R! and R2 or buffer."
+  (interactive "r")
+  (if (region-active-p)
+      (flyspell-region r1 r2)
+    (flyspell-buffer)))
 
 
 (defun scimax-ivy-jump-to-typo ()
-  "Use AVY to jump to a typo"
+  "Use AVY to jump to a typo, and correct it."
   (interactive)
   (save-excursion
     (avy-with avy-goto-typo
@@ -57,71 +59,75 @@
     (flyspell-correct-wrapper)))
 
 
-;;* flyspell save abbrevs
-
-;; I adapted this idea to define abbreviations while spell-checking
-;; This uses the ivy selection I prefer.
-;; http://endlessparentheses.com/ispell-and-abbrev-the-perfect-auto-correct.html
-;; I adapted this function in flyspell-correct.el
+(add-hook 'flyspell-incorrect-hook #'scimax-incorrect-word-tooltip)
+(add-hook 'org-mode-hook 'flyspell-mode)
 
 
-(defcustom scimax-save-spellcheck-abbrevs t
-  "If t save spellchecks as global-abbrevs.")
+;; Add action to correct and save abbrev. I implement this as an override advice
+;; because the actions are defined as closures in the function. This is a light
+;; adaptation of what is in `flyspell-correct-ivy'.
+(defun scimax-flyspell-correct-ivy (candidates word)
+  "Run `ivy-read' for the given CANDIDATES.
 
-;; Note this redefines an alias in flyspell-correct that points to
-;; `flyspell-correct-previous'.
-(defun flyspell-correct-previous-word-generic (position)
-  "Correct the first misspelled word that occurs before point.
-But don't look beyond what's visible on the screen.
+List of CANDIDATES is given by flyspell for the WORD.
 
-Uses `flyspell-correct-at-point' if installed or
-`flyspell-correct-word-generic' function for correction."
-  (interactive "d")
-  (let ((top (window-start))
-        (bot (window-end))
-        (incorrect-word-pos)
-        (position-at-incorrect-word))
-    (save-excursion
-      (save-restriction
-        ;; make sure that word under point is checked first
-        (forward-word)
+Return result according to `flyspell-correct-interface'
+specification."
+  (setq flyspell-correct-ivy--result nil)
+  (let* ((action-default
+          (lambda (x)
+            (setq flyspell-correct-ivy--result x)))
+         (action-save-word
+          (lambda (x)
+            (setq flyspell-correct-ivy--result
+                  (cons 'save (if (member x candidates) word x)))))
+         (action-accept-session
+          (lambda (x)
+            (setq flyspell-correct-ivy--result
+                  (cons 'session (if (member x candidates) word x)))))
+         (action-accept-buffer
+          (lambda (x)
+            (setq flyspell-correct-ivy--result
+                  (cons 'buffer (if (member x candidates) word x)))))
+         (action-skip-word
+          (lambda (x)
+            (setq flyspell-correct-ivy--result
+                  (cons 'skip (if (member x candidates) word x)))))
+         (action-stop
+          (lambda (x)
+            (setq flyspell-correct-ivy--result
+                  (cons 'stop (if (member x candidates) word x)))))
+	 ;; JRK added this
+	 (action-abbrev
+	  (lambda (x)
+	    ;; Correct
+	    (setq flyspell-correct-ivy--result x)
+	    ;; and add abbrev
+	    (define-abbrev global-abbrev-table word x)))
+         (action `(1
+                   ("o" ,action-default "correct")
+		   ("a" ,action-abbrev "correct and save abbrev")
+                   ("s" ,action-save-word "Save")
+                   ("S" ,action-accept-session "Accept (session)")
+                   ("b" ,action-accept-buffer "Accept (buffer)")
+                   ("k" ,action-skip-word "Skip")
+                   ("p" ,action-stop "Stop"))))
+    (ivy-read (format "Suggestions for \"%s\" in dictionary \"%s\": "
+                      word (or ispell-local-dictionary
+                               ispell-dictionary
+                               "Default"))
+              candidates
+              :action action
+              :keymap flyspell-correct-ivy-map
+              :caller 'flyspell-correct-ivy)
+    flyspell-correct-ivy--result))
 
-        ;; narrow the region
-        (narrow-to-region top bot)
-        (overlay-recenter (point))
 
-        (let ((overlay-list (overlays-in (point-min) (+ position 1)))
-              (overlay 'dummy-value))
-
-          (while overlay
-            (setq overlay (car-safe overlay-list))
-            (setq overlay-list (cdr-safe overlay-list))
-            (when (and overlay
-                       (flyspell-overlay-p overlay))
-              (setq position-at-incorrect-word (and (<= (overlay-start overlay) position)
-                                                    (>= (overlay-end overlay) position)))
-              (setq incorrect-word-pos (overlay-start overlay))
-              (setq overlay nil)))
-
-          (when incorrect-word-pos
-            (save-excursion
-              (goto-char incorrect-word-pos)
-	      (let (bef aft)
-		(setq bef (word-at-point))
-		;; See issue https://github.com/jkitchin/scimax/issues/336
-		(if (fboundp 'flyspell-correct-at-point)
-		    (flyspell-correct-at-point)
-		  (flyspell-correct-word-generic))
-		(goto-char incorrect-word-pos)
-		(setq aft (word-at-point))
-		(when (and scimax-save-spellcheck-abbrevs
-			   (not (string= bef aft)))
-		  (define-global-abbrev bef aft))))))))
-    (when position-at-incorrect-word
-      (forward-word))))
+(advice-add 'flyspell-correct-ivy :override #'scimax-flyspell-correct-ivy)
 
 
-(defun flyspell-goto-prev-error ()
+;; Adapted from flyspell-goto-next-error
+(defun scimax-flyspell-goto-prev-error ()
   "Go to the previous previously detected error.
 In general FLYSPELL-GOTO-PREV-ERROR must be used after
 FLYSPELL-BUFFER."
@@ -134,9 +140,9 @@ FLYSPELL-BUFFER."
 	  (if (= flyspell-old-pos-error min)
 	      ;; goto beginning of buffer
 	      (progn
-		(message "Restarting from beginning of buffer")
-		(goto-char (point-min)))
-	    (forward-word 1))
+		(message "Restarting from end of buffer")
+		(goto-char (point-max)))
+	    (backward-word 1))
 	  (setq pos (point))))
     ;; seek the next error
     (while (and (> pos min)
@@ -147,14 +153,13 @@ FLYSPELL-BUFFER."
 			(setq r t)
 		      (setq ovs (cdr ovs))))
 		  (not r)))
-      (setq pos (1+ pos)))
+      (setq pos (1- pos)))
     ;; save the current location for next invocation
     (setq flyspell-old-pos-error pos)
     (setq flyspell-old-buffer-error (current-buffer))
     (goto-char pos)
     (if (= pos min)
 	(message "No more miss-spelled word!"))))
-
 
 
 (provide 'scimax-spellcheck)
