@@ -145,6 +145,12 @@ commands and variables."
       t)))
 
 
+(defun ekm-ignore (beg end _sym)
+  "Hook function to ignore text fontified here."
+  (let ((ignore (get-text-property beg 'emacs-keybinding-command)))
+    ignore))
+
+
 ;;;###autoload
 (define-minor-mode emacs-keybinding-command-tooltip-mode
   "Fontify on emacs keybinding syntax.
@@ -159,13 +165,15 @@ get to the documentation."
 	 '((match-next-keybinding  font-lock-constant-face)
 	   (match-next-emacs-command  font-lock-constant-face)
 	   (match-next-keystroke  font-lock-constant-face)))
-	(add-to-list 'font-lock-extra-managed-props 'local-map))
+	(add-to-list 'font-lock-extra-managed-props 'local-map)
+	(add-hook 'flyspell-incorrect-hook 'ekm-ignore nil t))
     ;; turn them off
     (font-lock-remove-keywords
      nil
      '((match-next-keybinding  font-lock-constant-face)
        (match-next-emacs-command  font-lock-constant-face)
-       (match-next-keystroke  font-lock-constant-face))))
+       (match-next-keystroke  font-lock-constant-face)))
+    (remove-hook 'flyspell-incorrect-hook 'ekm-ignore t))
   (font-lock-fontify-buffer))
 
 
