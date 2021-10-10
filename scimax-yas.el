@@ -13,16 +13,20 @@
 
 (require 'yasnippet)
 
+
 (defcustom scimax-snippet-dir (expand-file-name "snippets" scimax-dir)
   "Directory to store snippets in."
   :group 'scimax
   :type 'directory)
 
+
 (unless (file-directory-p scimax-snippet-dir)
   (make-directory scimax-snippet-dir t))
 
+
 (add-to-list 'yas-snippet-dirs scimax-snippet-dir)
 (yas-global-mode 1)
+
 
 (defun scimax-ivy-yas ()
   "Interactively insert a snippet.
