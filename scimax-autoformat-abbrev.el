@@ -1,6 +1,6 @@
 ;;; scimax-autoformat-abbrev.el --- Autoformatting and abbreviations in scimax  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017  John Kitchin
+;; Copyright (C) 2017-2021  John Kitchin
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
 ;; Keywords:
@@ -64,6 +64,8 @@
 
 ;;* Customization variables
 
+;; ** Autoformatting
+
 (defcustom scimax-autoformat-superscripts t
   "Determines if words ending in a number should be superscripted."
   :group 'scimax-autoformat
@@ -99,6 +101,8 @@
   :group 'scimax-autoformat
   :type '(repeat function))
 
+;; ** Abbreviations
+
 (defcustom scimax-abbrev-function
   (lambda ()
     (and
@@ -112,7 +116,7 @@ abbreviation should be expanded at the current point."
   :group 'scimax
   :type 'function)
 
-;;** Months
+;;*** Months
 ;; Note: I disabled the May abbrev. I found I use the word may a lot, and it was too annoying to undo.
 (defcustom scimax-month-abbreviations
   '(("january" "January")
@@ -143,7 +147,7 @@ abbreviation should be expanded at the current point."
   :group 'scimax-autoformat
   :type '(repeat (list string string)))
 
-;;** Weekdays
+;;*** Weekdays
 
 (defcustom scimax-weekday-abbreviations
   '(("monday" "Monday")
@@ -166,7 +170,7 @@ abbreviation should be expanded at the current point."
   :type '(repeat (list string string)))
 
 
-;;** Contractions
+;;*** Contractions
 
 (defcustom scimax-contraction-abbreviations
   '(("arent" "are not")
@@ -192,7 +196,7 @@ them with the full version."
   :type '(repeat (list string string)))
 
 
-;;** transposed letter words
+;;*** transposed letter words
 
 (defcustom scimax-transposition-abbreviations
   '(("adn" "and")
@@ -213,7 +217,7 @@ them with the full version."
   :type '(repeat (list string string)))
 
 
-;;** Common Chemical Formulas
+;;*** Common Chemical Formulas
 
 (defcustom scimax-chemical-formula-abbreviations
   '(("co2" "CO_{2}")
@@ -229,7 +233,7 @@ them with the full version."
   :type '(repeat (list string string)))
 
 
-;;** Misc. abbreviations
+;;*** Misc. abbreviations
 
 (defcustom scimax-misc-abbreviations
   '(("degC" "°C")
@@ -243,6 +247,18 @@ them with the full version."
   :group 'scimax-autoformat
   :type '(repeat (list string string)))
 
+
+;; *** abbreviation list
+
+(defcustom scimax-abbreviations
+  '(scimax-month-abbreviations
+    scimax-weekday-abbreviations
+    scimax-contraction-abbreviations
+    scimax-transposition-abbreviations
+    scimax-chemical-formula-abbreviations
+    scimax-misc-abbreviations)
+  "List of abbreviation symbols."
+  :group 'scimax-autoformat)
 
 
 ;;* Autoformat mode in org-mode
@@ -262,6 +278,7 @@ them with the full version."
 
 
 (defun scimax-org-autoformat-transposed-caps ()
+  "If you write hTe, fixes it to The."
   (interactive)
   (when (and scimax-autoformat-transposed-caps
 	     (eq major-mode 'org-mode)
@@ -343,7 +360,6 @@ This is run as a post-self-insert-hook in `scimax-autoformat-mode'."
 
 ;;* Abbreviations
 
-
 (defun scimax-toggle-abbrevs (sym &optional state)
   "Toggle the abbrevs in SYM.
 If STATE is nil then toggle the state.
@@ -355,12 +371,7 @@ define the definitions."
    (list
     (intern (ivy-read
 	     "Collection: "
-	     '(scimax-month-abbreviations
-	       scimax-weekday-abbreviations
-	       scimax-contraction-abbreviations
-	       scimax-transposition-abbreviations
-	       scimax-chemical-formula-abbreviations
-	       scimax-misc-abbreviations)))
+	     ))
     current-prefix-arg))
 
   (let ((currently-enabled (get sym 'enabled)))
@@ -391,6 +402,16 @@ define the definitions."
 					      (nil . "disabled")))))))
 
 
+(define-minor-mode scimax-abbrev-mode
+  "Toggle scimax abbrev-mode on."
+  :init-value nil
+  (if scimax-abbrev-mode
+      ;; turn on
+      (dolist (sym scimax-abbreviations)
+	(scimax-toggle-abbrevs sym 1))
+    ;; turn off
+    (dolist (sym scimax-abbreviations)
+      (scimax-toggle-abbrevs sym -1))))
 
 
 ;;* Abbrev/spell-check
