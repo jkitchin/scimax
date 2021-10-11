@@ -349,7 +349,7 @@ ARG prompt for filename, else generate one. images are saved in
   (setq png
 	(if arg
 	    (read-file-name "PNG: ")
-	  (format-time-string "./screenshots/%Y-%m-%d:%H:%M:%S.png" (current-time))))
+	  (format-time-string "./screenshots/%Y-%m-%d-%H-%M-%S.png" (current-time))))
   (unless (file-directory-p "./screenshots")
     (make-directory "./screenshots"))
   (when (eq 0 (shell-command (format "pngpaste %s" png)))
@@ -398,11 +398,8 @@ Only works on Mac OSX."
 			   `((?s . ,fname)
 			     (?f . ,tmptext)))))
 
-    (message "applescript:\n%s\n" applescript)
-    
     (do-applescript applescript)
 
-    (message "CMD: %S" cmd)
     (insert (s-trim (shell-command-to-string cmd)))
 
     (insert (format "\n\n[[./%s]]\n\n" fname))
