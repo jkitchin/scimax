@@ -156,6 +156,7 @@ With prefix arg NEW, always insert new cell."
 (defun scimax-ob-jump-to-visible-block ()
   "Jump to a visible src block with avy."
   (interactive)
+  (org-mark-ring-push)
   (avy-with scimax-ob-jump-to-block
     (avy-jump "#\\+BEGIN_SRC"  nil (point-min) (point-max))))
 
@@ -182,6 +183,7 @@ Defaults to 3."
 	      p)))
     (ivy-read "block: " (reverse p)
 	      :action (lambda (candidate)
+			(org-mark-ring-push)
 			(goto-char (point-min))
 			(forward-line (1- (second candidate)))
 			(outline-show-entry)
@@ -199,6 +201,7 @@ Defaults to 3."
 	      p)))
     (ivy-read "inline: " (reverse p)
 	      :action (lambda (candidate)
+			(org-mark-ring-push)
 			(goto-char (second candidate))
 			(recenter)))))
 
@@ -207,6 +210,7 @@ Defaults to 3."
 (defun scimax-ob-jump-to-header ()
   "Jump to src header."
   (interactive)
+  (org-mark-ring-push)
   (let* ((src-info (org-babel-get-src-block-info 'light))
 	 (header-start (sixth src-info)))
     (goto-char header-start)))
@@ -215,6 +219,7 @@ Defaults to 3."
 (defun scimax-ob-jump-to-first-line ()
   "Move point to start of first line in the src block."
   (interactive)
+  (org-mark-ring-push)
   (org-edit-special)
   (goto-char (point-min))
   (org-edit-src-exit))
@@ -223,6 +228,7 @@ Defaults to 3."
 (defun scimax-ob-jump-to-end-line ()
   "Move point to end of last line in the src block."
   (interactive)
+  (org-mark-ring-push)
   (org-edit-special)
   (goto-char (point-max))
   (org-edit-src-exit))
@@ -231,6 +237,7 @@ Defaults to 3."
 (defun scimax-ob-jump-to-end ()
   "Jump to src block end."
   (interactive)
+  (org-mark-ring-push)
   (let* ((src (org-element-context))
 	 (nlines (org-element-property :post-blank src)))
 
