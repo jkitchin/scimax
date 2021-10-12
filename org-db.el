@@ -34,7 +34,8 @@
 ;; `org-db-properties' searches properties, although I don't find it that useful
 ;; `org-db-editmarks' searches your editmarks
 ;; `org-db-email-addresses' finds email addresses in your files.
-;;
+;; `org-db-src-blocks' search src-blocks
+
 ;; `org-db-toggle-org-id' If you want to use org-db to jump to an org-id instead
 ;; of `org-id-goto'. I find the built-in function to slow for me.
 ;;
@@ -1097,7 +1098,8 @@ If point is not looking back on a space insert a comma separator."
     (ivy-read "Location: " candidates :action '(1
 						("o" (lambda (x)
 						       (find-file (plist-get (cdr x) :filename))
-						       (goto-char (plist-get (cdr x) :begin))))
+						       (goto-char (plist-get (cdr x) :begin)))
+						 "open")
 						("l" (lambda (x)
 						       (let ((link)
 							     (candidate (cdr x)))
@@ -1108,7 +1110,8 @@ If point is not looking back on a space insert a comma separator."
 							   (setq link (format
 								       "[[location:%s][%s]]" (org-id-get-create)
 								       (nth 4 (org-heading-components)))))
-							 (insert link))))))))
+							 (insert link)))
+						 "insert link")))))
 
 
 ;; * org-db src-blocks
@@ -1360,7 +1363,7 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
 						:inner :join files
 						:on (= files:rowid file-hashtags:filename-id)]))
 	 (candidates (cl-loop for (hashtag begin fname) in hashtag-data
-			      collect (list (format "%40s  %s" hashtag fname) :hashtag hashtag :begin begin :filename fname))))
+			      collect (list (format "#%40s  %s" (s-pad-right 40 " " hashtag) fname) :hashtag hashtag :begin begin :filename fname))))
 
     (ivy-read "#hashtag: " candidates :initial-input tip
 	      :action
@@ -1581,19 +1584,23 @@ This finds other files with links in them to this file."
 (defhydra org-db (:color blue :hint nil)
   "org-db search
 "
-  ("h" org-db-headings "headlines")
-  ("c" org-db-contacts "contacts")
-  ("l" org-db-locations "locations")
-  ("e" org-db-email-addresses "email")
-  ("m" org-db-editmarks "editmarks")
-  ("p" org-db-properties "properties")
-  ("3" org-db-hashtags "hashtags")
-  ("f" org-db-recentf "recent files")
-  ("k" org-db-links "links")
-  ("b" org-db-backlinks "backlinks")
-  ("2" org-db-@ "@-labels")
-  ("i" org-db-images "images")
-  ("s" org-db-src-blocks "src-blocks"))
+  ("h" org-db-headings "headlines" :column "org element")
+  ("p" org-db-properties "properties" :column "org element")
+  ("s" org-db-src-blocks "src-blocks" :column "org element")
+  ("k" org-db-links "links" :column "org element")
+  ("b" org-db-backlinks "backlinks" :column "org element")
+  ("i" org-db-images "images" :column "org element")
+
+  ("c" org-db-contacts "contacts" :column "derived")
+  ("l" org-db-locations "locations" :column "derived")
+  
+  ("e" org-db-email-addresses "email" :column "pattern")
+  ("m" org-db-editmarks "editmarks"  :column "pattern")
+  ("3" org-db-hashtags "hashtags"  :column "pattern")
+  ("2" org-db-@ "@-labels"  :column "pattern")
+
+  ("f" org-db-files "files")
+  ("r" org-db-recentf "recent files"))
 
 
 
