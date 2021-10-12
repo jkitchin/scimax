@@ -161,7 +161,7 @@ With prefix arg NEW, always insert new cell."
     (avy-jump "#\\+BEGIN_SRC"  nil (point-min) (point-max))))
 
 
-(defun scimax-ob-jump-to-block (&optional N)
+(defun scimax-ob-jump-to-src-block (&optional N)
   "Jump to a block in the buffer.
 If narrowing is in effect, only a block in the narrowed region.
 Use a numeric prefix N to specify how many lines of context to use.
