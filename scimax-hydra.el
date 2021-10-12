@@ -366,39 +366,46 @@ _p_: ffap
   ("b" insert-buffer "Buffer")
   ("c" org-db-contacts "Contact")
   ("e" ivy-insert-org-entity "Org-entity")
-  ("f" insert-file "File")
+  ("f" insert-file "File contents")
   ("k" org-inlinetask-insert-task "org task")
   ;; ("l" ) a link function...
   ("L" lorem-ipsum-insert-paragraphs "Lorem ipsum" :color red)
-  ("n" insert-char "Unicode char")
+  ("u" insert-char "Unicode char")
   ("p" insert-parentheses "Parentheses")
   ("r" insert-register "Register")
-  ("s" screenshot "org screenshot")
+  ("ss" screenshot "screenshot")
+  ("sp" pngpaste  "Paste image")
+  ("st" tesseract "screenshot with OCR")
   ("t" org-time-stamp-inactive "Inactive [timestamp]")
   ("T" org-time-stamp "Active <timestamp>")
-  ("y" yas-insert-snippet "yasnippet"))
+  ("y" ivy-yasnippet "yasnippet"))
 
 ;;** jump
 
 (defhydra scimax-jump (:color blue :inherit (scimax-base/heads) :columns 3)
   "jump"
-  ("<" beginning-of-buffer "Beginning of buffer")
-  (">" end-of-buffer "End of buffer")
-  ("a" beginning-of-line "Beginning of line")
-  ("b" counsel-ibuffer "Buffer")
-  ("d" ace-window "Ace window")
-  ("e" end-of-line "End of line")
-  ("c" (scimax-open-hydra scimax-jump-char/body) "Char")
-  ("g" goto-line "Goto line")
-  ("h" org-db-headings "org-db-heading")
-  ("l" (scimax-open-hydra scimax-jump-line/body) "Line")
-  ("k" ace-link "Link")
-  ("o" (scimax-open-hydra scimax-jump-org/body) "Org")
-  ("p" avy-jump-to-paragraph "Paragraph")
-  ("r" counsel-recentf "Recent file")
-  ("s" avy-jump-to-sentence "Sentence")
-  ("w" (scimax-open-hydra scimax-jump-word/body) "Word")
-  ("y" (scimax-open-hydra scimax-jump-symbol/body) "Symbol" ))
+  ("<" beginning-of-buffer "Beginning of buffer" :column "line")
+  (">" end-of-buffer "End of buffer" :column "line")
+
+  ("a" beginning-of-line "Beginning of line" :column "line")
+  ("e" end-of-line "End of line" :column "line")
+  ("g" goto-line "Goto line" :column "line")
+  ("l" (scimax-open-hydra scimax-jump-line/body) "Line" :column "line")
+
+  ("c" (scimax-open-hydra scimax-jump-char/body) "Char" :column "text")
+  ("w" (scimax-open-hydra scimax-jump-word/body) "Word" :column "text")
+  ("s" avy-jump-to-sentence "Sentence" :column "text")
+  ("p" avy-jump-to-paragraph "Paragraph" :column "text")
+  ("y" (scimax-open-hydra scimax-jump-symbol/body) "Symbol" :column "text")
+
+  
+  ("h" org-db-headings "org-db-heading" :column "org")
+  ("k" ace-link "Link"  :column "org")
+  ("o" (scimax-open-hydra scimax-jump-org/body) "Org"  :column "org")
+  
+  ("b" counsel-ibuffer "Buffer" :column "misc")
+  ("d" ace-window "Ace window" :column "misc")
+  ("r" counsel-recentf "Recent file" :column "misc"))
 
 
 (defhydra scimax-jump-char (:color blue :inherit (scimax-base/heads) :columns 3)
@@ -413,28 +420,31 @@ _p_: ffap
 
 (defhydra scimax-jump-line (:color blue :inherit (scimax-base/heads) :columns 3)
   "line"
+  ("l" avy-goto-line "Line")
   ("a" avy-goto-line-above "Above")
-  ("b" avy-goto-line-below "Below")
-  ("l" avy-goto-line "Line"))
+  ("b" avy-goto-line-below "Below"))
 
 
 (defhydra scimax-jump-org (:color blue :inherit (scimax-base/heads) :columns 3)
   "org"
-  ("a" ivy-org-jump-to-agenda-heading "Agenda heading")
-  ("bb" scimax-jump-to-block "Jump to block")
-  ("bv" scimax-jump-to-visible-block "Jump to visible block")
-  ("d" ivy-org-jump-to-heading-in-directory "Directory heading")
-  ("h" ivy-org-jump-to-heading "Heading")
-  ("k" ace-link "link")
-  ("o" ivy-org-jump-to-open-headline "Open heading")
-  ("p" ivy-org-jump-to-project-headline "Project heading")
-  ("v" ivy-org-jump-to-visible-headline "Visible heading"))
+  ("v" ivy-org-jump-to-visible-headline "Visible heading" :column "heading")
+  ("h" ivy-org-jump-to-heading "Heading" :column "heading")
+  ("o" ivy-org-jump-to-open-headline "Open heading" :column "heading")
+  ("d" ivy-org-jump-to-heading-in-directory "Directory heading" :column "heading")
+  ("p" ivy-org-jump-to-project-headline "Project heading" :column "heading")
+  ("a" ivy-org-jump-to-agenda-heading "Agenda heading" :column "heading")
+  
+  ("bb" scimax-ob-jump-to-src-block "Jump to src-block" :column "block")
+  ("bv" scimax-ob-jump-to-visible-src-block "Jump to visible src-block" :column "block")
+  ("bi" scimax-ob-jump-to-inline-src "Jump to inline src" :column "block")
+
+  ("k" ace-link "link" :column "misc"))
 
 
 (defhydra scimax-jump-word (:color blue :inherit (scimax-base/heads) :columns 3)
   "word"
-  ("l" avy-jump-to-word-in-line "in line")
   ("w" avy-goto-word-1 "word1")
+  ("l" avy-jump-to-word-in-line "in line")
   ("0" avy-goto-word-0 "word0")
   ("a" avy-goto-word-0-above "above-0")
   ("A" avy-goto-word-1-above "above-1")
@@ -447,9 +457,9 @@ _p_: ffap
 
 (defhydra scimax-jump-symbol (:color blue :inherit (scimax-base/heads) :columns 3)
   "symbol"
+  ("y" avy-goto-symbol-1 "symbol")
   ("a" avy-goto-symbol-1-above "Above")
-  ("b" avy-goto-symbol-1-below "below")
-  ("y" avy-goto-symbol-1 "symbol"))
+  ("b" avy-goto-symbol-1-below "below"))
 
 ;;** bookmarks
 
