@@ -496,7 +496,7 @@ Additionally, you can generate different outputs of an org-file:
 
 We have templates prepared for the following manuscripts, proposals and documents.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp  :exports both
 (mapcar (lambda (x) (list (plist-get x :template))) (ox-manuscript-candidates))
 #+END_SRC
 
@@ -894,7 +894,7 @@ Here are the bibtex entry types and fields you should use. You can add extra fie
 
 Scimax provides hotkeys for when your cursor is on the @ at the beginning of an entry. Here are the currently defined hotkeys.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp  :exports both
 (require 'bibtex-hotkeys)
 (cl-loop for (key . desc) in bibtex-hotkeys collect (list key desc))
 #+END_SRC
@@ -964,7 +964,7 @@ You can also enter a contact link with completion, e.g. type C-x C-l and select 
 
 We also define several org heading speed commands for contacts.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp : :exports both
 (cl-loop for (key . cmd) in scimax-contacts-speed-commands
 	 collect (list key (documentation cmd)))
 #+END_SRC
@@ -1280,7 +1280,7 @@ Pygments doesn't support ipython out of the box for some reason, which is a prob
 
 ob-ipython allows you to use Ipython magic commands in your src blocks. Here is a protypical Ipython src block with a line magic.
 
-#+BEGIN_SRC ipython
+#+BEGIN_SRC ipython  :exports both
 %time print("hello world")
 a = 6
 #+END_SRC
@@ -1301,7 +1301,7 @@ And a block with cell magic.
 
 We have made a few improvements to ob-ipython (see [[./scimax-ipython.org]] for much more detail). Inline images are supported now similar to how they are supported in the Jupyter notebook. You specify the %matplotlib inline magic, and then plots will appear "inline" along with any output from your cell block. The plots are saved in a directory ipython-inline-images in filenames derived from and md5 hash of the image. You can have more than one image, and you also get the output from your block, similar to the way the Jupyter notebook behaves.
 
-#+BEGIN_SRC ipython
+#+BEGIN_SRC ipython  :exports both
 print('Hello world!')
 
 %matplotlib inline
@@ -1359,7 +1359,7 @@ a + b
 
 We also support HTML and Latex outputs like this. The results will contain an HTML or LaTeX block. As with the Jupyter notebook
 
-#+BEGIN_SRC ipython
+#+BEGIN_SRC ipython  :exports both
 from IPython.display import HTML, Latex
 
 HTML('H<sub>2</sub>O')
@@ -1374,7 +1374,7 @@ H<sub>2</sub>O
 
 and
 
-#+BEGIN_SRC ipython
+#+BEGIN_SRC ipython  :exports both
 Latex('H$_2$O')
 #+END_SRC
 
@@ -1392,7 +1392,7 @@ As with the Jupyter notebook, only the last returned cell is rendered.
 
 We finally have asynchronous execution of ipython blocks. This allows you to run a block, and keep working in Emacs. A temporary string is inserted into the results which is replaced when the code is done running. This command will make a clickable link to interrupt the kernel, or cancel the cell running. This will put names on every src block if they are not already named.
 
-#+BEGIN_SRC ipython
+#+BEGIN_SRC ipython  :exports both
 import time
 time.sleep(5)
 #print(8)
@@ -1663,7 +1663,7 @@ Here are some additional actions we define for `counsel-find-file'.
 
 Scimax uses a central hydra to launch a key-driven menu of commonly used commands.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp  :exports both
 (describe-function 'scimax/body)
 #+END_SRC
 
@@ -1817,7 +1817,7 @@ If you need sophisticated structured searches,  check out `org-ql-select' and `o
 
 For example, this searches the current buffer for a heading matching "queries", and it returns a data structure.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp  :exports both
 (org-ql-select (current-buffer) '(heading "queries"))
 #+END_SRC
 
@@ -1826,7 +1826,7 @@ For example, this searches the current buffer for a heading matching "queries", 
 
 Or from a file
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp  :exports both
 (org-ql-select "scimax.org" '(heading "queries"))
 #+END_SRC
 
@@ -1835,7 +1835,7 @@ Or from a file
 
 Or from a list of files.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp  :exports both
 (org-ql-select '("scimax.org" "README.org") '(or (heading "queries") (heading "users")))
 #+END_SRC
 
@@ -1849,6 +1849,7 @@ Or from a list of files.
 I don't use this library enough.
 
 * Navigation in scimax
+
 Navigation is almost as complex as searching, and it means moving your cursor to the place you want it to be. Yes, you can use a mouse or arrow keys. There are often faster ways to get what you want though. In scimax see `scimax-navigation/body' which provides ways to navigate by:
 
 - character
