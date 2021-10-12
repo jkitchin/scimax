@@ -252,7 +252,7 @@ f(x) = 2 e^x
 
 Here is a list of installed latex classes.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :exports both
 (mapcar 'car org-latex-classes)
 #+END_SRC
 
