@@ -577,11 +577,7 @@ Scimax-Journal"
   ("ar" scimax-journal-agenda-range "agenda range" :column "Agenda")
   ("aw" scimax-journal-agenda-last-week "agenda last week"  :column "Agenda")
   ("am" scimax-journal-agenda-last-month "agenda last month"  :column "Agenda")
-  ("ay" scimax-journal-agenda-last-year "agenda last year"  :column "Agenda")
-
-
-
-  )
+  ("ay" scimax-journal-agenda-last-year "agenda last year"  :column "Agenda"))
 
 
 
