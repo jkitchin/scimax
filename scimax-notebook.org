@@ -274,17 +274,9 @@ For example, if you delete or rename an org-file you will get an error that it c
 
 
 ;;;###autoload
-(defun nb-agenda (project &optional all-org-files)
-  "Show org-agenda for org-files in the notebook."
-  (interactive (list (completing-read "Project: "
-				      (mapcar 'expand-file-name
-					      (append
-					       (list (projectile-project-root
-						      (projectile-project-name)))
-					       (projectile-relevant-known-projects)))
-				      nil t
-				      (projectile-project-root (projectile-project-name)))
-		     current-prefix-arg))
+(defun nb-agenda (&optional all-org-files)
+  "Show org-agenda for org-files in the current notebook."
+  (interactive "P")
   (let ((org-agenda-files (if (or all-org-files
 				  (null nb-agenda-files))
 			      (nb-org-files)
@@ -356,8 +348,7 @@ An alternative is tar."
 (defcustom nb-archive-command-options "-r"
   "Command options to make archives.
 For tar you want -czf for a tar.gz
-or tar -cjf for a bzipped file
-For bzip2 you want "
+or tar -cjf for a bzipped file"
   :group 'scimax-notebook
   :type 'string)
 
@@ -370,19 +361,19 @@ For tar with -cjf I recommend .tbz2"
   :type 'string)
 
 
-(defun nb-archive (zip-file project)
+(defun nb-archive (zip-file)
   "Create an archive file of the project.
 The type of archive is determined by `nb-archive-command'."
   (interactive (list (read-string
 		      "Archive name: "
-		      (concat (projectile-project-name) nb-archive-extension))
-		     (projectile-completing-read "Project: "
-						 (projectile-relevant-known-projects))))
-  (let ((default-directory project))
-    (message
-     (format "%s %s %s \"%s\""
-	     nb-archive-command nb-archive-command-options
-	     zip-file project))))
+		      (concat (projectile-project-name) nb-archive-extension))))
+  (let ((default-directory (projectile-project-root)))
+    (message "%s"
+	     (shell-command-to-string
+	      (format-spec "%c %o %z ."
+			   `((?c . ,nb-archive-command)
+			     (?o . ,nb-archive-command-options)
+			     (?z . ,zip-file)))))))
 
 
 #+END_SRC
@@ -716,7 +707,9 @@ TODO: add a time stamp or log entry or date assigned property?"
 		:action '(1
 			  ("a"
 			   (lambda (participant)
-			     (setq emails (append emails (list (cdr participant))))
+			     (setq emails (append
+					   (org-entry-get-multivalued-property (point) "ASSIGNEDTO")
+					   (list (cdr participant))))
 			     (with-ivy-window
 			       (apply 'org-entry-put-multivalued-property (point)
 				      "ASSIGNEDTO" emails)
@@ -1338,27 +1331,31 @@ prj:students::README.org
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 (defhydra nb-hydra (:hint nil :color blue)
-  "
-navigation      search              utilities            link
---------------------------------------------------------------------------------
-_f_: file       _sa_: search all   _b_: Open in bash      _o_: open other window
-_d_: dir        _ss_: search some  _e_: Open in explorer  _O_: open other frame
-_D_: open root  _sb_: search bufs  _n_: new notebook      _y_: open with sys
+  "scimax-notebook
 "
-  ("b" bash "bash")
-  ("e" explorer "explorer")
-  ("f" projectile-find-file-dwim "find-file")
-  ("d" projectile-find-dir "find dir")
-  ("D" projectile-dired "open root in dired")
-  ("n" nb-new "new notebook")
+  
+  ("f" projectile-find-file-dwim "find-file" :column "navigation")
+  ("d" projectile-find-dir "find dir" :column "navigation")
+  ("D" projectile-dired "open root in dired" :column "navigation")
+  ("c" nb-contacts "Notebook contact" :column "navigation")
 
-  ("sa" nb-search-all "search all files")
-  ("ss" nb-search "search some files")
-  ("sb" projectile-multi-occur "search nb buffers")
-  ("st" nb-search-title "Search by title/date")
-  ("o" nb-follow-other "open other window")
-  ("O" nb-follow-other-frame "Open other frame")
-  ("y" nb-follow-sys "Open with system program"))
+  ("sa" nb-search-all "search all files" :column "search")
+  ("ss" nb-search "search some files" :column "search")
+  ("sb" projectile-multi-occur "search nb buffers" :column "search")
+  ("st" nb-search-title "Search by title/date" :column "search")
+
+  ("n" nb-new "new notebook" :column "utilities")
+  ("o" nb-open "open notebook" :column "utilities")
+  ("a" nb-agenda "notebook agenda" :column "utilities")
+  ("t" nb-set-tags "set tags" :column "utilities")
+  ("b" bash "bash" :column "utilities")
+  ("e" explorer "explorer" :column "utilities")
+  ("p" hydra-projectile/body "projectile" :column "utilities")
+  ("r" nb-archive "make archive" :column "utilities")
+  
+  ("C-<return>" nb-follow-other "open other window" :column "link")
+  ("S-<return>" nb-follow-other-frame "Open other frame" :column "link")
+  ("M-<return>" nb-follow-sys "Open with system program" :column "link"))
 
 #+END_SRC
 
