@@ -182,31 +182,24 @@ This is a macro so I don't have to quote the hydra name."
 				     :pre (scimax-app-hints)
 				     :color blue
 				     :inherit (scimax-base/heads))
-  "
-applications
-Emacs                 OS            Web
------------------------------------------------------
-_d_: dired           _b_: bash      _g_: browser
-_j_: journal         _f_: finder    _c_: google calendar
-^ ^                  _o_: Office    _s_: GSuite
-_r_: %s`elfeed-count
-------------------------------------------------------
-commands
-_k_: list packages _m_: compose mail
-------------------------------------------------------
-"
+  "applications"
 
-  ("b" bash)
-  ("c" google-calendar)
-  ("d" dired)
-  ("f" finder)
-  ("j" scimax-journal/body)
-  ("g" google)
-  ("k" package-list-packages)
-  ("m" compose-mail)
-  ("o" (scimax-open-hydra scimax-office/body))
-  ("s" (scimax-open-hydra scimax-gsuite/body))
-  ("r" elfeed))
+  ("d" dired "dired" :column  "Emacs")
+  ("j" scimax-journal/body "journal" :column "Emacs")
+  ("n" nb-hydra/body "notebook" :column "Emacs")
+  ("r" elfeed "elfeed" :column "Emacs")
+  
+  ("b" bash "bash" :column "OS")
+  ("f" finder "Finder" :column "OS")
+
+  ("c" google-calendar "Calendar" :column "Web")
+  ("g" google "Google" :column "Web")
+  ("o" (scimax-open-hydra scimax-office/body) "MS Office" :column "Web")
+  ("G" (scimax-open-hydra scimax-gsuite/body) "GSuite" :column "Web")
+  ("s" slack/body "Slack" :column "Web")
+  
+  ("k" package-list-packages "List packages" :column "commands")
+  ("m" compose-mail "Compose mail" :column "commands"))
 
 
 (defhydra scimax-office (:color blue)
@@ -400,11 +393,12 @@ _p_: ffap
 
   
   ("h" org-db-headings "org-db-heading" :column "org")
+  ("d" org-db/body "org-db hydra" :column "org")
   ("k" ace-link "Link"  :column "org")
   ("o" (scimax-open-hydra scimax-jump-org/body) "Org"  :column "org")
   
   ("b" counsel-ibuffer "Buffer" :column "misc")
-  ("d" ace-window "Ace window" :column "misc")
+  ("n" ace-window "Ace window" :column "misc")
   ("r" counsel-recentf "Recent file" :column "misc"))
 
 
