@@ -225,6 +225,15 @@ Run this on a link"
 ;; (when (string= system-type "darwin")
 ;;   (define-key image-map (kbd "<mouse-1>") #'scimax-org-copy-image))
 
+
+(defun scimax-org-image-toggle-image-CcCc ()
+  (when (org-element-property :attr_org (org-element-context))
+    (org-toggle-inline-images t)
+    (org-toggle-inline-images t)
+    t))
+
+(add-to-list 'org-ctrl-c-ctrl-c-hook 'scimax-org-image-toggle-image-CcCc)
+
 (provide 'scimax-org-images)
 
 ;;; scimax-org-images.el ends here
