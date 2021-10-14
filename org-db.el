@@ -76,7 +76,8 @@
     org-db-update-hashtags
     org-db-update-@-labels
     org-db-update-email-addresses
-    org-db-update-editmarks)
+    org-db-update-editmarks
+    org-db-update-targets)
   "List of functions to run when updating a file in `org-db'.
 Each function takes arguments that are the filename-id, and the
 parse tree from `org-element-parse-buffer'. Your function should
@@ -261,6 +262,19 @@ decorators in Python, etc.
 				(:foreign-key [filename-id] :references files [rowid]
 					      :on-delete :cascade))])
 
+;; targets
+(emacsql org-db [:create-table :if :not :exists targets
+			       ([(rowid integer :primary-key)
+				 (target text :unique)])])
+
+(emacsql org-db [:create-table :if :not :exists file-targets
+			       ([(rowid integer :primary-key)
+				 (filename-id integer)
+				 (target-id integer)
+				 (begin integer)]
+				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
+				(:foreign-key [target-id] :references targets [rowid]
+					      :on-delete :cascade))])
 
 ;; hashtags
 (emacsql org-db [:create-table :if :not :exists hashtags
@@ -471,6 +485,25 @@ PARSE-TREE is from `org-element-parse-buffer'."
 
 	     (emacsql org-db [:insert :into file-hashtags :values [nil $s1 $s2 $s3]]
 		      filename-id hashtag-id pos))))
+
+
+(defun org-db-update-targets (filename-id parse-tree)
+  "Update the targets table."
+  ;; delete entries from the targets table
+  (emacsql org-db [:delete :from file-targets :where (= file-targets:filename-id $s1)] filename-id)
+
+  (org-element-map parse-tree 'target
+    (lambda (target)
+      (let ((target-id (or (caar (emacsql org-db [:select rowid :from targets
+							  :where (= target $s1)]
+					  (org-element-property :value target)))
+			   (emacsql org-db [:insert :into targets :values [nil $s1]]
+				    (org-element-property :value target))
+			   (caar (emacsql org-db
+					  [:select (funcall last-insert-rowid)])))))
+	
+	(emacsql org-db [:insert :into file-targets :values [nil $s1 $s2 $s3]]
+		 filename-id target-id (org-element-property :begin target))))))
 
 
 (defun org-db-update-editmarks (filename-id parse-tree)
@@ -1243,6 +1276,25 @@ Recent is sorted by last-updated in the database."
 		     (list (format "%s | %s" rl fn) :filename fn :begin bg))))
     (ivy-read "link: " candidates :action '(1
 					    ("o" org-db-links--open "Open to link")))))
+
+
+;; * org-db-targets
+(defun org-db-target ()
+  "Search for targets in org-files."
+  (interactive)
+  (let* ((results (emacsql org-db [:select [target file-targets:begin files:filename]
+					   :from targets
+					   :left :join file-targets :on (= targets:rowid file-targets:target-id)
+					   :inner :join files
+					   :on (= files:rowid file-targets:filename-id)]))
+	 (candidates (cl-loop for (target begin fname) in results collect
+			      (list
+			       (format "%30s%s" (s-pad-right 30 " " target) fname)
+			       fname
+			       begin))))
+    (ivy-read "Target: " candidates :action (lambda (x)
+					      (find-file (cl-second x))
+					      (goto-char (cl-third x))))))
 
 ;; * org-db-hashtags
 
