@@ -412,7 +412,7 @@ Adds FNAME to the database if it doesn't exist."
 	   filename-id)
   (org-babel-map-src-blocks nil
 
-    (emacsql org-db [:insert :into src-blocks :values [nil $s1 $s2 $s3 %s4]]
+    (emacsql org-db [:insert :into src-blocks :values [nil $s1 $s2 $s3 $s4]]
 	     filename-id lang body beg-block)))
 
 (defun org-db-update-keywords (filename-id parse-tree)
@@ -914,7 +914,10 @@ Optional RECURSIVE is non-nil find files recursively."
   (emacsql org-db [:delete :from file-atlabels])
   (emacsql org-db [:delete :from email-addresses])
   (emacsql org-db [:delete :from file-email-addresses])
+  (emacsql org-db [:delete :from src-blocks])
   (emacsql org-db [:delete :from file-editmarks])
+  (emacsql org-db [:delete :from file-targets])
+  (emacsql org-db [:delete :from targets])
   (org-db-log "Everything should be reset."))
 
 
