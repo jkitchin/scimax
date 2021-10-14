@@ -540,7 +540,6 @@ Here is a function you can use to interactively search files by pattern. For exa
    nil))
 
 
-
 (defun nb-search-all (regexp)
   "Search files for REGEXP and show matches."
   (interactive "sSearch for: ")
@@ -679,7 +678,6 @@ See ivy-org-jump-to-project-headline.
   :ASSIGNEDTO: jkitchin@andrew.cmu.edu
   :END:
 
-
 If you share a notebook, you have collaborators. If you store them as headlines with an EMAIL property, you can use nb functions to find them.
 
 To assign a task to a participant, you use nb-assign-task.
@@ -720,7 +718,6 @@ TODO: add a time stamp or log entry or date assigned property?"
 			       (unless (string= "TODO" (org-get-todo-state))
 				 (org-todo "TODO"))))
 			   "Assign"))))))
-
 
 
 (defun nb-contacts ()
@@ -1008,6 +1005,7 @@ This makes it easy to type C-c C-l then type nb <enter> and then get to choose a
 
 (defun nb-insert-link ()
   "Insert a link with completion."
+  (interactive)
   (insert (nb-complete-link)))
 
 
@@ -1321,11 +1319,7 @@ This is just the link definition.
 #+attr_org: :width 50%
 nb:eeg-pitt::./obipy-resources/6d9672694ff9a17f61f22a2b1be01575-10220Ctf.png
 
-
- [[prj:students::README.org]]  bracketed
-
-prj:students::README.org
-
+[[nb:scimax::scimax-notebook.org::c48169]]
 
 * A notebook hydra
 
@@ -1333,7 +1327,9 @@ prj:students::README.org
 (defhydra nb-hydra (:hint nil :color blue)
   "scimax-notebook
 "
-  
+
+  ("n" nb-new "new notebook" :column "navigation")
+  ("o" nb-open "open notebook" :column "navigation")
   ("f" projectile-find-file-dwim "find-file" :column "navigation")
   ("d" projectile-find-dir "find dir" :column "navigation")
   ("D" projectile-dired "open root in dired" :column "navigation")
@@ -1344,15 +1340,14 @@ prj:students::README.org
   ("sb" projectile-multi-occur "search nb buffers" :column "search")
   ("st" nb-search-title "Search by title/date" :column "search")
 
-  ("n" nb-new "new notebook" :column "utilities")
-  ("o" nb-open "open notebook" :column "utilities")
   ("a" nb-agenda "notebook agenda" :column "utilities")
   ("t" nb-set-tags "set tags" :column "utilities")
   ("b" bash "bash" :column "utilities")
   ("e" explorer "explorer" :column "utilities")
   ("p" hydra-projectile/body "projectile" :column "utilities")
   ("r" nb-archive "make archive" :column "utilities")
-  
+
+  ("l" nb-insert-link "Insert link" :column "link")
   ("C-<return>" nb-follow-other "open other window" :column "link")
   ("S-<return>" nb-follow-other-frame "Open other frame" :column "link")
   ("M-<return>" nb-follow-sys "Open with system program" :column "link"))
