@@ -396,6 +396,7 @@ _p_: ffap
   ("d" org-db/body "org-db hydra" :column "org")
   ("k" ace-link "Link"  :column "org")
   ("o" (scimax-open-hydra scimax-jump-org/body) "Org"  :column "org")
+  ("3" scimax-ob-jump-to-src-block "src block" :column "org")
   
   ("b" counsel-ibuffer "Buffer" :column "misc")
   ("n" ace-window "Ace window" :column "misc")
@@ -445,8 +446,8 @@ _p_: ffap
   ("b" avy-goto-word-0-below "below0")
   ("B" avy-goto-word-1-below "below1")
   ("o" avy-goto-word-or-subword-1 "word or subword")
-  ("s" avy-subword-0 "subword-0")
-  ("S" avy-subword-1 "subword-1"))
+  ("s" avy-goto-subword-0 "subword-0")
+  ("S" avy-goto-subword-1 "subword-1"))
 
 
 (defhydra scimax-jump-symbol (:color blue :inherit (scimax-base/heads) :columns 3)
