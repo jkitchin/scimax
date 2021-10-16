@@ -1,10 +1,40 @@
-;;; scimax-ivy.el --- ivy functions for scimax
+;;; scimax-ivy.el --- ivy functions for scimax ;; -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;
 (require 'counsel)
 
 ;; * Generic ivy actions
+
+;; This is an idea I got from embark. It solves a problem I have had a lot,
+;; where I want to transfer the input text to another command. Why not use
+;; embark? I find it confusing.
+(defun scimax-ivy-become ()
+  "Change the command and reuse the current input.
+    You will be prompted to enter a new key sequence which can be a
+    shortcut or M-x. Then it will put the current input in the
+    minibuffer for the command.
+
+    Applications:
+    1. start with swiper, enter some text, C-M-b H-s to transfer the current input to swiper-all
+    2. C-xC -b to switch-buffer, C-M-b C-x C-f to transfer input to find-file."
+  (interactive)
+  (let* ((input ivy-text)
+         (transfer-input (lambda ()
+			   (setf (buffer-substring
+				  (point) (line-beginning-position))
+				 "")
+			   (insert input))))
+    (ivy-exit-with-action
+     (lambda (x)
+       (minibuffer-with-setup-hook
+	   (:append transfer-input)
+	 (call-interactively
+	  (key-binding
+	   (read-key-sequence "Switch to key sequence: ") t)))))))
+
+
+(define-key ivy-minibuffer-map (kbd "s-b") 'scimax-ivy-become)
 
 (ivy-set-actions
  t
@@ -23,11 +53,12 @@
 	      (unless (looking-at  " ") (insert " "))
 	      (insert cand))))
     "insert candidate")
-   ("B" switch-command "Become")
+   ;; ("B" scimax-ivy-become "Become")
    (" " (lambda (x) (ivy-resume)) "resume")
    ("?" (lambda (x)
 	  (interactive)
-	  (describe-keymap ivy-minibuffer-map)) "Describe keys")))
+	  (describe-keymap ivy-minibuffer-map))
+    "Describe keys")))
 
 ;; ** Extra projectile actions
 ;; Here I can open bash or finder when switching projects
