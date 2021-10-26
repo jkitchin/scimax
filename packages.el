@@ -54,7 +54,6 @@
 
 (use-package avy)
 
-
 ;; May 24, 2017: this seems to be causing emacs 25.2 to be crashing on my linux box.
 (unless (eq system-type 'gnu/linux)
   (use-package tex
@@ -90,6 +89,7 @@
 (use-package counsel
   :init
   (require 'ivy)
+  (require 'ivy-avy)
   (setq projectile-completion-system 'ivy)
   (setq ivy-use-virtual-buffers t)
   (define-prefix-command 'counsel-prefix-map)
@@ -113,6 +113,8 @@
    ("C-h i" . counsel-info-lookup-symbol)
    ("C-c r" . ivy-resume)
    ("H-c r" . ivy-resume)
+   ("s-r" . ivy-resume)
+   ("H-r" . ivy-resume)
    ("H-c l" . counsel-load-library)
    ("H-c f" . counsel-git)
    ("H-c g" . counsel-git-grep)
@@ -122,34 +124,14 @@
   :config
   (progn
     (counsel-mode)
-
-    ;; these are mostly for navigating directories with find file. I find it
-    ;; convenient to use the right arrow to "go into" a directory, and the left
-    ;; arrow or delete to go up a directory. I have commented out the left arrow
-    ;; though so it can be used to go backwards into the input. This is not
-    ;; critical though, the right-arrow does the same thing as S-ret below.
-
-    ;; (define-key ivy-minibuffer-map (kbd "<left>") 'ivy-backward-delete-char)
-    (define-key ivy-minibuffer-map (kbd "<right>") 'ivy-alt-done)
-
-    ;; single candidate
-    ;; default action on the current candidate
-    (define-key ivy-minibuffer-map (kbd "M-<return>") #'ivy-dispatching-done)
-    (define-key ivy-minibuffer-map (kbd "S-<return>") #'ivy-alt-done)
-
-    ;; multiple candidates
-    ;; C-RET call and go to next
-
-    (defun scimax-ivy-default-action-continue ()
-      "Apply default action and move to next/previous candidate."
-      (interactive)
+    
+    (defun scimax-ivy-default-action-continue (&optional arg)
+      "Apply default action and move to previous candidate with ARG else next candidate."
+      (interactive "P")
       (ivy-call)
-      (ivy-next-line))
-
-    (define-key ivy-minibuffer-map (kbd "C-<return>") #'scimax-ivy-default-action-continue)
-
-    ;; choose action on current candidate and continue
-    (define-key ivy-minibuffer-map (kbd "C-M-<return>") #'ivy-dispatching-call)
+      (if arg
+	  (ivy-previous-line)
+	(ivy-next-line)))
 
     ;; s-RET to quit (super)
     (defun scimax-ivy-exit-no-action ()
@@ -158,7 +140,21 @@
       (ivy-exit-with-action
        (lambda (x) nil)))
 
+    ;; default and continue
+    (define-key ivy-minibuffer-map (kbd "C-<return>") #'ivy-call)
+    ;; default and next
+    (define-key ivy-minibuffer-map (kbd "S-<return>") #'scimax-ivy-default-action-continue)
+    ;; alternate action and continue
+    (define-key ivy-minibuffer-map (kbd "M-<return>") #'ivy-dispatching-call)
+    ;; quit no action
     (define-key ivy-minibuffer-map (kbd "s-<return>") 'scimax-ivy-exit-no-action)
+    ;; kill whole line
+    (define-key ivy-minibuffer-map (kbd "C-k") 'kill-whole-line)
+    
+
+    ;; This is an idea I got from embark. It solves a problem I have had a lot,
+    ;; where I want to transfer the input text to another command. Why not use
+    ;; embark? I find it confusing.
 
     (defun scimax-ivy-become ()
       "Change the command and reuse the current input.
@@ -167,26 +163,38 @@
     minibuffer for the command.
 
     Applications:
-    1. start with swiper, C-M-b H-s to transfer the current input to swiper-all
+    1. start with swiper, enter some text, C-M-b H-s to transfer the current input to swiper-all
     2. C-xC -b to switch-buffer, C-M-b C-x C-f to transfer input to find-file."
       (interactive)
       (let* ((input ivy-text)
-             (transfer-input (lambda () (insert input))))
+             (transfer-input (lambda ()
+			       (setf (buffer-substring
+				      (point) (line-beginning-position))
+				     "")
+			       (insert input))))
 	(ivy-exit-with-action
 	 (lambda (x)
 	   (minibuffer-with-setup-hook
 	       (:append transfer-input)
-	     (call-interactively (key-binding (read-key-sequence "Switch to key sequence: ") t)))))))
+	     (call-interactively
+	      (key-binding
+	       (read-key-sequence (format "Switch from %s to key sequence (%s): "
+					  (ivy-state-caller ivy-last)
+					  input))
+	       t)))))))
 
-    (define-key ivy-minibuffer-map (kbd "C-M-b") 'scimax-ivy-become)
 
-    ;; Show keys
-    (defun scimax-show-marked-candidates ()
+    (define-key ivy-minibuffer-map (kbd "s-b") 'scimax-ivy-become)
+    (define-key ivy-minibuffer-map (kbd "s-o") 'ivy-occur)
+    
+
+    ;; Show key bindings
+    (defun scimax-show-key-bindings ()
       "Show keys in the map"
       (interactive)
       (describe-keymap ivy-minibuffer-map))
 
-    (define-key ivy-minibuffer-map (kbd "C-h") #'scimax-show-marked-candidates)
+    (define-key ivy-minibuffer-map (kbd "C-h") #'scimax-show-key-bindings)
 
     (defun scimax-ivy-show-marked-candidates ()
       "Show marked candidates"
@@ -198,37 +206,6 @@
 		 (princ "\n"))))
 
     (define-key ivy-minibuffer-map (kbd "C-s") #'scimax-ivy-show-marked-candidates)
-
-    (defun scimax-ivy-comma-insert ()
-      "Insert current candidate with comma separation. and clear minibuffer."
-      (interactive)
-      (let ((x (ivy-state-current ivy-last))
-	    cand)
-	(setq cand (cond
-		    ;; x is a string, the only sensible thing is to insert it
-		    ((stringp x)
-		     x)
-		    ;; x is a list where the first element is a string
-		    ((and (listp x) (stringp (first x)))
-		     (first x))
-		    (t
-		     (format "%S" x))))
-
-	(with-ivy-window
-	  (cond
-	   ;; at beginning of line, looking back at space, or comma insert
-	   ((or (bolp) (looking-back  " " 1) (looking-back  "," 1))
-	    (insert cand))
-	   ((word-at-point)
-	    ;; jump to first space? first word?
-	    (re-search-forward " " nil t)
-	    (insert ", " cand))
-	   (t
-	    (insert ", " cand)))))
-      (delete-minibuffer-contents)
-      (setq ivy-text ""))
-
-    (define-key ivy-minibuffer-map  ","  #'scimax-ivy-comma-insert)
 
     ;; Marking candidates
     (defun scimax-ivy-toggle-mark ()
