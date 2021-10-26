@@ -220,8 +220,9 @@ with the entry."
 		 collect
 		 (append (list line)
 			 (mapcar 's-trim
-				 (mapcar 'substring-no-properties (s-split "  " line t)))))
+				 (mapcar 'substring (s-split "  " line t)))))
       (kill-buffer "*Colors*"))))
+
 
 (defun ivy-colors ()
   "List colors in ivy."
