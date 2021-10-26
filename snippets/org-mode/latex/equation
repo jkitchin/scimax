@@ -1,6 +1,8 @@
 # -*- mode: snippet -*-
-# name: latex integral
-# key: int
+# name: latex equation
+# key: eq
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --
-\int_{$1}^{$2} $3 d$4$0
+\begin{equation}\label{$1}
+$0
+\end{equation}
