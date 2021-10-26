@@ -1,4 +1,4 @@
-;;; scimax-ivy.el --- ivy functions for scimax ;; -*- lexical-binding: t -*-
+;;; scimax-ivy.el --- ivy functions for scimax  -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;
@@ -6,36 +6,7 @@
 
 ;; * Generic ivy actions
 
-;; This is an idea I got from embark. It solves a problem I have had a lot,
-;; where I want to transfer the input text to another command. Why not use
-;; embark? I find it confusing.
-(defun scimax-ivy-become ()
-  "Change the command and reuse the current input.
-    You will be prompted to enter a new key sequence which can be a
-    shortcut or M-x. Then it will put the current input in the
-    minibuffer for the command.
-
-    Applications:
-    1. start with swiper, enter some text, C-M-b H-s to transfer the current input to swiper-all
-    2. C-xC -b to switch-buffer, C-M-b C-x C-f to transfer input to find-file."
-  (interactive)
-  (let* ((input ivy-text)
-         (transfer-input (lambda ()
-			   (setf (buffer-substring
-				  (point) (line-beginning-position))
-				 "")
-			   (insert input))))
-    (ivy-exit-with-action
-     (lambda (x)
-       (minibuffer-with-setup-hook
-	   (:append transfer-input)
-	 (call-interactively
-	  (key-binding
-	   (read-key-sequence "Switch to key sequence: ") t)))))))
-
-
-(define-key ivy-minibuffer-map (kbd "s-b") 'scimax-ivy-become)
-
+;; I usually want to be able to insert
 (ivy-set-actions
  t
  '(("i" (lambda (x)
@@ -53,7 +24,6 @@
 	      (unless (looking-at  " ") (insert " "))
 	      (insert cand))))
     "insert candidate")
-   ;; ("B" scimax-ivy-become "Become")
    (" " (lambda (x) (ivy-resume)) "resume")
    ("?" (lambda (x)
 	  (interactive)
@@ -124,15 +94,17 @@ with the entry."
     (ivy-quit-and-run))))
 
 
-(defun scimax-ivy-projectile-ag (x)
-  "Run projectile-ag in the selected project X."
-  (let ((default-directory x))
-    (call-interactively #'projectile-ag)))
+;; See `counsel-projectile-switch-project-action-ag'
+;; (defun scimax-ivy-projectile-ag (x)
+;;   "Run projectile-ag in the selected project X."
+;;   (let ((default-directory x))
+;;     (call-interactively #'projectile-ag)))
 
-(defun scimax-ivy-projectile-ripgrep (x)
-  "Run projectile-ag in the selected project X."
-  (let ((default-directory x))
-    (call-interactively #'projectile-ripgrep)))
+;; See `counsel-projectile-switch-project-action-rg'
+;; (defun scimax-ivy-projectile-ripgrep (x)
+;;   "Run projectile-ag in the selected project X."
+;;   (let ((default-directory x))
+;;     (call-interactively #'projectile-ripgrep)))
 
 
 (defun scimax-ivy-projectile-org-heading (x)
@@ -140,29 +112,57 @@ with the entry."
   (let ((default-directory x))
     (call-interactively #'ivy-org-jump-to-project-headline)))
 
+;; See [[nb:scimax::elpa/counsel-projectile-20201015.1109/counsel-projectile.el::c53333]]
+;; for a long list of actions in counsel-projectile
+(cl-loop for projectile-cmd in '(projectile-completing-read
+				 counsel-projectile-switch-project)
+	 do
+	 (ivy-add-actions
+	  projectile-cmd 
+	  '(
+	    ;; xs runs shell, and xe runs eshell. This is nice for an external shell.
+	    ("xb" scimax-ivy-projectile-bash "Open bash here.")
+	    ("xf" scimax-ivy-projectile-finder  "Open Finder here.")
 
-(ivy-add-actions
- 'projectile-completing-read
- '(("a" scimax-ivy-projectile-ag  "Run ag here")
-   ("b" scimax-ivy-projectile-bash "Open bash here.")
-   ("f" scimax-ivy-projectile-finder  "Open Finder here.")
-   ("g" scimax-ivy-magit-status  "Magit status")
-   ("h" scimax-ivy-projectile-org-heading "Open project heading")
-   ("l" scimax-ivy-insert-project-link "Insert project link")
-   ("r" scimax-ivy-projectile-ripgrep  "Run ripgrep here")))
+	    ;; This may not be useful, there is already v
+	    ("xg" scimax-ivy-magit-status  "Magit status")
+	    ("h" scimax-ivy-projectile-org-heading "Open project heading")
+	    ("l" scimax-ivy-insert-project-link "Insert project link")))) 
+
+
 
 (ivy-add-actions 'counsel-projectile-switch-project
 		 '(("l" (lambda (x)
 			  (insert (format "[[%s]]" x)))
 		    "Insert link to project")))
 
+
+(defun scimax-projectile-switch-project-transformer (project)
+  "Add title from readme.org in file if it exists."
+  (let ((title (when (file-exists-p (f-join project "readme.org"))
+		 (with-temp-buffer
+		   (insert-file-contents (f-join project "readme.org"))
+		   (when (re-search-forward "#\\+title:\\(.*\\)" nil t)
+		     (propertize (match-string 1)
+				 'face '(:foreground "DodgerBlue1")))))))
+    (format "%60s%s" (s-pad-right 60 " " project) (or title ""))))
+
+
+(ivy-configure 'counsel-projectile-switch-project :display-transformer-fn
+	       #'scimax-projectile-switch-project-transformer)
+(ivy-configure 'projectile-switch-project :display-transformer-fn
+	       #'scimax-projectile-switch-project-transformer)
+
+
 ;; ** Find file actions
+;; I like to do a lot of things from find-file.
 (ivy-add-actions
  'counsel-find-file
  '(("a" (lambda (x)
 	  (unless (memq major-mode '(mu4e-compose-mode message-mode))
 	    (compose-mail))
-	  (mml-attach-file x)) "Attach to email")
+	  (mml-attach-file x))
+    "Attach to email")
    ("c" (lambda (x) (kill-new (f-relative x))) "Copy relative path")
    ("4" (lambda (x) (find-file-other-window x)) "Open in new window")
    ("5" (lambda (x) (find-file-other-frame x)) "Open in new frame")
