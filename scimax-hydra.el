@@ -400,7 +400,8 @@ _p_: ffap
   
   ("b" counsel-ibuffer "Buffer" :column "misc")
   ("n" ace-window "Ace window" :column "misc")
-  ("r" counsel-recentf "Recent file" :column "misc"))
+  ("r" counsel-recentf "Recent file" :column "misc")
+  ("j" avy-goto-char-timer "avy timer" :coumn "misc"))
 
 
 (defhydra scimax-jump-char (:color blue :inherit (scimax-base/heads) :columns 3)
