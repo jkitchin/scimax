@@ -86,10 +86,10 @@
   :config
   (add-to-list 'mc/cmds-to-run-once 'swiper-mc))
 
+
 (use-package counsel
   :init
   (require 'ivy)
-  (require 'ivy-avy)
   (setq projectile-completion-system 'ivy)
   (setq ivy-use-virtual-buffers t)
   (define-prefix-command 'counsel-prefix-map)
@@ -123,7 +123,9 @@
   :diminish ""
   :config
   (progn
-    (counsel-mode))
+    (counsel-mode)))
+
+(use-package ivy-avy)
 
 (use-package counsel-projectile)
 
@@ -239,7 +241,7 @@
 (use-package helm)
 (use-package helm-bibtex)
 (use-package ivy-bibtex)
-
+(use-package citeproc)
 
 ;; this is in a git submodule
 (use-package org-ref
