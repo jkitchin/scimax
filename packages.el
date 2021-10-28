@@ -14,7 +14,9 @@
 
 ;; * org-mode
 ;; load this first before anything else to avoid mixed installations
-(use-package org-plus-contrib
+(use-package org
+  :ensure t
+  :pin gnu
   :mode ("\\.org\\'" . org-mode)
   :init
   ;; Use the current window for C-c ' source editing
@@ -29,17 +31,46 @@
    ("C-c o" . org-open-at-point-global)
    ("C-c a" . org-agenda)
    ("C-c c" . org-capture)
-   ("s-<SPC>" . org-mark-ring-goto)
+   ("M-<SPC>" . org-mark-ring-goto)
    ("H-." . org-time-stamp-inactive)))
 
-;; [2019-01-07 Mon] This is another package I don't use, and that sometimes is a
-;; problem on windows installations
-;; (use-package org-bullets)
+;; (use-package org-plus-contrib
+;;   :mode ("\\.org\\'" . org-mode)
+;;   :init
+;;   ;; Use the current window for C-c ' source editing
+;;   (setq org-src-window-setup 'current-window
+;; 	org-support-shift-select t)
 
-;; [2019-01-07 Mon] I don't use this now, and it frequently causes an issue on
-;; installing scimax
-;; (use-package org-edna
-;;   :init (org-edna-load))
+;;   ;; I like to press enter to follow a link. mouse clicks also work.
+;;   (setq org-return-follows-link t)
+;;   :bind
+;;   (("C-c l" . org-store-link)
+;;    ("C-c L" . org-insert-link-global)
+;;    ("C-c o" . org-open-at-point-global)
+;;    ("C-c a" . org-agenda)
+;;    ("C-c c" . org-capture)
+;;    ("M-<SPC>" . org-mark-ring-goto)
+;;    ("H-." . org-time-stamp-inactive)))
+
+
+;; (use-package org
+;;   :load-path "/Users/jkitchin/Dropbox/emacs/tests/org-mode-git/lisp"
+;;   :mode ("\\.org\\'" . org-mode)
+;;   :init
+;;   ;; Use the current window for C-c ' source editing
+;;   (setq org-src-window-setup 'current-window
+;; 	org-support-shift-select t)
+
+;;   ;; I like to press enter to follow a link. mouse clicks also work.
+;;   (setq org-return-follows-link t)
+;;   :bind
+;;   (("C-c l" . org-store-link)
+;;    ("C-c L" . org-insert-link-global)
+;;    ("C-c o" . org-open-at-point-global)
+;;    ("C-c a" . org-agenda)
+;;    ("C-c c" . org-capture)
+;;    ("s-<SPC>" . org-mark-ring-goto)
+;;    ("H-." . org-time-stamp-inactive)))
 
 
 ;; * Other packages
@@ -122,8 +153,7 @@
    ("H-c p" . counsel-pt))
   :diminish ""
   :config
-  (progn
-    (counsel-mode)))
+  (counsel-mode))
 
 (use-package ivy-avy)
 
@@ -212,16 +242,19 @@
 (use-package mustache)
 
 ;; this is a git submodule
-(if (executable-find "jupyter")
-    (use-package ob-ipython
-      :ensure nil
-      :load-path (lambda () (expand-file-name "ob-ipython-upstream" scimax-dir))
-      :init (add-to-list 'load-path (expand-file-name "ob-ipython-upstream" scimax-dir))
-      (require 'ob-ipython))
-  (message "jupyter was not found on your path. ob-ipython was not loaded."))
+;; (if (executable-find "jupyter")
+;;     (use-package ob-ipython
+;;       :ensure nil
+;;       :load-path (lambda () (expand-file-name "ob-ipython-upstream" scimax-dir))
+;;       :init (add-to-list 'load-path (expand-file-name "ob-ipython-upstream" scimax-dir))
+;;       (require 'ob-ipython))
+;;   (message "jupyter was not found on your path. ob-ipython was not loaded."))
 
-(use-package scimax-org-babel-ipython-upstream
-  :ensure nil
+;; (use-package scimax-org-babel-ipython-upstream
+;;   :ensure nil
+;;   :load-path scimax-dir)
+
+(use-package scimax-jupyter
   :load-path scimax-dir)
 
 (use-package ov)
