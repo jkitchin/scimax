@@ -34,44 +34,6 @@
    ("M-<SPC>" . org-mark-ring-goto)
    ("H-." . org-time-stamp-inactive)))
 
-;; (use-package org-plus-contrib
-;;   :mode ("\\.org\\'" . org-mode)
-;;   :init
-;;   ;; Use the current window for C-c ' source editing
-;;   (setq org-src-window-setup 'current-window
-;; 	org-support-shift-select t)
-
-;;   ;; I like to press enter to follow a link. mouse clicks also work.
-;;   (setq org-return-follows-link t)
-;;   :bind
-;;   (("C-c l" . org-store-link)
-;;    ("C-c L" . org-insert-link-global)
-;;    ("C-c o" . org-open-at-point-global)
-;;    ("C-c a" . org-agenda)
-;;    ("C-c c" . org-capture)
-;;    ("M-<SPC>" . org-mark-ring-goto)
-;;    ("H-." . org-time-stamp-inactive)))
-
-
-;; (use-package org
-;;   :load-path "/Users/jkitchin/Dropbox/emacs/tests/org-mode-git/lisp"
-;;   :mode ("\\.org\\'" . org-mode)
-;;   :init
-;;   ;; Use the current window for C-c ' source editing
-;;   (setq org-src-window-setup 'current-window
-;; 	org-support-shift-select t)
-
-;;   ;; I like to press enter to follow a link. mouse clicks also work.
-;;   (setq org-return-follows-link t)
-;;   :bind
-;;   (("C-c l" . org-store-link)
-;;    ("C-c L" . org-insert-link-global)
-;;    ("C-c o" . org-open-at-point-global)
-;;    ("C-c a" . org-agenda)
-;;    ("C-c c" . org-capture)
-;;    ("s-<SPC>" . org-mark-ring-goto)
-;;    ("H-." . org-time-stamp-inactive)))
-
 
 ;; * Other packages
 (use-package diminish)
