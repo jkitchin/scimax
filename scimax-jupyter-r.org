@@ -1,0 +1,22 @@
+#+title: Jupyter and R
+
+#+BEGIN_SRC sh
+brew install R
+#+END_SRC
+
+In an R terminal, run this to setup the kernel
+
+> install.packages('IRkernel')
+
+#+PROPERTY: header-args:jupyter-R  :session jupyter-e7dacfae5bf60e6555815711779c76f3
+
+#+BEGIN_SRC jupyter-R
+x <- seq(-pi,pi,0.1)
+plot(x, sin(x))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+attr_org: :width 420 :height 420
+[[file:./.ob-jupyter/fb972cf5b5fc26819f51a85e18f4e5cf86f4f3c0.png]]
+:END:
