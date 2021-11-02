@@ -6,6 +6,8 @@
 
 ;; * scimax customizations of ivy
 
+(setq ivy-read-action-function 'ivy-hydra-read-action)
+
 (defun scimax-ivy-default-action-continue (&optional arg)
   "Apply default action and move to previous candidate with ARG else next candidate."
   (interactive "P")
@@ -72,6 +74,8 @@
 (define-key ivy-minibuffer-map (kbd "s-o") 'ivy-occur)
 
 
+
+
 ;; Show key bindings
 (defun scimax-show-key-bindings ()
   "Show keys in the map"
@@ -103,6 +107,64 @@
 (define-key ivy-minibuffer-map (kbd "M-TAB")
   #'scimax-ivy-toggle-mark)
 
+
+;; * alternate actions via completion
+;;
+;; [2021-10-29 Fri] it looks like I basically reinvented some stuff in ivy-hydra
+;; here. I will leave this here in case it is useful one day.
+;; 
+;; I wrote this because some commands have so many alternate actions
+;; they are not all visible, and in those cases using completion is
+;; preferrable to scanning a lot of options.
+
+;; (defun scimax-ivy-alternate ()
+;;   "Run an alternate selection on the current candidate with completion.
+;; In an ivy completion, this command provides all the alternate
+;; actions via a new completion, and then runs it on the selected
+;; candidate."
+;;   (interactive)
+;;   (let* ((funcs (cl-loop for (key func desc) in (cdr (ivy-state-action ivy-last))
+;; 			 collect (cons (format "%3s - %s" (string-pad key 3 ? )
+;; 					       desc)
+;; 				       func))) 
+;; 	 (action `(lambda (x)
+;; 		    (let ((func (cdr (assoc (ivy-read "alternate action: "
+;; 						      ',funcs :initial-input "^")
+;; 					    ',funcs))))
+;; 		      ;; (message "Running %S on %S" func x)
+;; 		      (funcall func x)))))
+;;     (ivy-exit-with-action action)))
+
+
+;; (define-key ivy-minibuffer-map (kbd "C-M-<return>") 'scimax-ivy-alternate)
+
+;; (defun scimax-ivy-alternate-continue ()
+;;   (interactive)
+;;   (setq ivy-current-prefix-arg current-prefix-arg)
+;;   (let ((actions (copy-sequence (ivy-state-action ivy-last)))
+;;         (old-ivy-text ivy-text))
+;;     (unwind-protect
+;;         (when (ivy-read-action)
+;;           (ivy-set-text old-ivy-text)
+;;           (ivy-call))
+;;       (ivy-set-action actions)))
+;;   (ivy-shrink-after-dispatching)
+
+
+;;   (let* ((funcs (cl-loop for (key func desc) in (cdr (ivy-state-action ivy-last))
+;; 			 collect (cons (format "%3s - %s" (string-pad key 3 ? )
+;; 					       desc)
+;; 				       func))) 
+;; 	 (action `(lambda (x)
+;; 		    (let ((func (cdr (assoc (ivy-read "alternate action: "
+;; 						      ',funcs :initial-input "^")
+;; 					    ',funcs))))
+;; 		      ;; (message "Running %S on %S" func x)
+;; 		      (funcall func x)))))
+;;     (ivy-exit-with-action action)))
+
+
+;; (define-key ivy-minibuffer-map (kbd "M-s-<return>") 'scimax-ivy-alternate-continue)
 
 ;; * Generic ivy actions
 
