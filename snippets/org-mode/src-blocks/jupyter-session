@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: jupyter-python session
+# key: <jps
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+#+PROPERTY: header-args:jupyter-python  :session `(prog1 (concat "jupyter-python-" (md5 (buffer-file-name))) (org-ctrl-c-ctrl-c))`
