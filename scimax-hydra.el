@@ -332,24 +332,27 @@ _p_: ffap
 
 (defhydra scimax-help (:color blue :inherit (scimax-base/heads) :columns 3)
   "help"
-  ("a" apropos "Apropos")
-  ("c" describe-command "Command")
-  ("e" info-emacs-manual "Emacs manual")
-  ("f" describe-function "Function")
-  ("g" view-echo-area-messages "Messages")
-  ("h" describe-theme "Theme")
-  ("i" info "Info")
-  ("k" describe-key "Key")
-  ("K" describe-keymap "Keymap")
-  ("m" describe-mode "Mode")
-  ("o" ore "Org explorer")
-  ("p" describe-package "Package")
-  ("s" describe-syntax "Syntax")
-  ("t" describe-text-properties "Text properties")
-  ("T" help-with-tutorial "Emacs tutorial")
-  ("v" describe-variable "Variable")
-  ("S" scimax-help "Scimax help")
-  ("w" woman "Woman"))
+  ("a" apropos "Apropos" :column "Code")
+  ("c" describe-command "Command" :column "Code")
+  ("f" describe-function "Function" :column "Code")
+  ("v" describe-variable "Variable" :column "Code")
+  ("g" view-echo-area-messages "Messages" :column "Code")
+
+  ("o" ore "Org explorer" :column "Point")
+  ("t" describe-text-properties "Text properties" :column "Point")
+  ("s" describe-syntax "Syntax" :column "Point")
+
+  ("h" describe-theme "Theme" :column "Thing")
+  ("k" describe-key "Key" :column "Thing")
+  ("K" describe-keymap "Keymap" :column "Thing")
+  ("m" describe-mode "Mode" :column "Thing")
+  ("p" describe-package "Package" :column "Thing")
+
+  ("S" scimax-help "Scimax help" :column "Documentation")
+  ("e" info-emacs-manual "Emacs manual" :column "Documentation")
+  ("T" help-with-tutorial "Emacs tutorial" :column "Documentation")
+  ("i" info "Info" :column "Documentation")
+  ("w" woman "Unix manual pages" :column "Documentation"))
 
 
 ;;** insert
