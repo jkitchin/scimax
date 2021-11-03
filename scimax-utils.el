@@ -323,15 +323,17 @@ Only works on Mac OSX."
 	    "set the clipboard to result")
       "\n"))
     (insert (format "\n\n#+attr_org: :width %s\n[[./%s]]\n\n"
-		    (min 800 (string-to-number
-			      (cl-first
-			       (split-string 
-				(cl-third
-				 (split-string
-				  (string-trim
-				   (shell-command-to-string
-				    (format "identify %s" fname)))))
-				"x"))))
+		    (min 800
+			 ;; sometimes identify returns 0, and I want 800 in that case.
+			 (max 800 (string-to-number
+				   (cl-first
+				    (split-string 
+				     (cl-third
+				      (split-string
+				       (string-trim
+					(shell-command-to-string
+					 (format "identify %s" fname)))))
+				     "x")))))
 		    (concat "screenshots/"
 			    fname)))
     (org-redisplay-inline-images)
