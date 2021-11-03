@@ -147,7 +147,7 @@ These are activated in function `ob-ipython-key-bindings'."
 (defcustom ob-ipython-menu-items
   '(("Execute"
      ["Current block" org-ctrl-c-ctrl-c t]
-     ["Current and next" scimax-execute-and-next-block t]
+     ["Current and next" scimax-ob-execute-and-next-block t]
      ["To point" scimax-ob-execute-to-point t]
      ["Restart/block" scimax-ob-ipython-restart-kernel-execute-block t]
      ["Restart/to point" scimax-restart-ipython-and-execute-to-point t]
@@ -486,8 +486,8 @@ _c_: command mode   _z_: undo   _y_: redo
   ("c" scimax-jupyter-command-mode/body "command mode")
 
   ("C-<return>" org-ctrl-c-ctrl-c "run cell" :color red)
-  ("S-<return>" scimax-execute-and-next-block "run cell, select below" :color red)
-  ("M-<return>" (scimax-execute-and-next-block t) "run cell, insert new" :color red)
+  ("S-<return>" scimax-ob-execute-and-next-block "run cell, select below" :color red)
+  ("M-<return>" (scimax-ob-execute-and-next-block t) "run cell, insert new" :color red)
 
   ("-" scimax-ob-split-src-block "split cell")
 
@@ -563,8 +563,8 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
 "
   ("<return>" scimax-jupyter-edit-mode/body "Enter edit mode")
   ("C-<return>" org-ctrl-c-ctrl-c "run cell" :color red)
-  ("S-<return>" scimax-execute-and-next-block "run cell, select next" :color red)
-  ("M-<return>" (scimax-execute-and-next-block t) "run cell, insert new" :color red)
+  ("S-<return>" scimax-ob-execute-and-next-block "run cell, select next" :color red)
+  ("M-<return>" (scimax-ob-execute-and-next-block t) "run cell, insert new" :color red)
 
   ;; These don't really have great analogs in org-mode, but maybe it makes sense
   ;; to be able to do this.
