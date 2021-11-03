@@ -117,7 +117,7 @@ Make a new file if needed."
 	   (not (ov-at start)))
       (setq img (create-image
 		 (expand-file-name path)
-		 'imagemagick nil :width scimax-inkscape-thumbnail-width
+		 nil nil 
 		 :background "lightgray"))
       (setq ov (make-overlay start end))
       (overlay-put ov 'display img)
