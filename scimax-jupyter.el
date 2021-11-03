@@ -233,7 +233,6 @@ Meant to be used as the return value of
     (push result (jupyter-org-request-results req)))))
 
 
-
 ;; I don't know where the \\ lines come from, this removes them.
 (defun scimax-rm-backslashes ()
   "rm \\ from the end of lines."
@@ -249,6 +248,34 @@ Meant to be used as the return value of
 
 (add-hook 'org-babel-after-execute-hook 'scimax-rm-backslashes)
 
+;; * Fix org-show-entry so it doesn't collapse results all the time
+;; 
+;; I like to see the results, and this function usually hides them. I added the
+;; unless wrapper, so it doesn't happen if point is on a src block. In a
+;; previous version I just commented out the org-cycle-hide-drawers line, and I
+;; may need to go back to that. this version should work as the original one
+;; though except in src blocks. normally it is triggered by jumping to the next
+;; src-block, and this is when I don't want it to hide the previous results.
+
+(defun scimax-org-show-entry ()
+  "Show the body directly following this heading.
+Show the heading too, if it is currently invisible."
+  (interactive)
+  (unless (org-in-src-block-p)
+    (save-excursion
+      (ignore-errors
+	(org-back-to-heading t)
+	(outline-flag-region
+	 (max (point-min) (1- (point)))
+	 (save-excursion
+	   (if (re-search-forward
+		(concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
+	       (match-beginning 1)
+	     (point-max)))
+	 nil)
+	(org-cycle-hide-drawers 'children)))))
+
+(advice-add 'org-show-entry :override #'scimax-org-show-entry)
 
 ;; * Working with exceptions
 ;;
