@@ -9,6 +9,9 @@
 ;;
 
 ;;; Code:
+;; hack to get emacs-28 to work right
+(load "/Users/jkitchin/Dropbox/emacs/scimax/init-emacs28.el")
+
 ;; this makes garbage collection less frequent, which speeds up init by about 2 seconds.
 (setq gc-cons-threshold 80000000)
 
@@ -19,7 +22,7 @@
 (defconst scimax-dir (file-name-directory (or load-file-name (buffer-file-name)))
   "Directory where the scimax is installed.")
 
-(defvar scimax-user-dir (expand-file-name "user/" scimax-dir)
+(defvar scimax-user-dir (expand-file-name "user" scimax-dir)
   "User directory for personal code.")
 
 (setq user-emacs-directory scimax-user-dir)
@@ -45,9 +48,11 @@
   ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
   (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
 
-  (add-to-list
-   'package-archives
-   (cons "org" (concat proto "://orgmode.org/elpa/")))
+  ;; [2021-10-02 Sat] This is going away, in favor of elpa for org-mode after 9.5
+  ;; Trying this now to see if it works
+  ;; (add-to-list
+  ;;  'package-archives
+  ;;  (cons "org" (concat proto "://orgmode.org/elpa/")))
 
   (when no-ssl
     (setq package-check-signature nil)
