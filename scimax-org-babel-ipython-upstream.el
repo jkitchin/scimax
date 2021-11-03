@@ -683,7 +683,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   "Kill the kernel and run src-blocks to point."
   (interactive)
   (call-interactively 'ob-ipython-kill-kernel)
-  (scimax-execute-to-point))
+  (scimax-ob-execute-to-point))
 
 
 (defun scimax-ob-ipython-kill-kernel ()
