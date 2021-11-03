@@ -148,7 +148,7 @@ These are activated in function `ob-ipython-key-bindings'."
   '(("Execute"
      ["Current block" org-ctrl-c-ctrl-c t]
      ["Current and next" scimax-execute-and-next-block t]
-     ["To point" scimax-execute-to-point t]
+     ["To point" scimax-ob-execute-to-point t]
      ["Restart/block" scimax-ob-ipython-restart-kernel-execute-block t]
      ["Restart/to point" scimax-restart-ipython-and-execute-to-point t]
      ["Restart/buffer" scimax-ob-ipython-restart-kernel-execute-buffer t])
@@ -344,8 +344,8 @@ markdown headings _1_: _2_: _3_: _4_: _5_: _6_:
 	 (python-indent-line)
 	 (org-edit-src-exit))  :color red)
   ("<return>" org-ctrl-c-ctrl-c :color red)
-  ("S-<return>" scimax-execute-and-next-block :color red)
-  ("S-M-<return>" scimax-execute-to-point)
+  ("S-<return>" scimax-ob-execute-and-next-block :color red)
+  ("S-M-<return>" scimax-ob-execute-to-point)
   ("s-<return>" scimax-ob-ipython-restart-kernel-execute-block)
   ("M-s-<return>" scimax-restart-ipython-and-execute-to-point)
   ("H-<return>" scimax-ob-ipython-restart-kernel-execute-buffer)
