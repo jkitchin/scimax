@@ -145,7 +145,8 @@ These are activated in function `ob-ipython-key-bindings'."
   :type '(alist :key-type string :value-type function))
 
 (defcustom ob-ipython-menu-items
-  '(("Execute"
+  '("ob-ipython"
+    ("Execute"
      ["Current block" org-ctrl-c-ctrl-c t]
      ["Current and next" scimax-ob-execute-and-next-block t]
      ["To point" scimax-ob-execute-to-point t]
