@@ -9,8 +9,6 @@
 ;;
 
 ;;; Code:
-;; hack to get emacs-28 to work right
-(load "/Users/jkitchin/Dropbox/emacs/scimax/init-emacs28.el")
 
 ;; this makes garbage collection less frequent, which speeds up init by about 2 seconds.
 (setq gc-cons-threshold 80000000)
