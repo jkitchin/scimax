@@ -696,14 +696,14 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
     (setq header-line-format nil)
     (redisplay)
     ;; clean up some buffers
-    (loop for buf in (list
-		      "ob-ipython-out*" "*ob-ipython-debug*"
-		      "*ob-ipython-kernel-ipython*"
-		      (format "*ob-ipython-kernel-%s*" (scimax-ob-ipython-default-session))
-		      (format "*Python:%s" (scimax-ob-ipython-default-session)))
-	  do
-	  (when (get-buffer buf)
-	    (kill-buffer buf)))))
+    (cl-loop for buf in (list
+			 "ob-ipython-out*" "*ob-ipython-debug*"
+			 "*ob-ipython-kernel-ipython*"
+			 (format "*ob-ipython-kernel-%s*" (scimax-ob-ipython-default-session))
+			 (format "*Python:%s" (scimax-ob-ipython-default-session)))
+	     do
+	     (when (get-buffer buf)
+	       (kill-buffer buf)))))
 
 
 
@@ -734,17 +734,17 @@ variables, etc."
 			 (when (string= "ipython" (org-element-property :language src))
 			   src))))
 	     (first-start (org-element-property :begin (car blocks)))
-	     (merged-code (s-join "\n" (loop for src in blocks
-					     collect
-					     (org-element-property :value src)))))
+	     (merged-code (s-join "\n" (cl-loop for src in blocks
+						collect
+						(org-element-property :value src)))))
 	;; Remove blocks
-	(loop for src in (reverse blocks)
-	      do
-	      (goto-char (org-element-property :begin src))
-	      (org-babel-remove-result)
-	      (setf (buffer-substring (org-element-property :begin src)
-				      (org-element-property :end src))
-		    ""))
+	(cl-loop for src in (reverse blocks)
+		 do
+		 (goto-char (org-element-property :begin src))
+		 (org-babel-remove-result)
+		 (setf (buffer-substring (org-element-property :begin src)
+					 (org-element-property :end src))
+		       ""))
 	;; Now create the new big block.
 	(goto-char first-start)
 	(insert (format "#+BEGIN_SRC ipython
@@ -1072,13 +1072,13 @@ The overlays are not persistent, and are not saved."
        (when (and (not (string= "" output)) ob-ipython-show-mime-types) "# output\n")
        (funcall (cdr (assoc 'output ob-ipython-mime-formatters)) nil output)
        ;; I process the outputs one at a time here.
-       (s-join "\n\n" (loop for (type . value) in (append value display)
-			    collect
-			    (ob-ipython--render
-			     (if (memq type '(image/png image/svg))
-				 (pop file)
-			       file)
-			     (list (cons type value)))))))))
+       (s-join "\n\n" (cl-loop for (type . value) in (append value display)
+			       collect
+			       (ob-ipython--render
+				(if (memq type '(image/png image/svg))
+				    (pop file)
+				  file)
+				(list (cons type value)))))))))
 
 
 ;; ** Formatters for output
@@ -1571,12 +1571,12 @@ Note, this does not work if you run the block async."
 
 (defun ob-ipython-activate-buttons ()
   "Activate buttons."
-  (loop for (text cmd help-echo) in ob-ipython-buttons
-	do
-	(font-lock-add-keywords
-	 nil
-	 `((,(ob-ipython-button-font-lock text cmd help-echo) (0  'link t)))
-	 t))
+  (cl-loop for (text cmd help-echo) in ob-ipython-buttons
+	   do
+	   (font-lock-add-keywords
+	    nil
+	    `((,(ob-ipython-button-font-lock text cmd help-echo) (0  'link t)))
+	    t))
   (when (and ob-ipython-preview-html ob-ipython-html-to-image-program)
     (font-lock-add-keywords
      nil
