@@ -143,7 +143,6 @@ With prefix arg UNADVISE turn it off."
 If PARAMS has non-nil value for key ':pandoc' and TYPE is in
 `jupyter-org-pandoc-convertable', convert the result with pandoc.
 Otherwise, wrap it in an export block."
-  (message "%S" (list type value params))
   (jupyter-org-export-block type value))
 
 
