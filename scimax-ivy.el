@@ -182,8 +182,7 @@
 			  ((and (listp x) (stringp (first x)))
 			   (first x))
 			  (t
-			   (format "%S" x))))
-	      (unless (looking-at  " ") (insert " "))
+			   (format "%S" x)))) 
 	      (insert cand))))
     "insert candidate")
    ("?" (lambda (x)
