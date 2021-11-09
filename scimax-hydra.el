@@ -712,8 +712,8 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   "org blocks"
   ("r" org-babel-remove-result "clear result")
   ("<return>" org-babel-execute-src-block "execute")
-  ("S-<return>" scimax-execute-and-next-block "execute and next")
-  ("M-<return>" (scimax-execute-and-next-block t) "execute and new")
+  ("S-<return>" scimax-ob-execute-and-next-block "execute and next")
+  ("M-<return>" (scimax-ob-execute-and-next-block t) "execute and new")
   ("n" org-next-block "next block")
   ("p" org-previous-block "previous block")
   ("-" scimax-ob-split-src-block "split block")
