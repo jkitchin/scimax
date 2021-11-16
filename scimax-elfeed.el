@@ -133,7 +133,7 @@
 						:test #'equal)))
 				       (reverse dois)))
 		    :action
-		    (lambda (doi)
+		    (lambda (candidate)
 		      (let ((bibfile (completing-read
 				      "Bibfile: "
 				      (append (f-entries "." (lambda (f)
@@ -141,7 +141,7 @@
 								    (f-ext? f "bib"))))
 					      org-ref-default-bibliography))))
 			(doi-utils-add-bibtex-entry-from-doi
-			 doi
+			 (cdr candidate)
 			 bibfile)
 			;; this removes two blank lines before each entry.
 			(bibtex-beginning-of-entry)
