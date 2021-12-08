@@ -96,8 +96,8 @@ if you should continue to the next step."
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 ;; ** <<APS journals>>
-(add-to-list 'org-latex-classes '("revtex4-1"
-				  "\\documentclass{revtex4-1}
+(add-to-list 'org-latex-classes '("revtex4-2"
+				  "\\documentclass{revtex4-2}
  [NO-DEFAULT-PACKAGES]
  [PACKAGES]
  [EXTRA]"
