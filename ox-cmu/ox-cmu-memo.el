@@ -217,9 +217,14 @@ TEXINPUTS is augmented with the path to the cmumemo style file.
 This has worked before, but it does not seem to work on Mac
 Catalina."
   (interactive)
-  (let* ((*TEXINPUTS* (format "TEXINPUTS=%s%stex/latex/cmu/:"
+  (let* ((*TEXINPUTS* (format "TEXINPUTS=%s%stex/latex/cmu/%s"
 			      (or (getenv "TEXINPUTS") "")
-			      (file-name-directory (locate-library "ox-cmu-memo"))))
+			      (file-name-directory (locate-library "ox-cmu-memo"))
+			      (cond 
+			       ((eq system-type 'windows-nt)
+				";")
+			       (t
+				":"))))
 	 (process-environment (cons *TEXINPUTS* process-environment)))
     (org-open-file (cmu-memo-export-to-pdf async subtreep visible-only body-only ext-plist))))
 

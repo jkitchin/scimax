@@ -224,6 +224,7 @@ file.  DEPTH='deep will also remove the tex source and pdf file."
   (let* ((org-file (file-name-nondirectory (buffer-file-name)))
          (org-base (file-name-sans-extension org-file))
          (extensions '(".aux" ".pyg" ".bbl" ".blg" ".toc"
+		       ".ind" ".ilg"
 		       ".log" ".out" ".spl" "_flymake.out"
 		       "Notes.bib" ".dvi"))
          (temp-files (mapcar (lambda (extension)
@@ -700,20 +701,21 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 	 (tex-archive (concat base-name
 			      "-"
 			      (format-time-string "%Y-%m-%d/" (current-time))))
-	 (tex-file (concat (file-name-sans-extension org-file) ".tex"))
+	 (tex-file (concat (file-name-sans-extension org-file-abs-path) ".tex"))
 	 (tex-bak-file (concat (file-name-sans-extension org-file) ".tex.bak"))
 	 (base-tex-file (file-name-nondirectory tex-file))
 	 (bbl-file (replace-regexp-in-string "tex$" "bbl" tex-file))
 	 (tex-contents (with-temp-buffer
 			 (insert-file-contents tex-file)
 			 (buffer-string)))
-	 (figure-count 0))
+	 (figure-count 0)
+	 beg start end latex-file-path)
 
     ;; Make sure we have a tex-file and it is newer
     (unless (and  (file-exists-p tex-file)
 		  (file-newer-than-file-p tex-file org-file))
       ;;  and if not, build a tex file
-      (ox-manuscript-export-and-build-and-open
+      (ox-manuscript-export-and-build
        async subtreep
        visible-only body-only options)
       ;; remove image extensions
@@ -734,58 +736,61 @@ The optional FILES keyword is a list of additional files to copy into the archiv
       (insert tex-contents)
       (goto-char (point-min))
       (while (re-search-forward
-	      ;; group 1 is the whole string
-	      ;; group 2 is the file name
-	      ;; group 3 is the extension
-	      "\\(?1:\\includegraphics\\(?2:[?[^].*]?\\)?\\){\\(?3:[^}].*\\)}"
+	      ;; We get to the { in this, and then use parsing to get what is in
+	      ;; the {}. The regexp was not reliable in some cases.
+	      "\\\\includegraphics"
 	      nil t)
+	(search-forward "{")
+	(setq start (point))
+	(backward-char)
+	(forward-sexp)
+	(setq end (point))
+	(setq latex-file-path (buffer-substring-no-properties
+			       start (- end 1)))
+	
 	(cl-incf figure-count)
-	(let* ((eps-file (concat (match-string 3) ".eps"))
-	       (pdf-file (concat (match-string 3) ".pdf"))
-	       (png-file (concat (match-string 3) ".png"))
-	       (jpg-file (concat (match-string 3) ".jpg"))
-	       (jpeg-file (concat (match-string 3) ".jpeg"))
-	       (fname (file-name-nondirectory (match-string 3))))
-	  ;;  Copy the image to the tex-archive. Priority goes as eps,
-	  ;;  pdf then png
-	  (cond
-	   ((file-exists-p eps-file)
+	(let* ((eps-file (concat latex-file-path ".eps"))
+	       (pdf-file (concat latex-file-path ".pdf"))
+	       (png-file (concat latex-file-path ".png"))
+	       (jpg-file (concat latex-file-path ".jpg"))
+	       (jpeg-file (concat latex-file-path ".jpeg"))
+	       (fname (file-name-nondirectory  latex-file-path)))
+	  ;;  Copy the images to the tex-archive.
+	  
+	  (when (file-exists-p eps-file)
 	    (copy-file eps-file (expand-file-name
-				 (concat fname ".eps") tex-archive)
+				 (format "%02d-%s.eps" figure-count fname)
+				 tex-archive)
 		       t))
-	   ((file-exists-p pdf-file)
+	  (when (file-exists-p pdf-file)
 	    (copy-file pdf-file (expand-file-name
-				 (concat fname ".pdf") tex-archive)
+				 (format "%02d-%s.pdf" figure-count fname)
+				 tex-archive)
 		       t))
-	   ((file-exists-p png-file)
-	    (copy-file png-file (expand-file-name
-				 (concat fname ".png") tex-archive)
-		       t)
+	  (when (file-exists-p png-file) 
 	    (copy-file png-file (expand-file-name
 				 (format "%02d-%s.png" figure-count fname)
 				 tex-archive)
 		       t))
-	   ((file-exists-p jpg-file)
+	  (when (file-exists-p jpg-file)
 	    (copy-file jpg-file (expand-file-name
-				 (concat fname ".jpg") tex-archive)
+				 (format "%02d-%s.jpg" figure-count fname)
+				 tex-archive)
 		       t))
-	   ((file-exists-p jpeg-file)
+	  (when (file-exists-p jpeg-file)
 	    (copy-file jpeg-file (expand-file-name
-				  (concat fname ".jpeg") tex-archive)
+				  (format "%02d-%s.jpeg" figure-count fname)
+				  tex-archive)
 		       t))
-	   (t
-	    (error "No file found: %s (%s %s %s)"
-		   (match-string 3)
-		   eps-file
-		   pdf-file
-		   png-file)))
+
 	  ;; flatten the filename in the tex-file
-	  (replace-match (format "\\1{%02d-%s}" figure-count fname)))))
+	  (setf (buffer-substring start (- end 1))
+		(format "%02d-%s" figure-count fname)))))
 
     ;; the tex-file is no longer valid in the current directory
     ;; because the paths to images are wrong. So we move it to where
     ;; it belongs.
-    (rename-file tex-file (expand-file-name tex-file tex-archive) t)
+    (rename-file tex-file (expand-file-name (file-name-nondirectory tex-file) tex-archive) t)
 
     ;; restore the original version
     (rename-file tex-bak-file tex-file)
@@ -802,13 +807,13 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 			      (expand-file-name tex-archive))))
       ;; I do not know why shell-command does not work here.
       (message "Building %s in %s" base-tex-file default-directory)
-      (call-process "latexmk" nil nil nil "-f" "-pdf" "-shell-escape" base-tex-file)
-      ;; (call-process "pdflatex" nil nil nil "-shell-escape" base-tex-file)
-      (ox-manuscript-cleanup))
-    (org-open-file (concat
-		    (file-name-sans-extension
-		     (expand-file-name tex-file tex-archive))
-		    ".pdf"))
+      (call-process "latexmk" nil nil nil "-f" "-pdf" "-shell-escape" "-interaction=nonstopmode" base-tex-file)
+      ;; (ox-manuscript-cleanup)
+      
+      (org-open-file (concat
+		      (file-name-sans-extension
+		       base-tex-file)
+		      ".pdf")))
     ;; return directory
     tex-archive))
 
