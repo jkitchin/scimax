@@ -213,9 +213,7 @@ Return PDF file's name."
     (&optional async subtreep visible-only body-only ext-plist)
   "Export a memo to PDF and open it.
 
-TEXINPUTS is augmented with the path to the cmumemo style file.
-This has worked before, but it does not seem to work on Mac
-Catalina."
+TEXINPUTS is augmented with the path to the cmumemo style file."
   (interactive)
   (let* ((*TEXINPUTS* (format "TEXINPUTS=%s%stex/latex/cmu/%s"
 			      (or (getenv "TEXINPUTS") "")
