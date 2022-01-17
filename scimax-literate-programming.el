@@ -65,6 +65,7 @@
   '(("emacs-lisp"  . "lisp")
     ("fortran" . "fortran")
     ("python" . "python")
+    ("jupyter-python" . "python")
     ("ipython" . "python"))
   "An a-list of babel languages to language for etags.
 Each cons cell is (src-block lang . etags language)")
