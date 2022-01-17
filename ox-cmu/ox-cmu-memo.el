@@ -215,14 +215,20 @@ Return PDF file's name."
 
 TEXINPUTS is augmented with the path to the cmumemo style file."
   (interactive)
-  (let* ((*TEXINPUTS* (format "TEXINPUTS=%s%stex/latex/cmu/%s"
-			      (or (getenv "TEXINPUTS") "")
-			      (file-name-directory (locate-library "ox-cmu-memo"))
-			      (cond 
-			       ((eq system-type 'windows-nt)
-				";")
-			       (t
-				":"))))
+  ;; I think on windows ; is used for separators. On Mac/Linux : is used.
+  
+  (let* ((separator (pcase system-type
+		      ('windows-nt ";")
+		      (_ ":")))
+	 (texinputs (getenv "TEXINPUTS"))
+	 (*TEXINPUTS* (format "TEXINPUTS=%s%s%s"
+			      (if texinputs
+				  (concat texinputs separator)
+				"")
+			      (expand-file-name "tex/latex/cmu/"
+						(file-name-directory
+						 (locate-library "ox-cmu-memo")))
+			      separator))
 	 (process-environment (cons *TEXINPUTS* process-environment)))
     (org-open-file (cmu-memo-export-to-pdf async subtreep visible-only body-only ext-plist))))
 
