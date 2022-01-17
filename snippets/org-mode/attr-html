@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: html attribute
+# key: ah
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# condition: (looking-back "^ah" 3)
+# --
+#+attr_html: ${1::width 600}$0
