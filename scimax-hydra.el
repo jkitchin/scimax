@@ -191,6 +191,7 @@ This is a macro so I don't have to quote the hydra name."
   
   ("b" bash "bash" :column "OS")
   ("f" finder "Finder" :column "OS")
+  ("e" eshell "eshell" :column "OS")
 
   ("c" google-calendar "Calendar" :column "Web")
   ("g" google "Google" :column "Web")
@@ -391,7 +392,7 @@ _p_: ffap
   ("c" (scimax-open-hydra scimax-jump-char/body) "Char" :column "text")
   ("w" (scimax-open-hydra scimax-jump-word/body) "Word" :column "text")
   ("s" avy-jump-to-sentence "Sentence" :column "text")
-  ("p" avy-jump-to-paragraph "Paragraph" :column "text")
+  ("r" avy-jump-to-paragraph "Paragraph" :column "text")
   ("y" (scimax-open-hydra scimax-jump-symbol/body) "Symbol" :column "text")
 
   
@@ -403,8 +404,9 @@ _p_: ffap
   
   ("b" counsel-ibuffer "Buffer" :column "misc")
   ("n" ace-window "Ace window" :column "misc")
-  ("r" counsel-recentf "Recent file" :column "misc")
-  ("j" avy-goto-char-timer "avy timer" :coumn "misc"))
+  ("f" counsel-recentf "Recent file" :column "misc")
+  ("j" avy-goto-char-timer "avy timer" :coumn "misc")
+  ("p" counsel-projectile-switch-project  "project" :column "misc"))
 
 
 (defhydra scimax-jump-char (:color blue :inherit (scimax-base/heads) :columns 3)
