@@ -107,7 +107,7 @@ When we create the proxy files we need an extension for each block.")
   "Generate the proxy filename for LANG."
   (s-concat (if-let (bf (buffer-file-name))
 		(md5 (concat (expand-file-name bf) "-" lang))
-	      (concat "scratch" lang))
+	      (concat "scratch-" lang))
 	    (cdr (assoc lang obf-file-extensions))))
  #+END_SRC
 
