@@ -4,7 +4,7 @@
 #+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 #+default-filename: manuscript.org
 
-#+LATEX_CLASS: revtex4-1
+#+LATEX_CLASS: revtex4-2
 #+LATEX_CLASS_OPTIONS:[aps,prl,citeautoscript,preprint,showkeys,floatfix]
 #+OPTIONS: toc:nil author:nil ^:{}
 #+EXPORT_EXCLUDE_TAGS: noexport
