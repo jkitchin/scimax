@@ -462,7 +462,10 @@ _p_: ffap
 
 ;;** bookmarks
 
-(require 'org-mac-link)
+(when (eq 'darwin system-type)
+  ;; this is in org-contrib, but I actually keep a copy of my own. It is not
+  ;; part of scimax though.
+  (require 'org-mac-link))
 
 (defun scimax-bookmark-chrome (nickname)
   "Save the url currently open as a bookmark."
