@@ -5,7 +5,7 @@
 
 The goal of this library is to get flycheck overlays onto org-babel src-blocks /in org-mode/. The difficulty in this is that flycheck requires a file, but the src-blocks often have no corresponding file.
 
-The solution here is to create a proxy file for the src-blocks that is used with flycheck. We get the overlays from that buffer, and then transfer them to the org-file.
+The solution here is to create a proxy file for the src-blocks that is used with flycheck. We get the overlays from that buffer, and then transfer them to the org-file. The overlays are only created when you save the file, or are idle.
 
 We rely on some hook functions to create the proxy file after saving, and an idle timer to asynchronously move the overlays back.
 
@@ -26,7 +26,21 @@ And to use it,
 (scimax-ob-flycheck-mode +1)
 #+END_SRC
 
-See [[id:4C28546C-8F3F-4AD4-900E-C623C8485183][Known Limitations]].
+
+** Known Limitations
+  :PROPERTIES:
+  :ID:       4C28546C-8F3F-4AD4-900E-C623C8485183
+  :END:
+
+Overall, this works ok.
+
+Some limitations are related to running flycheck on a buffer that isn't really a code file. So, you can get some spurious flycheck errors related to extra blank lines, not enough blank lines, code files not starting or ending the right way etc. I don't see a practical solution to this any time soon. It would be nice to find a way to tangle the file so we could eliminate those, but then we would have to keep track of mapping the positions back to the org file.
+
+As you modify the buffer, the positions here get out of date with the proxy-files. If the logic is right, this isn't a big deal, but it is confusing if not.
+
+This will not work with noweb. I don't see a practical solution to that limitation.
+
+This library was not written with performance in mind
 
 ** Header
 
@@ -37,7 +51,7 @@ See [[id:4C28546C-8F3F-4AD4-900E-C623C8485183][Known Limitations]].
 ;; To use this module, enable `scimax-ob-flycheck-mode' in the buffer.
 
 ;;; Code
-(require 'cl)
+(require 'cl-lib)
 (require 'f)
 (require 's)
 (require 'ov)
@@ -76,6 +90,7 @@ See [[id:4C28546C-8F3F-4AD4-900E-C623C8485183][Known Limitations]].
 (defvar obf-file-extensions
   '(("emacs-lisp" . ".el")
     ("python" . ".py")
+    ("jupyter-python" . ".py")
     ("ipython" . ".py"))
   "An a-list of (language . extension).
 When we create the proxy files we need an extension for each block.")
@@ -91,8 +106,8 @@ When we create the proxy files we need an extension for each block.")
 (defun obf-proxy-filename (lang)
   "Generate the proxy filename for LANG."
   (s-concat (if-let (bf (buffer-file-name))
-		(md5 (expand-file-name bf))
-	      "scratch")
+		(md5 (concat (expand-file-name bf) "-" lang))
+	      (concat "scratch" lang))
 	    (cdr (assoc lang obf-file-extensions))))
  #+END_SRC
 
@@ -110,8 +125,7 @@ When we create the proxy files we need an extension for each block.")
 
 ** Transferring the overlays
 
-There will be a buffer holding the proxy file that is flychecked. After the syntax check is done,  we now want to loop over the overlays in that buffer, get their start, end and properties, and transfer them to the original buffer. There is conveniently a flycheck-after-syntax-check-hook.
-
+There will be a buffer holding the proxy file that is flychecked. After the syntax check is done,  we now want to loop over the overlays in that buffer, get their start, end and properties, and transfer them to the original buffer. There is conveniently a `flycheck-after-syntax-check-hook'.
 
 Here is the function that will run in the proxy-buffer and transfer the overlays. The variable =obf-buffer= is buffer local and points to the org-file we want the overlays to go in. The variable =obf-lang= is also buffer-local and indicates the language for the overlays. This function is run by a hook function after a flycheck syntax check is done. We modify the overlays so they look like they came from the org-buffer. That way you can use a command like =flycheck-previous-error= (M-g p) or  =flycheck-next-error= (M-g n).
 
@@ -124,28 +138,31 @@ Here is the function that will run in the proxy-buffer and transfer the overlays
     (cl-loop for ov in (ov-all) do
 	     (when (overlay-get ov 'flycheck-overlay)
 	       (push (list (ov-beg ov) (ov-end ov) ov) ovs)))
-    (with-current-buffer obf-buffer
-      (flycheck-mode -1)
+    (with-current-buffer obf-buffer      
       (save-excursion
-	(loop for (start end ov) in ovs do
-	      (when start
-		(goto-char start)
-		(when (and (get-text-property (point) 'src-block)
-			   (string= lang (car (org-babel-get-src-block-info)))
-			   (not (s-contains? "#\\+END_SRC" (buffer-substring
-							  (line-beginning-position)
-							  (line-end-position)))))
-		  (setq newov (make-overlay start end))
-		  (setq props (overlay-properties ov))
-		  (setf (flycheck-error-buffer
-			 (elt props
-			      (+ 1 (-find-index (lambda (a) (eq a 'flycheck-error)) props))))
-			(current-buffer))
-		  (setf (flycheck-error-filename
-			 (elt props
-			      (+ 1 (-find-index (lambda (a) (eq a 'flycheck-error)) props))))
-			(buffer-file-name (current-buffer)))
-		  (ov-set newov props))))))))
+	(cl-loop for (start end ov) in ovs do
+		 (when start
+		   (goto-char start)
+		   (when (and (get-text-property (point) 'src-block)
+			      (string= lang (car (org-babel-get-src-block-info)))
+			      (not (s-contains? "#\\+END_SRC" (buffer-substring
+							       (line-beginning-position)
+							       (line-end-position)))))
+		     (setq newov (make-overlay start end))
+		     (setq props (overlay-properties ov))
+		     (setf (flycheck-error-buffer
+			    (elt props
+				 (+ 1 (-find-index (lambda (a)
+						     (eq a 'flycheck-error))
+						   props))))
+			   (current-buffer))
+		     (setf (flycheck-error-filename
+			    (elt props
+				 (+ 1 (-find-index (lambda (a)
+						     (eq a 'flycheck-error))
+						   props))))
+			   (buffer-file-name (current-buffer)))
+		     (ov-set newov props))))))))
  #+END_SRC
 
  #+RESULTS:
@@ -182,7 +199,8 @@ Here is the function that will run in the proxy-buffer and transfer the overlays
 			      (line-beginning-position)
 			      (line-end-position))
 			     (make-string len ?\s))
-		       ;; Now skip to end, and go back to then src delimiter and eliminate that line.
+		       ;; Now skip to end, and go back to then src delimiter and
+		       ;; eliminate that line.
 		       (goto-char end)
 		       (forward-line (- (* -1 (org-element-property :post-blank src)) 1))
 		       (setf (buffer-substring
@@ -212,19 +230,14 @@ Here is the function that will run in the proxy-buffer and transfer the overlays
 	       (setq obf-lang (org-no-properties lang))
 	       (setq obf-buffer cb)
 	       ; Make sure we have the hook function setup, then trigger a check.
-	       (add-hook 'flycheck-after-syntax-check-hook 'obf-transfer-flycheck-overlays t t)
+	       (add-hook 'flycheck-after-syntax-check-hook
+			 'obf-transfer-flycheck-overlays t t)
 	       (flycheck-mode +1)
 	       (flycheck-buffer)))))
  #+END_SRC
 
  #+RESULTS:
  : obf-generate-proxy-files
-
-
-
- #+RESULTS:
- | flycheck-handle-save | t | org-db-hook-function | obf-generate-proxy-files |
-
 
 
 ** Minor mode
@@ -241,6 +254,15 @@ If you delete all the language blocks, this will leave some behind."
 	     (delete-file (obf-proxy-filename lang)))))
 
 
+(defvar obf-idle-timer nil
+  "An idle timer to update the buffer if you are idle.")
+
+
+(defcustom obf-idle-delay 5
+  "Idle time in seconds to run the proxy file function"
+  :group 'scimax
+  :type 'integer)
+
 (define-minor-mode scimax-ob-flycheck-mode
   "Minor mode to put flycheck overlays on src-blocks."
   :lighter " obf"
@@ -250,14 +272,21 @@ If you delete all the language blocks, this will leave some behind."
 	(flycheck-mode -1)
 	(add-hook 'kill-buffer-hook 'obf-delete-proxy-files t t)
 	(add-hook 'after-save-hook 'obf-generate-proxy-files t t)
-	(obf-generate-proxy-files))
+	(obf-generate-proxy-files)
+	(setq obf-idle-timer (run-with-idle-timer
+			      obf-idle-delay t
+			      'obf-generate-proxy-files)))
 
     ;; turn it off
     ;; clear current overlays
     (ov-clear)
     ;; close and delete proxy-files
     (obf-delete-proxy-files)
-    (remove-hook 'after-save-hook 'obf-generate-proxy-files t)))
+    (remove-hook 'after-save-hook 'obf-generate-proxy-files t)
+    ;; stop the timer
+    (when obf-idle-timer
+      (cancel-timer obf-idle-timer)
+      (setq obf-idle-timer nil))))
 #+END_SRC
 
  #+RESULTS:
@@ -272,17 +301,3 @@ If you delete all the language blocks, this will leave some behind."
 
 
 
-* Known Limitations
-  :PROPERTIES:
-  :ID:       4C28546C-8F3F-4AD4-900E-C623C8485183
-  :END:
-
-Overall, this works ok.
-
-Some limitations are related to running flycheck on a buffer that isn't really a code file. So, you can get some spurious flycheck errors related to extra blank lines, elisp files not starting or ending the right way etc.
-
-As you modify the buffer, the positions here get out of date with the proxy-files. If the logic is right, this isn't a big deal, but it is confusing if not.
-
-At the moment, the overlays don't seem to work on all the blocks when multiple languages are present. It seems like only the last language has overlays on it, the rest seem to get removed. That is a bug to be fixed one day.
-
-This will not work with noweb.
