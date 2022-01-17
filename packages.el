@@ -113,7 +113,7 @@
    ("s-r" . ivy-resume)
    ("H-r" . ivy-resume)
    ("H-c l" . counsel-load-library)
-   ("H-c f" . counsel-git)
+   ("H-c f" . counsel-find-library)
    ("H-c g" . counsel-git-grep)
    ("H-c a" . counsel-ag)
    ("H-c p" . counsel-pt))
