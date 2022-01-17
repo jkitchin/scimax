@@ -68,12 +68,16 @@
 (use-package drag-stuff)
 
 (use-package swiper
-  :bind
-  ([remap isearch-forward] . counsel-grep-or-swiper)
+  :bind 
   ("H-s" . swiper-all)
   :diminish ivy-mode
   :config
-  (ivy-mode))
+  (ivy-mode)
+  (define-key global-map [remap isearch-forward]
+    (if (executable-find "grep") 
+	'counsel-grep-or-swiper
+      'swiper)))
+
 
 (use-package multiple-cursors
   :config
