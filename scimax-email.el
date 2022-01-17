@@ -1,48 +1,39 @@
-;;; scimax-email.el --- Email functions
+;;; scimax-email.el --- Email functions -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;;
 
 ;;; Code:
 ;; * Regular email functions
+(require 'org-ref-export)
 
 ;;;###autoload
 (defun email-region (start end)
   "Send region as the body of an email."
   (interactive "r")
-  (let ((content (buffer-substring start end))
-	cite
-	keys
-	bibfile p1 p2
-	(bib-entries '()))
-    (goto-char (region-beginning))
-
-    (save-restriction
-      (narrow-to-region start end)
-      (org-element-map (org-element-parse-buffer) 'link
-	(lambda (link)
-	  (when (-contains? org-ref-cite-types (org-element-property :type link))
-	    (setq keys (s-split "," (org-element-property :path link)))
-	    (cl-loop for key in keys
-		     do
-		     (setq bibfile
-			   (cdr (org-ref-get-bibtex-key-and-file key)))
-		     (with-current-buffer (find-file-noselect bibfile)
-		       (bibtex-search-entry key)
-		       (save-excursion
-			 (bibtex-beginning-of-entry)
-			 (setq p1 (point))
-			 (bibtex-end-of-entry)
-			 (setq p2 (point)))
-		       (add-to-list 'bib-entries (buffer-substring-no-properties p1 p2))))))))
+  
+  (let* ((org-export-before-parsing-hook '((lambda (_)
+					     (goto-char (point-min))
+					     (unless (re-search-forward "bibliography:" nil t)
+					       (goto-char (point-max))
+					       (insert (format
+							"\nbibliography:%s"
+							(if (stringp bibtex-completion-bibliography)
+							    bibtex-completion-bibliography
+							  (string-join
+							   bibtex-completion-bibliography ",")))))
+					     (org-ref-csl-preprocess-buffer 'ascii))))
+	 (org-export-show-temporary-export-buffer nil)
+	 
+	 (content (progn
+		    (org-ascii-export-as-ascii nil nil nil t)
+		    (with-current-buffer "*Org ASCII Export*"
+		      (buffer-string)))))
+    
 
     (compose-mail)
     (message-goto-body)
     (insert content)
-    (insert "\n\n% Bibtex Entries:\n\n")
-    (cl-loop for bib-entry in bib-entries
-	     do
-	     (insert bib-entry))
     (message-goto-to)))
 
 ;;;###autoload
@@ -61,24 +52,6 @@
 (defvar *email-mu4e-link-to-message* nil
   "Global var to store mu4e link to Message-ID of last email.")
 
-(defun email-heading-return ()
-  "After returning from compose do this in the heading.
-Sets SENT-ON, TO and a Message-ID property.
-Removes unsent tag if there, and adds sent to tags"
-  (switch-to-buffer (marker-buffer  *email-heading-point*))
-  (goto-char (marker-position  *email-heading-point*))
-  (setq *email-heading-point* nil)
-  (org-set-property "SENT-ON" (current-time-string))
-  ;; reset this incase you added new ones
-  (org-set-property "TO" (mapconcat 'identity  *email-to-addresses* ", "))
-  (org-set-property "Message-ID" *email-mu4e-link-to-message*)
-  ;; remove unsent tag if it is there, and add sent
-  (let ((tags (org-get-tags)))
-    (add-to-list 'tags "sent")
-    (setq tags (-remove-item "unsent" tags))
-    (org-set-tags-to tags)))
-
-
 (defun email-send-action ()
   "Send action for `compose-mail'."
   (setq
@@ -92,40 +65,71 @@ Removes unsent tag if there, and adds sent to tags"
 		(replace-regexp-in-string
 		 "\\(\\`<\\|>\\'\\)" "" (mail-fetch-field "Message-ID"))
 		(mail-fetch-field "Subject")
-		(current-time-string))))
+		(current-time-string)))
+  
+  (save-excursion
+    (switch-to-buffer (marker-buffer  *email-heading-point*))
+    (goto-char (marker-position  *email-heading-point*))
+    (when (not (org-at-heading-p))
+      (org-previous-visible-heading 1))
+    (setq *email-heading-point* nil)
+    (org-set-property "SENT-ON" (current-time-string))
+    ;; reset this incase you added new ones
+    (org-set-property "TO" (mapconcat 'identity  *email-to-addresses* ", "))
+    (org-set-property "Message-ID" *email-mu4e-link-to-message*)
+    ;; remove unsent tag if it is there, and add sent
+    (let ((tags (org-get-tags)))
+      (add-to-list 'tags "sent")
+      (setq tags (-remove-item "unsent" tags))
+      (org-set-tags-to tags)))
+  (mu4e-update-mail-and-index t))
 
 ;;;###autoload
-(defun email-heading ()
+(defun email-heading (send)
   "Send the current org-mode heading as the body of an email, with headline as the subject.
 
-use these properties
+use these properties if they exist
 TO
 CC
 BCC
+SUBJECT
 OTHER-HEADERS is an alist specifying additional
 header fields.  Elements look like (HEADER . VALUE) where both
 HEADER and VALUE are strings.
 
+with prefix arg SEND, send immediately.
+
 Save when it was sent as a SENT property. this is overwritten on
 subsequent sends."
-  (interactive)
+  (interactive "P")
 					; store location.
   (setq *email-heading-point* (set-marker (make-marker) (point)))
   (save-excursion
     (org-mark-subtree)
-    (let ((content (buffer-substring (point) (mark)))
-	  (TO (org-entry-get (point) "TO" t))
-	  (CC (org-entry-get (point) "CC" t))
-	  (BCC (org-entry-get (point) "BCC" t))
-	  (SUBJECT (nth 4 (org-heading-components)))
-	  (OTHER-HEADERS (read (or (org-entry-get (point) "OTHER-HEADERS") "()")))
-	  (continue nil)
-	  (switch-function nil)
-	  (yank-action nil)
-	  (send-actions '((email-send-action . nil)))
-	  (return-action '(email-heading-return)))
+    (let* ((org-export-before-parsing-hook '((lambda (_)
+					       (unless (re-search-forward "bibliography:" nil t)
+						 (goto-char (point-max))
+						 (insert (format "\nbibliography:%s"
+								 (if (stringp bibtex-completion-bibliography)
+								     bibtex-completion-bibliography
+								   (string-join bibtex-completion-bibliography ","))))))
+					     org-ref-csl-preprocess-buffer))
+	   (content (org-export-string-as
+		     (buffer-substring (point) (mark)) 'ascii t))
+	   
+	   (TO (org-entry-get (point) "TO" t))
+	   (CC (org-entry-get (point) "CC" t))
+	   (BCC (org-entry-get (point) "BCC" t))
+	   (SUBJECT (or (org-entry-get (point) "SUBJECT" t) (nth 4 (org-heading-components))))
+	   (OTHER-HEADERS (read (or (org-entry-get (point) "OTHER-HEADERS") "()")))
+	   (continue nil)
+	   (switch-function nil)
+	   (yank-action nil)
+	   (send-actions '((email-send-action . nil))))
 
-      (compose-mail TO SUBJECT OTHER-HEADERS continue switch-function yank-action send-actions return-action)
+      (compose-mail TO SUBJECT OTHER-HEADERS
+		    continue switch-function yank-action
+		    send-actions)
       (message-goto-body)
       (insert content)
       (when CC
@@ -136,7 +140,9 @@ subsequent sends."
 	(insert BCC))
       (if TO
 	  (message-goto-body)
-	(message-goto-to)))))
+	(message-goto-to))
+      (when send
+	(message-send-and-exit)))))
 
 ;;;###autoload
 (defun email-heading-body (send)
@@ -160,26 +166,39 @@ overwritten on subsequent sends."
 					; store location.
   (setq *email-heading-point* (set-marker (make-marker) (point)))
   (save-excursion
-    (let ((TO (org-entry-get (point) "TO" t))
-          (CC (org-entry-get (point) "CC" t))
-          (BCC (org-entry-get (point) "BCC" t))
-          (SUBJECT (or (org-entry-get (point) "SUBJECT" t)
-		       (nth 4 (org-heading-components))))
-          (OTHER-HEADERS (eval (org-entry-get (point) "OTHER-HEADERS")))
-	  (content (progn
-                     (unless (org-at-heading-p) (outline-previous-heading))
-                     (let ((headline (org-element-at-point)))
-		       (org-end-of-meta-data)
-                       (buffer-substring
-			(point)
-                        (org-element-property :contents-end headline)))))
-          (continue nil)
-          (switch-function nil)
-          (yank-action nil)
-          (send-actions '((email-send-action . nil)))
-          (return-action '(email-heading-return)))
+    (let* ((TO (org-entry-get (point) "TO" t))
+           (CC (org-entry-get (point) "CC" t))
+           (BCC (org-entry-get (point) "BCC" t))
+           (SUBJECT (or (org-entry-get (point) "SUBJECT" t)
+			(nth 4 (org-heading-components))))
+           (OTHER-HEADERS (eval (org-entry-get (point) "OTHER-HEADERS")))
+	   (org-export-before-parsing-hook '((lambda (_)
+					       (goto-char (point-min))
+					       (unless (re-search-forward "bibliography:" nil t)
+						 (goto-char (point-max))
+						 (insert (format
+							  "\nbibliography:%s"
+							  (if (stringp bibtex-completion-bibliography)
+							      bibtex-completion-bibliography
+							    (string-join
+							     bibtex-completion-bibliography ",")))))
+					       (org-ref-csl-preprocess-buffer 'ascii))))
+	   (content (progn
+                      (unless (org-at-heading-p) (outline-previous-heading))
+                      (let ((headline (org-element-at-point)))
+			(org-end-of-meta-data)
+			(save-restriction
+			  (narrow-to-region (point)
+					    (org-element-property :contents-end headline))
+			  (org-ascii-export-as-ascii nil nil nil t)
+			  (with-current-buffer "*Org ASCII Export*"
+			    (buffer-string))))))
+           (continue nil)
+           (switch-function nil)
+           (yank-action nil)
+           (send-actions '((email-send-action . nil))))
 
-      (compose-mail TO SUBJECT OTHER-HEADERS continue switch-function yank-action send-actions return-action)
+      (compose-mail TO SUBJECT OTHER-HEADERS continue switch-function yank-action send-actions)
       (message-goto-body)
       (insert content)
       (when CC
@@ -201,17 +220,15 @@ overwritten on subsequent sends."
 
   (save-excursion
     (bibtex-beginning-of-entry)
-    (let* ((key (reftex-get-bib-field "=key=" (bibtex-parse-entry t)))
-	   (pdf (expand-file-name
-		 (concat key ".pdf")
-		 org-ref-pdf-directory)))
+    (let* ((key (bibtex-completion-get-key-bibtex))
+	   (pdf (bibtex-completion-find-pdf key)))
       (bibtex-copy-entry-as-kill)
       (compose-mail)
       (message-goto-body)
       (insert (pop bibtex-entry-kill-ring))
       (message-goto-subject)
       (insert (concat "Bibtex entry: " key))
-      (when (file-exists-p pdf)
+      (when (and pdf (file-exists-p pdf))
 	(mml-attach-file pdf))
       (message-goto-to))))
 
@@ -250,20 +267,38 @@ This function does not send the messages.
 
 Example usage:
 
- (mail-merge-make-headings
+#+name: data
+| TO           | name | application-id | subject    |
+|--------------+------+----------------+------------|
+| some@one.com  | Bill |            123 | [J] person |
+| some@two.com  | John |            456 | [J] two    |
+
+
+#+BEGIN_SRC emacs-lisp :var d=data
+(mail-merge-make-headings
  \"Dear ${name},
 
-  Please check this file: ${file}.
+  Thank you for submitting application ${application-id}.
 
   -----------------------
   Please do not delete this.
   [[id:${ID}]]
 
   \"
- '(((\"TO\" . \" some@person.com \")
-    (\"name\" . \"Someone\")
-    (\"file\" . \" tees.org \")
-    (\"SUBJECT\" . \" [J] Person \"))))"
+  (cl-loop for (to name id subject) in d collect
+	   (list (cons \"TO\" to)
+                 (cons \"name\" name)
+                 (cons \"application-id\" id)
+		 (cons \"SUBJECT\" subject))))
+#+END_SRC
+
+This only creates the messages. It does not send them.
+
+See `mail-merge-send-heading' to send one heading (e.g. to test it).
+
+See `mail-merge' to send them all.
+
+See also the speed keys below to send each heading manually."
   ;; create Messages heading if needed
   (save-restriction
     (org-narrow-to-subtree)
@@ -281,14 +316,17 @@ Example usage:
 		    (save-restriction
 		      (org-narrow-to-subtree)
 		      (goto-char (cdr (org-id-find this-id)))
-		      (org-insert-heading-after-current)
+		      (org-insert-heading-after-current) 
 		      (org-do-demote)
 		      (setq data (add-to-list 'data
 					      (cons "ID" (org-id-get-create))))
 		      (outline-previous-heading)
+				     
 		      (end-of-line)
 		      (insert (or (cdr (assoc "HEADLINE" data))
 				  (cdr (assoc "SUBJECT" data))))
+		      (org-set-tags-to (-uniq (append '("unsent") (org-get-tags))))
+				     
 		      (org-end-of-meta-data)
 		      (insert (s-format s-template 'aget data))
 		      ;; refill now that it is expanded
@@ -301,8 +339,7 @@ Example usage:
 						     (point-max))))
 		      (org-entry-put (point) "TO" (cdr (assoc "TO" data)))
 		      (when (cdr (assoc "SUBJECT" data))
-			(org-entry-put (point) "SUBJECT" (cdr (assoc "SUBJECT" data))))
-		      (org-set-tags-to (-uniq (append '("unsent") (org-get-tags))))))))))
+			(org-entry-put (point) "SUBJECT" (cdr (assoc "SUBJECT" data))))))))))
 
 
 ;;;###autoload
@@ -330,11 +367,10 @@ With prefix arg, also send the message and move to the next one."
 	  (continue nil)
 	  (switch-function nil)
 	  (yank-action nil)
-	  (send-actions '((email-send-action . nil)))
-	  (return-action '(email-heading-return)))
+	  (send-actions '((email-send-action . nil))))
 
       (compose-mail TO SUBJECT OTHER-HEADERS continue switch-function
-		    yank-action send-actions return-action)
+		    yank-action send-actions)
       (message-goto-body)
       (insert content)
       (when CC
@@ -395,6 +431,8 @@ mail the body of each heading using
   (with-current-buffer "*Help*"
     (setq truncate-lines t)))
 
+;; Should I make a mail-merge speed command, M? or should that always require
+;; thinking. I lean towards thinking.
 (setq org-speed-commands-mail-merge
       '(("m" . (mail-merge-send-heading))
 	("s" . (mail-merge-send-heading t))
