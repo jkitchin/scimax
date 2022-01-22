@@ -131,7 +131,13 @@ Use `ivy-insert-org-entity' (s-e) for all accented characters.
 
 The following examples show some of the shortcuts defined in scimax for expansion. Put your cursor after the shortcut and press tab to expand them. These are done with yasnippets (defined in [[./snippets/]]).
 
+
 #+BEGIN_EXAMPLE
+<jp 
+#+BEGIN_SRC jupyter-python
+
+#+END_SRC
+
 <ip
 #+BEGIN_SRC ipython
 
@@ -141,7 +147,6 @@ The following examples show some of the shortcuts defined in scimax for expansio
 #+BEGIN_SRC python
 
 #+END_SRC
-
 
 <el
 #+BEGIN_SRC emacs-lisp
@@ -153,10 +158,10 @@ The following examples show some of the shortcuts defined in scimax for expansio
 
 #+END_SRC
 
-<ti
+ti
 #+title:
 
-<ok   org-keywords with completions
+ok   org-keywords with completions
 #+ARCHIVE:
 
 lh
@@ -182,6 +187,11 @@ ca
 #+caption:
 
 ncf
+#+name: ${1:name}
+#+caption: ${2:caption}
+[[${3:}]]
+
+$0
 #+name: name
 #+caption: caption
 [[...]]
@@ -191,38 +201,39 @@ nct
 #+caption: caption
 |  |
 
-<n
+n
 #+name:
 
 o
 #+options:
 
-oo (org-mode options with completion
+oo (org-mode options with completion, use in an #+options line)
 toc:
 
-<<    noweb with completion
+nw    noweb with completion
 <<nil>>
 
 Here are some convenient table expansions.
 
-<t
+t
 |  |
 
-<tt
+tt
 |  |  |
 
-<ttt
+ttt
 |  |  |  |
 
 
-<tttt
+tttt
 |  |  |  |  |
 
-<tn (enter number of columns)
+tn (enter number of columns)
 |  |  |  |  |  |  |  |  |
 
 
 #+END_EXAMPLE
+
 
 There are some specific snippets to
 - emacs-lisp [[./snippets/emacs-lisp-mode/]]
