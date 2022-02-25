@@ -951,6 +951,47 @@ in a file. The search for KEYWORD is not case-sensitive."
     (match-string-no-properties 1)))
 
 
+;; * tooltips on footnotes
+;; inspired by Juan Manual Macías on the org-mode mailing list
+(defun scimax-footnote-reference-tooltip (_win _obj position)
+  "Get footnote contents"
+  (save-excursion
+    (goto-char position)
+    (or
+     (nth 3 (org-footnote-get-definition
+	     (org-element-property :label (org-element-context))))
+     "No footnote content found.")))
+
+
+(defun scimax-footnote-tooltip (limit)
+  "Add text properties for footnotes.
+This is used as :override advice on `org-activate-footnote-links'."
+  (let ((fn (org-footnote-next-reference-or-definition limit)))
+    (when fn
+      (let* ((beg (nth 1 fn))
+	     (end (nth 2 fn))
+	     (label (car fn))
+	     (referencep (/= (line-beginning-position) beg)))
+	(when (and referencep (nth 3 fn))
+	  (save-excursion
+	    (goto-char beg)
+	    (search-forward (or label "fn:"))
+	    (org-remove-flyspell-overlays-in beg (match-end 0))))
+	(add-text-properties beg end
+			     (list 'mouse-face 'highlight
+				   'keymap org-mouse-map
+				   'help-echo
+				   ;; this is the modification to get the tooltips to show
+				   (if referencep #'scimax-footnote-reference-tooltip
+				     ;; I don't know what would make sense here,
+				     ;; so we leave a string
+				     "Footnote definition")
+				   'font-lock-fontified t
+				   'font-lock-multiline t
+				   'face 'org-footnote))))))
+
+(advice-add 'org-activate-footnote-links :override 'scimax-footnote-tooltip)
+
 ;; * The end
 (provide 'scimax-org)
 
