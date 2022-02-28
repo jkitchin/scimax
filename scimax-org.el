@@ -64,11 +64,17 @@ With a prefix ARG move the headline to before the selected
 headline. With a numeric prefix, set the headline level. If ARG
 is positive, move after, and if negative, move before."
   (interactive "P")
-  ;; Kill current headline
-  (org-mark-subtree)
+
+  ;; if your heading is at the last line, we have to add a \n so that when we move it, there is a next line to separate it.
+  (save-excursion
+    (goto-char (line-end-position))
+    (when (eobp)
+      (insert "\n")))
+  
+  (org-mark-subtree) 
   (kill-region (region-beginning) (region-end))
   ;; Jump to a visible headline
-  (avy-with avy-goto-line (avy-jump org-heading-regexp nil))
+  (avy-with avy-goto-line (avy-jump org-heading-regexp))
   (cond
    ;; Move before  and change headline level
    ((and (numberp arg) (> 0 arg))
