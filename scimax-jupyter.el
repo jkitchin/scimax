@@ -29,32 +29,34 @@
 
 
 ;; ** Julia
-(setq org-babel-default-header-args:jupyter-julia '((:async . "yes")
-                                                    (:session . "jupyter-julia")
-                                                    (:kernel . "julia-1.6")))
+;; (setq org-babel-default-header-args:jupyter-julia '((:async . "yes")
+;;                                                     (:session . "jupyter-julia")
+;;                                                     (:kernel . "julia-1.6")
+;; 						    (:exports . "both")
+;; 						    (:eval . "never-export")))
 
 
 ;; https://datatofish.com/add-julia-to-jupyter/
 ;;  for setup
-(add-to-list 'org-babel-load-languages '(julia . t) t)
-(setq inferior-julia-program-name "/usr/local/bin/julia")
+;; (add-to-list 'org-babel-load-languages '(julia . t) t)
+;; (setq inferior-julia-program-name "/usr/local/bin/julia")
 
 ;; ** R setup
 
 ;; https://developers.refinitiv.com/en/article-catalog/article/setup-jupyter-notebook-r
-(setq org-babel-default-header-args:jupyter-R
-      '((:results . "value")
-	(:session . "jupyter-R")
-	(:kernel . "ir")
-	(:pandoc . "t")
-	(:exports . "both")
-	(:cache .   "no")
-	(:noweb . "no")
-	(:hlines . "no")
-	(:tangle . "no")
-	(:eval . "never-export")))
+;; (setq org-babel-default-header-args:jupyter-R
+;;       '((:results . "value")
+;; 	(:session . "jupyter-R")
+;; 	(:kernel . "ir")
+;; 	(:pandoc . "t")
+;; 	(:exports . "both")
+;; 	(:cache .   "no")
+;; 	(:noweb . "no")
+;; 	(:hlines . "no")
+;; 	(:tangle . "no")
+;; 	(:eval . "never-export")))
 
-(require 'jupyter-R)
+;; (require 'jupyter-R)
 
 ;; ** do the languages setup
 
@@ -62,8 +64,8 @@
 
 ;; * syntax highlighting
 (add-to-list 'org-src-lang-modes '("jupyter-python" . python))
-(add-to-list 'org-src-lang-modes '("jupyter-julia" . julia))
-(add-to-list 'org-src-lang-modes '("jupyter-R" . R))
+;; (add-to-list 'org-src-lang-modes '("jupyter-julia" . julia))
+;; (add-to-list 'org-src-lang-modes '("jupyter-R" . R))
 
 ;; * make old ipython blocks work with jupyter python
 
@@ -111,21 +113,41 @@
   (add-hook 'kill-buffer-hook 'scimax-jupyter-org-kill-kernel nil t))
 
 
-(defun scimax-jupyter-advise (&optional unadvise)
-  "Turn scimax-jupyter advice on.
-With prefix arg UNADVISE turn it off."
-  (interactive "P")
-  (if unadvise
-      (progn
-	(message "Un-advising emacs-jupyter")
-	(advice-remove 'org-babel-execute:jupyter  #'scimax-jupyter-kill-kernel-hook)
-	(advice-remove 'jupyter-org-sync-results  #'scimax-jupyter-org-sync-results)
-	(advice-remove 'jupyter-org--add-result  #'scimax-jupyter-org--add-result)
-	(advice-remove 'jupyter-org-export-block-or-pandoc #'scimax-jupyter-org-export-block-or-pandoc))
-    (advice-add 'org-babel-execute:jupyter :before #'scimax-jupyter-kill-kernel-hook)
-    (advice-add 'jupyter-org-sync-results :override #'scimax-jupyter-org-sync-results)
-    (advice-add 'jupyter-org--add-result :override #'scimax-jupyter-org--add-result)
-    (advice-add 'jupyter-org-export-block-or-pandoc :override #'scimax-jupyter-org-export-block-or-pandoc)))
+(defun scimax-jupyter-check-restart (&rest args)
+  "If :restart is in the header, kill the kernel first."
+  (let ((src (org-element-context)))
+    (when (string-match ":restart" (or (org-element-property :parameters src) ""))
+      (scimax-jupyter-org-kill-kernel))))
+
+
+(defcustom scimax-jupyter-advices
+  '((org-babel-execute:jupyter :before scimax-jupyter-kill-kernel-hook)
+    (org-babel-execute:jupyter :before scimax-jupyter-check-restart)
+    (jupyter-org-sync-results :override scimax-jupyter-org-sync-results)
+    (jupyter-org--add-result :override scimax-jupyter-org--add-result)
+    (jupyter-org-export-block-or-pandoc :override scimax-jupyter-org-export-block-or-pandoc))
+  "Advices for scimax-jupyter.
+This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
+  :group 'scimax-jupyter)
+
+
+(defun scimax-jupyter-advise ()
+  "Turn scimax-jupyter advices on."
+  (interactive)
+  (cl-loop for (emacs-jupyter-fn position scimax-jupyter-fn) in scimax-jupyter-advices
+	   do
+	   (advice-add emacs-jupyter-fn position scimax-jupyter-fn)))
+
+
+(defun scimax-jupyter-unadvise ()
+  "Turn scimax-jupyter advices off."
+  (interactive)
+  (message "Un-advising emacs-jupyter")
+  
+  (cl-loop for (emacs-jupyter-fn position scimax-jupyter-fn) in scimax-jupyter-advices
+	   do
+	   (advice-remove emacs-jupyter-fn scimax-jupyter-fn)))
+
 
 ;; Turn on by default
 (scimax-jupyter-advise)
@@ -346,12 +368,11 @@ way, but it is."
     ("N" jupyter-org-next-busy-src-block "next busy" :color red)
     ("g" jupyter-org-jump-to-visible-block "jump to visible src")
     ("G" jupyter-org-jump-to-block "jump to src block")
-    ("<tab>" org-cycle "(un)fold" :color red)
     ("e" scimax-jupyter-jump-to-error "Jump to error"))
 
    "Edit"
-   (("S-<up>" jupyter-org-move-src-block "move up" :color red)
-    ("S-<down>" (jupyter-org-move-src-block t) "move down" :color red)
+   (("<up>" jupyter-org-move-src-block "move up" :color red)
+    ("<down>" (jupyter-org-move-src-block t) "move down" :color red)
     ("x" jupyter-org-kill-block-and-results "kill block")
     ("c" jupyter-org-copy-block-and-results "copy block")
     ("o" (jupyter-org-clone-block t) "clone")
@@ -364,8 +385,8 @@ way, but it is."
     ("h" jupyter-org-edit-header "edit header"))
 
    "Misc"
-   (("/" jupyter-org-inspect-src-block "inspect")
-    ("M-<tab>" completion-at-point "Complete")
+   (("i" jupyter-org-inspect-src-block "inspect")
+    ("<tab>" completion-at-point "Complete")
     
     ("O" scimax-ob/body "scimax-ob")
     ("q" nil "quit"))
@@ -373,7 +394,7 @@ way, but it is."
    "Kernel"
    (("s" org-babel-jupyter-scratch-buffer "scratch")
     ("z" org-babel-switch-to-session "REPL")
-    ("i" jupyter-org-interrupt-kernel "interrupt")
+    ("u" jupyter-org-interrupt-kernel "interrupt")
     ("r" (jupyter-org-with-src-block-client
 	  (jupyter-repl-restart-kernel)) "restart")
     ("k" scimax-jupyter-org-kill-kernel "kill"))))
