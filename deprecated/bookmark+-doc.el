@@ -1196,7 +1196,7 @@
 ;;    T v bmkp-jump RET (lambda () (message "Hello!"))
 ;;
 ;;  The function that is the value of a "bmkp-jump" tag is called just
-;;  after the the standard hook `bookmark-after-jump-hook' is invoked.
+;;  after the standard hook `bookmark-after-jump-hook' is invoked.
 ;;  You can use this tag to invoke functions that are specific to
 ;;  individual bookmarks; bookmarks can thus have their own, extra
 ;;  jump functions.
@@ -3071,7 +3071,7 @@
 ;;    then the bookmarks in the current file or buffer are used as the
 ;;    navlist.
 ;;
-;;  * Otherwise, a snapshot is taken of the the bookmarks currently in
+;;  * Otherwise, a snapshot is taken of the bookmarks currently in
 ;;    the global bookmark list (the value of variable
 ;;    `bookmark-alist') as the navlist.
 ;;
@@ -3664,7 +3664,7 @@
 ;;  the text in the buffer, the highlighted location can thus become
 ;;  out of sync with the recorded position.  This is normal.  When you
 ;;  jump to the bookmark, its highlight is automatically repositioned
-;;  to the recorded location, possibly adjusted according to the the
+;;  to the recorded location, possibly adjusted according to the
 ;;  surrounding context.
 ;;
 ;;  In addition to the default highlighting, which you can customize,
