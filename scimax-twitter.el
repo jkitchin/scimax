@@ -643,7 +643,7 @@ Any link will count 23 characters."
 
 ;; The Twitter API for scheduling tweets is not that easy to use, and you have
 ;; to register as an advertiser. Rather than do that, here I try to leverage the
-;; at scheduler (avialiable on Mac and Linux) to do scheduling of tweets. The
+;; at scheduler (available on Mac and Linux) to do scheduling of tweets. The
 ;; idea is to use teh scheduled property on a headline to specify when to tweet
 ;; it, then create a shell script that runs to tweet it. This is limited to a
 ;; single image I think.
