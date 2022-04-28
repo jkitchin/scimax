@@ -15,7 +15,7 @@
 ;; Customization variables
 ;;
 ;; If `org-babel-async-ipython' is non-nil the src blocks will be run
-;; asynchrounously allowing you to work in emacs while the code runs. This mode
+;; asynchronously allowing you to work in emacs while the code runs. This mode
 ;; will create names for each code-block if they don't already have a name,
 ;; defaulting to a human readable name. The number of words in the name is
 ;; defined by `org-babel-ipython-name-length'. The function used to generate the
