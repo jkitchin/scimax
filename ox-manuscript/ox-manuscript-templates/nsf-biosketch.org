@@ -199,33 +199,33 @@ Assuming you have a bibtex file that is up to date, you can extract the authors 
 
 
 #+tblname: graduate-students
-| Firstname | Lastname     | year | degree | affiliation       |
-|-----------+--------------+------+--------+-------------------|
-| Sneha     | Akhade       | 2011 | MS     | Penn State        |
-| Rich      | Alesi        | 2012 | PhD    | Intel             |
-| Robin     | Chao         | 2012 | PhD    | IBM               |
-| Mehak     | Chawla       | 2015 | MS     | Dubai             |
-| Jing      | Chou         | 2007 | MS     | Taiwan            |
-| Matt      | Curnan       | 2015 | PhD    | unknown           |
-| Frank     | DeCarlo      | 2010 | MS     | ERC               |
-| Ethan     | Demeter      | 2013 | PhD    | FuelCell          |
-| Siddhard  | Deshpande    | 2015 | MS     | CMU               |
-| Zhizhong  | Ding         | 2012 | MS     | Lousiana State U. |
-| Qingqi    | Fan          | 2014 | MS     | unknown           |
-| Nitish    | Govindarajan | 2014 | MS     | unknown           |
-| Steve     | Illes        | 2014 | MS     | 3M                |
-| Nilay     | Inoglu       | 2011 | PhD    | Exxon             |
-| James     | Landon       | 2011 | PhD    | CAER              |
-| Anita     | Lee          | 2013 | PhD    | Exxon             |
-| Yuan      | Li           | 2008 | PD     | Taiwan            |
-| Bin       | Liu          | 2013 | PD     | Kansas State U.   |
-| Meiheng   | Lu           | 2014 | MS     | unknown           |
-| Prateek   | Mehta        | 2013 | MS     | Notre Dame        |
-| Spencer   | Miller       | 2011 | PhD    | Combinatorics     |
-| Venkatesh | Naik         | 2015 | MS     | unknown           |
-| Hari      | Thirumalai   | 2015 | MS     | U. Houston        |
-| Vivek     | Vinodan      | 2012 | MS     | unknown           |
-| Wenqin    | You          | 2014 | MS     | CMU               |
+| Firstname | Lastname     | year | degree | affiliation        |
+|-----------+--------------+------+--------+--------------------|
+| Sneha     | Akhade       | 2011 | MS     | Penn State         |
+| Rich      | Alesi        | 2012 | PhD    | Intel              |
+| Robin     | Chao         | 2012 | PhD    | IBM                |
+| Mehak     | Chawla       | 2015 | MS     | Dubai              |
+| Jing      | Chou         | 2007 | MS     | Taiwan             |
+| Matt      | Curnan       | 2015 | PhD    | unknown            |
+| Frank     | DeCarlo      | 2010 | MS     | ERC                |
+| Ethan     | Demeter      | 2013 | PhD    | FuelCell           |
+| Siddhard  | Deshpande    | 2015 | MS     | CMU                |
+| Zhizhong  | Ding         | 2012 | MS     | Louisiana State U. |
+| Qingqi    | Fan          | 2014 | MS     | unknown            |
+| Nitish    | Govindarajan | 2014 | MS     | unknown            |
+| Steve     | Illes        | 2014 | MS     | 3M                 |
+| Nilay     | Inoglu       | 2011 | PhD    | Exxon              |
+| James     | Landon       | 2011 | PhD    | CAER               |
+| Anita     | Lee          | 2013 | PhD    | Exxon              |
+| Yuan      | Li           | 2008 | PD     | Taiwan             |
+| Bin       | Liu          | 2013 | PD     | Kansas State U.    |
+| Meiheng   | Lu           | 2014 | MS     | unknown            |
+| Prateek   | Mehta        | 2013 | MS     | Notre Dame         |
+| Spencer   | Miller       | 2011 | PhD    | Combinatorics      |
+| Venkatesh | Naik         | 2015 | MS     | unknown            |
+| Hari      | Thirumalai   | 2015 | MS     | U. Houston         |
+| Vivek     | Vinodan      | 2012 | MS     | unknown            |
+| Wenqin    | You          | 2014 | MS     | CMU                |
 
 
 
