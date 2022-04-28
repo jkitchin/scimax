@@ -6180,7 +6180,7 @@ If it is a record then it need not belong to `bookmark-alist'."
 
 (defun bmkp-url-bookmark-p (bookmark)
   "Return non-nil if BOOKMARK is a URL bookmark.
-This means that it satifies `bmkp-eww-bookmark-p' (Emacs 25+),
+This means that it satisfies `bmkp-eww-bookmark-p' (Emacs 25+),
 `bmkp-w3m-bookmark-p', or `bmkp-url-browse-bookmark-p'.
 
 BOOKMARK is a bookmark name or a bookmark record.
