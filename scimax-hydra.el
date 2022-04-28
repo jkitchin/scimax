@@ -405,7 +405,7 @@ _p_: ffap
   ("b" counsel-ibuffer "Buffer" :column "misc")
   ("n" ace-window "Ace window" :column "misc")
   ("f" counsel-recentf "Recent file" :column "misc")
-  ("j" avy-goto-char-timer "avy timer" :coumn "misc")
+  ("j" avy-goto-char-timer "avy timer" :column "misc")
   ("p" counsel-projectile-switch-project  "project" :column "misc"))
 
 
