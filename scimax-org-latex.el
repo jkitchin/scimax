@@ -52,7 +52,7 @@
 	("" "amsmath" t)
 	("theorems, skins" "tcolorbox" t)
 
-	;; used for marking up chemical formulars
+	;; used for marking up chemical formulas
 	("version=3" "mhchem" t)
 
 	("numbers,super,sort&compress" "natbib" nil)
