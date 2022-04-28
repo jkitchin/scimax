@@ -267,7 +267,7 @@ open in the default journal even if there is a local journal."
   (let* ((fname (buffer-file-name))
 	 (tree (scimax-journal-entries)))
     (if (not (avl-tree-member tree fname))
-	(messsage "%s doesn't seem to be a journal file. Not deleting.")
+	(message "%s doesn't seem to be a journal file. Not deleting.")
       (when (y-or-n-p (format "Really delete %s? " fname)))
       ;; Now we delete it.
       (avl-tree-delete tree fname)
