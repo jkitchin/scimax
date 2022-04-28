@@ -19,7 +19,7 @@ There should be a directory called [[./reports]] which will contain subdirectori
 
 * Using this repo
 
-The documents in this repo are in a version control system (VCS) called git. You have a local copy of them which you can edit. When you are done, you save the files, commit them to the VCS and push the changes to Github. Then, I can pull your changes to my copy, review them, add comments, etc. When I am done, I will push my edits back to GitHUB. You can then pull my changes down for your review.
+The documents in this repo are in a version control system (VCS) called git. You have a local copy of them which you can edit. When you are done, you save the files, commit them to the VCS and push the changes to GitHub. Then, I can pull your changes to my copy, review them, add comments, etc. When I am done, I will push my edits back to GitHub. You can then pull my changes down for your review.
 
 It will take some practice and some time to understand how it all works.
 

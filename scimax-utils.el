@@ -285,13 +285,13 @@ You can also try putting expressions in for formatting, e.g.:
 
 
 (defun scimax-github ()
-  "Open the GitHUB repo."
+  "Open the GitHub repo."
   (interactive)
   (browse-url "https://github.com/jkitchin/scimax"))
 
 
 (defun scimax-github-issues ()
-  "Open the GitHUB repo issues page."
+  "Open the GitHub repo issues page."
   (interactive)
   (browse-url "https://github.com/jkitchin/scimax/issues"))
 

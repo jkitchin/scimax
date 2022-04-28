@@ -1211,7 +1211,7 @@ In an open file run ~M-x git-blame~, then press b to see commits that add lines.
   In magit-status window, press "W"
 
   "W p" creates patches
-  "W r" makes a pull request. This just creates an email with information in it. It is not a GitHUB request, and it is only useful if there is a public, external copy of the repo.
+  "W r" makes a pull request. This just creates an email with information in it. It is not a GitHub request, and it is only useful if there is a public, external copy of the repo.
 
 *** Cherry-picking
 
