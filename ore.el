@@ -216,7 +216,7 @@ Info node `(org) Tables'.
 
 
 (defun ore-plain-list (element)
-  "`ore' doucmentation for plain lists."
+  "`ore' documentation for plain lists."
   (concat
    (substitute-command-keys
     "You are on a plain list.
