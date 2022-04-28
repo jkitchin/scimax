@@ -382,7 +382,7 @@
 ;;    `bmkp-region-jump-other-window', `bmkp-remote-file-jump',
 ;;    `bmkp-remote-file-jump-other-window',
 ;;    `bmkp-remote-non-dir-file-jump',
-;;    `bmkp-temote-non-dir-file-jump-other-window',
+;;    `bmkp-remote-non-dir-file-jump-other-window',
 ;;    `bmkp-remove-all-tags', `bmkp-remove-tags',
 ;;    `bmkp-remove-tags-from-all', `bmkp-rename-tag',
 ;;    `bmkp-retrieve-icicle-search-hits',
