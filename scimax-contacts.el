@@ -342,7 +342,7 @@ Optional argument PATH is ignored."
 
 
 ;; * Capture contacts in messages
-;; I use this this mu4e, but it should work in any message.
+;; I use this with mu4e, but it should work in any message.
 
 (defun scimax-message-get-emails ()
   "Captures emails in a message."
