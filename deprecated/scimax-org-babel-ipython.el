@@ -182,7 +182,7 @@ With prefix arg BELOW, insert it below the current point."
       (forward-line -3)))
 
    ((org-in-src-block-p)
-    ;; goto begining and insert
+    ;; goto beginning and insert
     (goto-char (org-element-property :begin (org-element-context)))
     (insert "\n#+BEGIN_SRC ipython
 
