@@ -664,7 +664,7 @@
 ;;     bmkp-remove-all-tags, bmkp(-autofile)-(add|remove)-tags, bmkp-set-tag-value,
 ;;       bmkp-paste-(add|replace)-tags, bmkp-(url|file)-target-set, bmkp-autofile-set:
 ;;         Added missing NO-UPDATE-P arg for interactive spec.
-;;     bmkp-remove-all-tags: Moveed msg to the end.
+;;     bmkp-remove-all-tags: Moved msg to the end.
 ;;     bmkp-paste-replace-tags: Added sleep-for after first msg.
 ;; 2012/11/13 dadams
 ;;     bmkp-sorting-description: Fixed 1st case: use ORDER only if bmkp-sort-comparer is also non-nil.
