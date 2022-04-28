@@ -7081,7 +7081,7 @@ Return the copy.
 Do not sort if `bmkp-sort-comparer' is nil.
 This is a non-destructive operation: ALIST is not modified.
 
-Sorting is done using using `bmkp-sort-comparer'.
+Sorting is done using `bmkp-sort-comparer'.
 If `bmkp-reverse-sort-p' is non-nil, then reverse the sort order.
 Keys are compared for sorting using `equal'.
 
@@ -7114,7 +7114,7 @@ elements with keys in list OMIT."
 ;;; Always remove duplicates.  Keep only the first element with a given
 ;;; key.  This is a non-destructive operation: ALIST is not modified.
 
-;;; Sorting is done using using `bmkp-sort-comparer'.
+;;; Sorting is done using `bmkp-sort-comparer'.
 ;;; If `bmkp-reverse-sort-p' is non-nil, then reverse the sort order.
 ;;; Keys are compared for sorting using `equal'.
 ;;; If optional arg OMIT is non-nil, then omit from the return value any
