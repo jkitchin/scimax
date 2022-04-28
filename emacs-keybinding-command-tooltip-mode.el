@@ -100,7 +100,7 @@ commands and variables."
 			 ;; prevent the window from opening, and to eliminate
 			 ;; the minibuffer message.
 			 (describe-variable (intern command))
-		       ;; clear minbuffer
+		       ;; clear minibuffer
 		       (message ""))))))
 	   (describe-func
 	    `(lambda ()
