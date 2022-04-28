@@ -5657,7 +5657,7 @@ are marked or ALLP is non-nil."
 
 ;;; `Bookmark+' menu-bar menu in `*Bookmark List*'
 
-(defvar bmkp-bmenu-menubar-menu (make-sparse-keymap "Bookmark+") "`Boomark+' menu-bar menu.")
+(defvar bmkp-bmenu-menubar-menu (make-sparse-keymap "Bookmark+") "`Bookmark+' menu-bar menu.")
 (define-key bookmark-bmenu-mode-map [menu-bar bmkp]
   (cons "Bookmark+" bmkp-bmenu-menubar-menu))
 

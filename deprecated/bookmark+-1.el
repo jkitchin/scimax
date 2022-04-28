@@ -4252,7 +4252,7 @@ When you finish editing, use \\<bmkp-edit-bookmark-record-mode-map>\
 (define-key bmkp-edit-bookmark-records-mode-map "\C-c\C-c" 'bmkp-edit-bookmark-records-send)
 
 (defvar bmkp-edit-bookmark-records-number 0
-  "NUmber of bookmard records being edited.")
+  "NUmber of bookmark records being edited.")
 
 ;;;###autoload (autoload 'bmkp-edit-bookmark-records-send "bookmark+")
 (defun bmkp-edit-bookmark-records-send (&optional msg-p) ; Bound to `C-c C-c' in records-editing buffer.

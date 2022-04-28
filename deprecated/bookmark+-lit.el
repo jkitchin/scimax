@@ -869,7 +869,7 @@ With a prefix arg you are prompted for the style and/or face to use:
  Plain prefix arg (`C-u'): prompt for both style and face.
  Numeric non-negative arg: prompt for face.
  Numeric negative arg: prompt for style.
-See `bmkp-light-boookmark' for argument descriptions."
+See `bmkp-light-bookmark' for argument descriptions."
   (interactive
    (let* ((bmk  (bookmark-completing-read "Highlight bookmark" nil (bmkp-this-buffer-alist-only)))
           (sty  (and current-prefix-arg  (or (consp current-prefix-arg)
