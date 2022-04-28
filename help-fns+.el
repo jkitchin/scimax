@@ -109,7 +109,7 @@
 ;;    (require 'help-fns+)
 ;;
 ;;  Acknowledgement: Passing text properties on doc strings to the
-;;  *Help* buffer is an idea from Johan bockgard.  He sent it on
+;;  *Help* buffer is an idea from Johan Bockgard.  He sent it on
 ;;  2007-01-24 to emacs-devel@gnu.org, Subject
 ;;  "display-completion-list should not strip text properties".
 ;;
