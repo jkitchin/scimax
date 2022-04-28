@@ -1192,7 +1192,7 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
 
   [[info:magit#Rebasing][info:magit#Rebasing]]
 
-**** Interactve rebasing
+**** Interactive rebasing
 
  Open the log, select the oldest commit you want to rebase on then press "r" and then "i". Use M-p and M-n to move commits around. Press "s" on any commits you want to squash into the commit above it. C-c C-c will start the commands.
 
