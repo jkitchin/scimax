@@ -34,7 +34,7 @@
 
 #+latex_header: \author[1]{<replace with name>}
 #+latex_header: \author[2]{<replace with name>}
-#+latex_header: \author[2]{<replace with correspinding name>\thanks{<replace with email>}}
+#+latex_header: \author[2]{<replace with corresponding name>\thanks{<replace with email>}}
 #+latex_header: \affil[1]{<replace with address>}
 #+latex_header: \affil[2]{<replace with address>}
 
