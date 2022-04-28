@@ -62,7 +62,7 @@ Set to nil to avoid loading a theme."
   (let ((default-directory scimax-dir))
     (when (not (string= "" (shell-command-to-string "git status --porcelain")))
       (shell-command "git add *")
-      (shell-command "git commit -am \"commiting scimax.\""))
+      (shell-command "git commit -am \"committing scimax.\""))
     (shell-command "git pull origin master")
     (shell-command "git submodule update")
     (load-file "init.el")))
