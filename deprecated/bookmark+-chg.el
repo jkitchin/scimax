@@ -3329,7 +3329,7 @@
 ;;                  Faces for menu list.  Change region color.
 ;;       2009-06-11 Add: *-region-search-size, *-get-buffername, *-use-region.
 ;;                  Redefine *-handle-bookmark, *-jump, to fit bookmark-use-region.
-;;                  Add condtions to bookmark-make-record.  Support w3m.  Support t command.
+;;                  Add conditions to bookmark-make-record.  Support w3m.  Support t command.
 ;;       2009-06-10 Fix search regexp.  Fix region in Info. Save bookmark if region moves.
 ;;       2009-06-09 Added: bookmark-make-record(-region), bookmark-region-handler.
 ;;                  Relocation.
