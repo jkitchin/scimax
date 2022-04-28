@@ -16,7 +16,7 @@
 ;;
 ;; Use `sos-export-as-pdf-and-open' C-c C-e s o in any file to build the PDF.
 ;;
-;; Inspired by personal correspondance with Nicky van Foreest.
+;; Inspired by personal correspondence with Nicky van Foreest.
 
 
 ;;; Code:
