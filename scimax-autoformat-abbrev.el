@@ -50,7 +50,7 @@
 
 ;; This module also sets up flyspell to save abbrevs so they autocorrect in the
 ;; future. The variable `scimax-save-spellcheck-abbrevs' defaults to t, and
-;; saves any workd you correct with flyspell as an abbrev. It also binds C-x C-i
+;; saves any work you correct with flyspell as an abbrev. It also binds C-x C-i
 ;; to a function that calls ispell on a word, and then creates an abbrev for the
 ;; selection you make.
 ;;
