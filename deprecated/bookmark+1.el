@@ -954,7 +954,7 @@ The possible values:
 (defcustom bmkp-auto-idle-bookmark-min-distance 1000
   "*Minimum number of chars between automatic bookmark positions."
   :type '(choice
-          (const   :tag "No minumum distance" nil)
+          (const   :tag "No minimum distance" nil)
           (integer :tag "At least this many chars" :value 1000))
   :group 'bookmark-plus)
 
