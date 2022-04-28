@@ -169,7 +169,7 @@ Otherwise, wrap it in an export block."
 
 
 ;; used to advise `jupyter-org-sync-results'. I do this to fix some issues like
-;; retults drawers, etc.
+;; results drawers, etc.
 (defun scimax-jupyter-org-sync-results (req)
   "Return the result string in org syntax for the results of REQ.
 Meant to be used as the return value of
