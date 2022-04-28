@@ -47,7 +47,7 @@ If non-nil do not show the execution count in output."
   "Function for showing the execution count.
 The function takes one argument, the execution count. It should return a string to be displayed. Use an empty string to suppress the count.
 `ob-ipython-execution-count-suppress' will not show anything.
-`ob-ipython-execution-count-output' will show a string in the ouput.
+`ob-ipython-execution-count-output' will show a string in the output.
 `ob-ipython-execution-count-overlay' will show an overlay in the margin.
 `ob-ipython-execution-count-attribute' will store it in a src-block attribute."
   :group 'ob-ipython
@@ -609,7 +609,7 @@ _s_: save buffer  _z_: undo _<return>_: edit mode
   ;; this folds output
   ("o" ob-ipython-toggle-output "toggle output" :color red)
 
-  ;; for large ouputs, puts results in a window you can scroll in. Not sure if
+  ;; for large outputs, puts results in a window you can scroll in. Not sure if
   ;; that is possible in emacs. May be no analog.
   ;; ( ;; "S-o" "toggle output scrolling"
   ;;  )
