@@ -839,7 +839,7 @@
 ;;  (see (@> "Bookmarks for Specific Files or Buffers")).
 ;;
 ;;  All bookmark jump commands are bound to keys that have the prefix
-;;  `C-x j'.  There is an other-window version of most jump commands,
+;;  `C-x j'.  There is an `other-window` version of most jump commands,
 ;;  and it is bound to the same key as the same-window command, except
 ;;  the prefix is `C-x 4 j', not `C-x j'.  For instance,
 ;;  `bmkp-dired-jump-other-window' is bound to `C-x 4 j d'.
