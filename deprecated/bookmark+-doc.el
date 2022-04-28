@@ -3472,7 +3472,7 @@
 ;;  You can delete all such temporary bookmarks from the current
 ;;  bookmark list using command `bmkp-delete-all-temporary-bookmarks'
 ;;  (or by using `X M' to mark them in the bookmark-list display and
-;;  then hitting `D' to delete thems).
+;;  then hitting `D' to delete them).
 ;;
 ;;  In the bookmark-list display (buffer `*Bookmark List*'), temporary
 ;;  bookmarks are indicated with the mark `X' in the same column where
