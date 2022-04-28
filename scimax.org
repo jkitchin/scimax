@@ -1288,7 +1288,7 @@ If you like sessions in Python, the ob-ipython library is better than the defaul
 
 Pygments doesn't support ipython out of the box for some reason, which is a problem if you want to export your src block to LaTeX. scimax fixes this for you and automatically installs this if you don't already have it.
 
-ob-ipython allows you to use Ipython magic commands in your src blocks. Here is a protypical Ipython src block with a line magic.
+ob-ipython allows you to use Ipython magic commands in your src blocks. Here is a sample Ipython src block with a line magic.
 
 #+BEGIN_SRC ipython  :exports both
 %time print("hello world")
