@@ -3,7 +3,7 @@
 ;;; Commentary:
 ;; This library provides some integration of Emacs/org-mode and gitter.
 ;;
-;; You need a like like this in your ~/.authinfo
+;; You need a line like this in your ~/.authinfo
 ;; machine gitter.im password token
 ;;
 ;; where token comes from going to https://developer.gitter.im/apps
