@@ -23,7 +23,7 @@
 ;; Hashtags: #MeToo
 ;; @Usernames
 ;;
-;; Github issues: issue #153
+;; GitHub issues: issue #153
 ;; git commits:  commit 05fcea6
 ;; pull requests: pr #146  pull #146  or pull request #146
 
@@ -116,7 +116,7 @@ _c_: Contacts _m_: Mail
 
 ;; * Username handles
 ;;
-;; These may have many contexts, e.g. Twitter, Github, etc. The action on these
+;; These may have many contexts, e.g. Twitter, GitHub, etc. The action on these
 ;;  is to launch a hydra menu to pick which action you want.
 ;;
 ;; @johnkitchin   (twitter)
@@ -147,7 +147,7 @@ URL-PATTERN should have one %s in it which is replaced by username."
   "
 Open a @username
 _b_: Bitbucket  _f_: Facebook
-_g_: GitHUB     _i_: Instagram
+_g_: GitHub     _i_: Instagram
 _G_: GitLab     _l_: LinkedIn _r_: reddit  _t_: Twitter
 "
   ("b" (@username-open "https://bitbucket.org/%s/"))
@@ -204,8 +204,8 @@ _f_: Facebook _i_: Instagram  _o_: org-tag  _t_: Twitter"
    :face (list 'link)
    :help-echo "Click me to open the hashtag."))
 
-;; * Github
-;; ** Github issues
+;; * GitHub
+;; ** GitHub issues
 ;; When the link in a git repo, make it open the issue.
 ;; issue #153 -> https://github.com/jkitchin/scimax/issues/153
 (defvar github-issue-regexp "issue\\s-+#\\(?1:[0-9]+\\)"
@@ -214,7 +214,7 @@ _f_: Facebook _i_: Instagram  _o_: org-tag  _t_: Twitter"
 (defhydra github-issue (:color blue :hint nil)
   "
 git issue
-_g_: Github"
+_g_: GitHub"
   ("g" (lambda ()
 	 (interactive)
 	 (when-let (url (github-issue-at-p))
@@ -242,9 +242,9 @@ _g_: Github"
    github-issue-regexp
    'github-issue/body
    :face (list 'link)
-   :help-echo "Click me to open issue at Github."))
+   :help-echo "Click me to open issue at GitHub."))
 
-;; ** Github pull requests
+;; ** GitHub pull requests
 ;; pull request #146
 ;; pull #146
 ;; pr #146
@@ -271,7 +271,7 @@ _g_: Github"
 (defhydra github-pull-request (:color blue :hint nil)
   "
 git pull-request
-_g_: Github"
+_g_: GitHub"
   ("g" (lambda ()
 	 (interactive)
 	 (when-let (url (pull-request-at-p))
@@ -283,9 +283,9 @@ _g_: Github"
    pull-request-regexp
    'github-pull-request/body
    :face (list 'link)
-   :help-echo "Click me to open pull request at Github."))
+   :help-echo "Click me to open pull request at GitHub."))
 
-;; ** Github commits
+;; ** GitHub commits
 ;; Open a commit in a browser.
 ;; commit 15b8adf1 -> https://github.com/jkitchin/scimax/commit/15b8adf191a252bb6a4c16c327f9c6fccc315a73
 ;; commit 05fcea6
@@ -311,7 +311,7 @@ _g_: Github"
 (defhydra git-commit (:color blue :hint nil)
   "
 commit
-_g_: Github _m_: Magit log
+_g_: GitHub _m_: Magit log
 ^ ^         _c_: Magit commit"
   ("c" (magit-show-commit (third (github-commit-at-p))))
   ("g" (when-let ((data (github-commit-at-p))
@@ -326,7 +326,7 @@ _g_: Github _m_: Magit log
    github-commit-regexp
    'git-commit/body
    :face (list 'link)
-   :help-echo "Click me to open the commit on Github."))
+   :help-echo "Click me to open the commit on GitHub."))
 
 (provide 'scimax-functional-text)
 

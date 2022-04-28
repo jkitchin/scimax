@@ -2,7 +2,7 @@
 
 Why? Don't we already have org-mode? Yes, but some places like Markdown, it is no fun to write when you have really technical documents, and it would be harder to get markdown-mode to be as good as org-mode than to do this.
 
-Github's rendering of org-mode is only ok. Too many things like references, internal links, etc. don't work though to rely on it for high quality documentation in the browser. This might be a nicer way to get better Github pages. Why not just use html then? Some places like markdown.
+GitHub's rendering of org-mode is only ok. Too many things like references, internal links, etc. don't work though to rely on it for high quality documentation in the browser. This might be a nicer way to get better GitHub pages. Why not just use html then? Some places like markdown.
 
 * Headings
 
@@ -66,7 +66,7 @@ Suppose you have this equation to solve:
 
 $$8 = x - 4$$  label:eq-sle
 
-You can put a label near this and refer to it later. I guess Github does not do a great job rendering equations.
+You can put a label near this and refer to it later. I guess GitHub does not do a great job rendering equations.
 
 * Code blocks
 
@@ -133,7 +133,7 @@ Tables are numbered in the export, but they export as html, and it is the org-ht
 
 * Citations  label:sec-citations
 
-You can have proper scientific citations like this cite:kitchin-2015-examp, including multiple references cite:kitchin-2015-data-surfac-scien,kitchin-2015-examp,kitchin-2016-autom-data. Check out the tooltips on them in the html that Github renders. Somewhat unfortunately, the citations are exported basically as html, so they are not fun to read in the markdown. Oh well, did I mention tooltips!
+You can have proper scientific citations like this cite:kitchin-2015-examp, including multiple references cite:kitchin-2015-data-surfac-scien,kitchin-2015-examp,kitchin-2016-autom-data. Check out the tooltips on them in the html that GitHub renders. Somewhat unfortunately, the citations are exported basically as html, so they are not fun to read in the markdown. Oh well, did I mention tooltips!
 
 org-ref helps you insert citations from a bibtex database.
 

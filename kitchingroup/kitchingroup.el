@@ -29,7 +29,7 @@ Usually at ~/Box/andrewid."
 
 
 (defcustom kitchingroup-github-id nil
-  "Your Github id.
+  "Your GitHub id.
 This should be defined in user/preload.el, e.g. (setq kitchingroup-github-id \"your-id\")"
   :group 'kitchingroup)
 

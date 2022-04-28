@@ -1209,7 +1209,7 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
   In magit-status window, press "W"
 
   "W p" creates patches
-  "W r" makes a pull request. This just creates an email with information in it. It is not a GitHUB request, and it is only useful if there is a public, external copy of the repo.
+  "W r" makes a pull request. This just creates an email with information in it. It is not a GitHub request, and it is only useful if there is a public, external copy of the repo.
 
 *** Cherry-picking
 
