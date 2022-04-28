@@ -1981,7 +1981,7 @@ the current version. Returns the buffer."
 
 *** TODO Saving the generated wdiff buffer back
 
- The idea here is you you can do accept/reject in the temporary buffer, and then save it back. If you mess up badly, just delete the temp buffer. This needs to be tested.
+ The idea here is you can do accept/reject in the temporary buffer, and then save it back. If you mess up badly, just delete the temp buffer. This needs to be tested.
 
  #+BEGIN_SRC emacs-lisp
 (defun sem-wdiff-save ()
