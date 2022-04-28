@@ -106,7 +106,7 @@ comment <<}
 
 {>~ @author comment~<}
 
-** Replys
+** Replies
 
 {r> @replier A reply<r}
 
