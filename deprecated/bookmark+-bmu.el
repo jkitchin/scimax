@@ -5241,7 +5241,7 @@ compare them by bookmark name.")
 Sort a bookmark accessed more recently before one accessed less
 recently or not accessed.  Sort a bookmark to an existing buffer
 before a local file bookmark.  When two bookmarks are not comparable
-by such critera, sort them by bookmark name.  (In particular, sort
+by such criteria, sort them by bookmark name.  (In particular, sort
 remote-file bookmarks by bookmark name.")
 
 (bmkp-define-sort-command               ; Bound to `s v' in bookmark list
