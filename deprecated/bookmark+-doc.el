@@ -387,7 +387,7 @@
 ;;     - Lisp variable bookmarks.  A bookmark can represent a set of
 ;;       variables and their values.
 ;;
-;;     - Snippet bookmarks.  Select some some text and give it a
+;;     - Snippet bookmarks.  Select some text and give it a
 ;;       (bookmark) name.  Then copy it to the `kill-ring' anytime, in
 ;;       any Emacs session.
 ;;
