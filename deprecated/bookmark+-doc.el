@@ -854,7 +854,7 @@
 ;;  `bmkp-jump-map-prefix-keys' and
 ;;  `bmkp-jump-other-window-map-prefix-keys'.
 ;;
-;;  If you do not remember the different type-specfic bindings, you
+;;  If you do not remember the different type-specific bindings, you
 ;;  can use commands `bmkp-jump-to-type' and
 ;;  `bmkp-jump-to-type-other-window' (`C-x j :' and `C-x 4 j :').
 ;;  They work for any type, prompting you first for the type, then for
