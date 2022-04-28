@@ -78,7 +78,7 @@ If you are in a contact heading we store a link."
 
 (defun scimax-contact-complete (&optional arg)
   "Completion function for a scimax-contact.
-Optional argument ARG is ingored."
+Optional argument ARG is ignored."
   (let* ((contacts (org-db-contacts-candidates))
 	 (contact (cdr (assoc (completing-read "Contact: " contacts) contacts))))
     (org-link-store-props
