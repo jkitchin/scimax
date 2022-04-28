@@ -2496,7 +2496,7 @@ From Lisp, non-nil optional arg MSG-P means show progress messages."
     (bmkp-bmenu-cancel-incremental-filtering)))
 
 (defun bmkp-bmenu-filter-alist-by-annotation-regexp ()
-  "Filter bookmarks by annoation, then refresh the bookmark list."
+  "Filter bookmarks by annotation, then refresh the bookmark list."
   (setq bmkp-bmenu-filter-function  'bmkp-regexp-filtered-annotation-alist-only
         bmkp-bmenu-title            (format "Bookmarks with Annotations Matching Regexp `%s'"
                                             bmkp-bmenu-filter-pattern))
