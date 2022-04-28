@@ -90,7 +90,7 @@ Do not include the translate language here, it is added in
 
 
 (defcustom words-translate-preferred-language nil
-  "A two letter language code for the preferred languate to translate to.
+  "A two letter language code for the preferred language to translate to.
 See http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry."
   :group 'words)
 
