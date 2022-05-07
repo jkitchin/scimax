@@ -344,6 +344,47 @@ way, but it is."
 	(forward-line (string-to-number (match-string-no-properties 1))))))))
 
 
+;; * Handling ansi codes
+
+(defun scimax-jupyter-ansi ()
+  "Replaces ansi-codes in exceptions with colored text.
+I thought emacs-jupyter did this automatically, but it may only
+happen in the REPL. Without this, the tracebacks are very long
+and basically unreadable.
+
+We also add some font properties to click on goto-error.
+
+This should only apply to jupyter-lang blocks."
+  (when (string-match "^jupyter" (car (org-babel-get-src-block-info t)))
+    (let* ((r (org-babel-where-is-src-block-result))
+	   (result (when r
+		     (save-excursion
+		       (goto-char r)
+		       (org-element-context)))))
+      (when result
+	(ansi-color-apply-on-region (org-element-property :begin result)
+				    (org-element-property :end result))
+
+	;; Let's fontify "# [goto error]" to it is clickable
+	(save-excursion
+	  (goto-char r)
+	  (when (search-forward "# [goto error]")
+	    (add-text-properties
+	     (match-beginning 0) (match-end 0)
+	     (list 'help-echo "Click to jump to error."
+		   'mouse-face 'highlight
+		   'local-map (let ((map (copy-keymap help-mode-map)))
+				(define-key map [mouse-1] (lambda ()
+							    (interactive)
+							    (search-backward "#+BEGIN_SRC")
+							    (scimax-jupyter-jump-to-error)))
+				map))))))
+      
+      t)))
+
+
+(add-to-list 'org-babel-after-execute-hook 'scimax-jupyter-ansi t)
+
 ;; * The scimax jupyter hydra
 ;; customization of what is in jupyter
 ;; These are more aligned with jupyter notebook I think
