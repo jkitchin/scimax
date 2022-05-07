@@ -22,5 +22,6 @@ jobs:
     - name: Run tests
       run: |
         git clone https://github.com/cask/cask ~/.cask
-        PATH=$HOME/.cask/bin:$PATH cask install && make test
+        PATH=$HOME/.cask/bin:$PATH cask install
+        PATH=$HOME/.cask/bin:$PATH make test
         
