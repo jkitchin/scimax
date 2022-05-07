@@ -7,7 +7,6 @@
 (require 'org)
 (require 'org-inlinetask)
 (require 'org-mouse)
-(require 'org-ref)
 (require 'org-agenda)
 (require 'dash)
 
