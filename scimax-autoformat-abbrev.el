@@ -96,7 +96,8 @@
     scimax-org-autoformat-fractions
     scimax-org-autoformat-transposed-caps
     scimax-org-autoformat-superscripts
-    scimax-org-autoformat-sentence-capitalization)
+    scimax-org-autoformat-sentence-capitalization
+    scimax-org-autoformat-am-pm)
   "List of functions to call for autoformatting."
   :group 'scimax-autoformat
   :type '(repeat function))
@@ -336,6 +337,26 @@ Either at the beginning of a line, or after a sentence end."
 		 (looking-back (concat (sentence-end) "[a-z]"))))
     (undo-boundary)
     (capitalize-word -1)))
+
+
+(defun scimax-org-autoformat-am-pm ()
+  "Replace am/pm with a.m. and p.m. and 12am/pm with midnight/noon."
+  (interactive)
+  (when (looking-back "[0-9]\\(am\\)" 3)
+    (replace-match " a.m."
+		   nil nil nil 1))
+  
+  (when (looking-back "[0-9]\\(pm\\)" 3)
+    (replace-match " p.m."
+		   nil nil nil 1))
+
+  (when (looking-back "12pm" 4)
+    (replace-match "noon"
+		   nil nil nil 1))
+  
+  (when (looking-back "12am" 4)
+    (replace-match "midnight"
+		   nil nil nil 1)))
 
 
 (defun scimax-org-autoformat ()
