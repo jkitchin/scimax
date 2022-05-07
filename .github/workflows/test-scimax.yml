@@ -21,6 +21,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run tests
       run: |
-        curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
-        cask install
-        make test
+        git clone https://github.com/cask/cask ~/.cask
+        PATH=$HOME/.cask/bin:$PATH make test
+        
