@@ -991,6 +991,29 @@ for a recipe to use for the export."
 					(file-name-base (buffer-file-name))
 					".pdf")))))))
 
+
+;; * sentence spacing
+
+(defun ox-manuscript-one-space ()
+  "Make sentences separated by one space."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (and (forward-sentence) (not (eobp)))
+      (when (looking-at "\s+")
+	(replace-match " ")))))
+
+
+(defun ox-manuscript-two-space ()
+  "Make sentences separated by two spaces."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (and (forward-sentence) (not (eobp)))
+      (when (looking-at "\s+")
+	(replace-match "  ")))))
+
+
 (provide 'ox-manuscript)
 
 ;;; ox-manuscript.el ends here
