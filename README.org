@@ -5,9 +5,6 @@ Scimax is an Emacs starterkit for scientists and engineers. It provides a compre
 
 See the [[./scimax.org][manual]] for more details.
 
-[![scimax]()]()
-
-
 #+BEGIN_HTML
 <a href="https://github.com/jkitchin/scimax/actions/workflows/test-scimax.yml"><img src="https://github.com/jkitchin/scimax/actions/workflows/test-scimax.yml/badge.svg"></a>
 
