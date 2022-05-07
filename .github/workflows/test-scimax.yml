@@ -20,4 +20,7 @@ jobs:
 
     - uses: actions/checkout@v2
     - name: Run tests
-      run: make test
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
+        cask install
+        make test
