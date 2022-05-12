@@ -368,7 +368,7 @@ This should only apply to jupyter-lang blocks."
 	;; Let's fontify "# [goto error]" to it is clickable
 	(save-excursion
 	  (goto-char r)
-	  (when (search-forward "# [goto error]")
+	  (when (search-forward "# [goto error]" (org-element-property :end result) t)
 	    (add-text-properties
 	     (match-beginning 0) (match-end 0)
 	     (list 'help-echo "Click to jump to error."
