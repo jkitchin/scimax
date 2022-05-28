@@ -339,8 +339,6 @@ Only works on Mac OSX."
     (org-redisplay-inline-images)
     (raise-frame)))
 
-(global-set-key (kbd "<f10>") 'screenshot)
-
 
 (defun pngpaste (&optional arg)
   "Paste the clipboard image into org-mode.
