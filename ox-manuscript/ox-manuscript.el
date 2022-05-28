@@ -396,7 +396,17 @@ will be prompted for a tex file name."
 		     tex-file))))
 
     (with-current-buffer (get-buffer-create "*latex*")
-      (insert results))))
+      (insert results))
+
+    ;; return truth value for success
+    (when (or (string-match "Fatal error occurred" results)
+	      (string-match "Undefined control sequence" results))
+      (switch-to-buffer "*latex*")
+      (occur "warning\\|undefined\\|error\\|missing")
+      (if (y-or-n-p "Continue?")
+	  nil
+	(let ((debug-on-error nil))
+	  (error "LaTeX compilation error detected."))))))
 
 ;;;###autoload
 (defun ox-manuscript-bibtex (tex-file)
