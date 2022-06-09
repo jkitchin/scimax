@@ -74,8 +74,6 @@
 (define-key ivy-minibuffer-map (kbd "s-o") 'ivy-occur)
 
 
-
-
 ;; Show key bindings
 (defun scimax-show-key-bindings ()
   "Show keys in the map"
@@ -284,11 +282,19 @@ with the entry."
 	    ("xb" scimax-ivy-projectile-bash "Open bash here.")
 	    ("xf" scimax-ivy-projectile-finder  "Open Finder here.")
 
-	    ;; This may not be useful, there is already v
+	    ;; This may not be useful, there is already v for vcs
 	    ("xg" scimax-ivy-magit-status  "Magit status")
 	    ("h" scimax-ivy-projectile-org-heading "Open project heading")
-	    ("l" scimax-ivy-insert-project-link "Insert project link")))) 
-
+	    ("l" scimax-ivy-insert-project-link "Insert project link")
+	    ("4" (lambda (arg)
+		   (find-file-other-window arg))
+	     "open in other window")
+	    ("5" (lambda (arg)
+		   (find-file-other-frame arg))
+	     "open in new frame")
+	    ("6" (lambda (arg)
+		   (find-file-other-tab arg))
+	     "open in new tab")))) 
 
 
 (ivy-add-actions 'counsel-projectile-switch-project
@@ -316,6 +322,14 @@ with the entry."
 
 ;; ** Find file actions
 ;; I like to do a lot of things from find-file.
+
+;; I replace the x action with a x as a prefix here.
+(let ((p (plist-get ivy--actions-list 'counsel-find-file )))
+  (setq p (remove '("x" counsel-find-file-extern "open externally") p))
+  (push '("xt" counsel-find-file-extern "open externally") p)
+  (plist-put ivy--actions-list 'counsel-find-file p))
+
+
 (ivy-add-actions
  'counsel-find-file
  '(("a" (lambda (x)
@@ -335,6 +349,7 @@ with the entry."
 	  "Open X in another frame."
 	  (find-file-other-frame x))
     "Open in new frame")
+
    ("p" (lambda (path)
 	  (with-ivy-window
 	    (insert (f-relative path))))
@@ -360,12 +375,29 @@ with the entry."
    ("r" (lambda (path)
 	  (rename-file path (read-string "New name: ")))
     "Rename")
-   ("F" (lambda (path)
-	  (finder (file-name-directory path)))
+   ("s" (lambda (path)
+	  (find-file path)
+	  (swiper))
+    "Swiper in file")
+   
+   ("xb" (lambda (path)
+	   (bash (file-name-directory path)))
+    "Open in bash")
+   
+   ("xe" (lambda (path)
+	   (let ((default-directory (file-name-directory
+				     (expand-file-name path))))
+	     (eshell)))
+    "Open in eshell")
+   
+   ("xf" (lambda (path)
+	   (finder (file-name-directory path)))
     "Open in finder/explorer")
-   ("b" (lambda (path)
-	  (bash (file-name-directory path)))
-    "Open in bash")))
+   
+   ("xh" (lambda (path)
+	   (find-file path)
+	   (ivy-org-jump-to-heading))
+    "Jump to org heading in file")))
 
 
 ;; * ivy colors
