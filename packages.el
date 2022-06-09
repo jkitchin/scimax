@@ -133,9 +133,9 @@
 (use-package elfeed)
 
 ;; Python editing mode
-(use-package elpy
-  :config
-  (elpy-enable))
+;; (use-package elpy			;
+;;   :config
+;;   (elpy-enable))
 
 (use-package esup)
 
