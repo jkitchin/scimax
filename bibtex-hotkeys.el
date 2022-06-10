@@ -17,7 +17,7 @@
 
 (defmacro bibtex-hotkey (s &rest body)
   "Define the key S to execute BODY when at the beginning of a bibtex entry."
-  (let ((docstring (when (stringp (first body)) (first body)))
+  (let ((docstring (when (stringp (cl-first body)) (cl-first body)))
 	(known (assoc s bibtex-hotkeys)))
     (if known
 	(setf (cdr known) docstring)
