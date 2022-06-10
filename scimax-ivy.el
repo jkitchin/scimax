@@ -461,7 +461,7 @@ with the entry."
 
 
 ;; a data structure for a process
-(defstruct ivy-ps user pid)
+(cl-defstruct ivy-ps user pid)
 
 
 (defun ivy-ps ()
