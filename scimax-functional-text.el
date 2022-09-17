@@ -38,15 +38,14 @@
 REGEXP is the regular expression to match. It may have subgroups
 in it that are accessible in the ACTION. ACTION is either a list
 of sexps that are the body of a function, a lambda function, or a
-quoted symbol of a function. You can access the regexp subgroups
+quoted symbol of an interactive function. You can access the regexp subgroups
 in this function. PLIST is the rest of the arguments for
 `button-lock-set-button'. I like <return> to be active, so it is
 set by default. If you have a help-echo function it is also
 wrapped so that it too can have access to the match-data.
 "
-  (when (and (listp action) (functionp (cadr action)))
-    (setq action `((funcall-interactively ,action))))
-  ;; wrap the help-echo so match-data is available
+
+  ;; wrap the help-echo so match-data is available to functions later
   (when (and (plist-get plist :help-echo)
 	     (functionp (plist-get plist :help-echo)))
     (setq plist (plist-put plist :help-echo
@@ -62,26 +61,54 @@ wrapped so that it too can have access to the match-data.
 				  (while (not (looking-at ,regexp))
 				    (backward-char)) 
 				  (funcall ,(plist-get plist :help-echo) win buf pt)))))))
-  `(button-lock-register-global-button
-    ,regexp
-    ;; Suggested in https://github.com/rolandwalker/button-lock/issues/10
-    (lambda (event)
-      (interactive "e")
-      (let ((click-pos (posn-point (event-end event))))
-	(save-mark-and-excursion
-	 (save-match-data
-	   ;; This is clunky, but with grouping the properties may not extend to
-	   ;; the whole regexp, e.g. if you set properties on a subgroup.
-	   (goto-char (previous-single-property-change click-pos
-						       'button-lock))
-	   ;; now make sure we see it again to get the match-data
-	   (while (not (looking-at ,regexp))
-	     (backward-char))
-	   ,@action))))
-    ;; I like to press return on functional text to activate it.
-    :keyboard-binding "RET"
-    ;; These are the rest of the properties
-    ,@plist))
+  (let ((mouse-action `(lambda (event)
+			 (interactive "e")
+			 (let ((click-pos (posn-point (event-end event))))
+			   (save-mark-and-excursion
+			     (save-match-data
+			       ;; This is clunky, but with grouping the properties may not extend to
+			       ;; the whole regexp, e.g. if you set properties on a subgroup.
+			       (goto-char (or (previous-single-property-change click-pos
+									       'button-lock)
+					      (point-min)))
+			       ;; now make sure we see it again to get the match-data so it can be used in our functions
+			       (while (not (looking-at ,regexp))
+				 (backward-char))
+
+			       ;; Now we run the action
+			       ,(cond
+				 ((functionp action)
+				  `(,action))
+				 ;; it is probably a list of commands. wrap them in an interactive lambda
+				 (t
+				  `(progn
+				     ,@action))))))))
+	(kbd-action `(lambda ()
+		       (interactive)
+		       (save-excursion
+			 (while (not (looking-at ,regexp))
+			   (backward-char)))
+		       ,(cond
+			 ((functionp action)
+			  `(,action))
+			 ;; it is probably a list of commands. wrap them in an interactive lambda
+			 (t
+			  `(progn
+			     ,@action))))))
+    
+    `(progn
+       (button-lock-register-global-button
+	,regexp
+	;; Suggested in https://github.com/rolandwalker/button-lock/issues/10
+	,mouse-action
+	;; I like to press return on functional text to activate it.
+	:keyboard-binding "RET"
+	:keyboard-action ,kbd-action
+	;; These are the rest of the properties
+	,@plist)
+       ;; Toggle the mode, this seems to be important if you define this in a buffer.
+       (global-button-lock-mode -1)
+       (global-button-lock-mode 1))))
 
 
 (defun scimax-flyspell-ignore-buttons (orig-fun &rest args)
@@ -186,23 +213,27 @@ URL-PATTERN should have one %s in it which is replaced by the hashtag."
   (interactive)
   (browse-url (format url-pattern (match-string 1))))
 
+
 (defhydra hashtag (:color blue :hint nil)
   "
 @hashtag
-_f_: Facebook _i_: Instagram  _o_: org-tag  _t_: Twitter"
+_f_: Facebook _i_: Instagram  _o_: org-tag  _t_: Twitter _d_: org-db"
   ("i" (hashtag-open "https://www.instagram.com/explore/tags/%s/"))
   ("f" (hashtag-open "https://www.facebook.com/hashtag/%s"))
-  ("o" (org-tags-view nil (hashtag-at-p)))
+  ("o" (org-tags-view nil ((thing-at-point-looking-at hashtag-regexp))))
+  ("d" (org-db-hashtags))
   ("t" (hashtag-open "https://twitter.com/hashtag/%s")))
+
 
 (defun sf-activate-hashtags ()
   (interactive)
   (scimax-functional-text
    hashtag-regexp
-   'hashtag/body
+   hashtag/body
    :grouping 2
    :face (list 'link)
    :help-echo "Click me to open the hashtag."))
+
 
 ;; * Github
 ;; ** Github issues
