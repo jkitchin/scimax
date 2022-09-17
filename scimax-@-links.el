@@ -18,6 +18,7 @@
   '(@-links-this-buffer
     @-links-org-buffers
     @-links-open-files
+    @-hashtags
     @-links-stored-links
     @-counsel-recentf-candidates
     @-projectile-relevant-known-projects
@@ -115,11 +116,25 @@ A candidate is a list of (link function)."
 			candidates)))))
     candidates))
 
+
 (defun open-org-buffers ()
   (-filter (lambda (b)
 	     (-when-let (f (buffer-file-name b))
 	       (f-ext? f "org")))
 	   (buffer-list)))
+
+
+(defun @-hashtags ()
+  "Get a list of candidate hashtags you have used before."
+  (let* ((tip (looking-at-hashtag))
+	 (hashtag-data (emacsql org-db [:select [hashtag file-hashtags:begin files:filename]
+						:from hashtags
+						:left :join file-hashtags :on (= hashtags:rowid file-hashtags:hashtag-id)
+						:inner :join files
+						:on (= files:rowid file-hashtags:filename-id)])))
+    (-uniq (cl-loop for (hashtag begin fname) in hashtag-data
+		    collect (concat "#" hashtag)))))
+
 
 (defun @-links-org-buffers ()
   "Return candidates in all open org-buffers.
