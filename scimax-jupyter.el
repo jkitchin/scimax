@@ -390,7 +390,7 @@ This should only apply to jupyter-lang blocks."
 ;; These are more aligned with jupyter notebook I think
 
 ;; I had to use pretty hydra to get nicely aligned columns here.
-(require 'pretty-hydra)
+(use-package pretty-hydra)
 
 (pretty-hydra-define scimax-jupyter-org-hydra (:color blue :hint nil)
   ("Execute"
