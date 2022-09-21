@@ -24,5 +24,5 @@ jobs:
         git clone https://github.com/cask/cask ~/.cask
         PATH=$HOME/.cask/bin:$PATH cask install
         PATH=$HOME/.cask/bin:$PATH make test
-        emacs -l $HOME/scimax/init.el
+        emacs -batch -nw -l $HOME/scimax/init.el
         
