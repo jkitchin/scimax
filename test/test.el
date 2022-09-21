@@ -3,7 +3,7 @@
   (should (equal t t)))
 
 
-(ert-deftest test-hunspell-status ()
+(ert-deftest test-spell-status ()
   (require 'ispell)
   (when (executable-find ispell-program-name)
     (should (equal 0 (shell-command (executable-find ispell-program-name))))))
