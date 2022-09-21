@@ -6,4 +6,4 @@
 (ert-deftest test-hunspell-status ()
   (require 'ispell)
   (when (executable-find ispell-program-name)
-    (should (equal 0 (shell-command )))))
+    (should (equal 0 (shell-command (executable-find ispell-program-name))))))
