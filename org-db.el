@@ -357,6 +357,18 @@ decorators in Python, etc.
     (emacsql-close org-db)))
 
 
+(defmacro with-org-db (&rest body)
+  "Run BODY commands in an org-db context where we open the database, and close it at the end.
+BODY should be emacsql commands."
+  `(let* ((org-db (emacsql-sqlite (expand-file-name org-db-name org-db-root)))
+	  (results))
+     (condition-case err
+	 (setq results (emacsql org-db ,@body))
+       (org-db-log "Error: %s" err))
+     (org-db-close)
+     results))
+
+
 (add-hook 'kill-emacs-hook #'org-db-close)
 
 
