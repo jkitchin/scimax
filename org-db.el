@@ -705,7 +705,7 @@ PARSE-TREE is from `org-element-parse-buffer'."
 				(caar (emacsql org-db [:select (funcall last-insert-rowid)]))))
 		      (emacsql org-db [:insert :into headline-tags :values $v1]
 			       (vector nil headline-id tag-id)))
-
+	     
 	     ;; properties
 	     (emacsql org-db [:delete :from headline-properties
 				      :where (= headline-properties:headline-id $s1)]
@@ -1124,7 +1124,6 @@ If point is not looking back on a space insert a comma separator."
 
 
 ;; * org-db-locations
-
 (defun org-db-locations-candidates ()
   "Return a list of headings with an ADDRESS property."
   (let ((locations (emacsql org-db [:select [headlines:title headline-properties:value headlines:tags files:filename headlines:begin]
@@ -1189,18 +1188,22 @@ If point is not looking back on a space insert a comma separator."
 ;; * org-db headings
 (defun org-db-heading-candidates ()
   "Return heading candidates completion."
-  (let* ((headings (emacsql org-db [:select [headlines:level headlines:title headlines:tags
+  (let* ((headings (emacsql org-db [:select [headlines:level headlines:todo-keyword headlines:title headlines:tags
 							     files:filename headlines:begin
 							     files:last-updated]
 					    :from headlines
 					    :inner :join files
 					    :on (= files:rowid headlines:filename-id)
 					    :order :by files:last-updated :desc]))
-	 (candidates (cl-loop for (level title tags filename begin last-updated) in headings
+	 (candidates (cl-loop for (level todo title tags filename begin last-updated) in headings
 			      collect
 			      (cons
 			       (format "%100s|%20s|%s|%s"
-				       (s-pad-right 100 " " (concat  (make-string level (string-to-char "*")) " " title))
+				       (s-pad-right 100 " " (concat  (make-string level (string-to-char "*")) " "
+								     (if todo
+									 (concat todo " ")
+								       "")
+								     title))
 				       (s-pad-right 20 " " (or tags ""))
 				       filename last-updated)
 			       (list
@@ -1412,8 +1415,10 @@ line and only return a match if it is around the current point."
 					   :where (= hashtag $s1)]
 			   hashtag))
 	 (candidates (cl-loop for (hashtag begin fname) in results
-			      collect fname)))
-    (find-file (ivy-read "File: " candidates))))
+			      collect (cons fname begin)))
+	 (choice (ivy-read "File: " candidates)))
+    (find-file choice)
+    (goto-char (cdr (assoc choice candidates)))))
 
 
 (defun org-db-hashtags--delete (x)
@@ -1434,7 +1439,8 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
 						:inner :join files
 						:on (= files:rowid file-hashtags:filename-id)]))
 	 (candidates (cl-loop for (hashtag begin fname) in hashtag-data
-			      collect (list (format "#%40s  %s" (s-pad-right 40 " " hashtag) fname) :hashtag hashtag :begin begin :filename fname))))
+			      collect (list (format "#%40s  %s" (s-pad-right 40 " " hashtag) fname)
+					    :hashtag hashtag :begin begin :filename fname))))
 
     (ivy-read "#hashtag: " candidates :initial-input tip
 	      :action
