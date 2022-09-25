@@ -1,5 +1,3 @@
-;;; org-db.el --- An org database
-
 ;;; Commentary:
 ;; org-db is used to index org-files into a sqlite database to make searching
 ;; easier. It is complementary to things like `org-agenda-files'. I have found
@@ -47,6 +45,8 @@
 ;; Advanced usage
 ;; you can build emacsql queries on org-db to do lots of things.
 
+
+;;; org-db.el --- An org database
 
 ;;; Code:
 (require 'cl-lib)
@@ -215,9 +215,11 @@ decorators in Python, etc.
 				 footnote-section-p
 				 (begin integer :not :null)
 				 (tags text)
-				 (priority text)]
+				 (priority text)
+				 (deadline real)]
 				(:foreign-key [filename-id] :references files [rowid]
 					      :on-delete :cascade))])
+
 
 (emacsql org-db [:create-table :if :not :exists headline-tags
 			       ([(rowid integer :primary-key)
@@ -638,7 +640,8 @@ PARSE-TREE is from `org-element-parse-buffer'."
 		      'identity))
 	 hlv headline-id
 	 tags tag-id
-	 properties property-id)
+	 properties property-id
+	 deadline)
 
     (emacsql org-db [:delete :from headlines :where (= headlines:filename-id $s1)]
 	     filename-id)
@@ -648,6 +651,10 @@ PARSE-TREE is from `org-element-parse-buffer'."
 	       (goto-char (org-element-property :begin hl))
 	       (setq tags (mapcar 'org-no-properties (org-get-tags))
 		     properties (org-entry-properties (org-element-property :begin hl) 'all)))
+
+	     (setq deadline (when-let (ts (org-element-property :deadline hl))
+			      (float-time (org-time-string-to-time
+					   (org-element-property :raw-value ts)))))
 
 	     (setq hlv (vector
 			nil
@@ -669,9 +676,12 @@ PARSE-TREE is from `org-element-parse-buffer'."
 			  (concat ":" (mapconcat
 				       'substring-no-properties
 				       tags ":") ":"))
+			;; priority
 			(if (org-element-property :priority hl)
 			    (char-to-string (org-element-property :priority hl))
-			  nil)))
+			  nil)
+			;; deadline
+			deadline))
 
 	     ;; insert headline row and get headline-id
 	     (emacsql org-db [:insert :into headlines :values $v1] hlv)
@@ -832,6 +842,7 @@ Use a prefix ARG to FORCE the process instead of waiting for idle time."
 
 (defun org-db-refresh (&optional force)
   "Update all the files in the database.
+Updates are done by `org-db-update-buffer'. 
 
 Use a prefix arg to FORCE updates."
   (interactive "P")
