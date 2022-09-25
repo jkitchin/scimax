@@ -900,8 +900,13 @@ Optional RECURSIVE is non-nil find files recursively."
 
 (defun org-db-clean-db ()
   "Remove entries from the database where the file does not exist."
+  (interactive)
   (cl-loop for (fname) in (emacsql org-db [:select :distinct [filename] :from files])
-	   unless (file-exists-p fname)
+	   do (message "checking %s" fname)
+	   unless (and fname
+		       ;; tramp filenames are a problem
+		       (not (s-starts-with? "/ssh:" fname))
+		       (file-exists-p fname))
 	   do
 	   (org-db-log "%s was not found. Removing it." fname)
 	   (emacsql org-db [:delete :from files :where (= filename $s1)] fname)))
