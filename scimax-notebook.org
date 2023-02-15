@@ -672,11 +672,7 @@ See ivy-org-jump-to-project-headline.
   (find-file (expand-file-name "scimax-notebook.org" scimax-dir)))
 #+END_SRC
 
-* TODO Project management tools
-  DEADLINE: <2020-12-16 Wed>
-  :PROPERTIES:
-  :ASSIGNEDTO: jkitchin@andrew.cmu.edu
-  :END:
+* Project management tools
 
 If you share a notebook, you have collaborators. If you store them as headlines with an EMAIL property, you can use nb functions to find them.
 
