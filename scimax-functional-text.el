@@ -226,6 +226,8 @@ _f_: Facebook _i_: Instagram  _o_: org-tag  _t_: Twitter _d_: org-db"
 
 
 (defun sf-activate-hashtags ()
+  "Activate scimax-functional-text hashtags.
+These are words that start with #."
   (interactive)
   (scimax-functional-text
    hashtag-regexp
