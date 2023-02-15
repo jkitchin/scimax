@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: note drawer
+# key: <d
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+:note:
+`(with-temp-buffer (org-insert-time-stamp nil t t) (buffer-string))` ${1:`(if (region-active-p) (yas-selected-text) "replace. Tab to end.")`}
+:end:
+$0
