@@ -752,13 +752,19 @@ the scope."
 
 ;; * A better return
 
-(defun scimax/org-return (&optional ignore)
+(defun scimax/org-return (&optional arg)
   "Add new list item, heading or table row with RET.
 A double return on an empty element deletes it.
-Use a prefix arg to get regular RET. "
+Use a prefix arg to get regular RET.
+A prefix arg of 4 opens link in new window.
+A prefix arg of 5 opens link in new frame."
   (interactive "P")
-  (if ignore
-      (org-return)
+  (cond
+   ;; single prefix arg, no fancy stuff, just org-return
+   ((and arg (listp arg) (equal arg '(4))) 
+    (org-return))
+
+   ((null arg)
     (cond
 
      ((eq 'line-break (car (org-element-context)))
@@ -842,10 +848,23 @@ Use a prefix arg to get regular RET. "
 	(setf (buffer-substring
 	       (line-beginning-position) (line-end-position)) "")
 	(org-return)))
-
-     ;; fall-through case
+     ;; fall-through
      (t
-      (org-return)))))
+      (org-return))))
+   
+   ;; other window, 
+   ((= arg 4)
+    (clone-indirect-buffer-other-window (buffer-name) t)
+    (org-return))
+   
+   ;; other frame
+   ((= arg 5)
+    (clone-frame)
+    (org-return))
+
+   ;; fall-through case
+   (t
+    (org-return))))
 
 
 (defcustom scimax-return-dwim t
