@@ -149,10 +149,11 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
   "Toggle if latex fragment tooltips are used."
   (if  (not (get 'scimax-org-latex-fragment-tooltip 'enabled))
       (progn
-	(advice-add 'org--format-latex-make-overlay :after 'scimax-org-latex-fragment-tooltip)
+	
+	(advice-add 'org--make-preview-overlay :after 'scimax-org-latex-fragment-tooltip)
 	(put 'scimax-org-latex-fragment-tooltip 'enabled t)
 	(message "LaTeX fragment tooltips are enabled."))
-    (advice-remove 'org--format-latex-make-overlay 'scimax-org-latex-fragment-tooltip)
+    (advice-remove 'org--make-preview-overlay 'scimax-org-latex-fragment-tooltip)
     (put 'scimax-org-latex-fragment-tooltip 'enabled nil)
     (message "LaTeX fragment tooltips are disabled.")))
 
@@ -201,10 +202,10 @@ JUSTIFICATION is a symbol for 'left, 'center or 'right."
   (interactive)
   (if (not (get 'scimax-org-latex-fragment-justify-advice 'enabled))
       (progn
-	(advice-add 'org--format-latex-make-overlay :after 'scimax-org-latex-fragment-justify-advice)
+	(advice-add 'org--make-preview-overlay :after 'scimax-org-latex-fragment-justify-advice)
 	(put 'scimax-org-latex-fragment-justify-advice 'enabled t)
 	(message "Latex fragment justification enabled"))
-    (advice-remove 'org--format-latex-make-overlay 'scimax-org-latex-fragment-justify-advice)
+    (advice-remove 'org--make-preview-overlay 'scimax-org-latex-fragment-justify-advice)
     (put 'scimax-org-latex-fragment-justify-advice 'enabled nil)
     (message "Latex fragment justification disabled")))
 
