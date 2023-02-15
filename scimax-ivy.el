@@ -41,15 +41,19 @@
 
 (defun scimax-ivy-become ()
   "Change the command and reuse the current input.
-    You will be prompted to enter a new key sequence which can be a
-    shortcut or M-x. Then it will put the current input in the
-    minibuffer for the command.
+    You will be prompted to enter a new key sequence which can be
+    a shortcut or M-x. Then it will put the current input or
+    candidate in the minibuffer for the command.
 
     Applications:
-    1. start with swiper, enter some text, C-M-b H-s to transfer the current input to swiper-all
-    2. C-xC -b to switch-buffer, C-M-b C-x C-f to transfer input to find-file."
+    1. start with swiper, enter some text, s-b H-s to transfer the current input to swiper-all
+    2. C-xC-b to switch-buffer, s-b C-x C-f to transfer input to find-file.
+    3. C-xC-f to find-file, s-b C-x 5 f to open in new frame.
+"
   (interactive)
-  (let* ((input ivy-text)
+  (let* ((input (if (string= "" ivy-text)
+		    (ivy-state-current ivy-last)
+		  ivy-text))
          (transfer-input (lambda ()
 			   (setf (buffer-substring
 				  (point) (line-beginning-position))
