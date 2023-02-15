@@ -402,7 +402,7 @@ Only works on Mac OSX."
 
     (insert (s-trim (shell-command-to-string cmd)))
 
-    (insert (format "\n\n[[./%s]]\n\n" fname))
+    (insert (format "\n#+attr_org: :width 600\n[[./%s]]\n\n" fname))
     (org-redisplay-inline-images)
     (raise-frame)))
 
