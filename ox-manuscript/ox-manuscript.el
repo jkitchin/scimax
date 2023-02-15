@@ -203,6 +203,19 @@ grestore
 ;; ** Wiley
 ;; I have not been able to find a LaTeX package for Wiley
 
+;; customized article. better margins
+(add-to-list 'org-latex-classes
+	     '("cmu-article"                          ;class-name
+	       "\\documentclass{article}
+\\usepackage[top=1in, bottom=1.in, left=1in, right=1in]{geometry}
+ [PACKAGES]
+ [EXTRA]" ;;header-string
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*a{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
 ;; * Functions
 ;;;###autoload
 (defun ox-manuscript-toggle-interactive-build ()
