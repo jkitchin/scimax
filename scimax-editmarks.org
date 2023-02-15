@@ -42,7 +42,8 @@ This note is about the fact that sometimes it seems like there are residual prop
 
 ** TODO Need to disable editmark keymaps when in track change mode? It limits what you can type. Or, I need a prefix on all of them so that we don't collide with typing.
 
-** TODO Nested editmarks are not allowed
+** DONE Nested editmarks are not allowed
+CLOSED: [2022-09-30 Fri 13:40]
 
 This would require a more sophisticated parser. If you need this, you should probably look at a sexp based syntax, e.g. (@-insert "some text"), or a special block.
 
@@ -1012,7 +1013,7 @@ This uses org-db-contacts, not editmark contacts right now."
 #+RESULTS:
 : sem-contact/body
 
-*** TODO Needed features
+*** Needed features
 
 - [ ] a display function so we don't have to see the whole thing if we don't want to.
 - [ ] a validation function to tell you if it is ok, e.g. has required info
