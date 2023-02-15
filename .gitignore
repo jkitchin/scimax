@@ -22,3 +22,5 @@ scimax-notebook.el
 org-ref-cite/
 org-ref-v2/
 scimax-channel
+user.cache
+.ipynb_checkpoints
