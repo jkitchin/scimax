@@ -401,12 +401,18 @@ _p_: ffap
   ("k" ace-link "Link"  :column "org")
   ("o" (scimax-open-hydra scimax-jump-org/body) "Org"  :column "org")
   ("3" scimax-ob-jump-to-src-block "src block" :column "org")
+
+  ("pp" counsel-projectile-switch-project  "project" :column "Project")
+  ("pb" counsel-projectile-switch-to-buffer  "buffer" :column "Project")
+  ("pf" projectile-find-file "file" :column "Project")
+  ("ph" ivy-org-jump-to-project-headline "file" :column "Project")
+  
   
   ("b" counsel-ibuffer "Buffer" :column "misc")
   ("n" ace-window "Ace window" :column "misc")
   ("f" counsel-recentf "Recent file" :column "misc")
   ("j" avy-goto-char-timer "avy timer" :coumn "misc")
-  ("p" counsel-projectile-switch-project  "project" :column "misc"))
+  )
 
 
 (defhydra scimax-jump-char (:color blue :inherit (scimax-base/heads) :columns 3)
