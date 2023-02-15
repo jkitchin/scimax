@@ -2,8 +2,9 @@
 
 ;;; Commentary:
 ;; This library adds code navigation via M-. and M-, in literate program
-;; org-files. It works by creating and visiting a TAGS file for the src-blocks
-;; in the file.
+;; org-files. This assumes you are using an org-file to create a program file
+;; that will be tangled to a source file. It works by creating and visiting a
+;; TAGS file for the tangled src-blocks in the file.
 ;;
 ;; This works by creating a temporary version of the org-file with everything
 ;; but the relevant code stripped out, and then running etags on this temporary
@@ -21,6 +22,17 @@
 ;; `scimax-lp-signature-doc' can be used to try getting a signature/docstring for the
 ;; symbol at point. In emacs-lisp blocks this works on functions and variables.
 ;; In other languages it will just return the line where the symbol is defined.
+;;
+;; This is largely a proof of concept. It works, but it turns out I don't use
+;; literate programming as much as I thought I would. This library indeed makes
+;; it nicer, but still many debugging tools don't interface will with the
+;; org-file. It is a little annoying you have to run `scimax-lp-generate-tags'
+;; to regenerate tags. This might be an expensive operation though, and although
+;; you could run it in a save-buffer hook, that is not done by default here.
+;;
+;; Probably I would consider rewriting this code to use something like lsp or
+;; tree-sitter when that is a feature in Emacs 29. I wrote this code several
+;; years ago when that was not obvious.
 ;;
 ;;; Code:
 
@@ -60,6 +72,7 @@
 
 (defvar scimax-lp-consider-all nil
   "If non-nil consider all src blocks when making tags.")
+
 
 (defvar scimax-lp-etags-language-map
   '(("emacs-lisp"  . "lisp")
