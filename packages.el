@@ -180,9 +180,9 @@
 
 (use-package ivy-hydra)
 
-(use-package jedi)
+;; (use-package jedi)
 
-(use-package jedi-direx)
+;; (use-package jedi-direx)
 
 ;; Superior lisp editing
 (use-package lispy
