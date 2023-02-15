@@ -324,7 +324,7 @@ The best way to see other speed commands is to put your cursor at the beginning 
 
 `ox-clip-formatted-copy' provides a way to copy org-mode with formatting so it can be pasted into other programs like MS Word and web browsers. It does this by copying the selected text to the HTML clipboard.
 
-** TODO Better src block tools
+** Better src block tools
 
 scimax provides a lot of features on top of org-mode to work with src blocks. The usual stuff should work fine, e.g. C-c C-c to run a block.
 
@@ -486,7 +486,7 @@ Note: This library replaces several older attempts at this which are no longer m
 
 org-ref is the answer to citations and bibliographies in scientific writing. Run `org-ref-help'  and read it.
 
-** TODO Publishing (ox-manuscript)
+** Publishing (ox-manuscript)
 
 The key-binding C-c C-e j should enter the ox-manuscript export menu. This process differs from the regular export process in a number of ways. It will detect if bibtex, makeindex, or  makeglossary, and if minted is used, -shell-escape will automatically be used with pdflatex. The function `ox-manuscript-latex-pdf-process' handles all of that.
 
@@ -1154,7 +1154,7 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
 
   In the magit-status window press "m", then "m" and select the branch to merge into the current one.
 
-*** TODO Resolving conflicts
+*** Resolving conflicts
 
  [[info:magit#Resolving%20conflicts][info:magit#Resolving conflicts]]
 
@@ -1181,7 +1181,9 @@ In a magit-status window press "l =g" enter a pattern to grep for, and then pres
 
  Press "z" in the magit-status window
 
-*** TODO Git blame
+*** Git blame
+
+In an open file run ~M-x git-blame~, then press b to see commits that add lines. You press q to exit the blame mode.
 
 ** Advanced concepts
 *** Resetting
