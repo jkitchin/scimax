@@ -382,6 +382,10 @@
   :ensure nil
   :load-path scimax-dir)
 
+(use-package scimax-projectile
+  :ensure nil
+  :load-path scimax-dir)
+
 (use-package scimax-spellcheck
   :ensure nil
   :load-path scimax-dir)
