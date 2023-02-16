@@ -276,6 +276,7 @@
 	      org-ref-insert-ref-function 'org-ref-insert-ref-link
 	      org-ref-cite-onclick-function (lambda (_) (org-ref-citation-hydra/body))))
 
+(use-package ox-pandoc)
 
 ;; https://github.com/bbatsov/projectile
 (use-package projectile
