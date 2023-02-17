@@ -1,4 +1,6 @@
 #+title: scimax-jupyter
+#+attr_org: :width 800
+[[/Users/jkitchin/Dropbox/emacs/scimax/scimax-jupyter.png]]
 
 There are two approaches to using jupyter in scimax.
 
@@ -12,8 +14,11 @@ It is not the default (yet) because you have to be able to compile the zmq libra
 
 
 #+BEGIN_SRC emacs-lisp
-(use-package scimax-jupyter)
+(require 'scimax-jupyter)
 #+END_SRC
+
+#+RESULTS:
+: scimax-jupyter
 
 * Customization in scimax
 
@@ -53,8 +58,8 @@ I find it confusing to have one kernel shared among many files.
 3. I want the kernel to shutdown and close when I close the buffer because I don't need it after that.
 
 You can set a buffer specific kernel with yasnippet: <jps
+#+PROPERTY: header-args:jupyter-python  :session jupyter-python-6186d1147f976aff2402c12bfd60de5e
 
-#+PROPERTY: header-args:jupyter-python  :session jupyter-6186d1147f976aff2402c12bfd60de5e
 
 scimax closes kernels when you close their buffer.
 
@@ -82,8 +87,9 @@ for i in range(3):
 #+END_SRC
 
 #+RESULTS:
-
-
+0
+1
+2
 
 [[elisp:(scimax-jupyter-advise)]] this advises emacs-jupyter the scimax way
 
@@ -154,6 +160,8 @@ Easy access to:
 import numpy as np
 
 ?np.linspace
+
+np.linspace
 #+END_SRC
 
 #+RESULTS:
@@ -177,7 +185,7 @@ np.linspace
 Use M-tab to complete the thing at point. Sometimes you have to type it more than once.
 
 #+BEGIN_SRC jupyter-python
-np.
+np.geomspace
 #+END_SRC
 
 
@@ -185,7 +193,7 @@ np.
 
 ** Plotting with matplotlib
 
-Figures work like you expect. Note here that the printed text comes first, then the figures, even though the code is not in that order. It appears that the order is not precisely guaranteed. 
+Figures work like you expect. 
 
 
 #+BEGIN_SRC jupyter-python
@@ -223,6 +231,21 @@ x .dot. y = 1.3598389888491538
 Emacs still does not natively render html or interactive javascript. Until that happens, I monkey-patched plotly to capture a static image, and save the interactive html so you can still use it in a browser.
 
 #+BEGIN_SRC jupyter-python
+import plotly.express as px
+df = px.data.iris()
+fig = px.scatter(df, x="sepal_width", y="sepal_length", color="species",
+                 size='petal_length', hover_data=['petal_width'])
+fig.show()
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+
+<<44d53136-5dc5-45ca-b851-56c64248b5ce>>
+:END:
+
+
+#+BEGIN_SRC jupyter-python
 from pycse.plotly import *
 
 import plotly.express as px
@@ -234,7 +257,7 @@ fig.show()
 
 #+RESULTS:
 :RESULTS:
-[[file:.ob-jupyter/5e2c341e3c9e3456a944ba46a8a9f071.html]]
+[[file:.ob-jupyter/c7bf60c3c9d0675232889ce0bb712b10.html]]
 [[file:./.ob-jupyter/2f642ad6943faf5b9c0de1d90b7df76f52390546.png]]
 :END:
 
@@ -257,6 +280,9 @@ display(f)
 | 0 | a | b |
 | 1 | 1 | 2 |
 :END:
+
+
+
 
 ** Figures and Tables with captions, names, attributes
 
@@ -286,6 +312,7 @@ Table([['x', 'y'],
 | 3 | 4 |
 :END:
 
+See Table ref:org-data.
 
 #+BEGIN_SRC jupyter-python 
 import matplotlib.pyplot as plt
@@ -307,6 +334,8 @@ Figure(f, name='org-fig', caption='a line plot',
 #+caption: a line plot
 [[./test.png]]
 :END:
+
+ref:org-fig
 
 #+BEGIN_SRC jupyter-python
 import matplotlib.pyplot as plt
@@ -404,6 +433,7 @@ Heading('An example of a heading from code', 3)
 
 
 
+
 #+BEGIN_SRC jupyter-python
 Comment('A comment for orgmode')
 #+END_SRC
@@ -415,11 +445,10 @@ Comment('A comment for orgmode')
 
 
 
+
 ** Exceptions 
 
 Exceptions go in the results. Type f12 e to jump to the exception in the src block.
-
-
 
 #+BEGIN_SRC jupyter-python 
 print(5)
@@ -427,9 +456,6 @@ print(5)
 
 a = 5
 
-
-
-(
 
 
 
@@ -446,11 +472,18 @@ print(z)
 
 #+RESULTS:
 :RESULTS:
+5
 # [goto error]
-  File "/var/folders/3q/ht_2mtk52hl7ydxrcr87z2gr0000gn/T/ipykernel_39351/2049798434.py", line 8
-    )
-    ^
-SyntaxError: unmatched ')'
+---------------------------------------------------------------------------
+ZeroDivisionError                         Traceback (most recent call last)
+/var/folders/3q/ht_2mtk52hl7ydxrcr87z2gr0000gn/T/ipykernel_2999/2244444055.py in <module>
+      8 
+      9 for j in range(5):
+---> 10     1 / 0
+     11 
+     12 
+
+ZeroDivisionError: division by zero
 :END:
 
 
@@ -604,12 +637,14 @@ YouTubeVideo('ZXSaLcFSOsU')
 :RESULTS:
 https://www.youtube.com/embed/ZXSaLcFSOsU
 :END:
+
 :RESULTS:
 
 
 ** scratch space and the REPL
 
 The buffer is a great scratch space, but there is also a separate Jupyter scratch buffer. Use it to try out ideas, check values, etc.
+
 
 #+BEGIN_SRC jupyter-python
 
@@ -660,7 +695,7 @@ See ox-ipynb. This org-file is not ideal for this export, it has some links that
 #+END_SRC
 
 #+RESULTS:
-: #<window 57 on *Async Shell Command*>
+: #<window 215 on *Async Shell Command*>
 
 
 * Other languages
@@ -721,7 +756,7 @@ display(HTML('''#+attr_org: :width 400<br>
 :END:
 
 
-** TODO using jupyter-python blocks as input to other blocks was broken in emacs-jupyter and is sort of better in scimax
+** using jupyter-python blocks as input to other blocks was broken in emacs-jupyter and is sort of better in scimax
 
 and it works in scimax, sort of. Raw strings get passed around, which isn't great. One day I will figure out the issue with that. It seems to be a feature of emacs-jupyter though (https://github.com/nnicandro/emacs-jupyter#standard-output-displayed-data-and-code-block-results_. It has something to do with org-babel-insert-result.
 
@@ -732,42 +767,44 @@ a
 #+END_SRC
 
 #+RESULTS: jp
-[[file:./.ob-jupyter/a77f657842647650163b0d79cf27eb8555843d08.png]]
+:RESULTS:
+18
+:END:
 
 #+BEGIN_SRC emacs-lisp :var d=jp
-d
+( / d 2)
 #+END_SRC
 
 #+RESULTS:
-: [[file:./.ob-jupyter/de5224fcbbd86725f4baad31eba68268aed84617.png]]
+: 18
 
 *** example with a table
 
-#+name: pd-data
+#+name: pd-datad
 #+BEGIN_SRC jupyter-python 
 import pandas as pd
-data = [[1, 2], [3, 4]]
+data = [[1, 2], [34, 4]]
 pd.DataFrame(data, columns=["Foo", "Bar"])
 #+END_SRC
 
-#+RESULTS: pd-data
+#+RESULTS: pd-datad
 :RESULTS:
 |   | Foo | Bar |
 |---+-----+-----|
 | 0 |   1 |   2 |
-| 1 |   3 |   4 |
+| 1 |  34 |   4 |
 :END:
 
 
-#+BEGIN_SRC emacs-lisp :var d=pd-data
-d
+#+BEGIN_SRC emacs-lisp :var dd=pd-datad
+(with-temp-buffer (insert dd) (org-babel-read-table))
 #+END_SRC
 
 #+RESULTS:
-: |   | Foo | Bar |
-: |---+-----+-----|
-: | 0 | 1   | 2   |
-: | 1 | 3   | 4   |
+|   | Foo | Bar |
+|---+-----+-----|
+| 0 |   1 |   2 |
+| 1 |  34 |   4 |
 
 
 see [[nb:scimax::elpa/org-9.5/ob-emacs-lisp.el::c2254]]  I think it has something to do with this.
@@ -791,6 +828,24 @@ d
 | 0 | 1 | 2 |
 | 1 | 3 | 4 |
 
+#+name: pdata
+#+BEGIN_SRC python
+return [[1, 2, 3], [3, 4, 6]]
+#+END_SRC
+
+#+RESULTS: pdata
+| 1 | 2 | 3 |
+| 3 | 4 | 6 |
+
+
+#+BEGIN_SRC emacs-lisp :var d=pdata
+d
+#+END_SRC
+
+#+RESULTS:
+| 1 | 2 | 3 |
+| 3 | 4 | 6 |
+
 
 ** widgets do not seem to work
 
@@ -800,43 +855,6 @@ In theory emacs-jupyter supports widgets, if you build it in the emacs-jupyter s
 (let ((default-directory (file-name-directory (locate-library "jupyter"))))
   (shell-command-to-string "make widgets"))
 #+END_SRC
-
-#+RESULTS:
-#+begin_example
-make -C js
-/usr/local/bin/npm install
-
-up to date, audited 1005 packages in 7s
-
-7 packages are looking for funding
-  run `npm fund` for details
-
-48 vulnerabilities (29 moderate, 19 high)
-
-To address issues that do not require attention, run:
-  npm audit fix
-
-To address all issues (including breaking changes), run:
-  npm audit fix --force
-
-Run `npm audit` for details.
-./node_modules/.bin/yarn run build --progress
-yarn run v1.22.17
-$ webpack --progress
- 
-Time: 3569ms
-                               Asset     Size  Chunks                    Chunk Names
-674f50d287a8c48dc19ba404d20fe713.eot   166 kB          [emitted]         
-                      index.built.js  5.83 MB       0  [emitted]  [big]  main
-   [8] (webpack)/buildin/global.js 509 bytes {0} [built]
-  [29] (webpack)/buildin/module.js 517 bytes {0} [built]
- [425] ./index.js 512 bytes {0} [built]
- [710] ./manager.js 3.09 kB {0} [built]
- [754] ./emacs-jupyter.js 12.2 kB {0} [built]
- [813] ./node_modules/moment/locale ^\.\/.*$ 3.29 kB {0} [optional] [built]
-    + 823 hidden modules
-Done in 5.21s.
-#+end_example
 
 This at least outputs something, but I think it should open a browser.
 
@@ -848,9 +866,6 @@ w = widgets.VBox([widgets.Text('#+attr_org: :width 300'),
                   widgets.Text('#+caption: something here.')])
 display(w)
 #+END_SRC
-
-#+RESULTS:
-: VBox(children=(Text(value='#+attr_org: :width 300'), Text(value='#+name: fig-data'), Text(value='#+caption: so…
 
 This code does not run correctly. I am not sure why. I don't think it is related to my changes. See https://github.com/nnicandro/emacs-jupyter/issues/333, I am not sure widgets still work.
 
@@ -883,3 +898,4 @@ print(a + 5)  # inspect a here, I usually see print documentation
 :RESULTS:
 10
 :END:
+
