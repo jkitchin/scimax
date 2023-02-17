@@ -734,21 +734,8 @@ the scope."
 		  (cdr (car scimax-ivy-jump-functions)))))
     (funcall jumpfn)))
 
-
 (require 'scimax-org-babel-python)
 
-
-;; * Enable pdf and eps images in org-mode
-;; Suggested on the org-mode maillist by Julian Burgos
-(add-to-list 'image-file-name-extensions "pdf")
-(add-to-list 'image-file-name-extensions "eps")
-
-(add-to-list 'image-type-file-name-regexps '("\\.eps\\'" . imagemagick))
-(add-to-list 'image-file-name-extensions "eps")
-(add-to-list 'image-type-file-name-regexps '("\\.pdf\\'" . imagemagick))
-(add-to-list 'image-file-name-extensions "pdf")
-
-(setq imagemagick-types-inhibit (remove 'PDF imagemagick-types-inhibit))
 
 ;; * A better return
 

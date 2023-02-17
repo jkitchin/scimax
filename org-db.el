@@ -82,15 +82,16 @@
 Each function takes arguments that are the filename-id, and the
 parse tree from `org-element-parse-buffer'. Your function should
 delete old data if needed, and insert or update data as needed."
+  :type '(list function)
   :group 'org-db)
 
-
+;; Make sure we have a directory to store the root in
 (unless (file-directory-p org-db-root)
   (make-directory org-db-root t))
 
 
-(defvar org-db (emacsql-sqlite (expand-file-name org-db-name org-db-root))
-  "Variable for the ‘org-db’ connection.")
+(defvar org-db nil
+  "Variable to hold the sqlite connection.")
 
 
 (defvar org-db-queue '()
@@ -101,7 +102,7 @@ delete old data if needed, and insert or update data as needed."
   "Path to the log file.")
 
 
-(defvar org-db-ignore-file-regexps '(".*.gpg$" "\\.dropbox")
+(defvar org-db-ignore-file-regexps '(".*.gpg$" "\\.dropbox" "*~undo-tree~*")
   "A list of regexps of files (including their path) to ignore.")
 
 
@@ -117,7 +118,7 @@ delete old data if needed, and insert or update data as needed."
   "A list of keywords to exclude from the database.")
 
 
-(defvar org-db-debug nil
+(defvar org-db-debug t
   "If non-nil log messages.")
 
 
@@ -163,255 +164,266 @@ decorators in Python, etc.
 
 
 (defvar email-rx "<?\\([-+_.~a-zA-Z][-+_.~:a-zA-Z0-9]*@[-.a-zA-Z0-9]+\\)>?"
-  "Regular expression for email addresses. Adapted from `thing-at-point-email-regexp'.")
+  "Regular expression for email addresses.
+Adapted from `thing-at-point-email-regexp'.")
 
 
 (defun org-db-log (format-string &rest args)
-  "Insert the FORMAT-STRING formatted with ARGS into log buffer."
-  (when org-db-debug
-    (with-current-buffer (get-buffer-create "*org-db-log*")
-      (goto-char (point-max))
-      (insert (format "%s:\n" (current-time-string)))
-      (let* ((msg (with-temp-buffer
-		    (insert (format "%s\n"
-				    (apply 'format format-string args)))
-		    (fill-region (point-min) (point-max))
-		    (indent-region (point-min) (point-max) 4)
-		    (buffer-string))))
-	(insert msg)))))
-
-(org-db-log "Started org-db")
-
-;; create the tables if we need to.
-(emacsql org-db [:PRAGMA (= foreign_keys 1)])
-
-(emacsql org-db [:create-table :if :not :exists files
-			       ([(rowid integer :primary-key)
-				 (filename text :unique)
-				 (md5 text)
-				 (last-updated text)])])
-
-(emacsql org-db [:create-table :if :not :exists tags
-			       ([(rowid integer :primary-key)
-				 (tag text :unique)])])
-
-(emacsql org-db [:create-table :if :not :exists properties
-			       ([(rowid integer :primary-key)
-				 (property text :unique)])])
-
-(emacsql org-db [:create-table :if :not :exists keywords
-			       ([(rowid integer :primary-key)
-				 (keyword text :unique)])])
-
-(emacsql org-db [:create-table :if :not :exists headlines
-			       ([(rowid integer :primary-key)
-				 (filename-id integer :not :null)
-				 (title text :not :null)
-				 (level integer :not :null)
-				 (todo-keyword text)
-				 (todo-type text)
-				 archivedp
-				 commentedp
-				 footnote-section-p
-				 (begin integer :not :null)
-				 (tags text)
-				 (priority text)
-				 (deadline real)]
-				(:foreign-key [filename-id] :references files [rowid]
-					      :on-delete :cascade))])
+  "Insert the FORMAT-STRING formatted with ARGS into log file."
+  (f-append-text
+   (apply 'format (append (list (concat "%s " format-string "\n\n"))
+			  (list (current-time-string)) args))
+   'utf-8
+   org-db-log-file)
+  
+  ;; (append-to-file
+  ;;  (apply 'format (append (list (concat format-string "\n\n")) args))
+  ;;  nil
+  ;;  org-db-log-file)
+  ;; (when org-db-debug
+  ;;   (with-current-buffer (get-buffer-create "*org-db-log*")
+  ;;     (goto-char (point-max))
+  ;;     (insert (format "%s:\n" (current-time-string)))
+  ;;     (let* ((msg (with-temp-buffer
+  ;; 		    (insert (format "%s\n"
+  ;; 				    (apply 'format format-string args)))
+  ;; 		    (fill-region (point-min) (point-max))
+  ;; 		    (indent-region (point-min) (point-max) 4)
+  ;; 		    (buffer-string))))
+  ;; 	(insert msg))))
+  )
 
 
-(emacsql org-db [:create-table :if :not :exists headline-tags
-			       ([(rowid integer :primary-key)
-				 (headline-id integer)
-				 (tag-id integer)]
-				(:foreign-key [headline-id] :references headlines [rowid]
-					      :on-delete :cascade)
-				(:foreign-key [tag-id] :references tags [rowid] :on-delete :cascade))])
-
-
-(emacsql org-db [:create-table :if :not :exists headline-properties
-			       ([(rowid integer :primary-key)
-				 (headline-id integer)
-				 (property-id integer)
-				 (value text)]
-				(:foreign-key [headline-id] :references headlines [rowid]
-					      :on-delete :cascade)
-				(:foreign-key [property-id] :references properties [rowid]
-					      :on-delete :cascade))])
-
-
-(emacsql org-db [:create-table :if :not :exists file-keywords
-			       ([(rowid integer :primary-key)
-				 (filename-id integer)
-				 (keyword-id integer)
-				 (value text)
-				 (begin integer)]
-				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
-				(:foreign-key [keyword-id] :references keywords [rowid]
-					      :on-delete :cascade))])
-
-
-(emacsql org-db [:create-table :if :not :exists links
-			       ([(rowid integer :primary-key)
-				 (filename-id integer)
-				 (type text)
-				 (path text)
-				 (raw-link text)
-				 (description text)
-				 (search-option text)
-				 (begin integer)]
-				(:foreign-key [filename-id] :references files [rowid]
-					      :on-delete :cascade))])
-
-;; targets
-(emacsql org-db [:create-table :if :not :exists targets
-			       ([(rowid integer :primary-key)
-				 (target text :unique)])])
-
-(emacsql org-db [:create-table :if :not :exists file-targets
-			       ([(rowid integer :primary-key)
-				 (filename-id integer)
-				 (target-id integer)
-				 (begin integer)]
-				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
-				(:foreign-key [target-id] :references targets [rowid]
-					      :on-delete :cascade))])
-
-;; hashtags
-(emacsql org-db [:create-table :if :not :exists hashtags
-			       ([(rowid integer :primary-key)
-				 (hashtag text :unique)])])
-
-(emacsql org-db [:create-table :if :not :exists file-hashtags
-			       ([(rowid integer :primary-key)
-				 (filename-id integer)
-				 (hashtag-id integer)
-				 (begin integer)]
-				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
-				(:foreign-key [hashtag-id] :references hashtags [rowid]
-					      :on-delete :cascade))])
-
-;; @labels
-(emacsql org-db [:create-table :if :not :exists atlabels
-			       ([(rowid integer :primary-key)
-				 (atlabel text :unique)])])
-
-(emacsql org-db [:create-table :if :not :exists file-atlabels
-			       ([(rowid integer :primary-key)
-				 (filename-id integer)
-				 (atlabel-id integer)
-				 (begin integer)]
-				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
-				(:foreign-key [atlabel-id] :references atlabels [rowid]
-					      :on-delete :cascade))])
-
-;; emails
-(emacsql org-db [:create-table :if :not :exists email-addresses
-			       ([(rowid integer :primary-key)
-				 (email-address text :unique)])])
-
-
-;; email-addresses
-(emacsql org-db [:create-table :if :not :exists file-email-addresses
-			       ([(rowid integer :primary-key)
-				 (filename-id integer)
-				 (email-address-id integer)
-				 (begin integer)]
-				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
-				(:foreign-key [email-address-id] :references email-addresses [rowid]
-					      :on-delete :cascade))])
-
-
-;; editmarks
-(emacsql org-db [:create-table :if :not :exists file-editmarks
-			       ([(rowid integer :primary-key)
-				 (filename-id integer)
-				 (type text)
-				 (content text)
-				 (begin integer)]
-				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade))])
-
-;; src-blocks
-(emacsql org-db [:create-table :if :not :exists src-blocks
-			       ([(rowid integer :primary-key)
-				 (filename-id integer)
-				 (language text)
-				 (contents text)
-				 (begin integer)]
-				(:foreign-key [filename-id] :references files [rowid] :on-delete :cascade))])
-
-
-(defun org-db-connect ()
-  "Make sure we are connected."
-  (unless (and org-db (emacsql-live-p org-db))
-    (setq org-db (emacsql-sqlite (expand-file-name org-db-name org-db-root)))))
-
-
-(defun org-db-close ()
-  "Close the connection."
-  (interactive)
-  (when org-db
-    ;; It seems like you need to call this twice before org-db is nil
-    (emacsql-close org-db)
-    (emacsql-close org-db)))
-
+;; (defmacro with-org-db (&rest body)
+;;   "Run BODY commands in an org-db context where we open the database, and close it at the end.
+;; BODY should be regular commands. They can use the variable `org-db' in them."
+;;   (org-db-log "working?")
+;;   `(let* ((org-db (emacsql-sqlite (expand-file-name org-db-name org-db-root) :debug t))
+;; 	  (results))
+;;      (prog1
+;; 	 (condition-case err
+;; 	     (progn
+;; 	       (org-db-log "Running %S" ',body)
+;; 	       ,@body)
+;; 	   (org-db-log "Error: %s" err))
+;;        ;; It seems like you need to call this twice before org-db is nil
+;;        (emacsql-close org-db)
+;;        (emacsql-close org-db))))
 
 (defmacro with-org-db (&rest body)
-  "Run BODY commands in an org-db context where we open the database, and close it at the end.
-BODY should be emacsql commands."
-  `(let* ((org-db (emacsql-sqlite (expand-file-name org-db-name org-db-root)))
-	  (results))
-     (condition-case err
-	 (setq results (emacsql org-db ,@body))
-       (org-db-log "Error: %s" err))
-     (org-db-close)
-     results))
+  "Run BODY commands in an org-db context.
+Opens the database if needed. BODY should be regular commands.
+They can use the variable `org-db' in them. Does not close the
+database."
+  `(progn
+     (unless (and org-db (emacsql-live-p org-db))
+       (setq org-db (emacsql-sqlite (expand-file-name org-db-name org-db-root) :debug t)))
+     ,@body))
 
 
-(add-hook 'kill-emacs-hook #'org-db-close)
+(org-db-log "Starting org-db")
+
+;; create the tables if we need to.
+(with-org-db
+ (emacsql org-db [:PRAGMA (= foreign_keys 1)])
+
+ (emacsql org-db [:create-table :if :not :exists files
+				([(rowid integer :primary-key)
+				  (filename text :unique)
+				  (md5 text)
+				  (last-updated text)])])
+
+ (emacsql org-db [:create-table :if :not :exists tags
+				([(rowid integer :primary-key)
+				  (tag text :unique)])])
+
+ (emacsql org-db [:create-table :if :not :exists properties
+				([(rowid integer :primary-key)
+				  (property text :unique)])])
+
+ (emacsql org-db [:create-table :if :not :exists keywords
+				([(rowid integer :primary-key)
+				  (keyword text :unique)])])
+
+ (emacsql org-db [:create-table :if :not :exists headlines
+				([(rowid integer :primary-key)
+				  (filename-id integer :not :null)
+				  (title text :not :null)
+				  (level integer :not :null)
+				  (todo-keyword text)
+				  (todo-type text)
+				  archivedp
+				  commentedp
+				  footnote-section-p
+				  (begin integer :not :null)
+				  (tags text)
+				  (priority text)
+				  (scheduled real)
+				  (deadline real)]
+				 (:foreign-key [filename-id] :references files [rowid]
+					       :on-delete :cascade))])
 
 
-(set-process-query-on-exit-flag (emacsql-process org-db) nil)
+ (emacsql org-db [:create-table :if :not :exists headline-tags
+				([(rowid integer :primary-key)
+				  (headline-id integer)
+				  (tag-id integer)]
+				 (:foreign-key [headline-id] :references headlines [rowid]
+					       :on-delete :cascade)
+				 (:foreign-key [tag-id] :references tags [rowid] :on-delete :cascade))])
+
+
+ (emacsql org-db [:create-table :if :not :exists headline-properties
+				([(rowid integer :primary-key)
+				  (headline-id integer)
+				  (property-id integer)
+				  (value text)]
+				 (:foreign-key [headline-id] :references headlines [rowid]
+					       :on-delete :cascade)
+				 (:foreign-key [property-id] :references properties [rowid]
+					       :on-delete :cascade))])
+
+
+ (emacsql org-db [:create-table :if :not :exists file-keywords
+				([(rowid integer :primary-key)
+				  (filename-id integer)
+				  (keyword-id integer)
+				  (value text)
+				  (begin integer)]
+				 (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
+				 (:foreign-key [keyword-id] :references keywords [rowid]
+					       :on-delete :cascade))])
+
+
+ (emacsql org-db [:create-table :if :not :exists links
+				([(rowid integer :primary-key)
+				  (filename-id integer)
+				  (type text)
+				  (path text)
+				  (raw-link text)
+				  (description text)
+				  (search-option text)
+				  (begin integer)]
+				 (:foreign-key [filename-id] :references files [rowid]
+					       :on-delete :cascade))])
+
+ ;; targets
+ (emacsql org-db [:create-table :if :not :exists targets
+				([(rowid integer :primary-key)
+				  (target text :unique)])])
+
+ (emacsql org-db [:create-table :if :not :exists file-targets
+				([(rowid integer :primary-key)
+				  (filename-id integer)
+				  (target-id integer)
+				  (begin integer)]
+				 (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
+				 (:foreign-key [target-id] :references targets [rowid]
+					       :on-delete :cascade))])
+
+ ;; hashtags
+ (emacsql org-db [:create-table :if :not :exists hashtags
+				([(rowid integer :primary-key)
+				  (hashtag text :unique)])])
+
+ (emacsql org-db [:create-table :if :not :exists file-hashtags
+				([(rowid integer :primary-key)
+				  (filename-id integer)
+				  (hashtag-id integer)
+				  (begin integer)]
+				 (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
+				 (:foreign-key [hashtag-id] :references hashtags [rowid]
+					       :on-delete :cascade))])
+
+ ;; @labels
+ (emacsql org-db [:create-table :if :not :exists atlabels
+				([(rowid integer :primary-key)
+				  (atlabel text :unique)])])
+
+ (emacsql org-db [:create-table :if :not :exists file-atlabels
+				([(rowid integer :primary-key)
+				  (filename-id integer)
+				  (atlabel-id integer)
+				  (begin integer)]
+				 (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
+				 (:foreign-key [atlabel-id] :references atlabels [rowid]
+					       :on-delete :cascade))])
+
+ ;; emails
+ (emacsql org-db [:create-table :if :not :exists email-addresses
+				([(rowid integer :primary-key)
+				  (email-address text :unique)])])
+
+
+ ;; email-addresses
+ (emacsql org-db [:create-table :if :not :exists file-email-addresses
+				([(rowid integer :primary-key)
+				  (filename-id integer)
+				  (email-address-id integer)
+				  (begin integer)]
+				 (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade)
+				 (:foreign-key [email-address-id] :references email-addresses [rowid]
+					       :on-delete :cascade))])
+
+
+ ;; editmarks
+ (emacsql org-db [:create-table :if :not :exists file-editmarks
+				([(rowid integer :primary-key)
+				  (filename-id integer)
+				  (type text)
+				  (content text)
+				  (begin integer)]
+				 (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade))])
+
+ ;; src-blocks
+ (emacsql org-db [:create-table :if :not :exists src-blocks
+				([(rowid integer :primary-key)
+				  (filename-id integer)
+				  (language text)
+				  (contents text)
+				  (begin integer)]
+				 (:foreign-key [filename-id] :references files [rowid] :on-delete :cascade))]))
 
 
 (defun org-db-get-filename-id (fname)
   "Return the rowid corresponding to FNAME.
 Adds FNAME to the database if it doesn't exist."
-  (org-db-connect)
-  (or
-   ;; this is a file in the database
-   (caar (emacsql org-db [:select rowid :from files
-				  :where (= filename $s1)]
-		  fname))
-   ;; no file found, we add one and get the id.
-   (prog2
-       (emacsql org-db [:insert :into files :values [nil $s1 $s2 $s3]]
-		(buffer-file-name)
-		(md5 (buffer-string))
-		nil)
-       (caar (emacsql org-db [:select (funcall last-insert-rowid)])))))
+  (with-org-db 
+   (or
+    ;; this is a file in the database
+    (caar (emacsql org-db [:select rowid :from files
+				   :where (= filename $s1)]
+		   fname))
+    ;; no file found, we add one and get the id.
+    (prog2
+	(emacsql org-db [:insert :into files :values [nil $s1 $s2 $s3]]
+		 (buffer-file-name)
+		 (md5 (buffer-string))
+		 nil)
+	(caar (emacsql org-db [:select (funcall last-insert-rowid)]))))))
 
 
 (defun org-db-remove-buffer ()
   "Remove the current buffer from the database."
   (interactive)
   (let* ((filename-id (org-db-get-filename-id (buffer-file-name))))
-    ;; delete links
-    (emacsql org-db [:delete :from links :where (= links:filename-id $s1)] filename-id)
+    (with-org-db
+     ;; delete links
+     (emacsql org-db [:delete :from links :where (= links:filename-id $s1)] filename-id)
 
-    ;; keywords
-    (emacsql org-db [:delete :from file-keywords
-			     :where (= file-keywords:filename-id $s1)]
-	     filename-id)
+     ;; keywords
+     (emacsql org-db [:delete :from file-keywords
+			      :where (= file-keywords:filename-id $s1)]
+	      filename-id)
 
-    ;; headlines
-    (emacsql org-db [:delete :from headlines :where (= headlines:filename-id $s1)]
-	     filename-id)
+     ;; headlines
+     (emacsql org-db [:delete :from headlines :where (= headlines:filename-id $s1)]
+	      filename-id)
 
-    ;; and the file
-    (emacsql org-db [:delete :from files :where (= rowid $s2)] filename-id))
-  (org-db-log "Removed %s from the database." (buffer-file-name)))
+     ;; and the file
+     (emacsql org-db [:delete :from files :where (= rowid $s2)] filename-id)
+     (org-db-log "Removed %s from the database." (buffer-file-name)))))
+
 
 ;; * Update the database for a buffer
 ;;
@@ -420,50 +432,56 @@ Adds FNAME to the database if it doesn't exist."
 
 (defun org-db-update-src-blocks (filename-id parse-tree)
   "Update the src blocks in the buffer."
-  ;; delete old entries
-  (emacsql org-db [:delete :from src-blocks
-			   :where (= src-blocks:filename-id $s1)]
-	   filename-id)
-  (org-babel-map-src-blocks nil
+  (org-db-log "Updating src blocks")
+  (with-org-db
+   ;; delete old entries
+   (emacsql org-db [:delete :from src-blocks
+			    :where (= src-blocks:filename-id $s1)]
+	    filename-id)
+   (org-babel-map-src-blocks nil
 
-    (emacsql org-db [:insert :into src-blocks :values [nil $s1 $s2 $s3 $s4]]
-	     filename-id lang body beg-block)))
+     (emacsql org-db [:insert :into src-blocks :values [nil $s1 $s2 $s3 $s4]]
+	      filename-id lang body beg-block))))
+
 
 (defun org-db-update-keywords (filename-id parse-tree)
   "Updates the keyword table for the org-buffer.
 FILENAME-ID is the rowid for the org-file.
 PARSE-TREE is from `org-element-parse-buffer'."
+  (org-db-log "Updating keywords")
   (let ((keywords (org-element-map parse-tree 'keyword
 		    (lambda (kw) (list
 				  (upcase (org-element-property :key kw))
 				  (org-element-property :value kw)
 				  (org-element-property :begin kw)))))
 	keyword-id)
-    ;; * File keywords.
-    (emacsql org-db [:delete :from file-keywords
-			     :where (= file-keywords:filename-id $s1)]
-	     filename-id)
+    (with-org-db
+     ;; * File keywords.
+     (emacsql org-db [:delete :from file-keywords
+			      :where (= file-keywords:filename-id $s1)]
+	      filename-id)
 
-    ;; For each keyword, get the id or add to the keywords table and get the id.
-    (cl-loop for (keyword value begin) in keywords
-	     if (not (member keyword org-db-ignore-keywords))
-	     do
-	     (setq keyword-id (or (caar (emacsql org-db [:select rowid :from keywords
-								 :where (= keyword $s1)]
-						 keyword))
-				  (emacsql org-db [:insert :into keywords :values [nil $s1]]
-					   keyword)
-				  (caar (emacsql org-db
-						 [:select (funcall last-insert-rowid)]))))
-	     ;; Now add to the file-keywords
-	     (emacsql org-db [:insert :into file-keywords :values [nil $s1 $s2 $s3 $s4]]
-		      filename-id keyword-id value begin))))
+     ;; For each keyword, get the id or add to the keywords table and get the id.
+     (cl-loop for (keyword value begin) in keywords
+	      if (not (member keyword org-db-ignore-keywords))
+	      do
+	      (setq keyword-id (or (caar (emacsql org-db [:select rowid :from keywords
+								  :where (= keyword $s1)]
+						  keyword))
+				   (emacsql org-db [:insert :into keywords :values [nil $s1]]
+					    keyword)
+				   (caar (emacsql org-db
+						  [:select (funcall last-insert-rowid)]))))
+	      ;; Now add to the file-keywords
+	      (emacsql org-db [:insert :into file-keywords :values [nil $s1 $s2 $s3 $s4]]
+		       filename-id keyword-id value begin)))))
 
 
 (defun org-db-update-hashtags (filename-id parse-tree)
   "Update hashtags in the buffer.
 FILENAME-ID is the rowid for the org-file.
 PARSE-TREE is from `org-element-parse-buffer'."
+  (org-db-log "Updating hashtags")
   ;; "#\\([^0-9!$%^&*+.]\\(\\w+[-_]?\\)+\\)"
   (let ((hashtags (save-excursion
 		    (goto-char (point-min))
@@ -479,69 +497,75 @@ PARSE-TREE is from `org-element-parse-buffer'."
 			  (push (cons (match-string-no-properties 1) (match-beginning 0)) hashtags)))
 		      hashtags)))
 	hashtag-id)
+    (with-org-db
 
-    ;; hashtags
-    ;; first delete existing data on hashtags because it has probably changed.
-    (emacsql org-db [:delete :from file-hashtags
-			     :where (= file-hashtags:filename-id $s1)]
-	     filename-id)
+     ;; hashtags
+     ;; first delete existing data on hashtags because it has probably changed.
+     (emacsql org-db [:delete :from file-hashtags
+			      :where (= file-hashtags:filename-id $s1)]
+	      filename-id)
 
 
-    (cl-loop for (hashtag . pos) in hashtags do
-	     ;; get hashtag id
-	     (setq hashtag-id (or (caar (emacsql org-db [:select rowid :from hashtags
-								 :where (= hashtag $s1)]
-						 hashtag))
-				  (emacsql org-db [:insert :into hashtags :values [nil $s1]]
-					   hashtag)
-				  (caar (emacsql org-db
-						 [:select (funcall last-insert-rowid)]))))
+     (cl-loop for (hashtag . pos) in hashtags do
+	      ;; get hashtag id
+	      (setq hashtag-id (or (caar (emacsql org-db [:select rowid :from hashtags
+								  :where (= hashtag $s1)]
+						  hashtag))
+				   (emacsql org-db [:insert :into hashtags :values [nil $s1]]
+					    hashtag)
+				   (caar (emacsql org-db
+						  [:select (funcall last-insert-rowid)]))))
 
-	     (emacsql org-db [:insert :into file-hashtags :values [nil $s1 $s2 $s3]]
-		      filename-id hashtag-id pos))))
+	      (emacsql org-db [:insert :into file-hashtags :values [nil $s1 $s2 $s3]]
+		       filename-id hashtag-id pos)))))
 
 
 (defun org-db-update-targets (filename-id parse-tree)
   "Update the targets table."
-  ;; delete entries from the targets table
-  (emacsql org-db [:delete :from file-targets :where (= file-targets:filename-id $s1)] filename-id)
+  (org-db-log "Updating targets")
+  (with-org-db
+   ;; delete entries from the targets table
+   (emacsql org-db [:delete :from file-targets :where (= file-targets:filename-id $s1)] filename-id)
 
-  (org-element-map parse-tree 'target
-    (lambda (target)
-      (let ((target-id (or (caar (emacsql org-db [:select rowid :from targets
-							  :where (= target $s1)]
-					  (org-element-property :value target)))
-			   (emacsql org-db [:insert :into targets :values [nil $s1]]
-				    (org-element-property :value target))
-			   (caar (emacsql org-db
-					  [:select (funcall last-insert-rowid)])))))
-	
-	(emacsql org-db [:insert :into file-targets :values [nil $s1 $s2 $s3]]
-		 filename-id target-id (org-element-property :begin target))))))
+   (org-element-map parse-tree 'target
+     (lambda (target)
+       (let ((target-id (or (caar (emacsql org-db [:select rowid :from targets
+							   :where (= target $s1)]
+					   (org-element-property :value target)))
+			    (emacsql org-db [:insert :into targets :values [nil $s1]]
+				     (org-element-property :value target))
+			    (caar (emacsql org-db
+					   [:select (funcall last-insert-rowid)])))))
+	 
+	 (emacsql org-db [:insert :into file-targets :values [nil $s1 $s2 $s3]]
+		  filename-id target-id (org-element-property :begin target)))))))
 
 
 (defun org-db-update-editmarks (filename-id parse-tree)
   "Update the editmarks table in a buffer.
 FILENAME-ID is the rowid for the org-file.
 PARSE-TREE is from `org-element-parse-buffer'."
+  (org-db-log "Updating editmarks")
   (when (fboundp 'sem-get-editmarks)
-    (emacsql org-db [:delete :from file-editmarks
-			     :where (= file-editmarks:filename-id $s1)]
-	     filename-id)
-    (cl-loop for (em-type buffer (start . end) em-content) in (sem-get-editmarks)
-	     do
-	     (emacsql org-db [:insert :into file-editmarks
-				      :values [nil $s1 $s2 $s3 $s4]]
-		      filename-id
-		      em-type
-		      em-content
-		      start))))
+    (with-org-db
+     (emacsql org-db [:delete :from file-editmarks
+			      :where (= file-editmarks:filename-id $s1)]
+	      filename-id)
+     (cl-loop for (em-type buffer (start . end) em-content) in (sem-get-editmarks)
+	      do
+	      (emacsql org-db [:insert :into file-editmarks
+				       :values [nil $s1 $s2 $s3 $s4]]
+		       filename-id
+		       em-type
+		       em-content
+		       start)))))
 
 
 (defun org-db-update-email-addresses (filename-id parse-tree)
   "Update emails table.
 FILENAME-ID is the rowid for the org-file.
 PARSE-TREE is from `org-element-parse-buffer'."
+  (org-db-log "Updating email addresses")
   (let ((emailaddresses (save-excursion
 			  (goto-char (point-min))
 			  (let ((emailaddresses '()))
@@ -554,29 +578,31 @@ PARSE-TREE is from `org-element-parse-buffer'."
 				(push (cons (match-string-no-properties 1) (match-beginning 0)) emailaddresses)))
 			    emailaddresses)))
 	email-address-id)
+    (with-org-db
 
-    (emacsql org-db [:delete :from file-email-addresses
-			     :where (= file-email-addresses:filename-id $s1)]
-	     filename-id)
+     (emacsql org-db [:delete :from file-email-addresses
+			      :where (= file-email-addresses:filename-id $s1)]
+	      filename-id)
 
-    (cl-loop for (email-address . pos) in emailaddresses do
-	     ;; get email-address-id
-	     (setq email-address-id (or (caar (emacsql org-db [:select rowid :from email-addresses
-								       :where (= email-address $s1)]
-						       email-address))
-					(emacsql org-db [:insert :into email-addresses :values [nil $s1]]
-						 email-address)
-					(caar (emacsql org-db
-						       [:select (funcall last-insert-rowid)]))))
+     (cl-loop for (email-address . pos) in emailaddresses do
+	      ;; get email-address-id
+	      (setq email-address-id (or (caar (emacsql org-db [:select rowid :from email-addresses
+									:where (= email-address $s1)]
+							email-address))
+					 (emacsql org-db [:insert :into email-addresses :values [nil $s1]]
+						  email-address)
+					 (caar (emacsql org-db
+							[:select (funcall last-insert-rowid)]))))
 
-	     (emacsql org-db [:insert :into file-email-addresses :values [nil $s1 $s2 $s3]]
-		      filename-id email-address-id pos))))
+	      (emacsql org-db [:insert :into file-email-addresses :values [nil $s1 $s2 $s3]]
+		       filename-id email-address-id pos)))))
 
 
 (defun org-db-update-@-labels (filename-id parse-tree)
   "Update @labels.
 FILENAME-ID is the rowid for the org-file.
 PARSE-TREE is from `org-element-parse-buffer'."
+  (org-db-log "Updating @-labels")
   (let ((atlabels (save-excursion
 		    (goto-char (point-min))
 		    (let ((atlabels '()))
@@ -591,29 +617,31 @@ PARSE-TREE is from `org-element-parse-buffer'."
 			  (push (cons (match-string-no-properties 1) (match-beginning 0)) atlabels)))
 		      atlabels)))
 	atlabel-id)
-    (emacsql org-db [:delete :from file-atlabels
-			     :where (= file-atlabels:filename-id $s1)]
-	     filename-id)
+    (with-org-db
+     ;; delete existing records
+     (emacsql org-db [:delete :from file-atlabels
+			      :where (= file-atlabels:filename-id $s1)]
+	      filename-id)
+
+     (cl-loop for (atlabel . pos) in atlabels do
+	      ;; get atlabel id
+	      (setq atlabel-id (or (caar (emacsql org-db [:select rowid :from atlabels
+								  :where (= atlabel $s1)]
+						  atlabel))
+				   (emacsql org-db [:insert :into atlabels :values [nil $s1]]
+					    atlabel)
+				   (caar (emacsql org-db
+						  [:select (funcall last-insert-rowid)]))))
+
+	      (emacsql org-db [:insert :into file-atlabels :values [nil $s1 $s2 $s3]]
+		       filename-id atlabel-id pos)))))
 
 
-    (cl-loop for (atlabel . pos) in atlabels do
-	     ;; get atlabel id
-	     (setq atlabel-id (or (caar (emacsql org-db [:select rowid :from atlabels
-								 :where (= atlabel $s1)]
-						 atlabel))
-				  (emacsql org-db [:insert :into atlabels :values [nil $s1]]
-					   atlabel)
-				  (caar (emacsql org-db
-						 [:select (funcall last-insert-rowid)]))))
-
-	     (emacsql org-db [:insert :into file-atlabels :values [nil $s1 $s2 $s3]]
-		      filename-id atlabel-id pos))))
-
-
-(defun org-db-update-links (filename-id parsetree)
+(defun org-db-update-links (filename-id parse-tree)
   "Update links table.
 FILENAME-ID is the rowid for the org-file.
 PARSE-TREE is from `org-element-parse-buffer'."
+  (org-db-log "Updating links")
   (let* ((links (org-element-map parse-tree 'link
 		  (lambda (link)
 		    (vector
@@ -633,41 +661,52 @@ PARSE-TREE is from `org-element-parse-buffer'."
 	 (ba (-split-at 400 links))
 	 (handle (nth 0 ba))
 	 (next (nth 1 ba)))
-    ;; * delete old links
-    (emacsql org-db [:delete :from links :where (= links:filename-id $s1)] filename-id)
 
-    ;;  ** add new links
-    (while handle
-      (emacsql org-db [:insert :into links :values $v1] handle)
-      (setq ba (-split-at 400 next)
-	    handle (nth 0 ba)
-	    next (nth 1 ba)))))
+    (with-org-db
+     ;; * delete old links
+     (emacsql org-db [:delete :from links :where (= links:filename-id $s1)] filename-id)
+
+     ;;  ** add new links
+     (while handle
+       (emacsql org-db [:insert :into links :values $v1] handle)
+       (setq ba (-split-at 400 next)
+	     handle (nth 0 ba)
+	     next (nth 1 ba))))))
 
 
-(defun org-db-update-headlines (filename-id parsetree)
+(defun org-db-update-headlines (filename-id parse-tree)
   "Update headlines table.
 FILENAME-ID is the rowid for the org-file.
 PARSE-TREE is from `org-element-parse-buffer'."
+  (org-db-log "Updating headlines")
   (let* ((headlines (org-element-map parse-tree 'headline
 		      'identity))
 	 hlv headline-id
 	 tags tag-id
 	 properties property-id
+	 scheduled
 	 deadline)
 
-    (emacsql org-db [:delete :from headlines :where (= headlines:filename-id $s1)]
-	     filename-id)
-
+    ;; delete old headline data
+    (with-org-db
+     (emacsql org-db [:delete :from headlines :where (= headlines:filename-id $s1)]
+	      filename-id))
+    
     (cl-loop for hl in headlines do
 	     (save-excursion
 	       (goto-char (org-element-property :begin hl))
 	       (setq tags (mapcar 'org-no-properties (org-get-tags))
 		     properties (org-entry-properties (org-element-property :begin hl) 'all)))
 
-	     (setq deadline (when-let (ts (org-element-property :deadline hl))
-			      (float-time (org-time-string-to-time
-					   (org-element-property :raw-value ts)))))
+	     (setq
+	      scheduled (when-let (ts (org-element-property :scheduled hl))
+			  (float-time (org-time-string-to-time
+				       (org-element-property :raw-value ts))))
 
+	      deadline (when-let (ts (org-element-property :deadline hl))
+			 (float-time (org-time-string-to-time
+				      (org-element-property :raw-value ts)))))
+	     
 	     (setq hlv (vector
 			nil
 			filename-id
@@ -687,41 +726,51 @@ PARSE-TREE is from `org-element-parse-buffer'."
 			(when tags
 			  (concat ":" (mapconcat
 				       'substring-no-properties
-				       tags ":") ":"))
+				       tags ":")
+				  ":"))
 			;; priority
 			(if (org-element-property :priority hl)
 			    (char-to-string (org-element-property :priority hl))
 			  nil)
-			;; deadline
+			;; scheduled and deadline
+			scheduled
 			deadline))
 
 	     ;; insert headline row and get headline-id
-	     (emacsql org-db [:insert :into headlines :values $v1] hlv)
-	     (setq headline-id (caar (emacsql org-db
-					      [:select (funcall last-insert-rowid)])))
-
+	     (org-db-log "Working on headline: %s" (org-element-property :raw-value hl))
+	     (with-org-db
+	      (emacsql org-db [:insert :into headlines :values $v1] hlv)
+	      (setq headline-id (caar (emacsql org-db
+					       [:select (funcall last-insert-rowid)])))
+	      (org-db-log "Working on headline-id: %s" headline-id))
+	     
+	     
 	     ;; remove old tag data
-	     (emacsql org-db [:delete :from headline-tags
-				      :where (= headline-tags:headline-id $s1)]
-		      headline-id)
+	     (with-org-db
+	      (emacsql org-db [:delete :from headline-tags
+				       :where (= headline-tags:headline-id $s1)]
+		       headline-id))
 
 	     (cl-loop for tag in tags
 		      if (not (member tag org-db-ignore-tags))
 		      do
 		      (setq tag-id
-			    (or (caar (emacsql org-db [:select rowid :from tags
-							       :where (= tag $s1)]
-					       tag))
-				(emacsql org-db [:insert :into tags :values [nil $s1]]
-					 tag)
-				(caar (emacsql org-db [:select (funcall last-insert-rowid)]))))
-		      (emacsql org-db [:insert :into headline-tags :values $v1]
-			       (vector nil headline-id tag-id)))
+			    (or (caar (with-org-db (emacsql org-db [:select rowid :from tags
+									    :where (= tag $s1)]
+							    tag)))
+				(with-org-db
+				 (emacsql org-db [:insert :into tags :values [nil $s1]]
+					  tag)
+				 (caar (emacsql org-db [:select (funcall last-insert-rowid)])))))
+		      (with-org-db
+		       (emacsql org-db [:insert :into headline-tags :values $v1]
+				(vector nil headline-id tag-id))))
 	     
 	     ;; properties
-	     (emacsql org-db [:delete :from headline-properties
-				      :where (= headline-properties:headline-id $s1)]
-		      headline-id)
+	     (with-org-db
+	      (emacsql org-db [:delete :from headline-properties
+				       :where (= headline-properties:headline-id $s1)]
+		       headline-id))
 
 	     (setq properties (save-excursion
 				(goto-char (org-element-property :begin hl))
@@ -730,22 +779,28 @@ PARSE-TREE is from `org-element-parse-buffer'."
 	     (cl-loop for (property . value) in properties
 		      if (not (member property org-db-ignore-properties))
 		      do
+		      ;; get the property-id
 		      (setq property-id
 			    (or
-			     (caar (emacsql org-db [:select rowid :from properties
-							    :where (= property $s1)]
-					    property))
-			     (emacsql org-db [:insert :into properties
-						      :values [nil $s1]]
-				      property)
-			     (caar (emacsql org-db [:select (funcall last-insert-rowid)]))))
+			     ;; we have a property already
+			     (caar
+			      (with-org-db (emacsql org-db [:select rowid :from properties
+								    :where (= property $s1)]
+						    property)))
+			     ;; no property, so insert one, and get the rowid
+			     (with-org-db
+			      (emacsql org-db [:insert :into properties
+						       :values [nil $s1]]
+				       property)
+			      (caar (emacsql org-db [:select (funcall last-insert-rowid)])))))
 
 		      ;; and the values
-		      (emacsql org-db [:insert :into headline-properties
-					       :values [nil $s1 $s2 $s3]]
-			       headline-id
-			       property-id
-			       (org-no-properties value))))))
+		      (with-org-db
+		       (emacsql org-db [:insert :into headline-properties
+						:values [nil $s1 $s2 $s3]]
+				headline-id
+				property-id
+				(org-no-properties value)))))))
 
 
 ;; ** update a buffer
@@ -754,49 +809,54 @@ PARSE-TREE is from `org-element-parse-buffer'."
   "Update the entries in the database for the currently visited buffer.
 Optional argument FORCE. if non-nil force the buffer to be added."
   (interactive "P")
-  (org-db-connect)
-  (save-buffer)
-  (org-db-log "Updating in buffer: %s" (buffer-file-name))
+  
+  (save-buffer) 
   (org-with-wide-buffer
-   (when (or force
-	     (and
-	      ;; file does not match an ignore pattern
-	      (and org-db-ignore-file-regexps
-		   (not (string-match (regexp-opt org-db-ignore-file-regexps)
-				      (buffer-file-name))))
-	      ;; file is not in database
-	      (null (caar (emacsql org-db [:select [md5] :from files
-						   :where (= filename $s1)]
-				   (buffer-file-name))))
-	      (org-db-log "%s is a new file" (buffer-file-name)))
-	     (and
-	      ;; file does not match an ignore pattern
-	      (and org-db-ignore-file-regexps
-		   (not (string-match (regexp-opt org-db-ignore-file-regexps)
-				      (buffer-file-name))))
-	      ;; file is in database and it has changed
-	      (prog1
-		  (not (string= (md5 (buffer-string))
-				(caar (emacsql org-db [:select [md5] :from files
-							       :where (= filename $s1)]
-					       (buffer-file-name)))))
-		(org-db-log "%s has changed." (buffer-file-name)))))
-     (let* ((filename-id (org-db-get-filename-id (buffer-file-name)))
-	    (parse-tree (org-element-parse-buffer)))
+   (if (or force
+	   (and
+	    ;; file does not match an ignore pattern
+	    (and org-db-ignore-file-regexps
+		 (not (string-match (regexp-opt org-db-ignore-file-regexps)
+				    (buffer-file-name))))
+	    ;; file is not in database
+	    (null (caar (with-org-db (emacsql org-db [:select [md5] :from files
+							      :where (= filename $s1)]
+					      (buffer-file-name)))))
+	    (org-db-log "update %s is a new file" (buffer-file-name)))
+	   (and
+	    ;; file does not match an ignore pattern
+	    (and org-db-ignore-file-regexps
+		 (not (string-match (regexp-opt org-db-ignore-file-regexps)
+				    (buffer-file-name))))
+	    ;; file is in database and it has changed, i.e. the md5 is not the same as on record
+	    (not (string= (md5 (buffer-string))
+			  (caar (with-org-db (emacsql org-db [:select [md5] :from files
+								      :where (= filename $s1)]
+						      (buffer-file-name))))))))
+       (progn
+	 (org-db-log "%s has changed." (buffer-file-name))
+	 
+	 (let* ((filename-id (org-db-get-filename-id (buffer-file-name)))
+		(parse-tree (org-element-parse-buffer)))
 
-       ;; update the md5 for the file so we can tell later if it has changed.
-       (emacsql org-db [:update files :set (= md5 $s1) :where (= rowid $s2)]
-		(md5 (buffer-string)) filename-id)
+	   ;; update the md5 for the file so we can tell later if it has changed.
+	   (with-org-db
+	    (emacsql org-db [:update files :set (= md5 $s1) :where (= rowid $s2)]
+		     (md5 (buffer-string)) filename-id))
 
-       (cl-loop for update-func in org-db-update-functions do
-		(funcall update-func filename-id parse-tree))
+	   (cl-loop for update-func in org-db-update-functions do
+		    (funcall update-func filename-id parse-tree))
 
-       (emacsql org-db [:update files :set (= last-updated $s1) :where (= rowid $s2)]
-		(format-time-string "%Y-%m-%d %H:%M:%S") filename-id)))))
+	   (with-org-db
+	    (emacsql org-db [:update files :set (= last-updated $s1) :where (= rowid $s2)]
+		     (format-time-string "%Y-%m-%d %H:%M:%S") filename-id))))
+     (org-db-log "no change detected"))))
 
 
 
 ;; * the hooks
+(use-package pcache)
+
 (defun org-db-hook-function ()
   "Function to run after starting ‘org-mode’."
   ;; Run when we open in case it changed from some external program. Only for
@@ -809,12 +869,18 @@ Optional argument FORCE. if non-nil force the buffer to be added."
     (add-to-list 'org-db-queue (buffer-file-name) t)
     (org-db-log "added %s to the queue." (buffer-file-name))
 
+    ;; persistent cache. [2022-12-22 Thu] I am not sure we use this.
+    (let ((repo (pcache-repository :file "org-db-queue")))
+      (pcache-put repo 'org-db-queue org-db-queue))
+
     ;; add local after save hook in case this is a new file.
     (add-hook 'after-save-hook 'org-db-hook-function t t)))
 
 
 (add-hook 'org-mode-hook 'org-db-hook-function)
 
+(let ((repo (pcache-repository :file "org-db-queue")))
+  (pcache-get repo 'org-db-queue))
 
 ;; * Idle timer to update
 
@@ -822,22 +888,37 @@ Optional argument FORCE. if non-nil force the buffer to be added."
   "Update all the files in `org-db-queue'.
 Use a prefix ARG to FORCE the process instead of waiting for idle time."
   (interactive "P")
-  (org-db-connect)
-  (catch 'done
-    (while org-db-queue
-      (unless (or force (current-idle-time))
-	(throw 'done nil))
-      (org-db-log "Updating org-db for files %s." org-db-queue)
-      (let* ((filename (pop org-db-queue))
-	     (org-mode-hook '())
-	     (enable-local-variables nil)
-	     (already-open (find-buffer-visiting filename))
-	     (buf (find-file-noselect filename)))
-	(org-db-log "Updating %s" filename)
-	(with-current-buffer buf
-	  (org-db-update-buffer force))
-	(unless already-open (kill-buffer buf)))))
-  (org-db-log "Done processing org-db queue."))
+  (with-org-db
+   (catch 'done
+     (while org-db-queue
+       (unless (or force (current-idle-time))
+	 (throw 'done nil))
+       (org-db-log "Updating org-db for files %s." org-db-queue)
+
+       (let* ((filename (pop org-db-queue))
+	      (org-mode-hook '())
+	      (enable-local-variables nil)
+	      (already-open (find-buffer-visiting filename))
+	      (buf (find-file-noselect filename)))
+	 (org-db-log "Updating %s" filename)
+	 (with-current-buffer buf
+	   (org-db-update-buffer force))
+	 (unless already-open (kill-buffer buf)))))
+   (org-db-log "Done processing org-db queue.")
+   ;; [2022-12-02 Fri] I still don't have a good solution for shutting this
+   ;; down. it didn't seem reliable to open and close it all the time. I have a
+   ;; residual issue on startup where it is not open for some reason.
+   ;; 
+   ;; close the org-db. The idea here is to shut it down when idle, and after
+   ;; updating. Usually this means I am not working on this machine, and may be
+   ;; working on another machine. It isn't a big deal to open the connection,
+   ;; and it stays open while working. This way if you switch machines, it
+   ;; should shut down, so the other machine won't have a conflict. It won't be
+   ;; perfect, but I think it will be better.
+   ;; (emacsql-close org-db)
+   ;; (emacsql-close org-db)
+   ;; (setq org-db nil)
+   ))
 
 ;; if we are idle for 5 minutes, process the queue.
 (setq org-db-timer (run-with-idle-timer (* 60 5) t 'org-db-process-queue))
@@ -852,32 +933,69 @@ Use a prefix ARG to FORCE the process instead of waiting for idle time."
 
 ;; * Update the whole database
 
+(defun swap (LIST el1 el2)
+  "in LIST swap indices EL1 and EL2 in place"
+  (cl-psetf (elt LIST el2) (elt LIST el1)
+         (elt LIST el1) (elt LIST el2)))
+
+
+(defun shuffle (LIST)
+  "Shuffle the elements in LIST.
+Used to randomize the order. Shuffling is done in place."
+  (cl-loop for i in (reverse (number-sequence 1 (1- (length LIST))))
+           do (let ((j (random (+ i 1))))
+		(swap LIST i j)))
+  LIST)
+
 (defun org-db-refresh (&optional force)
   "Update all the files in the database.
 Updates are done by `org-db-update-buffer'. 
 
 Use a prefix arg to FORCE updates."
   (interactive "P")
-  (let* ((files (emacsql org-db [:select [filename] :from files :order-by rowid :asc]))
-	 (N (length files))
+  
+  (let* ((files)
+	 (N)
 	 (enable-local-variables nil)
 	 (org-mode-hook '())
-	 buf already-open)
-    (cl-loop for (fname) in files for i from 0 to N
+	 buf already-open
+	 md5)
+    (with-org-db
+     ;; (setq files (emacsql org-db [:select [filename] :from files :order-by last-updated :desc])
+     ;; 	   N (length files))
+     (setq files (emacsql org-db [:select [filename] :from files])
+	   N (length files)))
+
+    (org-db-log "refresh %s Refreshing %s files" (current-time-string) N)
+
+    ;; Shuffle the files so they are randomly updated. In case an early file
+    ;; fails a lot, this increases the likely hood of getting past it.
+    (cl-loop for (fname) in (shuffle files) for i from 0 to N
 	     if (and fname (file-exists-p fname))
 	     do
-	     (org-db-log "Refreshing %s of %s (%s)" i N fname)
-	     (setq already-open (find-buffer-visiting fname))
-	     (setq buf (find-file-noselect fname))
-	     (with-current-buffer buf
-	       (condition-case err
-		   (org-db-update-buffer force)
-		 (org-db-log "Error updating %s: %s" fname err)))
-	     (unless already-open (kill-buffer buf))
+	     (org-db-log "refresh Refreshing %s of %s (%s)" i N fname)
+	     (unless (string=
+		      (setq md5 (s-trim (shell-command-to-string
+					 (format "md5sum %s | cut -c -32" fname))))
+
+		      (caar (with-org-db (emacsql org-db [:select [md5] :from files
+								  :where (= filename $s1)]
+						  fname))))
+	       (with-timeout (60 (org-db-log "refresh ERROR: Timed out refreshing  %s." fname)) 
+		 (setq already-open (find-buffer-visiting fname))
+		 (setq buf (find-file-noselect fname))
+		 
+		 (with-current-buffer buf
+		   (condition-case err
+		       (org-db-update-buffer force)
+		     (org-db-log "refresh ERROR updating %s: %s" fname err)))
+		 
+		 (unless already-open (kill-buffer buf))))
 	     else
 	     do
-	     (org-db-log "deleting %s from the database." fname)
-	     (emacsql org-db [:delete :from files :where (= filename $s1)] fname))))
+	     (org-db-log "refresh %s not found. Deleting from the database." fname)
+	     (with-org-db
+	      (emacsql org-db [:delete :from files :where (= filename $s1)] fname)))))
 
 
 (defun org-db-index (path  &optional recursive)
@@ -901,52 +1019,53 @@ Optional RECURSIVE is non-nil find files recursively."
     (cl-loop for fname in files
 	     for i from 1
 	     do
-	     (org-db-log "%s of %s - %s" i N fname)
+	     (org-db-log "index %s of %s - %s" i N fname)
 	     (setq already-open (find-buffer-visiting fname))
 	     (with-current-buffer (or already-open (setq buf (find-file-noselect fname)))
 	       (condition-case err
 		   (org-db-update-buffer)
-		 (org-db-log "Error updating %s: %s" fname err)))
+		 (org-db-log "index ERROR updating %s: %s" fname err)))
 	     (unless already-open (kill-buffer buf)))))
 
 
 (defun org-db-clean-db ()
   "Remove entries from the database where the file does not exist."
   (interactive)
-  (cl-loop for (fname) in (emacsql org-db [:select :distinct [filename] :from files])
-	   do (message "checking %s" fname)
-	   unless (and fname
-		       ;; tramp filenames are a problem
-		       (not (s-starts-with? "/ssh:" fname))
-		       (file-exists-p fname))
-	   do
-	   (org-db-log "%s was not found. Removing it." fname)
-	   (emacsql org-db [:delete :from files :where (= filename $s1)] fname)))
+  (with-org-db
+   (cl-loop for (fname) in (emacsql org-db [:select :distinct [filename] :from files])
+	    unless (and fname
+			;; tramp filenames are a problem
+			(not (s-starts-with? "/ssh:" fname))
+			(file-exists-p fname))
+	    do
+	    (org-db-log "clean %s was not found. Removing it." fname)
+	    (emacsql org-db [:delete :from files :where (= filename $s1)] fname))))
 
 
 (defun org-db-reset-db ()
   "Clear all entries from all tables."
   (interactive)
-  (emacsql org-db [:delete :from files])
-  (emacsql org-db [:delete :from tags])
-  (emacsql org-db [:delete :from properties])
-  (emacsql org-db [:delete :from keywords])
-  (emacsql org-db [:delete :from headlines])
-  (emacsql org-db [:delete :from headline-tags])
-  (emacsql org-db [:delete :from headline-properties])
-  (emacsql org-db [:delete :from file-keywords])
-  (emacsql org-db [:delete :from links])
-  (emacsql org-db [:delete :from hashtags])
-  (emacsql org-db [:delete :from file-hashtags])
-  (emacsql org-db [:delete :from atlabels])
-  (emacsql org-db [:delete :from file-atlabels])
-  (emacsql org-db [:delete :from email-addresses])
-  (emacsql org-db [:delete :from file-email-addresses])
-  (emacsql org-db [:delete :from src-blocks])
-  (emacsql org-db [:delete :from file-editmarks])
-  (emacsql org-db [:delete :from file-targets])
-  (emacsql org-db [:delete :from targets])
-  (org-db-log "Everything should be reset."))
+  (with-org-db
+   (emacsql org-db [:delete :from files])
+   (emacsql org-db [:delete :from tags])
+   (emacsql org-db [:delete :from properties])
+   (emacsql org-db [:delete :from keywords])
+   (emacsql org-db [:delete :from headlines])
+   (emacsql org-db [:delete :from headline-tags])
+   (emacsql org-db [:delete :from headline-properties])
+   (emacsql org-db [:delete :from file-keywords])
+   (emacsql org-db [:delete :from links])
+   (emacsql org-db [:delete :from hashtags])
+   (emacsql org-db [:delete :from file-hashtags])
+   (emacsql org-db [:delete :from atlabels])
+   (emacsql org-db [:delete :from file-atlabels])
+   (emacsql org-db [:delete :from email-addresses])
+   (emacsql org-db [:delete :from file-email-addresses])
+   (emacsql org-db [:delete :from src-blocks])
+   (emacsql org-db [:delete :from file-editmarks])
+   (emacsql org-db [:delete :from file-targets])
+   (emacsql org-db [:delete :from targets]))
+  (org-db-log "reset Everything should be reset."))
 
 
 
@@ -954,24 +1073,31 @@ Optional RECURSIVE is non-nil find files recursively."
 
 (defun org-db-contacts-candidates ()
   "List of headings with EMAIL properties."
-  (let ((contacts (emacsql org-db
-			   [:select [headlines:title
-				     headline-properties:value
-				     headlines:tags files:filename files:last-updated headlines:begin]
-				    :from headlines
-				    :inner :join headline-properties
-				    :on (=  headlines:rowid headline-properties:headline-id)
-				    :inner :join properties
-				    :on (= properties:rowid headline-properties:property-id)
-				    :inner :join files :on (= files:rowid headlines:filename-id)
-				    :where (= properties:property "EMAIL")])))
-    (cl-loop for (title email tags fname last-updated begin) in contacts
-	     collect
-	     (list (format "%30s | %40s | %s"
-			   (s-pad-right 30 " " (s-trim title))
-			   (s-pad-right 40 " " email)
-			   (or tags ""))
-		   :filename fname :last-updated last-updated :begin begin :email email :title (s-trim title)))))
+  (with-org-db
+   (let ((contacts (with-org-db (emacsql org-db
+					 [:select [headlines:title
+						   headline-properties:value
+						   headlines:tags files:filename
+						   files:last-updated
+						   headlines:begin]
+						  :from headlines
+						  :inner :join headline-properties
+						  :on (=  headlines:rowid headline-properties:headline-id)
+						  :inner :join properties
+						  :on (= properties:rowid headline-properties:property-id)
+						  :inner :join files :on (= files:rowid headlines:filename-id)
+						  :where (= properties:property "EMAIL")]))))
+     (cl-loop for (title email tags fname last-updated begin) in contacts
+	      collect
+	      (list (format "%30s | %40s | %s"
+			    (s-pad-right 30 " " (s-trim title))
+			    (s-pad-right 40 " " email)
+			    (or tags ""))
+		    :filename fname
+		    :last-updated last-updated
+		    :begin begin
+		    :email email
+		    :title (s-trim title))))))
 
 
 (defun org-db--insert-contact-link (x)
@@ -1027,7 +1153,8 @@ Sets heading TODO state and prompts for deadline if there is not one."
 
 (defun org-db--open-contact (x)
   "Open contact X.
-This is a little flexible. Sometimes :begin is out of date so instead we use search."
+This is a little flexible. Sometimes :begin is out of date so
+instead we use search."
   (find-file (plist-get (cdr x) :filename))
   (goto-char (car (org-ql-query :select #'point
 				:from (current-buffer)
@@ -1096,6 +1223,7 @@ If point is not looking back on a space insert a comma separator."
     (define-key map (kbd "C-h") 'org-db--contacts-help)
     map))
 
+
 (defun org-db--contacts-help ()
   (interactive)
   (org-link-open-from-string
@@ -1107,9 +1235,8 @@ If point is not looking back on a space insert a comma separator."
 (defun org-db-contacts ()
   "Ivy command to select an `org-db' contact."
   (interactive)
-  ;; start with no marked candidates. I am not sure how this works with ivy resume.
-  (setq org-db-contacts-marked-candidates '())
-  (let ((candidates (org-db-contacts-candidates)))
+  (let* ((org-db-contacts-marked-candidates '())
+	 (candidates (org-db-contacts-candidates)))
     (ivy-read "Contact: " candidates
 	      :keymap org-db-contacts-keymap
 	      :caller 'org-db-contacts
@@ -1130,27 +1257,27 @@ If point is not looking back on a space insert a comma separator."
       (propertize s 'face 'font-lock-warning-face)
     s))
 
-(ivy-set-display-transformer
- 'org-db-contacts
- 'org-db-contact-transformer)
+(ivy-configure 'org-db-contacts
+  :display-transformer-fn 'org-db-contact-transformer)
 
 
 ;; * org-db-locations
 (defun org-db-locations-candidates ()
   "Return a list of headings with an ADDRESS property."
-  (let ((locations (emacsql org-db [:select [headlines:title headline-properties:value headlines:tags files:filename headlines:begin]
-					    :from headlines
-					    :inner :join headline-properties :on (=  headlines:rowid headline-properties:headline-id)
-					    :inner :join properties :on (= properties:rowid headline-properties:property-id)
-					    :inner :join files :on (= files:rowid headlines:filename-id)
-					    :where (= properties:property "ADDRESS")])))
-    (cl-loop for (title address tags fname begin) in locations
-	     collect
-	     (list (format "%60s | %70s | %s"
-			   (s-trim title)
-			   address
-			   (or tags ""))
-		   :filename fname :begin begin))))
+  (with-org-db
+   (let ((locations (emacsql org-db [:select [headlines:title headline-properties:value headlines:tags files:filename headlines:begin]
+					     :from headlines
+					     :inner :join headline-properties :on (=  headlines:rowid headline-properties:headline-id)
+					     :inner :join properties :on (= properties:rowid headline-properties:property-id)
+					     :inner :join files :on (= files:rowid headlines:filename-id)
+					     :where (= properties:property "ADDRESS")])))
+     (cl-loop for (title address tags fname begin) in locations
+	      collect
+	      (list (format "%60s | %70s | %s"
+			    (s-trim title)
+			    address
+			    (or tags ""))
+		    :filename fname :begin begin)))))
 
 
 
@@ -1177,17 +1304,18 @@ If point is not looking back on a space insert a comma separator."
 						 "insert link")))))
 
 
-;; * org-db src-blocks
+;; * TODO org-db src-blocks - maybe isn't working
 (defun org-db-src-blocks ()
   "Search src blocks."
   (interactive)
-  (let* ((src-blocks (emacsql org-db [:select [src-blocks:language
-					       src-blocks:contents
-					       src-blocks:begin
-					       files:filename]
-					      :from src-blocks
-					      :inner  :join files
-					      :on (= files:rowid src-blocks:filename-id)]))
+  
+  (let* ((src-blocks (with-org-db (emacsql org-db [:select [src-blocks:language
+							    src-blocks:contents
+							    src-blocks:begin
+							    files:filename]
+							   :from src-blocks
+							   :inner  :join files
+							   :on (= files:rowid src-blocks:filename-id)])))
 	 (candidates (cl-loop for (language contents begin filename) in src-blocks collect
 			      (list (format "%s: %s" language contents)
 				    :filename filename :begin begin))))
@@ -1197,16 +1325,17 @@ If point is not looking back on a space insert a comma separator."
 			(find-file (plist-get (cdr candidate) :filename))
 			(goto-char (plist-get (cdr candidate) :begin))))))
 
+
 ;; * org-db headings
 (defun org-db-heading-candidates ()
   "Return heading candidates completion."
-  (let* ((headings (emacsql org-db [:select [headlines:level headlines:todo-keyword headlines:title headlines:tags
-							     files:filename headlines:begin
-							     files:last-updated]
-					    :from headlines
-					    :inner :join files
-					    :on (= files:rowid headlines:filename-id)
-					    :order :by files:last-updated :desc]))
+  (let* ((headings (with-org-db (emacsql org-db [:select [headlines:level headlines:todo-keyword headlines:title headlines:tags
+									  files:filename headlines:begin
+									  files:last-updated]
+							 :from headlines
+							 :inner :join files
+							 :on (= files:rowid headlines:filename-id)
+							 :order :by files:last-updated :desc])))
 	 (candidates (cl-loop for (level todo title tags filename begin last-updated) in headings
 			      collect
 			      (cons
@@ -1239,7 +1368,7 @@ If point is not looking back on a space insert a comma separator."
   (interactive)
   (find-file (plist-get (cdr x) :file))
   (goto-char (plist-get (cdr x) :begin))
-  (org-store-link))
+  (org-store-link nil))
 
 
 (defun org-db-headings--insert-link (x)
@@ -1269,9 +1398,24 @@ If point is not looking back on a space insert a comma separator."
 (defun org-db-files ()
   "Open a file in ‘org-db’ with completion."
   (interactive)
-  (find-file (completing-read "File: " (mapcar 'car (emacsql org-db [:select [filename]
-									     :from files
-									     :order :by filename])))))
+  (let ((candidates (mapcar 'car (with-org-db (emacsql org-db [:select [filename]
+								       :from files
+								       :order :by filename])))))
+    (ivy-read "File: " candidates
+	      :action
+	      '(1
+		("o" (lambda (candidate)
+		       (find-file candidate))
+		 "Open file")
+		("r" (lambda (candidate)
+		       (with-org-db
+			(emacsql org-db [:delete :from files :where (= filename $s1)]
+				 candidate)))
+		 "Remove file from org-db")))))
+
+
+
+
 
 
 (defun org-db-recentf ()
@@ -1280,10 +1424,15 @@ Recent is sorted by last-updated in the database."
   (interactive)
   (let ((candidates (mapcar (lambda (x)
 			      (cons (format "%s %s" (cdr x) (car x)) (car x)))
-			    (emacsql org-db [:select [filename last-updated]
-						     :from files
-						     :order :by last-updated :desc]))))
-    (find-file (cdr (assoc (ivy-read "File: " candidates) candidates)))))
+			    (with-org-db (emacsql org-db [:select [filename last-updated]
+								  :from files
+								  :order :by last-updated :desc])))))
+    (ivy-read "File: " candidates
+	      :action
+	      '(1
+		("o" (lambda (candidate)
+		       (find-file (cdr candidate)))
+		 "Open file")))))
 
 
 ;; * org-db-links
@@ -1301,10 +1450,11 @@ Recent is sorted by last-updated in the database."
   (interactive)
   (let ((candidates (cl-loop
 		     for (rl fn bg) in
-		     (emacsql org-db [:select [raw-link filename begin ]
-					      :from links
-					      :left :join files :on (= links:filename-id files:rowid)
-					      :order :by filename])
+		     (with-org-db
+		      (emacsql org-db [:select [raw-link filename begin]
+					       :from links
+					       :left :join files :on (= links:filename-id files:rowid)
+					       :order :by filename]))
 		     collect
 		     ;; (candidate :filename :begin)
 		     (list (format "%s | %s" rl fn) :filename fn :begin bg))))
@@ -1316,11 +1466,12 @@ Recent is sorted by last-updated in the database."
 (defun org-db-target ()
   "Search for targets in org-files."
   (interactive)
-  (let* ((results (emacsql org-db [:select [target file-targets:begin files:filename]
-					   :from targets
-					   :left :join file-targets :on (= targets:rowid file-targets:target-id)
-					   :inner :join files
-					   :on (= files:rowid file-targets:filename-id)]))
+  (let* ((results (with-org-db
+		   (emacsql org-db [:select [target file-targets:begin files:filename]
+					    :from targets
+					    :left :join file-targets :on (= targets:rowid file-targets:target-id)
+					    :inner :join files
+					    :on (= files:rowid file-targets:filename-id)])))
 	 (candidates (cl-loop for (target begin fname) in results collect
 			      (list
 			       (format "%30s%s" (s-pad-right 30 " " target) fname)
@@ -1331,7 +1482,6 @@ Recent is sorted by last-updated in the database."
 					      (goto-char (cl-third x))))))
 
 ;; * org-db-hashtags
-
 ;; The idea here is to use #hashtags in org files so we can search them later.
 ;; These are hard, there are many reasons for #something, including comments in
 ;; python blocks, #'in-elisp, etc. I sort of like the idea though, because it
@@ -1340,26 +1490,28 @@ Recent is sorted by last-updated in the database."
 
 (defun org-db-delete-hashtag (hashtag)
   "Delete HASHTAG from the db."
-  (let* ((hashtag-id (caar (emacsql org-db [:select rowid :from hashtags
-						    :where (= hashtag $s1)]
-				    hashtag))))
+  (let* ((hashtag-id (caar (with-org-db (emacsql org-db [:select rowid :from hashtags
+								 :where (= hashtag $s1)]
+						 hashtag)))))
     (if (null hashtag-id)
 	(org-db-log "Weird. no hashtag id found for %s" hashtag)
       (org-db-log "removing %s entries: %s" hashtag hashtag-id)
 
-      (emacsql org-db [:delete :from file-hashtags
-			       :where (= file-hashtags:hashtag-id $s1)]
-	       hashtag-id)
-      (emacsql org-db [:delete :from hashtags
-			       :where (= hashtags:rowid $s1)]
-	       hashtag-id))))
+      (with-org-db
+       (emacsql org-db [:delete :from file-hashtags
+				:where (= file-hashtags:hashtag-id $s1)]
+		hashtag-id)
+       (emacsql org-db [:delete :from hashtags
+				:where (= hashtags:rowid $s1)]
+		hashtag-id)))))
 
 
 (defun org-db-delete-hashtags ()
   "Delete all the hashtags in the db."
   (interactive)
-  (emacsql org-db [:delete :from hashtags])
-  (emacsql org-db [:delete :from file-hashtags]))
+  (with-org-db
+   (emacsql org-db [:delete :from hashtags])
+   (emacsql org-db [:delete :from file-hashtags])))
 
 
 (defun looking-at-hashtag ()
@@ -1419,13 +1571,14 @@ line and only return a match if it is around the current point."
   "Open list of other files containing hashtag X."
   (interactive)
   (let* ((hashtag (org-no-properties (plist-get (cdr x) :hashtag)))
-	 (results (emacsql org-db [:select [hashtag file-hashtags:begin files:filename]
-					   :from hashtags
-					   :left :join file-hashtags :on (= hashtags:rowid file-hashtags:hashtag-id)
-					   :inner :join files
-					   :on (= files:rowid file-hashtags:filename-id)
-					   :where (= hashtag $s1)]
-			   hashtag))
+	 (results (with-org-db
+		   (emacsql org-db [:select [hashtag file-hashtags:begin files:filename]
+					    :from hashtags
+					    :left :join file-hashtags :on (= hashtags:rowid file-hashtags:hashtag-id)
+					    :inner :join files
+					    :on (= files:rowid file-hashtags:filename-id)
+					    :where (= hashtag $s1)]
+			    hashtag)))
 	 (candidates (cl-loop for (hashtag begin fname) in results
 			      collect (cons fname begin)))
 	 (choice (ivy-read "File: " candidates)))
@@ -1442,14 +1595,16 @@ line and only return a match if it is around the current point."
 (defun org-db-hashtags ()
   "Open a #hashtag.
 If the cursor is on a hashtag, it uses that as the initial input.
-I am not sure how to do multiple hashtag matches right now, that needs a fancier query."
+I am not sure how to do multiple hashtag matches right now, that
+needs a fancier query."
   (interactive)
   (let* ((tip (looking-at-hashtag))
-	 (hashtag-data (emacsql org-db [:select [hashtag file-hashtags:begin files:filename]
-						:from hashtags
-						:left :join file-hashtags :on (= hashtags:rowid file-hashtags:hashtag-id)
-						:inner :join files
-						:on (= files:rowid file-hashtags:filename-id)]))
+	 (hashtag-data (with-org-db
+			(emacsql org-db [:select [hashtag file-hashtags:begin files:filename]
+						 :from hashtags
+						 :left :join file-hashtags :on (= hashtags:rowid file-hashtags:hashtag-id)
+						 :inner :join files
+						 :on (= files:rowid file-hashtags:filename-id)])))
 	 (candidates (cl-loop for (hashtag begin fname) in hashtag-data
 			      collect (list (format "#%40s  %s" (s-pad-right 40 " " hashtag) fname)
 					    :hashtag hashtag :begin begin :filename fname))))
@@ -1468,11 +1623,12 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
   "Jump to an @label."
   (interactive)
   (let* ((tip (looking-at-hashtag))
-	 (@-data (emacsql org-db [:select [atlabel file-atlabels:begin files:filename]
-					  :from atlabels
-					  :left :join file-atlabels :on (= atlabels:rowid file-atlabels:atlabel-id)
-					  :inner :join files
-					  :on (= files:rowid file-atlabels:filename-id)]))
+	 (@-data (with-org-db
+		  (emacsql org-db [:select [atlabel file-atlabels:begin files:filename]
+					   :from atlabels
+					   :left :join file-atlabels :on (= atlabels:rowid file-atlabels:atlabel-id)
+					   :inner :join files
+					   :on (= files:rowid file-atlabels:filename-id)])))
 	 (candidates (cl-loop for (atlabel begin fname) in @-data
 			      collect (list (format "%40s  %s" atlabel fname)
 					    :@-label atlabel :begin begin :filename fname))))
@@ -1493,17 +1649,18 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
 ;; org-id-goto is very slow for me. This function can replace it.
 (defun org-db-goto-id (id)
   "Open an org file at ID."
-  (let* ((result (emacsql org-db
-			  [:select [files:filename headlines:begin]
-				   :from headlines
-				   :inner :join headline-properties
-				   :on (=  headlines:rowid headline-properties:headline-id)
-				   :inner :join properties
-				   :on (= properties:rowid headline-properties:property-id)
-				   :inner :join files :on (= files:rowid headlines:filename-id)
-				   :where (and (= properties:property "ID")
-					       (= headline-properties:value $s1))]
-			  id))
+  (let* ((result (with-org-db
+		  (emacsql org-db
+			   [:select [files:filename headlines:begin]
+				    :from headlines
+				    :inner :join headline-properties
+				    :on (=  headlines:rowid headline-properties:headline-id)
+				    :inner :join properties
+				    :on (= properties:rowid headline-properties:property-id)
+				    :inner :join files :on (= files:rowid headlines:filename-id)
+				    :where (and (= properties:property "ID")
+						(= headline-properties:value $s1))]
+			   id)))
 	 match fname p)
     (cond
      ((and result
@@ -1548,24 +1705,25 @@ I am not sure how to do multiple hashtag matches right now, that needs a fancier
 PATTERN follows sql patterns, so % is a wildcard.
 It is not currently possible to do multiple property searches."
   (interactive (list (completing-read "Property: "
-				      (-flatten (emacsql org-db
-							 [:select properties:property
-								  :from properties])))
+				      (-flatten (with-org-db (emacsql org-db
+								      [:select properties:property
+									       :from properties]))))
 		     (read-string "Pattern: ")))
-  (let* ((results (emacsql org-db
-			   [:select [headlines:title
-				     properties:property
-				     headline-properties:value
-				     files:filename files:last-updated headlines:begin]
-				    :from headlines
-				    :inner :join headline-properties
-				    :on (=  headlines:rowid headline-properties:headline-id)
-				    :inner :join properties
-				    :on (= properties:rowid headline-properties:property-id)
-				    :inner :join files :on (= files:rowid headlines:filename-id)
-				    :where (and (= properties:property $s1)
-						(like headline-properties:value $s2))]
-			   property pattern))
+  (let* ((results (with-org-db
+		   (emacsql org-db
+			    [:select [headlines:title
+				      properties:property
+				      headline-properties:value
+				      files:filename files:last-updated headlines:begin]
+				     :from headlines
+				     :inner :join headline-properties
+				     :on (=  headlines:rowid headline-properties:headline-id)
+				     :inner :join properties
+				     :on (= properties:rowid headline-properties:property-id)
+				     :inner :join files :on (= files:rowid headlines:filename-id)
+				     :where (and (= properties:property $s1)
+						 (like headline-properties:value $s2))]
+			    property pattern)))
 	 (candidates (cl-loop for (title property value fname last-updated begin) in results
 			      collect
 			      (list (format "%s | %s=%s | %s" title property value fname)
@@ -1583,10 +1741,11 @@ It is not currently possible to do multiple property searches."
   "Search the editmarks table in org-db."
   (interactive)
 
-  (let* ((results (emacsql org-db
-			   [:select  [files:filename file-editmarks:begin file-editmarks:content file-editmarks:type]
+  (let* ((results (with-org-db
+		   (emacsql org-db
+			    [:select [files:filename file-editmarks:begin file-editmarks:content file-editmarks:type]
 				     :from file-editmarks
-				     :inner :join files :on (= files:rowid file-editmarks:filename-id)]))
+				     :inner :join files :on (= files:rowid file-editmarks:filename-id)])))
 	 (candidates (cl-loop for (fname begin content type) in results
 			      collect
 			      (list
@@ -1603,12 +1762,13 @@ It is not currently possible to do multiple property searches."
 
 (defun org-db-email-addresses ()
   (interactive)
-  (let* ((results (emacsql org-db
-			   [:select  [files:filename file-email-addresses:begin email-addresses:email-address]
+  (let* ((results (with-org-db
+		   (emacsql org-db
+			    [:select [files:filename file-email-addresses:begin email-addresses:email-address]
 				     :from file-email-addresses
 				     :inner :join files :on (= files:rowid file-email-addresses:filename-id)
 				     :inner :join email-addresses :on (= email-addresses:rowid
-									 file-email-addresses:email-address-id)]))
+									 file-email-addresses:email-address-id)])))
 	 (candidates (cl-loop for (fname begin email-address) in results
 			      collect
 			      (list
@@ -1626,12 +1786,13 @@ It is not currently possible to do multiple property searches."
   (let* ((buffer-name (buffer-file-name))
 	 (fname (file-name-nondirectory buffer-name))
 	 ;; I am assuming we only want to match on file links
-	 (potential-matches (emacsql org-db [:select [filename path begin]
-						     :from links
-						     :left :join files :on (= links:filename-id files:rowid)
-						     :where (and (= links:type "file")
-								 (like path $s1))]
-				     (concat "%" fname "%")))
+	 (potential-matches (with-org-db
+			     (emacsql org-db [:select [filename path begin]
+						      :from links
+						      :left :join files :on (= links:filename-id files:rowid)
+						      :where (and (= links:type "file")
+								  (like path $s1))]
+				      (concat "%" fname "%"))))
 	 (matches (cl-loop for (src-filename path begin) in potential-matches collect
 			   (cond
 			    ;; path is absolute and points to file
@@ -1679,7 +1840,8 @@ This finds other files with links in them to this file."
   ("k" org-db-links "links" :column "org element")
   ("b" org-db-backlinks "backlinks" :column "org element")
   ("i" org-db-images "images" :column "org element")
-
+  ("t" org-db-fulltext-search "full text" :column "org element")
+  
   ("c" org-db-contacts "contacts" :column "derived")
   ("l" org-db-locations "locations" :column "derived")
   
@@ -1687,9 +1849,11 @@ This finds other files with links in them to this file."
   ("m" org-db-editmarks "editmarks"  :column "pattern")
   ("3" org-db-hashtags "hashtags"  :column "pattern")
   ("2" org-db-@ "@-labels"  :column "pattern")
+  ("g" org-db-target "target" :column "pattern")
 
-  ("f" org-db-files "files")
-  ("r" org-db-recentf "recent files"))
+  ("f" org-db-files "files" :column "pattern")
+  ("r" org-db-recentf "recent files" :column "pattern")
+  ("u" (org-db-update-buffer t) "update buffer" :column "misc"))
 
 
 
