@@ -17,6 +17,8 @@
 
 ;; https://ericjmritz.wordpress.com/2015/10/14/some-personal-hydras-for-gnu-emacs/
 
+(require 'cl)
+
 (defgroup scimax-hydra nil
   "Customization for `scimax-hydra'."
   :tag "scimax-hydra")
@@ -184,6 +186,7 @@ This is a macro so I don't have to quote the hydra name."
 				     :inherit (scimax-base/heads))
   "applications"
 
+  ("a" (org-db-agenda "+2d") "agenda" :column "Emacs")
   ("d" dired "dired" :column  "Emacs")
   ("j" scimax-journal/body "journal" :column "Emacs")
   ("n" nb-hydra/body "notebook" :column "Emacs")
@@ -405,7 +408,7 @@ _p_: ffap
   ("pp" counsel-projectile-switch-project  "project" :column "Project")
   ("pb" counsel-projectile-switch-to-buffer  "buffer" :column "Project")
   ("pf" projectile-find-file "file" :column "Project")
-  ("ph" ivy-org-jump-to-project-headline "file" :column "Project")
+  ("ph" ivy-org-jump-to-project-headline "headline" :column "Project")
   
   
   ("b" counsel-ibuffer "Buffer" :column "misc")
