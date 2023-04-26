@@ -246,10 +246,7 @@
 ;; this is in a git submodule
 (use-package org-ref
   :ensure nil
-  :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
   :init
-  (add-to-list 'load-path
-	       (expand-file-name "org-ref" scimax-dir))
   (require 'bibtex)
   (setq bibtex-autokey-year-length 4
 	bibtex-autokey-name-year-separator "-"
