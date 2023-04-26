@@ -286,7 +286,6 @@
 	      (expand-file-name "user/projectile-bookmarks.eld" scimax-dir))
   :bind
   ("C-c pp" . counsel-projectile-switch-project)
-  ("C-c pn" . counsel-projectile-switch-project-by-name)
   ("C-c pb" . counsel-projectile-switch-to-buffer)
   ("C-c pf" . counsel-projectile-find-file)
   ("C-c pd" . counsel-projectile-find-dir)
