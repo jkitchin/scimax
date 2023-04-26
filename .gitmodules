@@ -1,6 +1,3 @@
-[submodule "ov-highlight"]
-	path = ov-highlight
-	url = https://github.com/jkitchin/ov-highlight
 [submodule "emacs-win"]
 	path = emacs-win
 	url = https://github.com/jkitchin/emacs-win
