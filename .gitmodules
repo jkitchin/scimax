@@ -1,6 +1,3 @@
-[submodule "ox-ipynb"]
-	path = ox-ipynb
-	url = https://github.com/jkitchin/ox-ipynb
 [submodule "ov-highlight"]
 	path = ov-highlight
 	url = https://github.com/jkitchin/ov-highlight
