@@ -174,12 +174,12 @@ This will attempt to get tags for every language defined in
 		       "."
 		       (lambda (f) (f-ext? f "org")) t))
 	   langs)
-      (loop for org-file in org-files do
-	    (setq langs '())
-	    (org-babel-map-src-blocks org-file
-	      (pushnew lang langs :test 'string=))
-	    (loop for lang in langs do
-		  (scimax-lp-update-lang-tags org-file lang)))
+      (cl-loop for org-file in org-files do
+	       (setq langs '())
+	       (org-babel-map-src-blocks org-file
+		 (pushnew lang langs :test 'string=))
+	       (clloop for lang in langs do
+		       (scimax-lp-update-lang-tags org-file lang)))
       (goto-char current-point)))
   (let ((tag-buffer (or (find-buffer-visiting "TAGS")
 			(find-file-noselect "TAGS"))))
