@@ -4,7 +4,3 @@
 [submodule "elpa"]
 	path = elpa
 	url = https://github.com/jkitchin/scimax-win-elpa
-[submodule "org-mime"]
-	path = org-mime
-	url = https://github.com/jkitchin/org-mime.git
-	branch = file-eqns
