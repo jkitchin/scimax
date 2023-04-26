@@ -15,6 +15,7 @@
 ;; * org-mode
 ;; load this first before anything else to avoid mixed installations
 (use-package org
+  :straight t
   :ensure t
   :pin gnu
   :mode ("\\.org\\'" . org-mode)
