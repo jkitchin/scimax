@@ -243,7 +243,6 @@
 (use-package ivy-bibtex)
 (use-package citeproc)
 
-;; this is in a git submodule
 (use-package org-ref
   :ensure nil
   :init
