@@ -1,3 +1,4 @@
+
 ;;; scimax-contacts.el --- org-mode contacts in scimax
 
 ;;; Commentary:
@@ -46,19 +47,19 @@ If you are in a contact heading we store a link."
   (interactive)
   (let* ((email (org-element-property :path (org-element-context)))
 	 (candidates (cl-loop for (title value tags fname lup begin) in
-			      (emacsql org-db
-				       [:select [headlines:title
-						 headline-properties:value
-						 headlines:tags files:filename files:last-updated headlines:begin]
-						:from headlines
-						:inner :join headline-properties
-						:on (=  headlines:rowid headline-properties:headline-id)
-						:inner :join properties
-						:on (= properties:rowid headline-properties:property-id)
-						:inner :join files :on (= files:rowid headlines:filename-id)
-						:where (and  (= properties:property "EMAIL")
-							     (= headline-properties:value $s1))]
-				       email)
+			      (with-org-db (emacsql org-db
+						    [:select [headlines:title
+							      headline-properties:value
+							      headlines:tags files:filename files:last-updated headlines:begin]
+							     :from headlines
+							     :inner :join headline-properties
+							     :on (=  headlines:rowid headline-properties:headline-id)
+							     :inner :join properties
+							     :on (= properties:rowid headline-properties:property-id)
+							     :inner :join files :on (= files:rowid headlines:filename-id)
+							     :where (and  (= properties:property "EMAIL")
+									  (= headline-properties:value $s1))]
+						    email))
 			      collect
 			      (list (format "%40s | %s" title fname) :filename fname :begin begin :email email)))
 	 candidate)
@@ -101,19 +102,20 @@ Argument OBJECT is ignored.
 Argument POSITION is where the mouse cursor is."
   (let* ((email (org-element-property :path (org-element-context))))
     (cl-loop for (title value tags fname lup begin) in
-	     (emacsql org-db
-		      [:select [headlines:title
-				headline-properties:value
-				headlines:tags files:filename files:last-updated headlines:begin]
-			       :from headlines
-			       :inner :join headline-properties
-			       :on (=  headlines:rowid headline-properties:headline-id)
-			       :inner :join properties
-			       :on (= properties:rowid headline-properties:property-id)
-			       :inner :join files :on (= files:rowid headlines:filename-id)
-			       :where (and  (= properties:property "EMAIL")
-					    (= headline-properties:value $s1))]
-		      email)
+	     (with-org-db
+	      (emacsql org-db
+		       [:select [headlines:title
+				 headline-properties:value
+				 headlines:tags files:filename files:last-updated headlines:begin]
+				:from headlines
+				:inner :join headline-properties
+				:on (=  headlines:rowid headline-properties:headline-id)
+				:inner :join properties
+				:on (= properties:rowid headline-properties:property-id)
+				:inner :join files :on (= files:rowid headlines:filename-id)
+				:where (and  (= properties:property "EMAIL")
+					     (= headline-properties:value $s1))]
+		       email))
 	     concat
 	     (format "%40s | %s | %s\n" email title fname))))
 
@@ -138,8 +140,8 @@ Argument POSITION is where the mouse cursor is."
       (append
        (org-get-tags)
        (list (ivy-read "Tag: "
-		       (-flatten (emacsql org-db [:select [tags:tag]
-							  :from tags ])))))))
+		       (-flatten (with-org-db (emacsql org-db [:select [tags:tag]
+								       :from tags ]))))))))
     (save-buffer)))
 
 
@@ -177,51 +179,52 @@ If FROM is non-nil, emails from the contact."
   (let* ((email (org-element-property :path (org-element-context)))
 	 (link-candidates (cl-loop
 			   for (rl fn bg) in
-			   (emacsql org-db [:select [raw-link filename begin ]
-						    :from links
-						    :left :join files :on (= links:filename-id files:rowid)
-						    :where (and
-							    (= links:type "contact")
-							    (= links:path $s1))
-						    :order :by filename]
-				    email)
+			   (with-org-db
+			    (emacsql org-db [:select [raw-link filename begin ]
+						     :from links
+						     :left :join files :on (= links:filename-id files:rowid)
+						     :where (and
+							     (= links:type "contact")
+							     (= links:path $s1))
+						     :order :by filename]
+				     email))
 			   collect
 			   ;; (candidate :filename :begin)
 			   (list (format "%s | %s" rl fn) :filename fn :begin bg)))
 
-	 (results (emacsql org-db
-			   [:select [headlines:title
-				     properties:property
-				     headline-properties:value
-				     files:filename files:last-updated headlines:begin]
-				    :from headlines
-				    :inner :join headline-properties
-				    :on (=  headlines:rowid headline-properties:headline-id)
-				    :inner :join properties
-				    :on (= properties:rowid headline-properties:property-id)
-				    :inner :join files :on (= files:rowid headlines:filename-id)
-				    :where (and (= properties:property "ASSIGNEDTO")
-						(like headline-properties:value $s1))]
-			   email))
+	 (results (with-org-db (emacsql org-db
+					[:select [headlines:title
+						  properties:property
+						  headline-properties:value
+						  files:filename files:last-updated headlines:begin]
+						 :from headlines
+						 :inner :join headline-properties
+						 :on (=  headlines:rowid headline-properties:headline-id)
+						 :inner :join properties
+						 :on (= properties:rowid headline-properties:property-id)
+						 :inner :join files :on (= files:rowid headlines:filename-id)
+						 :where (and (= properties:property "ASSIGNEDTO")
+							     (like headline-properties:value $s1))]
+					email)))
 
 	 (assigned-candidates (cl-loop for (title property value fname last-updated begin) in results
 				       collect
 				       (list (format "%s | %s=%s | %s" title property value fname)
 					     :filename fname :begin begin)))
-	 (results (emacsql org-db
-			   [:select [headlines:title
-				     properties:property
-				     headline-properties:value
-				     files:filename files:last-updated headlines:begin]
-				    :from headlines
-				    :inner :join headline-properties
-				    :on (=  headlines:rowid headline-properties:headline-id)
-				    :inner :join properties
-				    :on (= properties:rowid headline-properties:property-id)
-				    :inner :join files :on (= files:rowid headlines:filename-id)
-				    :where (and (= properties:property "EMAIL")
-						(like headline-properties:value $s1))]
-			   email))
+	 (results (with-org-db (emacsql org-db
+					[:select [headlines:title
+						  properties:property
+						  headline-properties:value
+						  files:filename files:last-updated headlines:begin]
+						 :from headlines
+						 :inner :join headline-properties
+						 :on (=  headlines:rowid headline-properties:headline-id)
+						 :inner :join properties
+						 :on (= properties:rowid headline-properties:property-id)
+						 :inner :join files :on (= files:rowid headlines:filename-id)
+						 :where (and (= properties:property "EMAIL")
+							     (like headline-properties:value $s1))]
+					email)))
 	 (email-candidates (cl-loop for (title property value fname last-updated begin) in results
 				    collect
 				    (list (format "%s | %s=%s | %s" title property value fname)
@@ -321,17 +324,17 @@ Optional argument PATH is ignored."
 
 (defun scimax-contacts-exists-p (email)
   "Return non-nil if the EMAIL address is already in org-db."
-  (not (null (emacsql org-db
-		      [:select [files:filename headlines:begin headlines:title]
-			       :from headlines
-			       :inner :join headline-properties
-			       :on (=  headlines:rowid headline-properties:headline-id)
-			       :inner :join properties
-			       :on (= properties:rowid headline-properties:property-id)
-			       :inner :join files :on (= files:rowid headlines:filename-id)
-			       :where (and (= properties:property "EMAIL")
-					   (= headline-properties:value $s1))]
-		      email))))
+  (not (null (with-org-db (emacsql org-db
+				   [:select [files:filename headlines:begin headlines:title]
+					    :from headlines
+					    :inner :join headline-properties
+					    :on (=  headlines:rowid headline-properties:headline-id)
+					    :inner :join properties
+					    :on (= properties:rowid headline-properties:property-id)
+					    :inner :join files :on (= files:rowid headlines:filename-id)
+					    :where (and (= properties:property "EMAIL")
+							(= headline-properties:value $s1))]
+				   email)))))
 
 
 
