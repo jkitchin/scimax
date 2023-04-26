@@ -370,7 +370,6 @@
 
 (use-package ox-clip
   :ensure nil
-  :load-path (lambda () (expand-file-name "ox-clip" scimax-dir))
   :bind ("H-k" . ox-clip-formatted-copy))
 
 (use-package scimax-contacts
