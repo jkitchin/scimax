@@ -4,6 +4,9 @@
 [submodule "ob-ipython"]
 	path = ob-ipython
 	url = https://github.com/jkitchin/ob-ipython.git
+[submodule "ox-clip"]
+	path = ox-clip
+	url = https://github.com/jkitchin/ox-clip
 [submodule "ox-ipynb"]
 	path = ox-ipynb
 	url = https://github.com/jkitchin/ox-ipynb
