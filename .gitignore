@@ -24,3 +24,4 @@ org-ref-v2/
 scimax-channel
 user.cache
 .ipynb_checkpoints
+.ob-jupyter
