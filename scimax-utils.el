@@ -300,9 +300,10 @@ You can also try putting expressions in for formatting, e.g.:
 ;; adapted from [[https://vmtyler.com/applescript-markdown-ready-screenshots/][AppleScript Markdown-Ready Screenshots | VMTyler.com]]
 (defun screenshot (&optional arg)
   "Take a screenshot and insert org link.
-with prefix arg, minimize emacs first.
-with double prefix arg, prompt for filename.
-Only works on Mac OSX."
+screencapture starts in window capture mode. press space bar to
+toggle it to mouse select. with prefix arg, minimize emacs first.
+with double prefix arg, prompt for filename. Only works on Mac
+OSX."
   (interactive "P")
   (when arg
     (suspend-frame))
@@ -318,7 +319,7 @@ Only works on Mac OSX."
      (mapconcat
       'identity
       (list (format "set screenshotFilePath to \"%s\"" (expand-file-name fname "screenshots"))
-	    "do shell script \"screencapture \" & \"-s\" & \" \" & quoted form of screenshotFilePath"
+	    "do shell script \"screencapture \" & \"-i -Jwindow\" & \" \" & quoted form of screenshotFilePath"
 	    (concat "set result to \"[[./" fname "]]\"")
 	    "set the clipboard to result")
       "\n"))
