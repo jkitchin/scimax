@@ -1,7 +1,8 @@
 ;;; scimax-projectile.el --- Scimax projectile customizations
 
 ;;; Commentary:
-;; 
+;;
+;; I find these convenient to have around.
 
 ;; * Extra projectile actions
 ;; Here I can open bash or finder when switching projects
@@ -67,6 +68,9 @@ with the entry."
     (ivy-quit-and-run))))
 
 
+;; These functions already exist in counsel. Leaving them here so i don't forget
+;; later.
+;;
 ;; See `counsel-projectile-switch-project-action-ag'
 ;; (defun scimax-ivy-projectile-ag (x)
 ;;   "Run projectile-ag in the selected project X."
@@ -103,19 +107,19 @@ with the entry."
 	    ("l" scimax-ivy-insert-project-link "Insert project link")
 	    ("4" (lambda (arg)
 		   (find-file-other-window arg))
-	     "open in other window")
+	     "open file in other window")
 	    ("5" (lambda (arg)
 		   (find-file-other-frame arg))
-	     "open in new frame")
+	     "open file in new frame") 
 	    ("6" (lambda (arg)
 		   (find-file-other-tab arg))
 	     "open in new tab")))) 
 
 
-(ivy-add-actions 'counsel-projectile-switch-project
-		 '(("l" (lambda (x)
-			  (insert (format "[[%s]]" x)))
-		    "Insert link to project")))
+;; (ivy-add-actions 'counsel-projectile-switch-project
+;; 		 '(("l" (lambda (x)
+;; 			  (insert (format "[[%s]]" x)))
+;; 		    "Insert link to project")))
 
 
 (defun scimax-projectile-switch-project-transformer (project)
@@ -133,7 +137,6 @@ with the entry."
 	       #'scimax-projectile-switch-project-transformer)
 (ivy-configure 'projectile-switch-project :display-transformer-fn
 	       #'scimax-projectile-switch-project-transformer)
-
 
 
 ;; * advices to remove ignore files, and prioritize default files
@@ -174,10 +177,36 @@ entries in `scimax-project-default-files' to the top."
 	     (when (member (file-name-nondirectory f) scimax-project-default-files)
 	       (push f defaults)))
     ;; return defaults first
-    (append defaults files)))
+    (-uniq (append defaults files))))
 
 
 (advice-add #'projectile-project-files :around 'scimax-current-project-files)
+
+;; * rename projects
+;;
+;; I sometimes want to rename projects, and this is a function to do that so
+;; they do not get lost, and so old projects do not remain.
+
+(defun scimax-projectile-mv-project (newpath)
+  "Rename current project to NEWPRJ.
+This updates the cache, and the project list for the new project."
+  (interactive (list
+		(read-directory-name "New Project: ")))
+
+  (let ((oldprj (projectile-project-root))
+	(newprj (f-join newpath (car (last (f-split (projectile-project-root))))))
+	(projectile-switch-project-action (lambda (&optional args) nil))) 
+    (projectile-invalidate-cache nil)
+    (projectile-kill-buffers)
+
+    
+    (rename-file oldprj newprj)
+    (projectile-remove-known-project oldprj)
+    
+    (projectile-add-known-project newprj)
+    (projectile-switch-project-by-name newprj)
+    (projectile-cache-project newprj (projectile-project-files newprj))))
+
 
 
 (provide 'scimax-projectile)
