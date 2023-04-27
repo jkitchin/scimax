@@ -184,11 +184,13 @@ today Due by today
   (cl-loop for candidate in (org-db-agenda--candidates before) do
 	   (let* ((fname (plist-get (cdr candidate) :file))
 		  (open (get-file-buffer fname))
-		  (buf (find-file-noselect fname)))
-	     (with-current-buffer buf
-	       (org-db-update-buffer t))
-	     (when (null open)
-	       (kill-buffer buf)))))
+		  ;; TODO remove files that don't exist
+		  (buf (when (file-exists-p fname) (find-file-noselect fname))))
+	     (when buf
+	       (with-current-buffer buf
+		 (org-db-update-buffer t))
+	       (when (null open)
+		 (kill-buffer buf))))))
 
 
 
