@@ -12,6 +12,12 @@ See the [[./scimax.org][manual]] for more details.
 #+END_HTML
 
 * NEWS
+** [2023-04-26 Wed] scimax 3.0
+
+Another 2 year update :) This release revolves around making scimax brew-installable.
+
+There are some newish features. The org-db code has been expanded and includes full-text and image search now. It also provides an org-db-agenda interface.
+
 ** [2021-01-02 Sat] new features
 
 It has been about two years since I noted the last new features. Here are few new features:
@@ -33,6 +39,7 @@ It is an update of scimax, and the main new features are:
 5. Functional text: [[./scimax-functional-text.el]]
 
 And probably more.
+
 
 * Installation
 
