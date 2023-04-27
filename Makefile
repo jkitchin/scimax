@@ -21,12 +21,12 @@ clean:
 nouser:
 	${CASK_EXEC} ${emacs} -Q --eval="(setq scimax-load-user-dir nil)" -l ${INIT}
 
-org:
-	mkdir -p elpa-`date +%F`
-	find "elpa" -name "org-plus*" -type d -exec mv {} elpa-`date +%F` \;
-	${CASK_EXEC} ${emacs} -l ${INIT}
-travis:
-	open https://travis-ci.org/jkitchin/scimax
+# [2023-04-27 Thu] I am not real sure what this does, maybe it moves an old org out, and installs a new one?
+# org-plus isn't used anymore I think. I am commenting this out for now, and maybe will remove it eventually.
+#org:
+#	mkdir -p elpa-`date +%F`
+#	find "elpa" -name "org-plus*" -type d -exec mv {} elpa-`date +%F` \;
+#	${CASK_EXEC} ${emacs} -l ${INIT}
 
 github:
 	open https://github.com/jkitchin/scimax
