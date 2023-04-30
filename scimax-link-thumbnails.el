@@ -12,8 +12,7 @@
 
 (defun org-file-link-image-thumbnail (start end path bracketp)
   "Put a thumbnail on a file link if the description is an image."
-  (when bracketp
-    (let ((s (buffer-substring-no-properties start end))
+  (let ((s (buffer-substring-no-properties start end))
 	  img ov)
       (when (and s (string-match org-link-bracket-re s))
 	(setq imgfile (match-string 3 s))
@@ -37,7 +36,7 @@
 		       (list
 			`(lambda (&rest args)
 			   (org-display-inline-remove-overlay ,ov t ,start ,end))))
-	  (push ov org-inline-image-overlays))))))
+	  (push ov org-inline-image-overlays)))))
 
 
 ;; We use the activate-func feature to get images on links.
