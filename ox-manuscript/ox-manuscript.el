@@ -596,7 +596,7 @@ intermediate output steps."
     0))
 
 ;; We use our function for building the manuscript
-(setq org-latex-pdf-process 'ox-manuscript-latex-pdf-process)
+(setq org-latex-pdf-process #'ox-manuscript-latex-pdf-process)
 
 
 (defun ox-manuscript-build ()
