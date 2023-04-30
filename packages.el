@@ -396,9 +396,9 @@
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-lob
-  :ensure nil
-  :load-path scimax-dir)
+;; (use-package scimax-lob
+;;   :ensure nil
+;;   :load-path scimax-dir)
 
 (use-package scimax-yas
   :ensure nil
