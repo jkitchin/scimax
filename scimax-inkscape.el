@@ -133,7 +133,7 @@ file if needed."
       (push ov org-inline-image-overlays))))
 
 
-(defun scimax-inkscape-redraw-thumbnails (&rest args)
+(defun scimax-inkscape-redraw-thumbnails (&optional include-linked refresh beg end)
   "Use font-lock to redraw the links."
   (with-current-buffer (or (buffer-base-buffer) (current-buffer))
     (org-restart-font-lock)))
@@ -189,10 +189,11 @@ Here are two examples:
 
 (add-to-list 'org-file-apps '("\\.svg\\'" . scimax-inkscape-open))
 
-;; This should enable thumbnails on the file link.
-(org-link-set-parameters
- "file"
- :activate-func 'scimax-inkscape-thumbnail)
+;; Load this library if you want thumbnails on file links: `scimax-link-thumbnail' 
+;; Alternatively, you can also try this.
+;; (org-link-set-parameters
+;;  "file"
+;;  :activate-func 'scimax-inkscape-thumbnail)
 
 (provide 'scimax-inkscape)
 
