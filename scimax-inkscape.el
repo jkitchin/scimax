@@ -91,9 +91,12 @@
   :type 'string)
 
 
-(defun scimax-inkscape-open (path)
+(defun scimax-inkscape-open (path &optional _)
   "Open the PATH in inkscape.
-Make a new file if needed."
+
+On an inkscape link, make a new file if needed. When used on a
+file link, if `org-open-non-existing-files' is non-nil make a new
+file if needed."
   (interactive)
   (unless (f-ext-p path "svg") (error "Must be an svg file."))
   (unless (file-exists-p path)
@@ -122,7 +125,6 @@ Make a new file if needed."
       (setq ov (make-overlay start end))
       (overlay-put ov 'display img)
       (overlay-put ov 'face 'default)
-      ;; (overlay-put ov 'before-string "inkscape:")
       (overlay-put ov 'org-image-overlay t)
       (overlay-put ov 'modification-hooks
 		   (list
@@ -179,6 +181,18 @@ Here are two examples:
   "Convenience function to insert a drawing with filename PATH."
   (interactive "sFilename: ")
   (insert (format "inkscape:%s" path)))
+
+
+;; * Use file links instead
+;; from https://github.com/jkitchin/scimax/issues/382
+;; This leverages other org-capabilities, e.g. you can use captions, attributes.
+
+(add-to-list 'org-file-apps '("\\.svg\\'" . scimax-inkscape-open))
+
+;; This should enable thumbnails on the file link.
+(org-link-set-parameters
+ "file"
+ :activate-func 'scimax-inkscape-thumbnail)
 
 (provide 'scimax-inkscape)
 
