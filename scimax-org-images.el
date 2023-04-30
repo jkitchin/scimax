@@ -234,17 +234,6 @@ Run this on a link"
 
 (add-to-list 'org-ctrl-c-ctrl-c-hook 'scimax-org-image-toggle-image-CcCc)
 
-
-;; * Enable pdf and eps images in org-mode
-;; Suggested on the org-mode maillist by Julian Burgos
-;; (add-to-list 'image-file-name-extensions "pdf")
-;; (add-to-list 'image-file-name-extensions "eps")
-
-;; (add-to-list 'image-type-file-name-regexps '("\\.eps\\'" . imagemagick))
-;; (add-to-list 'image-file-name-extensions "eps")
-;; (add-to-list 'image-type-file-name-regexps '("\\.pdf\\'" . imagemagick))
-;; (add-to-list 'image-file-name-extensions "pdf")
-
 (setq imagemagick-types-inhibit (remove 'PDF imagemagick-types-inhibit))
 
 (provide 'scimax-org-images)
