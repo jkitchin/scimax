@@ -729,7 +729,9 @@ Use a prefix arg FONTIFY for colored headlines."
 in `scimax-ivy-jump-functions'. With a prefix arg, you can choose
 the scope."
   (interactive "P")
-  (let ((jumpfn (if arg (cdr (assoc (intern-soft (ivy-read "Scope: " scimax-ivy-jump-functions)) scimax-ivy-jump-functions))
+  (let ((jumpfn (if arg (cdr (assoc (intern-soft
+				     (ivy-read "Scope: " scimax-ivy-jump-functions))
+				    scimax-ivy-jump-functions))
 		  ;; the default choice.
 		  (cdr (car scimax-ivy-jump-functions)))))
     (funcall jumpfn)))
