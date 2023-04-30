@@ -734,8 +734,6 @@ the scope."
 		  (cdr (car scimax-ivy-jump-functions)))))
     (funcall jumpfn)))
 
-(require 'scimax-org-babel-python)
-
 
 ;; * A better return
 
