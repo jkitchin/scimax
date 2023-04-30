@@ -56,8 +56,7 @@
 
 (use-package bookmark
   :init
-  (setq bookmark-default-file (expand-file-name "user/bookmarks" scimax-dir)
-	bookmark-save-flag 1))
+  (setq bookmark-save-flag 1))
 
 
 (use-package button-lock)
@@ -79,11 +78,10 @@
 	'counsel-grep-or-swiper
       'swiper)))
 
-
 (use-package multiple-cursors
   :config
+  ;; mc/cmds-to-run-once is defined in `lispy'.
   (add-to-list 'mc/cmds-to-run-once 'swiper-mc))
-
 
 (use-package counsel
   :init
@@ -223,7 +221,7 @@
 (use-package citeproc)
 
 (use-package org-ref
-  :ensure nil
+  :ensure t
   :init
   (require 'bibtex)
   (setq bibtex-autokey-year-length 4
@@ -243,8 +241,7 @@
 
 
 (use-package org-ref-ivy
-  :ensure nil
-  :load-path (lambda () (expand-file-name "org-ref" scimax-dir))
+  :ensure nil 
   :init (setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
 	      org-ref-insert-cite-function 'org-ref-cite-insert-ivy
 	      org-ref-insert-label-function 'org-ref-insert-label-link
@@ -254,11 +251,7 @@
 (use-package ox-pandoc)
 
 ;; https://github.com/bbatsov/projectile
-(use-package projectile
-  :init (setq projectile-cache-file
-	      (expand-file-name "user/projectile.cache" scimax-dir)
-	      projectile-known-projects-file
-	      (expand-file-name "user/projectile-bookmarks.eld" scimax-dir))
+(use-package projectile 
   :bind
   ("C-c pp" . counsel-projectile-switch-project)
   ("C-c pb" . counsel-projectile-switch-to-buffer)
@@ -424,10 +417,6 @@
 (use-package scimax-ob
   :ensure nil
   :load-path scimax-dir)
-
-(use-package kitchingroup
-  :ensure nil
-  :load-path (lambda () (expand-file-name "kitchingroup" scimax-dir)))
 
 (let ((enable-local-variables nil))
   (org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir)))
