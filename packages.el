@@ -432,14 +432,6 @@
 (let ((enable-local-variables nil))
   (org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir)))
 
-;; * User packages
-
-;; We load one file: user.el
-
-(when (and
-       scimax-load-user-dir
-       (file-exists-p (expand-file-name "user.el" scimax-user-dir)))
-  (load (expand-file-name "user.el" scimax-user-dir)))
 
 (add-to-list 'Info-directory-list scimax-dir)
 

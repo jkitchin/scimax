@@ -339,7 +339,7 @@ Optional argument PATH is ignored."
 
 
 (defvar scimax-message-org-contacts-file
-  (expand-file-name "message-contacts.org" scimax-user-dir)
+  (expand-file-name (locate-user-emacs-file "message-contacts.org")) 
   "File name to store contacts captured from messages.")
 
 

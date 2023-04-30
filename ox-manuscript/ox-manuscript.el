@@ -61,7 +61,9 @@ if you should continue to the next step."
   :group 'ox-manuscript)
 
 (defcustom ox-manuscript-user-template-dir
-  (file-name-as-directory (expand-file-name "ox-manuscript-templates" scimax-user-dir))
+  (file-name-as-directory
+   (expand-file-name
+    (locate-user-emacs-file "ox-manuscript-templates")))
   "Directory for user-defined ox-manuscript templates."
   :group 'ox-manuscript)
 
