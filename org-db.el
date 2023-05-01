@@ -159,8 +159,7 @@ delete old data if needed, and insert or update data as needed."
   "Regular expression to match @labels.
 Maybe not surprisingly, there are a lot of false positives.
 Sometimes, this seems to match emails, it matches things like
-decorators in Python, etc.
-")
+decorators in Python, etc.")
 
 
 (defvar email-rx "<?\\([-+_.~a-zA-Z][-+_.~:a-zA-Z0-9]*@[-.a-zA-Z0-9]+\\)>?"
