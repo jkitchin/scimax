@@ -174,41 +174,8 @@ Adapted from `thing-at-point-email-regexp'.")
    (apply 'format (append (list (concat "%s " format-string "\n\n"))
 			  (list (current-time-string)) args))
    'utf-8
-   org-db-log-file)
-  
-  ;; (append-to-file
-  ;;  (apply 'format (append (list (concat format-string "\n\n")) args))
-  ;;  nil
-  ;;  org-db-log-file)
-  ;; (when org-db-debug
-  ;;   (with-current-buffer (get-buffer-create "*org-db-log*")
-  ;;     (goto-char (point-max))
-  ;;     (insert (format "%s:\n" (current-time-string)))
-  ;;     (let* ((msg (with-temp-buffer
-  ;; 		    (insert (format "%s\n"
-  ;; 				    (apply 'format format-string args)))
-  ;; 		    (fill-region (point-min) (point-max))
-  ;; 		    (indent-region (point-min) (point-max) 4)
-  ;; 		    (buffer-string))))
-  ;; 	(insert msg))))
-  )
+   org-db-log-file))
 
-
-;; (defmacro with-org-db (&rest body)
-;;   "Run BODY commands in an org-db context where we open the database, and close it at the end.
-;; BODY should be regular commands. They can use the variable `org-db' in them."
-;;   (org-db-log "working?")
-;;   `(let* ((org-db (emacsql-sqlite (expand-file-name org-db-name org-db-root) :debug t))
-;; 	  (results))
-;;      (prog1
-;; 	 (condition-case err
-;; 	     (progn
-;; 	       (org-db-log "Running %S" ',body)
-;; 	       ,@body)
-;; 	   (org-db-log "Error: %s" err))
-;;        ;; It seems like you need to call this twice before org-db is nil
-;;        (emacsql-close org-db)
-;;        (emacsql-close org-db))))
 
 (defmacro with-org-db (&rest body)
   "Run BODY commands in an org-db context.
