@@ -221,7 +221,6 @@
 (use-package citeproc)
 
 (use-package org-ref
-  :ensure t
   :init
   (require 'bibtex)
   (setq bibtex-autokey-year-length 4
@@ -233,15 +232,10 @@
 	bibtex-autokey-titleword-length 5)
   (define-key bibtex-mode-map (kbd "H-b") 'org-ref-bibtex-hydra/body)
   (define-key org-mode-map (kbd "C-c ]") 'org-ref-insert-link)
-  (define-key org-mode-map (kbd "s-[") 'org-ref-insert-link-hydra/body)
-  (require 'org-ref-ivy)
-  (require 'org-ref-arxiv)
-  (require 'org-ref-scopus)
-  (require 'org-ref-wos))
+  (define-key org-mode-map (kbd "s-[") 'org-ref-insert-link-hydra/body))
 
 
 (use-package org-ref-ivy
-  :ensure nil 
   :init (setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
 	      org-ref-insert-cite-function 'org-ref-cite-insert-ivy
 	      org-ref-insert-label-function 'org-ref-insert-label-link
