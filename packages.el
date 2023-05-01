@@ -236,6 +236,7 @@
 
 
 (use-package org-ref-ivy
+  :load-path (lambda () (file-name-directory (locate-library "org-ref")))
   :init (setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
 	      org-ref-insert-cite-function 'org-ref-cite-insert-ivy
 	      org-ref-insert-label-function 'org-ref-insert-label-link
