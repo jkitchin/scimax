@@ -1844,6 +1844,71 @@ This finds other files with links in them to this file."
 ;; 				   (like headline-properties:value $s2)))
 ;; 	 "EMAIL" "%kitchin%")
 
+
+;; * debugging
+(defun org-db-tables ()
+  "Get a list of tables in `org-db'."
+  (interactive)
+  (split-string
+   (shell-command-to-string (format "sqlite3 %s \".tables\"" (expand-file-name org-db-name org-db-root)))))
+
+
+(defun org-db-table-columns (tblname)
+  "List the columns in TBLNAME."
+  (interactive (list (ivy-read "Table: " (org-db-tables))))
+  (message "%s"
+	   (shell-command-to-string (format "sqlite3 %s \"PRAGMA table_info(%s)\""
+					    (expand-file-name org-db-name org-db-root)
+					    tblname))))
+
+(defun org-db-report ()
+  (interactive)
+  (let ((buf (get-buffer-create "*org-db-report*"))
+	(tables (split-string
+		 (shell-command-to-string (format "sqlite3 %s \".tables\""
+						  (expand-file-name org-db-name org-db-root))))))
+    (with-current-buffer buf
+      (erase-buffer)
+      (insert "#+title: org-db report\n\n")
+      
+      (insert "* Files\n\n")
+      (insert (format "org-db is at %s (%1.1f MB)\n\n"
+		      (expand-file-name org-db-name org-db-root)
+		      (/  (float (file-attribute-size (file-attributes (expand-file-name org-db-name org-db-root)))) 1024 1024)))
+
+      (insert (format "org-db contains:\n- %d files\n"
+		      (with-org-db
+		       (caar (emacsql org-db [:select (funcall count) :from files])))))
+      (insert (format "- %d headlines\n"
+		      (with-org-db
+		       (caar (emacsql org-db [:select (funcall count) :from headlines])))))
+      
+
+      (insert "* tables\n\n")
+      
+      (cl-loop for table in tables do
+	       (insert (format "** %s\n\n" table))
+	       (let ((columns (split-string
+			       (string-trim (shell-command-to-string (format "sqlite3 %s \"PRAGMA table_info(%s)\""
+									     (expand-file-name org-db-name org-db-root)
+									     table)))
+			       "\n")))
+		 (cl-loop for line in columns do
+			  (when line
+			    (insert (concat "|" line "|\n")))))
+	       (insert "\n\n")
+	       (insert (format "# rows: %s\n\n"
+			       (with-org-db
+				(caar (eval `(emacsql org-db [:select (funcall count) :from $s1]
+						      (make-symbol table))))))))
+      
+      (org-table-map-tables (lambda () (org-table-align)))
+
+      (org-mode))
+    (pop-to-buffer buf)
+    (beginning-of-buffer)))
+
+
 ;; * End
 (provide 'org-db)
 
