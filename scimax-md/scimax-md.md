@@ -118,7 +118,7 @@ Suppose you have this equation to solve:
 
 \[8 = x - 4\]  <a name="eq-sle"></a>
 
-You can put a label near this and refer to it later. I guess Github does not do a great job rendering equations.
+You can put a label near this and refer to it later. I guess GitHUB does not do a great job rendering equations.
 
 
 <a id="org6a858e9"></a>

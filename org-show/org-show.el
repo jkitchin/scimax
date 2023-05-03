@@ -394,7 +394,7 @@ Try to reset the state of your Emacs. It isn't perfect ;)"
 
 (defun org-show-increase-text-size (&optional arg)
   "Increase text size. Bound to \\[org-show-increase-text-size].
-With prefix ARG, set `org-show-text-scale' so subsquent slides
+With prefix ARG, set `org-show-text-scale' so subsequent slides
 are the same text size."
   (interactive "P")
   (text-scale-increase 1.5)
@@ -404,7 +404,7 @@ are the same text size."
 
 (defun org-show-decrease-text-size (&optional arg)
   "Increase text size. Bound to \\[org-show-decrease-text-size].
-With prefix ARG, set `org-show-text-scale' so subsquent slides
+With prefix ARG, set `org-show-text-scale' so subsequent slides
 are the same text size."
   (interactive "P")
   (text-scale-decrease 1.5)

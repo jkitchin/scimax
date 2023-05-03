@@ -758,10 +758,25 @@ A prefix arg of 5 opens link in new frame."
       (org-return t))
 
      ;; Open links like usual, unless point is at the end of a line.
-     ;; and if at beginning of line, just press enter.
-     ((or (and (eq 'link (car (org-element-context))) (not (eolp)))
-	  (bolp))
+     ((and (eq 'link (car (org-element-context))) (not (eolp)))
       (org-return))
+     
+
+     ;; when you are here
+     ;; * headline...
+     ;;              ^
+     ;; this rule is activated
+     ((and (bolp)
+	   ;; This is a heuristic device where I found C-a C-e does not return
+	   ;; to the same place. I feel like this is new behavior since org
+	   ;; 9.5ish, but am not sure
+	   (save-excursion
+	     (let ((p (point)))
+	       (org-beginning-of-line)
+	       (org-end-of-line)
+	       (not (= p (point))))))
+      (org-show-entry)
+      (org-insert-heading))
 
      ;; It doesn't make sense to add headings in inline tasks. Thanks Anders
      ;; Johansson!

@@ -14,7 +14,7 @@ See the [[./scimax.org][manual]] for more details.
 * NEWS
 ** [2023-04-26 Wed] scimax 3.0
 
-Another 2+ year update :) This release primarily revolves around making scimax brew-installable. See [[*homebrew]] fir details. This new method installs a command-line utility ~scimax~ that will start scimax for you.
+Another 2+ year update :) This release primarily revolves around making scimax brew-installable. See [[*homebrew]] for details. This new method installs a command-line utility ~scimax~ that will start scimax for you.
 
 There are some newish features. The org-db code has been expanded and includes full-text and image search now. It also provides an org-db-agenda interface.
 

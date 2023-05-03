@@ -90,7 +90,7 @@ Do not include the translate language here, it is added in
 
 
 (defcustom words-translate-preferred-language nil
-  "A two letter language code for the preferred languate to translate to.
+  "A two letter language code for the preferred language to translate to.
 See http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry."
   :group 'words)
 
@@ -342,7 +342,7 @@ Not every language is supported.
 The translation will appear as a message.
 
 If `words-translate-speak' is non-nil, or a double prefix arg is
-used the translation will be read outloud by `words-speak'.
+used the translation will be read aloud by `words-speak'.
 
 Note: there are usage limits of 1000
 words/day (https://mymemory.translated.net/doc/usagelimits.php)."

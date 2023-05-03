@@ -1,7 +1,7 @@
 ;;; org-db-agenda.el --- Agenda from org-db
 
 ;;; Commentary:
-;;
+;; TODO: add scheduled tasks
 
 (require 'org-archive)
 (require 'org-db)
@@ -18,36 +18,36 @@ today Due by today
   (interactive) 
   (let* ((deadline-headings (with-org-db
 			     (emacsql org-db [:select [headlines:level headlines:title headlines:tags
-								       files:filename headlines:begin
-								       headlines:deadline
-								       files:last-updated
-								       headlines:todo-keyword]
-						      :from headlines
-						      :inner :join files
-						      :on (= files:rowid headlines:filename-id)
+						       files:filename headlines:begin
+						       headlines:deadline
+						       files:last-updated
+						       headlines:todo-keyword]
+					      :from headlines
+					      :inner :join files
+					      :on (= files:rowid headlines:filename-id)
 					;only get deadlines before now
-						      :where (and
-							      (= headlines:todo-keyword "TODO")
-							      (is headlines:archivedp (not nil))
-							      (< headlines:deadline $s1))
-						      :order :by headlines:deadline :desc]
+					      :where (and
+						      (= headlines:todo-keyword "TODO")
+						      (is headlines:archivedp (not nil))
+						      (< headlines:deadline $s1))
+					      :order :by headlines:deadline :desc]
 				      (float-time (org-read-date t t before-date)))))
 	 
 	 (todo-headings (with-org-db
 			 (emacsql org-db [:select [headlines:level headlines:title headlines:tags
-								   files:filename headlines:begin
-								   headlines:deadline
-								   files:last-updated
-								   headlines:todo-keyword]
-						  :from headlines
-						  :inner :join files
-						  :on (= files:rowid headlines:filename-id)
-						  ;; headlines with TODO state but no deadline, and not archived
-						  :where (and
-							  (= headlines:todo-keyword "TODO")
-							  (is headlines:deadline (not nil))
-							  (is headlines:archivedp (not nil)))
-						  :order :by files:last-updated :desc])))
+						   files:filename headlines:begin
+						   headlines:deadline
+						   files:last-updated
+						   headlines:todo-keyword]
+					  :from headlines
+					  :inner :join files
+					  :on (= files:rowid headlines:filename-id)
+					  ;; headlines with TODO state but no deadline, and not archived
+					  :where (and
+						  (= headlines:todo-keyword "TODO")
+						  (is headlines:deadline (not nil))
+						  (is headlines:archivedp (not nil)))
+					  :order :by files:last-updated :desc])))
 	 (ignores (pcache-get (pcache-repository :file "org-db-agenda-ignore") 'ignores))
 	 (candidates (cl-loop for (level title tags filename begin deadline last-updated todo-keyword)
 			      in (append deadline-headings todo-headings)

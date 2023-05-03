@@ -1194,7 +1194,7 @@ In an open file run ~M-x git-blame~, then press b to see commits that add lines.
 
   [[info:magit#Rebasing][info:magit#Rebasing]]
 
-**** Interactve rebasing
+**** Interactive rebasing
 
  Open the log, select the oldest commit you want to rebase on then press "r" and then "i". Use M-p and M-n to move commits around. Press "s" on any commits you want to squash into the commit above it. C-c C-c will start the commands.
 
@@ -1284,13 +1284,13 @@ You can make this the default behavior by adding this to your init file:
 #+END_SRC
 
 
-** Jupyter/Ipython
+** TODO Jupyter/Ipython
 
 If you like sessions in Python, the ob-ipython library is better than the default ob-python in org-mode.
 
 Pygments doesn't support ipython out of the box for some reason, which is a problem if you want to export your src block to LaTeX. scimax fixes this for you and automatically installs this if you don't already have it.
 
-ob-ipython allows you to use Ipython magic commands in your src blocks. Here is a protypical Ipython src block with a line magic.
+ob-ipython allows you to use Ipython magic commands in your src blocks. Here is an example Ipython src block with a line magic.
 
 #+BEGIN_SRC ipython  :exports both
 %time print("hello world")

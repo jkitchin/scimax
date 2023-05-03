@@ -1272,7 +1272,7 @@ _/_: directories  _M_: chmod
 _@_: symlinks     _G_: chgrp
 _O_: omitted      _O_: chown
 ----
-_U_: unmark all   _A_: find regx
+_U_: unmark all   _A_: find regex
 _t_: toggle marks _Q_: find/rep
 "
   ;; marking

@@ -117,7 +117,7 @@
 ;; 
 ;; I wrote this because some commands have so many alternate actions
 ;; they are not all visible, and in those cases using completion is
-;; preferrable to scanning a lot of options.
+;; preferable to scanning a lot of options.
 
 ;; (defun scimax-ivy-alternate ()
 ;;   "Run an alternate selection on the current candidate with completion.

@@ -79,7 +79,7 @@ If you are in a contact heading we store a link."
 
 (defun scimax-contact-complete (&optional arg)
   "Completion function for a scimax-contact.
-Optional argument ARG is ingored."
+Optional argument ARG is ignored."
   (let* ((contacts (org-db-contacts-candidates))
 	 (contact (cdr (assoc (completing-read "Contact: " contacts) contacts))))
     (org-link-store-props
@@ -345,7 +345,7 @@ Optional argument PATH is ignored."
 
 
 ;; * Capture contacts in messages
-;; I use this this mu4e, but it should work in any message.
+;; I use this with mu4e, but it should work in any message.
 
 (defun scimax-message-get-emails ()
   "Captures emails in a message."

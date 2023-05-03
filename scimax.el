@@ -57,12 +57,12 @@ Set to nil to avoid loading a theme."
 (setq vc-handled-backends '(Git SVN))
 
 (defun scimax-update ()
-  "Update scimax from github."
+  "Update scimax from GitHUB."
   (interactive)
   (let ((default-directory scimax-dir))
     (when (not (string= "" (shell-command-to-string "git status --porcelain")))
       (shell-command "git add *")
-      (shell-command "git commit -am \"commiting scimax.\""))
+      (shell-command "git commit -am \"committing scimax.\""))
     (shell-command "git pull origin master")
     (shell-command "git submodule update")
     (load-file "init.el")))

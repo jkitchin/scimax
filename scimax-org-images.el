@@ -7,7 +7,7 @@
 ;; org-mode. 1. On Windows, emacs is not always built with imagemagick support.
 ;; This library enables you to use an external program from imagemagick to build
 ;; the thumbnails required to show images. 2. It expands the ways you can resize
-;; an image to supprot more options from mogrify.
+;; an image to support more options from mogrify.
 
 ;;; Code:
 
