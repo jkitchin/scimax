@@ -1464,7 +1464,7 @@ scimax provides the jupyter-hy src block to run hylang in src blocks. The requir
 
 * RSS feeds
 
-It is a major challenge to keep up with the scientific literature. `elfeed' is the package we use in scimax for that. It aggregates RSS feeds and provides a pretty easy way to consume them, capture them in to org-mode, search them, and do things with them. scimax preconfigures elfeed with some python, and emacs feeds, and you can easily add new feeds:
+It is a major challenge to keep up with the scientific literature. `elfeed' is the package we use in scimax for that. It aggregates RSS feeds and provides a pretty easy way to consume them, capture them into org-mode, search them, and do things with them. scimax preconfigures elfeed with some python, and emacs feeds, and you can easily add new feeds:
 
 The scimax customizations of elfeed are not loaded by default. If you want them, you have to add this to  your init files.:
 
