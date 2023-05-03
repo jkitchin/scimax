@@ -9936,7 +9936,7 @@ BOOKMARK is a bookmark name or a bookmark record."
     (let ((buf       (bmkp-get-buffer-name bookmark))
           (kbd-macs  (bookmark-prop-get bookmark 'kmacros)))
       (unless (and buf  (get-buffer buf))
-        (message "Bookmarked for non-existent buffer `%s', so using current buffer" buf) (sit-for 3)
+        (message "Bookmarked for nonexistent buffer `%s', so using current buffer" buf) (sit-for 3)
         (setq buf (current-buffer)))
       (with-current-buffer buf
         (let ((kmacs  kbd-macs))
@@ -9957,7 +9957,7 @@ BOOKMARK is a bookmark name or a bookmark record."
   (let ((buf        (bmkp-get-buffer-name bookmark))
         (vars+vals  (bookmark-prop-get bookmark 'variables)))
     (unless (get-buffer buf)
-      (message "Bookmarked for non-existent buffer `%s', so using current buffer" buf) (sit-for 3)
+      (message "Bookmarked for nonexistent buffer `%s', so using current buffer" buf) (sit-for 3)
       (setq buf (current-buffer)))
     (with-current-buffer buf
       (dolist (var+val  vars+vals)
