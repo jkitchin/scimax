@@ -2452,7 +2452,7 @@
 ;; 2010/06/11 dadams
 ;;     Wrap all (require '* nil t) in condition-case.
 ;; 2010/06/07 dadams
-;;     Fix deskstop bookmarks for Emacs < 22.  Protect:
+;;     Fix desktop bookmarks for Emacs < 22.  Protect:
 ;;       *-release-lock with fboundp, *-buffer-args-list with boundp, *-dir with Emacs version #,
 ;; 2010/05/30 dadams
 ;;     Added: bookmarkp-(next|previous)-bookmark-w32(-repeat).  Bound to C-x p (next|prior).
