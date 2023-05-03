@@ -158,7 +158,7 @@ We store all projects by default in nb-notebook-directory. You can use nested di
 	       (shell-command "git init")
 	       ;; We also should have a .projectile. I think this will make some
 	       ;; searches work on files not committed to the git repo. In any
-	       ;; case, it should not hurt anythin.
+	       ;; case, it should not hurt anything.
 	       (shell-command "touch .projectile")))
 	    ((eq 'projectile nb-project-type)
 	     (let ((default-directory dir))
