@@ -49,7 +49,7 @@
 ;;; Commentary:
 ;;
 ;; This code allows you to grab either the current selected items, or
-;; the frontmost url in various mac appliations, and insert them as
+;; the frontmost url in various mac applications, and insert them as
 ;; hyperlinks into the current org-mode document at point.
 ;;
 ;; This code is heavily based on, and indeed incorporates,
