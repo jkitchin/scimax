@@ -748,7 +748,7 @@ I often want to make links between projects. For example, I may have notes in a 
 
 We need a different kind of link that allows you to specify a project, and a file in that project. Then, when you follow the link, it will look up the project in your list of known projects to get the root directory for it, and then construct a path to the file from that.
 
-Here we define a new org-link for making links to files in notebooks. These links will look like nb:project-name::relative-file-path::link-target. If the target is not existent, the link will be red.
+Here we define a new org-link for making links to files in notebooks. These links will look like nb:project-name::relative-file-path::link-target. If the target is nonexistent, the link will be red.
 
 - project-name :: Name of project, usually at the end of the absolute path to the project directory.
 - relative-file-path :: Path to a file, usually relative to the project root

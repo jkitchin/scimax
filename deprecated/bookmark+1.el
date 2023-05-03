@@ -382,7 +382,7 @@
 ;;    `bmkp-region-jump-other-window', `bmkp-remote-file-jump',
 ;;    `bmkp-remote-file-jump-other-window',
 ;;    `bmkp-remote-non-dir-file-jump',
-;;    `bmkp-temote-non-dir-file-jump-other-window',
+;;    `bmkp-remote-non-dir-file-jump-other-window',
 ;;    `bmkp-remove-all-tags', `bmkp-remove-tags',
 ;;    `bmkp-remove-tags-from-all', `bmkp-rename-tag',
 ;;    `bmkp-retrieve-icicle-search-hits',
@@ -954,7 +954,7 @@ The possible values:
 (defcustom bmkp-auto-idle-bookmark-min-distance 1000
   "*Minimum number of chars between automatic bookmark positions."
   :type '(choice
-          (const   :tag "No minumum distance" nil)
+          (const   :tag "No minimum distance" nil)
           (integer :tag "At least this many chars" :value 1000))
   :group 'bookmark-plus)
 
@@ -4252,7 +4252,7 @@ When you finish editing, use \\<bmkp-edit-bookmark-record-mode-map>\
 (define-key bmkp-edit-bookmark-records-mode-map "\C-c\C-c" 'bmkp-edit-bookmark-records-send)
 
 (defvar bmkp-edit-bookmark-records-number 0
-  "NUmber of bookmard records being edited.")
+  "NUmber of bookmark records being edited.")
 
 ;;;###autoload (autoload 'bmkp-edit-bookmark-records-send "bookmark+")
 (defun bmkp-edit-bookmark-records-send (&optional msg-p) ; Bound to `C-c C-c' in records-editing buffer.
@@ -6180,7 +6180,7 @@ If it is a record then it need not belong to `bookmark-alist'."
 
 (defun bmkp-url-bookmark-p (bookmark)
   "Return non-nil if BOOKMARK is a URL bookmark.
-This means that it satifies `bmkp-eww-bookmark-p' (Emacs 25+),
+This means that it satisfies `bmkp-eww-bookmark-p' (Emacs 25+),
 `bmkp-w3m-bookmark-p', or `bmkp-url-browse-bookmark-p'.
 
 BOOKMARK is a bookmark name or a bookmark record.
@@ -7081,7 +7081,7 @@ Return the copy.
 Do not sort if `bmkp-sort-comparer' is nil.
 This is a non-destructive operation: ALIST is not modified.
 
-Sorting is done using using `bmkp-sort-comparer'.
+Sorting is done using `bmkp-sort-comparer'.
 If `bmkp-reverse-sort-p' is non-nil, then reverse the sort order.
 Keys are compared for sorting using `equal'.
 
@@ -7114,7 +7114,7 @@ elements with keys in list OMIT."
 ;;; Always remove duplicates.  Keep only the first element with a given
 ;;; key.  This is a non-destructive operation: ALIST is not modified.
 
-;;; Sorting is done using using `bmkp-sort-comparer'.
+;;; Sorting is done using `bmkp-sort-comparer'.
 ;;; If `bmkp-reverse-sort-p' is non-nil, then reverse the sort order.
 ;;; Keys are compared for sorting using `equal'.
 ;;; If optional arg OMIT is non-nil, then omit from the return value any
@@ -9936,7 +9936,7 @@ BOOKMARK is a bookmark name or a bookmark record."
     (let ((buf       (bmkp-get-buffer-name bookmark))
           (kbd-macs  (bookmark-prop-get bookmark 'kmacros)))
       (unless (and buf  (get-buffer buf))
-        (message "Bookmarked for non-existent buffer `%s', so using current buffer" buf) (sit-for 3)
+        (message "Bookmarked for nonexistent buffer `%s', so using current buffer" buf) (sit-for 3)
         (setq buf (current-buffer)))
       (with-current-buffer buf
         (let ((kmacs  kbd-macs))
@@ -9957,7 +9957,7 @@ BOOKMARK is a bookmark name or a bookmark record."
   (let ((buf        (bmkp-get-buffer-name bookmark))
         (vars+vals  (bookmark-prop-get bookmark 'variables)))
     (unless (get-buffer buf)
-      (message "Bookmarked for non-existent buffer `%s', so using current buffer" buf) (sit-for 3)
+      (message "Bookmarked for nonexistent buffer `%s', so using current buffer" buf) (sit-for 3)
       (setq buf (current-buffer)))
     (with-current-buffer buf
       (dolist (var+val  vars+vals)

@@ -606,7 +606,7 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   ("z" (scimax-open-hydra scimax-jump/body) :color blue)
   ("H-w" backward-word)
   ("H-s" backward-sentence)
-  ("H-p" backaward-paragraph)
+  ("H-p" backward-paragraph)
   ("s-p" forward-paragraph)
   ("s-w" forward-word)
   ("s-s" forward-sentence)

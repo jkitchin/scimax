@@ -664,7 +664,7 @@
 ;;     bmkp-remove-all-tags, bmkp(-autofile)-(add|remove)-tags, bmkp-set-tag-value,
 ;;       bmkp-paste-(add|replace)-tags, bmkp-(url|file)-target-set, bmkp-autofile-set:
 ;;         Added missing NO-UPDATE-P arg for interactive spec.
-;;     bmkp-remove-all-tags: Moveed msg to the end.
+;;     bmkp-remove-all-tags: Moved msg to the end.
 ;;     bmkp-paste-replace-tags: Added sleep-for after first msg.
 ;; 2012/11/13 dadams
 ;;     bmkp-sorting-description: Fixed 1st case: use ORDER only if bmkp-sort-comparer is also non-nil.
@@ -2452,7 +2452,7 @@
 ;; 2010/06/11 dadams
 ;;     Wrap all (require '* nil t) in condition-case.
 ;; 2010/06/07 dadams
-;;     Fix deskstop bookmarks for Emacs < 22.  Protect:
+;;     Fix desktop bookmarks for Emacs < 22.  Protect:
 ;;       *-release-lock with fboundp, *-buffer-args-list with boundp, *-dir with Emacs version #,
 ;; 2010/05/30 dadams
 ;;     Added: bookmarkp-(next|previous)-bookmark-w32(-repeat).  Bound to C-x p (next|prior).
@@ -3329,7 +3329,7 @@
 ;;                  Faces for menu list.  Change region color.
 ;;       2009-06-11 Add: *-region-search-size, *-get-buffername, *-use-region.
 ;;                  Redefine *-handle-bookmark, *-jump, to fit bookmark-use-region.
-;;                  Add condtions to bookmark-make-record.  Support w3m.  Support t command.
+;;                  Add conditions to bookmark-make-record.  Support w3m.  Support t command.
 ;;       2009-06-10 Fix search regexp.  Fix region in Info. Save bookmark if region moves.
 ;;       2009-06-09 Added: bookmark-make-record(-region), bookmark-region-handler.
 ;;                  Relocation.

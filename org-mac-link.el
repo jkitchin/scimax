@@ -49,7 +49,7 @@
 ;;; Commentary:
 ;;
 ;; This code allows you to grab either the current selected items, or
-;; the frontmost url in various mac appliations, and insert them as
+;; the frontmost url in various mac applications, and insert them as
 ;; hyperlinks into the current org-mode document at point.
 ;;
 ;; This code is heavily based on, and indeed incorporates,
@@ -324,7 +324,7 @@ The links are of the form <link>::split::<name>."
 ;; the contents of the url bar, and copy it. It then uses the title of
 ;; the window as the text of the link. There is no way to grab links
 ;; from other open tabs, and further, if there is more than one window
-;; open, it is not clear which one will be used (though emperically it
+;; open, it is not clear which one will be used (though empirically it
 ;; seems that it is always the last active window).
 
 (defun org-as-mac-firefox-get-frontmost-url ()

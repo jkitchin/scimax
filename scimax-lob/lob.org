@@ -559,7 +559,7 @@ Fraga.  It was modified slightly by Tom Dye.
 | CSS        | css        | ditaa          | ditaa      |
 | Graphviz   | dot        | Emacs Lisp     | emacs-lisp |
 | gnuplot    | gnuplot    | Haskell        | haskell    |
-| Javascript | js         | LaTeX          | latex      |
+| JavaScript | js         | LaTeX          | latex      |
 | Ledger     | ledger     | Lisp           | lisp       |
 | Lilypond   | lilypond   | MATLAB         | matlab     |
 | Mscgen     | mscgen     | Objective Caml | ocaml      |

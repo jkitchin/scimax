@@ -146,7 +146,7 @@
    :button-prefix ""
    :button-suffix ""
    :format "%[%t%]"
-   "scimax (Github)")
+   "scimax (GitHub)")
 
   (insert "    ")
   (widget-create

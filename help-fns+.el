@@ -109,7 +109,7 @@
 ;;    (require 'help-fns+)
 ;;
 ;;  Acknowledgement: Passing text properties on doc strings to the
-;;  *Help* buffer is an idea from Johan bockgard.  He sent it on
+;;  *Help* buffer is an idea from Johan Bockgard.  He sent it on
 ;;  2007-01-24 to emacs-devel@gnu.org, Subject
 ;;  "display-completion-list should not strip text properties".
 ;;
@@ -762,7 +762,7 @@ Optional arg NOMSG non-nil means do not display a progress message."
   (defun Info-first-index-occurrence (index-entry &optional index-nodes manuals nomsg)
     "Return nil or an occurrence of INDEX-ENTRY in INDEX-NODES of MANUALS.
 Search INDEX-NODES and MANUALS in order.
-A non-nil return value is the first first successful index lookup, in
+A non-nil return value is the first successful index lookup, in
 the form (FILE INDEX-ENTRY NODE LINE) - see `Info-index-occurrences'.
 
 Optional arg INDEX-NODES are the index nodes of MANUALS to search.

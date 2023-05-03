@@ -3,7 +3,7 @@
 
 * Updates to ipython in scimax
 
-Scimax has used a forked version ob-ipython for a long time. The upstream version has improved a lot over the last year, and is nicer than my forked version, especially for asynchronous blocks. So.... I have been working to integrate the upstream version and replace my forked version. Well, mostly. I have specific things I want in org-mode/ipython integration that aren't built in to ob-ipython, and aren't customizable either. So, my new integration still monkey patches quite a few ob-ipython functions.
+Scimax has used a forked version ob-ipython for a long time. The upstream version has improved a lot over the last year, and is nicer than my forked version, especially for asynchronous blocks. So.... I have been working to integrate the upstream version and replace my forked version. Well, mostly. I have specific things I want in org-mode/ipython integration that aren't built into ob-ipython, and aren't customizable either. So, my new integration still monkey patches quite a few ob-ipython functions.
 
 The new update is in two files: [[./scimax-ob.el]], which contains pretty general functions for all org babel src blocks I think, and [[./scimax-org-babel-ipython-upstream.el]] which contains monkey-patches on ob-ipython, and additional features.
 

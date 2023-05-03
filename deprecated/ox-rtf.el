@@ -6,7 +6,7 @@
 ;; for RTF see http://www.biblioscape.com/rtf15_spec.htm
 ;; and https://www.safaribooksonline.com/library/view/rtf-pocket-guide/9781449302047/ch01.html
 ;;
-;; It isn't my intention to full support RTF export to arbitrily complex
+;; It isn't my intention to full support RTF export to arbitrarily complex
 ;; documents, although I would like to get to where citations as footnotes are
 ;; reasonable, and cross-references work.
 

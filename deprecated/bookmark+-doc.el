@@ -387,7 +387,7 @@
 ;;     - Lisp variable bookmarks.  A bookmark can represent a set of
 ;;       variables and their values.
 ;;
-;;     - Snippet bookmarks.  Select some some text and give it a
+;;     - Snippet bookmarks.  Select some text and give it a
 ;;       (bookmark) name.  Then copy it to the `kill-ring' anytime, in
 ;;       any Emacs session.
 ;;
@@ -839,7 +839,7 @@
 ;;  (see (@> "Bookmarks for Specific Files or Buffers")).
 ;;
 ;;  All bookmark jump commands are bound to keys that have the prefix
-;;  `C-x j'.  There is an other-window version of most jump commands,
+;;  `C-x j'.  There is an `other-window` version of most jump commands,
 ;;  and it is bound to the same key as the same-window command, except
 ;;  the prefix is `C-x 4 j', not `C-x j'.  For instance,
 ;;  `bmkp-dired-jump-other-window' is bound to `C-x 4 j d'.
@@ -854,7 +854,7 @@
 ;;  `bmkp-jump-map-prefix-keys' and
 ;;  `bmkp-jump-other-window-map-prefix-keys'.
 ;;
-;;  If you do not remember the different type-specfic bindings, you
+;;  If you do not remember the different type-specific bindings, you
 ;;  can use commands `bmkp-jump-to-type' and
 ;;  `bmkp-jump-to-type-other-window' (`C-x j :' and `C-x 4 j :').
 ;;  They work for any type, prompting you first for the type, then for
@@ -1196,7 +1196,7 @@
 ;;    T v bmkp-jump RET (lambda () (message "Hello!"))
 ;;
 ;;  The function that is the value of a "bmkp-jump" tag is called just
-;;  after the the standard hook `bookmark-after-jump-hook' is invoked.
+;;  after the standard hook `bookmark-after-jump-hook' is invoked.
 ;;  You can use this tag to invoke functions that are specific to
 ;;  individual bookmarks; bookmarks can thus have their own, extra
 ;;  jump functions.
@@ -3071,7 +3071,7 @@
 ;;    then the bookmarks in the current file or buffer are used as the
 ;;    navlist.
 ;;
-;;  * Otherwise, a snapshot is taken of the the bookmarks currently in
+;;  * Otherwise, a snapshot is taken of the bookmarks currently in
 ;;    the global bookmark list (the value of variable
 ;;    `bookmark-alist') as the navlist.
 ;;
@@ -3472,7 +3472,7 @@
 ;;  You can delete all such temporary bookmarks from the current
 ;;  bookmark list using command `bmkp-delete-all-temporary-bookmarks'
 ;;  (or by using `X M' to mark them in the bookmark-list display and
-;;  then hitting `D' to delete thems).
+;;  then hitting `D' to delete them).
 ;;
 ;;  In the bookmark-list display (buffer `*Bookmark List*'), temporary
 ;;  bookmarks are indicated with the mark `X' in the same column where
@@ -3664,7 +3664,7 @@
 ;;  the text in the buffer, the highlighted location can thus become
 ;;  out of sync with the recorded position.  This is normal.  When you
 ;;  jump to the bookmark, its highlight is automatically repositioned
-;;  to the recorded location, possibly adjusted according to the the
+;;  to the recorded location, possibly adjusted according to the
 ;;  surrounding context.
 ;;
 ;;  In addition to the default highlighting, which you can customize,
