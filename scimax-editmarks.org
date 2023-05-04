@@ -1152,7 +1152,7 @@ content: ${content}"
 
 *** Inserting editmarks
 
- This generates the insert commands. This trys to be a dwim type of command.
+ This generates the insert commands. This tries to be a dwim type of command.
 
 If you are on a blank space, insert the markers and put the cursor in the middle.
 

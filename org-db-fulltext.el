@@ -29,18 +29,7 @@ BODY should be regular commands. They can use the variable `org-db' in them."
 	   ,@body)
        (emacsql-close org-db-ft)
        (emacsql-close org-db-ft)
-       (setq org-db-ft nil)))
-  
-  ;; `(let* ((org-db-ft (emacsql-sqlite (expand-file-name org-db-fulltext org-db-root)))
-  ;; 	  (results))
-  ;;    (prog1
-  ;; 	 (condition-case err
-  ;; 	     ,@body
-  ;; 	   (org-db-log "Error fulltext: %s" err))
-  ;;      ;; It seems like you need to call this twice before org-db is nil
-  ;;      (emacsql-close org-db-ft)
-  ;;      (emacsql-close org-db-ft)))
-  )
+       (setq org-db-ft nil))))
 
 ;; Make sure the database and table exists
 (with-org-db-ft
@@ -67,6 +56,7 @@ BODY should be regular commands. They can use the variable `org-db' in them."
 
 (defun org-db-fulltext-search ()
   "Search the fulltext database.
+This function opens the file at the first match of your query string.
 This uses ivy right now, since it is so fast. On day I might have
 to change this. It could be nice to find some way to read in an
 emacsql query like :match '\"something.\" Alternatively, I may
@@ -77,6 +67,7 @@ need a better async version."
     (ivy-read "query: " candidates
 	      :action (lambda (x)
 			(find-file (cadr x))
+			(goto-char (point-min))
 			(re-search-forward ivy-text)
 			(goto-char (match-beginning 0))))))
 

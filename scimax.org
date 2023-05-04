@@ -431,7 +431,7 @@ scimax also defines some abbreviations that you can toggle on and off. The abbre
    2. `scimax-weekday-abbreviations'
 2. Contraction expansion: cant to can not and can't  to can not
    1. `scimax-contraction-abbreviations'
-3. Commonly transposed letters in words: teh to the
+3. Commonly transposed letters in words: the to the
    1. `scimax-transposition-abbreviations'
 4. Some common chemicals like co2 to CO_{2}
    1. `scimax-chemical-formula-abbreviations'

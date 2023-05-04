@@ -496,7 +496,7 @@ words"
 
   ("sb" words-bibtex "bibtex" :column "search")
   ("sf" words-finder "Mac Finder" :column "search")
-  ("sa" words-swiper-all "swiper-all" :colum "search")
+  ("sa" words-swiper-all "swiper-all" :column "search")
   ("sm" words-mdfind "mdfind" :column "search")
 
   ("k" words-speak "Speak" :column "audio")

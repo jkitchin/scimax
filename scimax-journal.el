@@ -351,7 +351,7 @@ use this a lot, but Shreyas thought it would be helpful."
 (defun scimax-journal-grep (regex &optional case-sensitive)
   "Run grep on all the files in `scimax-journal-root-dir'.
 Argument REGEX the pattern to grep for.
-CASE-SENSITIVE is optional to mke the search case sensitive if non-nil."
+CASE-SENSITIVE is optional to make the search case sensitive if non-nil."
   (interactive "sPattern: \nP")
   (let ((default-directory scimax-journal-root-dir))
     (grep (format "grep -nH %s --recursive %s *"

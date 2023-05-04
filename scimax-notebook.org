@@ -298,7 +298,7 @@ This function allows you to search an agenda like you would use org-tags-view. =
 
 #+BEGIN_SRC emacs-lisp :tangle yes :results silent
 (defun nb-search-agenda (&optional todo-only match)
-  "Search notebook agenda similar to `org-tags-vew'."
+  "Search notebook agenda similar to `org-tags-view'."
   (interactive "P")
   (let ((org-agenda-files (nb-org-files)))
     (org-tags-view todo-only match)))

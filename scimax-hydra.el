@@ -1385,7 +1385,7 @@ _s_ort keys
   "
 org table
 _ic_: insert column    _M-<left>_: move col left    _d_: edit field
-_dc_: delete colum     _M-<right>_: move col right  _e_: eval formula
+_dc_: delete column    _M-<right>_: move col right  _e_: eval formula
 _ir_: insert row       _M-<up>_: move row up        _E_: export table
 _ic_: delete row       _M-<down>_: move row down    _r_: recalculate
 _i-_: insert line      _w_: wrap region             _I_: org-table-iterate

@@ -200,7 +200,7 @@
 ;; 2013/02/08 dadams
 ;;     describe-variable: Updated wrt Emacs 24 build of 2013-01-30.
 ;; 2012/11/18 dadams
-;;     describe-(variable|function): Add completion-candidate annotation: (option|comand).
+;;     describe-(variable|function): Add completion-candidate annotation: (option|command).
 ;; 2012/10/28 dadams
 ;;     help-fns--key-bindings: Fixed: forgot to mapconcat over keys.
 ;; 2012/10/26 dadams
