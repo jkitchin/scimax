@@ -624,9 +624,9 @@ PARSE-TREE is from `org-element-parse-buffer'."
 		     (org-element-property :search-option link)
 		     (org-element-property :begin link)))))
 	 ;; WHAT IS THIS DOING????
-	 (ba (-split-at 400 links))
-	 (handle (nth 0 ba))
-	 (next (nth 1 ba)))
+	 (before-after (-split-at 400 links))
+	 (handle (nth 0 before-after))
+	 (next (nth 1 before-after)))
 
     (with-org-db
      ;; * delete old links
@@ -635,9 +635,9 @@ PARSE-TREE is from `org-element-parse-buffer'."
      ;;  ** add new links
      (while handle
        (emacsql org-db [:insert :into links :values $v1] handle)
-       (setq ba (-split-at 400 next)
-	     handle (nth 0 ba)
-	     next (nth 1 ba))))))
+       (setq before-after (-split-at 400 next)
+	     handle (nth 0 before-after)
+	     next (nth 1 before-after))))))
 
 
 (defun org-db-update-headlines (filename-id parse-tree)
