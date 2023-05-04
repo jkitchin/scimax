@@ -162,6 +162,28 @@ FLYSPELL-BUFFER."
 	(message "No more miss-spelled word!"))))
 
 
+;; * typos
+
+(defun typos ()
+  "Run typos and make a clickable buffer to get to the typos.
+See https://github.com/crate-ci/typos."
+  (interactive)
+  (let ((lines (split-string (string-trim (shell-command-to-string "typos --format json --exclude=*.png --exclude=*deprecated*")) "\n"))
+	data)
+    (with-current-buffer (get-buffer-create "*typos*")
+      (erase-buffer)
+      ;; (insert (shell-command-to-string "typos --format json"))
+      (cl-loop for line in lines do
+	       (let-alist (json-read-from-string line)
+		 (insert (format "- %s [[elisp:(progn (find-file \"%s\") (goto-line %s)(forward-char %s))][%s]] %s -> %s\n"
+				 .type
+				 .path
+				 .line_num .byte_offset
+				 .path
+				 .typo .corrections))))
+      (org-mode))
+    (pop-to-buffer "*typos*")))
+
 (provide 'scimax-spellcheck)
 
 ;;; scimax-spellcheck.el ends here
