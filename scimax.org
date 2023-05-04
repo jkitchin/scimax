@@ -1,6 +1,6 @@
 #+TITLE: Scimax - The manual
 #+AUTHOR: John Kitchin
-#+DATE: 2016-2021
+#+DATE: 2016-2023
 #+options: toc:nil
 
 \maketitle
