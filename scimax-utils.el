@@ -302,8 +302,7 @@ You can also try putting expressions in for formatting, e.g.:
   "Take a screenshot and insert org link.
 screencapture starts in window capture mode. press space bar to
 toggle it to mouse select. with prefix arg, minimize emacs first.
-with double prefix arg, prompt for filename. Only works on Mac
-OSX."
+with double prefix arg, prompt for filename. Only works on macOS."
   (interactive "P")
   (when arg
     (suspend-frame))
