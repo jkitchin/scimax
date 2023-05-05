@@ -138,8 +138,10 @@ today Due by today
   "Update current entry"
   (let* ((plist (cdr candidate))
 	 (fname (plist-get plist :file)))
-    (with-current-buffer (find-file-noselect fname)
-      (org-db-update-buffer t))))
+    (if (file-exists-p fname)
+	(with-current-buffer (find-file-noselect fname)
+	  (org-db-update-buffer t))
+      (org-db-remove-file fname))))
 
 
 (defun org-db-agenda (before)
@@ -184,9 +186,13 @@ today Due by today
   (cl-loop for candidate in (org-db-agenda--candidates before) do
 	   (let* ((fname (plist-get (cdr candidate) :file))
 		  (open (get-file-buffer fname))
-		  ;; TODO remove files that don't exist
 		  (buf (when (file-exists-p fname) (find-file-noselect fname))))
-	     (when buf
+	     (if (null buf)
+		 (let* ((filename-id (org-db-get-filename-id fname)))
+		   (with-org-db
+		    (emacsql org-db [:delete :from files :where (= rowid $s2)] filename-id)
+		    (org-db-log "Removed %s from the database." fname)))
+	       
 	       (with-current-buffer buf
 		 (org-db-update-buffer t))
 	       (when (null open)

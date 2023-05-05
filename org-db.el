@@ -372,23 +372,29 @@ Adds FNAME to the database if it doesn't exist."
 (defun org-db-remove-buffer ()
   "Remove the current buffer from the database."
   (interactive)
-  (let* ((filename-id (org-db-get-filename-id (buffer-file-name))))
-    (with-org-db
-     ;; delete links
-     (emacsql org-db [:delete :from links :where (= links:filename-id $s1)] filename-id)
+  (org-db-remove-file (buffer-file-name)))
 
-     ;; keywords
-     (emacsql org-db [:delete :from file-keywords
-			      :where (= file-keywords:filename-id $s1)]
-	      filename-id)
 
-     ;; headlines
-     (emacsql org-db [:delete :from headlines :where (= headlines:filename-id $s1)]
-	      filename-id)
+(defun org-db-remove-file (fname)
+  "Remove FNAME from the database."
+  (let* ((filename-id (org-db-get-filename-id fname)))
+    (when filename-id
+      (with-org-db
+       ;; delete links
+       (emacsql org-db [:delete :from links :where (= links:filename-id $s1)] filename-id)
 
-     ;; and the file
-     (emacsql org-db [:delete :from files :where (= rowid $s2)] filename-id)
-     (org-db-log "Removed %s from the database." (buffer-file-name)))))
+       ;; keywords
+       (emacsql org-db [:delete :from file-keywords
+				:where (= file-keywords:filename-id $s1)]
+		filename-id)
+
+       ;; headlines
+       (emacsql org-db [:delete :from headlines :where (= headlines:filename-id $s1)]
+		filename-id)
+
+       ;; and the file
+       (emacsql org-db [:delete :from files :where (= rowid $s2)] filename-id)
+       (org-db-log "Removed %s from the database." (buffer-file-name))))))
 
 
 ;; * Update the database for a buffer
