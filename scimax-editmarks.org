@@ -2132,8 +2132,8 @@ changed."
       1. You are in an empty editmark, we should delete it. [[(delete-2-empty)]]
       2. Fresh delete, insert markers and put content in them. [[(delete-2-new)]]
       3. At the beginning of a delete, and deleting. Push deletion to front of content. [[(delete-2-front)]].
-      4. At the beginning of a delete and end of another delete. merge them. [[(delete-2-merge)]].
-      5. At the beginning of a delete and end of another mark. Just move in to previous mark. [[(delete-2-end+mark)]].
+      4. At the beginning of a delete and end of another delete. Merge them. [[(delete-2-merge)]].
+      5. At the beginning of a delete and end of another mark. Just move to the previous mark. [[(delete-2-end+mark)]].
       6. At the end of a delete, but not looking at another mark. Jump to the front. [[(delete-2-end-extend)]]
 
 
