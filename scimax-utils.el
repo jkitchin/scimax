@@ -375,7 +375,7 @@ ARG prompt for filename, else generate one. images are saved in
   "Take a screenshot and insert org link.
 with prefix arg, minimize emacs first.
 With a double prefix, prompt for the filename.
-Only works on Mac OSX."
+Only works on macOS."
   (interactive "P")
   (when arg
     (suspend-frame))
