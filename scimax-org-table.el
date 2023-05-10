@@ -15,14 +15,20 @@
     (when pos (goto-char pos))))
 
 
-(defun scimax-org-get-named-table (ref)
+(defun scimax-org-get-named-table (name)
   "Return the table with NAME as Lisp."
-  (org-babel-ref-resolve ref))
+  (org-babel-ref-resolve name))
 
 
-(defun scimax-org-table-column (ref col)
-  "For the table in REF return column number COL."
-  (cl-loop for row in (scimax-org-get-named-table ref)
+(defun scimax-org-table-row (name row)
+  "For the table in NAME return the row number ROW.
+This includes hlines, etc."
+  (nth row (scimax-org-get-named-table name)))
+
+
+(defun scimax-org-table-column (name col)
+  "For the table in NAME return column number COL."
+  (cl-loop for row in (scimax-org-get-named-table name)
 	   if (and (sequencep row)
 		   (not (string= "!" (car row)))
 		   (not (string= "^" (car row)))
