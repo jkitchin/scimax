@@ -760,6 +760,9 @@ A prefix arg of 5 opens link in new frame."
      ;; Open links like usual, unless point is at the end of a line.
      ((and (eq 'link (car (org-element-context))) (not (eolp)))
       (org-return))
+
+     ((looking-at org-heading-regexp)
+      (org-return))
      
 
      ;; when you are here
@@ -767,11 +770,16 @@ A prefix arg of 5 opens link in new frame."
      ;;              ^
      ;; this rule is activated
      ((and (bolp)
+	   ;; This avoids the case where you are at the beginning of a line that is not folded
+	   (save-excursion
+	     (let ((p (point))) 
+	       (org-beginning-of-line) 
+	       (not (= p (point)))))
 	   ;; This is a heuristic device where I found C-a C-e does not return
 	   ;; to the same place. I feel like this is new behavior since org
 	   ;; 9.5ish, but am not sure
 	   (save-excursion
-	     (let ((p (point)))
+	     (let ((p (point))) 
 	       (org-beginning-of-line)
 	       (org-end-of-line)
 	       (not (= p (point))))))
@@ -819,6 +827,9 @@ A prefix arg of 5 opens link in new frame."
 	     (looking-back "[0-9]+. " (line-beginning-position)))
 	(beginning-of-line)
 	(delete-region (line-beginning-position) (line-end-position)))
+       ((and (looking-at "$")
+	     (looking-at "^"))
+	(org-return))
        ;; insert new item
        (t
 	(end-of-line)
@@ -835,7 +846,8 @@ A prefix arg of 5 opens link in new frame."
 	;; The heading was empty, so we delete it
 	(beginning-of-line)
 	(setf (buffer-substring
-	       (line-beginning-position) (line-end-position)) "")))
+	       (line-beginning-position) (line-end-position))
+	      "")))
 
      ;; tables
      ((org-at-table-p)
@@ -848,7 +860,8 @@ A prefix arg of 5 opens link in new frame."
 	;; empty row
 	(beginning-of-line)
 	(setf (buffer-substring
-	       (line-beginning-position) (line-end-position)) "")
+	       (line-beginning-position) (line-end-position))
+	      "")
 	(org-return)))
      ;; fall-through
      (t
