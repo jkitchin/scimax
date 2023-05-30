@@ -10,7 +10,7 @@
 ;; a hydra or transient menu?
 
 (defun scimax-mac-attach-from-finder ()
-  ""
+  "Attach a file from Finder on MacOS."
   (interactive)
   (let* ((item (as-get-selected-finder-items))
 	 (fields (split-string item "::split::"))
