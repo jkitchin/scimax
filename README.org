@@ -12,19 +12,19 @@ See the [[./scimax.org][manual]] for more details.
 #+END_HTML
 
 * NEWS
-** [2023-04-26 Wed] scimax 3.0
+** [2023-05-30 Tue] scimax 3.0
 
 Another 2+ year update :) This release primarily revolves around making scimax brew-installable. See [[*homebrew]] for details. This new method installs a command-line utility ~scimax~ that will start scimax for you.
 
-There are some newish features. The org-db code has been expanded and includes full-text and image search now. It also provides an org-db-agenda interface.
+There are some newish features. The org-db code has been expanded and includes full-text and image search now. It also provides an org-db-agenda interface. This code is still "just useful enough"; although I use it almost daily, it is still not perfect and has some [[./org-db.org::*Known issues][issues]] that make it likely I will never separate it from scimax.
 
-scimax now uses [[https://github.com/nnicandro/emacs-jupyter][emacs-jupyter]].
+scimax now uses [[https://github.com/nnicandro/emacs-jupyter][emacs-jupyter]]. See [[./scimax-jupyter.org]] for some examples.
 
 New files include:
 
 - [[./scimax-org-table.el]] :: some convenience functions for tables
 - [[./scimax-projectile.el]] :: projectile integration functions
-- [[./scimax-org-attachments.el]] ::
+- [[./scimax-org-attachments.el]] :: org-attachment enhancements for scimax
 - [[./scimax-slack.el]] :: integration with Slack
 - [[./scimax-ob-flycheck.el]]  :: integration of flycheck with src blocks (experimental)
 - [[./ox-twee2.el]] :: experimental exporter for org to twee (interactive fiction)
@@ -84,6 +84,19 @@ This will output some text that tells you how to load scimax in your init file. 
 (load "/usr/local/opt/scimax/share/emacs/site-lisp/scimax/init.el")
 #+END_SRC
 
+If you install scimax by homebrew, you want some lines like this in your ~/.emacs.d/init.el file:
+
+#+BEGIN_SRC emacs-lisp
+;; If you want preload variables
+(load  "/Users/jkitchin/Dropbox/emacs/user/preload.el")
+
+;; This is what homebrew installed
+(load "/usr/local/opt/scimax/share/emacs/site-lisp/scimax/init.el")
+
+;; This points to your user.el file
+(load  "/Users/jkitchin/Dropbox/emacs/user/user.el")
+#+END_SRC
+
 
 ** archived methods
 
@@ -121,8 +134,6 @@ This got me:
 : GNU Emacs 28.2 (build 1, x86_64-apple-darwin22.4.0, NS appkit-2299.50 Version 13.3.1 (Build 22E261))
 :  of 2023-04-25
 
-
-
 After that, I clone scimax like this:
 
 #+BEGIN_SRC sh
@@ -134,6 +145,8 @@ and launch emacs with:
 #+BEGIN_SRC sh
 emacs -q -l scimax/init.el
 #+END_SRC
+
+Note that scimax no longer loads your user files like it did before. You will need to add some lines to an init file to do this.
 
 *** Linux users
 
@@ -157,7 +170,7 @@ There is an emacs 25.2 binary in this repository for Windows. You should be able
 
 ** Manual installation
 
-You can use your own emacs if you have one (version 25 or more is recommended). You still have to install Python and LaTeX if you will be using those.
+You can use your own emacs if you have one (version 27 or more is recommended). You still have to install Python and LaTeX if you will be using those.
 
 Clone the scimax repo where you want it.
 
@@ -179,6 +192,7 @@ Alternatively, add scimax to your load path in your init file and just require w
 #+END_SRC
 
 It is not uncommon to have to restart emacs a few times while all the packages from MELPA are installed. Windows seems to be like that.
+
 * Funding for scimax
 
 =scimax= development has been partially supported by the following grants:
