@@ -161,6 +161,22 @@ FLYSPELL-BUFFER."
     (if (= pos min)
 	(message "No more miss-spelled word!"))))
 
+;; * flyspell predicate function in scimax
+;;
+;; This variable `flyspell-generic-check-word-predicate' is used to determine if a word is mispelled. Org-mode sets this variable to `org-mode-flyspell-verify'. I have a need to augment this.
+
+(defvar scimax-flyspell-predicates '(org-mode-flyspell-verify)
+  "List of functions to check in order for flyspell.
+Each function returns t if it should continue, and nil to ignore.")
+
+(defun scimax-flyspell-verify ()
+  "flyspell-verification function.
+Only continue if all functions return t. If any returns nil, then
+it should be marked."
+  (cl-every (lambda (x) (funcall x)) scimax-flyspell-predicates))
+
+(setq flyspell-generic-check-word-predicate #'scimax-flyspell-verify)
+
 
 ;; * typos
 

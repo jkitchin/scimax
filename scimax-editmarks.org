@@ -47,7 +47,28 @@ CLOSED: [2022-09-30 Fri 13:40]
 
 This would require a more sophisticated parser. If you need this, you should probably look at a sexp based syntax, e.g. (@-insert "some text"), or a special block.
 
-** TODO disable flyspell/check in at least the typo editmarks.
+** DONE disable flyspell/check in at least the typo editmarks.
+CLOSED: [2023-05-30 Tue 14:50]
+
+{>.tpyo.<}                   
+
+Note, this relies on a scimax variable `scimax-flyspell-predicates' that is defined in [[./scimax-flyspell.el]].
+
+#+BEGIN_SRC emacs-lisp 
+(defun scimax-editmarks-flyspell-verify ()
+  "Return non-nil if point has an sem-editmark property.
+In flyspell, continue if not on an editmark."
+   (not (get-text-property (point) 'sem-editmark)))
+
+
+(add-to-list 'scimax-flyspell-predicates #'scimax-editmarks-flyspell-verify)
+
+
+#+END_SRC
+
+#+RESULTS:
+| scimax-editmarks-flyspell-verify | org-mode-flyspell-verify |
+
 
 
 * Features I would like to implement one day
@@ -1817,20 +1838,8 @@ On an editmark open the action menu, otherwise the insert menu."
 
 *** org-export
 
-It appears that org-export--generate-copy-script makes a copy of the buffer with no properties, which breaks finding the editmarks. A solution I worked out is to temporarily redefine buffer-substring-no-properties to just be buffer-substring for that command. That seems to be the least intrusive.
-
-It seems this will be unnecessary in a future version of org-mode; Nicholas has changed this code in master. [2018-11-28 Wed].
 
 #+BEGIN_SRC emacs-lisp
-
-(defun sem-export-copy-advice (orig-func &rest args)
-  "Temporarily redefine buffer-substring-no-properties for exporting."
-  (cl-letf (((symbol-function 'buffer-substring-no-properties) #'buffer-substring))
-    (apply orig-func args)))
-
-(advice-add 'org-export--generate-copy-script :around 'sem-export-copy-advice)
-
-
 (defun sem-editmarks-to-org (&optional backend)
   "Convert sem editmarks in an org-file to org syntax for BACKEND.
 Inserts some headers at the top for todonotes and ulem, and the
@@ -1842,6 +1851,7 @@ Note this function changes the buffer, so you may want to use it
 in a copy of the buffer."
   (interactive)
   (goto-char (point-min))
+  (sem-mode)
   (when
       (and
        (save-excursion (sem-next-editmark))
