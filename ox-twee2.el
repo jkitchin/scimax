@@ -2,12 +2,19 @@
 
 ;;; Commentary:
 ;;
-;; Generally a passage is a level one headline
+;; https://twinery.org/
+;; https://dan-q.github.io/twee2/
+;;
+;; A passage is a level one headline. You should put each passage in a separate file, and link them by filename.
+
+;;; Code:
 
 (defun ox-twee2-headline (headline contents info)
-  "Convert a headline to twee2.
+  "Convert a HEADLINE to twee2.
 Level one headings are passages. Subheadings are rendered in twee markup.
-Tags on level one headings are added as twee tags."
+Tags on level one headings are added as twee tags.
+Argument CONTENTS the contents.
+Argument INFO the info plist."
   (let* ((title (org-export-data (org-element-property :title headline) info))
 	 (level (org-export-get-relative-level headline info))
 	 (tags (and (plist-get info :with-tags)
@@ -23,10 +30,11 @@ Tags on level one headings are added as twee tags."
 
 
 (defun ox-twee2-link (link contents info)
-  "Transcode a link to twee.
+  "Transcode a LINK to twee.
 Images are handled separate from regular links.
 It is not likely that a link like a citation is handled right.
-"
+Argument CONTENTS .
+Argument INFO ."
   (let* ((type (org-element-property :type link))
 	 (path (org-element-property :path link))
 	 (description (and (org-element-property :contents-begin link)
@@ -65,17 +73,12 @@ It is not likely that a link like a citation is handled right.
 
 	 (t
 	  (format "[img[%s]]" path)))))
-     ;; Special case for cite links. This is a little hacky, but simple. There is no overall bibliography in a passage.
+     ;; Special case for cite links. This is a little hacky, but simple. There
+     ;; is no overall bibliography in a passage.
      ((-contains? org-ref-cite-types type)
-      (let ((org-ref-bibliography-entry-format '(("article" . "%a, %t, %j, %v(%n), %p (%y).")
-
-						 ("book" . "%a, %t, %u (%y).")
-						 ("techreport" . "%a, %t, %i, %u (%y).")
-						 ("proceedings" . "%e, %t in %S, %u (%y).")
-						 ("inproceedings" . "%a, %t, %p, in %b, edited by %e, %u (%y)"))))
-	(format  "<font color=\"green\" title=\"%s\">%s</font>"
-		 (org-ref-clean-unused-entry-html (org-ref-get-bibtex-entry-citation path))
-		 path)))
+      (format  "<font color=\"green\" title=\"%s\">%s</font>"
+	       (org-ref-clean-unused-entry-html (org-ref-get-bibtex-entry-citation path))
+	       path))
      ;; this is a goto link with a description
      (description
       (format "[[%s|%s]]" description path))
@@ -85,47 +88,72 @@ It is not likely that a link like a citation is handled right.
 
 
 (defun ox-twee2-target (target contents info)
+  "Transcode the TARGET to twee.
+CONTENTS the contents
+INFO plist"
   (format "<<%s>>" (org-element-property :value target)))
 
 
 (defun ox-twee2-src-block (src-block contents info)
-  "Wraps the html in the verbatim html tags for twee2."
+  "Wraps the html in the verbatim html tags for twee2.
+CONTENTS the contents
+INFO plist"
   (format "<html>%s</html>"
 	  (let ((org-html-with-latex 'imagemagick))
 	    (org-html-src-block src-block contents info))))
 
 
 (defun ox-twee2-special-block (special-block contents info)
+  "Transcode a SPECIAL-BLOCK to twee.
+CONTENTS the contents
+INFO plist"
   (buffer-substring (org-element-property :contents-begin special-block)
 		    (org-element-property :contents-end special-block)))
 
 
-
 (defun ox-twee2-bold (bold contents info)
+  "Transcode a BOLD element.
+CONTENTS the contents
+INFO plist"
   (format "''%s''" contents))
 
 
 (defun ox-twee2-italic (italic contents info)
+  "Transcode an ITALIC element to twee.
+CONTENTS the contents
+INFO plist"
   (format "//%s//" contents))
 
 
 (defun ox-twee2-underline (underline contents info)
+  "Transcode an UNDERLINE element.
+CONTENTS the contents
+INFO plist"
   (format "__%s__" contents))
 
 
 (defun ox-twee2-strike-through (strikethrough contents info)
+  "Transcode a STRIKETHROUGH element.
+CONTENTS the contents
+INFO plist"
   (format "==%s==" contents))
 
 
 (defun ox-twee2-subscript (subscript contents info)
+  "Transcode a SUBSCRIPT element.
+CONTENTS the contents
+INFO plist"
   (format "~~%s~~" contents))
 
 
 (defun ox-twee2-superscript (superscript contents info)
+  "Transcode a SUPERSCRIPT element.
+CONTENTS the contents
+INFO plist"
   (format "^^%s^^" contents))
 
 
-;; I derive this from markdown. Ithought html would be better, but it adds a lot
+;; I derive this from markdown. I thought html would be better, but it adds a lot
 ;; of stuff that tends to break twee2
 (org-export-define-derived-backend 'twee2 'md
   :menu-entry
@@ -148,18 +176,38 @@ It is not likely that a link like a citation is handled right.
 		     (target . ox-twee2-target)
 		     (underline . ox-twee2-underline)))
 
+
 (defun ox-twee2-export-to-buffer (&optional async subtreep visible-only body-only info)
+  "Export to a buffer.
+ASYNC if non-nil
+SUBTREEP if non-nil limit to subtree
+VISIBLE-ONLY if non-nil limit to visible
+BODY-ONLY if non-nil show only body
+INFO plist."
   (org-export-to-buffer 'twee2 "*Org twee2 Export*"
     async subtreep visible-only nil nil (lambda () (text-mode))))
 
 
 (defun ox-twee2-export-to-file (&optional async subtreep visible-only body-only info)
+  "Export to a file, with .tw2 extension.
+ASYNC if non-nil
+SUBTREEP if non-nil limit to subtree
+VISIBLE-ONLY if non-nil limit to visible
+BODY-ONLY if non-nil show only body
+INFO plist."
   (let ((outfile (org-export-output-file-name ".tw2" subtreep)))
     (when (file-exists-p outfile) (delete-file outfile))
     (org-export-to-file 'twee2 outfile
       async subtreep visible-only body-only info)))
 
+
 (defun ox-twee2-export-to-file-and-open (&optional async subtreep visible-only body-only info)
+  "Export to HTML and open.
+ASYNC if non-nil
+SUBTREEP if non-nil limit to subtree
+VISIBLE-ONLY if non-nil limit to visible
+BODY-ONLY if non-nil show only body
+INFO plist."
   (let* ((twfile)
 	 (html (org-export-output-file-name ".html" subtreep)))
     (when (file-exists-p html) (delete-file html))
