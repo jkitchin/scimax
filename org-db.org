@@ -16,7 +16,7 @@ Features:
   - editmarks
   - email addresses
 - full text search
-- image search (text in images)
+- image search (text in images, requires tessaract for OCR)
 
 * Known issues
 
