@@ -924,15 +924,16 @@ The templates are just org-files that can be inserted into a
 
 
 (defun ox-manuscript-parse-template-file (template-file)
-  "Parse the TEMPLATE-FILE and return a plist."
-  (prog1
-      (list
-       :key (ox-manuscript-get-filetag "KEY" template-file)
-       :group (ox-manuscript-get-filetag "GROUP" template-file)
-       :template (ox-manuscript-get-filetag "TEMPLATE" template-file)
-       :default-filename (ox-manuscript-get-filetag
-			  "DEFAULT-FILENAME" template-file)
-       :filename template-file)))
+  "Parse the TEMPLATE-FILE and return a plist.
+Return nil if no key is found in TEMPLATE-FILE."
+  (when (ox-manuscript-get-filetag "KEY" template-file)
+    (list
+     :key (ox-manuscript-get-filetag "KEY" template-file)
+     :group (ox-manuscript-get-filetag "GROUP" template-file)
+     :template (ox-manuscript-get-filetag "TEMPLATE" template-file)
+     :default-filename (ox-manuscript-get-filetag
+			"DEFAULT-FILENAME" template-file)
+     :filename template-file)))
 
 
 (defun ox-manuscript-candidates ()
@@ -940,18 +941,24 @@ The templates are just org-files that can be inserted into a
 These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 '((name . data))."
   (append
-   (cl-loop for template-file in (f-entries ox-manuscript-templates-dir
-					    (lambda (f)
-					      (f-ext? f "org")))
-	    with data = nil
-	    do (setq data (ox-manuscript-parse-template-file template-file))
-	    collect data)
-   (cl-loop for template-file in (f-entries ox-manuscript-user-template-dir
-					    (lambda (f)
-					      (f-ext? f "org")))
-	    with data = nil
-	    do (setq data (ox-manuscript-parse-template-file template-file))
-	    collect data)))
+   (if ox-manuscript-templates-dir
+       (cl-loop for template-file in (f-entries ox-manuscript-templates-dir
+						(lambda (f)
+						  (f-ext? f "org")))
+		with data = nil
+		do (setq data (ox-manuscript-parse-template-file template-file))
+		when data
+		collect data)
+     '())
+   (if ox-manuscript-user-template-dir
+       (cl-loop for template-file in (f-entries ox-manuscript-user-template-dir
+						(lambda (f)
+						  (f-ext? f "org")))
+		with data = nil
+		do (setq data (ox-manuscript-parse-template-file template-file))
+		when data
+		collect data)
+     '())))
 
 
 ;;;###autoload
