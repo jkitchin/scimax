@@ -184,6 +184,10 @@ it should be marked."
   "Run typos and make a clickable buffer to get to the typos.
 See https://github.com/crate-ci/typos."
   (interactive)
+
+  (unless (executable-find "typos")
+    (error "typos was not found. Try: brew install typos-cli."))
+  
   (let ((lines (split-string (string-trim (shell-command-to-string "typos --format json --exclude=*.png --exclude=*deprecated*")) "\n"))
 	data)
     (with-current-buffer (get-buffer-create "*typos*")
