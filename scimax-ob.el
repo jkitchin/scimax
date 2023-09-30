@@ -421,11 +421,10 @@ Defaults to 3."
 (defun scimax-ob-toggle-output ()
   "Toggle folded state of results if there are some."
   (interactive)
-  (let ((loc (org-babel-where-is-src-block-result)))
-    (when loc
-      (save-excursion
-	(goto-char loc)
-	(org-cycle)))))
+  (when-let (loc (org-babel-where-is-src-block-result))
+    (save-excursion
+      (goto-char loc)
+      (org-cycle))))
 
 
 (defun scimax-ob-mark-code ()
@@ -441,8 +440,6 @@ Defaults to 3."
 
 
 ;; * src keys for specific languages
-;; These are used in scimax-org-babel-ipython-upstream.el
-;; See `ob-ipython-key-bindings'
 
 (defvar scimax-ob-src-keys '()
   "Keep a list of key definitions for each language.")
@@ -760,6 +757,7 @@ With a prefix arg cycle backwards."
   ("<right>" (scimax-ob-cycle-header-1))
   ("q" nil))
 
+
 ;; * a hydra for src blocks
 
 (defhydra scimax-ob (:color red :hint nil)
@@ -781,7 +779,7 @@ _C-M-<return>_: buffer       _C-<up>_: goto src start      _c_: clone         _N
 _;_: dwim comment  _z_: undo  _y_: redo _r_: Goto repl
 
 "
-  ("o" ob-ipython-toggle-output :color red)
+  ("o" scimax-ob-toggle-output :color red)
   ("<up>" scimax-ob-edit-up :color red)
   ("<down>" scimax-ob-edit-down :color red)
   ("<left>" left-char :color red)
