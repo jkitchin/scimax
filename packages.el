@@ -202,6 +202,9 @@
 (use-package magithub
   :after magit)
 
+(use-package move-text
+  :init (move-text-default-bindings))
+
 ;; Templating system
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
