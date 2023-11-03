@@ -8,7 +8,8 @@
 
 ;; * automatic buffer kernels This is done by setting a session name in the org
 ;; file <jps is a yasnippet that does this reliably. I decided for now it is too
-;; difficult to advise everything in jupyter to get the same result.
+;; difficult to advise everything in jupyter to get the same result. [2023-11-03
+;; Fri] I think this has been solved below with a function for the session name.
 
 
 ;; * scimax jupyter header defaults
@@ -17,7 +18,8 @@
 
 (setq org-babel-default-header-args:jupyter-python
       '((:results . "both")
-	(:session . "jupyter-python")
+	;; This seems to lead to buffer specific sessions!
+	(:session . (lambda () (buffer-file-name)))
 	(:kernel . "python3")
 	(:pandoc . "t")
 	(:exports . "both")
@@ -79,12 +81,18 @@
 (defun scimax-jupyter-get-session ()
   "Get the session name in the current buffer."
   (let ((lang (car (org-babel-get-src-block-info))))
-    (or
-     (cdr
-      (assoc :session
-	     (cadr (org-babel-params-from-properties lang))))
-     (cdr (assoc :session
-		 org-babel-default-header-args:jupyter-python)))))
+    (let ((session (org-babel-read
+		    (or
+		     (cdr
+		      (assoc :session
+			     (cadr (org-babel-params-from-properties lang))))
+		     (cdr (assoc :session
+				 org-babel-default-header-args:jupyter-python))))))
+      (cond
+       ((functionp session)
+	(funcall session))
+       (t
+	session)))))
 
 
 (defun scimax-jupyter-org-kill-kernel ()
