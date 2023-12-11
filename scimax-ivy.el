@@ -55,9 +55,7 @@
 		    (ivy-state-current ivy-last)
 		  ivy-text))
          (transfer-input (lambda ()
-			   (setf (buffer-substring
-				  (point) (line-beginning-position))
-				 "")
+			   (cl--set-buffer-substring (point) (line-beginning-position) "") 
 			   (insert input))))
     (ivy-exit-with-action
      (lambda (x)
