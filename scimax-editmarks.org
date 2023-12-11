@@ -611,11 +611,12 @@ Another potential idea is an md5 hash, so you can tell if the file has changed s
 	(plist (sem-editmark-plist)))
     (cond
      ((eq 'latex backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (format "@@latex:Line %s in \\href{file://%s}{%s}@@"
-		    (plist-get plist :line)
-		    (plist-get plist :file)
-		    (file-name-nondirectory (plist-get plist :file))))))))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (format "@@latex:Line %s in \\href{file://%s}{%s}@@"
+	       (plist-get plist :line)
+	       (plist-get plist :file)
+	       (file-name-nondirectory (plist-get plist :file))))))))
 
 
 #+END_SRC
@@ -639,22 +640,24 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 	(content-bounds (sem-content-bounds)))
     (cond
      ((eq 'latex backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (mapconcat
-	     (lambda (s)
-	       (format "@@latex:\\noindent\\protect\\bgroup\\markoverwith{\\textcolor{blue}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
-		       s))
-	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
-							   (cdr content-bounds)))
-	     "@@latex:\\\\@@\n")))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (mapconcat
+	(lambda (s)
+	  (format "@@latex:\\noindent\\protect\\bgroup\\markoverwith{\\textcolor{blue}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
+		  s))
+	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds)))
+	"@@latex:\\\\@@\n")))
      ((eq 'html backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (mapconcat
-	     (lambda (s)
-	       (format "@@html:<span style=\"color: blue\">%s</span>@@" s))
-	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
-							   (cdr content-bounds)))
-	     "@@html:<br>@@"))))))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (mapconcat
+	(lambda (s)
+	  (format "@@html:<span style=\"color: blue\">%s</span>@@" s))
+	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds)))
+	"@@html:<br>@@"))))))
 
 
 (defun sem-export-delete (backend)
@@ -663,22 +666,24 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 	(content-bounds (sem-content-bounds)))
     (cond
      ((eq 'latex backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (mapconcat
-	     (lambda (s)
-	       (format "@@latex:\\noindent\\protect\\bgroup\\markoverwith{\\textcolor{red}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
-		       s))
-	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
-							   (cdr content-bounds)))
-	     "@@latex:\\\\@@\n")))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (mapconcat
+	(lambda (s)
+	  (format "@@latex:\\noindent\\protect\\bgroup\\markoverwith{\\textcolor{red}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
+		  s))
+	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds)))
+	"@@latex:\\\\@@\n")))
      ((eq 'html backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (mapconcat
-	     (lambda (s)
-	       (format "@@html:<span style=\"color: red\">%s</span>@@" s))
-	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
-							   (cdr content-bounds)))
-	     "@@html:<br>@@"))))))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (mapconcat
+	(lambda (s)
+	  (format "@@html:<span style=\"color: red\">%s</span>@@" s))
+	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds)))
+	"@@html:<br>@@"))))))
 
 
 (defun sem-export-comment (backend)
@@ -687,23 +692,25 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 	(content-bounds (sem-content-bounds)))
     (cond
      ((eq 'latex backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (mapconcat
-	     (lambda (s)
-	       (format "@@latex:%s@@" s))
-	     (s-split "\n" (format "\\todo{%s}"
-				   (buffer-substring-no-properties
-				    (car content-bounds)
-				    (cdr content-bounds))))
-	     "@@latex:\\\\@@\n")))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (mapconcat
+	(lambda (s)
+	  (format "@@latex:%s@@" s))
+	(s-split "\n" (format "\\todo{%s}"
+			      (buffer-substring-no-properties
+			       (car content-bounds)
+			       (cdr content-bounds))))
+	"@@latex:\\\\@@\n")))
      ((eq 'html backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (mapconcat
-	     (lambda (s)
-	       (format "@@html:<span style=\"color: orange\">%s</span>@@" s))
-	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
-							   (cdr content-bounds)))
-	     "@@html:<br>@@"))))))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (mapconcat
+	(lambda (s)
+	  (format "@@html:<span style=\"color: orange\">%s</span>@@" s))
+	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds)))
+	"@@html:<br>@@"))))))
 
 
 (defun sem-export-task (backend)
@@ -712,23 +719,25 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 	(content-bounds (sem-content-bounds)))
     (cond
      ((eq 'latex backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (mapconcat
-	     (lambda (s)
-	       (format "@@latex:%s@@" s))
-	     (s-split "\n" (format "\\todo[color=green!40]{TASK: %s}"
-				   (buffer-substring-no-properties
-				    (car content-bounds)
-				    (cdr content-bounds))))
-	     "@@latex:\\\\@@\n")))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (mapconcat
+	(lambda (s)
+	  (format "@@latex:%s@@" s))
+	(s-split "\n" (format "\\todo[color=green!40]{TASK: %s}"
+			      (buffer-substring-no-properties
+			       (car content-bounds)
+			       (cdr content-bounds))))
+	"@@latex:\\\\@@\n")))
      ((eq 'html backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (mapconcat
-	     (lambda (s)
-	       (format "@@html:<span style=\"color: purple\">%s</span>@@" s))
-	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
-							   (cdr content-bounds)))
-	     "@@html:<br>@@"))))))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (mapconcat
+	(lambda (s)
+	  (format "@@html:<span style=\"color: purple\">%s</span>@@" s))
+	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds)))
+	"@@html:<br>@@"))))))
 
 
 #+END_SRC
@@ -760,38 +769,40 @@ we go with the font color."
 
     (cond
      ((eq 'latex backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (concat
-	     (format "@@latex:\\definecolor{%s}{rgb}{%s,%s,%s}%s{%s}{\\parbox{\\textwidth}{%s:@@"
-		     (or bg-color fg-color)
-		     (if bg-color (cl-first bg-rgb) (cl-first fg-rgb))
-		     (if bg-color (cl-second bg-rgb) (cl-second fg-rgb))
-		     (if bg-color (cl-third bg-rgb) (cl-third fg-rgb))
-		     (if bg-color
-			 "\\colorbox"
-		       "\\textcolor")
-		     (or bg-color fg-color)
-		     (get-text-property (point) 'sem-type))
-	     (mapconcat
-	      (lambda (s)
-		(format "@@latex:%s@@" s))
-	      (s-split "\n" (buffer-substring-no-properties
-			     (car content-bounds)
-			     (cdr content-bounds)))
-	      "@@latex:\\\\@@\n")
-	     "@@latex: }}@@")))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (concat
+	(format "@@latex:\\definecolor{%s}{rgb}{%s,%s,%s}%s{%s}{\\parbox{\\textwidth}{%s:@@"
+		(or bg-color fg-color)
+		(if bg-color (cl-first bg-rgb) (cl-first fg-rgb))
+		(if bg-color (cl-second bg-rgb) (cl-second fg-rgb))
+		(if bg-color (cl-third bg-rgb) (cl-third fg-rgb))
+		(if bg-color
+		    "\\colorbox"
+		  "\\textcolor")
+		(or bg-color fg-color)
+		(get-text-property (point) 'sem-type))
+	(mapconcat
+	 (lambda (s)
+	   (format "@@latex:%s@@" s))
+	 (s-split "\n" (buffer-substring-no-properties
+			(car content-bounds)
+			(cdr content-bounds)))
+	 "@@latex:\\\\@@\n")
+	"@@latex: }}@@")))
 
      ((eq 'html backend)
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (mapconcat
-	     (lambda (s)
-	       (format "@@html:<span style=\"color: %s; background-color: %s\">%s</span>@@"
-		       fg-hex
-		       bg-hex
-		       s))
-	     (s-split "\n" (buffer-substring-no-properties (car content-bounds)
-							   (cdr content-bounds)))
-	     "@@html:<br>@@"))))))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (mapconcat
+	(lambda (s)
+	  (format "@@html:<span style=\"color: %s; background-color: %s\">%s</span>@@"
+		  fg-hex
+		  bg-hex
+		  s))
+	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds)))
+	"@@html:<br>@@"))))))
 #+END_SRC
 
 #+RESULTS:
@@ -1217,67 +1228,68 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
     ;; we do not track changes when inserting so we don't trigger nested
     ;; editmarks when editing editmarks.
     (cond
-       ;; this is a special case
-       ((eq type 'audio)
-	(sem-audio-insert))
-       ;; We have an active region we want to apply
-       ((region-active-p)
-	(let* ((bounds (list (region-beginning) (region-end)))
-	       (start (apply 'min bounds))
-	       (end (apply 'max bounds))
-	       (lines))
-	  ;; make sure we are not crossing any existing markups
-	  (when (or (get-text-property (region-beginning) 'sem-type)
-		    (get-text-property (region-end) 'sem-type)
-		    (not (= (region-end)
-			    (next-single-property-change
-			     (region-beginning)
-			     'sem-type
-			     nil
-			     (region-end)))))
-	    (error "You are in an editmark. Nesting editmarks is not allowed."))
+     ;; this is a special case
+     ((eq type 'audio)
+      (sem-audio-insert))
+     ;; We have an active region we want to apply
+     ((region-active-p)
+      (let* ((bounds (list (region-beginning) (region-end)))
+	     (start (apply 'min bounds))
+	     (end (apply 'max bounds))
+	     (lines))
+	;; make sure we are not crossing any existing markups
+	(when (or (get-text-property (region-beginning) 'sem-type)
+		  (get-text-property (region-end) 'sem-type)
+		  (not (= (region-end)
+			  (next-single-property-change
+			   (region-beginning)
+			   'sem-type
+			   nil
+			   (region-end)))))
+	  (error "You are in an editmark. Nesting editmarks is not allowed."))
 
-	  (setf (buffer-substring start end)
-		(concat (plist-get (cdr entry) :open-marker)
-			(when (plist-get (cdr entry) :include-author)
-			  (concat " " (sem-author) " "))
-			(buffer-substring start end)
-			(plist-get (cdr entry) :close-marker)))))
-       ;; We are on a word with no region selected
-       ((thing-at-point 'word)
-	(cond
-	 ;; beginning of a word
-	 ((looking-back "\\<" 1)
-	  (insert (plist-get (cdr entry) :open-marker)
-		  (when (plist-get (cdr entry) :include-author)
-		    (concat " " (sem-author) " ")))
-	  (re-search-forward "\\>")
-	  (insert (plist-get (cdr entry) :close-marker)))
-	 ;; end of a word
-	 ((looking-back "\\>" 1)
-	  (insert (concat (plist-get (cdr entry) :open-marker)
-			  (when (plist-get (cdr entry) :include-author)
-			    (concat " " (sem-author) " "))
-			  (plist-get (cdr entry) :close-marker)))
-	  (backward-char (length (plist-get (cdr entry) :close-marker))))
-	 ;; somewhere else in a word
-	 (t
-	  (re-search-backward "\\<")
-	  (insert (plist-get (cdr entry) :open-marker)
-		  (if (plist-get (cdr entry) :include-author)
-		      (concat " " (sem-author) " ")
-		    ""))
-	  (re-search-forward "\\>")
-	  (insert (plist-get (cdr entry) :close-marker)))))
-       ;; not at a word or region, insert markers and put point between
-       ;; them.
-       (t
+	(cl--set-buffer-substring
+	 start end
+	 (concat (plist-get (cdr entry) :open-marker)
+		 (when (plist-get (cdr entry) :include-author)
+		   (concat " " (sem-author) " "))
+		 (buffer-substring start end)
+		 (plist-get (cdr entry) :close-marker)))))
+     ;; We are on a word with no region selected
+     ((thing-at-point 'word)
+      (cond
+       ;; beginning of a word
+       ((looking-back "\\<" 1)
+	(insert (plist-get (cdr entry) :open-marker)
+		(when (plist-get (cdr entry) :include-author)
+		  (concat " " (sem-author) " ")))
+	(re-search-forward "\\>")
+	(insert (plist-get (cdr entry) :close-marker)))
+       ;; end of a word
+       ((looking-back "\\>" 1)
 	(insert (concat (plist-get (cdr entry) :open-marker)
 			(when (plist-get (cdr entry) :include-author)
 			  (concat " " (sem-author) " "))
 			(plist-get (cdr entry) :close-marker)))
-	;; goto middle
-	(backward-char (length (plist-get (cdr entry) :close-marker))))))
+	(backward-char (length (plist-get (cdr entry) :close-marker))))
+       ;; somewhere else in a word
+       (t
+	(re-search-backward "\\<")
+	(insert (plist-get (cdr entry) :open-marker)
+		(if (plist-get (cdr entry) :include-author)
+		    (concat " " (sem-author) " ")
+		  ""))
+	(re-search-forward "\\>")
+	(insert (plist-get (cdr entry) :close-marker)))))
+     ;; not at a word or region, insert markers and put point between
+     ;; them.
+     (t
+      (insert (concat (plist-get (cdr entry) :open-marker)
+		      (when (plist-get (cdr entry) :include-author)
+			(concat " " (sem-author) " "))
+		      (plist-get (cdr entry) :close-marker)))
+      ;; goto middle
+      (backward-char (length (plist-get (cdr entry) :close-marker))))))
   ;; Should we add a local variable so the file opens in sem-mode?
   (hack-local-variables)
   ;; This is more complicated than I thought it should be. When I try to just
@@ -1324,7 +1336,7 @@ For other editmarks, e.g. typo, or highlights, it is less clear what the right t
   (interactive)
   (let ((bounds (sem-editmark-bounds)))
     (when bounds
-      (setf (buffer-substring (car bounds) (cdr bounds)) ""))))
+      (cl--set-buffer-substring (car bounds) (cdr bounds) ""))))
 
 
 (defun sem-delete-and-next-editmark ()
@@ -1332,7 +1344,7 @@ For other editmarks, e.g. typo, or highlights, it is less clear what the right t
   (interactive)
   (let ((bounds (sem-editmark-bounds)))
     (when bounds
-      (setf (buffer-substring (car bounds) (cdr bounds)) ""))
+      (cl--set-buffer-substring (car bounds) (cdr bounds) ""))
     (sem-next-editmark)))
 
 
@@ -1342,8 +1354,9 @@ For other editmarks, e.g. typo, or highlights, it is less clear what the right t
   (let ((bounds (sem-editmark-bounds))
 	(content-bounds (sem-content-bounds)))
     (when bounds
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (buffer-substring-no-properties (car content-bounds) (cdr content-bounds))))))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (buffer-substring-no-properties (car content-bounds) (cdr content-bounds))))))
 
 
 (defun sem-clear-and-next-editmark ()
@@ -1352,8 +1365,10 @@ For other editmarks, e.g. typo, or highlights, it is less clear what the right t
   (let ((bounds (sem-editmark-bounds))
 	(content-bounds (sem-content-bounds)))
     (when bounds
-      (setf (buffer-substring (car bounds) (cdr bounds))
-	    (buffer-substring-no-properties (car content-bounds) (cdr content-bounds))))
+      (cl--set-buffer-substring
+       (car bounds) (cdr bounds)
+       (buffer-substring-no-properties
+	(car content-bounds) (cdr content-bounds))))
     (sem-next-editmark)))
 
 
