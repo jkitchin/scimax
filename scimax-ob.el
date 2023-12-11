@@ -404,9 +404,10 @@ Defaults to 3."
 	 (header-start (sixth src-info))
 	 (header-end (save-excursion (goto-char header-start)
 				     (line-end-position))))
-    (setf (buffer-substring header-start header-end)
-	  (read-string "Header: "
-		       (buffer-substring-no-properties header-start header-end)))))
+    (cl--set-buffer-substring
+     header-start header-end
+     (read-string "Header: "
+		  (buffer-substring-no-properties header-start header-end)))))
 
 
 (defun scimax-ob-clear-all-results ()
