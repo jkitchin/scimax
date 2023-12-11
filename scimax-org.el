@@ -257,7 +257,7 @@ subscripts and superscripts."
 			      s))
 			  (split-string
 			   (buffer-substring start end) "\n"))))
-      (setf (buffer-substring start end) lines)
+      (cl--set-buffer-substring start end lines) 
       (forward-char (length lines))))
    ;; We are on a word with no region selected
    ((thing-at-point 'word)
@@ -798,7 +798,7 @@ A prefix arg of 5 opens link in new frame."
 	(org-insert-todo-heading nil))
        ;; no content, delete
        ((and (eolp) (eq 'item (car (org-element-context))))
-	(setf (buffer-substring (line-beginning-position) (point)) ""))
+	(delete-region (line-beginning-position) (point)))
        ((eq 'paragraph (car (org-element-context)))
 	(goto-char (org-element-property :end (org-element-context)))
 	(org-insert-todo-heading nil))
@@ -843,9 +843,7 @@ A prefix arg of 5 opens link in new frame."
 	    (outline-show-entry))
 	;; The heading was empty, so we delete it
 	(beginning-of-line)
-	(setf (buffer-substring
-	       (line-beginning-position) (line-end-position))
-	      "")))
+	(delete-region (line-beginning-position) (line-end-position))))
 
      ;; tables
      ((org-at-table-p)
@@ -857,9 +855,7 @@ A prefix arg of 5 opens link in new frame."
 	  (org-return)
 	;; empty row
 	(beginning-of-line)
-	(setf (buffer-substring
-	       (line-beginning-position) (line-end-position))
-	      "")
+	(delete-region (line-beginning-position) (line-end-position)) 
 	(org-return)))
      ;; fall-through
      (t
