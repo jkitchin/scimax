@@ -270,7 +270,6 @@
 (defun scimax-dashboard-recentf (&rest args)
   "Create our version of recent"
   (dashboard-insert-recents (cdr (assoc 'scimax-recentf dashboard-items)))
-  (insert "\n    ")
   (widget-create 'push-button
 		 :action `(lambda (&rest ignore)
 			    (counsel-recentf))
@@ -281,7 +280,9 @@
 		 :button-prefix ""
 		 :button-suffix ""
 		 :format "%[%t%]"
-		 "Open another recent file"))
+		 "Open another recent file")
+  (insert "\n    ")
+  )
 
 (add-to-list 'dashboard-item-generators  '(scimax-recentf . scimax-dashboard-recentf))
 
@@ -289,7 +290,7 @@
 (defun scimax-dashboard-bookmarks (&rest args)
   "Create our version of bookmarks"
   (dashboard-insert-bookmarks (cdr (assoc 'scimax-bookmarks dashboard-items)))
-  (insert "\n    ")
+  (insert "\n    " )
   (widget-create 'push-button
 		 :action `(lambda (&rest ignore)
 			    (counsel-bookmark))
@@ -300,7 +301,7 @@
 		 :button-prefix ""
 		 :button-suffix ""
 		 :format "%[%t%]"
-		 "Open another bookmark."))
+		 "Open another bookmark"))
 
 (add-to-list 'dashboard-item-generators  '(scimax-bookmarks . scimax-dashboard-bookmarks))
 
@@ -308,18 +309,17 @@
 (defun scimax-dashboard-projects (&rest args)
   "Create our version of projects"
   (dashboard-insert-projects (cdr (assoc 'scimax-projects dashboard-items)))
-  (insert "\n    ")
-  (widget-create 'push-button
-		 :action `(lambda (&rest ignore)
-			    (projectile-switch-project))
-		 :mouse-face 'highlight
-		 :button-face '(:background "Lightgray" :underline t)
-		 :help-echo "Open another project."
-		 :follow-link "\C-m"
-		 :button-prefix ""
-		 :button-suffix ""
-		 :format "%[%t%]"
-		 "Open another project"))
+  (insert "\n    " (widget-create 'push-button
+				  :action `(lambda (&rest ignore)
+					     (projectile-switch-project))
+				  :mouse-face 'highlight
+				  :button-face '(:background "Lightgray" :underline t)
+				  :help-echo "Open another project."
+				  :follow-link "\C-m"
+				  :button-prefix ""
+				  :button-suffix ""
+				  :format "%[%t%]"
+				  "Open another project")))
 
 (add-to-list 'dashboard-item-generators  '(scimax-projects . scimax-dashboard-projects))
 
