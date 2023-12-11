@@ -195,28 +195,29 @@ Here is the function that will run in the proxy-buffer and transfer the overlays
 					  (line-beginning-position)
 					  (line-end-position))))
 			    newend)
-		       (setf (buffer-substring
-			      (line-beginning-position)
-			      (line-end-position))
-			     (make-string len ?\s))
+		       (cl--set-buffer-substring
+			(line-beginning-position)
+			(line-end-position)
+			(make-string len ?\s))
+		       
 		       ;; Now skip to end, and go back to then src delimiter and
 		       ;; eliminate that line.
 		       (goto-char end)
 		       (forward-line (- (* -1 (org-element-property :post-blank src)) 1))
-		       (setf (buffer-substring
-			      (line-beginning-position)
-			      (line-end-position))
-			     (make-string (length (buffer-substring
-						   (line-beginning-position)
-						   (line-end-position)))
-					  ?\s)))
-		   (setf (buffer-substring
-			  (line-beginning-position)
-			  (line-end-position))
-			 (make-string (length (buffer-substring
-					       (line-beginning-position)
-					       (line-end-position)))
-				      ?\s)))
+		       (cl--set-buffer-substring
+			(line-beginning-position)
+			(line-end-position)
+			(make-string (length (buffer-substring
+					      (line-beginning-position)
+					      (line-end-position)))
+				     ?\s)))
+		   (cl--set-buffer-substring
+		    (line-beginning-position)
+		    (line-end-position)
+		    (make-string (length (buffer-substring
+					  (line-beginning-position)
+					  (line-end-position)))
+				 ?\s)))
 		 (forward-line 1)))
 	     (save-buffer)
 	     ;; Now, make sure it is open and getting checked
@@ -229,7 +230,7 @@ Here is the function that will run in the proxy-buffer and transfer the overlays
 	       (make-local-variable 'obf-lang)
 	       (setq obf-lang (org-no-properties lang))
 	       (setq obf-buffer cb)
-	       ; Make sure we have the hook function setup, then trigger a check.
+					; Make sure we have the hook function setup, then trigger a check.
 	       (add-hook 'flycheck-after-syntax-check-hook
 			 'obf-transfer-flycheck-overlays t t)
 	       (flycheck-mode +1)
