@@ -720,10 +720,10 @@ With a prefix arg, delete the thing you jumped to."
 	(skip-chars-backward " ")
 	(delete-region (point) (line-end-position)))
       (unless (looking-back " " 1) (insert " "))
-      (setf (buffer-substring (point) (or (re-search-forward " " (line-end-position) 'mv)
-					  (line-end-position)))
-	    (if delete ""
-	      (concat new-value " "))))))
+      (cl--set-buffer-substring (point) (or (re-search-forward " " (line-end-position) 'mv)
+					    (line-end-position))
+				(if delete ""
+				  (concat new-value " "))))))
 
 
 
