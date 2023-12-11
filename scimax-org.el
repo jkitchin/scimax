@@ -144,8 +144,6 @@ is positive, move after, and if negative, move before."
 
 (setq org-id-link-to-org-use-id 'create-if-interactive)
 (setq org-link-search-must-match-exact-headline 'query-to-create)
-(setq org-id-locations-file
-      (expand-file-name "user/.org-id-locations" scimax-dir))
 (require 'org-id)
 
 ;; * Agenda setup
