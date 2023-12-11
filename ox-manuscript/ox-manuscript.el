@@ -809,8 +809,9 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 		       t))
 
 	  ;; flatten the filename in the tex-file
-	  (setf (buffer-substring start (- end 1))
-		(format "%02d-%s" figure-count fname)))))
+	  (cl--set-buffer-substring
+	   start (- end 1)
+	   (format "%02d-%s" figure-count fname)))))
 
     ;; the tex-file is no longer valid in the current directory
     ;; because the paths to images are wrong. So we move it to where
