@@ -42,9 +42,11 @@
 (use-package aggressive-indent
   :config (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode))
 
-(use-package auto-complete
-  :diminish auto-complete-mode
-  :config (ac-config-default))
+;; [2023-12-11 Mon] I don't think we use this for anything. commenting out for now.
+;; see issue #487
+;; (use-package auto-complete
+;;   :diminish auto-complete-mode
+;;   :config (ac-config-default))
 
 (use-package avy)
 
