@@ -170,7 +170,7 @@
 
 (use-package htmlize)
 
-(use-package hy-mode)
+;; (use-package hy-mode)
 
 (use-package hydra
   :init
