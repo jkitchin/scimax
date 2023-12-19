@@ -1433,6 +1433,26 @@ Recent is sorted by last-updated in the database."
     (ivy-read "link: " candidates :action '(1
 					    ("o" org-db-links--open "Open to link")))))
 
+(defun org-db-bookmark ()
+  "Open a bookmark.
+A bookmark is any heading with a url property"
+  (interactive)
+  (let ((candidates (with-org-db
+		     (emacsql org-db
+			      [:select [headlines:title
+					headline-properties:value]
+				       :from headlines
+				       :inner :join headline-properties
+				       :on (=  headlines:rowid headline-properties:headline-id)
+				       :inner :join properties
+				       :on (= properties:rowid headline-properties:property-id)
+				       :inner :join files :on (= files:rowid headlines:filename-id)
+				       :where (= properties:property "URL")]))))
+    (ivy-read "bookmark: " candidates :action '(1
+						("o" (lambda (cand) 
+						       (browse-url (cadr cand)))
+						 "Open to bookmark")))))
+
 
 ;; * org-db-targets
 (defun org-db-target ()
