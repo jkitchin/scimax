@@ -162,8 +162,8 @@
   :config
   (google-this-mode 1))
 
-(use-package help-fns+
-  :load-path scimax-dir)
+;; (use-package help-fns+
+;;   :load-path scimax-dir)
 
 ;; Functions for working with hash tables
 (use-package ht)
