@@ -808,7 +808,8 @@ Optional argument FORCE. if non-nil force the buffer to be added."
        (progn
 	 (org-db-log "%s has changed." (buffer-file-name))
 	 
-	 (let* ((filename-id (org-db-get-filename-id (buffer-file-name)))
+	 (let* ((tramp-mode nil)
+		(filename-id (org-db-get-filename-id (buffer-file-name)))
 		(parse-tree (org-element-parse-buffer)))
 
 	   ;; update the md5 for the file so we can tell later if it has changed.
