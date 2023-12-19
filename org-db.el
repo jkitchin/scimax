@@ -1008,6 +1008,7 @@ Optional RECURSIVE is non-nil find files recursively."
 	    unless (and fname
 			;; tramp filenames are a problem
 			(not (s-starts-with? "/ssh:" fname))
+			(not (s-starts-with? "/kubectl:" fname))
 			(file-exists-p fname))
 	    do
 	    (org-db-log "clean %s was not found. Removing it." fname)
