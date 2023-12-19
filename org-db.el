@@ -1407,7 +1407,14 @@ Recent is sorted by last-updated in the database."
 	      '(1
 		("o" (lambda (candidate)
 		       (find-file (cdr candidate)))
-		 "Open file")))))
+		 "Open file")
+		("u" (lambda (candidate)
+		       (cl-loop for filename in (with-org-db (emacsql org-db [:select filename
+										      :from files]))
+				do
+				(unless (file-exists-p (car filename))
+				  (org-db-remove-file (car filename)))))
+		 "Update the file list")))))
 
 
 ;; * org-db-links
