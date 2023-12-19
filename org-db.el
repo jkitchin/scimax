@@ -1383,11 +1383,14 @@ If point is not looking back on a space insert a comma separator."
 		       (with-org-db
 			(emacsql org-db [:delete :from files :where (= filename $s1)]
 				 candidate)))
-		 "Remove file from org-db")))))
-
-
-
-
+		 "Remove file from org-db")
+		("u" (lambda (candidate)
+		       (cl-loop for filename in (with-org-db (emacsql org-db [:select filename
+										      :from files]))
+				do
+				(unless (file-exists-p (car filename))
+				  (org-db-remove-file (car filename)))))
+		 "Update the file list")))))
 
 
 (defun org-db-recentf ()
