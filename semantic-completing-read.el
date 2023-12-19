@@ -7,7 +7,7 @@
 ;;; Commentary:
 ;;
 ;; You must have a working emacs-jupyter installation. Additionally your Jupyter
-;; environment must have faiss and sentence_transformers installed.
+;; environment must have pycse, faiss and sentence_transformers installed.
 ;;
 ;; The principle here is we open a buffer named `scr-buffer-name' and start a
 ;; Jupyter REPL there. Then we communicate with that REPL to load candidates,
@@ -26,7 +26,8 @@
 ;;
 ;; You can customize the embedding model with `scr-model-name'. See
 ;; https://www.sbert.net/docs/pretrained_models.html for choices if you have
-;; some good reason to do that.
+;; some good reason to do that. I don't recommend changing the model
+;; dynamically; set it once and stick with it.
 ;;
 ;; Sometimes large candidate sets can cause a timeout in Jupyter-emacs.
 ;; `scr-timeout' can be modified if you think more time is required. To minimize
@@ -49,8 +50,8 @@
 ;; I should be able to make it work on `completing-read', but I have found it
 ;; very difficult to do.
 ;;
-;; Limitations: I would not use this with very large collections. I have used it
-;; with ~4K candidates, but was not successful at ~12K.
+;; This is still alpha-code. It works ok for me, but probably has room for
+;; improvement in performance and robustness. I would not rely on the API yet.
 
 
 ;;; Code:
@@ -195,8 +196,8 @@ scr_get_embeddings = hashcache()(scr_get_embeddings)
   
   (with-current-buffer (get-buffer-create scr-buffer-name)
     (erase-buffer)
-    (python-mode)
-    (setq jupyter-current-client (jupyter-run-repl "python3")))
+    (setq jupyter-current-client (jupyter-run-repl "python3"))
+    (python-mode))
 
   (scr-startup))
 
