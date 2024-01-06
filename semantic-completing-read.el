@@ -103,7 +103,7 @@ if nil, use one batch."
 
 
 ;; check if libraries are installed.
-(cl-loop for pylib in '("sentence_transformers" "faiss" "pycse")
+(cl-loop for pylib in '("sentence_transformers" "faiss" "pycse" "joblib")
 	 do
 	 (unless
 	     (read
@@ -134,6 +134,7 @@ Returns STR either way."
        "from operator import itemgetter
 import faiss
 from sentence_transformers import SentenceTransformer
+from joblib import Parallel, delayed
 "))))
   
   (with-current-buffer (get-buffer-create scr-buffer-name)
