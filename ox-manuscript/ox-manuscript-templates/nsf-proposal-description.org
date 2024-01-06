@@ -41,5 +41,5 @@ nobibliography:<replace: bibfiles>
 * Broader impacts of the work
 
 * build					:noexport:
-The
+
   elisp:ox-manuscript-export-and-build-and-open
