@@ -962,6 +962,19 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
      '())))
 
 
+(defun ox-manuscript-open (key)
+  "Open entry for KEY.
+KEY is a string that maps to a :key entry in `ox-manuscript-candidates'.
+Open document if it exists, create it otherwise."
+  (let ((entry (car (seq-filter (lambda (x) (string= key (plist-get x :key))) (ox-manuscript-candidates)))))
+    (if (file-exists-p (plist-get entry :default-filename))
+	(find-file (plist-get entry :default-filename))
+      (find-file (plist-get entry :default-filename))
+      (insert-file-contents (plist-get entry :filename))
+      (goto-char (point-min))
+      (font-lock-fontify-buffer))))
+
+
 ;;;###autoload
 (defun ox-manuscript-new-ivy ()
   "Create a new manuscript from a template in
@@ -976,14 +989,10 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 					  (plist-get x :template))
 				  x))
 			       candidates)
+	      
 	      :action (lambda (entry)
-			(setq entry (cdr entry))
-			(if (file-exists-p (plist-get entry :default-filename))
-			    (find-file (plist-get entry :default-filename))
-			  (find-file (plist-get entry :default-filename))
-			  (insert-file-contents (plist-get entry :filename))
-			  (goto-char (point-min))
-			  (font-lock-fontify-buffer))))))
+			(ox-manuscript-open (plist-get (cdr entry) :key))))))
+
 
 (defun ox-manuscript-texcount ()
   "Use texcount to estimate words in an org-file if it exists.
