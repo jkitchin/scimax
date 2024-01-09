@@ -43,7 +43,7 @@ This is a typical, un-solicited NSF proposal.
 - [ ] Current and Pending          https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2hii
   - [ ] Get from https://www.ncbi.nlm.nih.gov/sciencv/
 - [ ] Collaborators (COA)          https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2hiii
-- [ ] [[elisp:(ox-manuscript-new-manuscript "nsf-proposal-facilities")][Facilities, equipment]]        https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2g
+- [ ] [[elisp:(ox-manuscript-open "nsf-proposal-facilities")][Facilities, equipment]]        https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2g
 
 - [ ] [[elisp:(ox-manuscript-open "nsf-project-summary")][Project Summary]]              https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2b
 - [ ] [[elisp:(ox-manuscript-open "nsf-project-description")][Project Description]]          https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2d
