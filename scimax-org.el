@@ -135,28 +135,17 @@ is positive, move after, and if negative, move before."
   (outline-hide-leaves))
 
 ;; [2021-05-24 Mon] See https://github.com/jkitchin/scimax/issues/416#issuecomment-836802234
-(cond
- ;; This is for org versions less than 9.5
- ((boundp 'org-speed-commands-user)
-  (setq org-speed-commands-user
-	(append org-speed-commands-user
-		'(("P" . org-set-property)
-		  ("d" . org-deadline)
-		  ("m"  . org-mark-subtree)
-		  ("S" . widen)
-		  ("k" . scimax-org-kill-subtree)
-		  ("q" . scimax-avy-org-headline)
-		  ("T" . org-teleport)))))
- (t
-  (setq org-speed-commands
-	(append org-speed-commands
-		'(("P" . org-set-property)
-		  ("d" . org-deadline)
-		  ("m"  . org-mark-subtree)
-		  ("S" . widen)
-		  ("k" . scimax-org-kill-subtree)
-		  ("q" . scimax-avy-org-headline)
-		  ("T" . org-teleport))))))
+;; [2024-02-05 Mon] This may not work for org-versions less than 9.5. I think that is ok.
+(setq org-speed-commands
+      (append org-speed-commands
+	      '(("P" . org-set-property)
+		("d" . org-deadline)
+		("m"  . org-mark-subtree)
+		("S" . widen)
+		("k" . scimax-org-kill-subtree)
+		("K" . scimax-org-headline-to-inlinetask)
+		("q" . scimax-avy-org-headline)
+		("T" . org-teleport))))
 
 
 ;; * Org-id
