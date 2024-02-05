@@ -29,9 +29,28 @@
   (use-package org-bullets)
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode))))
 
-
 (setq org-todo-keywords
       '((sequence "TODO(t)" "|" "DONE(d)")))
+
+
+;; * heading manipulation
+
+(defun scimax-org-headline-to-inlinetask ()
+  "Convert the heading at point to an inlinetask."
+  (interactive)
+  (let* ((hl (org-element-context))
+	 (body (buffer-substring-no-properties (org-element-property :contents-begin hl)
+					       (org-element-property :contents-end hl)))
+	 (title (org-element-property :title hl))
+	 (tags (nth 5 (org-heading-components)))
+	 (beg (org-element-property :begin hl))
+	 (end (org-element-property :end hl))
+	 (inlinetask (with-temp-buffer
+		       (org-mode)
+		       (org-inlinetask-insert-task) 
+		       (insert title "  " tags "\n" body)
+		       (concat (buffer-string) "\n\n"))))
+    (cl--set-buffer-substring beg end inlinetask)))
 
 ;; * Speed commands
 ;; These are single letter commands at headings
