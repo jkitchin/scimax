@@ -191,6 +191,7 @@ This is a macro so I don't have to quote the hydra name."
   ("j" scimax-journal/body "journal" :column "Emacs")
   ("n" nb-hydra/body "notebook" :column "Emacs")
   ("r" elfeed "elfeed" :column "Emacs")
+  ("F" scimax-org-feed "scimax-org-feed" :column "Emacs")
   
   ("b" bash "bash" :column "OS")
   ("f" finder "Finder" :column "OS")
