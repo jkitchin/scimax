@@ -237,7 +237,9 @@ CANDIDATE is a string, possibly with a timestamp in it."
 
 
 ;; Note this did not work as well as I hoped. Maybe some things happen like
-;; updating the deadline after this is done
+;; updating the deadline after this is done, like updating the CLOSED property.
+;; It is also pretty slow to update a buffer, so it feels laggy when using it.
+;; Leaving it here to remind me I tried it.
 
 ;; (defun org-db-todo-hook-fn ()
 ;;   "Run when you change a TODO state.
@@ -290,7 +292,8 @@ order by headlines.deadline desc")))
 		  ;; delta * 4%
 		  (percent (* (- count  2) 4))
 		  (color)
-		  (d (mapcar 'string-to-number (list month day year))))
+		  (d (mapcar 'string-to-number (list month day year)))
+		  (calendar-date-echo-text (format "test %d" count)))
 	     (when (calendar-date-is-visible-p d)
 	       (save-excursion
 		 (calendar-cursor-to-visible-date d)
@@ -298,9 +301,9 @@ order by headlines.deadline desc")))
 					      (org-read-date nil t "+1w"))
 				 (color-darken-name "red" percent)
 			       (color-darken-name "DarkOliveGreen4" percent)))
-		 (overlay-put
-		  (make-overlay (1- (point)) (1+ (point))) 'face
-		  (list :foreground color :weight 'bold :help-echo "test")))))))
+		 (add-text-properties (1- (point)) (1+ (point))
+				      `(font-lock-face '(:foreground ,color :weight bold)
+						       help-echo (format "%s tasks" ,count))))))))
 
 
 (defun org-db-agenda-calendar-view ()
@@ -309,8 +312,18 @@ order by headlines.deadline desc")))
   (let ((calendar-today-visible-hook))
     (add-hook 'calendar-today-visible-hook
 	      'org-db-agenda-mark-calendar)
-    (org-db-agenda
-     (org-read-date))))
+    ;; What do we do with the selected date? This adds a day to what you
+    ;; selected which then shows entries on that day or earlier.
+    ;; (org-db-agenda
+    ;;  (org-format-time-string
+    ;;   "%Y-%m-%d %H:%M:%S"
+    ;;   (time-add (org-read-date t t) (* 60 60 24))))
+
+    (let ((selection (org-read-date t t)))
+      (org-db-ogenda (format-time-string "%Y-%m-%d" selection)
+		     (format-time-string "%Y-%m-%d" (time-add
+						     selection
+						     (* 60 60 24)))))))
 
 
 
