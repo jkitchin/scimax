@@ -64,7 +64,7 @@ from fulltext where contents match '%s'" query)))
 
 
 (defun org-db-fulltext-open (cand)
-  (destructuring-bind (snippet fname)
+  (cl-destructuring-bind (snippet fname)
       (mapcar 'string-trim (split-string cand "::"))
     (find-file fname)
     (goto-char (point-min))
