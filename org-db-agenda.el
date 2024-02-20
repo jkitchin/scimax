@@ -318,12 +318,64 @@ order by headlines.deadline desc")))
     ;;  (org-format-time-string
     ;;   "%Y-%m-%d %H:%M:%S"
     ;;   (time-add (org-read-date t t) (* 60 60 24))))
-
-    (let ((selection (org-read-date t t)))
-      (org-db-ogenda (format-time-string "%Y-%m-%d" selection)
-		     (format-time-string "%Y-%m-%d" (time-add
-						     selection
-						     (* 60 60 24)))))))
+    (let* ((selection (org-read-date t t))
+	   (entries (with-org-db
+		     (sqlite-select org-db "select
+headlines.level, headlines.title, headlines.tags,
+files.filename, headlines.begin,
+strftime('<%Y-%m-%d %H:%M:%S>', headlines.deadline),
+files.last_updated, headlines.todo_keyword
+from headlines
+inner join files on files.rowid = headlines.filename_id
+where headlines.todo_keyword = \"TODO\"
+-- and headlines.archivedp is null
+and headlines.deadline > date(?)
+and headlines.deadline < date(?)
+order by headlines.deadline desc
+"
+				    (list (format-time-string "%Y-%m-%d" selection)
+					  (format-time-string "%Y-%m-%d" (time-add
+									  selection
+									  (* 60 60 24)))))))
+	   (candidates (cl-loop for (level title tags filename begin deadline last-updated todo-keyword)
+				in entries
+				collect
+				(cons
+				 (format "%28s|%100s|%20s|%s|%s"
+					 (s-pad-right 28 " "
+						      (or deadline " "))
+					 
+					 (s-pad-right 100 " " (concat  (make-string
+									level
+									(string-to-char "*"))
+								       " "
+								       todo-keyword " "
+								       title))
+					 (s-pad-right 20 " " (or tags ""))
+					 filename last-updated)
+				 (list
+				  :file filename
+				  :deadline deadline
+				  :last-updated last-updated
+				  :begin begin
+				  :title title)))))
+      (ivy-read "Agenda: " candidates
+		:caller 'org-db-agenda
+		:action '(1
+			  ("o" org-db-headings--open "Open to heading")
+			  ("O" org-db-ogenda "open in org-agenda")
+			  ("a" (lambda (_) (call-interactively #'org-db-agenda))  "New interval")
+			  ("d" org-db-agenda--done "Mark entry done")
+			  ("v" org-db-agenda--archive "Add archive tag")
+			  ("V" org-db-agenda--archive-subtree "Archive subtree")
+			  ("i" org-db-agenda--ignore "Ignore this file")
+			  ("u" org-db-agenda--update "Update file in database")
+			  ("r" org-db-agenda--remove "Remove file")
+			  ("c" (lambda (_) (org-db-agenda-calendar-view)) "Calendar view")
+			  ("q" (lambda (_)
+				 (org-db-process-queue t)
+				 (call-interactively #'org-db-agenda))
+			   "Process queue"))))))
 
 
 
