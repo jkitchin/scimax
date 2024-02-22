@@ -191,6 +191,7 @@ This is mostly an experiment: {@>John Kitchin :email jkitchin@andrew.cmu.edu <@}
 (require 'cl-lib)
 (require 'color)
 (require 'easymenu)
+(require 's)
 
 #+END_SRC
 
@@ -1302,8 +1303,12 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 	(save-restriction
 	  (widen)
 	  (goto-char (point-max))
+	  (unless (bolp)
+	    (insert "\n\n"))
+	  (when (eq mode 'org-mode)
+	    (insert "* Local Variables :noexport:\n\n"))
 	  (insert (with-temp-buffer
-		    (funcall mode)
+		    (funcall mode) 
 		    (insert "Local Variables:\nEnd:\n")
 		    (comment-region (point-min) (point-max))
 		    (buffer-string)))))))
