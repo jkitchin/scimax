@@ -45,10 +45,7 @@
 ;;
 ;; Should there be a filter mechanism to prevent adding entries?
 ;;
-;; [2024-02-05 Mon] This is still alpha code and I expect to make some changes.
-;; For example, I use the md5sum of content instead of a uuid as the unique key.
-;; That is fragile if the upstream content changes, and RSS uses a uuid instead.
-;; I don't really want to generate these at the moment though.
+;; [2024-02-25 Sun] I replaced md5 with a uuid from the feed.
 
 ;;; Code:
 
@@ -117,16 +114,16 @@ Meant to be used in `scimax-org-feed-post-update-hook'."
 ;; [[info:elisp#Database]]
 
 ;; Tables:
-;; entries: (md5 content)
-;; entry_tags: (md5 tag)
-;; entry_property: (md5 propertyid value)
+;; entries: (uuid content)
+;; entry_tags: (uuid tag)
+;; entry_property: (uuid propertyid value)
 
 (defun scimax-org-feed-setup-db ()
   "Create the db."
   (let ((scimax-org-feed-db  (sqlite-open  scimax-org-feed-db-file)))
-    (sqlite-execute scimax-org-feed-db "create virtual table if not exists entries using fts5 (md5, content, date_added)")
-    (sqlite-execute scimax-org-feed-db "create table if not exists entry_tag (md5, tag)")
-    (sqlite-execute scimax-org-feed-db "create table if not exists entry_property (md5, property, value)")
+    (sqlite-execute scimax-org-feed-db "create virtual table if not exists entries using fts5(uuid, content, date_added)")
+    (sqlite-execute scimax-org-feed-db "create table if not exists entry_tag (uuid, tag text, foreign key(uuid) references entries(uuid) on delete cascade)")
+    (sqlite-execute scimax-org-feed-db "create table if not exists entry_property (uuid, property text, value text, foreign key(uuid) references entries(uuid) on delete cascade)")
     (sqlite-close scimax-org-feed-db)))
 
 
@@ -143,12 +140,15 @@ Meant to be used in `scimax-org-feed-post-update-hook'."
 (defun scimax-org-feed-update ()
   "Update all the feeds."
   (let ((scimax-org-feed-db (sqlite-open  scimax-org-feed-db-file)))
+    ;; Iterate over the feed urls
     (cl-loop for feed-url in scimax-org-feeds do
+	     ;; get the content 
 	     (let* ((org-feed-content (with-current-buffer
 					  (url-retrieve-synchronously
 					   feed-url)
 					(buffer-substring
 					 url-http-end-of-headers (point-max))))
+		    ;; in a temp buffer process the entries
 		    (entries (with-temp-buffer
 			       (insert org-feed-content)
 			       (org-mode)
@@ -166,34 +166,35 @@ Meant to be used in `scimax-org-feed-post-update-hook'."
 						 (content (buffer-substring
 							   (org-element-property :begin el)
 							   (org-element-property :end el)))
-						 (md5 (md5 content)))
+						 (uuid (org-entry-get (point) "UUID")))
 					    (list :content content
 						  :tags tags
 						  :properties properties
-						  :md5 md5)))))))
-	       
+						  :uuid uuid)))))))
+
+	       ;; now in `scimax-org-feed-file' update as needed
 	       (with-current-buffer (find-file-noselect scimax-org-feed-file)
 		 (set-buffer-file-coding-system 'utf-8)
 		 (cl-loop for entry in entries do
-			  (let ((md5 (plist-get entry :md5))
+			  (let ((uuid (plist-get entry :uuid))
 				(content (plist-get entry :content)))
 			    ;; this means we do not have the entry, so we insert
 			    ;; it, and save the entry
 			    (unless (sqlite-select scimax-org-feed-db
-						   "select * from entries where md5=?"
-						   (list md5))
+						   "select * from entries where uuid=?"
+						   (list uuid))
 			      (goto-char (point-max))
 			      (insert (plist-get entry :content))
 			      (sqlite-execute scimax-org-feed-db
-					      "insert into entries (md5, content, date_added) values (?, ?, datetime('now','localtime'))"
-					      (list md5 content))
+					      "insert into entries (uuid, content, date_added) values (?, ?, datetime('now','localtime'))"
+					      (list uuid content))
 
 			      ;; update tags
 			      (cl-loop for tag in (plist-get entry :tags)
 				       do
 				       (sqlite-execute scimax-org-feed-db
-						       "insert into entry_tag (md5, tag) values (?, ?)"
-						       (list md5 tag)))
+						       "insert into entry_tag (uuid, tag) values (?, ?)"
+						       (list uuid tag)))
 			      
 			      ;; update properties
 			      (cl-loop for (property . value) in (plist-get entry :properties)
@@ -201,8 +202,8 @@ Meant to be used in `scimax-org-feed-post-update-hook'."
 				       (when value
 					 (sqlite-execute
 					  scimax-org-feed-db
-					  "insert into entry_property (md5, property, value) values (?, ?, ?)"
-					  (list md5 property value))))))))))
+					  "insert into entry_property (uuid, property, value) values (?, ?, ?)"
+					  (list uuid property value))))))))))
     (sqlite-close scimax-org-feed-db)
     (with-current-buffer (find-file-noselect scimax-org-feed-file)
       ;; This fixes some display issues where raw unicode characters are shown
@@ -213,7 +214,9 @@ Meant to be used in `scimax-org-feed-post-update-hook'."
 	    (revert-without-query (list scimax-org-feed-file)))
 	(save-buffer)
 	(revert-buffer-with-coding-system 'utf-8))
-      (run-hooks 'scimax-org-feed-post-update-hook))))
+      (cl-loop for hook-func in scimax-org-feed-post-update-hook
+	       do
+	       (funcall hook-func)))))
 
 
 (defun scimax-org-feed-header ()
@@ -375,22 +378,22 @@ See https://www.sqlite.org/fts5.html for query syntax."
 	 (tag (ivy-read "Tag: " (mapcar 'car (sqlite-execute
 					      scimax-org-feed-db
 					      "select distinct tag from entry_tag"))))
-	 (md5s (let ()
-		 (prog1
-		     (mapcar 'car
-			     (sqlite-execute scimax-org-feed-db
-					     "select distinct md5 from entry_tag where tag=?"
-					     (list tag)))
-		   (sqlite-close scimax-org-feed-db))))
+	 (uuids (let ()
+		  (prog1
+		      (mapcar 'car
+			      (sqlite-execute scimax-org-feed-db
+					      "select distinct uuid from entry_tag where tag=?"
+					      (list tag)))
+		    (sqlite-close scimax-org-feed-db))))
 	 (buf (get-buffer-create "*scimax-org-feed-tag*"))
 	 (scimax-org-feed-db  (sqlite-open  scimax-org-feed-db-file)))
     (with-current-buffer buf
       (erase-buffer)
-      (cl-loop for md5 in md5s
+      (cl-loop for uuid in uuids
 	       do
 	       (insert (caar (sqlite-execute scimax-org-feed-db
-					     "select content from entries where md5=?"
-					     (list md5)))))
+					     "select content from entries where uuid=?"
+					     (list uuid)))))
       (org-mode)
       (scimax-org-feed-header))
     (sqlite-close scimax-org-feed-db)
@@ -408,25 +411,25 @@ Use % for a wildcard."
 							scimax-org-feed-db
 							"select distinct property from entry_property"))))
 	 (value (read-string "Value: "))
-	 (md5s (let ()
-		 (prog1
-		     (mapcar 'car
-			     (or
-			      (sqlite-execute
-			       scimax-org-feed-db
-			       "select distinct md5 from entry_property where property=? and value like ?"
-			       (list property value))
-			      '()))
-		   (sqlite-close scimax-org-feed-db))))
+	 (uuids (let ()
+		  (prog1
+		      (mapcar 'car
+			      (or
+			       (sqlite-execute
+				scimax-org-feed-db
+				"select distinct uuid from entry_property where property=? and value like ?"
+				(list property value))
+			       '()))
+		    (sqlite-close scimax-org-feed-db))))
 	 (buf (get-buffer-create "*scimax-org-feed-property*"))
 	 (scimax-org-feed-db  (sqlite-open  scimax-org-feed-db-file)))
     (with-current-buffer buf
       (erase-buffer)
-      (cl-loop for md5 in md5s
+      (cl-loop for uuid in uuids
 	       do
 	       (insert (caar (sqlite-execute scimax-org-feed-db
-					     "select content from entries where md5=?"
-					     (list md5)))))
+					     "select content from entries where uuid=?"
+					     (list uuid)))))
       (org-mode)
       (scimax-org-feed-header))
     (sqlite-close scimax-org-feed-db)
@@ -434,8 +437,8 @@ Use % for a wildcard."
     (goto-char (point-min))))
 
 
-;; ** searching by date
-;; Leaving this here so I don't forget.
+;; * searching by date
+;; Leaving this here so I don't forget how to do it.
 (defun scimax-org-feed-date (start end)
   "Show entries in the database for dates from START to END.
 These are dates when the entries were added to the database.
@@ -461,6 +464,24 @@ you add them are."
     (pop-to-buffer buf)
     (goto-char (point-min))))
 
+;; * Show all entries
+(defun scimax-org-feed-showall ()
+  "Open a buffer with all entries.
+Warning: this may be a big buffer!"
+  (interactive)
+  (let* ((scimax-org-feed-db (sqlite-open  scimax-org-feed-db-file))
+	 (entries (sqlite-select scimax-org-feed-db "select content from entries"))
+	 (buf (get-buffer-create "*scimax-org-feed*")))
+    (with-current-buffer buf
+      (erase-buffer)
+      (cl-loop for entry in entries
+	       do
+	       (insert (car entry)))
+      (org-mode)
+      (scimax-org-feed-header))
+    (sqlite-close scimax-org-feed-db)
+    (pop-to-buffer buf)
+    (goto-char (point-min))))
 
 
 
