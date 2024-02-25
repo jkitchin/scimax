@@ -464,6 +464,7 @@ you add them are."
     (pop-to-buffer buf)
     (goto-char (point-min))))
 
+
 ;; * Show all entries
 (defun scimax-org-feed-showall ()
   "Open a buffer with all entries.
@@ -482,8 +483,6 @@ Warning: this may be a big buffer!"
     (sqlite-close scimax-org-feed-db)
     (pop-to-buffer buf)
     (goto-char (point-min))))
-
-
 
 
 (provide 'scimax-org-feed)
