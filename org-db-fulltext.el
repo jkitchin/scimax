@@ -2,9 +2,13 @@
 
 ;;; Commentary:
 ;;
-;; Add fulltext search for org-db.
+;; Add fulltext search for org-db. There are two main entry points.
 ;;
-;; TODO replace org-db-ft
+;; `org-db-fulltext-search' uses fts5 MATCH syntax for searching with dynamic
+;; candidate completion. The candidates are short snippets of context.
+;;
+;; `org-db-fulltext-search-ivy' uses ivy on the full candidates, with ivy
+;; matching. It is surprisingly fast. I like this one best.
 
 (require 'org-db)
 
@@ -19,7 +23,6 @@
   (let ((org-db-ft (sqlite-open (expand-file-name org-db-fulltext org-db-root))))
     (sqlite-execute org-db-ft "create virtual table if not exists fulltext using fts5(filename, contents)")
     (sqlite-close org-db-ft)))
-
 
 
 (defun org-db-fulltext-update (_filename-id _parse-tree _org-db)
@@ -64,25 +67,22 @@ from fulltext where contents match '%s'" query)))
 
 
 (defun org-db-fulltext-open (cand)
+  "Open the file in CAND."
   (cl-destructuring-bind (snippet fname)
       (mapcar 'string-trim (split-string cand "::"))
     (find-file fname)
     (goto-char (point-min))
     (search-forward snippet nil t)))
 
+
 (defun org-db-fulltext-search ()
   "Search the fulltext database.
 This function opens the file that matches your query string."
   (interactive)
-  ;; this uses ivy for completion. 
-  ;; (let ((candidates (let ((org-db-ft (sqlite-open (expand-file-name org-db-fulltext org-db-root))))
-  ;; 		      (prog1
-  ;; 			  (sqlite-select org-db-ft "select contents, filename from fulltext")
-  ;; 			(sqlite-close org-db-ft)))))
-  ;;   )
   (ivy-read "query: " #'org-db-fulltext-candidates 
 	    :dynamic-collection t
 	    :action #'org-db-fulltext-open))
+
 
 (defun org-db-fulltext-search-ivy ()
   "Search the fulltext database.
