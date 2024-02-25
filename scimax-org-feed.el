@@ -270,12 +270,13 @@ done and archives it at once."
 (defun scimax-org-feed-refile-to-open-org-buffer ()
   "Refile current heading to a heading in open org-buffer."
   (interactive)
-  (let* ((org-file (ivy-read "Buffer: " (cl-loop for buf in (buffer-list)
-						 if (and (buffer-file-name buf)
-							 (string= "org"
-								  (file-name-extension
-								   (buffer-file-name buf))))
-						 collect (buffer-file-name buf))))
+  (let* ((org-file (ivy-read "Buffer: "
+			     (cl-loop for buf in (buffer-list)
+				      if (and (buffer-file-name buf)
+					      (string= "org"
+						       (file-name-extension
+							(buffer-file-name buf))))
+				      collect (buffer-file-name buf))))
 	 (headlines (with-current-buffer (find-file-noselect org-file)
 		      (save-excursion
 			(let ((hl '()))
@@ -291,7 +292,7 @@ done and archives it at once."
 			      :position (match-beginning 0))
 			     hl))
 			  hl))))
-	 (selection (ivy-read "Heading: " headlines))
+	 (selection (ivy-read "Heading: " headlines :initial-input "openalex"))
 	 (candidate (cdr (assoc selection headlines)))
 	 (rfloc (list
 		 (plist-get candidate :headline)
@@ -412,30 +413,58 @@ Use % for a wildcard."
 							scimax-org-feed-db
 							"select distinct property from entry_property"))))
 	 (value (read-string "Value: "))
-	 (uuids (let ()
-		  (prog1
-		      (mapcar 'car
-			      (or
-			       (sqlite-execute
-				scimax-org-feed-db
-				"select distinct uuid from entry_property where property=? and value like ?"
-				(list property value))
-			       '()))
-		    (sqlite-close scimax-org-feed-db))))
-	 (buf (get-buffer-create "*scimax-org-feed-property*"))
-	 (scimax-org-feed-db  (sqlite-open  scimax-org-feed-db-file)))
+	 (uuids (sqlite-execute
+		 scimax-org-feed-db
+		 "select distinct uuid from entry_property where property=? and value like ?"
+		 (list property value))) 
+	 (buf))
+    (when (listp uuids)
+      (setq uuids (mapcar 'car uuids)
+	    buf (get-buffer-create "*scimax-org-feed-property*"))
+      (with-current-buffer buf
+	(erase-buffer)
+	(cl-loop for uuid in uuids
+		 do
+		 (insert (caar (sqlite-execute scimax-org-feed-db
+					       "select content from entries where uuid=?"
+					       (list uuid)))))
+	(org-mode)
+	(scimax-org-feed-header)
+	(pop-to-buffer buf)
+	(goto-char (point-min))))
+    (sqlite-close scimax-org-feed-db)))
+
+
+(defun scimax-org-feed-topic-search ()
+  "Find entries by topic."
+  (let* ((scimax-org-feed-db  (sqlite-open scimax-org-feed-db-file))
+	 (topics (sqlite-execute
+		  scimax-org-feed-db
+		  "select distinct value from entry_property where property = \"TOPICS\""))
+	 (topic-candidates (delete-dups
+			    (flatten-list
+			     (cl-loop for (topic) in topics collect
+				      (mapcar 'string-trim
+					      (string-split topic ","))))))
+	 (topic-choice (completing-read "Topic: " topic-candidates))
+	 (uuids (sqlite-execute
+		 scimax-org-feed-db
+		 "select uuid from entry_property where value like ?"
+		 (list (format "%%%s%%" topic-choice))))
+	 (buf (get-buffer-create "*scimax-org-feed-property*")))
     (with-current-buffer buf
       (erase-buffer)
-      (cl-loop for uuid in uuids
+      (cl-loop for (uuid) in uuids
 	       do
 	       (insert (caar (sqlite-execute scimax-org-feed-db
 					     "select content from entries where uuid=?"
 					     (list uuid)))))
       (org-mode)
-      (scimax-org-feed-header))
-    (sqlite-close scimax-org-feed-db)
-    (pop-to-buffer buf)
-    (goto-char (point-min))))
+      (scimax-org-feed-header)
+      (pop-to-buffer buf)
+      (goto-char (point-min)))
+    
+    (sqlite-close scimax-org-feed-db)))
 
 
 ;; * searching by date
