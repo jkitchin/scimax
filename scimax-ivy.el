@@ -35,6 +35,7 @@
 (define-key ivy-minibuffer-map (kbd "C-k") 'kill-whole-line)
 
 
+;; * ivy-become
 ;; This is an idea I got from embark. It solves a problem I have had a lot,
 ;; where I want to transfer the input text to another command. Why not use
 ;; embark? I find it confusing.
@@ -76,7 +77,8 @@
 (define-key ivy-minibuffer-map (kbd "s-o") 'ivy-occur)
 
 
-;; Show key bindings
+;; * Show key bindings
+
 (defun scimax-show-key-bindings ()
   "Show keys in the map"
   (interactive)
@@ -95,9 +97,11 @@
 
 (define-key ivy-minibuffer-map (kbd "C-s") #'scimax-ivy-show-marked-candidates)
 
-;; Marking candidates
+;; * Marking candidates
 (defun scimax-ivy-toggle-mark ()
-  "Toggle the mark"
+  "Toggle the mark.
+This stays on the line because eventually you press <return> and
+that could include the next line, which is not desirable here."
   (interactive)
   (if (ivy--marked-p)
       (ivy-unmark)
@@ -105,7 +109,21 @@
   (ivy-previous-line))
 
 (define-key ivy-minibuffer-map (kbd "M-TAB")
-  #'scimax-ivy-toggle-mark)
+	    #'scimax-ivy-toggle-mark)
+
+
+(define-key ivy-minibuffer-map (kbd "S-<down>")
+	    (lambda ()
+	      "Mark line and go to next."
+	      (interactive)
+	      (ivy-mark)))
+
+
+(define-key ivy-minibuffer-map (kbd "S-<up>")
+	    (lambda ()
+	      (interactive)
+	      (ivy-unmark)
+	      (ivy-previous-line 2)))
 
 
 ;; * alternate actions via completion
@@ -351,7 +369,12 @@ TODO: sorting, actions."
     (ivy-read "process: " candidates
 	      :action
 	      '(1
-		("k" (lambda (cand) (message "%s" (ivy-ps-pid cand))) "kill")))))
+		("k" (lambda (cand)
+		       (shell-command (format "kill -9 %s" (ivy-ps-pid (cdr cand)))))
+		 "kill")
+		("2" (lambda (cand)
+		       (shell-command (format "kill -USR2 %s" (ivy-ps-pid (cdr cand)))))
+		 "kill -USR2")))))
 
 (provide 'scimax-ivy)
 
