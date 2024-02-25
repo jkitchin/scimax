@@ -441,7 +441,7 @@ this is it is not feasible to have a key without a value."
 	  (push this-word s)
 	;; word is not a :keyword
 	(when s
-	  (setq tempstr (s-join " " (reverse  s)))
+	  (setq tempstr (string-join (reverse  s) " "))
 	  (if (string= tempstr (format "%s" (string-to-number tempstr)))
 	      (push (string-to-number tempstr) sexp)
 	    (push tempstr sexp)))
@@ -449,11 +449,11 @@ this is it is not feasible to have a key without a value."
 	(push (intern this-word) sexp)))
     ;; make sure we get the last s...
     (when s
-      (setq tempstr (s-join " " (reverse  s)))
+      (setq tempstr (string-join (reverse  s) " "))
       (if (string= tempstr (format "%s" (string-to-number tempstr)))
 	  (push (string-to-number tempstr) sexp)
 	(push tempstr sexp)))
-    (-flatten (reverse sexp))))
+    (flatten-list (reverse sexp))))
 
 
 (defun sem-editmark-plist ()
@@ -647,8 +647,9 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 	(lambda (s)
 	  (format "@@latex:\\noindent\\protect\\bgroup\\markoverwith{\\textcolor{blue}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
 		  s))
-	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
-						      (cdr content-bounds)))
+	(string-split (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds))
+		      "\n")
 	"@@latex:\\\\@@\n")))
      ((eq 'html backend)
       (cl--set-buffer-substring
@@ -656,8 +657,9 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
        (mapconcat
 	(lambda (s)
 	  (format "@@html:<span style=\"color: blue\">%s</span>@@" s))
-	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
-						      (cdr content-bounds)))
+	(string-split (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds))
+		      "\n")
 	"@@html:<br>@@"))))))
 
 
@@ -673,8 +675,9 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
 	(lambda (s)
 	  (format "@@latex:\\noindent\\protect\\bgroup\\markoverwith{\\textcolor{red}{\\rule[-0.5ex]{4pt}{1.4pt}}}\\ULon{%s}@@"
 		  s))
-	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
-						      (cdr content-bounds)))
+	(string-split (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds))
+		      "\n")
 	"@@latex:\\\\@@\n")))
      ((eq 'html backend)
       (cl--set-buffer-substring
@@ -682,8 +685,9 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
        (mapconcat
 	(lambda (s)
 	  (format "@@html:<span style=\"color: red\">%s</span>@@" s))
-	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
-						      (cdr content-bounds)))
+	(string-split (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds))
+		      "\n")
 	"@@html:<br>@@"))))))
 
 
@@ -698,10 +702,11 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
        (mapconcat
 	(lambda (s)
 	  (format "@@latex:%s@@" s))
-	(s-split "\n" (format "\\todo{%s}"
+	(string-split (format "\\todo{%s}"
 			      (buffer-substring-no-properties
 			       (car content-bounds)
-			       (cdr content-bounds))))
+			       (cdr content-bounds)))
+		      "\n")
 	"@@latex:\\\\@@\n")))
      ((eq 'html backend)
       (cl--set-buffer-substring
@@ -709,8 +714,9 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
        (mapconcat
 	(lambda (s)
 	  (format "@@html:<span style=\"color: orange\">%s</span>@@" s))
-	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
-						      (cdr content-bounds)))
+	(string-split (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds))
+		      "\n")
 	"@@html:<br>@@"))))))
 
 
@@ -725,10 +731,11 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
        (mapconcat
 	(lambda (s)
 	  (format "@@latex:%s@@" s))
-	(s-split "\n" (format "\\todo[color=green!40]{TASK: %s}"
+	(string-split (format "\\todo[color=green!40]{TASK: %s}"
 			      (buffer-substring-no-properties
 			       (car content-bounds)
-			       (cdr content-bounds))))
+			       (cdr content-bounds)))
+		      "\n")
 	"@@latex:\\\\@@\n")))
      ((eq 'html backend)
       (cl--set-buffer-substring
@@ -736,8 +743,9 @@ For LaTeX, I rely on https://ctan.org/pkg/todonotes?lang=en for comments and tas
        (mapconcat
 	(lambda (s)
 	  (format "@@html:<span style=\"color: purple\">%s</span>@@" s))
-	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
-						      (cdr content-bounds)))
+	(string-split (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds))
+		      "\n")
 	"@@html:<br>@@"))))))
 
 
@@ -786,9 +794,10 @@ we go with the font color."
 	(mapconcat
 	 (lambda (s)
 	   (format "@@latex:%s@@" s))
-	 (s-split "\n" (buffer-substring-no-properties
+	 (string-split (buffer-substring-no-properties
 			(car content-bounds)
-			(cdr content-bounds)))
+			(cdr content-bounds))
+		       "\n")
 	 "@@latex:\\\\@@\n")
 	"@@latex: }}@@")))
 
@@ -801,8 +810,9 @@ we go with the font color."
 		  fg-hex
 		  bg-hex
 		  s))
-	(s-split "\n" (buffer-substring-no-properties (car content-bounds)
-						      (cdr content-bounds)))
+	(string-split (buffer-substring-no-properties (car content-bounds)
+						      (cdr content-bounds))
+		      "\n")
 	"@@html:<br>@@"))))))
 #+END_SRC
 
