@@ -127,11 +127,11 @@ A candidate is a list of (link function)."
 (defun @-hashtags ()
   "Get a list of candidate hashtags you have used before."
   (let* ((tip (looking-at-hashtag))
-	 (hashtag-data (emacsql org-db [:select [hashtag file-hashtags:begin files:filename]
-						:from hashtags
-						:left :join file-hashtags :on (= hashtags:rowid file-hashtags:hashtag-id)
-						:inner :join files
-						:on (= files:rowid file-hashtags:filename-id)])))
+	 (hashtag-data (with-org-db
+			(sqlite-select org-db "select hashtag, file_hashtags.begin, files.filename
+from hashtags
+left join file_hashtags on hashtags.rowid = file_hashtags.hashtag_id
+inner join files on files.rowid = file_hashtags.filename_id"))))
     (-uniq (cl-loop for (hashtag begin fname) in hashtag-data
 		    collect (concat "#" hashtag)))))
 
