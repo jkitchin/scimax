@@ -43,10 +43,6 @@
 ;; `org-db-clean-db' will prune entries where the file no longer exists.
 ;; `org-db-reset-db' will clear all the entries from org-db if you want to start over.
 ;;
-;; Advanced usage
-;; you can build emacsql queries on org-db to do lots of things.
-
-
 ;;; org-db.el --- An org database
 
 ;;; Code:
@@ -90,10 +86,6 @@ delete old data if needed, and insert or update data as needed."
 ;; Make sure we have a directory to store the root in
 (unless (file-directory-p org-db-root)
   (make-directory org-db-root t))
-
-
-(defvar org-db-queue '()
-  "A list of files that need to be updated.")
 
 
 (defvar org-db-log-file (expand-file-name "org-db.log" org-db-root)
@@ -855,7 +847,7 @@ Optional argument FORCE. if non-nil force the buffer to be added."
 ;; * Idle timer to update
 
 (defun org-db-process-queue (&optional force)
-  "Update all the files in `org-db-queue'.
+  "Update all the files in the queue (stored in the db).
 Use a prefix ARG to FORCE the process instead of waiting for idle time."
   (interactive "P")
   (let ((filenames (mapcar 'car (with-org-db  (sqlite-select org-db "select filename from queue")))))
@@ -1382,15 +1374,13 @@ order by files.last_updated desc")))
 		 "Open file")
 		("r" (lambda (candidate)
 		       (with-org-db
-			(emacsql org-db [:delete :from files :where (= filename $s1)]
-				 candidate)))
+			(sqlite-execute org-db "delete from files where filename = ?" (list candidate))))
 		 "Remove file from org-db")
 		("u" (lambda (candidate)
-		       (cl-loop for filename in (with-org-db (emacsql org-db [:select filename
-										      :from files]))
+		       (cl-loop for (filename) in (with-org-db (sqlite-select org-db "select filename from files"))
 				do
-				(unless (file-exists-p (car filename))
-				  (org-db-remove-file (car filename)))))
+				(unless (file-exists-p filename)
+				  (org-db-remove-file filename))))
 		 "Update the file list")))))
 
 
@@ -1410,11 +1400,10 @@ Recent is sorted by last-updated in the database."
 		       (find-file (cdr candidate)))
 		 "Open file")
 		("u" (lambda (candidate)
-		       (cl-loop for filename in (with-org-db (emacsql org-db [:select filename
-										      :from files]))
+		       (cl-loop for (filename) in (with-org-db (sqlite-select org-db "select filename from files"))
 				do
-				(unless (file-exists-p (car filename))
-				  (org-db-remove-file (car filename)))))
+				(unless (file-exists-p filename)
+				  (org-db-remove-file filename))))
 		 "Update the file list")))))
 
 
@@ -1648,49 +1637,45 @@ on files.rowid = file_atlabels.filename_id")))
 
 ;; ;; * org-id integration
 ;; ;; org-id-goto is very slow for me. This function can replace it.
-;; (defun org-db-goto-id (id)
-;;   "Open an org file at ID."
-;;   (let* ((result (with-org-db
-;; 		  (emacsql org-db
-;; 			   [:select [files:filename headlines:begin]
-;; 				    :from headlines
-;; 				    :inner :join headline-properties
-;; 				    :on (=  headlines:rowid headline-properties:headline-id)
-;; 				    :inner :join properties
-;; 				    :on (= properties:rowid headline-properties:property-id)
-;; 				    :inner :join files :on (= files:rowid headlines:filename-id)
-;; 				    :where (and (= properties:property "ID")
-;; 						(= headline-properties:value $s1))]
-;; 			   id)))
-;; 	 match fname p)
-;;     (cond
-;;      ((and result
-;; 	   (= 1 (length result)))
-;;       (setq match (cl-first result)
-;; 	    fname (cl-first match)
-;; 	    p (cl-second match))
-;;       (find-file fname)
-;;       (goto-char p))
+(defun org-db-goto-id (id)
+  "Open an org file at ID."
+  (let* ((result (with-org-db
+		  (sqlite-select org-db "select files.filename,headlines.begin
+from headlines
+inner join headline_properties on headlines.rowid = headline_properties.headline_id
+inner join properties on properties.rowid = headline_properties.property_id
+inner join files on files.rowid = headlines.filename_id
+where properties.property = \"ID\" and headline_properties.value = ?"
+				 (list id))))
+	 match fname p)
+    (cond
+     ((and result
+	   (= 1 (length result)))
+      (setq match (cl-first result)
+	    fname (cl-first match)
+	    p (cl-second match))
+      (find-file fname)
+      (goto-char p))
 
-;;      ((> (length result) 1)
-;;       ;; TODO maybe use ivy to select?
-;;       (org-db-log "(%s) matches: %s result" (length result) result))
+     ((> (length result) 1)
+      ;; TODO maybe use ivy to select?
+      (org-db-log "(%s) matches: %s result" (length result) result))
 
-;;      (t
-;;       (org-db-log "No match found")))))
+     (t
+      (org-db-log "No match found")))))
 
 
-;; (defun org-db-toggle-org-id ()
-;;   "Toggle using `org-db' to follow org-id links."
-;;   (interactive)
-;;   (if (not (get 'org-db-goto-id 'enabled))
-;;       (progn
-;; 	(advice-add 'org-id-goto :override #'org-db-goto-id)
-;; 	(put 'org-db-goto-id 'enabled t)
-;; 	(org-db-log "org-db-goto-id advice enabled."))
-;;     (advice-remove 'org-id-goto #'org-db-goto-id)
-;;     (put 'org-db-goto-id 'enabled nil)
-;;     (org-db-log "org-db-goto-id advice disabled.")))
+(defun org-db-toggle-org-id ()
+  "Toggle using `org-db' to follow org-id links."
+  (interactive)
+  (if (not (get 'org-db-goto-id 'enabled))
+      (progn
+	(advice-add 'org-id-goto :override #'org-db-goto-id)
+	(put 'org-db-goto-id 'enabled t)
+	(org-db-log "org-db-goto-id advice enabled."))
+    (advice-remove 'org-id-goto #'org-db-goto-id)
+    (put 'org-db-goto-id 'enabled nil)
+    (org-db-log "org-db-goto-id advice disabled.")))
 
 
 ;; * tag search
@@ -1699,7 +1684,7 @@ on files.rowid = file_atlabels.filename_id")))
 ;; in case I ever think of trying to write this again!
 
 
-;; ;; * property search
+;; * property search
 
 (defun org-db-properties (property pattern)
   "Search org-db for entries where PROPERTY matches PATTERN.
@@ -1788,14 +1773,7 @@ inner join email_addresses on email_addresses.rowid = file_email_addresses.email
 			     (sqlite-select org-db "select filename, path, begin from links
 left join files on links.filename_id = files.rowid
 where links.type = 'file' and path like ?"
-					    (list (concat "%" fname "%")))
-			     ;; (emacsql org-db [:select [filename path begin]
-			     ;; 			      :from links
-			     ;; 			      :left :join files :on (= links:filename-id files:rowid)
-			     ;; 			      :where (and (= links:type "file")
-			     ;; 					  (like path $s1))]
-			     ;; 	      (concat "%" fname "%"))
-			     ))
+					    (list (concat "%" fname "%")))))
 	 (matches (cl-loop for (src-filename path begin) in potential-matches collect
 			   (cond
 			    ;; path is absolute and points to file
@@ -1889,6 +1867,7 @@ inner join files on timestamps.filename_id = files.rowid"))))
 					    tblname))))
 
 (defun org-db-report ()
+  "Create a summary report of the db and its status."
   (interactive)
   (let ((buf (get-buffer-create "*org-db-report*"))
 	(tables (split-string
@@ -1905,6 +1884,7 @@ inner join files on timestamps.filename_id = files.rowid"))))
 	       do
 	       (insert (format "- %s\n" fname)))
       (insert "\n")
+      (insert "[[elisp:org-db-report]]\n\n")
       (insert "[[elisp:(progn (org-db-process-queue t) (org-db-report))][Process queue]]\n\n")
       
       (insert "* Files\n\n")
