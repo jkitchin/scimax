@@ -216,7 +216,7 @@ Meant to be used in `scimax-org-feed-post-update-hook'."
 	(revert-buffer-with-coding-system 'utf-8))
       (cl-loop for hook-func in scimax-org-feed-post-update-hook
 	       do
-	       (funcall hook-func))))
+	       (funcall hook-func)))))
 
 
 (defun scimax-org-feed-header ()
@@ -238,7 +238,7 @@ Meant to be used in `scimax-org-feed-post-update-hook'."
   (scimax-org-feed-update)
   (scimax-org-feed-header)
   (goto-char (point-min)) 
-  (org-next-visible-heading 1)))
+  (org-next-visible-heading 1))
 
 
 ;; * Acting on entries: delete, refile
