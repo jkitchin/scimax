@@ -985,54 +985,37 @@ This uses org-db-contacts, not editmark contacts right now."
   (interactive)
   (let* ((plist (sem-editmark-plist))
 	 (email (plist-get (cdr plist) :email))
-
 	 (link-candidates (cl-loop
 			   for (rl fn bg) in
-			   (emacsql org-db [:select [raw-link filename begin ]
-						    :from links
-						    :left :join files :on (= links:filename-id files:rowid)
-						    :where (and
-							    (= links:type "contact")
-							    (= links:path $s1))
-						    :order :by filename]
-				    email)
+			   (with-org-db
+			    (sqlite-select org-db "select raw_link,filename,begin from links
+left join files on links.filename_id = files.rowid where links.type = \"contact\" and links.path = ? order by filename"
+					   (list email))) 
 			   collect
 			   ;; (candidate :filename :begin)
 			   (list (format "%s | %s" rl fn) :filename fn :begin bg)))
 
-	 (results (emacsql org-db
-			   [:select [headlines:title
-				     properties:property
-				     headline-properties:value
-				     files:filename files:last-updated headlines:begin]
-				    :from headlines
-				    :inner :join headline-properties
-				    :on (=  headlines:rowid headline-properties:headline-id)
-				    :inner :join properties
-				    :on (= properties:rowid headline-properties:property-id)
-				    :inner :join files :on (= files:rowid headlines:filename-id)
-				    :where (and (= properties:property "ASSIGNEDTO")
-						(like headline-properties:value $s1))]
-			   email))
+	 (results (with-org-db
+		   (sqlite-select org-db "select headlines.title,properties.property,headline_properties.value,files.filename,files.last_updated,headlines.begin
+from headlines
+inner join headline_properties on headlines.rowid = headline_properties.headline_id
+inner join properties on properties.rowid = headline_properties.property_id
+inner join files on files.rowid = headlines.filename_id
+where properties.property = \"ASSIGNEDTO\" and headline_properties.value like ?"
+				  (list email))))
 
 	 (assigned-candidates (cl-loop for (title property value fname last-updated begin) in results
 				       collect
 				       (list (format "%s | %s=%s | %s" title property value fname)
 					     :filename fname :begin begin)))
-	 (results (emacsql org-db
-			   [:select [headlines:title
-				     properties:property
-				     headline-properties:value
-				     files:filename files:last-updated headlines:begin]
-				    :from headlines
-				    :inner :join headline-properties
-				    :on (=  headlines:rowid headline-properties:headline-id)
-				    :inner :join properties
-				    :on (= properties:rowid headline-properties:property-id)
-				    :inner :join files :on (= files:rowid headlines:filename-id)
-				    :where (and (= properties:property "EMAIL")
-						(like headline-properties:value $s1))]
-			   email))
+	 (results (with-org-db
+		   (sqlite-select org-db "select headlines.title, properties.property, headline_properties.value, files.filename, files.last_updated, headlines.begin
+from headlines
+inner join headline_properties on headlines.rowid = headline_properties.headline_id
+inner join properties on properties.rowid = headline_properties.property_id
+inner join files on files.rowid = headlines.filename_id
+where properties.property = \"EMAIL\" and headline_properties.value like ?"
+				  (list email))))
 	 (email-candidates (cl-loop for (title property value fname last-updated begin) in results
 				    collect
 				    (list (format "%s | %s=%s | %s" title property value fname)
