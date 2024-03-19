@@ -60,8 +60,8 @@ from fulltext where contents match '%s'" query)))
 		  ;; to get the filename. Its probably not even reliable because
 		  ;; the full text might have :: in it.
 		  collect
-		  (cons snippet fname)
-		  ;; (format "%s :: %s" snippet fname)
+		  ;; (cons snippet fname)
+		  (format "%s :: %s" snippet fname)
 		  )
        (sqlite-close org-db-ft)))))
 
