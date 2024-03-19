@@ -28,7 +28,7 @@ today Due by today
 headlines.level, headlines.title, headlines.tags,
 files.filename, headlines.begin,
 strftime('<%Y-%m-%d %H:%M:%S>', headlines.deadline),
-files.last_updated, headlines.todo_keyword
+files.last_updated, headlines.todo_keyword, headlines.priority
 from headlines
 inner join files on files.rowid = headlines.filename_id
 where headlines.todo_keyword = \"TODO\"
@@ -47,7 +47,7 @@ format('%s (scheduled)', headlines.title),
 headlines.tags,
 files.filename, headlines.begin,
 strftime('<%Y-%m-%d %H:%M:%S>', headlines.scheduled),
-files.last_updated, headlines.todo_keyword
+files.last_updated, headlines.todo_keyword, headlines.priority
 from headlines
 inner join files on files.rowid = headlines.filename_id
 where headlines.todo_keyword = \"TODO\"
@@ -64,7 +64,7 @@ order by headlines.scheduled desc
 headlines.level, headlines.title, headlines.tags,
 files.filename, headlines.begin,
 null,
-files.last_updated, headlines.todo_keyword
+files.last_updated, headlines.todo_keyword, headlines.priority
 from headlines
 inner join files on files.rowid = headlines.filename_id
 where headlines.todo_keyword = \"TODO\"
@@ -74,20 +74,23 @@ and headlines.deadline is null
 ")))
 	 (ignores (mapcar 'car (with-org-db
 				(sqlite-execute org-db "select * from agenda_ignores"))))
-	 (candidates (cl-loop for (level title tags filename begin deadline last-updated todo-keyword)
+	 (candidates (cl-loop for (level title tags filename begin deadline last-updated todo-keyword priority)
 			      in (-uniq (append deadline-headings scheduled-headings
 						todo-headings))
 			      when (not (member filename ignores))
 			      collect
 			      (cons
 			       (format "%28s|%100s|%20s|%s|%s"
+				       ;; deadline
 				       (s-pad-right 28 " "
 						    (or deadline " "))
-				       
+				       ;; title
 				       (s-pad-right 100 " " (concat  (make-string
 								      level
 								      (string-to-char "*"))
-								     " "
+								     (if priority
+									 (format " [#%s] " priority)
+								       " ")
 								     todo-keyword " "
 								     title))
 				       (s-pad-right 20 " " (or tags ""))
@@ -117,6 +120,9 @@ CANDIDATE is a string, possibly with a timestamp in it."
 				    (match-string 0 candidate)))))))
     (cond
      ((null es) candidate)
+     ;; I don't think I can put priority in here without changing the
+     ;; candidates, it is not in the title string
+     ((string-match "\\[#A\\]" candidate) (propertize candidate 'face '(:foreground "red1" :weight bold)))
      ((string-match "scheduled" candidate) (propertize candidate 'face '(:foreground "DarkOrange3")))
      ((> es now) (propertize candidate 'face '(:foreground "green4")))
      ((< es now) (propertize candidate 'face '(:foreground "dark red"))))))
