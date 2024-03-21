@@ -344,9 +344,9 @@
   :ensure nil
   :bind ("H-k" . ox-clip-formatted-copy))
 
-(use-package scimax-contacts
-  :ensure nil
-  :load-path scimax-dir)
+;; (use-package scimax-contacts
+;;   :ensure nil
+;;   :load-path scimax-dir)
 
 (use-package scimax-email
   :ensure nil
