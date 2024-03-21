@@ -6,6 +6,7 @@
 ;;
 ;; It relies on org-db to find contacts.
 ;;
+;; [2024-03-21 Thu] There is some overlap with org-db-contacts here
 
 ;;; Code:
 
@@ -94,17 +95,20 @@ Optional argument ARG is ignored."
 Argument WINDOW is ignored.
 Argument OBJECT is ignored.
 Argument POSITION is where the mouse cursor is."
-  (let* ((email (org-element-property :path (org-element-context))))
-    (cl-loop for (title value tags fname lup begin) in
-	     (with-org-db
-	      (sqlite-select org-db "select headlines.title,headline_properties.value,headlines.tags,files.filename,files.last_updated,headlines.begin
+  (with-current-buffer object
+    (save-excursion
+      (goto-char position)
+      (let* ((email (org-element-property :path (org-element-context))))
+	(cl-loop for (title value tags fname lup begin) in
+		 (with-org-db
+		  (sqlite-select org-db "select headlines.title,headline_properties.value,headlines.tags,files.filename,files.last_updated,headlines.begin
 from headlines inner join headline_properties on headlines.rowid = headline_properties.headline_id
 inner join properties on properties.rowid = headline_properties.property_id
 inner join files on files.rowid = headlines.filename_id
 where properties.property = \"EMAIL\" and headline_properties.value = ?"
-			     (list email)))
-	     concat
-	     (format "%40s | %s | %s\n" email title fname))))
+				 (list email)))
+		 concat
+		 (format "%40s | %s | %s\n" email title fname))))))
 
 
 (defun scimax-contact-email ()
