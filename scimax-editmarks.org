@@ -915,125 +915,128 @@ PARAMETERS is a set of keyword value pairs
 
 *** Creating a contact editmark.
 
+This code depends on org-db. If it isn't loaded, we dont' define this code. That means you have to require org-db before requiring this. I don't love that, but the alternative ideas seem more complex, e.g. move this to a new scimax-editmark-contact.el file that you intentionally load to use org-db. 
+
 #+BEGIN_SRC emacs-lisp
-(defvar sem-editmark-contact-map
-  (let ((map (copy-keymap org-mode-map)))
-    (define-key map (kbd "<return>") 'sem-contact/body)
-    (define-key map (kbd "s-e") 'sem-contact-email)
-    (define-key map (kbd "s-t") 'sem-contact-email-to)
-    (define-key map (kbd "s-f") 'sem-contact-email-from)
-    (define-key map (kbd "s-r") 'sem-contact-related)
-    map)
-  "Map for actions on editmark contact.")
+(when (featurep 'org-db)
+  (defvar sem-editmark-contact-map
+    (let ((map (copy-keymap org-mode-map)))
+      (define-key map (kbd "<return>") 'sem-contact/body)
+      (define-key map (kbd "s-e") 'sem-contact-email)
+      (define-key map (kbd "s-t") 'sem-contact-email-to)
+      (define-key map (kbd "s-f") 'sem-contact-email-from)
+      (define-key map (kbd "s-r") 'sem-contact-related)
+      map)
+    "Map for actions on editmark contact.")
 
 
-(sem-set-editmark-parameters 'contact
-			     :open-marker "{@>" :close-marker "<@}"
-			     :marker-face '(:foreground "OrangeRed1" :weight ultra-light)
-			     :face '(:foreground "OrangeRed1" :weight bold)
-			     :keymap 'sem-editmark-contact-map
-			     :help-echo "An editmark contact."
-			     :export nil)
+  (sem-set-editmark-parameters 'contact
+			       :open-marker "{@>" :close-marker "<@}"
+			       :marker-face '(:foreground "OrangeRed1" :weight ultra-light)
+			       :face '(:foreground "OrangeRed1" :weight bold)
+			       :keymap 'sem-editmark-contact-map
+			       :help-echo "An editmark contact."
+			       :export nil)
 
 
-(defun sem-contact-insert ()
-  "Insert a contact edit mark"
-  (interactive)
-  (let* ((contacts (org-db-contacts-candidates))
-	 (choice (cdr (assoc (ivy-read "Contact: "  contacts) contacts))))
-    (insert (format "%s %s :email %s %s"
-		    (plist-get (cdr (assoc 'contact sem-editmarks)) :open-marker)
-		    (plist-get choice :title)
-		    (plist-get choice :email)
-		    (plist-get (cdr (assoc 'contact sem-editmarks)) :close-marker)))))
+  (defun sem-contact-insert ()
+    "Insert a contact edit mark"
+    (interactive)
+    (let* ((contacts (org-db-contacts-candidates))
+	   (choice (cdr (assoc (ivy-read "Contact: "  contacts) contacts))))
+      (insert (format "%s %s :email %s %s"
+		      (plist-get (cdr (assoc 'contact sem-editmarks)) :open-marker)
+		      (plist-get choice :title)
+		      (plist-get choice :email)
+		      (plist-get (cdr (assoc 'contact sem-editmarks)) :close-marker)))))
 
 
-(defun sem-contact-email ()
-  "Open an email buffer to the contact."
-  (interactive)
-  (let* ((plist (sem-editmark-plist))
-	 (email (plist-get (cdr plist) :email)))
-    (compose-mail)
-    (message-goto-to)
-    (insert email)
-    (message-goto-subject)))
+  (defun sem-contact-email ()
+    "Open an email buffer to the contact."
+    (interactive)
+    (let* ((plist (sem-editmark-plist))
+	   (email (plist-get (cdr plist) :email)))
+      (compose-mail)
+      (message-goto-to)
+      (insert email)
+      (message-goto-subject)))
 
 
-(defun sem-contact-email-from ()
-  "Open mu4e showing emails from the candidate."
-  (interactive)
-  (let* ((plist (sem-editmark-plist))
-	 (email (plist-get (cdr plist) :email)))
-    (org-link-open-from-string
-     (format "[[mu4e:query:from:%s]]"
-	     email))))
+  (defun sem-contact-email-from ()
+    "Open mu4e showing emails from the candidate."
+    (interactive)
+    (let* ((plist (sem-editmark-plist))
+	   (email (plist-get (cdr plist) :email)))
+      (org-link-open-from-string
+       (format "[[mu4e:query:from:%s]]"
+	       email))))
 
 
-(defun sem-contact-email-to ()
-  "Open mu4e showing emails to the candidate."
-  (interactive)
-  (let* ((plist (sem-editmark-plist))
-	 (email (plist-get (cdr plist) :email)))
-    (org-link-open-from-string
-     (format "[[mu4e:query:tofrom:%s]]"
-	     email))))
+  (defun sem-contact-email-to ()
+    "Open mu4e showing emails to the candidate."
+    (interactive)
+    (let* ((plist (sem-editmark-plist))
+	   (email (plist-get (cdr plist) :email)))
+      (org-link-open-from-string
+       (format "[[mu4e:query:tofrom:%s]]"
+	       email))))
 
 
-(defun sem-contact-related ()
-  "Completion to choose documents with this contact email in them.
+  (defun sem-contact-related ()
+    "Completion to choose documents with this contact email in them.
 This uses org-db-contacts, not editmark contacts right now."
-  (interactive)
-  (let* ((plist (sem-editmark-plist))
-	 (email (plist-get (cdr plist) :email))
-	 (link-candidates (cl-loop
-			   for (rl fn bg) in
-			   (with-org-db
-			    (sqlite-select org-db "select raw_link,filename,begin from links
+    (interactive)
+    (let* ((plist (sem-editmark-plist))
+	   (email (plist-get (cdr plist) :email))
+	   (link-candidates (cl-loop
+			     for (rl fn bg) in
+			     (with-org-db
+			      (sqlite-select org-db "select raw_link,filename,begin from links
 left join files on links.filename_id = files.rowid where links.type = \"contact\" and links.path = ? order by filename"
-					   (list email))) 
-			   collect
-			   ;; (candidate :filename :begin)
-			   (list (format "%s | %s" rl fn) :filename fn :begin bg)))
+					     (list email))) 
+			     collect
+			     ;; (candidate :filename :begin)
+			     (list (format "%s | %s" rl fn) :filename fn :begin bg)))
 
-	 (results (with-org-db
-		   (sqlite-select org-db "select headlines.title,properties.property,headline_properties.value,files.filename,files.last_updated,headlines.begin
+	   (results (with-org-db
+		     (sqlite-select org-db "select headlines.title,properties.property,headline_properties.value,files.filename,files.last_updated,headlines.begin
 from headlines
 inner join headline_properties on headlines.rowid = headline_properties.headline_id
 inner join properties on properties.rowid = headline_properties.property_id
 inner join files on files.rowid = headlines.filename_id
 where properties.property = \"ASSIGNEDTO\" and headline_properties.value like ?"
-				  (list email))))
+				    (list email))))
 
-	 (assigned-candidates (cl-loop for (title property value fname last-updated begin) in results
-				       collect
-				       (list (format "%s | %s=%s | %s" title property value fname)
-					     :filename fname :begin begin)))
-	 (results (with-org-db
-		   (sqlite-select org-db "select headlines.title, properties.property, headline_properties.value, files.filename, files.last_updated, headlines.begin
+	   (assigned-candidates (cl-loop for (title property value fname last-updated begin) in results
+					 collect
+					 (list (format "%s | %s=%s | %s" title property value fname)
+					       :filename fname :begin begin)))
+	   (results (with-org-db
+		     (sqlite-select org-db "select headlines.title, properties.property, headline_properties.value, files.filename, files.last_updated, headlines.begin
 from headlines
 inner join headline_properties on headlines.rowid = headline_properties.headline_id
 inner join properties on properties.rowid = headline_properties.property_id
 inner join files on files.rowid = headlines.filename_id
 where properties.property = \"EMAIL\" and headline_properties.value like ?"
-				  (list email))))
-	 (email-candidates (cl-loop for (title property value fname last-updated begin) in results
-				    collect
-				    (list (format "%s | %s=%s | %s" title property value fname)
-					  :filename fname :begin begin))))
-    (ivy-read "Choose: " (append assigned-candidates email-candidates link-candidates)
-	      :action (lambda (x)
-			(let ((candidate (cdr x)))
-			  (find-file (plist-get candidate :filename))
-			  (goto-char (plist-get candidate :begin)))))))
+				    (list email))))
+	   (email-candidates (cl-loop for (title property value fname last-updated begin) in results
+				      collect
+				      (list (format "%s | %s=%s | %s" title property value fname)
+					    :filename fname :begin begin))))
+      (ivy-read "Choose: " (append assigned-candidates email-candidates link-candidates)
+		:action (lambda (x)
+			  (let ((candidate (cdr x)))
+			    (find-file (plist-get candidate :filename))
+			    (goto-char (plist-get candidate :begin)))))))
 
 
-(defhydra sem-contact (:color blue :hint nil)
-  "Editmark contact"
-  ("o" sem-contact-open "open")
-  ("e" sem-contact-email "Email contact")
-  ("r" sem-contact-related "Related documents")
-  ("t" sem-contact-email-to "Open emails to contact")
-  ("f" sem-contact-email-from "Open emails from contact"))
+  (defhydra sem-contact (:color blue :hint nil)
+    "Editmark contact"
+    ("o" sem-contact-open "open")
+    ("e" sem-contact-email "Email contact")
+    ("r" sem-contact-related "Related documents")
+    ("t" sem-contact-email-to "Open emails to contact")
+    ("f" sem-contact-email-from "Open emails from contact")))
 #+END_SRC
 
 #+RESULTS:
