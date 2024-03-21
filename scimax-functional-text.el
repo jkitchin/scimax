@@ -203,7 +203,7 @@ _G_: GitLab     _l_: LinkedIn _r_: reddit  _t_: Twitter
 ;; They also could have different contexts, maybe Twitter, maybe Instagram, or
 ;; tags in org-mode, etc. so we also define a hydra for this.
 
-(defvar hashtag-regexp "\\(^\\|[[:space:]]\\|\\s(\\)\\(?2:#\\(?1:[[:alnum:]]+\\)\\)"
+(defvar hashtag-regexp "\\(^\\|[[:space:]]\\|\\s(\\)[^[]?\\(?2:#\\(?1:[[:alnum:]]+\\)\\)"
   "A regexp for a hashtag.
 The hashtag is in group 1.")
 
