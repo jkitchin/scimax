@@ -201,13 +201,6 @@
   ("<f5>" . magit-status)
   ("C-c v t" . magit-status))
 
-;; see https://github.com/jkitchin/scimax/issues/486 I have been having some
-;; annoying warnings about magithub, and I think I don't actually use it
-;; anymore.
-;; 
-;; (use-package magithub
-;;   :after magit)
-
 (use-package move-text
   :init (move-text-default-bindings))
 
