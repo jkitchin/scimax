@@ -74,7 +74,8 @@
   '(("r" . scimax-org-feed-refile-to-project)
     ("b" . scimax-org-feed-refile-to-open-org-buffer)
     ("d" . scimax-org-feed-delete-entry)
-    ("a" . scimax-org-feed-done-and-archive))
+    ("a" . scimax-org-feed-done-and-archive)
+    ("o" . scimax-org-feed-refile-to-open-org-buffer))
   "List of speed commands.
 These only operate on headlines in `scimax-org-feed-file'"
   :type '(list (cons string function))
@@ -304,17 +305,22 @@ done and archives it at once."
   (scimax-org-feed-header))
 
 
-(defun scimax-org-feed-refile-to-project ()
-  "Refile current heading to a heading in a known project."
-  (interactive)
-  (let* ((default-directory (ivy-read "Project: " projectile-known-projects))
-	 (org-files (mapcar
-		     (lambda (f) (expand-file-name f (projectile-project-root)))
-		     (-filter (lambda (f)
-				(and
-				 (f-ext? f "org")
-				 (not (s-contains? "#" f))))
-			      (projectile-current-project-files))))
+(defun scimax-org-feed-refile-to-project (project)
+  "Refile current heading to a heading in a project.
+If `scimax-org-feed-file' is in a project, use headings from it.
+If PROJECT is non-nil (prefix arg) or you are not in a project,
+you will be prompted to pick one."
+  (interactive "P")
+  (let* ((default-directory (cond
+			     ((or project (not (projectile-project-p)))
+			      (ivy-read "Project: " projectile-known-projects))
+			     (t
+			      (projectile-project-p))))
+	 (org-files (-filter (lambda (f)
+			       (and
+				(f-ext? f "org")
+				(not (s-contains? "#" f))))
+			     (projectile-current-project-files)))
 	 (headlines (cl-loop for file in org-files
 			     append
 			     (let ((hl '()))
@@ -336,7 +342,7 @@ done and archives it at once."
 				       :position (match-beginning 0))
 				      hl))))
 			       hl)))
-	 (selection (ivy-read "Heading: " headlines))
+	 (selection (ivy-read "Heading: " headlines :initial-input ":openalex: "))
 	 (candidate (cdr (assoc selection headlines)))
 	 (rfloc (list
 		 (plist-get candidate :headline)
