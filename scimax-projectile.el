@@ -3,6 +3,8 @@
 ;;; Commentary:
 ;;
 ;; I find these convenient to have around.
+(require 'projectile)
+
 
 ;; * Extra projectile actions
 ;; Here I can open bash or finder when switching projects
