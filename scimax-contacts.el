@@ -6,7 +6,8 @@
 ;;
 ;; It relies on org-db to find contacts.
 ;;
-;; [2024-03-21 Thu] There is some overlap with org-db-contacts here
+;; [2024-03-21 Thu] There is some overlap with org-db-contacts here. I am not
+;; sure what the best way to manage that, maybe move org-db-contacts here?
 
 ;;; Code:
 
