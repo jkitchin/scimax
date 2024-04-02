@@ -1040,7 +1040,6 @@ where properties.property = \"EMAIL\" and headline_properties.value like ?"
 #+END_SRC
 
 #+RESULTS:
-: sem-contact/body
 
 *** Needed features
 
