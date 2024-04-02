@@ -28,7 +28,13 @@
   :type 'string
   :group 'scimax-hydra)
 
+(defcustom scimax-hydra-mode-key "<M-f12>"
+  "Key to bind `scimax-dispatch-mode-hydra/body' to."
+  :type 'string
+  :group 'scimax-hydra)
+
 (global-set-key (kbd scimax-hydra-key) 'scimax/body)
+(global-set-key (kbd scimax-hydra-mode-key) 'scimax-dispatch-mode-hydra)
 
 ;;* scimax-hydra utilities
 
@@ -1235,7 +1241,6 @@ doesn't move, it means you were at the beginning of a paragraph."
 		   (scimax-open-hydra scimax-org/body)))))
     (_ (message "no hydra found for this context"))))
 
-(global-set-key (kbd "<H-f12>") 'scimax-dispatch-mode-hydra)
 
 ;; ** major mode hydras
 (defhydra scimax-words (:color blue :hint nil :inherit (scimax-base/heads))
