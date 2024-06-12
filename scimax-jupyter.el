@@ -6,11 +6,6 @@
 (require 'scimax-ob)
 (require 'jupyter)
 
-;; * automatic buffer kernels This is done by setting a session name in the org
-;; file <jps is a yasnippet that does this reliably. I decided for now it is too
-;; difficult to advise everything in jupyter to get the same result. [2023-11-03
-;; Fri] I think this has been solved below with a function for the session name.
-
 
 ;; * scimax jupyter header defaults
 
@@ -131,9 +126,10 @@
 (defcustom scimax-jupyter-advices
   '((org-babel-execute:jupyter :before scimax-jupyter-kill-kernel-hook)
     (org-babel-execute:jupyter :before scimax-jupyter-check-restart)
-    (jupyter-org-sync-results :override scimax-jupyter-org-sync-results)
-    (jupyter-org--add-result :override scimax-jupyter-org--add-result)
-    (jupyter-org-export-block-or-pandoc :override scimax-jupyter-org-export-block-or-pandoc))
+    ;; (jupyter-org-sync-results :override scimax-jupyter-org-sync-results)
+    ;; (jupyter-org--add-result :override scimax-jupyter-org--add-result)
+    ;; (jupyter-org-export-block-or-pandoc :override scimax-jupyter-org-export-block-or-pandoc)
+    )
   "Advices for scimax-jupyter.
 This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
   :group 'scimax-jupyter)
@@ -168,98 +164,98 @@ This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
 ;; come first in some process filter. This avoids this step and we do it later
 ;; in `scimax-jupyter-org-sync-results'. There is probably no guarantee that
 ;; this always works though.
-(defun scimax-jupyter-org-export-block-or-pandoc (type value params)
-  "Return VALUE, either converted with pandoc or in an export block.
-If PARAMS has non-nil value for key ':pandoc' and TYPE is in
-`jupyter-org-pandoc-convertable', convert the result with pandoc.
-Otherwise, wrap it in an export block."
-  (jupyter-org-export-block type value))
+;; (defun scimax-jupyter-org-export-block-or-pandoc (type value params)
+;;   "Return VALUE, either converted with pandoc or in an export block.
+;; If PARAMS has non-nil value for key ':pandoc' and TYPE is in
+;; `jupyter-org-pandoc-convertable', convert the result with pandoc.
+;; Otherwise, wrap it in an export block."
+;;   (jupyter-org-export-block type value))
 
 
 ;; used to advise `jupyter-org-sync-results'. I do this to fix some issues like
 ;; results drawers, etc.
-(defun scimax-jupyter-org-sync-results (req)
-  "Return the result string in org syntax for the results of REQ.
-Meant to be used as the return value of
-`org-babel-execute:jupyter'."
-  (when-let* ((results (nreverse (jupyter-org-request-results req))) 
-	      ;; Not sure why these are reversed above, it works right for some things,
-	      ;; but not right for display stuff. I wonder if there is some way
-	      ;; to tell when something is displayed.
-              (params (jupyter-org-request-block-params req))
-              (result-params (alist-get :result-params params)))
+;; (defun scimax-jupyter-org-sync-results (req)
+;;   "Return the result string in org syntax for the results of REQ.
+;; Meant to be used as the return value of
+;; `org-babel-execute:jupyter'."
+;;   (when-let* ((results (nreverse (jupyter-org-request-results req))) 
+;; 	      ;; Not sure why these are reversed above, it works right for some things,
+;; 	      ;; but not right for display stuff. I wonder if there is some way
+;; 	      ;; to tell when something is displayed.
+;;               (params (jupyter-org-request-block-params req))
+;;               (result-params (alist-get :result-params params)))
 
-    ;; There is an inconsistency when you specify :results value where printed
-    ;; outputs and the return value is provided, sometimes as a fixed width.
-    ;; That is consistent with the jupyter notebook, but not consistent with
-    ;; org-babel. Here I only return the last thing if value is selected, and do
-    ;; not require it to be fixed-width. That also isn't quite right, except in
-    ;; a drawer. 
-    (when (member "value" result-params)
-      (let ((retval (car (last results)))) 
-	(setq results
-	      (list
-	       (cond
-		((eq 'fixed-width (org-element-type retval))
-		 (org-element-property :value retval))
-		(t
-		 retval))))))
+;;     ;; There is an inconsistency when you specify :results value where printed
+;;     ;; outputs and the return value is provided, sometimes as a fixed width.
+;;     ;; That is consistent with the jupyter notebook, but not consistent with
+;;     ;; org-babel. Here I only return the last thing if value is selected, and do
+;;     ;; not require it to be fixed-width. That also isn't quite right, except in
+;;     ;; a drawer. 
+;;     (when (member "value" result-params)
+;;       (let ((retval (car (last results)))) 
+;; 	(setq results
+;; 	      (list
+;; 	       (cond
+;; 		((eq 'fixed-width (org-element-type retval))
+;; 		 (org-element-property :value retval))
+;; 		(t
+;; 		 retval))))))
 
-    (when (member "both" result-params)
-      (let ((retval (car (last results)))) 
-	(setf (car (last results))
-	      (cond
-	       ((eq 'fixed-width (org-element-type retval))
-		(org-element-property :value retval))
-	       (t
-		retval)))))
+;;     (when (member "both" result-params)
+;;       (let ((retval (car (last results)))) 
+;; 	(setf (car (last results))
+;; 	      (cond
+;; 	       ((eq 'fixed-width (org-element-type retval))
+;; 		(org-element-property :value retval))
+;; 	       (t
+;; 		retval)))))
 
-    ;; Do pandoc conversion here so the order of results is preserved.
-    (when (cdr (assoc :pandoc params))
-      (setq results
-	    (cl-loop for result in results
-		     collect
-		     (cond
-		      ((stringp result)
-		       result)
-		      ((and (listp result)
-			    (member (org-element-property :type result) jupyter-org-pandoc-convertable))
-		       (jupyter-pandoc-convert
-			(org-element-property :type result)
-			"org"
-			(org-element-property :value result)))
-		      (t
-		       result)))))
-    
-    (org-element-interpret-data
-     (cond
-      ;; This happens when a named block is a variable in another block.
-      ;; It is different than a :results silent header.
-      ((jupyter-org-request-silent-p req)
-       results)
+;;     ;; Do pandoc conversion here so the order of results is preserved.
+;;     (when (cdr (assoc :pandoc params))
+;;       (setq results
+;; 	    (cl-loop for result in results
+;; 		     collect
+;; 		     (cond
+;; 		      ((stringp result)
+;; 		       result)
+;; 		      ((and (listp result)
+;; 			    (member (org-element-property :type result) jupyter-org-pandoc-convertable))
+;; 		       (jupyter-pandoc-convert
+;; 			(org-element-property :type result)
+;; 			"org"
+;; 			(org-element-property :value result)))
+;; 		      (t
+;; 		       result)))))
 
-      ((member "raw" result-params)
-       results)
+;;     (org-element-interpret-data
+;;      (cond
+;;       ;; This happens when a named block is a variable in another block.
+;;       ;; It is different than a :results silent header.
+;;       ((jupyter-org-request-silent-p req)
+;;        results)
 
-      ;; fall through to a drawer for now.
-      (t
-       (apply #'jupyter-org-results-drawer results))))))
+;;       ((member "raw" result-params)
+;;        results)
+
+;;       ;; fall through to a drawer for now.
+;;       (t
+;;        (apply #'jupyter-org-results-drawer results))))))
 
 
 
 ;; This was causing a problem in emacs-jupyter for using code blocks as
 ;; variables in other blocks. Commenting out the first line seems to fix it for
 ;; me.
-(defun scimax-jupyter-org--add-result (req result)
-  (cond
-   ;; ((jupyter-org-request-silent-p req)
-   ;;  (unless (equal (jupyter-org-request-silent-p req) "none")
-   ;;    (message "%s" (org-element-interpret-data result))))
-   ((jupyter-org-request-async-p req)
-    (jupyter-org--clear-request-id req)
-    (jupyter-org--do-insert-result req result))
-   (t
-    (push result (jupyter-org-request-results req)))))
+;; (defun scimax-jupyter-org--add-result (req result)
+;;   (cond
+;;    ;; ((jupyter-org-request-silent-p req)
+;;    ;;  (unless (equal (jupyter-org-request-silent-p req) "none")
+;;    ;;    (message "%s" (org-element-interpret-data result))))
+;;    ((jupyter-org-request-async-p req)
+;;     (jupyter-org--clear-request-id req)
+;;     (jupyter-org--do-insert-result req result))
+;;    (t
+;;     (push result (jupyter-org-request-results req)))))
 
 
 ;; I don't know where the \\ lines come from, this removes them.
@@ -286,25 +282,25 @@ Meant to be used as the return value of
 ;; though except in src blocks. normally it is triggered by jumping to the next
 ;; src-block, and this is when I don't want it to hide the previous results.
 
-(defun scimax-org-show-entry ()
-  "Show the body directly following this heading.
-Show the heading too, if it is currently invisible."
-  (interactive)
-  (unless (org-in-src-block-p)
-    (save-excursion
-      (ignore-errors
-	(org-back-to-heading t)
-	(outline-flag-region
-	 (max (point-min) (1- (point)))
-	 (save-excursion
-	   (if (re-search-forward
-		(concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
-	       (match-beginning 1)
-	     (point-max)))
-	 nil)
-	(org-cycle-hide-drawers 'children)))))
+;; (defun scimax-org-show-entry ()
+;;   "Show the body directly following this heading.
+;; Show the heading too, if it is currently invisible."
+;;   (interactive)
+;;   (unless (org-in-src-block-p)
+;;     (save-excursion
+;;       (ignore-errors
+;; 	(org-back-to-heading t)
+;; 	(outline-flag-region
+;; 	 (max (point-min) (1- (point)))
+;; 	 (save-excursion
+;; 	   (if (re-search-forward
+;; 		(concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
+;; 	       (match-beginning 1)
+;; 	     (point-max)))
+;; 	 nil)
+;; 	(org-cycle-hide-drawers 'children)))))
 
-(advice-add 'org-show-entry :override #'scimax-org-show-entry)
+;; (advice-add 'org-show-entry :override #'scimax-org-show-entry)
 
 ;; * Working with exceptions
 ;;
@@ -345,7 +341,7 @@ way, but it is."
        ;; search for something like --> 21
        (t
 	(goto-char location)
-	(re-search-forward "^-*> \\([[:digit:]]*\\)" (org-babel-result-end))
+	(re-search-forward "-*> \\([[:digit:]]*\\)" (org-babel-result-end))
 	(save-match-data
 	  (goto-char cp)
 	  (goto-char (org-element-property :begin (org-element-context))))
@@ -451,223 +447,6 @@ This should only apply to jupyter-lang blocks."
 
 (jupyter-org-define-key (kbd "<f12>") #'scimax-jupyter-org-hydra/body)
 
-;; utilities
-;; * autopep8
-
-(defun autopep8 ()
-  "Replace Python code block contents with autopep8 corrected code."
-  (interactive)
-  (unless (executable-find "autopep8")
-    (if (executable-find "pip")
-	(shell-command "python -c \"import pip; pip.main(['install','autopep8'])\"")
-      (shell-command "python -c \"from setuptools.command import easy_install; easy_install.main(['-U','autopep8'])\"")))
-  (let* ((src (org-element-context))
-	 (beg (org-element-property :begin src))
-	 (value (org-element-property :value src)))
-    (save-excursion
-      (goto-char beg)
-      (search-forward value)
-      (shell-command-on-region
-       (match-beginning 0)
-       (match-end 0)
-       "autopep8 -a -a -" nil t))))
-
-
-;; * pylint
-(defvar pylint-options
-  '()
-  "List of options to use with pylint.")
-
-(setq pylint-options
-      '("-r no "			 ; no reports
-	;; we are not usually writing programs where it
-	;; makes sense to be too formal on variable
-	;; names.
-	"--disable=invalid-name "
-	;; don't usually have modules, which triggers
-	;; this when there is not string at the top
-	"--disable=missing-docstring "
-	;; superfluous-parens is raised with print(),
-	;; which I am promoting for python3
-	;; compatibility.
-	"--disable=superfluous-parens "	;
-
-	;; these do not seem important for my work.
-	"--disable=too-many-locals "	;
-
-	;; this is raised in solving odes and is
-	;; unimportant for us.
-	"--disable=unused-argument "	;
-	"--disable=unused-wildcard-import "
-	"--disable=redefined-outer-name "
-	;; this is triggered a lot from fsolve
-	"--disable=unbalanced-tuple-unpacking "
-	"--disable=wildcard-import "
-	"--disable=redefined-builtin "
-	;; I dont mind semicolon separated lines
-	"--disable=multiple-statements "
-	;; pylint picks up np.linspace as a no-member error. That does not make sense.
-	"--disable=no-member "
-	"--disable=wrong-import-order "
-	"--disable=unused-import "))
-
-
-(defun pylint ()
-  "Run pylint on a source block.
-Opens a buffer with links to what is found. This function installs pylint if needed."
-  (interactive)
-  (let ((eop (org-element-at-point))
-	(temporary-file-directory ".")
-        (cb (current-buffer))
-	(n) ; for line number
-	(cn) ; column number
-	(content) ; error on line
-	(pb "*pylint*")
-	(link)
-	(tempfile))
-
-    (unless (executable-find "pylint")
-      (if (executable-find "pip")
-	  (shell-command "python -c \"import pip; pip.main(['install','pylint'])\"")
-	(shell-command "python -c \"from setuptools.command import easy_install; easy_install.main(['pylint'])\"")))
-
-    ;; rm buffer if it exists
-    (when (get-buffer pb) (kill-buffer pb))
-
-    ;; only run if in a python code-block
-    (when (and (eq 'src-block (car eop))
-	       (string= "python" (org-element-property :language eop)))
-
-      ;; tempfile for the code
-      (setq tempfile (make-temp-file "org-py-check" nil ".py"))
-      ;; create code file
-      (with-temp-file tempfile
-	(insert (org-element-property :value eop)))
-
-      ;; pylint
-      (let ((status (shell-command
-		     (concat
-		      "pylint "
-		      (mapconcat 'identity pylint-options " ")
-		      " "
-		      ;; this is the file to check.
-		      (file-name-nondirectory tempfile))))
-
-	    ;; remove empty strings
-	    (output (delete "" (split-string
-				(with-current-buffer "*Shell Command Output*"
-				  (buffer-string)) "\n"))))
-
-	;; also remove this line so the output is empty if nothing
-	;; comes up
-	(setq output (delete
-		      "No config file found, using default configuration"
-		      output))
-
-	(kill-buffer "*Shell Command Output*")
-	(if output
-	    (progn
-	      (set-buffer (get-buffer-create pb))
-	      (insert (format "\n\n* pylint (status = %s)\n" status))
-	      (insert "pylint checks your code for errors, style and convention. Click on the links to jump to each line.
-
-")
-
-	      (dolist (line output)
-		;; pylint gives a line and column number
-		(if
-		    (string-match "[A-Z]:\\s-+\\([0-9]*\\),\\s-*\\([0-9]*\\):\\(.*\\)"
-				  line)
-		    (let ((line-number (match-string 1 line))
-			  (column-number (match-string 2 line))
-			  (content (match-string 3 line)))
-
-		      (setq link (format "[[elisp:(progn (switch-to-buffer-other-window \"%s\")(goto-char %s)(forward-line %s)(forward-line 0)(forward-char %s))][%s]]\n"
-					 cb
-					 (org-element-property :begin eop)
-					 line-number
-					 column-number
-					 line)))
-		  ;; no match, just insert line
-		  (setq link (concat line "\n")))
-		(insert link)))
-	  (message "pylint was clean!")))
-
-      (when (get-buffer pb)
-	;; open the buffer
-	(switch-to-buffer-other-window pb)
-	(goto-char (point-min))
-	(insert "Press q to close the window\n")
-	(org-mode)
-	(org-cycle '(64))  ; open everything
-	;; make read-only and press q to quit
-	(setq buffer-read-only t)
-	(use-local-map (copy-keymap org-mode-map))
-	(local-set-key "q" #'(lambda () (interactive) (kill-buffer)))
-	(switch-to-buffer-other-window cb))
-      ;; final cleanup and delete file
-      (delete-file tempfile))))
-
-
-;; * Numbered lines in code blocks
-(defvar number-line-overlays '()
-  "List of overlays for line numbers.")
-
-(make-variable-buffer-local 'number-line-overlays)
-
-(defun number-line-src-block ()
-  "Add line numbers to an org src-block."
-  (interactive)
-  (save-excursion
-    (let* ((src-block (org-element-context))
-           (nlines (- (length
-                       (s-split
-                        "\n"
-                        (org-element-property :value src-block)))
-                      1)))
-      ;; clear any existing overlays
-      (when number-line-overlays
-	(mapc 'delete-overlay
-	      number-line-overlays)
-	(setq number-line-overlays '()))
-
-      (goto-char (org-element-property :begin src-block))
-      ;; the beginning may be header, so we move forward to get the #+BEGIN
-      ;; line. Then jump one more to get in the code block
-      (while (not (looking-at "#\\+BEGIN"))
-	(forward-line))
-      (forward-line)
-      (cl-loop for i from 1 to nlines
-               do
-               (beginning-of-line)
-               (let (ov)
-		 (setq ov (make-overlay (point)(point)))
-		 (overlay-put
-		  ov
-		  'before-string (propertize
-				  (format "%03s:" (number-to-string i))
-				  'font-lock-face '(:foreground "black" :background "gray80")
-				  'local-map (let ((map (make-sparse-keymap)))
-					       (define-key map [mouse-1]
-						 (lambda ()
-						   (interactive)
-						   (mapc 'delete-overlay
-							 number-line-overlays)
-						   (setq number-line-overlays '())))
-					       map)))
-		 (overlay-put ov 'mouse-face 'highlight)
-		 (overlay-put ov 'help-echo "Click to remove")
-		 (overlay-put ov 'local-map (let ((map (make-sparse-keymap)))
-					      (define-key map [mouse-1]
-						(lambda ()
-						  (interactive)
-						  (mapc 'delete-overlay
-							number-line-overlays)
-						  (setq number-line-overlays '())))
-					      map))
-		 (add-to-list 'number-line-overlays ov))
-               (forward-line))))
-  (add-hook 'post-command-hook 'number-line-src-block nil 'local))
 
 (provide 'scimax-jupyter)
 
