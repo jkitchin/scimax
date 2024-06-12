@@ -120,10 +120,12 @@ CANDIDATE is a string, possibly with a timestamp in it."
 				    (match-string 0 candidate)))))))
     (cond
      ((null es) candidate)
-     ;; I don't think I can put priority in here without changing the
-     ;; candidates, it is not in the title string
+     ;; Make priority red
      ((string-match "\\[#A\\]" candidate) (propertize candidate 'face '(:foreground "red1" :weight bold)))
      ((string-match "scheduled" candidate) (propertize candidate 'face '(:foreground "DarkOrange3")))
+     ;; Calendar entries are not meant to be changed
+     ((string-match ":gcal:" candidate) (propertize candidate 'face '(:foreground "DodgerBlue3")))
+     
      ((> es now) (propertize candidate 'face '(:foreground "green4")))
      ((< es now) (propertize candidate 'face '(:foreground "dark red"))))))
 
