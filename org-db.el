@@ -1435,22 +1435,32 @@ inner join files on links.filename_id = files.rowid order by filename"))
 
 (defun org-db-bookmark ()
   "Open a bookmark.
-A bookmark is any heading with a url property"
+A bookmark is any heading with a url property. If the url starts
+with http it opens in a browser, otherwise we assume it is an
+org-link."
   (interactive)
-  (let ((candidates (cl-loop for row in  (with-org-db
-					  (sqlite-select org-db "select
-headlines.title, headline_properties.value
+  (let ((candidates (cl-loop for (title tags value) in
+			     (with-org-db
+			      (sqlite-select org-db "select
+headlines.title, headlines.tags, headline_properties.value
 from headlines
 inner join headline_properties on headlines.rowid = headline_properties.headline_id
 inner join properties on properties.rowid = headline_properties.property_id
 inner join files on files.rowid = headlines.filename_id
 where properties.property = \"URL\"
 "))
-			     collect (cons (format "%s - %s" (car row) (cdr row))
-					   (cadr row)))))
+			     collect (cons (format "%s %s" title tags)
+					   value))))
     (ivy-read "bookmark: " candidates :action '(1
-						("o" (lambda (cand) 
-						       (browse-url (cdr cand)))
+						("o"
+						 (lambda (cand)
+						   (cond
+						    ;; A regular url to open in a browser
+						    ((string-prefix-p "http" (string-trim (cdr cand)))
+						     (browse-url (cdr cand)))
+						    ;; an org-link
+						    (t
+						     (org-link-open-from-string (cdr cand)))))
 						 "Open to bookmark")))))
 
 
