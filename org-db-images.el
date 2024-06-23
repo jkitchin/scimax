@@ -2,7 +2,10 @@
 
 
 ;;; Commentary:
-;;
+;; This relies on tesseract https://github.com/tesseract-ocr/tesseract to
+;; extract text from images, and then store that text for searching. It is sort
+;; of a proof of concept. It works ok, and is certainly limited by the OCR
+;; quality.
 
 (require 'org-db)
 
@@ -52,6 +55,23 @@ PARSE-TREE is from `org-element-parse-buffer'."
 (add-to-list 'org-db-update-functions #'org-db-update-images t)
 
 
+(defun org-db-candidate-transformer (candidate)
+  "Propertize CANDIDATE with an image.
+This is much faster than putting it on the candidates at creation time"
+  (let* ((idx (get-text-property 1 'idx candidate))
+	 (entry (nth idx (ivy-state-collection ivy-last))))
+    
+    (concat
+     ;; pad each line text to 80 chars wide after we wrap it at 70
+     (mapconcat (lambda (s) (s-pad-right 80 " " s))
+		(s-split "\n" (s-word-wrap 80 candidate))
+		"\n" )
+     ;; add a thumbnail
+     (propertize " " 'display (create-image (nth 1 entry) nil nil :width 300)))))
+
+(ivy-configure 'org-db-images :display-transformer-fn #'org-db-candidate-transformer)
+
+
 (defun org-db-images ()
   "Search the images database."
   (interactive)
@@ -59,16 +79,15 @@ PARSE-TREE is from `org-element-parse-buffer'."
 			 (sqlite-select org-db "select images.text, images.img_filename, images.position, files.filename
 from images
 inner join files on files.rowid = images.filename_id")))
-	 (candidates (cl-loop for c in db-candidates collect
-			      (append
-			       (list
-				(concat
-				 (s-join " " (s-split "\n" (car c)))
-				 "\n"
-				 (propertize "\n" 'display (create-image (cl-second c) nil nil :width 300))))
-			       (cdr c)))))
+	 (candidates (cl-loop for (text fname position ofile) in db-candidates collect
+			      (list
+			       (s-join " " (s-split "\n" text))
+			       fname
+			       position
+			       ofile))))
 
     (ivy-read "Query: " candidates
+	      :caller 'org-db-images
 	      :action '(1
 			("o" (lambda (candidate)
 			       (pcase-let ((`(,text ,img-filename ,position ,org-file) candidate))
@@ -86,7 +105,10 @@ inner join files on files.rowid = images.filename_id")))
 
 
 (defun org-db-images-purge ()
-  "Remove image entries where the image path does not exist."
+  "Remove image entries where the image path does not exist.
+There is not an automated way to remove images when you delete
+files, or change filenames, etc. You have to run this manually
+from time to time."
   (interactive)
   (let ((imgs (mapcar 'car (with-org-db
 			    (sqlite-select org-db "select img_filename from images")))))
