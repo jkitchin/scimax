@@ -44,7 +44,7 @@ PARSE-TREE is from `org-element-parse-buffer'."
     ;; Add new entries
     (cl-loop for (img-file . begin) in img-data do
 	     (setq text (shell-command-to-string
-			 (format "tesseract %s -" img-file)))
+			 (format "tesseract -c debug_file=/dev/null %s -" img-file)))
 	     (sqlite-execute org-db "insert into images values (?, ?, ?, ?, ?)"
 			     (list nil filename-id
 				   (expand-file-name img-file)
