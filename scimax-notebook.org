@@ -532,7 +532,9 @@ Here is a function you can use to interactively search files by pattern. For exa
 
 (defun nb-search (file-pattern regexp)
   "Search files matching FILE-PATTERN for REGEXP and show matches."
-  (interactive "sfile pattern: \nsSearch for: ")
+  (interactive "sfile pattern (RET for all): \nsSearch for: ")
+  (when (string= file-pattern "")
+    (setq file-pattern "*"))
   (ivy-xref-show-xrefs
    (lambda ()
      (xref-matches-in-directory regexp file-pattern (projectile-project-root)
