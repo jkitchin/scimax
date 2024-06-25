@@ -28,3 +28,4 @@ user.cache
 scimax.info
 build
 *.egg-info
+__pycache__
