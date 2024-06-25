@@ -9,7 +9,7 @@
 #+Latex_class_options: [12pt]
 #+OPTIONS: toc:nil
 
-NSF Grant Proposal Guide: https://new.nsf.gov/policies/pappg/23-1
+NSF Grant Proposal Guide: https://new.nsf.gov/policies/pappg/24-1
 
 # Obviously some of these directions are specific to CMU.
 
@@ -33,24 +33,24 @@ Duration: <replace: duration>
 
 This is a typical, un-solicited NSF proposal.
 
-- [ ] Budget                       https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2f
+- [ ] Budget                       https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2f
 - [ ] Budget Justification         see [[*Budget notes]]
 - [ ] [[elisp:(ox-manuscript-open "nsf-sow")][Statement of Work]]            see [[*Budget notes]]
 - [ ] SPEX signoff
 
-- [ ] Biographical Sketch          https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2hi
+- [ ] Biographical Sketch          https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2hi
   - [ ] Get from https://www.ncbi.nlm.nih.gov/sciencv/
-- [ ] Current and Pending          https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2hii
+- [ ] Current and Pending          https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2hii
   - [ ] Get from https://www.ncbi.nlm.nih.gov/sciencv/
-- [ ] Collaborators (COA)          https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2hiii
-- [ ] [[elisp:(ox-manuscript-open "nsf-proposal-facilities")][Facilities, equipment]]        https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2g
+- [ ] Collaborators (COA)          https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2hiii
+- [ ] [[elisp:(ox-manuscript-open "nsf-proposal-facilities")][Facilities, equipment]]        https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2g
 
-- [ ] [[elisp:(ox-manuscript-open "nsf-project-summary")][Project Summary]]              https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2b
-- [ ] [[elisp:(ox-manuscript-open "nsf-project-description")][Project Description]]          https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2d
-- [ ] [[*References Cited]]             https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2e
+- [ ] [[elisp:(ox-manuscript-open "nsf-project-summary")][Project Summary]]              https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2b
+- [ ] [[elisp:(ox-manuscript-open "nsf-project-description")][Project Description]]          https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2d
+- [ ] [[*References Cited]]             https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2e
 
-- [ ] [[elisp:(ox-manuscript-open "nsf-proposal-postdoc-plan")][Postdoctoral Mentoring Plan]]  https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2i-i
-- [ ] [[elisp:(ox-manuscript-open "nsf-proposal-data-plan")][Data Management plan]]         https://new.nsf.gov/policies/pappg/23-1/ch-2-proposal-preparation#2D2i-ii
+- [ ] [[elisp:(ox-manuscript-open "nsf-proposal-mentoring-plan")][Mentoring Plan]]  https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2i-i
+- [ ] [[elisp:(ox-manuscript-open "nsf-proposal-data-plan")][Data Management plan]]         https://new.nsf.gov/policies/pappg/24-1/ch-2-proposal-preparation#ch2D2i-ii
 
 
 ** Budget notes
@@ -93,7 +93,7 @@ Refresh all the files with a fresh build.
 			"project-summary.org"
 			"data-management-plan.org"
 			"facilities.org"
-			"postdoctoral-mentoring-plan.org")
+			"mentoring-plan.org")
       do
       (find-file org-file)
       (ox-manuscript-export-and-build-and-open))

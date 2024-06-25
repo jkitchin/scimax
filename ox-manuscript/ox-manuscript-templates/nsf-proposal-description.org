@@ -13,6 +13,7 @@
 
 # Adjust this line for line spacing.
 \setstretch{1.21}
+\pagenumbering{gobble}
 
 #+TITLE: <replace: title>
 * Introduction
