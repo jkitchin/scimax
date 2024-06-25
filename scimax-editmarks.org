@@ -28,7 +28,7 @@ You should avoid:
 
 The editmarks are supposed to support multiline markup. This is hard to do right in Emacs, so things are likely to work better if you stick  to single line editmarks. I like `visual-line-mode' for that purpose.
 
-This document is the manual and the source..
+This document is the manual and the source.
 
 * Known issues and limitations
 
@@ -293,7 +293,7 @@ To define an editmark we need to define open and close markers, and the faces fo
 
 Export functions should take one argument, the backend as a symbol, and they are responsible for replacing the editmark with the new markup suitable for the backend. Example functions are in [[id:53446467-2C90-49B5-B0E2-09FB347B2B21][Export functions]].
 
- #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defvar sem-editmarks
   `((delete :open-marker "{>-" :close-marker "-<}"
 	    :marker-face (:foreground "red" :weight ultra-light :strike-through t)
@@ -384,6 +384,14 @@ Export functions should take one argument, the backend as a symbol, and they are
 	   :accept-func sem-delete-editmark
 	   :reject-func sem-clear-editmark)
 
+    (video :open-marker "{v>"
+	   :close-marker "<v}"
+	   :help-echo "A video editmark"
+	   :keymap sem-editmark-video-map
+	   :marker-face (:foreground "MediumOrchid4" :weight ultra-light)
+	   :face (:foreground "MediumOrchid4" :weight bold)
+	   :mouse-face highlight)
+
     (file :open-marker "{>|"
 	  :close-marker "|<}"
 	  :marker-face (:foreground "cadet blue" :weight ultra-light)
@@ -403,7 +411,7 @@ Export functions should take one argument, the backend as a symbol, and they are
   "The default editmarks")
 
 
- #+END_SRC
+#+END_SRC
 
  #+RESULTS:
  : sem-editmarks
@@ -496,7 +504,14 @@ This editmark points to an audio file.
 
 (defun sem-audio-tooltip (window object position)
   "Tooltip for audio editmarks."
-  "Audio editmark. use M-o or s-mouse-1 to listen.")
+  ;; a2t is an executable script in scimax python
+  (if (executable-find "a2t")
+      (save-window-excursion
+	(goto-char position)
+	(shell-command-to-string
+	 (format "a2t %s"
+		 (plist-get (sem-editmark-plist) :file))))
+    "Audio editmark. use M-o or s-mouse-1 to listen."))
 
 
 (defun sem-audio-insert ()
@@ -504,7 +519,7 @@ This editmark points to an audio file.
   (interactive)
   (let* ((cb (current-buffer))
 	 (buffer "*record*")
-	 (fname (format-time-string "%Y-%m-%d-%H-%M-%S.mp3"))
+	 (fname (format-time-string "%Y-%m-%d-%H-%M-%S.aiff"))
 	 (process (start-process buffer buffer "sox" "-d" fname)))
     (pop-to-buffer buffer)
     (setq-local header-line-format "press q to quit.")
@@ -526,6 +541,67 @@ This editmark points to an audio file.
 #+RESULTS:
 : sem-audio-insert
 
+** video editmark functions
+
+#+BEGIN_SRC emacs-lisp
+(defvar sem-editmark-video-map
+  (let ((map (copy-keymap org-mode-map)))
+    (define-key map (kbd "<return>") 'sem-video-watch)
+    (define-key map (kbd "<mouse-1") 'sem-video-watch)
+    map)
+  "Map for actions on editmark video.")
+
+
+(defun sem-video-insert ()
+  "Insert a video editmark."
+  (interactive)
+  (let* ((cb (current-buffer))
+	 (buffer "*record*")
+	 (fname (format-time-string "%Y-%m-%d-%H-%M-%S.mov"))
+	 (process (do-applescript
+		   "tell application \"QuickTime Player\" to activate (new movie recording)")))
+    (pop-to-buffer buffer)
+    (insert "Setup Quicktime with the Camera you want and press record. Press q in this buffer when you want to stop and save the video.")
+    (setq-local header-line-format "press q to quit.")
+    (use-local-map (copy-keymap org-mode-map))
+    (local-set-key "q" (lambda ()
+			 (interactive)
+			 (do-applescript
+			  (format
+			   "set theFilePath to POSIX path of \"%s\"
+
+tell application \"QuickTime Player\"
+    tell document \"Movie Recording\"
+        pause
+        save it in POSIX file theFilePath
+        stop
+        close
+    end tell
+end tell" (expand-file-name fname)))
+			 (kill-buffer buffer)
+			 (pop-to-buffer cb)
+			 (insert (format "{v> :file %s %s <v}"
+					 fname
+					 (let ((note (read-string "Note: ")))
+					   (if (string= "" note)
+					       ""
+					     (format " :note \"%s\"" note)))))))
+    (recursive-edit)))
+
+
+(defun sem-video-watch ()
+  "Open a video to watch it.
+Mac dependent"
+  (interactive)
+  (let ((plist (sem-editmark-plist))) 
+    (shell-command (format "open %s" (plist-get plist :file)))
+    (do-applescript "tell application \"System Events\" to keystroke space")))
+
+
+#+END_SRC
+
+#+RESULTS:
+: sem-video-watch
 
 ** file editmark functions
 
@@ -1227,6 +1303,8 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
      ;; this is a special case
      ((eq type 'audio)
       (sem-audio-insert))
+     ((eq type 'video)
+      (sem-video-insert))
      ;; We have an active region we want to apply
      ((region-active-p)
       (let* ((bounds (list (region-beginning) (region-end)))
@@ -1787,7 +1865,8 @@ Finally we define a minor mode for the list view.
  #+BEGIN_SRC emacs-lisp
 (defhydra sem-insert (:color blue :hint nil :columns 3)
   "Editmark insert"
-  ("u" (sem-audio-insert) "audio")
+  ("a" (sem-insert 'audio) "audio")
+  ("v" (sem-insert 'video) "video")
   ("m" (sem-insert 'comment) "comment")
   ("r" (sem-insert 'reply) "reply")
   ("i" (sem-insert 'insert) "insert")
@@ -1806,8 +1885,8 @@ Finally we define a minor mode for the list view.
   ("g" sem-track-change-mode "toggle track changes")
   ("l" sem-editmark-display "List all")
   ("q" sem-jump-to-editmark "Jump to editmark")
-  ("v" sem-jump-to-visible-editmark "Jump to visible")
-  ("a" sem-action/body "action menu"))
+  ("V" sem-jump-to-visible-editmark "Jump to visible")
+  ("A" sem-action/body "action menu"))
 
 
 (defhydra sem-action (:color red :hint nil :columns 3)
@@ -1945,7 +2024,7 @@ For line-based diff use `diff-buffer-with-file'."
 
  This is lightly tested. It should show changes from the current version to some version in a past git commit. Note if you have existing sem-editmarks in the old version, you might get confusing results.
 
- #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun sem-wdiff-git (commit)
   "Perform a wdiff between HEAD and a git commit.
 An ivy selection is used to choose the commit.
@@ -2000,7 +2079,7 @@ the current version. Returns the buffer."
     buf))
 
 
- #+END_SRC
+#+END_SRC
 
  #+RESULTS:
  : sem-wdiff-git
@@ -2009,7 +2088,7 @@ the current version. Returns the buffer."
 
  The idea here is you can do accept/reject in the temporary buffer, and then save it back. If you mess up badly, just delete the temp buffer. This needs to be tested.
 
- #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun sem-wdiff-save ()
   "Save changes.
 If there is an *org-wdiff-git* buffer, then we copy that content
@@ -2026,7 +2105,7 @@ where it came from. Otherwise we just save the buffer."
     (save-buffer)))
 
 
- #+END_SRC
+#+END_SRC
 
 
 
@@ -2043,7 +2122,7 @@ where it came from. Otherwise we just save the buffer."
 
  This code is not super sophisticated yet, and the editmarks will break org-mode syntax if you delete across boundaries of tables, blocks, headlines, etc. It is not clear how clever the code can get to avoid this.
 
- #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (define-minor-mode sem-track-change-mode
   "A minor mode for tracking changes."
   :lighter " tc"
@@ -2057,7 +2136,7 @@ where it came from. Otherwise we just save the buffer."
     (message "Track changes mode deactivated.")))
 
 
- #+END_SRC
+#+END_SRC
 
  #+RESULTS:
 
@@ -2136,12 +2215,6 @@ changed."
 
 
 #+END_SRC
-
-#+RESULTS:
-: sem-before-change
-
-#+RESULTS:
-: sem-before-change
 
 
 
@@ -2320,14 +2393,14 @@ of the affected text."
   (save-excursion (font-lock-fontify-region (line-beginning-position) (line-end-position))))
 
 
- #+END_SRC
+#+END_SRC
 
  #+RESULTS:
  : sem-after-change
 
  While in track changes mode, we often need to modify the buffer without triggering the change functions. This macro simplifies that.
 
- #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defmacro sem-without-following-changes (&rest body)
   "Execute BODY without following changes."
   (declare (indent defun))
@@ -2335,7 +2408,7 @@ of the affected text."
      ,@body))
 
 
- #+END_SRC
+#+END_SRC
 
  #+RESULTS:
  : sem-without-following-changes
