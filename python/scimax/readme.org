@@ -1,0 +1,26 @@
+#+title: Scimax python package
+
+
+* Installation
+
+I suggest you install it in editable form:
+
+#+BEGIN_SRC sh
+pip install -e .
+#+END_SRC
+
+* CLI utilities
+
+These are all powered by click. 
+
+** For emacs
+
+Provides ~eint~ and ~ekill~ to interrupt and kill emacs.
+
+** Google calendar integration
+
+Provides a CLI called ~gcal~ that writes your google calendar to an org file.
+
+** a2t
+
+audio to text cli - ~a2t~

@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scimax"
+authors = [
+    {name = "John Kitchin", email = "jkitchin@andrew.cmu.edu"},
+]
+description = "command line utilities for scimax"
+license = {text = "MIT"}
+version = "0.0.2"
+dependencies = [
+    "ics",
+    "arrow",
+    "requests",
+    "click",
+    "pocketsphinx",
+    "SpeechRecognition",
+    "moviepy"
+]
+
+[project.scripts]
+ekill = "scimax.cli:ekill"
+eint = "scimax.cli:eint"
+gcal = "scimax.gcal:main"
+a2t = "scimax.audio:a2t"
