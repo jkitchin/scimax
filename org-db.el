@@ -1275,13 +1275,19 @@ where properties.property = \"ADDRESS\""))))
 
 
 ;; * org-db src-blocks 
-(defun org-db-src-blocks ()
-  "Search src blocks."
-  (interactive)
+(defun org-db-src-blocks (&optional project)
+  "Search src blocks.
+Optional PROJECT prefix arg to limit to current project."
+  (interactive "P")
 
   (let* ((src-blocks (with-org-db
-		      (sqlite-select org-db "select src_blocks.language, src_blocks.contents,
-src_blocks.begin, files.filename from src_blocks inner join files on files.rowid = src_blocks.filename_id")))
+		      (sqlite-select
+		       org-db
+		       (format "select src_blocks.language, src_blocks.contents,
+src_blocks.begin, files.filename from src_blocks inner join files on files.rowid = src_blocks.filename_id%s"
+			       (if project
+				   (format " where files.filename like \"%s%%\"" (projectile-project-root))
+				 "")))))
 	 (candidates (cl-loop for (language contents begin filename) in src-blocks collect
 			      (list (format "%s: %s" language contents)
 				    :filename filename :begin begin))))
@@ -1293,15 +1299,21 @@ src_blocks.begin, files.filename from src_blocks inner join files on files.rowid
 
 
 ;; * org-db headings
-(defun org-db-heading-candidates ()
+(defun org-db-heading-candidates (&optional project)
   "Return heading candidates completion."
   (let* ((headings (with-org-db
-		    (sqlite-select org-db "
+		    (sqlite-select
+		     org-db
+		     (format "
 select headlines.level, headlines.todo_keyword, headlines.title, headlines.tags,
 files.filename, headlines.begin, files.last_updated from headlines
 inner join files 
 on files.rowid = headlines.filename_id
-order by files.last_updated desc")))
+%s
+order by files.last_updated desc"
+			     (if project
+				 (format "where files.filename like \"%s%%\"" (projectile-project-root))
+			       "")))))
 	 (candidates (cl-loop for (level todo title tags filename begin last-updated) in headings
 			      collect
 			      (cons
@@ -1347,10 +1359,10 @@ order by files.last_updated desc")))
 
 
 ;;;###autoload
-(defun org-db-headings ()
+(defun org-db-headings (&optional project)
   "Use ivy to open a heading with completion."
-  (interactive)
-  (let* ((candidates (org-db-heading-candidates)))
+  (interactive "P")
+  (let* ((candidates (org-db-heading-candidates project)))
     (ivy-read "heading: " candidates
 	      :action
 	      '(1

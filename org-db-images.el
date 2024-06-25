@@ -72,13 +72,19 @@ This is much faster than putting it on the candidates at creation time"
 (ivy-configure 'org-db-images :display-transformer-fn #'org-db-candidate-transformer)
 
 
-(defun org-db-images ()
+(defun org-db-images (&optional project)
   "Search the images database."
-  (interactive)
+  (interactive "P")
   (let* ((db-candidates (with-org-db
-			 (sqlite-select org-db "select images.text, images.img_filename, images.position, files.filename
+			 (sqlite-select
+			  org-db
+			  (format
+			   "select images.text, images.img_filename, images.position, files.filename
 from images
-inner join files on files.rowid = images.filename_id")))
+inner join files on files.rowid = images.filename_id%s"
+			   (if project
+			       (format " where files.filename like \"%s%%\"" (projectile-project-root))
+			     "")))))
 	 (candidates (cl-loop for (text fname position ofile) in db-candidates collect
 			      (list
 			       (s-join " " (s-split "\n" text))

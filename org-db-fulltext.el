@@ -48,10 +48,15 @@ This does not use the arguments pased in update functions."
 QUERY should be in fts5 syntax. We use MATCH for the select.
 https://www.sqlite.org/fts5.html"
   (or
-   (ivy-more-chars)
+   (ivy-more-chars) 
    (let ((org-db-ft (sqlite-open (expand-file-name org-db-fulltext org-db-root)))
 	 (statement (format "select snippet(fulltext, 1, '', '', '', 8), filename
-from fulltext where contents match '%s'" query)))
+from fulltext where contents match '%s'%s"
+			    query
+			    (if org-db-project-p
+				(format "  and filename match '\"^%s\"'" (projectile-project-root))
+			      ""))))
+     
      (prog1
 	 (cl-loop for (snippet fname) in
 		  (sqlite-select org-db-ft statement)
@@ -61,8 +66,7 @@ from fulltext where contents match '%s'" query)))
 		  ;; the full text might have :: in it.
 		  collect
 		  ;; (cons snippet fname)
-		  (format "%s :: %s" snippet fname)
-		  )
+		  (format "%s :: %s" snippet fname))
        (sqlite-close org-db-ft)))))
 
 
@@ -75,10 +79,15 @@ from fulltext where contents match '%s'" query)))
     (search-forward snippet nil t)))
 
 
-(defun org-db-fulltext-search ()
+(defvar org-db-project-p nil
+  "Boolean for limiting search to current project.")
+
+(defun org-db-fulltext-search (&optional project)
   "Search the fulltext database.
-This function opens the file that matches your query string."
-  (interactive)
+This function opens the file that matches your query string.
+With optional prefix arg PROJECT limit query to current project."
+  (interactive "P")
+  (setq org-db-project-p project)
   (ivy-read "query: " #'org-db-fulltext-candidates 
 	    :dynamic-collection t
 	    :action #'org-db-fulltext-open))
@@ -115,3 +124,6 @@ This function opens the file that matches your query string."
 (provide 'org-db-fulltext)
 
 ;;; org-db-fulltext.el ends here
+;; Local Variables:
+;; eval: (sem-mode)
+;; End:
