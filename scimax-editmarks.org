@@ -504,14 +504,17 @@ This editmark points to an audio file.
 
 (defun sem-audio-tooltip (window object position)
   "Tooltip for audio editmarks."
+
+  "Audio editmark. use M-o or s-mouse-1 to listen."
   ;; a2t is an executable script in scimax python
-  (if (executable-find "a2t")
-      (save-window-excursion
-	(goto-char position)
-	(shell-command-to-string
-	 (format "a2t %s"
-		 (plist-get (sem-editmark-plist) :file))))
-    "Audio editmark. use M-o or s-mouse-1 to listen."))
+  ;; (if (executable-find "a2t")
+  ;;     (save-window-excursion
+  ;; 	(goto-char position)
+  ;; 	(shell-command-to-string
+  ;; 	 (format "a2t %s"
+  ;; 		 (plist-get (sem-editmark-plist) :file))))
+  ;;   "Audio editmark. use M-o or s-mouse-1 to listen.")
+  )
 
 
 (defun sem-audio-insert ()
