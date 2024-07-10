@@ -75,7 +75,12 @@ inner join files on files.rowid = audio.filename_id%s"
 			     "")))))
 	 (candidates (cl-loop for (text fname position ofile) in db-candidates collect
 			      (list
-			       (s-join " " (s-split "\n" text))
+			       (concat
+				(format "%s in %s" fname ofile)
+				"\n"
+				(s-word-wrap
+				 80 
+				 (s-join " " (s-split "\n" text))))
 			       fname
 			       position
 			       ofile))))
