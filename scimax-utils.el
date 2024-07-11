@@ -230,7 +230,7 @@ You can also try putting expressions in for formatting, e.g.:
   - Package user dir :: ${package-user-dir}
   - User dir :: ${user-emacs-directory}
   - imagemagick support :: ${(image-type-available-p 'imagemagick)}
-  - image types :: ${(imagemagick-types)}
+  - image types :: ${(when (boundp 'imagemagick-types) imagemagick-types)}
   - gnutls available :: ${(gnutls-available-p)}
 - Org-version :: ${(org-version)}\n")
 	  "\n- exec-path (this is what Emacs knows)\n"
@@ -265,23 +265,22 @@ You can also try putting expressions in for formatting, e.g.:
 - git :: ${(executable-find \"git\")}
     - git version :: ${(string-trim (shell-command-to-string \"git --version\"))}
 - ssh :: ${(executable-find \"ssh\")}
-  - ssh version :: ${(string-trim (shell-command-to-string \"ssh -V\"))}
-- python :: ${(executable-find \"python\")}
+    - ssh version :: ${(string-trim (shell-command-to-string \"ssh -V\"))}
 - latex :: ${(executable-find \"latex\")}
-  - For more latex info click [[elisp:scimax-latex-setup]]
+- For more latex info click [[elisp:scimax-latex-setup]]
 - Searching tools
-  - grep :: ${(executable-find \"grep\")}
-  - ag ::  ${(executable-find \"ag\")}
-  - pt ::  ${(executable-find \"pt\")}
-  - find ::  ${(executable-find \"find\")}
-  - locate ::  ${(executable-find \"locate\")}
+    - grep :: ${(executable-find \"grep\")}
+    - ag ::  ${(executable-find \"ag\")}
+    - pt ::  ${(executable-find \"pt\")}
+    - find ::  ${(executable-find \"find\")}
+    - locate ::  ${(executable-find \"locate\")}
 - Graphics
-  - convert :: ${(executable-find \"convert\"}
-  - mogrify :: ${(executable-find \"mogrify\"}
-"))
-
-    ;; the end
-    (goto-char (point-min))))
+    - convert :: ${(executable-find \"convert\")}
+    - mogrify :: ${(executable-find \"mogrify\")}
+")
+	    ))
+  ;; the end
+  (goto-char (point-min)))
 
 
 (defun scimax-github ()
@@ -337,7 +336,8 @@ with double prefix arg, prompt for filename. Only works on macOS."
 		    (concat "screenshots/"
 			    fname)))
     (org-redisplay-inline-images)
-    (raise-frame)))
+    (raise-frame)
+    fname))
 
 
 (defun pngpaste (&optional arg)
