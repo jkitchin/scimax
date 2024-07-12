@@ -196,10 +196,15 @@
 		(eldoc-mode)))))
 
 (use-package magit
-  :init (setq magit-completing-read-function 'ivy-completing-read)
+  :init
+  (setq magit-completing-read-function 'ivy-completing-read)
   :bind
-  ("<f5>" . magit-status)
-  ("C-c v t" . magit-status))
+  (("<f5>" . magit-status)
+   ("C-c v t" . magit-status)
+   :map magit-status-mode-map
+   ("s" . magit-stage)
+   ("u" . magit-unstage)
+   ("k" . magit-discard)))
 
 (use-package move-text
   :init (move-text-default-bindings))
