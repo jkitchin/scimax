@@ -726,7 +726,8 @@ _<tab>_: %(ring-ref scimax-hydra-modes (+ 1 scimax-hydra-mode-counter)) _S-<tab>
   ("p" outline-previous-heading "previous heading" :color red)
   ("<tab>" org-cycle "cycle" :color red)
   ("r" (scimax-open-hydra scimax-org-ref/body) "org-ref")
-  ("t" (scimax-open-hydra scimax-org-toggle/body) "toggle"))
+  ("t" (scimax-open-hydra scimax-org-table/body) "table")
+  ("G" (scimax-open-hydra scimax-org-toggle/body) "toggle"))
 
 
 (defhydra scimax-org-block (:color red :inherit (scimax-base/heads) :columns 3)
@@ -1389,15 +1390,23 @@ _s_ort keys
 
 (defhydra scimax-org-table (:color red :hint nil :inherit (scimax-base/heads))
   "
-org table
-_ic_: insert column    _M-<left>_: move col left    _d_: edit field
-_dc_: delete column    _M-<right>_: move col right  _e_: eval formula
-_ir_: insert row       _M-<up>_: move row up        _E_: export table
-_ic_: delete row       _M-<down>_: move row down    _r_: recalculate
-_i-_: insert line      _w_: wrap region             _I_: org-table-iterate
-_-_: insert line/move  ^ ^                          _D_: formula debugger
-_s_ort  _t_ranspose _m_ark
+Navigate
+_j_: previous cell  _;_: next cell _k_: previous row _l_: next row           
 _<_: beginning of table _>_: end of table
+
+Edit
+_S-<left>_: move cell left _S-<right>_: move cell right _S-<up>_: move cell up  _S-<down>_: move cell down
+
+_M-<left>_: move col left _M-<right>_: move col right  _M-<up>_: move row up _M-<down>_: move row down
+
+_<backspace>_: clear _M-w_: copy _C-w_: kill
+_ic_: insert column _dc_: delete column _ir_: insert row _ic_: delete row
+_i-_: insert line _-_: insert line/move
+
+_s_: sort  _t_: transpose  _m_: mark table _R_: rectangle mark
+_E_: export table  _I_: org-table-import   _w_: wrap region              
+
+_ef_: edit field _er_: eval formula _r_: recalculate _D_: formula debugger
 "
   ("ic" org-table-insert-column)
   ("ir" org-table-insert-row)
@@ -1406,11 +1415,29 @@ _<_: beginning of table _>_: end of table
   ("i-" org-table-insert-hline)
   ("-" org-table-hline-and-move)
 
-  ("d" org-table-edit-field)
-  ("e" org-table-eval-formula)
+  ("<backspace>" org-table-blank-field)
+
+  ("M-w" (save-excursion
+	   (goto-char (org-table-begin))
+	   (org-mark-element)
+	   (kill-ring-save (region-beginning) (region-end))))
+  
+  ("C-w" (progn (goto-char (org-table-begin))
+		(org-mark-element)
+		(kill-region (region-beginning) (region-end)))
+   
+   :color blue)
+
+  (";" org-table-next-field)
+  ("j" org-table-previous-field)
+  ("l" org-table-next-row)
+  ("k" previous-line)
+
+  ("ef" org-table-edit-field)
+  ("er" org-table-eval-formula)
   ("E" org-table-export :color blue)
+  ("I" org-table-import)
   ("r" org-table-recalculate)
-  ("I" org-table-iterate)
   ("B" org-table-iterate-buffer-tables)
   ("w" org-table-wrap-region)
   ("D" org-table-toggle-formula-debugger)
@@ -1419,10 +1446,17 @@ _<_: beginning of table _>_: end of table
   ("M-<down>" org-table-move-row-down)
   ("M-<left>" org-table-move-column-left)
   ("M-<right>" org-table-move-column-right)
+
+  ("S-<up>" org-table-move-cell-up)
+  ("S-<down>" org-table-move-cell-down)
+  ("S-<left>" org-table-move-cell-left)
+  ("S-<right>" org-table-move-cell-right)
+
   ("t" org-table-transpose-table-at-point)
 
   ("m" (progn (goto-char (org-table-begin))
 	      (org-mark-element)))
+  ("R" rectangle-mark-mode)
   ("s" org-table-sort-lines)
   ("<" (goto-char (org-table-begin)))
   (">" (progn (goto-char (org-table-begin))
