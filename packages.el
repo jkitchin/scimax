@@ -13,27 +13,23 @@
 (setq use-package-always-ensure t)
 
 ;; * org-mode
+;; To upgrade org, run this command in a shell, with no emacs open
+;; emacs -Q -batch -eval "(progn (require 'package) (package-initialize) (package-refresh-contents) (package-upgrade 'org))"
 ;; load this first before anything else to avoid mixed installations
-(use-package org
-  :straight t
-  :ensure t
-  :pin gnu
-  :mode ("\\.org\\'" . org-mode)
-  :init
-  ;; Use the current window for C-c ' source editing
-  (setq org-src-window-setup 'current-window
-	org-support-shift-select t)
+(straight-use-package 'org)
 
-  ;; I like to press enter to follow a link. mouse clicks also work.
-  (setq org-return-follows-link t)
-  :bind
-  (("C-c l" . org-store-link)
-   ("C-c L" . org-insert-link-global)
-   ("C-c o" . org-open-at-point-global)
-   ("C-c a" . org-agenda)
-   ("C-c c" . org-capture)
-   ("M-<SPC>" . org-mark-ring-goto)
-   ("H-." . org-time-stamp-inactive)))
+;; Use the current window for C-c ' source editing
+(setq org-src-window-setup 'current-window
+      org-support-shift-select t
+      ;; I like to press enter to follow a link. mouse clicks also work.
+      org-return-follows-link t)
+
+(global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c L") 'org-insert-link-global)
+(global-set-key (kbd "C-c o") 'org-open-at-point-global)
+(global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "M-<SPC>") 'org-mark-ring-goto)
+(global-set-key (kbd "H-.") 'org-time-stamp-inactive)
 
 
 ;; * Other packages
