@@ -1,0 +1,1 @@
+("~/dev/scimax-new-config/" "~/dev/my-emacs-config-old-version/" "~/dev/scimax/" "~/.dotfiles/" "~/dev/emacs-28.2/src/" "~/dev/my-notebooks/")

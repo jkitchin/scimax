@@ -1,0 +1,27 @@
+
+;; ----- smex-history -----
+(
+ load-file
+ scroll-bar-mode
+ scroll-bar-drag
+ counsel-load-theme
+ org-babel-result-hide-all
+ org-babel-initiate-session
+ org-mode
+)
+
+;; ----- smex-data -----
+(
+ (counsel-el . 1)
+ (straight-use-package . 1)
+ (python-mode . 1)
+ (org-mode . 1)
+ (org-babel-initiate-session . 1)
+ (org-babel-result-hide-all . 4)
+ (yas/expand . 1)
+ (yas-expand . 3)
+ (counsel-load-theme . 1)
+ (scroll-bar-drag . 1)
+ (scroll-bar-mode . 1)
+ (load-file . 2)
+)

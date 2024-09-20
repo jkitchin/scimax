@@ -1,0 +1,5 @@
+(undo-tree-save-format-version . 1)
+"d58df916bc221f2597d9c41e6d8350fcdc0af4bb"
+[nil nil nil nil (26349 5308 791582 556000) 0 nil]
+([nil current ((#("scimax-dir" 0 10 (fontified nil)) . -11547) (11557 . 11565) (#("scimax-dir" 0 10 (fontified nil)) . -9827) (9837 . 9845) (#("scimax-dir" 0 10 (fontified t)) . -1828) (1838 . 1846) (#("scimax-dir" 0 10 (face font-lock-comment-face fontified t)) . -1458) (1468 . 1476) (#("scimax-dir" 0 10 (fontified t)) . -1372) (1382 . 1390) (#("scimax-dir" 0 10 (face font-lock-comment-face fontified t)) . -1232) (t 26341 41735 168380 387000) (1242 . 1250) (t 26341 41735 168380 387000)) nil (26349 5308 791569 559000) 0 nil])
+nil

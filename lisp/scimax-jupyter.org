@@ -1,0 +1,639 @@
+#+title: scimax-jupyter
+#+attr_org: :width 800
+[[/Users/jkitchin/Dropbox/emacs/scimax/scimax-jupyter.png]]
+
+https://github.com/nnicandro/emacs-jupyter uses a compiled module to communicate directly with a jupyter kernel using zeromq. This requires that you have an emacs with support for compiled modules, and that you are able to compile it. This is the default option in scimax. The older ob-ipython modules might work, but I don't use or support them anymore.
+
+#+BEGIN_SRC emacs-lisp
+(require 'scimax-jupyter)
+#+END_SRC
+
+#+RESULTS:
+: scimax-jupyter
+
+* Customization in scimax
+
+Overall, emacs-jupyter is an improvement on ob-ipython. There are a few things I want that don't come out of the box with emacs-jupyter. Here are a few customizations I have done in scimax.
+
+** default header args
+
+These are the settings that work well for me.
+
+#+BEGIN_SRC emacs-lisp :results code pp
+org-babel-default-header-args:jupyter-python
+#+END_SRC
+
+#+RESULTS:
+: ((:results . "both") (:session lambda nil (buffer-file-name))
+:  (:kernel . "python3") (:pandoc . "t") (:exports . "both") (:cache . "no")
+:  (:noweb . "no") (:hlines . "no") (:tangle . "no") (:eval . "never-export"))
+
+Some of these are scimax-specific. For example =:results . "both"= captures both printed and returned values, which is most consistent with Jupyter notebooks. I set =:pandoc . "t"= to convert outputs like html to org format where possible.
+
+
+** buffer specific kernels that close when you kill the buffer
+
+I find it confusing to have one kernel shared among many files. 
+
+1. It is easy to mess up the state if you use similar variables in different files
+2. I often assume the CWD is the file I work from, but the kernel starts in the directory it was started in, which is often different than another org-file
+3. I want the kernel to shutdown and close when I close the buffer because I don't need it after that.
+
+scimax makes that happen.
+
+** scimax jupyter src-block hydra
+
+Try it: elisp:scimax-jupyter-org-hydra/body
+
+Easy access to:
+- inspect (M-i)
+- completion (M-tab)
+- editing functions
+- kernel management
+
+* Examples of usage
+
+** Getting help
+
+#+BEGIN_SRC jupyter-python
+import numpy as np
+
+?np.linspace
+
+np.linspace
+#+END_SRC
+
+#+RESULTS:
+: <function linspace at 0x1074f2fb0>
+
+#+BEGIN_SRC jupyter-python
+??np.linspace
+#+END_SRC
+
+#+RESULTS:
+
+If you have your cursor on linspace, type M-i or f12-/ to inspect it.
+
+#+BEGIN_SRC jupyter-python
+np.linspace
+#+END_SRC
+
+
+
+** Completion
+
+Use M-tab to complete the thing at point. Sometimes you have to type it more than once.
+
+#+BEGIN_SRC jupyter-python
+np.geomspace
+#+END_SRC
+
+
+
+
+** Plotting with matplotlib
+
+Figures work like you expect. 
+
+
+#+BEGIN_SRC jupyter-python
+import matplotlib.pyplot as plt
+import numpy as np
+
+t = np.linspace(0, 20 * np.pi, 350)
+x = np.exp(-0.1 * t) * np.sin(t)
+y = np.exp(-0.1 * t) * np.cos(t)
+
+plt.plot(x, y)
+plt.axis('equal')
+
+plt.figure()
+plt.plot(y, x)
+
+plt.axis('equal')
+
+print('Length of t = {}'.format(len(t)))
+print('x .dot. y = {}'.format(x @ y))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+: Length of t = 350
+: x .dot. y = 1.359838988849154
+[[file:./.ob-jupyter/2bfeb89f7e2f92d0ee9defd6e245cb31be1ebfdf.png]]
+[[file:./.ob-jupyter/6e01f37ad5782aca45aeebd550d8d635d003152d.png]]
+:END:
+
+
+
+** pycse and plotly
+
+Emacs still does not natively render html or interactive javascript. Until that happens, I monkey-patched plotly to capture a static image, and save the interactive html so you can still use it in a browser. This isn't purely scimax, it requires you to ~pip install pycse~, which is a Python package I wrote to do things like this.
+
+#+BEGIN_SRC jupyter-python
+from pycse.plotly import *
+
+import plotly.express as px
+df = px.data.iris()
+fig = px.scatter(df, x="sepal_width", y="sepal_length", color="species",
+                 size='petal_length', hover_data=['petal_width'])
+fig.show()
+#+END_SRC
+
+#+RESULTS:
+[[file:./.ob-jupyter/4a226dfaab0614115a5f096d917836dc57c3a703.png]]
+
+
+** pandas
+
+using the =pandoc: "t"= header generally makes pandas behave well with org-mode. Turn that off if you want with an empty header like =:pandoc=; note you will get html output then.
+
+#+BEGIN_SRC jupyter-python 
+import pandas as pd
+
+f = pd.DataFrame([['a', 'b'], [1, 2]])
+f
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+|   | 0 | 1 |
+|---+---+---|
+| 0 | a | b |
+| 1 | 1 | 2 |
+:END:
+
+
+
+
+** Figures and Tables with captions, names, attributes with pycse
+
+pycse.orgmode defines several helpful classes to make org figures and tables with attributes.
+
+
+#+BEGIN_SRC jupyter-python
+from pycse.orgmode import *
+
+Table([['x', 'y'],
+       [1, 2],
+       [3, 4]],
+      headers='firstrow',
+      name='org-data',
+      caption='The information about the table',
+      attributes=[('latex', ':environment longtable :align |l||l|')])
+#+END_SRC
+
+#+RESULTS:
+#+attr_latex: :environment longtable :align |l||l|
+#+name: org-data
+#+caption: The information about the table
+| x | y |
+|---+---|
+| 1 | 2 |
+| 3 | 4 |
+
+See Table ref:org-data.
+
+#+BEGIN_SRC jupyter-python 
+import matplotlib.pyplot as plt
+
+f = './test.png'
+plt.plot([1, 4, 17])
+plt.savefig(f)
+plt.close() # you need this to not see two figures.
+Figure(f, name='org-fig', caption='a line plot',
+       attributes=[('org', ':width 300'),
+                   ('latex', ':placement [H]')])
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+attr_org: :width 300
+#+attr_latex: :placement [H]
+#+name: org-fig
+#+caption: a line plot
+[[./test.png]]
+:END:
+
+ref:org-fig
+
+#+BEGIN_SRC jupyter-python
+import matplotlib.pyplot as plt
+import numpy as np
+
+t = np.linspace(0, 20 * np.pi, 350)
+x = np.exp(-0.1 * t) * np.sin(t)
+y = np.exp(-0.1 * t) * np.cos(t)
+
+plt.plot(x, y)
+plt.axis('equal')
+plt.savefig('fig-1.png')
+plt.close()
+
+plt.figure()
+plt.plot(y, x)
+plt.axis('equal')
+plt.savefig('fig-2.png')
+plt.close()
+
+print('Length of t = {}'.format(len(t)))
+print('x .dot. y = {}'.format(x @ y))
+
+from pycse.orgmode import Figure, Org
+
+from IPython.display import display
+
+display(Org("\n\n"),
+        Figure('./fig-1.png', name='clock',
+               caption='a clockwise line plot'),
+        Org("\n\n"),
+        Figure('./fig-2.png', name='counterclock',
+               caption='a counter-clockwise line plot'))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+: Length of t = 350
+: x .dot. y = 1.359838988849154
+
+#+name: clock
+#+caption: a clockwise line plot
+[[./fig-1.png]]
+
+
+
+#+name: counterclock
+#+caption: a counter-clockwise line plot
+[[./fig-2.png]]
+:END:
+
+
+#+BEGIN_SRC jupyter-python
+import pandas as pd
+
+Table(pd.DataFrame([['a', 'b'],
+                    [1, 2],
+                    [5, 6]]),
+      headers='firstrow',
+      name='pd-data',
+      caption='A table from a dataframe')
+#+END_SRC
+
+#+RESULTS:
+#+name: pd-data
+#+caption: A table from a dataframe
+| 0 | a | b |
+|---+---+---|
+| 1 | 1 | 2 |
+| 2 | 5 | 6 |
+
+There is also a keyword.
+
+#+BEGIN_SRC jupyter-python
+Keyword('name', 'fig-1')    
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+name: fig-1
+:END:
+
+and a comment.
+
+#+BEGIN_SRC jupyter-python
+Heading('An example of a heading from code', 3)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+*** An example of a heading from code
+:END:
+
+
+
+#+BEGIN_SRC jupyter-python
+Comment('A comment for orgmode')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# A comment for orgmode
+:END:
+
+
+
+
+
+** Exceptions 
+
+Exceptions go in the results. Type f12 e to jump to the exception in the src block.
+
+#+BEGIN_SRC jupyter-python 
+print(5)
+
+
+a = 5
+
+
+
+
+for j in range(5):
+    1 / 0
+
+
+
+print(54)
+
+print(z)
+
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+: 5
+# [goto error]
+: ---------------------------------------------------------------------------
+: ZeroDivisionError                         Traceback (most recent call last)
+: Cell In[29], line 10
+:       4 a = 5
+:       9 for j in range(5):
+: ---> 10     1 / 0
+:      14 print(54)
+:      16 print(z)
+: 
+: ZeroDivisionError: division by zero
+:END:
+
+
+
+** Select rich outputs with :display
+
+The priority for [[https://github.com/nnicandro/emacs-jupyter#rich-kernel-output-1][display]] is:
+- text/org
+- image/svg+xml, image/jpeg, image/png
+- text/html
+- text/markdown
+- text/latex
+- text/plain
+
+LaTeX is automatically rendered to a png
+
+#+BEGIN_SRC jupyter-python
+from sympy import *
+init_printing()
+x, y, z = symbols('x y z')
+
+Integral(sqrt(1 / x), x)
+#+END_SRC
+
+#+RESULTS:
+[[file:./.ob-jupyter/aaa721727d61fc47479b455e22f44ed88a8e0cb1.png]]
+
+
+To get the actual LaTeX, use the :display
+
+#+BEGIN_SRC jupyter-python :display text/latex
+from sympy import *
+init_printing()
+x, y, z = symbols('x y z')
+
+Integral(sqrt(1 / x), x)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+\(\displaystyle \int \sqrt{\frac{1}{x}}\, dx\)
+:END:
+
+and to get it in plain text:
+
+#+BEGIN_SRC jupyter-python :display text/plain
+from sympy import *
+init_printing()
+x, y, z = symbols('x y z')
+
+Integral(sqrt(1 / x), x)
+#+END_SRC
+
+#+RESULTS:
+: ⌠           
+: ⎮     ___   
+: ⎮    ╱ 1    
+: ⎮   ╱  ─  dx
+: ⎮ ╲╱   x    
+: ⌡           
+
+
+** Rich displays mostly work
+
+These get converted to org-syntax by pandoc I think.  Note that emacs-jupyter and/or pandoc seems to put some \\ in the converted results. I use the function scimax-rm-backslashes in a hook to remove these. 
+
+
+#+BEGIN_SRC jupyter-python 
+from IPython.display import FileLink, Image, display
+
+FileLink('scimax.png')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:scimax.png]]
+:END:
+
+
+
+
+#+BEGIN_SRC jupyter-python
+Image('test.png')
+#+END_SRC
+
+#+RESULTS:
+[[file:./.ob-jupyter/ea63442b692c3a2be74ebfde8ba4b0e549706827.png]]
+
+
+
+
+#+BEGIN_SRC jupyter-python
+display(FileLink('scimax.png'), Image('test.png'))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[file:scimax.png]]
+[[file:./.ob-jupyter/ea63442b692c3a2be74ebfde8ba4b0e549706827.png]]
+:END:
+
+
+Some of these are already orgified, e.g. YouTubeVideo.
+
+#+BEGIN_SRC jupyter-python
+from IPython.display import YouTubeVideo
+
+YouTubeVideo('ZXSaLcFSOsU')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+https://www.youtube.com/embed/ZXSaLcFSOsU
+:END:
+
+
+** scratch space and the REPL
+
+The buffer is a great scratch space, but there is also a separate Jupyter scratch buffer. Use it to try out ideas, check values, etc.
+
+Each kernel has a REPL associated with it. Type C-c C-v C-z or f12-z to get to it. It is like an IPython shell! You can explore things there, make plots, etc...
+
+** REPL like interaction mode in src blocks
+
+
+#+BEGIN_SRC jupyter-python
+print(3) 
+3 + 4  # highlight region, C-M-x to run it.
+
+a = 5  # Run C-x C-e here
+5 + a  # Then, M-i here to inspect a
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+: 3
+[[file:./.ob-jupyter/81e42ea101563870e7c6950a80870fae45d34c62.png]]
+:END:
+
+** debugging with the REPL
+
+Put a breakpoint in a function. Define it, then go to the REPL (f12 z) to step through it.
+
+#+BEGIN_SRC jupyter-python
+def f(x):
+    breakpoint()
+    return 1 / x
+#+END_SRC
+
+#+RESULTS:
+
+learn more about PDB at https://realpython.com/python-debugging-pdb/#getting-started-printing-a-variables-value.
+
+** Export to ipynb
+
+See ox-ipynb. This org-file is not ideal for this export, it has some links that are not supported, and I marked the Known issues section as noexport because it has src-blocks with variables in it.
+
+#+ox-ipynb-language: jupyter-python
+#+BEGIN_SRC emacs-lisp :results silent
+(setq  org-export-with-broken-links t)
+(ox-ipynb-export-to-ipynb-file-and-open)
+#+END_SRC
+
+#+RESULTS:
+: #<window 215 on *Async Shell Command*>
+
+
+* Other languages
+** Julia seems to work
+
+[[./scimax-jupyter-julia.org]]
+
+
+** R
+
+[[./scimax-jupyter-r.org]]
+
+* Known issues                                                     :noexport:
+
+** widgets do not seem to work
+
+In theory emacs-jupyter supports widgets, if you build it in the emacs-jupyter src directory. I did that, and don't see any obvious issues, but this does not work. I am not likely to spend time fixing this anytime soon.
+
+#+BEGIN_SRC emacs-lisp
+(let ((default-directory (file-name-directory (locate-library "jupyter"))))
+  (shell-command-to-string "make widgets"))
+#+END_SRC
+
+This at least outputs something, but I think it should open a browser.
+
+#+BEGIN_SRC jupyter-python
+import ipywidgets as widgets
+
+w = widgets.VBox([widgets.Text('#+attr_org: :width 300'),
+                  widgets.Text('#+name: fig-data'),
+                  widgets.Text('#+caption: something here.')])
+display(w)
+#+END_SRC
+
+#+RESULTS:
+: VBox(children=(Text(value='#+attr_org: :width 300'), Text(value='#+name: fig-data'), Text(value='#+caption: so…
+
+I am not sure why. I don't think it is related to my changes. See https://github.com/nnicandro/emacs-jupyter/issues/333, I am not sure widgets still work.
+
+This just hangs, and does not do anything.
+
+#+BEGIN_SRC jupyter-python
+widgets.Image(value=open("test.png", "rb").read(),  width=400)
+#+END_SRC
+
+#+RESULTS:
+: 3e26f7aa-19dd-462f-bf56-505d66f9e629
+
+** Tricky using :cache
+
+This sequence of cells leads to an error when you run them the first time. The issue is the first cell doesn't use jupyter, it uses a cached result, so when you get to ~a * 4~ the variable is not defined.
+
+#+name: one
+#+BEGIN_SRC jupyter-python :cache yes
+a = 15
+print(a)
+
+import time
+time.sleep(5)
+#+END_SRC
+
+#+RESULTS[890bb80ec5ce30e9fa7f63b50d7df113702c43c5]: one
+: 15
+
+
+#+BEGIN_SRC jupyter-python  :var data=one
+data
+#+END_SRC
+
+#+RESULTS:
+: 15
+
+#+BEGIN_SRC jupyter-python
+a * 4
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# [goto error]
+: ---------------------------------------------------------------------------
+: NameError                                 Traceback (most recent call last)
+: Cell In[3], line 1
+: ----> 1 a * 4
+: 
+: NameError: name 'a' is not defined
+:END:
+
+
+* Wishlist
+
+** handle long outputs
+
+Sometimes you get long outputs from things, and especially when it is something that needs fontification, this makes Emacs hard to use. I would like to have a way to truncate long outputs, and maybe write them to a file where you could look at them.
+
+** Jump to definition of variable or function
+
+It would be awesome to do this. Probably this could build on  [[./scimax-literate-programming.el]] and [[./scimax-ob-flycheck.el]].
+
+** inspect variables in function calls
+
+This does not always work when variables are inside a call. I usually see help for the function then.
+
+#+BEGIN_SRC jupyter-python
+a = 5
+print(a + 5)  # inspect a here, I usually see print documentation
+#+END_SRC
+
+#+RESULTS:
+: 10
+

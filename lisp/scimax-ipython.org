@@ -1,0 +1,1258 @@
+#+TITLE: ob-ipython 2.0 in scimax
+#+DATE:  <2018-02-11 Sun>
+
+* Updates to ipython in scimax
+
+Scimax has used a forked version ob-ipython for a long time. The upstream version has improved a lot over the last year, and is nicer than my forked version, especially for asynchronous blocks. So.... I have been working to integrate the upstream version and replace my forked version. Well, mostly. I have specific things I want in org-mode/ipython integration that aren't built in to ob-ipython, and aren't customizable either. So, my new integration still monkey patches quite a few ob-ipython functions.
+
+The new update is in two files: [[./scimax-ob.el]], which contains pretty general functions for all org babel src blocks I think, and [[./scimax-org-babel-ipython-upstream.el]] which contains monkey-patches on ob-ipython, and additional features.
+
+This document shows the new features.
+
+I am anticipating deprecating the old ob-ipython fork, but I have no idea how many people use it, and have no issue with it, so I have added an ob-ipython-upstream submodule, and started a new scimax-org-babel-ipython-upstream.el library that is independent of the old one.
+
+** Basic output
+
+Source blocks usually differentiate between results that are output and value. This has rarely made sense for how I use org-mode. I usually print things and want outputs.  Anything you print will show in the results, and the last value will also show. Printed output comes first.
+
+#+BEGIN_SRC ipython
+def f(x):
+    print(x)
+    return x**2
+
+f(1.41)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[3]:
+# output
+1.41
+
+# text/plain
+: 1.9880999999999998
+:END:
+
+A new feature for scimax users is the execution count, which shows you the counter for when the cell was executed. This shows as comment in the results, so it won't appear in exported content. The count is controlled by the output of the function defined in =ob-ipython-execution-count=. See the docstring of that variable for other options.
+
+#+BEGIN_SRC emacs-lisp
+(setq ob-ipython-execution-count 'ob-ipython-execution-count-suppress)
+#+END_SRC
+
+Ipython can have many kinds of output. The =# text/plain= line in the output tells you what kind of output this is. Later we will see how to filter these. If you don't like these lines, turn them off like this.
+
+#+BEGIN_SRC emacs-lisp
+(setq ob-ipython-show-mime-types nil)
+#+END_SRC
+
+** Multiple inline figures and output
+
+The output really shines with printed output and figures. In the upstream ob-ipython you cannot do both, and it only shows one figure. We get everything with scimax, including all the outputs. You can also filter the outputs to only show what you want.
+
+#+BEGIN_SRC ipython
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as np
+
+t = np.linspace(0, 20 * np.pi, 350)
+x = np.exp(-0.1 * t) * np.sin(t)
+y = np.exp(-0.1 * t) * np.cos(t)
+
+plt.plot(x, y)
+plt.axis('equal')
+
+plt.figure()
+plt.plot(y, x)
+
+plt.axis('equal')
+
+print('Length of t = {}'.format(len(t)))
+print('x .dot. y = {}'.format(x @ y))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[4]:
+# output
+Length of t = 350
+x .dot. y = 1.3598389888491538
+
+
+
+# image/png
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-64787w6c.png]]
+
+
+
+# image/png
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-647879Ej.png]]
+:END:
+
+** Add attributes to images in the output
+
+You can use an =:ipyfile= header argument to put attributes on images in the output and to specify their filenames. This is helpful when writing technical documents so you can do things like make references to them like ref:clockwise and ref:counterclockwise, and when you want nice filenames for other purposes. We support :name, :filename, :caption, :attr_org, :attr_html and :attr_latex. These should be entered as a list of plists. It is necessary to quote the list.
+
+#+BEGIN_SRC ipython :ipyfile '((:name "clockwise" :filename "obipy-resources/clockwise.png" :caption "A clockwise spiral.") (:name "counterclockwise" :filename "obipy-resources/counterclockwise.png" :caption "A counterclockwise spiral."))
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as np
+
+t = np.linspace(0, 20 * np.pi, 350)
+x = np.exp(-0.1 * t) * np.sin(t)
+y = np.exp(-0.1 * t) * np.cos(t)
+
+plt.plot(x, y)
+plt.axis('equal')
+
+plt.figure()
+plt.plot(y, x)
+
+plt.axis('equal')
+
+print('Length of t = {}'.format(len(t)))
+print('x .dot. y = {}'.format(x @ y))
+#+END_SRC
+
+#+RESULTS:
+:results:
+# output
+Length of t = 350
+x .dot. y = 1.3598389888491538
+
+
+
+# image/png
+#+caption: A clockwise spiral.
+#+name: clockwise
+[[file:obipy-resources/clockwise.png]]
+
+
+
+# image/png
+#+caption: A counterclockwise spiral.
+#+name: counterclockwise
+[[file:obipy-resources/counterclockwise.png]]
+:end:
+
+
+
+
+** Fine tune the output
+
+By default we get all the outputs from the kernel. Here we get plain text, an image and a LaTeX representation.
+
+#+BEGIN_SRC ipython
+from sympy import *
+init_printing()
+x, y, z = symbols('x y z')
+
+Integral(sqrt(1 / x), x)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[5]:
+# text/plain
+: ⌠
+: ⎮     ___
+: ⎮    ╱ 1
+: ⎮   ╱  ─  dx
+: ⎮ ╲╱   x
+: ⌡
+
+# image/png
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-64787KPp.png]]
+
+# text/latex
+#+BEGIN_EXPORT latex
+$$\int \sqrt{\frac{1}{x}}\, dx$$
+#+END_EXPORT
+:END:
+
+You can choose to display in the src block header by specifying which mime-type to display (that is one reason I added it to the output).
+
+#+BEGIN_SRC ipython :display image/png
+Integral(sqrt(1/x), x)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[6]:
+# image/png
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-64787XZv.png]]
+:END:
+
+I have not added an exclude feature, but it would not be hard to. Unfortunately, it is not yet possible to control the order these come out in, or to do things like add captions or size information to the images.
+
+** Exceptions are better
+
+By default we capture exceptions in results. I like that because for notes, it is nice to show what happens, and I find it less disruptive while working to not have windows opening and closing.
+
+#+BEGIN_SRC ipython
+print(1 / 0)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[7]:
+# output
+
+ZeroDivisionErrorTraceback (most recent call last)
+<ipython-input-7-3ec96714f820> in <module>()
+----> 1 print(1 / 0)
+
+ZeroDivisionError: division by zero
+:END:
+
+If you like an exception buffer, set this variable like this:
+
+#+BEGIN_SRC emacs-lisp
+(setq ob-ipython-exception-results nil)
+#+END_SRC
+
+Even this is better, press q in that buffer to jump to the offending line in your src block. This does not work right when you run in async mode.
+
+#+BEGIN_SRC ipython
+
+print(1 / 0)
+
+#+END_SRC
+
+** Documentation and code via ? and ??
+
+You can now access the documentation like you can in jupyter.
+
+#+BEGIN_SRC ipython
+import numpy as np
+?np.linspace
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[10]:
+:END:
+
+Similarly you can see the source code:
+
+#+BEGIN_SRC ipython
+??np.linspace
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[11]:
+:END:
+
+This works for functions defined in your org file too.
+
+#+BEGIN_SRC ipython
+def func(X):
+    '''a function of X'''
+
+    return 2 * X
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[12]:
+:END:
+
+#+BEGIN_SRC ipython
+?func
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[14]:
+:END:
+
+** Inspecting objects in src-blocks
+
+You can inspect things in your src-blocks to find out things about them. With your cursor on some object, type s-/ and if it can be figured out you will get some information about it.
+
+#+BEGIN_SRC ipython
+import numpy as np
+
+x = np.linspace(0, 1, 5)
+x
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[15]:
+# text/plain
+: array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
+:END:
+
+You can also enable something like eldoc with elisp:scimax-ob-ipython-turn-on-eldoc and turn it off with elisp:scimax-ob-ipython-turn-off-eldoc. This is a little tricky, it sometimes only works when you have a syntactically correct command with parentheses, or after some cursor movement. I wish it worked better.
+
+#+BEGIN_SRC ipython
+np.linspace
+#+END_SRC
+
+** Completion in src-blocks
+
+You can get some completion options. I like =scimax-ob-ipython-complete-ivy=. I have this bound to s-. It often works on objects too.
+
+#+BEGIN_SRC ipython
+np.linalg.add
+x.argsort
+#+END_SRC
+
+You can also use company mode like this:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'company-backends 'company-ob-ipython)
+(company-mode)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+
+#+BEGIN_SRC ipython
+np.linalg.inv
+#+END_SRC
+
+Company-mode is kind of slow, and lacks the completion like ivy, but it might work for you.
+
+** Easy async
+
+You can use an :async header to run a block asynchronously. That means it runs in the background and you can keep using emacs! You can mix and match async blocks in a document. I simplified how this is done compared to upstream; in my version just putting :async in the header (with no argument) makes it run asynchronously.
+
+#+BEGIN_SRC ipython :async
+import time
+
+for i in range(4):
+    print(i)
+    time.sleep(2)
+# type new things
+# keep on working!
+print('done')
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[20]:
+# output
+0
+1
+2
+3
+done
+
+:END:
+
+You will see another buffer pop up with intermediate results, and they will be put back in the results when it is done.
+
+** Customizing outputs
+
+ipython/org-mode really shines when you start leveraging rich outputs from Ipython. A new feature I have added is that you can write your own functions to customize the output.
+
+This variable maps mime-types to formatting functions. You can add new mime-types to this, or redefine the formatting functions if you don't like the way the work.
+
+#+BEGIN_SRC emacs-lisp
+(append '(("mime-type" "formatting function"))
+	'(hline)
+	(loop for (mime-type . func) in ob-ipython-mime-formatters
+	      collect (list mime-type func)))
+#+END_SRC
+
+#+RESULTS:
+| mime-type              | formatting function                      |
+|------------------------+------------------------------------------|
+| text/plain             | ob-ipython-format-text/plain             |
+| text/html              | ob-ipython-format-text/html              |
+| text/latex             | ob-ipython-format-text/latex             |
+| text/org               | ob-ipython-format-text/org               |
+| image/png              | ob-ipython-format-image/png              |
+| image/svg+xml          | ob-ipython-format-image/svg+xml          |
+| application/javascript | ob-ipython-format-application/javascript |
+| default                | ob-ipython-format-default                |
+| output                 | ob-ipython-format-output                 |
+
+You can set these to whatever you want, and add new ones for new mimetypes.
+
+*** Better representations of Polynomial objects
+
+Most python objects have a __str__ or __repr__ method defined that display them when printed. For example, here is a Polynomial from numpy with it's default representation.
+
+#+BEGIN_SRC ipython
+import numpy as np
+p = np.polynomial.Polynomial([1, 2, 3])
+p
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[21]:
+# text/plain
+: Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
+:END:
+
+Let's change this to get a LaTeX representation (adapted from https://github.com/jupyter/ngcm-tutorial/blob/master/Part-1/IPython%20Kernel/Custom%20Display%20Logic.ipynb). We will do this on the Ipython side of output customization where we register a formatting function for a specific type in IPython.
+
+#+BEGIN_SRC ipython :display text/latex
+def poly_to_latex(p):
+    terms = ['%.2g' % p.coef[0]]
+    if len(p) > 1:
+        term = 'x'
+        c = p.coef[1]
+        if c != 1:
+            term = ('%.2g ' % c) + term
+        terms.append(term)
+    if len(p) > 2:
+        for i in range(2, len(p)):
+            term = 'x^%d' % i
+            c = p.coef[i]
+            if c != 1:
+                term = ('%.2g ' % c) + term
+            terms.append(term)
+    px = '$P(x)=%s$' % '+'.join(terms)
+    dom = r', $x \in [%.2g,\ %.2g]$' % tuple(p.domain)
+    return px + dom
+
+
+ip = get_ipython()
+latex_f = ip.display_formatter.formatters['text/latex']
+latex_f.for_type_by_name('numpy.polynomial.polynomial',
+                                 'Polynomial', poly_to_latex)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[22]:
+:END:
+
+#+BEGIN_SRC ipython
+p
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[23]:
+# text/plain
+: Polynomial([ 1.,  2.,  3.], [-1,  1], [-1,  1])
+
+# text/latex
+#+BEGIN_EXPORT latex
+$P(x)=1+2 x+3 x^2$, $x \in [-1,\ 1]$
+#+END_EXPORT
+:END:
+
+That looks nice, but we can go one step further and define graphical outputs too.
+
+#+BEGIN_SRC ipython
+import matplotlib.pyplot as plt
+from IPython.core.pylabtools import print_figure
+
+def poly_to_png(p):
+    fig, ax = plt.subplots()
+    x = np.linspace(-1, 1)
+    y = [p(_x) for _x in x]
+    ax.plot(x, y)
+    ax.set_title(poly_to_latex(p))
+    ax.set_xlabel('x')
+    ax.set_ylabel('P(x)')
+    data = print_figure(fig, 'png')
+    # We MUST close the figure, otherwise IPython's display machinery
+    # will pick it up and send it as output, resulting in a double display
+    plt.close(fig)
+    return data
+
+
+ip = get_ipython()
+png_f = ip.display_formatter.formatters['image/png']
+png_f.for_type_by_name('numpy.polynomial.polynomial',
+                                 'Polynomial', poly_to_png)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[24]:
+:END:
+
+Now, we can easily see the formula and shape of this polynomial in a graphical form.
+
+#+BEGIN_SRC ipython :display image/png text/latex
+p
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[26]:
+# image/png
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-64787WtE.png]]
+
+# text/latex
+#+BEGIN_EXPORT latex
+$P(x)=1+2 x+3 x^2$, $x \in [-1,\ 1]$
+#+END_EXPORT
+:END:
+
+Most likely you would not put all this code into a document like this, but would instead put it in a Python library you import. The point here is to show what can be done with that, and once it is done, you get easy visualization of objects.
+
+*** Tensorflow visualizations
+
+In Tensorflow, we are always making computation graphs. These are usually visualized in Tensorboard. We can leverage Jupyter to show us a graphical representation instead. This is another example of registering a type in Ipython.
+
+  #+BEGIN_SRC ipython
+from graphviz import Digraph
+
+def tf_to_dot(graph):
+    "Adapted from https://blog.jakuba.net/2017/05/30/tensorflow-visualization.html"
+    dot = Digraph()
+
+    for n in g.as_graph_def().node:
+        dot.node(n.name, label=n.name)
+
+        for i in n.input:
+            dot.edge(i, n.name)
+    dot.format = 'svg'
+    return dot.pipe().decode('utf-8')
+
+ip = get_ipython()
+svg_f = ip.display_formatter.formatters['image/svg+xml']
+svg_f.for_type_by_name('tensorflow.python.framework.ops',
+                       'Graph', tf_to_dot)
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+  # Out[27]:
+  :END:
+
+  #+BEGIN_SRC ipython
+import tensorflow as tf
+
+g = tf.Graph()
+
+with g.as_default():
+    a = tf.placeholder(tf.float32, name="a")
+    b = tf.placeholder(tf.float32, name="b")
+    c = a + b
+
+g
+  #+END_SRC
+
+  #+RESULTS:
+  :RESULTS:
+  # Out[28]:
+
+
+  # image/svg
+  [[file:obipy-resources/19a94859c854121de1c305426d09b77e-64787j3K.svg]]
+  :END:
+
+Now we have a record of what the graph looks like. Ez peezy.
+
+*** Pandas in org-mode
+
+Just for fun, here is a way to get Pandas dataframes to be displayed as org-mode tables using tabulate (https://pypi.python.org/pypi/tabulate). This is adapted from https://github.com/gregsexton/ob-ipython. tabulate has a built-in org formatter, so no reason to reinvent that!
+
+#+BEGIN_SRC ipython :display text/org
+import IPython
+import tabulate
+
+class OrgFormatter(IPython.core.formatters.BaseFormatter):
+    format_type = IPython.core.formatters.Unicode('text/org')
+    print_method = IPython.core.formatters.ObjectName('_repr_org_')
+
+def pd_dataframe_to_org(df):
+    return tabulate.tabulate(df, headers='keys', tablefmt='orgtbl', showindex='always')
+
+ip = get_ipython()
+ip.display_formatter.formatters['text/org'] = OrgFormatter()
+
+f = ip.display_formatter.formatters['text/org']
+f.for_type_by_name('pandas.core.frame', 'DataFrame', pd_dataframe_to_org)
+
+import pandas as pd
+df = pd.DataFrame([1, 2], columns=['widecolumn'])
+df.index.name = 'indexname'
+df
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[29]:
+# text/org
+| indexname | widecolumn |
+|-----------+------------|
+|         0 |          1 |
+|         1 |          2 |
+:END:
+
+Here is a bigger example.
+
+#+BEGIN_SRC ipython :display text/org
+import numpy as np
+df2 = pd.DataFrame(np.random.randint(low=0, high=10, size=(5, 5)),
+                   columns=['a', 'b', 'c', 'd', 'e'])
+df2
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[30]:
+# text/org
+|   | a | b | c | d | e |
+|---+---+---+---+---+---|
+| 0 | 6 | 2 | 4 | 3 | 9 |
+| 1 | 6 | 1 | 3 | 9 | 8 |
+| 2 | 7 | 9 | 7 | 0 | 0 |
+| 3 | 6 | 2 | 2 | 3 | 9 |
+| 4 | 3 | 1 | 9 | 9 | 8 |
+:END:
+
+*** Customizing a class output with _repr_*_ methods
+
+Adapted from http://nbviewer.jupyter.org/github/ipython/ipython/blob/6.x/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb#Custom-Mimetypes-with-_repr_mimebundle
+
+The canonical way to make rich outputs on your own classes is to add _repr_X_ methods. Here is the example from the Jupyter tutorial listed above. Here, we just add a PNG and LaTeX representation.
+
+#+BEGIN_SRC ipython
+import numpy as np
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+from IPython.core.pylabtools import print_figure
+from IPython.display import Image, SVG, Math
+
+class Gaussian(object):
+    """A simple object holding data sampled from a Gaussian distribution.
+    """
+    def __init__(self, mean=0.0, std=1, size=1000):
+        self.data = np.random.normal(mean, std, size)
+        self.mean = mean
+        self.std = std
+        self.size = size
+        # For caching plots that may be expensive to compute
+        self._png_data = None
+
+    def _figure_data(self, format):
+        fig, ax = plt.subplots()
+        ax.hist(self.data, bins=50)
+        ax.set_title(self._repr_latex_())
+        ax.set_xlim(-10.0,10.0)
+        data = print_figure(fig, format)
+        # We MUST close the figure, otherwise IPython's display machinery
+        # will pick it up and send it as output, resulting in a double display
+        plt.close(fig)
+        return data
+
+    def _repr_png_(self):
+        if self._png_data is None:
+            self._png_data = self._figure_data('png')
+        return self._png_data
+
+    def _repr_latex_(self):
+        return r'$\mathcal{N}(\mu=%.2g, \sigma=%.2g),\ N=%d$' % (self.mean,
+                                                                 self.std, self.size)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[31]:
+:END:
+
+#+BEGIN_SRC ipython
+Gaussian()
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[32]:
+
+
+# image/png
+[[file:obipy-resources/19a94859c854121de1c305426d09b77e-64787wBR.png]]
+
+# text/latex
+#+BEGIN_EXPORT latex
+$\mathcal{N}(\mu=0, \sigma=1),\ N=1000$
+#+END_EXPORT
+:END:
+
+*** text/org output with _repr_mimebundle_
+
+ We can define custom outputs for our own objects too. Here we define org and html representations of a heading object within the class. We have to define a _repr_mimebundle_ method to get 'text/org' output as it is not a predefined type in Jupyter. Alternatively, we could use the methods earlier to define formatters for these types.
+
+ See http://nbviewer.jupyter.org/github/ipython/ipython/blob/6.x/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb#Custom-Mimetypes-with-_repr_mimebundle_ for more details.
+
+#+BEGIN_SRC ipython
+class Heading(object):
+    def __init__(self, content, level=1, tags=()):
+        self.content = content
+        self.level = level
+        self.tags = tags
+
+    def _repr_org(self):
+        s = '*' * self.level + ' ' + self.content
+        if self.tags:
+            s += f"  :{':'.join(self.tags)}:"
+        return s
+
+    def _repr_html(self):
+        return  f"<h{self.level}>{self.content}</h{self.level}>"
+
+    def _repr_mimebundle_(self, include, exclude, **kwargs):
+        """
+        repr_mimebundle should accept include, exclude and **kwargs
+        """
+
+        data = {'text/html': self._repr_html(),
+                'text/org': self._repr_org()
+                }
+        if include:
+            data = {k:v for (k,v) in data.items() if k in include}
+        if exclude:
+            data = {k:v for (k,v) in data.items() if k not in exclude}
+        return data
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[33]:
+:END:
+
+ Now, you can construct headings in iPython, and get different outputs that might be suitable for different purposes.
+
+#+BEGIN_SRC ipython :display text/org
+Heading('A level 4 headline', level=4, tags=['example'])
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[35]:
+# text/org
+**** A level 4 headline  :example:
+:END:
+
+
+
+*** Bokeh
+
+ The Jupyter notebook does really shine for JavaScript driven interactive data exploration. For now, the only option for Emacs is to open external programs for this, e.g. a matplotlib figure, or a browser. [[https://bokeh.pydata.org/en/latest/][Bokeh]] is a really interesting interactive plotting library you can use in Python, but it makes interactive html documents for viewing in a browser. Here we will adapt the outputs to show us a thumbnail and org-link to open the html file. This is yet another example of registering a type in Ipython.
+
+ Here we modify the plain text output so that it saves an html file, and returns a link to it.
+
+Note you need to install bokeh, selenium, pillow with conda, and install a modern phantomjs in your OS for this to work (I build one from https://github.com/eisnerd/phantomjs).
+
+#+BEGIN_SRC ipython :restart
+import tempfile
+import warnings
+warnings.filterwarnings("ignore")
+import webbrowser
+
+import IPython
+from bokeh.io import export_png
+from bokeh.io.saving import save
+from bokeh.plotting.figure import Figure
+import os
+
+def bokeh_to_org(plt):
+  fh, tmp = tempfile.mkstemp(suffix=".html", prefix="bokeh-",
+                             dir="obipy-resources")
+  fname = save(plt, tmp)
+  os.close(fh)
+  os.system(f'open {fname}')
+  return "[[{}]]".format(fname)
+
+
+def bokeh_to_png(plt):
+  png_filename = export_png(plt)
+  with open(png_filename, "rb") as f:
+    return f.read()
+
+
+def bokeh_mimebundle(self, include=(), exclude=(), **kwargs):
+  data = {'text/org': bokeh_to_org(self),
+          'image/png': bokeh_to_png(self)}
+
+  if include:
+    data = {k:v for (k,v) in data.items() if k in include}
+  if exclude:
+    data = {k:v for (k,v) in data.items() if k not in exclude}
+  return data, {}
+
+Figure._repr_mimebundle_ = bokeh_mimebundle
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[1]:
+:END:
+
+Now we are setup to make an interactive figure.
+
+#+BEGIN_SRC ipython :display text/org image/png
+from bokeh.io import output_file, show
+from bokeh.models import ColumnDataSource, HoverTool
+
+from bokeh.sampledata.periodic_table import elements
+from bokeh.transform import dodge, factor_cmap
+
+periods = ["I", "II", "III", "IV", "V", "VI", "VII"]
+groups = [str(x) for x in range(1, 19)]
+
+df = elements.copy()
+df["atomic mass"] = df["atomic mass"].astype(str)
+df["group"] = df["group"].astype(str)
+df["period"] = [periods[x - 1] for x in df.period]
+df = df[df.group != "-"]
+df = df[df.symbol != "Lr"]
+df = df[df.symbol != "Lu"]
+
+cmap = {
+    "alkali metal": "#a6cee3",
+    "alkaline earth metal": "#1f78b4",
+    "metal": "#d93b43",
+    "halogen": "#999d9a",
+    "metalloid": "#e08d49",
+    "noble gas": "#eaeaea",
+    "nonmetal": "#f1d4Af",
+    "transition metal": "#599d7A",
+}
+
+source = ColumnDataSource(df)
+
+p = Figure(
+    title="Periodic Table (omitting LA and AC Series)",
+    plot_width=1000,
+    plot_height=450,
+    tools="",
+    toolbar_location=None,
+    x_range=groups,
+    y_range=list(reversed(periods)))
+
+p.rect(
+    "group",
+    "period",
+    0.95,
+    0.95,
+    source=source,
+    fill_alpha=0.6,
+    legend="metal",
+    color=factor_cmap(
+        "metal", palette=list(cmap.values()), factors=list(cmap.keys())))
+
+text_props = {"source": source, "text_align": "left", "text_baseline": "middle"}
+
+x = dodge("group", -0.4, range=p.x_range)
+
+r = p.text(x=x, y="period", text="symbol", **text_props)
+r.glyph.text_font_style = "bold"
+
+r = p.text(
+    x=x,
+    y=dodge("period", 0.3, range=p.y_range),
+    text="atomic number",
+    ,**text_props)
+r.glyph.text_font_size = "8pt"
+
+r = p.text(
+    x=x, y=dodge("period", -0.35, range=p.y_range), text="name", **text_props)
+r.glyph.text_font_size = "5pt"
+
+r = p.text(
+    x=x,
+    y=dodge("period", -0.2, range=p.y_range),
+    text="atomic mass",
+    ,**text_props)
+r.glyph.text_font_size = "5pt"
+
+p.text(
+    x=["3", "3"],
+    y=["VI", "VII"],
+    text=["LA", "AC"],
+    text_align="center",
+    text_baseline="middle")
+
+p.add_tools(
+    HoverTool(tooltips=[
+        ("Name", "@name"),
+        ("Atomic number", "@{atomic number}"),
+        ("Atomic mass", "@{atomic mass}"),
+        ("Type", "@metal"),
+        ("CPK color", "$color[hex, swatch]:CPK"),
+        ("Electronic configuration", "@{electronic configuration}"),
+    ]))
+
+p.outline_line_color = None
+p.grid.grid_line_color = None
+p.axis.axis_line_color = None
+p.axis.major_tick_line_color = None
+p.axis.major_label_standoff = 0
+p.legend.orientation = "horizontal"
+p.legend.location = "top_center"
+
+p
+ #+END_SRC
+
+ #+RESULTS:
+ :RESULTS:
+ # Out[2]:
+ # text/org
+ [[/Users/jkitchin/vc/jkitchin-github/scimax/obipy-resources/bokeh-8ebtmkj9.html]]
+
+ # image/png
+ [[file:obipy-resources/19a94859c854121de1c305426d09b77e-647879LX.png]]
+ :END:
+
+
+
+
+
+
+
+Now if you click on the link above, it will open an interactive html file in your browser. It is just a tempfile, so some work might be necessary to get it to a persistent place, like the images are.
+
+
+*** More complex display with _ipython_display_
+
+This example is also from [[http://nbviewer.jupyter.org/github/ipython/ipython/blob/6.x/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb#More-complex-display-with-_ipython_display_][this url]], and shows how to override the IPython output all together.
+
+
+#+BEGIN_SRC ipython :noweb yes
+import numpy as np
+import json
+import uuid
+from IPython.display import display_javascript, display_html, display
+
+class FlotPlot(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.uuid = str(uuid.uuid4())
+
+    def _ipython_display_(self):
+        json_data = json.dumps(list(zip(self.x, self.y)))
+        display_html('<div id="{}" style="height: 300px; width:80%;"></div>'.format(self.uuid),
+            raw=True)
+
+        display_javascript(f'''require(["//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"], function() {{
+          var line = JSON.parse("{json_data}");
+          console.log(line);
+          $.plot("#{self.uuid}", [line]);
+        }});''', raw=True)
+
+x = np.linspace(0,10)
+y = np.sin(x)
+FlotPlot(x, np.sin(x))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[3]:
+# text/html
+#+BEGIN_EXPORT html
+<div id="2ebc40f4-a6da-4ae4-b45f-78288681d551" style="height: 300px; width:80%;"></div>
+#+END_EXPORT
+
+# application/javascript
+#+BEGIN_SRC javascript
+require(["//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"], function() {
+          var line = JSON.parse("[[0.0, 0.0], [0.20408163265306123, 0.20266793654820095], [0.40816326530612246, 0.39692414892492234], [0.6122448979591837, 0.5747060412161791], [0.8163265306122449, 0.7286347834693503], [1.0204081632653061, 0.8523215697196184], [1.2244897959183674, 0.9406327851124867], [1.4285714285714286, 0.9899030763721239], [1.6326530612244898, 0.9980874821347183], [1.836734693877551, 0.9648463089837632], [2.0408163265306123, 0.8915592304110037], [2.2448979591836737, 0.7812680235262639], [2.4489795918367347, 0.6385503202266021], [2.6530612244897958, 0.469329612777201], [2.857142857142857, 0.28062939951435684], [3.0612244897959187, 0.0802816748428135], [3.2653061224489797, -0.12339813736217871], [3.4693877551020407, -0.3219563150726187], [3.673469387755102, -0.5071517094845144], [3.8775510204081636, -0.6712977935519321], [4.081632653061225, -0.8075816909683364], [4.285714285714286, -0.9103469443107828], [4.4897959183673475, -0.9753282860670456], [4.6938775510204085, -0.9998286683840896], [4.8979591836734695, -0.9828312039256306], [5.1020408163265305, -0.9250413717382029], [5.3061224489795915, -0.8288577363730427], [5.510204081632653, -0.6982723955653996], [5.714285714285714, -0.5387052883861563], [5.918367346938775, -0.35677924089893803], [6.122448979591837, -0.16004508604325057], [6.326530612244898, 0.04333173336868346], [6.530612244897959, 0.2449100710119793], [6.73469387755102, 0.4363234264718193], [6.938775510204081, 0.6096271964908323], [7.142857142857143, 0.7576284153927202], [7.346938775510204, 0.8741842988197335], [7.551020408163265, 0.9544571997387519], [7.755102040816327, 0.9951153947776636], [7.959183673469388, 0.9944713672636168], [8.16326530612245, 0.9525518475314604], [8.36734693877551, 0.8710967034823207], [8.571428571428571, 0.7534867274396376], [8.775510204081632, 0.6046033165061543], [8.979591836734695, 0.43062587038273736], [9.183673469387756, 0.23877531564403087], [9.387755102040817, 0.03701440148506237], [9.591836734693878, -0.1662827938487564], [9.795918367346939, -0.3626784288265488], [10.0, -0.5440211108893699]]");
+          console.log(line);
+          $.plot("#2ebc40f4-a6da-4ae4-b45f-78288681d551", [line]);
+        });
+#+END_SRC
+:END:
+
+** Clickable buttons in src blocks
+
+Jupyter has some nice features like buttons to click on to run a block. We have something like that. The text in angle brackets in the comments below is clickable!
+
+#+BEGIN_SRC ipython
+# <run>  <restart and run>  <repl>  <delete block>  <menu>
+# open some buffers  <output>  <execute>  <debug>
+6 * 3
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[5]:
+# text/plain
+: 30
+:END:
+
+#+BEGIN_SRC ipython  <run>
+5
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[6]:
+# text/plain
+: 5
+:END:
+
+
+
+** Jupyter-like keybindings in src-blocks
+
+Jupyter notebooks have some nice key bindings, like all the variations of modified-return that do different things. When your cursor is in an ipython block, these bindings are active. They are not active outside of ipython code blocks. See this [[http://endlessparentheses.com/define-context-aware-keys-in-emacs.html][magical post]] for how that is possible!
+
+#+caption: Commands to execute blocks.
+| Ctrl-<return>       | run current block                                          |
+| Shift-<return>      | run current block and go to next one, create one if needed |
+| Meta-<return>       | runs the current cell and inserts a new one below.         |
+| super-<return>      | restart ipython and run block                              |
+| Meta-super-<return> | restart ipython and run all blocks to point                |
+| H-<return>          | restart ipython and run all blocks in buffer               |
+
+#+BEGIN_SRC ipython
+5
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[8]:
+# text/plain
+: 5
+:END:
+
+
+
+#+BEGIN_SRC ipython
+
+#+END_SRC
+
+#+BEGIN_SRC ipython
+1
+#+END_SRC
+
+
+#+BEGIN_SRC ipython
+
+#+END_SRC
+
+#+BEGIN_SRC ipython
+2
+3
+#+END_SRC
+
+Note you can put :restart in the src block header and ipython will restart every time you run that block. This is helpful when developing libraries, as it forces the library to be reloaded every time you run the block.
+
+#+caption: Commands to insert/split blocks
+| H-=         | insert src-block above current block               |
+| C-u hyper-= | insert src-block below current block               |
+| H--         | split current block at point, point in upper block |
+| C-u H--     | split current block at point, point in lower block |
+
+
+
+#+caption: Commands to manipulate blocks
+| H-h   | Edit the src block header in the minibuffer                      |
+| H-w   | Kill the current block                                           |
+| H-n   | Copy the current block                                           |
+| H-o   | Clone the current block (make a copy of it below the current one |
+| H-m   | Merge blocks in the selected region                              |
+| s-w   | Move current block before the previous one                       |
+| s-s   | Move current block below the next one                            |
+| H-l   | Clear results from the block                                     |
+| H-s-l | Clear all results in buffer                                      |
+
+#+caption: Commands to navigate blocks
+| s-i   | Jump to previous block                 |
+| s-k   | Jump to next block                     |
+| H-q   | Jump to a visible block with avy       |
+| H-s-q | Jump to a block in the buffer with ivy |
+
+#+caption: Miscellaneous
+| s-/ | get help about thing at point (ob-ipython-inspect) |
+| H-r | switch to session REPL                             |
+| H-k | Kill the kernel                                    |
+
+
+I am not 100% committed to all these bindings. I still find the need to fine tune them every once in a while.
+
+Can't remember all these bindings? Me neither. Checkout M-x scimax-obi/body (usually bound to H-s) for a nice hydra. The hydra key-bindings don't match the ones in the tables above; I am not sure that makes sense. It would add keystrokes, but it would also be a good reminder of the bindings.
+
+These keybindings are relatively easy to customize. The are stored as cons cells in this variable.
+
+#+BEGIN_SRC emacs-lisp
+ob-ipython-key-bindings
+#+END_SRC
+
+You can define/change any binding you want like this. They are only active in ipython src blocks. For example, you can define a src-block key like this:
+
+#+BEGIN_SRC emacs-lisp
+(scimax-define-src-key ipython "H-/" #'some-command)
+#+END_SRC
+
+If you like the Jupyter keybindings more directly, checkout these bindings when you are in an ipython block:
+
+| H-e | function | scimax-jupyter-edit-mode/body    |   |   |
+| H-c | function | scimax-jupyter-command-mode/body |   |   |
+
+#+BEGIN_SRC ipython
+
+#+END_SRC
+
+
+** Other languages
+
+Jupyter can run many [[https://github.com/jupyter/jupyter/wiki/Jupyter-kernels][languages]] ranging from Fortran to shell. I like hylang, a lispy Python. Install the hylang Jupyter kernel like this:
+
+#+BEGIN_SRC sh :results silent
+pip install git+https://github.com/Calysto/calysto_hy.git --user
+python -m calysto_hy install --user
+#+END_SRC
+
+Now we can use it in scimax. This is already pre-configured in scimax. For fun, we use hylang here.
+
+#+BEGIN_SRC jupyter-hy :session hylang
+(import [tensorflow :as tf])
+
+(setv a (tf.constant 3)
+      b (tf.constant 3)
+      c (tf.add a b))
+
+(with [sess (tf.Session)] (print (.run sess c)))
+#+END_SRC
+
+There is a little issue with the double colon on output, but otherwise it looks like it works.
+
+This kernel is a little quieter on exceptions than I would like, but still it could be useful if you want to play around with hylang and document your work.
+
+** Unique kernel per org file is default
+
+By default, each org file gets a unique kernel. I am sure there is a use case for every buffer sharing one kernel, but it is too confusing for me, and too prone to errors where one buffer changes a variable that affects others. So, if you want src blocks in different buffers to share kernels, you have to manually specify the kernel in the header, or use this for the original behavior.
+
+#+BEGIN_SRC emacs-lisp
+(setq ob-ipython-buffer-unique-kernel nil)
+#+END_SRC
+
+** Multiple sessions in one org file
+   :PROPERTIES:
+   :ID:       74f0669a-6322-4511-8b6f-fbeea6bd7821
+   :END:
+
+See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions, and [[id:f7b80c4b-fd88-4c25-baca-2910e57aa5f1][Remote kernels]] about remote kernels.  Here we use a properties drawer in two different headlines to have different sessions open in the same org file. Of course, you can manually define the :session in src blocks, but using a header like this:
+
+ #+BEGIN_EXAMPLE
+   :PROPERTIES:
+   :header-args:ipython: :session session-1
+   :END:
+ #+END_EXAMPLE
+
+ means that you don't have to type that on every block. That is helpful, since if you forget the block will use the default buffer kernel. This shows I am currently running four kernels. See this [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365317473][comment]] for an example of multiple remote sessions.
+
+ #+BEGIN_SRC emacs-lisp
+(ob-ipython--get-kernel-processes)
+ #+END_SRC
+
+*** Session 1
+    :PROPERTIES:
+    :header-args:ipython: :session session-1
+    :END:
+
+ Every block under this header will use the kernel associated with session-1. Here we just look at what ports are being used.
+
+  #+BEGIN_SRC ipython
+%connect_info
+  #+END_SRC
+
+*** Session 2
+    :PROPERTIES:
+    :header-args:ipython: :session session-2
+    :END:
+
+ Every block in this heading will use the kernel associated with session-2. You can see here it uses different ports than session-1 does. They are both running at the same time though.
+
+  #+BEGIN_SRC ipython
+%connect_info
+  #+END_SRC
+
+** Remote kernels
+   :PROPERTIES:
+   :ID:       f7b80c4b-fd88-4c25-baca-2910e57aa5f1
+   :END:
+
+According to a comment in [[https://github.com/jkitchin/scimax/issues/114#issuecomment-364891125][issue 114]] this finally works. I don't have a remote server to test it on, but I did test it locally. Here are the steps to follow, adapted from https://vxlabs.com/2017/11/30/run-code-on-remote-ipython-kernels-with-emacs-and-orgmode/.
+
+Note: This [[https://github.com/jkitchin/scimax/issues/114#issuecomment-365219262][comment]] reports some flakiness with the method below, and suggests an alternative approach that they find more robust.
+
+On the remote server, find out where your runtime directory is like this:
+
+#+BEGIN_SRC sh
+jupyter --runtime-dir
+#+END_SRC
+
+Start a kernel on the remote server like this. It will create a json file that you will need to copy to your local machine jupyter runtime directory.
+
+#+BEGIN_SRC sh
+ipython kernel
+#+END_SRC
+
+You should see some text like this one.
+
+#+BEGIN_EXAMPLE
+NOTE: When using the `ipython kernel` entry point, Ctrl-C will not work.
+
+To exit, you will have to explicitly quit this process, by either sending
+"quit" from a client, or using Ctrl-\ in UNIX-like environments.
+
+To read more about this, see https://github.com/ipython/ipython/issues/2049
+
+
+To connect another client to this kernel, use:
+    --existing kernel-16577.json
+#+END_EXAMPLE
+
+You can see the connection file is indeed in the runtime directory:
+
+#+BEGIN_SRC sh
+ls `jupyter --runtime-dir`
+#+END_SRC
+
+On a real remote machine, you would have to copy this file to your local machine runtime directory. There is nothing too mysterious in this file, it just has some information about the IP address and ports used.
+
+#+BEGIN_SRC sh
+cat `jupyter --runtime-dir`/kernel-226309.json
+#+END_SRC
+
+Now, on your local machine, connect to the remote kernel like this, obviously with your own username and hostname.
+
+#+BEGIN_SRC sh
+jupyter console --existing kernel-226309.json --ssh username@hostname
+#+END_SRC
+
+You should get some output like:
+
+#+BEGIN_EXAMPLE
+[ZMQTerminalIPythonApp] Forwarding connections to 127.0.0.1 via kitchin@some.host.com
+[ZMQTerminalIPythonApp] To connect another client via this tunnel, use:
+[ZMQTerminalIPythonApp] --existing kernel-16577-ssh.json
+Jupyter console 5.2.0
+
+Python 3.6.3 |Anaconda, Inc.| (default, Oct 13 2017, 12:02:49)
+Type 'copyright', 'credits' or 'license' for more information
+IPython 6.1.0 -- An enhanced Interactive Python. Type '?' for help.
+#+END_EXAMPLE
+
+The critical text to note here is =--existing kernel-16577-ssh.json=. You need to specify that kernel file (note the -ssh in it) as the :session in the header of the src block.
+
+The command above  opens a local Ipython terminal. In that terminal, I typed a = 7.
+
+Then, you specify the kernel connection file as the :session argument in an ipython block.
+
+#+BEGIN_SRC ipython :session kernel-16577-ssh.json
+print(a)
+
+b = 6
+#+END_SRC
+
+You can see from  the output that we successfully connected to the kernel and that indeed a=7. Furthermore, in the block above we assigned b=6, and in the terminal I can type "b" and see that it is equal to 6.
+
+If you have a lot of blocks in your buffer, you can use a file property like this to specify the header for every block in the buffer. See [[id:74f0669a-6322-4511-8b6f-fbeea6bd7821][Multiple sessions in one org file]] for an example of using heading properties instead.
+
+#+BEGIN_EXAMPLE
+,#+PROPERTY: header-args:ipython :session kernel-16577-ssh.json
+#+END_EXAMPLE
+** Known issues
+*** Interrupting the kernel does not work
+
+ This seems to be an issue with the upstream repo. It may work on unix/Mac, but maybe not on Windows. Probably does not work on remote kernels. See https://github.com/gregsexton/ob-ipython/commit/fcb2c48f64ba1005ad6fe5d1a4149f1117a9b45d

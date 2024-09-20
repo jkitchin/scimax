@@ -29,3 +29,8 @@ scimax.info
 build
 *.egg-info
 __pycache__
+straight/repos/*
+*.elc
+*.eld
+bkup-el-files/*
+bkup-el-files/*/*

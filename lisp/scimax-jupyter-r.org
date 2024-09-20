@@ -1,0 +1,61 @@
+#+title: Jupyter and R
+
+On a Mac, you can install R like this.
+
+#+BEGIN_SRC sh
+brew install R
+#+END_SRC
+
+In an R terminal, run this to setup the kernel
+
+> install.packages('IRkernel')
+> IRkernel::installspec()
+
+Here is a video of this in action.
+
+#+BEGIN_EXPORT html
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ZrEthbq0SkI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+#+END_EXPORT
+
+I don't use R a lot, so you may need settings like this to get it working.
+
+ https://developers.refinitiv.com/en/article-catalog/article/setup-jupyter-notebook-r
+
+#+BEGIN_SRC emacs-lisp
+;;
+(setq org-babel-default-header-args:jupyter-R
+      '((:results . "value")
+	(:session . "jupyter-R")
+	(:kernel . "ir")
+	(:pandoc . "t")
+	(:exports . "both")
+	(:cache .   "no")
+	(:noweb . "no")
+	(:hlines . "no")
+	(:tangle . "no")
+	(:eval . "never-export")))
+
+(require 'jupyter)
+(require 'ob-jupyter)
+
+(use-package ess)
+(add-to-list 'org-src-lang-modes '("jupyter-R" . R))
+(add-to-list 'org-babel-load-languages '(jupyter . t) t)
+(org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
+#+END_SRC
+
+#+RESULTS:
+
+Then, in principle, org-babel blocks like this should work.
+
+#+BEGIN_SRC jupyter-R
+x <- seq(-pi, pi, 0.1)
+plot(x, sin(x))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+attr_org: :width 420 :height 420
+[[file:./.ob-jupyter/fb972cf5b5fc26819f51a85e18f4e5cf86f4f3c0.png]]
+:END:
+

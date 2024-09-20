@@ -20,13 +20,17 @@
   (warn "You probably need at least Emacs 25. You should upgrade. You may need to install leuven-theme manually."))
 
 ;; remember this directory
+
 (defconst load-dir (concat (file-name-directory (or load-file-name (buffer-file-name))) "lisp")
   "This configuration's load directory (lisp).") 
 
 (add-to-list 'load-path load-dir)
 
+
+
+
 ;; TODO: is this the right place for this? why not have this in user-space?
-;; (setq package-user-dir (expand-file-name "elpa"  scimax-dir))
+;; (setq package-user-dir (expand-file-name "elpa"  load-dir))
 
 ;; we load the preload.el file if it exists. This lets users define
 ;; variables that might affect packages when they are loaded, e.g. key-bindings

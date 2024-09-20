@@ -1,0 +1,6 @@
+;; -*- lisp-data -*- <24/09/17 18:54:37 ~/dev/scimax/tramp>
+;; Tramp connection history.  Don't change this file.
+;; Run `M-x tramp-cleanup-all-connections' instead.
+
+(((tramp-file-name "cache" nil nil nil nil nil nil)
+  ("tramp-version" "2.8.0-pre")))

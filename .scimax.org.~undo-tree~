@@ -1,0 +1,5 @@
+(undo-tree-save-format-version . 1)
+"b7ca32e6906589f9b7084acdd62c535ff9bbabaa"
+[nil nil nil nil (26349 3378 348352 994000) 0 nil]
+([nil current ((#("scimax-dir" 0 10 (face (font-lock-string-face org-block) font-lock-multiline t src-block t fontified t font-lock-fontified t)) . -64887) (t 26342 58653 835425 57000) (64897 . 64905) (t 26342 58653 835425 57000)) nil (26349 3378 348342 166000) 0 nil])
+nil

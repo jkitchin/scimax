@@ -1,0 +1,138 @@
+#+title: Jupyter and Julia
+
+See  https://datatofish.com/add-julia-to-jupyter/
+
+Make sure you have julia installed. On Mac, I used:
+
+#+BEGIN_SRC sh
+brew install --cask julia
+#+END_SRC
+
+Then, make sure you install the kernel.
+
+#+BEGIN_SRC sh
+julia -e 'using Pkg; Pkg.add("IJulia")'
+#+END_SRC
+
+In the kernel section here, you have use a name consistent with your julia version.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-babel-default-header-args:jupyter-julia '((:async . "no")
+                                                    (:session . "jupyter-julia")
+                                                    (:kernel . "julia-1.8")
+						    (:results . "value")
+						    (:exports . "both")
+						    (:eval . "never-export")))
+
+(require 'jupyter)
+(require 'ob-jupyter)
+#+END_SRC
+
+#+RESULTS:
+: ob-jupyter
+
+
+
+#+BEGIN_SRC jupyter-julia :restart
+print("Hello World")
+#+END_SRC
+
+#+RESULTS:
+: Hello World
+
+here is a fun ascii plot. 
+
+#+BEGIN_SRC jupyter-julia 
+function mandelbrot(a) 
+    z = 0
+    for i=1:50
+        z = z^2 + a
+    end
+    return z
+end
+
+for y=1.0:-0.05:-1.0
+    for x=-2.0:0.0315:0.5
+        abs(mandelbrot(complex(x, y))) < 2 ? print(".") : print(" ")
+    end
+    println()
+end
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+                                                                                
+                                                                                
+                                                                                
+                                                           ..                   
+                                                         ......                 
+                                                       ........                 
+                                                         ......                 
+                                                      ........ ..   .           
+                                              ...   .................           
+                                              ........................  ...     
+                                              ............................      
+                                           ..............................       
+                                            ..............................      
+                                         ....................................   
+                                .         ..................................    
+                           .. ..... .     ..................................    
+                           ...........   ....................................   
+                         .............. ....................................    
+                         ...................................................    
+                     .....................................................      
+ .......................................................................        
+                     .....................................................      
+                         ...................................................    
+                         .............. ....................................    
+                           ...........   ....................................   
+                           .. ..... .     ..................................    
+                                .         ..................................    
+                                         ....................................   
+                                            ..............................      
+                                           ..............................       
+                                              ............................      
+                                              ........................  ...     
+                                              ...   .................           
+                                                      ........ ..   .           
+                                                         ......                 
+                                                       ........                 
+                                                         ......                 
+                                                           ..                   
+#+end_example
+
+These run asynchronously, be patient!
+
+you have to install Plots if you don't have it.
+
+#+BEGIN_SRC jupyter-julia :results silent
+import Pkg; Pkg.add("Plots")
+#+END_SRC
+
+
+#+BEGIN_SRC jupyter-julia
+using Plots
+x = 1:10; y = rand(10); # These are the plotting data
+plot(x, y)
+#+END_SRC
+
+#+RESULTS:
+[[file:./.ob-jupyter/5eb7b190e5191e97ed8d0c20aa434de5c5c7765d.svg]]
+
+
+
+And, an entertaining function with emojis. This is a factorial function with recursion.
+
+#+BEGIN_SRC jupyter-julia :results value
+function 😎(🤓)
+    if 🤓 == 0
+        return 1
+    else
+        return 🤓 * 😎(🤓 - 1)
+    end
+end
+😎(3)
+#+END_SRC
+
+#+RESULTS:
+: 6
