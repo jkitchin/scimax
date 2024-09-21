@@ -42,9 +42,11 @@
 (use-package aggressive-indent
   :config (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode))
 
-(use-package auto-complete
-  :diminish auto-complete-mode
-  :config (ac-config-default))
+;; [2023-12-11 Mon] I don't think we use this for anything. commenting out for now.
+;; see issue #487
+;; (use-package auto-complete
+;;   :diminish auto-complete-mode
+;;   :config (ac-config-default))
 
 (use-package avy)
 
@@ -160,15 +162,15 @@
   :config
   (google-this-mode 1))
 
-(use-package help-fns+
-  :load-path scimax-dir)
+;; (use-package help-fns+
+;;   :load-path scimax-dir)
 
 ;; Functions for working with hash tables
 (use-package ht)
 
 (use-package htmlize)
 
-(use-package hy-mode)
+;; (use-package hy-mode)
 
 (use-package hydra
   :init
@@ -199,8 +201,8 @@
   ("<f5>" . magit-status)
   ("C-c v t" . magit-status))
 
-(use-package magithub
-  :after magit)
+(use-package move-text
+  :init (move-text-default-bindings))
 
 ;; Templating system
 ;; https://github.com/Wilfred/mustache.el
@@ -253,6 +255,7 @@
   ("C-c pf" . counsel-projectile-find-file)
   ("C-c pd" . counsel-projectile-find-dir)
   ("C-c pg" . counsel-projectile-grep)
+  ("C-c ph" . ivy-org-jump-to-project-headline)
   ("C-c pG" . counsel-projectile-git-grep)
   ("C-c pa" . counsel-projectile-ag)
   ("C-c pr" . counsel-projectile-rg)
@@ -335,9 +338,9 @@
   :ensure nil
   :bind ("H-k" . ox-clip-formatted-copy))
 
-(use-package scimax-contacts
-  :ensure nil
-  :load-path scimax-dir)
+;; (use-package scimax-contacts
+;;   :ensure nil
+;;   :load-path scimax-dir)
 
 (use-package scimax-email
   :ensure nil

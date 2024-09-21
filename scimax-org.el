@@ -29,9 +29,28 @@
   (use-package org-bullets)
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode))))
 
-
 (setq org-todo-keywords
       '((sequence "TODO(t)" "|" "DONE(d)")))
+
+
+;; * heading manipulation
+
+(defun scimax-org-headline-to-inlinetask ()
+  "Convert the heading at point to an inlinetask."
+  (interactive)
+  (let* ((hl (org-element-context))
+	 (body (buffer-substring-no-properties (org-element-property :contents-begin hl)
+					       (org-element-property :contents-end hl)))
+	 (title (org-element-property :title hl))
+	 (tags (nth 5 (org-heading-components)))
+	 (beg (org-element-property :begin hl))
+	 (end (org-element-property :end hl))
+	 (inlinetask (with-temp-buffer
+		       (org-mode)
+		       (org-inlinetask-insert-task) 
+		       (insert title "  " tags "\n" body)
+		       (concat (buffer-string) "\n\n"))))
+    (cl--set-buffer-substring beg end inlinetask)))
 
 ;; * Speed commands
 ;; These are single letter commands at headings
@@ -54,17 +73,18 @@
   "Jump to an org headline with avy."
   (interactive)
   (avy-with avy-goto-line
-    (avy-jump org-heading-regexp nil)))
+    (avy-jump org-heading-regexp)))
 
 
 (defun org-teleport (&optional arg)
-  "Teleport the current heading to after a headline selected with avy.
+  "Teleport the current heading to a visible headline selected with avy.
 With a prefix ARG move the headline to before the selected
 headline. With a numeric prefix, set the headline level. If ARG
 is positive, move after, and if negative, move before."
   (interactive "P")
 
-  ;; if your heading is at the last line, we have to add a \n so that when we move it, there is a next line to separate it.
+  ;; if your heading is at the last line, we have to add a \n so that when we
+  ;; move it, there is a next line to separate it.
   (save-excursion
     (goto-char (line-end-position))
     (when (eobp)
@@ -116,36 +136,23 @@ is positive, move after, and if negative, move before."
   (outline-hide-leaves))
 
 ;; [2021-05-24 Mon] See https://github.com/jkitchin/scimax/issues/416#issuecomment-836802234
-(cond
- ;; This is for org versions less than 9.5
- ((boundp 'org-speed-commands-user)
-  (setq org-speed-commands-user
-	(append org-speed-commands-user
-		'(("P" . org-set-property)
-		  ("d" . org-deadline)
-		  ("m"  . org-mark-subtree)
-		  ("S" . widen)
-		  ("k" . scimax-org-kill-subtree)
-		  ("q" . scimax-avy-org-headline)
-		  ("T" . org-teleport)))))
- (t
-  (setq org-speed-commands
-	(append org-speed-commands
-		'(("P" . org-set-property)
-		  ("d" . org-deadline)
-		  ("m"  . org-mark-subtree)
-		  ("S" . widen)
-		  ("k" . scimax-org-kill-subtree)
-		  ("q" . scimax-avy-org-headline)
-		  ("T" . org-teleport))))))
+;; [2024-02-05 Mon] This may not work for org-versions less than 9.5. I think that is ok.
+(setq org-speed-commands
+      (append org-speed-commands
+	      '(("P" . org-set-property)
+		("d" . org-deadline)
+		("m"  . org-mark-subtree)
+		("S" . widen)
+		("k" . scimax-org-kill-subtree)
+		("K" . scimax-org-headline-to-inlinetask)
+		("q" . scimax-avy-org-headline)
+		("T" . org-teleport))))
 
 
 ;; * Org-id
 
 (setq org-id-link-to-org-use-id 'create-if-interactive)
 (setq org-link-search-must-match-exact-headline 'query-to-create)
-(setq org-id-locations-file
-      (expand-file-name "user/.org-id-locations" scimax-dir))
 (require 'org-id)
 
 ;; * Agenda setup
@@ -218,10 +225,7 @@ is positive, move after, and if negative, move before."
 	  'scimax-align-result-table)
 
 
-
-
 ;; * Markup commands for org-mode
-
 
 (defun org-markup-region-or-point (type beginning-marker end-marker)
   "Apply the markup TYPE with BEGINNING-MARKER and END-MARKER to region, word or point.
@@ -259,7 +263,7 @@ subscripts and superscripts."
 			      s))
 			  (split-string
 			   (buffer-substring start end) "\n"))))
-      (setf (buffer-substring start end) lines)
+      (cl--set-buffer-substring start end lines) 
       (forward-char (length lines))))
    ;; We are on a word with no region selected
    ((thing-at-point 'word)
@@ -800,7 +804,7 @@ A prefix arg of 5 opens link in new frame."
 	(org-insert-todo-heading nil))
        ;; no content, delete
        ((and (eolp) (eq 'item (car (org-element-context))))
-	(setf (buffer-substring (line-beginning-position) (point)) ""))
+	(delete-region (line-beginning-position) (point)))
        ((eq 'paragraph (car (org-element-context)))
 	(goto-char (org-element-property :end (org-element-context)))
 	(org-insert-todo-heading nil))
@@ -845,9 +849,7 @@ A prefix arg of 5 opens link in new frame."
 	    (outline-show-entry))
 	;; The heading was empty, so we delete it
 	(beginning-of-line)
-	(setf (buffer-substring
-	       (line-beginning-position) (line-end-position))
-	      "")))
+	(delete-region (line-beginning-position) (line-end-position))))
 
      ;; tables
      ((org-at-table-p)
@@ -859,9 +861,7 @@ A prefix arg of 5 opens link in new frame."
 	  (org-return)
 	;; empty row
 	(beginning-of-line)
-	(setf (buffer-substring
-	       (line-beginning-position) (line-end-position))
-	      "")
+	(delete-region (line-beginning-position) (line-end-position)) 
 	(org-return)))
      ;; fall-through
      (t
@@ -890,66 +890,7 @@ A prefix arg of 5 opens link in new frame."
 
 (when scimax-return-dwim
   (define-key org-mode-map (kbd "RET")
-    'scimax/org-return))
-
-;;* org-numbered headings
-(defun scimax-overlay-numbered-headings ()
-  "Put numbered overlays on the headings."
-  (interactive)
-  (cl-loop for (p lv) in (let ((counters (copy-list '(0 0 0 0 0 0 0 0 0 0)))
-			    (current-level 1)
-			    last-level)
-			(mapcar (lambda (x)
-				  (list (car x)
-					;; trim trailing zeros
-					(let ((v (nth 1 x)))
-					  (while (= 0 (car (last v)))
-					    (setq v (butlast v)))
-					  v)))
-				(org-map-entries
-				 (lambda ()
-				   (let* ((hl (org-element-context))
-					  (level (org-element-property :level hl)))
-				     (setq last-level current-level
-					   current-level level)
-				     (cond
-				      ;; no level change or increase, increment level counter
-				      ((or (= last-level current-level)
-					   (> current-level last-level))
-				       (cl-incf (nth current-level counters)))
-
-				      ;; decrease in level
-				      (t
-				       (cl-loop for i from (+ 1 current-level) below (length counters)
-					     do
-					     (setf (nth i counters) 0))
-				       (cl-incf (nth current-level counters))))
-
-				     (list (point) (-slice counters 1)))))))
-	do
-	(let ((ov (make-overlay p p)))
-	  (overlay-put ov 'before-string (concat (mapconcat 'number-to-string lv ".") ". "))
-	  (overlay-put ov 'numbered-heading t))))
-
-
-(define-minor-mode scimax-numbered-org-mode
-  "Minor mode to number org headings."
-  :init-value nil
-  (cl-labels ((fl-noh (_) (save-restriction
-			    (widen)
-			    (ov-clear 'numbered-heading)
-			    (scimax-overlay-numbered-headings))))
-
-    (if scimax-numbered-org-mode
-	(progn
-	  (font-lock-add-keywords
-	   nil
-	   `((fl-noh 0 nil)))
-	  (font-lock-ensure))
-      (ov-clear 'numbered-heading)
-      (font-lock-remove-keywords
-       nil
-       `((fl-noh 0 nil))))))
+	      'scimax/org-return))
 
 
 (use-package scimax-org-radio-checkbox

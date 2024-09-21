@@ -145,8 +145,9 @@ the directory, and the bibliography file."
 		(insert org-content)
 		(cl-loop for link in link-list
 			 do
-			 (setf (buffer-substring (nth 2 link) (nth 3 link))
-			       (nth 4 link)))
+			 (cl--set-buffer-substring
+			  (nth 2 link) (nth 3 link)
+			  (nth 4 link)))
 		;; add bibliography references if they exist. if there is a
 		;; citation, and not a bibliography link we add one. If there is
 		;; a bibliography link, it should get inserted automatically.

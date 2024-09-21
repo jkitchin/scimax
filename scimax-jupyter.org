@@ -2,16 +2,7 @@
 #+attr_org: :width 800
 [[/Users/jkitchin/Dropbox/emacs/scimax/scimax-jupyter.png]]
 
-There are two approaches to using jupyter in scimax.
-
-The first one is based on https://github.com/gregsexton/ob-ipython which uses a web-server to communicate with the kernel. This is currently ([2021-11-02 Tue]) the default in scimax.
-
-The second one is based on https://github.com/nnicandro/emacs-jupyter which uses a compiled module to communicate directly with a kernel using zeromq. This requires that you have an emacs with support for compiled modules, and that you are able to compile it.
-
-I have been trying to move away from ob-ipython. The web-server really limits things like completion and inspection, and also is sometimes problematic in debugging. Using zeromq to interface with the kernel solves some of these problems. This document shows how to use it.
-
-It is not the default (yet) because you have to be able to compile the zmq library, and at least on my Mac, this requires some manual intervention. I am not sure how easy it is to do that in Windows.
-
+https://github.com/nnicandro/emacs-jupyter uses a compiled module to communicate directly with a jupyter kernel using zeromq. This requires that you have an emacs with support for compiled modules, and that you are able to compile it. This is the default option in scimax. The older ob-ipython modules might work, but I don't use or support them anymore.
 
 #+BEGIN_SRC emacs-lisp
 (require 'scimax-jupyter)
@@ -28,25 +19,16 @@ Overall, emacs-jupyter is an improvement on ob-ipython. There are a few things I
 
 These are the settings that work well for me.
 
-#+BEGIN_SRC emacs-lisp :results pp
+#+BEGIN_SRC emacs-lisp :results code pp
 org-babel-default-header-args:jupyter-python
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-((:results . "both")
- (:session . "jupyter-python")
- (:kernel . "python3")
- (:pandoc . "t")
- (:exports . "both")
- (:cache . "no")
- (:noweb . "no")
- (:hlines . "no")
- (:tangle . "no")
- (:eval . "never-export"))
-#+end_example
+: ((:results . "both") (:session lambda nil (buffer-file-name))
+:  (:kernel . "python3") (:pandoc . "t") (:exports . "both") (:cache . "no")
+:  (:noweb . "no") (:hlines . "no") (:tangle . "no") (:eval . "never-export"))
 
-Some of these are scimax-specific. For example =:results . "both"= captures both printed and returned values, which is most consistent with Jupyter notebooks. I set =:pandoc . "t"= to convert outputs like html to org format.
+Some of these are scimax-specific. For example =:results . "both"= captures both printed and returned values, which is most consistent with Jupyter notebooks. I set =:pandoc . "t"= to convert outputs like html to org format where possible.
 
 
 ** buffer specific kernels that close when you kill the buffer
@@ -57,90 +39,7 @@ I find it confusing to have one kernel shared among many files.
 2. I often assume the CWD is the file I work from, but the kernel starts in the directory it was started in, which is often different than another org-file
 3. I want the kernel to shutdown and close when I close the buffer because I don't need it after that.
 
-You can set a buffer specific kernel with yasnippet: <jps
-#+PROPERTY: header-args:jupyter-python  :session jupyter-python-6186d1147f976aff2402c12bfd60de5e
-
-
-scimax closes kernels when you close their buffer.
-
-** :results raw seemed to be broken in emacs-jupyter
-
-and it works in scimax.
-
-[[elisp:(scimax-jupyter-advise t)]] this un-advises emacs-jupyter
-
-Not raw
-#+BEGIN_SRC jupyter-python 
-for i in range(3):
-    print(i)
-#+END_SRC
-
-#+RESULTS:
-: 0
-: 1
-: 2
-
-
-#+BEGIN_SRC jupyter-python :results raw
-for i in range(3):
-    print(i)
-#+END_SRC
-
-#+RESULTS:
-0
-1
-2
-
-[[elisp:(scimax-jupyter-advise)]] this advises emacs-jupyter the scimax way
-
-
-** emacs-jupyter in scimax is more consistent with org-babel
-
-Out of the box you get mixed output and value with =:results value= and not quite the right way.  On one hand that is consistent with what you would get in a terminal. OTOH, it is not fully consistent with org-babel.
-
-I modified this to be closer to org-babel behavior. Note, however that if you have any code that uses Ipython display (e.g. plots, rich outputs, etc.) You will not get what you expect. The display results always come last, and it is not clear you can put them in order to get the right last line.
-
-- :results value  returns the last line.
-
-#+BEGIN_SRC jupyter-python :results value
-print(5)
-
-3-5
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
--2
-:END:
-
-If you choose output for results, that is all you get, there is nothing returned for the last line.
-
-#+BEGIN_SRC jupyter-python :results output
-print(5)
-
-
-[9 + 9, 4]
-3-5
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-5
-:END:
-
-scimax provides "both" to get the original behavior. This is also the default setting in scimax.
-
-#+BEGIN_SRC jupyter-python :results both
-print(5)
-
-[9 + 9, 4]
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-5
-| 18 | 4 |
-:END:
+scimax makes that happen.
 
 ** scimax jupyter src-block hydra
 
@@ -165,6 +64,7 @@ np.linspace
 #+END_SRC
 
 #+RESULTS:
+: <function linspace at 0x1074f2fb0>
 
 #+BEGIN_SRC jupyter-python
 ??np.linspace
@@ -218,32 +118,17 @@ print('x .dot. y = {}'.format(x @ y))
 
 #+RESULTS:
 :RESULTS:
-Length of t = 350
-x .dot. y = 1.3598389888491538
-[[file:./.ob-jupyter/a52845542412d18942cdfd219023af1385da4c0d.png]]
-[[file:./.ob-jupyter/14a1c6c91d53a606c5ae297964c8ce5c769b17d5.png]]
+: Length of t = 350
+: x .dot. y = 1.359838988849154
+[[file:./.ob-jupyter/2bfeb89f7e2f92d0ee9defd6e245cb31be1ebfdf.png]]
+[[file:./.ob-jupyter/6e01f37ad5782aca45aeebd550d8d635d003152d.png]]
 :END:
 
 
 
-** plotly
+** pycse and plotly
 
-Emacs still does not natively render html or interactive javascript. Until that happens, I monkey-patched plotly to capture a static image, and save the interactive html so you can still use it in a browser.
-
-#+BEGIN_SRC jupyter-python
-import plotly.express as px
-df = px.data.iris()
-fig = px.scatter(df, x="sepal_width", y="sepal_length", color="species",
-                 size='petal_length', hover_data=['petal_width'])
-fig.show()
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-
-<<44d53136-5dc5-45ca-b851-56c64248b5ce>>
-:END:
-
+Emacs still does not natively render html or interactive javascript. Until that happens, I monkey-patched plotly to capture a static image, and save the interactive html so you can still use it in a browser. This isn't purely scimax, it requires you to ~pip install pycse~, which is a Python package I wrote to do things like this.
 
 #+BEGIN_SRC jupyter-python
 from pycse.plotly import *
@@ -256,21 +141,18 @@ fig.show()
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
-[[file:.ob-jupyter/c7bf60c3c9d0675232889ce0bb712b10.html]]
-[[file:./.ob-jupyter/2f642ad6943faf5b9c0de1d90b7df76f52390546.png]]
-:END:
+[[file:./.ob-jupyter/4a226dfaab0614115a5f096d917836dc57c3a703.png]]
 
 
 ** pandas
 
-using the =pandoc: "t"= header generally makes pandas behave well with org-mode. Turn that off if you want with an empty header like =:pandoc=
+using the =pandoc: "t"= header generally makes pandas behave well with org-mode. Turn that off if you want with an empty header like =:pandoc=; note you will get html output then.
 
 #+BEGIN_SRC jupyter-python 
 import pandas as pd
 
 f = pd.DataFrame([['a', 'b'], [1, 2]])
-display(f)
+f
 #+END_SRC
 
 #+RESULTS:
@@ -284,7 +166,7 @@ display(f)
 
 
 
-** Figures and Tables with captions, names, attributes
+** Figures and Tables with captions, names, attributes with pycse
 
 pycse.orgmode defines several helpful classes to make org figures and tables with attributes.
 
@@ -302,7 +184,6 @@ Table([['x', 'y'],
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
 #+attr_latex: :environment longtable :align |l||l|
 #+name: org-data
 #+caption: The information about the table
@@ -310,7 +191,6 @@ Table([['x', 'y'],
 |---+---|
 | 1 | 2 |
 | 3 | 4 |
-:END:
 
 See Table ref:org-data.
 
@@ -361,6 +241,8 @@ print('x .dot. y = {}'.format(x @ y))
 
 from pycse.orgmode import Figure, Org
 
+from IPython.display import display
+
 display(Org("\n\n"),
         Figure('./fig-1.png', name='clock',
                caption='a clockwise line plot'),
@@ -371,10 +253,8 @@ display(Org("\n\n"),
 
 #+RESULTS:
 :RESULTS:
-Length of t = 350
-x .dot. y = 1.3598389888491538
-
-
+: Length of t = 350
+: x .dot. y = 1.359838988849154
 
 #+name: clock
 #+caption: a clockwise line plot
@@ -400,14 +280,12 @@ Table(pd.DataFrame([['a', 'b'],
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
 #+name: pd-data
 #+caption: A table from a dataframe
 | 0 | a | b |
 |---+---+---|
 | 1 | 1 | 2 |
 | 2 | 5 | 6 |
-:END:
 
 There is also a keyword.
 
@@ -433,7 +311,6 @@ Heading('An example of a heading from code', 3)
 
 
 
-
 #+BEGIN_SRC jupyter-python
 Comment('A comment for orgmode')
 #+END_SRC
@@ -442,6 +319,7 @@ Comment('A comment for orgmode')
 :RESULTS:
 # A comment for orgmode
 :END:
+
 
 
 
@@ -472,18 +350,18 @@ print(z)
 
 #+RESULTS:
 :RESULTS:
-5
+: 5
 # [goto error]
----------------------------------------------------------------------------
-ZeroDivisionError                         Traceback (most recent call last)
-/var/folders/3q/ht_2mtk52hl7ydxrcr87z2gr0000gn/T/ipykernel_2999/2244444055.py in <module>
-      8 
-      9 for j in range(5):
----> 10     1 / 0
-     11 
-     12 
-
-ZeroDivisionError: division by zero
+: ---------------------------------------------------------------------------
+: ZeroDivisionError                         Traceback (most recent call last)
+: Cell In[29], line 10
+:       4 a = 5
+:       9 for j in range(5):
+: ---> 10     1 / 0
+:      14 print(54)
+:      16 print(z)
+: 
+: ZeroDivisionError: division by zero
 :END:
 
 
@@ -505,13 +383,11 @@ from sympy import *
 init_printing()
 x, y, z = symbols('x y z')
 
-display(Integral(sqrt(1 / x), x))
+Integral(sqrt(1 / x), x)
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
 [[file:./.ob-jupyter/aaa721727d61fc47479b455e22f44ed88a8e0cb1.png]]
-:END:
 
 
 To get the actual LaTeX, use the :display
@@ -521,12 +397,12 @@ from sympy import *
 init_printing()
 x, y, z = symbols('x y z')
 
-display(Integral(sqrt(1 / x), x))
+Integral(sqrt(1 / x), x)
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-$\displaystyle \int \sqrt{\frac{1}{x}}\, dx$
+\(\displaystyle \int \sqrt{\frac{1}{x}}\, dx\)
 :END:
 
 and to get it in plain text:
@@ -536,18 +412,16 @@ from sympy import *
 init_printing()
 x, y, z = symbols('x y z')
 
-display(Integral(sqrt(1 / x), x))
+Integral(sqrt(1 / x), x)
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
-⌠           
-⎮     ___   
-⎮    ╱ 1    
-⎮   ╱  ─  dx
-⎮ ╲╱   x    
-⌡           
-:END:
+: ⌠           
+: ⎮     ___   
+: ⎮    ╱ 1    
+: ⎮   ╱  ─  dx
+: ⎮ ╲╱   x    
+: ⌡           
 
 
 ** Rich displays mostly work
@@ -558,7 +432,7 @@ These get converted to org-syntax by pandoc I think.  Note that emacs-jupyter an
 #+BEGIN_SRC jupyter-python 
 from IPython.display import FileLink, Image, display
 
-display(FileLink('scimax.png'))
+FileLink('scimax.png')
 #+END_SRC
 
 #+RESULTS:
@@ -567,14 +441,14 @@ display(FileLink('scimax.png'))
 :END:
 
 
+
+
 #+BEGIN_SRC jupyter-python
-display(Image('test.png'))
+Image('test.png')
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
-[[file:./.ob-jupyter/7377ddd106aeca2bac31a5dad7a8ddbf26749a0d.png]]
-:END:
+[[file:./.ob-jupyter/ea63442b692c3a2be74ebfde8ba4b0e549706827.png]]
 
 
 
@@ -586,42 +460,7 @@ display(FileLink('scimax.png'), Image('test.png'))
 #+RESULTS:
 :RESULTS:
 [[file:scimax.png]]
-[[file:./.ob-jupyter/7377ddd106aeca2bac31a5dad7a8ddbf26749a0d.png]]
-:END:
-
-Not every type is easily converted to org-mode, pandoc doesn't know everything. 
-
-#+BEGIN_SRC jupyter-python
-from IPython.display import Audio
-
-audio = Audio(filename='/Users/jkitchin/Dropbox/emacs/scimax/2021-06-04-19-48-38.mp3')
-
-display(audio)
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-Your browser does not support the audio element.
-:END:
-
-We can "orgify" these like this.
-
-#+BEGIN_SRC jupyter-python
-from pycse.orgmode import *
-
-ip = get_ipython()
-
-orgf = ip.display_formatter.formatters['text/org']
-orgf.for_type_by_name('IPython.lib.display', 'Audio', lambda O: f'[[{O.filename}]]')
-
-
-audio = Audio(filename='./2021-06-04-19-48-38.mp3')
-audio
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-[[./2021-06-04-19-48-38.mp3]]
+[[file:./.ob-jupyter/ea63442b692c3a2be74ebfde8ba4b0e549706827.png]]
 :END:
 
 
@@ -638,18 +477,10 @@ YouTubeVideo('ZXSaLcFSOsU')
 https://www.youtube.com/embed/ZXSaLcFSOsU
 :END:
 
-:RESULTS:
-
 
 ** scratch space and the REPL
 
 The buffer is a great scratch space, but there is also a separate Jupyter scratch buffer. Use it to try out ideas, check values, etc.
-
-
-#+BEGIN_SRC jupyter-python
-
-#+END_SRC
-
 
 Each kernel has a REPL associated with it. Type C-c C-v C-z or f12-z to get to it. It is like an IPython shell! You can explore things there, make plots, etc...
 
@@ -666,8 +497,8 @@ a = 5  # Run C-x C-e here
 
 #+RESULTS:
 :RESULTS:
-3
-10
+: 3
+[[file:./.ob-jupyter/81e42ea101563870e7c6950a80870fae45d34c62.png]]
 :END:
 
 ** debugging with the REPL
@@ -689,7 +520,7 @@ learn more about PDB at https://realpython.com/python-debugging-pdb/#getting-sta
 See ox-ipynb. This org-file is not ideal for this export, it has some links that are not supported, and I marked the Known issues section as noexport because it has src-blocks with variables in it.
 
 #+ox-ipynb-language: jupyter-python
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results silent
 (setq  org-export-with-broken-links t)
 (ox-ipynb-export-to-ipynb-file-and-open)
 #+END_SRC
@@ -707,145 +538,8 @@ See ox-ipynb. This org-file is not ideal for this export, it has some links that
 ** R
 
 [[./scimax-jupyter-r.org]]
+
 * Known issues                                                     :noexport:
-
-** display order is not always respected
-
-See https://github.com/nnicandro/emacs-jupyter/issues/351
-
-When using pandoc, it takes time to convert the display, and this often messes up the display order. scimax overrides this behavior to try avoiding this. The root of the issue seems to be there is a process filter that processes data in the order it is received though, so I cannot guarantee the order will always be correct. For now what we do works here.
-
-#+BEGIN_SRC jupyter-python :pandoc t
-from IPython.display import HTML, Markdown, Latex
-
-print(1)
-display(HTML('<b>bold</b>'),
-        Latex('\\bf{lbold}'),
-        Markdown('**mbold**'))
-print(2)
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-1
-*bold*
-*lbold*
-*mbold*
-2
-:END:
-
-This works now for making Figures.
-
-#+BEGIN_SRC jupyter-python
-from IPython.display import Image, Markdown, HTML
-
-print(1)
-display(HTML('''#+attr_org: :width 400<br>
-,#+name: fig-one<br>
-,#+caption: <b>bold</b> text.'''),
-  Image('test.png'))
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-1
-#+attr_org: :width 400
-#+name: fig-one
-#+caption: *bold* text.
-[[file:./.ob-jupyter/7377ddd106aeca2bac31a5dad7a8ddbf26749a0d.png]]
-:END:
-
-
-** using jupyter-python blocks as input to other blocks was broken in emacs-jupyter and is sort of better in scimax
-
-and it works in scimax, sort of. Raw strings get passed around, which isn't great. One day I will figure out the issue with that. It seems to be a feature of emacs-jupyter though (https://github.com/nnicandro/emacs-jupyter#standard-output-displayed-data-and-code-block-results_. It has something to do with org-babel-insert-result.
-
-#+name: jp
-#+BEGIN_SRC jupyter-python
-a = 9 + 9
-a
-#+END_SRC
-
-#+RESULTS: jp
-:RESULTS:
-18
-:END:
-
-#+BEGIN_SRC emacs-lisp :var d=jp
-( / d 2)
-#+END_SRC
-
-#+RESULTS:
-: 18
-
-*** example with a table
-
-#+name: pd-datad
-#+BEGIN_SRC jupyter-python 
-import pandas as pd
-data = [[1, 2], [34, 4]]
-pd.DataFrame(data, columns=["Foo", "Bar"])
-#+END_SRC
-
-#+RESULTS: pd-datad
-:RESULTS:
-|   | Foo | Bar |
-|---+-----+-----|
-| 0 |   1 |   2 |
-| 1 |  34 |   4 |
-:END:
-
-
-#+BEGIN_SRC emacs-lisp :var dd=pd-datad
-(with-temp-buffer (insert dd) (org-babel-read-table))
-#+END_SRC
-
-#+RESULTS:
-|   | Foo | Bar |
-|---+-----+-----|
-| 0 |   1 |   2 |
-| 1 |  34 |   4 |
-
-
-see [[nb:scimax::elpa/org-9.5/ob-emacs-lisp.el::c2254]]  I think it has something to do with this.
-
-#+name: el-data
-#+BEGIN_SRC emacs-lisp 
-'(("" Foo Bar) hline (0 1 2) (1 3 4))
-#+END_SRC
-
-#+RESULTS: el-data
-|   | Foo | Bar |
-|---+-----+-----|
-| 0 |   1 |   2 |
-| 1 |   3 |   4 |
-
-#+BEGIN_SRC emacs-lisp :var d=el-data 
-d
-#+END_SRC
-
-#+RESULTS:
-| 0 | 1 | 2 |
-| 1 | 3 | 4 |
-
-#+name: pdata
-#+BEGIN_SRC python
-return [[1, 2, 3], [3, 4, 6]]
-#+END_SRC
-
-#+RESULTS: pdata
-| 1 | 2 | 3 |
-| 3 | 4 | 6 |
-
-
-#+BEGIN_SRC emacs-lisp :var d=pdata
-d
-#+END_SRC
-
-#+RESULTS:
-| 1 | 2 | 3 |
-| 3 | 4 | 6 |
-
 
 ** widgets do not seem to work
 
@@ -867,7 +561,10 @@ w = widgets.VBox([widgets.Text('#+attr_org: :width 300'),
 display(w)
 #+END_SRC
 
-This code does not run correctly. I am not sure why. I don't think it is related to my changes. See https://github.com/nnicandro/emacs-jupyter/issues/333, I am not sure widgets still work.
+#+RESULTS:
+: VBox(children=(Text(value='#+attr_org: :width 300'), Text(value='#+name: fig-data'), Text(value='#+caption: so…
+
+I am not sure why. I don't think it is related to my changes. See https://github.com/nnicandro/emacs-jupyter/issues/333, I am not sure widgets still work.
 
 This just hangs, and does not do anything.
 
@@ -875,8 +572,51 @@ This just hangs, and does not do anything.
 widgets.Image(value=open("test.png", "rb").read(),  width=400)
 #+END_SRC
 
+#+RESULTS:
+: 3e26f7aa-19dd-462f-bf56-505d66f9e629
+
+** Tricky using :cache
+
+This sequence of cells leads to an error when you run them the first time. The issue is the first cell doesn't use jupyter, it uses a cached result, so when you get to ~a * 4~ the variable is not defined.
+
+#+name: one
+#+BEGIN_SRC jupyter-python :cache yes
+a = 15
+print(a)
+
+import time
+time.sleep(5)
+#+END_SRC
+
+#+RESULTS[890bb80ec5ce30e9fa7f63b50d7df113702c43c5]: one
+: 15
+
+
+#+BEGIN_SRC jupyter-python  :var data=one
+data
+#+END_SRC
+
+#+RESULTS:
+: 15
+
+#+BEGIN_SRC jupyter-python
+a * 4
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# [goto error]
+: ---------------------------------------------------------------------------
+: NameError                                 Traceback (most recent call last)
+: Cell In[3], line 1
+: ----> 1 a * 4
+: 
+: NameError: name 'a' is not defined
+:END:
+
 
 * Wishlist
+
 ** handle long outputs
 
 Sometimes you get long outputs from things, and especially when it is something that needs fontification, this makes Emacs hard to use. I would like to have a way to truncate long outputs, and maybe write them to a file where you could look at them.
@@ -895,7 +635,5 @@ print(a + 5)  # inspect a here, I usually see print documentation
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
-10
-:END:
+: 10
 

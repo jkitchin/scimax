@@ -25,3 +25,7 @@ scimax-channel
 user.cache
 .ipynb_checkpoints
 .ob-jupyter
+scimax.info
+build
+*.egg-info
+__pycache__

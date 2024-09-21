@@ -318,7 +318,7 @@ with double prefix arg, prompt for filename. Only works on macOS."
      (mapconcat
       'identity
       (list (format "set screenshotFilePath to \"%s\"" (expand-file-name fname "screenshots"))
-	    "do shell script \"screencapture \" & \"-i -Jwindow\" & \" \" & quoted form of screenshotFilePath"
+	    "do shell script \"screencapture \" & \"-i \" & \" \" & quoted form of screenshotFilePath"
 	    (concat "set result to \"[[./" fname "]]\"")
 	    "set the clipboard to result")
       "\n"))

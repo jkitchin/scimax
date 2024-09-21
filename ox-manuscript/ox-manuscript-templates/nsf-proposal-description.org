@@ -13,6 +13,7 @@
 
 # Adjust this line for line spacing.
 \setstretch{1.21}
+\pagenumbering{gobble}
 
 #+TITLE: <replace: title>
 * Introduction
@@ -41,5 +42,5 @@ nobibliography:<replace: bibfiles>
 * Broader impacts of the work
 
 * build					:noexport:
-The
+
   elisp:ox-manuscript-export-and-build-and-open

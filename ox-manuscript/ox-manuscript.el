@@ -43,7 +43,7 @@
   "Customization group for ox-manuscript.")
 
 (defcustom ox-manuscript-latex-command
-  "pdflatex"
+  "lualatex"
   "Command to run latex."
   :group 'ox-manuscript)
 
@@ -51,6 +51,13 @@
   "bibtex8"
   "Command to run bibtex."
   :group 'ox-manuscript)
+
+(defcustom ox-manuscript-page-numbering
+  ""
+  "Command to influence page-numbering.
+Set it to \"\\pagenumbering{gobble}\n\" if you want no page numbers."
+  :group 'ox-manuscript
+  :type 'string)
 
 (defcustom ox-manuscript-interactive-build
   nil
@@ -205,7 +212,7 @@ grestore
 ;; ** Wiley
 ;; I have not been able to find a LaTeX package for Wiley
 
-;; customized article. better margins
+;; ** customized article. better margins
 (add-to-list 'org-latex-classes
 	     '("cmu-article"                          ;class-name
 	       "\\documentclass{article}
@@ -217,6 +224,24 @@ grestore
 	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
 	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
 	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+;; ** NSF proposal - with Times New Roman
+(add-to-list 'org-latex-classes
+	     '("NSF"			;class-name
+	       "\\documentclass[12pt]{article}
+\\usepackage{fontspec}
+\\setmainfont{Times New Roman}
+\\usepackage[top=1in, bottom=1.in, left=1in, right=1in]{geometry}
+ [PACKAGES]
+ [EXTRA]" ;;header-string
+	       ("\\section{%s}" . "\\section*{%s}")
+	       ("\\subsection{%s}" . "\\subsection*a{%s}")
+	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+
+
 
 ;; * Functions
 ;;;###autoload
@@ -340,6 +365,7 @@ references should go into a separate file."
     (goto-char (point-min))
     (re-search-forward "begin{document}" (point-max))
     (forward-line)
+    (insert ox-manuscript-page-numbering)
     (beginning-of-line)
     (setq p1 (point))
     (re-search-forward "end{document}")
@@ -386,7 +412,7 @@ This function checks for the presence of minted, and uses
 -shell-escape if needed.  You can run this interactively, and you
 will be prompted for a tex file name."
   (interactive "fTex file: ")
-  (message "running pdflatex on %s" tex-file)
+  (message "running %s on %s" ox-manuscript-latex-command tex-file)
 
   (let ((minted-p (with-temp-buffer
 		    (insert-file-contents tex-file)
@@ -809,8 +835,9 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 		       t))
 
 	  ;; flatten the filename in the tex-file
-	  (setf (buffer-substring start (- end 1))
-		(format "%02d-%s" figure-count fname)))))
+	  (cl--set-buffer-substring
+	   start (- end 1)
+	   (format "%02d-%s" figure-count fname)))))
 
     ;; the tex-file is no longer valid in the current directory
     ;; because the paths to images are wrong. So we move it to where
@@ -961,6 +988,19 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
      '())))
 
 
+(defun ox-manuscript-open (key)
+  "Open entry for KEY.
+KEY is a string that maps to a :key entry in `ox-manuscript-candidates'.
+Open document if it exists, create it otherwise."
+  (let ((entry (car (seq-filter (lambda (x) (string= key (plist-get x :key))) (ox-manuscript-candidates)))))
+    (if (file-exists-p (plist-get entry :default-filename))
+	(find-file (plist-get entry :default-filename))
+      (find-file (plist-get entry :default-filename))
+      (insert-file-contents (plist-get entry :filename))
+      (goto-char (point-min))
+      (font-lock-fontify-buffer))))
+
+
 ;;;###autoload
 (defun ox-manuscript-new-ivy ()
   "Create a new manuscript from a template in
@@ -975,14 +1015,10 @@ These are snippets in `ox-manuscript-templates-dir' in the \"manuscript\" group.
 					  (plist-get x :template))
 				  x))
 			       candidates)
+	      
 	      :action (lambda (entry)
-			(setq entry (cdr entry))
-			(if (file-exists-p (plist-get entry :default-filename))
-			    (find-file (plist-get entry :default-filename))
-			  (find-file (plist-get entry :default-filename))
-			  (insert-file-contents (plist-get entry :filename))
-			  (goto-char (point-min))
-			  (font-lock-fontify-buffer))))))
+			(ox-manuscript-open (plist-get (cdr entry) :key))))))
+
 
 (defun ox-manuscript-texcount ()
   "Use texcount to estimate words in an org-file if it exists.

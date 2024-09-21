@@ -300,37 +300,40 @@ Perhaps Info node `(org) Tables'?
 (defun ore ()
   "Help function for the org-mode element at point."
   (interactive)
-  (with-help-window
-      (help-buffer)
-    (let* ((oeap (org-element-context))
-	   (ore-func (intern (format "ore-%s" (car oeap))))
-	   (s (if (fboundp ore-func)
-		  (funcall ore-func oeap)
-		(format
-		 "No documentation found for %s.
+  (let* ((oeap (org-element-context))
+	 (ore-func (intern (format "ore-%s" (car oeap))))
+	 (s (if (fboundp ore-func)
+		(funcall ore-func oeap)
+	      (format
+	       "No documentation found for %s.
 
 %s"
-		 (car oeap)
-		 (ore-user-documentation (car oeap))))))
-      ;; There are some special cases.
-      (cond
-       ((and  (eq 'src-block (car oeap))
-	      (ore-src-block-header-p oeap))
-	(setq s (ore-src-block-header oeap)))
+	       (car oeap)
+	       (ore-user-documentation (car oeap))))))
+    ;; There are some special cases.
+    (cond
+     ((and  (eq 'src-block (car oeap))
+	    (ore-src-block-header-p oeap))
+      (setq s (ore-src-block-header oeap)))
 
-       ((or (eq 'table (car oeap))
-	    (eq 'table-row (car oeap))
-	    (eq 'table-cell (car oeap)))
-	(setq s (ore-table oeap)))
+     ((or (eq 'table (car oeap))
+	  (eq 'table-row (car oeap))
+	  (eq 'table-cell (car oeap)))
+      (setq s (ore-table oeap)))
 
-       ((or (eq 'latex-fragment (car oeap))
-	    (eq 'latex-environment (car oeap)))
-	(setq s (ore-latex oeap))))
+     ((or (eq 'latex-fragment (car oeap))
+	  (eq 'latex-environment (car oeap)))
+      (setq s (ore-latex oeap))))
+
+    (with-help-window
+	(help-buffer)
+      
 
       (princ s)
       (princ "\n\nHere is how org-mode sees the element.\n\n")
       (pp oeap)
-      (emacs-keybinding-command-tooltip-mode))))
+      (emacs-keybinding-command-tooltip-mode)))
+  )
 
 
 (defun match-next-ore-file (&optional limit)

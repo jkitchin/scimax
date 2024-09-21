@@ -40,13 +40,13 @@ Set to nil to avoid loading a theme."
 
 (fset 'yes-or-no-p 'y-or-n-p) ; answer with y/n instead of yes/no
 
-(setq custom-file (expand-file-name "user/custom.el" scimax-dir))
-(when (f-exists? custom-file) (load custom-file))
+;; (setq custom-file (expand-file-name "user/custom.el" scimax-dir))
+;; (when (f-exists? custom-file) (load custom-file))
 
 (setq auto-save-list-file-prefix (expand-file-name "auto-save-list/saves-" scimax-dir))
 
 ;; abbrevs
-(setq abbrev-file-name (expand-file-name "user/abbrev_defs" scimax-dir))
+;; (setq abbrev-file-name (expand-file-name "user/abbrev_defs" scimax-dir))
 (setq save-abbrevs t)
 (setq-default abbrev-mode t)
 (setq save-abbrevs 'silently)

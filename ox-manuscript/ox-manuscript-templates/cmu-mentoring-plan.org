@@ -1,0 +1,43 @@
+#+TEMPLATE: NSF Proposal - postdoctoral mentoring plan
+#+key: nsf-proposal-mentoring-plan
+#+group: proposal
+#+contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+#+default-filename: mentoring-plan.org
+
+#+LATEX_CLASS: cmu-article
+#+Latex_class_options: [12pt]
+#+OPTIONS: toc:nil ^:{}
+#+LATEX_HEADER: \usepackage{setspace}
+#+latex_header: \usepackage{titlesec}
+#+latex_header: \titlespacing*{\section}{0pt}{*1}{*1}
+#+latex_header: \usepackage{enumitem}
+#+latex_header: \setlist{nosep} 
+#+latex_header:  \setlist{itemsep=1pt, topsep=3pt}
+\pagenumbering{gobble} 
+# Adjust this to fill the page. 1.0 is single line spacing.
+# \setstretch{1.2}
+
+#+macro: PI John Kitchin
+#+macro: DEPARTMENT Chemical Engineering
+
+This Mentoring Plan has been prepared by Carnegie Mellon University (CMU). The Plan establishes guidelines for work to be performed by graduate students (GS) and Postdoctoral Researchers (PDR) in the {{{DEPARTMENT}}} in support of the proposal submitted by CMU.
+
+1. Individual development plan templates are provided by the College of Engineering to facilitate individualized mentoring plans for all researchers. Reports on the use of these plans will be required for all IUCRC-supported projects.
+
+2. Career Counseling will be directed at providing the GS and PDR with the skills, knowledge, and experience needed to excel in their chosen career path. 
+
+3. Experience with Preparation of Grant Proposals will be gained by direct involvement of the PDR in proposals prepared by CMU. The PDR will have an opportunity to learn best practices in proposal preparation including identification of key research questions, definition of objectives, description of approach and rationale, and construction of a work plan, timeline, and budget.
+
+4. Publications and Presentations are expected to result form the work supported by the grant. These will be prepared under the direction of {{{PI}}}. The GS and PDR will receive guidance and training in the preparation of manuscripts for scientific journals and presentations at conferences.
+
+5. Teaching and Mentoring Skills will be developed in the context of regular meetings within the PI research group, during which graduate students and postdoctoral researchers describe their work to colleagues within the group and assist each other with solutions to challenging research problems, often resulting in cross fertilization of ideas. GSs and PDRs will have full access to CMU’s Eberly Center for Teaching Excellence (https://www.cmu.edu/teaching/aboutus/index.html).
+
+6. Instruction in Professional Practices will be provided on a regular basis in the context of the research work and will include fundamentals of the scientific method, laboratory safety, and other standards of professional practice. The PDR will be encouraged to affiliate with one or more professional societies in his/her chosen field. Non-native speaking GSs and PDRs will have access to CMU’s Intercultural Communication Center (https://www.cmu.edu/student-success/programs/language-support/index.html).
+
+7. Success of the Mentoring Plan will be assessed by monitoring the personal progress of the GS towards their degree and career goals, and for the PDR through a tracking of the PDR’s progress toward their career goals after finishing the postdoctoral program.
+
+
+* Build					:noexport:
+
+   elisp:ox-manuscript-export-and-build-and-open
+

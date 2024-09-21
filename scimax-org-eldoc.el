@@ -215,14 +215,12 @@ Code:
 	  (cond
 	   ;; known function
 	   ((fboundp (intern result))
-	    (setf (buffer-substring bg end)
-		  (format "[[elisp:(describe-function '%s)][%s]]"
-			  result result)))
+	    (cl--set-buffer-substring bg end (format "[[elisp:(describe-function '%s)][%s]]"
+						     result result)))
 	   ;; known variable
 	   ((boundp (intern result))
-	    (setf (buffer-substring bg end)
-		  (format "[[elisp:(describe-variable '%s)][%s]]"
-			  result result)))
+	    (cl--set-buffer-substring bg end (format "[[elisp:(describe-variable '%s)][%s]]"
+						     result result)))
 	   ;; unknown quoted thing, just return it back
 	   (t
 	    result)))))

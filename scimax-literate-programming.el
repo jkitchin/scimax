@@ -127,20 +127,20 @@ should make this a safe operation."
 				       (line-beginning-position)
 				       (line-end-position))))
 			 newend)
-		    (setf (buffer-substring
-			   (line-beginning-position)
-			   (line-end-position))
-			  "")
+		    (cl--set-buffer-substring (line-beginning-position)
+					      (line-end-position)
+					      "")
+		    
 		    ;; Now skip to end, and go back to then src delimiter and
 		    ;; eliminate that line.
 		    (goto-char (- end len))
 		    (forward-line (- (* -1 (org-element-property :post-blank src)) 1))
-		    (setf (buffer-substring
-			   (line-beginning-position)
-			   (line-end-position)) ""))
-		(setf (buffer-substring
-		       (line-beginning-position)
-		       (line-end-position)) ""))
+		    (cl--set-buffer-substring (line-beginning-position)
+					      (line-end-position)
+					      ""))
+		(cl--set-buffer-substring (line-beginning-position)
+					  (line-end-position)
+					  ""))
 	      (forward-line 1))
 	    (save-buffer)
 	    (shell-command

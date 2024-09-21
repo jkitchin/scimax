@@ -108,13 +108,10 @@ This function should be added to `org-mode-hook' to make it work."
 ;; [2021-09-05 Sun] It kind of works
 
 (defcustom scimax-src-block-python-edit-mode-map
-  (cond
-   ((boundp 'elpy-mode-map) elpy-mode-map)
-   ((boundp 'anaconda-mode-map) anaconda-mode-map)
-   (t nil))
-  "Keymap used in editing Python blocks. Defaults to `elpy-mode-map'.
-Use `anaconda-mode-map' if you prefer `anaconda-mode'. This
-keymap is combined with some other keymaps in
+  nil
+  "Keymap used in editing Python blocks.
+Some examples include `elpy-mode-map', or `anaconda-mode-map'.
+This keymap is combined with some other keymaps in
 `scimax-src-block-keymaps' to enable native edit commands in
 them."
   :group :scimax)

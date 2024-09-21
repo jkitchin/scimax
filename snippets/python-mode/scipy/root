@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: scipy.optimize.root
+# key: r
+# contributor: John Kitchin <jkitchin@andrew.cmu.edu>
+# --
+root(${1:func}, ${2:y0})$0

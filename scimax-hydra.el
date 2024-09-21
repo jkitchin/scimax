@@ -28,7 +28,13 @@
   :type 'string
   :group 'scimax-hydra)
 
+(defcustom scimax-hydra-mode-key "<M-f12>"
+  "Key to bind `scimax-dispatch-mode-hydra/body' to."
+  :type 'string
+  :group 'scimax-hydra)
+
 (global-set-key (kbd scimax-hydra-key) 'scimax/body)
+(global-set-key (kbd scimax-hydra-mode-key) 'scimax-dispatch-mode-hydra)
 
 ;;* scimax-hydra utilities
 
@@ -191,6 +197,7 @@ This is a macro so I don't have to quote the hydra name."
   ("j" scimax-journal/body "journal" :column "Emacs")
   ("n" nb-hydra/body "notebook" :column "Emacs")
   ("r" elfeed "elfeed" :column "Emacs")
+  ("F" scimax-org-feed "scimax-org-feed" :column "Emacs")
   
   ("b" bash "bash" :column "OS")
   ("f" finder "Finder" :column "OS")
@@ -1234,7 +1241,6 @@ doesn't move, it means you were at the beginning of a paragraph."
 		   (scimax-open-hydra scimax-org/body)))))
     (_ (message "no hydra found for this context"))))
 
-(global-set-key (kbd "<H-f12>") 'scimax-dispatch-mode-hydra)
 
 ;; ** major mode hydras
 (defhydra scimax-words (:color blue :hint nil :inherit (scimax-base/heads))
@@ -1498,17 +1504,34 @@ _u_: Update"
   ("u" elfeed-update))
 
 
+
+(defun scimax-dwim-send ()
+  "Send something to Python in a dwim sense.
+With a prefix arg, send the buffer.
+If a region is active, send that.
+Otherwise, send the current statement
+"
+  (interactive "P")
+  (cond
+   (current-prefix-arg
+    (python-shell-send-buffer))
+   ((region-active-p)
+    (python-shell-send-region (region-beginning) (region-end)))
+   (t
+    (python-shell-send-statement))))
+
+
 (defhydra scimax-python-mode (:color red :hint nil :inherit (scimax-base/heads))
   "
 Python helper
-_a_: begin def/class  _w_: move up   _x_: syntax    _Sb_: send buffer
-_e_: end def/class    _s_: move down _n_: next err  _Ss_: switch shell
-_<_: dedent line      ^ ^            _p_: prev err
-_>_: indent line
+_a_: begin def/class  _w_: move up          _x_: syntax    _Sb_: send buffer
+_e_: end def/class    _s_: move down        _n_: next err  _Sr_: send region
+_<_: dedent line      _m_: mark class/def   _p_: prev err  _Ss_: send statement
+_>_: indent line      ^ ^                   ^ ^            _Sh: switch shell 
 _j_: jump to
 _._: goto definition
 
-_t_: run tests _m_: magit  _8_: autopep8
+_t_: run tests  _8_: autopep8
 "
   ("a" beginning-of-defun)
   ("e" end-of-defun)
@@ -1516,21 +1539,24 @@ _t_: run tests _m_: magit  _8_: autopep8
   (">" python-indent-shift-right)
   ("j" counsel-imenu)
 
-  ("t" elpy-test)
-  ("." elpy-goto-definition)
-  ("x" elpy-check)
-  ("n" elpy-flymake-next-error)
-  ("p" elpy-flymake-previous-error)
+  ("t" projectile-test-project)
+  ("." xref-find-definitions)
+  ("x" python-check)
+  ("n" flymake-goto-next-error)
+  ("p" flymake-goto-previous-error)
 
-  ("m" magit-status)
+  ("m" python-mark-defun)
 
-  ("w" elpy-nav-move-line-or-region-up)
-  ("s" elpy-nav-move-line-or-region-down)
+  ("w" move-text-up)
+  ("s" move-text-down)
 
-  ("Sb" elpy-shell-send-region-or-buffer)
-  ("Ss" elpy-shell-switch-to-shell)
+  ("Sb" python-shell-send-buffer)
+  ("Sr" python-shell-send-region)
+  ("Ss" python-shell-send-statement)
+  ("Sh" python-shell-switch-to-shell)
 
   ("8" autopep8))
+
 
 
 

@@ -113,27 +113,28 @@ The file names look like obf-<md5 hash>.ext"
 					  (line-beginning-position)
 					  (line-end-position))))
 			    newend)
-		       (setf (buffer-substring
-			      (line-beginning-position)
-			      (line-end-position))
-			     (make-string len ?\s))
+		       (cl--set-buffer-substring
+			(line-beginning-position)
+			(line-end-position)
+			(make-string len ?\s))
+		       
 		       ;; Now skip to end, and go back to then src delimiter and eliminate that line.
 		       (goto-char end)
 		       (forward-line (- (* -1 (org-element-property :post-blank src)) 1))
-		       (setf (buffer-substring
-			      (line-beginning-position)
-			      (line-end-position))
-			     (make-string (length (buffer-substring
-						   (line-beginning-position)
-						   (line-end-position)))
-					  ?\s)))
-		   (setf (buffer-substring
-			  (line-beginning-position)
-			  (line-end-position))
-			 (make-string (length (buffer-substring
-					       (line-beginning-position)
-					       (line-end-position)))
-				      ?\s)))
+		       (cl--set-buffer-substring
+			(line-beginning-position)
+			(line-end-position)
+			(make-string (length (buffer-substring
+					      (line-beginning-position)
+					      (line-end-position)))
+				     ?\s)))
+		   (cl--set-buffer-substring
+		    (line-beginning-position)
+		    (line-end-position)
+		    (make-string (length (buffer-substring
+					  (line-beginning-position)
+					  (line-end-position)))
+				 ?\s)))
 		 (forward-line 1)))
 	     (save-buffer)
 	     ;; Now, make sure it is open and getting checked
