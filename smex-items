@@ -1,0 +1,16 @@
+
+;; ----- smex-history -----
+(
+ scimax-mode
+ cd
+ 5x5
+ arp
+ dbx
+ dig
+ erc
+)
+
+;; ----- smex-data -----
+(
+ (scimax-mode . 4)
+)

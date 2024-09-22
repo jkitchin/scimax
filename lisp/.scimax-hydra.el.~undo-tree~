@@ -1,5 +1,0 @@
-(undo-tree-save-format-version . 1)
-"5ee43342f9878d4ce74da67d67b724e79c3a5a87"
-[nil nil nil nil (26349 5344 932070 473000) 0 nil]
-([nil current ((#("scimax-dir" 0 10 (fontified nil)) . -43180) (43190 . 43198) (#("scimax-dir" 0 10 (fontified t)) . -41217) (t 26341 41735 153380 322000) (41227 . 41235) (t 26341 41735 153380 322000)) nil (26349 5344 932059 81000) 0 nil])
-nil

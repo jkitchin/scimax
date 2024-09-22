@@ -1,5 +1,0 @@
-(undo-tree-save-format-version . 1)
-"702dce3b2493779b8221c30654bd0a27abb43103"
-[nil nil nil nil (26349 3429 7580 787000) 0 nil]
-([nil current ((#("scimax-dir" 0 10 (fontified nil)) . -6595) (6605 . 6613) (#("scimax-dir" 0 10 (fontified nil)) . -6581) (6591 . 6599) (#("scimax-dir" 0 10 (fontified nil)) . -6288) (6298 . 6306) (#("scimax-dir" 0 10 (fontified nil)) . -3467) (3477 . 3485) (#("scimax-dir" 0 10 (fontified t)) . -415) (t 26341 41735 168380 387000) (425 . 433) (t 26341 41735 168380 387000)) nil (26349 3429 7567 26000) 0 nil])
-nil
