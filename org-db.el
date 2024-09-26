@@ -667,6 +667,7 @@ PARSE-TREE is from `org-element-parse-buffer'."
     (cl-loop for hl in headlines do
 	     (save-excursion
 	       (goto-char (org-element-property :begin hl))
+	       
 	       (setq tags (mapcar 'org-no-properties (org-get-tags))
 		     properties (org-entry-properties (org-element-property :begin hl) 'all)))
 
@@ -688,9 +689,11 @@ PARSE-TREE is from `org-element-parse-buffer'."
 			   (org-element-property :todo-keyword hl)))
 			;; todo-type is a symbol.
 			(symbol-name (org-element-property :todo-type hl))
-			(mapconcat 'org-no-properties
-				   (org-element-property :archivedp hl)
-				   " ")
+			(org-element-property :archivedp hl)
+			;; I am not sure why this was here.
+			;; (mapconcat 'org-no-properties
+			;; 	   (org-element-property :archivedp hl)
+			;; 	   " ")
 			(org-element-property :commentedp hl)
 			(org-element-property :footnote-section-p hl)
 			(org-element-property :begin hl)
