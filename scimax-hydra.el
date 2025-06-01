@@ -198,7 +198,7 @@ This is a macro so I don't have to quote the hydra name."
   ("n" nb-hydra/body "notebook" :column "Emacs")
   ("r" elfeed "elfeed" :column "Emacs")
   ("F" scimax-org-feed "scimax-org-feed" :column "Emacs")
-  
+
   ("b" bash "bash" :column "OS")
   ("f" finder "Finder" :column "OS")
   ("e" eshell "eshell" :column "OS")
@@ -208,7 +208,7 @@ This is a macro so I don't have to quote the hydra name."
   ("o" (scimax-open-hydra scimax-office/body) "MS Office" :column "Web")
   ("G" (scimax-open-hydra scimax-gsuite/body) "GSuite" :column "Web")
   ("s" slack/body "Slack" :column "Web")
-  
+
   ("k" package-list-packages "List packages" :column "commands")
   ("m" compose-mail "Compose mail" :column "commands"))
 
@@ -405,10 +405,10 @@ _p_: ffap
   ("r" avy-jump-to-paragraph "Paragraph" :column "text")
   ("y" (scimax-open-hydra scimax-jump-symbol/body) "Symbol" :column "text")
 
-  
+
   ("h" org-db-headings "org-db-heading" :column "org")
   ("d" org-db/body "org-db hydra" :column "org")
-  ("k" ace-link "Link"  :column "org")
+  ("k" org-db-bookmark "org-db bookmark"  :column "org")
   ("o" (scimax-open-hydra scimax-jump-org/body) "Org"  :column "org")
   ("3" scimax-ob-jump-to-src-block "src block" :column "org")
 
@@ -416,8 +416,8 @@ _p_: ffap
   ("pb" counsel-projectile-switch-to-buffer  "buffer" :column "Project")
   ("pf" projectile-find-file "file" :column "Project")
   ("ph" ivy-org-jump-to-project-headline "headline" :column "Project")
-  
-  
+
+
   ("b" counsel-ibuffer "Buffer" :column "misc")
   ("n" ace-window "Ace window" :column "misc")
   ("f" counsel-recentf "Recent file" :column "misc")
@@ -450,7 +450,7 @@ _p_: ffap
   ("d" ivy-org-jump-to-heading-in-directory "Directory heading" :column "heading")
   ("p" ivy-org-jump-to-project-headline "Project heading" :column "heading")
   ("a" ivy-org-jump-to-agenda-heading "Agenda heading" :column "heading")
-  
+
   ("bb" scimax-ob-jump-to-src-block "Jump to src-block" :column "block")
   ("bv" scimax-ob-jump-to-visible-src-block "Jump to visible src-block" :column "block")
   ("bi" scimax-ob-jump-to-inline-src "Jump to inline src" :column "block")
@@ -1391,7 +1391,7 @@ _s_ort keys
 (defhydra scimax-org-table (:color red :hint nil :inherit (scimax-base/heads))
   "
 Navigate
-_j_: previous cell  _;_: next cell _k_: previous row _l_: next row           
+_j_: previous cell  _;_: next cell _k_: previous row _l_: next row
 _<_: beginning of table _>_: end of table
 
 Edit
@@ -1404,7 +1404,7 @@ _ic_: insert column _dc_: delete column _ir_: insert row _ic_: delete row
 _i-_: insert line _-_: insert line/move
 
 _s_: sort  _t_: transpose  _m_: mark table _R_: rectangle mark
-_E_: export table  _I_: org-table-import   _w_: wrap region              
+_E_: export table  _I_: org-table-import   _w_: wrap region
 
 _ef_: edit field _er_: eval formula _r_: recalculate _D_: formula debugger
 "
@@ -1421,11 +1421,11 @@ _ef_: edit field _er_: eval formula _r_: recalculate _D_: formula debugger
 	   (goto-char (org-table-begin))
 	   (org-mark-element)
 	   (kill-ring-save (region-beginning) (region-end))))
-  
+
   ("C-w" (progn (goto-char (org-table-begin))
 		(org-mark-element)
 		(kill-region (region-beginning) (region-end)))
-   
+
    :color blue)
 
   (";" org-table-next-field)
@@ -1561,7 +1561,7 @@ Python helper
 _a_: begin def/class  _w_: move up          _x_: syntax    _Sb_: send buffer
 _e_: end def/class    _s_: move down        _n_: next err  _Sr_: send region
 _<_: dedent line      _m_: mark class/def   _p_: prev err  _Ss_: send statement
-_>_: indent line      ^ ^                   ^ ^            _Sh: switch shell 
+_>_: indent line      ^ ^                   ^ ^            _Sh: switch shell
 _j_: jump to
 _._: goto definition
 
