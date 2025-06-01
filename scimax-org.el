@@ -47,7 +47,7 @@
 	 (end (org-element-property :end hl))
 	 (inlinetask (with-temp-buffer
 		       (org-mode)
-		       (org-inlinetask-insert-task) 
+		       (org-inlinetask-insert-task)
 		       (insert title "  " tags "\n" body)
 		       (concat (buffer-string) "\n\n"))))
     (cl--set-buffer-substring beg end inlinetask)))
@@ -89,8 +89,8 @@ is positive, move after, and if negative, move before."
     (goto-char (line-end-position))
     (when (eobp)
       (insert "\n")))
-  
-  (org-mark-subtree) 
+
+  (org-mark-subtree)
   (kill-region (region-beginning) (region-end))
   ;; Jump to a visible headline
   (avy-with avy-goto-line (avy-jump org-heading-regexp))
@@ -263,7 +263,7 @@ subscripts and superscripts."
 			      s))
 			  (split-string
 			   (buffer-substring start end) "\n"))))
-      (cl--set-buffer-substring start end lines) 
+      (cl--set-buffer-substring start end lines)
       (forward-char (length lines))))
    ;; We are on a word with no region selected
    ((thing-at-point 'word)
@@ -752,7 +752,7 @@ A prefix arg of 5 opens link in new frame."
   (interactive "P")
   (cond
    ;; single prefix arg, no fancy stuff, just org-return
-   ((and arg (listp arg) (equal arg '(4))) 
+   ((and arg (listp arg) (equal arg '(4)))
     (org-return))
 
    ((null arg)
@@ -767,7 +767,7 @@ A prefix arg of 5 opens link in new frame."
 
      ((looking-at org-heading-regexp)
       (org-return))
-     
+
 
      ;; when you are here
      ;; * headline...
@@ -776,14 +776,14 @@ A prefix arg of 5 opens link in new frame."
      ((and (bolp)
 	   ;; This avoids the case where you are at the beginning of a line that is not folded
 	   (save-excursion
-	     (let ((p (point))) 
-	       (org-beginning-of-line) 
+	     (let ((p (point)))
+	       (org-beginning-of-line)
 	       (not (= p (point)))))
 	   ;; This is a heuristic device where I found C-a C-e does not return
 	   ;; to the same place. I feel like this is new behavior since org
 	   ;; 9.5ish, but am not sure
 	   (save-excursion
-	     (let ((p (point))) 
+	     (let ((p (point)))
 	       (org-beginning-of-line)
 	       (org-end-of-line)
 	       (not (= p (point))))))
@@ -861,17 +861,17 @@ A prefix arg of 5 opens link in new frame."
 	  (org-return)
 	;; empty row
 	(beginning-of-line)
-	(delete-region (line-beginning-position) (line-end-position)) 
+	(delete-region (line-beginning-position) (line-end-position))
 	(org-return)))
      ;; fall-through
      (t
       (org-return))))
-   
-   ;; other window, 
+
+   ;; other window,
    ((= arg 4)
     (clone-indirect-buffer-other-window (buffer-name) t)
     (org-return))
-   
+
    ;; other frame
    ((= arg 5)
     (clone-frame)
