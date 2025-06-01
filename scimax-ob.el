@@ -395,7 +395,73 @@ Defaults to 3."
     (when (string= lang (org-element-property :language (org-element-context)))
       (scimax-ob-merge-blocks p (point)))))
 
-;; * convenience functions
+;; * header functions
+
+(defun scimax-ob-get-param (param)
+  "Get PARAM value in the current source block header.
+PARAM should be a :keyword.
+if VAL is nil, it deletes the PARAM."
+  (interactive)
+  (if (keywordp param)
+      (setq param (intern-soft (substring (symbol-name param) 1)))
+    (error "%s should be a :keyword" param))
+  (when (org-in-src-block-p)
+    (save-excursion
+      (goto-char (org-babel-where-is-src-block-head))
+      (let* ((header-line (thing-at-point 'line t))
+             (case-fold-search t))
+        (when (string-match "^\\([ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)\\)\\(.*\\)$" header-line)
+          (let* ((prefix (match-string 1 header-line))
+                 (lang (match-string 2 header-line))
+                 (params-string (match-string 3 header-line))
+                 (params (org-babel-parse-header-arguments params-string)))
+	    (or (cdr (assoc param params))
+		(when (assoc param params) t))))))))
+
+
+(defun scimax-ob-update-param (param val)
+  "Update PARAM to VAL in the current source block header.
+PARAM should be a :keyword.
+if VAL is nil, it deletes the PARAM."
+  (interactive)
+  (if (keywordp param)
+      (setq param (intern-soft (substring (symbol-name param) 1)))
+    (error "%s should be a :keyword" param))
+  (when (org-in-src-block-p)
+    (save-excursion
+      (goto-char (org-babel-where-is-src-block-head))
+      (let* ((header-line (thing-at-point 'line t))
+             (case-fold-search t))
+        (when (string-match "^\\([ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)\\)\\(.*\\)$" header-line)
+          (let* ((prefix (match-string 1 header-line))
+                 (lang (match-string 2 header-line))
+                 (params-string (match-string 3 header-line))
+                 (params (org-babel-parse-header-arguments params-string))
+                 (updated-params (assq-delete-all param params)))
+            ;; Add the new parameter value
+            (when val
+	      (push (cons param val) updated-params))
+            ;; Rebuild the header line
+            (let ((new-params-string (mapconcat
+				      (lambda (param)
+					(let ((key (car param))
+					      (val (cdr param)))
+					  (if val
+					      (format ":%s %S" (symbol-name key) val)
+					    (format ":%s" (symbol-name key)))))
+				      updated-params" ")))
+              (beginning-of-line)
+              (kill-line)
+              (insert (concat prefix
+                              (if (string-empty-p new-params-string)
+                                  ""
+                                (concat " " new-params-string)))))))))))
+
+(defun scimax-ob-delete-param (param)
+  "Delete PARAM from header.
+PARAM should be a :keyword."
+  (scimax-ob-update-param param nil))
+
 
 (defun scimax-ob-edit-header ()
   "Edit the src-block header in the minibuffer."
@@ -408,6 +474,36 @@ Defaults to 3."
      header-start header-end
      (read-string "Header: "
 		  (buffer-substring-no-properties header-start header-end)))))
+
+;; * Single-run src blocks
+
+;; The idea here is you can advise `org-babel-execute-src-block' so that a block
+;; can only be run once if :single-run is set in the header. This advice updates
+;; the header with a timestamp that indicates it has already been run once.
+
+;; (advice-add 'org-babel-execute-src-block :around 'scimax-ob-single-run-advice)
+
+(defun scimax-ob-single-run-advice (orig-func &rest args)
+  "Conditionally run based on value of :single-run in the header.
+If it is t, run once, and update the value with a timestamp.
+If it is a timestamp, raise an error.
+If it is not set in the header run normally."
+  (cond
+   ;; single-run that we need to run
+   ((string= (scimax-ob-get-param :single-run) "t")
+    (apply orig-func args)
+    (scimax-ob-update-param :single-run
+			    (with-temp-buffer
+			      (org-insert-timestamp (current-time) t t))))
+   ;; this has already been run so we raise an error
+   ((scimax-ob-get-param :single-run)
+    (error "This cell has already been run"))
+   ;; run as usual
+   (t
+    (apply orig-func args))))
+
+;; * convenience functions
+
 
 
 (defun scimax-ob-clear-all-results ()
