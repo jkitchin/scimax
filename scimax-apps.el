@@ -95,6 +95,13 @@ PATH is optional, and defaults to the current directory."
   (browse-url "http://google.com"))
 
 
+(defun google-scholar (query)
+  "Search Google Scholar for QUERY."
+  (interactive "sQuery: ")
+  (browse-url
+   (format "https://scholar.google.com/scholar?q=%s" (url-hexify-string query))))
+
+
 (provide 'scimax-apps)
 
 ;;; scimax-apps.el ends here
