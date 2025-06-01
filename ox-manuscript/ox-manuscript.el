@@ -798,7 +798,7 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 	(setq end (point))
 	(setq latex-file-path (buffer-substring-no-properties
 			       start (- end 1)))
-	
+
 	(cl-incf figure-count)
 	(let* ((eps-file (concat latex-file-path ".eps"))
 	       (pdf-file (concat latex-file-path ".pdf"))
@@ -807,7 +807,7 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 	       (jpeg-file (concat latex-file-path ".jpeg"))
 	       (fname (file-name-nondirectory  latex-file-path)))
 	  ;;  Copy the images to the tex-archive.
-	  
+
 	  (when (file-exists-p eps-file)
 	    (copy-file eps-file (expand-file-name
 				 (format "%02d-%s.eps" figure-count fname)
@@ -818,7 +818,7 @@ The optional FILES keyword is a list of additional files to copy into the archiv
 				 (format "%02d-%s.pdf" figure-count fname)
 				 tex-archive)
 		       t))
-	  (when (file-exists-p png-file) 
+	  (when (file-exists-p png-file)
 	    (copy-file png-file (expand-file-name
 				 (format "%02d-%s.png" figure-count fname)
 				 tex-archive)
@@ -861,7 +861,7 @@ The optional FILES keyword is a list of additional files to copy into the archiv
       (message "Building %s in %s" base-tex-file default-directory)
       (call-process "latexmk" nil nil nil "-f" "-pdf" "-shell-escape" "-interaction=nonstopmode" base-tex-file)
       ;; (ox-manuscript-cleanup)
-      
+
       (org-open-file (concat
 		      (file-name-sans-extension
 		       base-tex-file)
@@ -1015,7 +1015,7 @@ Open document if it exists, create it otherwise."
 					  (plist-get x :template))
 				  x))
 			       candidates)
-	      
+
 	      :action (lambda (entry)
 			(ox-manuscript-open (plist-get (cdr entry) :key))))))
 
