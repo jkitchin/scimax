@@ -1355,6 +1355,21 @@ nb:eeg-pitt::./obipy-resources/6d9672694ff9a17f61f22a2b1be01575-10220Ctf.png
 #+RESULTS:
 : nb-hydra/body
 
+* Notebook utilities
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defun nb-uuid (quote)
+  "Insert a uuid at point."
+  (interactive "P")
+  (let ((uuid (org-id-uuid)))
+    (insert (if quote
+		(format "%S" uuid)
+	      uuid))))
+
+
+#+END_SRC
+
+
 * The end
 
 #+BEGIN_SRC emacs-lisp  :tangle yes :results silent
