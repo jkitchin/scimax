@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: scipy.optimize.minimize
+# name: import.scipy.optimize.minimize
 # key: im
 # contributor: John Kitchin <jkitchin@andrew.cmu.edu>
 # --

@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: from ase.cluster.icosahedron import Icosahedron
+# name: from ase.cluster.icosahedron import Decahedron
 # key: idec
 # --
 from ase.cluster.decahedron import Decahedron
