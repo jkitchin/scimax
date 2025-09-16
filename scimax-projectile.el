@@ -97,7 +97,7 @@ with the entry."
 				 counsel-projectile-switch-project)
 	 do
 	 (ivy-add-actions
-	  projectile-cmd 
+	  projectile-cmd
 	  '(
 	    ;; xs runs shell, and xe runs eshell. This is nice for an external shell.
 	    ("xb" scimax-ivy-projectile-bash "Open bash here.")
@@ -110,12 +110,15 @@ with the entry."
 	    ("4" (lambda (arg)
 		   (find-file-other-window arg))
 	     "open file in other window")
-	    ("5" (lambda (arg)
-		   (find-file-other-frame arg))
-	     "open file in new frame") 
+	    ("5o" (lambda (arg)
+		    (find-file-other-frame arg))
+	     "open file in new frame")
+	    ("5f" (lambda (arg)
+		    (projectile-find-file-dwim))
+	     "find file in new frame")
 	    ("6" (lambda (arg)
 		   (find-file-other-tab arg))
-	     "open in new tab")))) 
+	     "open in new tab"))))
 
 
 ;; (ivy-add-actions 'counsel-projectile-switch-project
@@ -168,8 +171,8 @@ Filters out files that match entries in
 entries in `scimax-project-default-files' to the top."
   (let ((files (apply orig-func args))
 	(defaults))
-    
-    ;; Remove any files from projectile-globally-ignored-files 
+
+    ;; Remove any files from projectile-globally-ignored-files
     (setq files (cl-delete-if (lambda (f)
 				(member (file-name-nondirectory f)
 					projectile-globally-ignored-files))
@@ -197,14 +200,14 @@ This updates the cache, and the project list for the new project."
 
   (let ((oldprj (projectile-project-root))
 	(newprj (f-join newpath (car (last (f-split (projectile-project-root))))))
-	(projectile-switch-project-action (lambda (&optional args) nil))) 
+	(projectile-switch-project-action (lambda (&optional args) nil)))
     (projectile-invalidate-cache nil)
     (projectile-kill-buffers)
 
-    
+
     (rename-file oldprj newprj)
     (projectile-remove-known-project oldprj)
-    
+
     (projectile-add-known-project newprj)
     (projectile-switch-project-by-name newprj)
     (projectile-cache-project newprj (projectile-project-files newprj))))
