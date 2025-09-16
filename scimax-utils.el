@@ -317,7 +317,7 @@ with double prefix arg, prompt for filename. Only works on macOS."
      (mapconcat
       'identity
       (list (format "set screenshotFilePath to \"%s\"" (expand-file-name fname "screenshots"))
-	    "do shell script \"screencapture \" & \"-i \" & \" \" & quoted form of screenshotFilePath"
+	    "do shell script \"screencapture \" & \"-x \" & \"-i \" & \" \" & quoted form of screenshotFilePath"
 	    (concat "set result to \"[[./" fname "]]\"")
 	    "set the clipboard to result")
       "\n"))
@@ -326,7 +326,7 @@ with double prefix arg, prompt for filename. Only works on macOS."
 			 ;; sometimes identify returns 0, and I want 800 in that case.
 			 (max 800 (string-to-number
 				   (cl-first
-				    (split-string 
+				    (split-string
 				     (cl-third
 				      (split-string
 				       (string-trim
@@ -356,7 +356,7 @@ ARG prompt for filename, else generate one. images are saved in
     (insert (format "#+attr_org: :width %s\n"
 		    (min 800 (string-to-number
 			      (cl-first
-			       (split-string 
+			       (split-string
 				(cl-third
 				 (split-string
 				  (string-trim
