@@ -2077,8 +2077,7 @@ the current version. Returns the buffer."
     (goto-char (point-min))
     ;; save fname as buffer local variable to save back later.
     (with-current-buffer buf
-      (make-local-variable '*sem-wdiff-git-source*)
-      (setq *sem-wdiff-git-source* curbuf))
+      (setq-local *sem-wdiff-git-source* curbuf))
     buf))
 
 

@@ -618,10 +618,8 @@ Usually called in a hook function."
 
 
 ;; * line numbers
-(defvar scimax-ob-number-line-overlays '()
+(defvar-local scimax-ob-number-line-overlays '()
   "List of overlays for line numbers.")
-
-(make-variable-buffer-local 'scimax-ob-number-line-overlays)
 
 (defun scimax-ob-toggle-line-numbers ()
   (interactive)

@@ -143,10 +143,8 @@ The file names look like obf-<md5 hash>.ext"
 	     (with-current-buffer proxy-buffer
 	       (revert-buffer :ignore-auto :noconfirm)
 	       ;; put the original buffer into a local variable for use later
-	       (make-local-variable 'obf-buffer)
-	       (make-local-variable 'obf-lang)
-	       (setq obf-lang (org-no-properties lang))
-	       (setq obf-buffer cb)
+	       (setq-local obf-buffer cb)
+	       (setq-local obf-lang (org-no-properties lang))
 					; Make sure we have the hook function
 					; setup, then trigger a check.
 	       (add-hook 'flycheck-after-syntax-check-hook 'obf-transfer-flycheck-overlays t t)
