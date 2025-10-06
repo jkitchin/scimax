@@ -147,7 +147,7 @@ This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
   "Turn scimax-jupyter advices off."
   (interactive)
   (message "Un-advising emacs-jupyter")
-  
+
   (cl-loop for (emacs-jupyter-fn position scimax-jupyter-fn) in scimax-jupyter-advices
 	   do
 	   (advice-remove emacs-jupyter-fn scimax-jupyter-fn)))
@@ -178,7 +178,7 @@ This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
 ;;   "Return the result string in org syntax for the results of REQ.
 ;; Meant to be used as the return value of
 ;; `org-babel-execute:jupyter'."
-;;   (when-let* ((results (nreverse (jupyter-org-request-results req))) 
+;;   (when-let* ((results (nreverse (jupyter-org-request-results req)))
 ;; 	      ;; Not sure why these are reversed above, it works right for some things,
 ;; 	      ;; but not right for display stuff. I wonder if there is some way
 ;; 	      ;; to tell when something is displayed.
@@ -190,9 +190,9 @@ This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
 ;;     ;; That is consistent with the jupyter notebook, but not consistent with
 ;;     ;; org-babel. Here I only return the last thing if value is selected, and do
 ;;     ;; not require it to be fixed-width. That also isn't quite right, except in
-;;     ;; a drawer. 
+;;     ;; a drawer.
 ;;     (when (member "value" result-params)
-;;       (let ((retval (car (last results)))) 
+;;       (let ((retval (car (last results))))
 ;; 	(setq results
 ;; 	      (list
 ;; 	       (cond
@@ -202,7 +202,7 @@ This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
 ;; 		 retval))))))
 
 ;;     (when (member "both" result-params)
-;;       (let ((retval (car (last results)))) 
+;;       (let ((retval (car (last results))))
 ;; 	(setf (car (last results))
 ;; 	      (cond
 ;; 	       ((eq 'fixed-width (org-element-type retval))
@@ -274,7 +274,7 @@ This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
 (add-hook 'org-babel-after-execute-hook 'scimax-rm-backslashes)
 
 ;; * Fix org-show-entry so it doesn't collapse results all the time
-;; 
+;;
 ;; I like to see the results, and this function usually hides them. I added the
 ;; unless wrapper, so it doesn't happen if point is on a src block. In a
 ;; previous version I just commented out the org-cycle-hide-drawers line, and I
@@ -320,7 +320,7 @@ way, but it is."
   (let* ((cp (point))
 	 (location (org-babel-where-is-src-block-result))
 	 (case-fold-search t))
-    
+
     (when (and location
 	       (goto-char location)
 	       (looking-at org-babel-result-regexp))
@@ -383,7 +383,7 @@ This should only apply to jupyter-lang blocks."
 							    (search-backward "#+BEGIN_SRC")
 							    (scimax-jupyter-jump-to-error)))
 				map))))))
-      
+
       t)))
 
 
@@ -432,12 +432,12 @@ This should only apply to jupyter-lang blocks."
    "Misc"
    (("i" jupyter-org-inspect-src-block "inspect")
     ("<tab>" completion-at-point "Complete")
-    
+
     ("O" scimax-ob/body "scimax-ob")
     ("q" nil "quit"))
-   
+
    "Kernel"
-   (("s" org-babel-jupyter-scratch-buffer "scratch")
+   (("R" org-babel-jupyter-scratch-buffer "scratch")
     ("z" org-babel-switch-to-session "REPL")
     ("u" jupyter-org-interrupt-kernel "interrupt")
     ("r" (jupyter-org-with-src-block-client
