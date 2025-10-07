@@ -7,11 +7,22 @@ See the [[./scimax.org][manual]] for more details.
 
 #+BEGIN_HTML
 <a href="https://github.com/jkitchin/scimax/actions/workflows/test-scimax.yml"><img src="https://github.com/jkitchin/scimax/actions/workflows/test-scimax.yml/badge.svg"></a>
-
-<a href="https://gitter.im/scimax-users"><img src="https://badges.gitter.im/gitterHQ/gitter.png"></a>
 #+END_HTML
 
 * NEWS
+
+** [2025-10-07 Tue] scimax 4.0
+
+It is hard to believe it is over two years again since the last big update. I have some renewed energy in scimax with the development of LLMs, and integration of them in Emacs with packages like gptel.
+
+Some plans that are underway:
+
+- Update to Emacs 31+. Scimax may work for earlier Emacs, but this is the version I am starting to use daily, and that I use scimax in.
+- scimax-gptel this isn't public yet, and it will include tool and mcp integration for scientific writing activities
+- rewrite of org-db to enable semantic search
+
+The last commit in scimax 3.0 can be found at https://github.com/jkitchin/scimax/commit/dca8595b1094ffa11f9e3eebfcfb367f141b7979.
+
 ** [2023-05-30 Tue] scimax 3.0
 
 Another 2+ year update :) This release primarily revolves around making scimax brew-installable. See [[*homebrew]] for details. This new method installs a command-line utility ~scimax~ that will start scimax for you.
