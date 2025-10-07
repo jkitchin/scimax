@@ -204,6 +204,13 @@ Alternatively, add scimax to your load path in your init file and just require w
 
 It is not uncommon to have to restart emacs a few times while all the packages from MELPA are installed. Windows seems to be like that.
 
+
+* Known / reported issues
+
+** AUCTeX installation
+
+It appears that AUCTeX may not be automatically installed on Linux ([[https://github.com/jkitchin/scimax/issues/498][issue]]) when using the archived installation method. I don't know if this is an issue with homebrew or not.
+
 * Funding for scimax
 
 =scimax= development has been partially supported by the following grants:
