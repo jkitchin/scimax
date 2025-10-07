@@ -1,3 +1,10 @@
+;;; scimax-macros.el --- Macros for scimax -*- lexical-binding: t -*-
+
+;;; Commentary:
+;;
+
+;;; Code:
+
 (defmacro defn (fname args &optional docstring &rest body)
   "Macro to define a function with improved argument documentation.
 FNAME is a symbol for the function name.

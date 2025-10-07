@@ -1,4 +1,4 @@
-;;; scimax-latex.el --- Utilities to check the LaTeX setup
+;;; scimax-latex.el --- Utilities to check the LaTeX setup -*- lexical-binding: t -*-
 
 
 ;;; Commentary:

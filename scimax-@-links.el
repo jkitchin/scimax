@@ -1,4 +1,4 @@
-;;; scimax-@-links.el --- Scimax support for links
+;;; scimax-@-links.el --- Scimax support for links -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This is some idea to bind @ to insert links to convenient things.

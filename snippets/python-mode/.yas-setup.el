@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (defun scimax-get-numpy-docstring-snippet ()
   "Returns a snippet for a numpy docstring.
 This should be run in a python function."

@@ -1,4 +1,4 @@
-;;; ore.el --- Org-mode explorer
+;;; ore.el --- Org-mode explorer -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This module provides one command `ore' that provides information about the

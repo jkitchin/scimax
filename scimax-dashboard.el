@@ -1,4 +1,4 @@
-;;; scimax-dashboard.el --- Dashboard for scimax
+;;; scimax-dashboard.el --- Dashboard for scimax -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This module creates a dashboard splash screen for scimax.  It

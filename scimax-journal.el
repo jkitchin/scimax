@@ -1,4 +1,4 @@
-;;; scimax-journal.el --- Journal commands for orgmode
+;;; scimax-journal.el --- Journal commands for orgmode -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This is a set of functions to make journaling in org-mode easier. A journal

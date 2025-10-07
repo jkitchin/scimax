@@ -1,4 +1,4 @@
-;;; scimax-contacts.el --- org-mode contacts in scimax
+;;; scimax-contacts.el --- org-mode contacts in scimax -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

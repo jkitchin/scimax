@@ -1,4 +1,4 @@
-;;; scimax-utils.el --- Utility functions scimax cannot live without
+;;; scimax-utils.el --- Utility functions scimax cannot live without -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

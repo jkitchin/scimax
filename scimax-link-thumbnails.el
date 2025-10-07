@@ -1,4 +1,4 @@
-;;; scimax-link-thumbnails.el --- Put thumbnails on org-mode links.
+;;; scimax-link-thumbnails.el --- Put thumbnails on org-mode links. -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This module puts thumbnails on org-mode file links that have images in the

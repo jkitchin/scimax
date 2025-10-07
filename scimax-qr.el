@@ -1,9 +1,9 @@
-;;; scimax-qr.el --- qr code utilities for scimax
+;;; scimax-qr.el --- qr code utilities for scimax -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;
 ;; * Utilities for QR codes in scimax.
-;; 
+;;
 ;; `scimax-insert-qr' will generate and insert a QR code link in your document.
 ;; This relies on `org-id' so you need to be in a heading.
 ;;
@@ -19,16 +19,16 @@
 ;; export CFLAGS="-I$(brew --prefix zbar)/include"
 ;; pip install zbarlight
 ;; #+END_SRC
-;; 
+;;
 ;; This is alpha code. It is not obvious what the best thing to save in the QR
 ;; code is. At the moment I save an `org-id' which is useful to get you back to
 ;; a heading. It is less useful to get to a location though.
 ;;
-;; An alternative could be an editmark, or a an nb link, which could be a
+;; An alternative could be an editmark, or an nb link, which could be a
 ;; pointer to a specific location. You would have to rely on `org-db' to find it
 ;; again (I already rely on it for `org-id').
 ;;
-;; I use a qr link for this. It has limited export support: LaTeX and HTML for
+;; I use a qr org-mode link to provide limited export support: LaTeX and HTML for
 ;; now. Note when the link is activated, a qr code will be saved in the current
 ;; directory. I don't love that, but it is simple, and there is not an obvious
 ;; central place to keep them.
@@ -47,7 +47,7 @@
 		  (when
 		      (and
 		       ;; got a path
-		       path 
+		       path
 		       ;; and there is no overlay here.
 		       (not (ov-at start)))
 		    (let* ((qr (concat path ".png"))
@@ -60,14 +60,14 @@ qr.make(fit=True)
 img = qr.make_image()
 img.save('%s')
 "
-					   
+
 					   (format "[[qr:%s]]" path)
 					   qr)))
 		      (unless (file-exists-p qr)
 			(shell-command (format "python -c \"%s\"" script)))
 		      (setq img (create-image (expand-file-name qr))
 			    ov (make-overlay start end))
-		      (overlay-put ov 'display img) 
+		      (overlay-put ov 'display img)
 		      (overlay-put ov 'face 'default)
 		      (overlay-put ov 'org-image-overlay t)
 		      (overlay-put ov 'modification-hooks

@@ -1,4 +1,4 @@
-;;; scimax-ob.el --- New org-babel functions for src blocks
+;;; scimax-ob.el --- New org-babel functions for src blocks -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; Inspired by some editing commands in Jupyter notebook I created these

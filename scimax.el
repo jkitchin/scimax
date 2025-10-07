@@ -1,4 +1,4 @@
-;;; scimax.el ---
+;;; scimax.el --- -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

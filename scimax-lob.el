@@ -1,4 +1,4 @@
-;;; scimax-lob.el --- Library of babel for scimax
+;;; scimax-lob.el --- Library of babel for scimax -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This was motivated by the work described at

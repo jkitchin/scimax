@@ -1,4 +1,4 @@
-;;; scimax-apps.el --- Library to open programs
+;;; scimax-apps.el --- Library to open programs -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

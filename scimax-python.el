@@ -1,4 +1,4 @@
-;;; scimax-python.el --- Scimax python utilities
+;;; scimax-python.el --- Scimax python utilities -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; 

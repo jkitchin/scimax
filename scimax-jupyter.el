@@ -1,4 +1,4 @@
-;;; scimax-jupyter.el --- scimax customization for emacs-jupyter
+;;; scimax-jupyter.el --- scimax customization for emacs-jupyter -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This provides some fine-tuning of key bindings, and loads jupyter for scimax.

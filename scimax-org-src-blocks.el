@@ -1,4 +1,4 @@
-;;; scimax-org-src-blocks.el --- Scimax customizations for src blocks.
+;;; scimax-org-src-blocks.el --- Scimax customizations for src blocks. -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

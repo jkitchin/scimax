@@ -1,4 +1,4 @@
-;;; emacs-keybinding-command-tooltip-mode.el --- A minor mode for emacs commands and keybindings
+;;; emacs-keybinding-command-tooltip-mode.el --- A minor mode for emacs commands and keybindings -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; Makes the syntax \\[some-command] and `some-command' and (kbd "key-sequence") functional in a buffer.

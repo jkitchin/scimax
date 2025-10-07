@@ -1,4 +1,4 @@
-;;; ox-twee2.el --- export org to twee2 format for interactive fiction
+;;; ox-twee2.el --- export org to twee2 format for interactive fiction -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

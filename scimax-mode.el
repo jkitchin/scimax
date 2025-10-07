@@ -1,4 +1,4 @@
-;;; scimax-mode.el --- Summary
+;;; scimax-mode.el --- Summary -*- lexical-binding: t -*-
 ;; Copyright(C) 2014 John Kitchin
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>

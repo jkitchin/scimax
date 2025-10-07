@@ -1,4 +1,4 @@
-;;; bibtex-hotkeys.el --- Hotkeys for bibtex files.
+;;; bibtex-hotkeys.el --- Hotkeys for bibtex files. -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This is an experimental module to add hotkeys to bibtex files. The idea is

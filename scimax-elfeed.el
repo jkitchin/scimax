@@ -1,4 +1,4 @@
-;;; scimax-elfeed.el --- scimax configuration for elfeed
+;;; scimax-elfeed.el --- scimax configuration for elfeed -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This just sets up elfeed for scimax. It sets some default feeds and

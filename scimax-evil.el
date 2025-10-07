@@ -1,4 +1,4 @@
-;;; scimax-evil.el --- Evil mode for scimax
+;;; scimax-evil.el --- Evil mode for scimax -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

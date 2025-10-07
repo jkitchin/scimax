@@ -171,7 +171,7 @@ Adapted from `thing-at-point-email-regexp'.")
 Opens the database if needed. BODY should be regular commands.
 The commands can use the variable `org-db' in them. Closes the db
 when done. Returns the last sexp of BODY."
-  `(lexical-let ((org-db (sqlite-open (expand-file-name org-db-name org-db-root))))
+  `(let ((org-db (sqlite-open (expand-file-name org-db-name org-db-root))))
      (prog1
 	 (progn ,@body)
        (sqlite-close org-db))))

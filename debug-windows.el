@@ -1,3 +1,10 @@
+;;; debug-windows.el --- Debug script for Windows -*- lexical-binding: t -*-
+
+;;; Commentary:
+;;
+
+;;; Code:
+
 (require 'package)
 
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))

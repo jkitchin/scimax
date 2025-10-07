@@ -1,4 +1,4 @@
-;;; scimax-build.el --- Build capability for org-mode
+;;; scimax-build.el --- Build capability for org-mode -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; The idea here is to allow an easy build process for org-files. When you run

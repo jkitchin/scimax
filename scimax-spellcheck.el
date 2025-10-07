@@ -1,4 +1,4 @@
-;;; scimax-spellcheck.el --- Spell-check setup for scimax
+;;; scimax-spellcheck.el --- Spell-check setup for scimax -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

@@ -1,4 +1,4 @@
-;;; scimax-inkscape.el --- Using inkscape in org-mode
+;;; scimax-inkscape.el --- Using inkscape in org-mode -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

@@ -1,4 +1,4 @@
-;;; org-db-fulltext.el --- Fulltext search for org-db
+;;; org-db-fulltext.el --- Fulltext search for org-db -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

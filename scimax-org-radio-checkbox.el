@@ -1,4 +1,4 @@
-;;; scimax-org-radio-checkbox.el --- Org radio checkboxes
+;;; scimax-org-radio-checkbox.el --- Org radio checkboxes -*- lexical-binding: t -*-
 ;; * radio checkboxes
 
 ;;; Commentary:
@@ -9,6 +9,14 @@
 ;; and remove the others. To facilitate using the checked value in code,
 ;; `scimax-get-radio-list-value' is provided to get the value from a radio
 ;; checkbox list by its name.
+;;
+;; Here is an example radio checklist
+;;
+;; #+attr_org: :radio
+;; - [ ] one
+;; - [X] two
+;; - [ ] three
+
 
 ;;; Code:
 

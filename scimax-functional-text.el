@@ -1,4 +1,4 @@
-;;; scimax-functional-text.el --- Functional text for scimax
+;;; scimax-functional-text.el --- Functional text for scimax -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This library makes functional links out of text in Emacs. It is similar to

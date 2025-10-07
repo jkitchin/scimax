@@ -1,4 +1,4 @@
-;;; scimax-md.el --- A better exporter for markdown
+;;; scimax-md.el --- A better exporter for markdown -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

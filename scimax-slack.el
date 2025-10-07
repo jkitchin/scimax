@@ -1,4 +1,4 @@
-;;; scimax-slack.el --- a Slack integration for scimax and org-mode
+;;; scimax-slack.el --- a Slack integration for scimax and org-mode -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; Light wrapper around the emacs-slack package to enable some org-mode integration

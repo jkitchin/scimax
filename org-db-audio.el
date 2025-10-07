@@ -1,4 +1,4 @@
-;;; org-db-audio.el --- an org-db module for searching audio from aiff and mov
+;;; org-db-audio.el --- an org-db module for searching audio from aiff and mov -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;
@@ -17,13 +17,14 @@
 
 (defun org-db-audio-setup ()
   "Code to setup an audio table in org-db."
-  (sqlite-execute org-db "create table if not exists audio(
+  (with-org-db
+   (sqlite-execute org-db "create table if not exists audio(
 rowid integer primary key,
 filename_id integer,
 audio_filename text,
 position integer,
 text text,
-foreign key(filename_id) references files(rowid) on delete cascade)"))
+foreign key(filename_id) references files(rowid) on delete cascade)")))
 
 
 (defun org-db-update-audio (filename-id parse-tree org-db)

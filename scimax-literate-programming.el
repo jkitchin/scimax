@@ -1,4 +1,4 @@
-;;; scimax-literate-programming.el --- Literate programming tools for org-mode
+;;; scimax-literate-programming.el --- Literate programming tools for org-mode -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This library adds code navigation via M-. and M-, in literate program

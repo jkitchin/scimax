@@ -1,4 +1,4 @@
-;;; org-db-agenda.el --- Agenda from org-db
+;;; org-db-agenda.el --- Agenda from org-db -*- lexical-binding: t -*-
 
 ;;; Commentary:
 

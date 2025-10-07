@@ -1,4 +1,4 @@
-;;; scimax-gitter.el --- org-mode + gitter integration
+;;; scimax-gitter.el --- org-mode + gitter integration -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This library provides some integration of Emacs/org-mode and gitter.

@@ -1,4 +1,4 @@
-;;; scimax-yas.el --- scimax setup for snippets
+;;; scimax-yas.el --- scimax setup for snippets -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This module provides a scimax customized setup for yasnippets. It was

@@ -1,4 +1,4 @@
-;;; scimax-org-eldoc.el --- Generate org-mode elisp documentation
+;;; scimax-org-eldoc.el --- Generate org-mode elisp documentation -*- lexical-binding: t -*-
 
 
 ;;; Commentary:

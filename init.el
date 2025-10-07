@@ -1,4 +1,4 @@
-;;; init.el --- Where all the magic begins
+;;; init.el --- Where all the magic begins -*- lexical-binding: t -*-
 ;;
 
 ;;; Commentary:

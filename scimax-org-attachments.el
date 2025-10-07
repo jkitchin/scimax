@@ -1,4 +1,4 @@
-;;; scimax-org-attachments.el --- scimax enhancements for org-attachments
+;;; scimax-org-attachments.el --- scimax enhancements for org-attachments -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

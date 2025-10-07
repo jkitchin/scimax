@@ -1,4 +1,4 @@
-;;; scimax-projectile.el --- Scimax projectile customizations
+;;; scimax-projectile.el --- Scimax projectile customizations -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

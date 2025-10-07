@@ -1,4 +1,4 @@
-;;; org-db-images.el --- Indexes images for text search in org-db
+;;; org-db-images.el --- Indexes images for text search in org-db -*- lexical-binding: t -*-
 
 
 ;;; Commentary:
@@ -12,13 +12,14 @@
 ;;; Code:
 
 (defun org-db-images-setup ()
-  (sqlite-execute org-db "create table if not exists images(
+  (with-org-db
+   (sqlite-execute org-db "create table if not exists images(
 rowid integer primary key,
 filename_id integer,
 img_filename text,
 position integer,
 text text,
-foreign key(filename_id) references files(rowid) on delete cascade)"))
+foreign key(filename_id) references files(rowid) on delete cascade)")))
 
 
 (defun org-db-update-images (filename-id parse-tree org-db)

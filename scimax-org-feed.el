@@ -1,4 +1,4 @@
-;;; scimax-org-feed.el --- A scimax library for consuming org-feeds
+;;; scimax-org-feed.el --- A scimax library for consuming org-feeds -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

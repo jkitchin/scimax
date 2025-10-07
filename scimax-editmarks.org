@@ -182,7 +182,7 @@ This is mostly an experiment: {@>John Kitchin :email jkitchin@andrew.cmu.edu <@}
 * The code
 
 #+BEGIN_SRC emacs-lisp
-;;; scimax-editmarks.el --- Editmarks for scimax
+;;; scimax-editmarks.el --- Editmarks for scimax -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

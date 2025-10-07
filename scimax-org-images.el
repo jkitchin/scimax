@@ -1,4 +1,4 @@
-;;; scimax-org-images.el --- scimax customizations for images in org-mode
+;;; scimax-org-images.el --- scimax customizations for images in org-mode -*- lexical-binding: t -*-
 ;; * Rescaling inline-images
 ;; This may eventually be obsolete if this makes it into org-mode
 

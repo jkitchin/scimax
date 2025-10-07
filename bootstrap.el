@@ -1,4 +1,4 @@
-;;; bootstrap.el --- install use-package
+;;; bootstrap.el --- install use-package -*- lexical-binding: t -*-
 
 
 ;;; Commentary:

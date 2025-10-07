@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (require 'yasnippet)
 (defvar yas-text)
 
@@ -7,7 +8,3 @@
     (mapconcat 'identity
 	       (mapcar 'upcase args)
 	       "\n")))
-
-
-
-

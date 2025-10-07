@@ -1,4 +1,4 @@
-;;; scimax-org-latex.el --- scimax customizations for latex in org-mode
+;;; scimax-org-latex.el --- scimax customizations for latex in org-mode -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; These are scimax modifications to how org generates Latex or Latex equation fragments.

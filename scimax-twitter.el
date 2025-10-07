@@ -1,4 +1,4 @@
-;;; scimax-twitter.el --- Twitter functions
+;;; scimax-twitter.el --- Twitter functions -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

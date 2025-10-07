@@ -1,4 +1,4 @@
-;;; semantic-completing-read.el --- Semantic completing read
+;;; semantic-completing-read.el --- Semantic completing read -*- lexical-binding: t -*-
 ;;
 ;; Copyright(C) 2023 John Kitchin
 ;;

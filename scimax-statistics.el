@@ -1,4 +1,4 @@
-;;; scimax-statistics.el --- Statistics and data science features for emacs
+;;; scimax-statistics.el --- Statistics and data science features for emacs -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

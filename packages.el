@@ -66,13 +66,13 @@
 (use-package drag-stuff)
 
 (use-package swiper
-  :bind 
+  :bind
   ("H-s" . swiper-all)
   :diminish ivy-mode
   :config
   (ivy-mode)
   (define-key global-map [remap isearch-forward]
-    (if (executable-find "grep") 
+    (if (executable-find "grep")
 	'counsel-grep-or-swiper
       'swiper)))
 
@@ -249,7 +249,7 @@
 (use-package ox-pandoc)
 
 ;; https://github.com/bbatsov/projectile
-(use-package projectile 
+(use-package projectile
   :bind
   ("C-c pp" . counsel-projectile-switch-project)
   ("C-c pb" . counsel-projectile-switch-to-buffer)

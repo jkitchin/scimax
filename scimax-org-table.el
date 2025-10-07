@@ -1,4 +1,4 @@
-;;; scimax-org-table.el --- Scimax utility functions for org tables
+;;; scimax-org-table.el --- Scimax utility functions for org tables -*- lexical-binding: t -*-
 ;;
 ;;; Commentary:
 ;; These work for tables in the current file

@@ -39,7 +39,7 @@
 ;;* scimax-hydra utilities
 
 ;; Lexical closure to encapsulate the stack variable.
-(lexical-let ((scimax-hydra-stack '()))
+(let ((scimax-hydra-stack '()))
   (defun scimax-hydra-push (expr)
     "Push an EXPR onto the stack."
     (push expr scimax-hydra-stack))

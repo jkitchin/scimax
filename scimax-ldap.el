@@ -1,4 +1,4 @@
-;;; scimax-ldap.el --- An ivy interface to LDAP services
+;;; scimax-ldap.el --- An ivy interface to LDAP services -*- lexical-binding: t -*-
 
 
 ;;; Commentary:
