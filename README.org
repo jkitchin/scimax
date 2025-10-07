@@ -13,13 +13,16 @@ See the [[./scimax.org][manual]] for more details.
 
 ** [2025-10-07 Tue] scimax 4.0
 
-It is hard to believe it is over two years again since the last big update. I have some renewed energy in scimax with the development of LLMs, and integration of them in Emacs with packages like gptel.
+It is hard to believe it is over two years again since the last big update. Scimax development hasn't been as vigorous in these two years as years past, but there were a few new modules like org-db-audio, and scimax-qr, and some refactoring of scimax-jupyter. In some ways that stability is a feature of maturity. I make a lot of videos about electronic lab notebooks (https://www.youtube.com/playlist?list=PL0sMmOaE_gs1Ox-wIIbHPLZ9O5uLJ_rQW) and data sharing (https://www.youtube.com/playlist?list=PL0sMmOaE_gs0r3h4lOaQLp7MTVolHH6pr).
+
+I have some renewed energy in scimax with the development of LLMs, and integration of them in Emacs with packages like gptel. These developments will make the text-based nature of org-mode and the way we use it in scimax even better!
 
 Some plans that are underway:
 
 - Update to Emacs 31+. Scimax may work for earlier Emacs, but this is the version I am starting to use daily, and that I use scimax in.
 - scimax-gptel this isn't public yet, and it will include tool and mcp integration for scientific writing activities
-- rewrite of org-db to enable semantic search
+- rewrite of org-db to enable semantic search across text, images, audio and more.
+- Refactoring to make startup faster, and maintenance easier
 
 The last commit in scimax 3.0 can be found at https://github.com/jkitchin/scimax/commit/dca8595b1094ffa11f9e3eebfcfb367f141b7979.
 
