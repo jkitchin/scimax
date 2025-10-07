@@ -209,7 +209,7 @@ It is not uncommon to have to restart emacs a few times while all the packages f
 
 ** AUCTeX installation
 
-It appears that AUCTeX may not be automatically installed on Linux ([[https://github.com/jkitchin/scimax/issues/498][issue]]) when using the archived installation method. I don't know if this is an issue with homebrew or not.
+[2024-05-07 Tue] It appears that AUCTeX may not be automatically installed on Linux ([[https://github.com/jkitchin/scimax/issues/498][issue]]) when using the archived installation method. I don't know if this is an issue with homebrew or not.
 
 * Funding for scimax
 
