@@ -1,4 +1,4 @@
-;;; org-show.el --- Summary
+;;; org-show.el --- Summary  -*- lexical-binding: t; -*-
 ;; Copyright(C) 2014-2021 John Kitchin
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>

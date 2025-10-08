@@ -1,4 +1,4 @@
-;;; ox-manuscript.el -- utilities to export scientific manuscripts,
+;;; ox-manuscript.el -- utilities to export scientific manuscripts,  -*- lexical-binding: t; -*-
 
 ;; Copyright(C) 2014-2021 John Kitchin
 

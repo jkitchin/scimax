@@ -50,25 +50,7 @@ This would require a more sophisticated parser. If you need this, you should pro
 ** DONE disable flyspell/check in at least the typo editmarks.
 CLOSED: [2023-05-30 Tue 14:50]
 
-{>.tpyo.<}                   
-
-Note, this relies on a scimax variable `scimax-flyspell-predicates' that is defined in [[./scimax-flyspell.el]].
-
-#+BEGIN_SRC emacs-lisp 
-(defun scimax-editmarks-flyspell-verify ()
-  "Return non-nil if point has an sem-editmark property.
-In flyspell, continue if not on an editmark."
-   (not (get-text-property (point) 'sem-editmark)))
-
-
-(add-to-list 'scimax-flyspell-predicates #'scimax-editmarks-flyspell-verify)
-
-
-#+END_SRC
-
-#+RESULTS:
-| scimax-editmarks-flyspell-verify | org-mode-flyspell-verify |
-
+{>.tpyo.<}
 
 
 * Features I would like to implement one day
@@ -596,7 +578,7 @@ end tell" (expand-file-name fname)))
   "Open a video to watch it.
 Mac dependent"
   (interactive)
-  (let ((plist (sem-editmark-plist))) 
+  (let ((plist (sem-editmark-plist)))
     (shell-command (format "open %s" (plist-get plist :file)))
     (do-applescript "tell application \"System Events\" to keystroke space")))
 
@@ -657,7 +639,7 @@ Another potential idea is an md5 hash, so you can tell if the file has changed s
   (let* ((plist (sem-editmark-plist))
 	 (fname (plist-get plist :file)))
     ;; I should add a :project option here
-    (when-let (project (plist-get plist :project))
+    (when-let* ((project (plist-get plist :project)))
       ;; we need to build the path so we can open it.
       (let*
 	  ((projects (remove nil (append (projectile-relevant-known-projects)
@@ -994,7 +976,7 @@ PARAMETERS is a set of keyword value pairs
 
 *** Creating a contact editmark.
 
-This code depends on org-db. If it isn't loaded, we dont' define this code. That means you have to require org-db before requiring this. I don't love that, but the alternative ideas seem more complex, e.g. move this to a new scimax-editmark-contact.el file that you intentionally load to use org-db. 
+This code depends on org-db. If it isn't loaded, we dont' define this code. That means you have to require org-db before requiring this. I don't love that, but the alternative ideas seem more complex, e.g. move this to a new scimax-editmark-contact.el file that you intentionally load to use org-db.
 
 #+BEGIN_SRC emacs-lisp
 (when (featurep 'org-db)
@@ -1072,7 +1054,7 @@ This uses org-db-contacts, not editmark contacts right now."
 			     (with-org-db
 			      (sqlite-select org-db "select raw_link,filename,begin from links
 left join files on links.filename_id = files.rowid where links.type = \"contact\" and links.path = ? order by filename"
-					     (list email))) 
+					     (list email)))
 			     collect
 			     ;; (candidate :filename :begin)
 			     (list (format "%s | %s" rl fn) :filename fn :begin bg)))
@@ -1384,7 +1366,7 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 	  (when (eq mode 'org-mode)
 	    (insert "* Local Variables :noexport:\n\n"))
 	  (insert (with-temp-buffer
-		    (funcall mode) 
+		    (funcall mode)
 		    (insert "Local Variables:\nEnd:\n")
 		    (comment-region (point-min) (point-max))
 		    (buffer-string)))))))
@@ -2417,7 +2399,19 @@ of the affected text."
 
 * The end
 
+Note, this relies on a scimax variable `scimax-flyspell-predicates' that is defined in [[./scimax-flyspell.el]].
+
 #+BEGIN_SRC emacs-lisp
+
+(defun scimax-editmarks-flyspell-verify ()
+  "Return non-nil if point has an sem-editmark property.
+In flyspell, continue if not on an editmark."
+   (not (get-text-property (point) 'sem-editmark)))
+
+
+(add-to-list 'scimax-flyspell-predicates #'scimax-editmarks-flyspell-verify)
+
+
 (provide 'scimax-editmarks)
 
 ;;; scimax-editmarks.el ends here
