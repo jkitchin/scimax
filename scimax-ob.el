@@ -518,7 +518,7 @@ If it is not set in the header run normally."
 (defun scimax-ob-toggle-output ()
   "Toggle folded state of results if there are some."
   (interactive)
-  (when-let (loc (org-babel-where-is-src-block-result))
+  (when-let* ((loc (org-babel-where-is-src-block-result)))
     (save-excursion
       (goto-char loc)
       (org-cycle))))

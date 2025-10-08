@@ -662,7 +662,7 @@ Another potential idea is an md5 hash, so you can tell if the file has changed s
 	(find-file-other-window fname)
       (find-file fname))
     (forward-line (plist-get plist :line))
-    (when-let  (col (plist-get plist :column))
+    (when-let*  ((col (plist-get plist :column)))
       (move-to-column col))))
 
 

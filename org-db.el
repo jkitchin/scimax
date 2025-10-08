@@ -672,10 +672,10 @@ PARSE-TREE is from `org-element-parse-buffer'."
 		     properties (org-entry-properties (org-element-property :begin hl) 'all)))
 
 	     (setq
-	      scheduled (when-let (ts (org-element-property :scheduled hl))
+	      scheduled (when-let* ((ts (org-element-property :scheduled hl)))
 			  (org-timestamp-format ts "%Y-%m-%d %H:%M:%S"))
 
-	      deadline (when-let (ts (org-element-property :deadline hl))
+	      deadline (when-let* ((ts (org-element-property :deadline hl)))
 			 (org-timestamp-format ts "%Y-%m-%d %H:%M:%S")))
 
 	     ;; headline vector to insert in table.

@@ -381,7 +381,7 @@ done."
     (when (org-entry-get nil "TWITTER_MSGID")
       (user-error "This headline has already been tweeted.")))
 
-  (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
+  (when-let* ((account (org-entry-get nil "TWITTER_ACCOUNT" t)))
     (shell-command (format "t set active %s" account)))
 
   (let* ((components (scimax-twitter-org-tweet-components))
@@ -414,7 +414,7 @@ The default behavior is to dry run and check each heading for length.
 Use a prefix arg to make it actually tweet."
   (interactive "P")
 
-  (when-let (account (org-entry-get nil "TWITTER_ACCOUNT" t))
+  (when-let* ((account (org-entry-get nil "TWITTER_ACCOUNT" t)))
     (shell-command (format "t set active %s" account)))
 
   (save-restriction

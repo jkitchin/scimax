@@ -129,7 +129,7 @@ button-lock precedence in org-mode. It is used as advice on
 mail address
 _c_: Contacts _m_: Mail
 "
-  ("m" (when-let (email (thing-at-point 'email)) (compose-mail email)))
+  ("m" (when-let* ((email (thing-at-point 'email))) (compose-mail email)))
   ("c" (let ((ivy-initial-inputs-alist `((ivy-contacts . ,(thing-at-point 'email)))))
 	 (ivy-contacts))))
 
@@ -250,7 +250,7 @@ git issue
 _g_: GitHUB"
   ("g" (lambda ()
 	 (interactive)
-	 (when-let (url (github-issue-at-p))
+	 (when-let* ((url (github-issue-at-p)))
 	   (browse-url url)))))
 
 (defun github-issue-at-p ()
@@ -307,7 +307,7 @@ git pull-request
 _g_: GitHUB"
   ("g" (lambda ()
 	 (interactive)
-	 (when-let (url (pull-request-at-p))
+	 (when-let* ((url (pull-request-at-p)))
 	   (browse-url url)))))
 
 (defun sf-activate-github-pull-requests ()
@@ -347,9 +347,9 @@ commit
 _g_: GitHUB _m_: Magit log
 ^ ^         _c_: Magit commit"
   ("c" (magit-show-commit (third (github-commit-at-p))))
-  ("g" (when-let ((data (github-commit-at-p))
-		  (url (format "https://github.com/%s/commit/%s"
-			       (first data) (third full-hash))))
+  ("g" (when-let* ((data (github-commit-at-p))
+		   (url (format "https://github.com/%s/commit/%s"
+			        (first data) (third full-hash))))
 	 (browse-url url)))
   ("m" (magit-log (list (third (github-commit-at-p))))))
 

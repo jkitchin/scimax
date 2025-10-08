@@ -133,7 +133,7 @@ A candidate is a list of (link function)."
 (defun open-org-buffers ()
   "Return a list of buffers to org-files."
   (seq-filter (lambda (b)
-		(when-let (f (buffer-file-name b))
+		(when-let* ((f (buffer-file-name b)))
 		  (string= "org" (file-name-extension f))))
 	      (buffer-list)))
 
@@ -193,7 +193,7 @@ These candidates are to headings by position and by *links."
   "Return links to all open files."
   (delete nil
 	  (mapcar (lambda (buf)
-		    (when-let ((fname (buffer-file-name buf)))
+		    (when-let* ((fname (buffer-file-name buf)))
 		      (format "[[file:%s]]" fname)))
 		  (buffer-list))))
 
