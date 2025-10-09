@@ -1,4 +1,4 @@
-;;; Define Back-End
+;;; Define Back-End  -*- lexical-binding: t; -*-
 (require 'ox)
 
 (add-to-list 'org-latex-classes
@@ -216,7 +216,7 @@ Return PDF file's name."
 TEXINPUTS is augmented with the path to the cmumemo style file."
   (interactive)
   ;; I think on windows ; is used for separators. On Mac/Linux : is used.
-  
+
   (let* ((separator (pcase system-type
 		      ('windows-nt ";")
 		      (_ ":")))
