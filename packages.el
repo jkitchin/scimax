@@ -15,10 +15,9 @@
 ;; * org-mode
 ;; To upgrade org, run this command in a shell, with no emacs open
 ;; emacs -Q -batch -eval "(progn (require 'package) (package-initialize) (package-refresh-contents) (package-upgrade 'org))"
-;; Built-in org is removed in init.el, and we install from org ELPA
+;; Built-in org is removed in bootstrap.el, and we install from GNU ELPA
 (use-package org
-  :ensure t
-  :pin org)
+  :ensure t)
 
 ;; Use the current window for C-c ' source editing
 (setq org-src-window-setup 'current-window

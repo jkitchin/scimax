@@ -39,8 +39,6 @@
        (proto (if no-ssl "http" "https")))
   ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
   (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  ;; Add org ELPA for latest org-mode versions
-  (add-to-list 'package-archives (cons "org" (concat proto "://orgmode.org/elpa/")) t)
 
   (when no-ssl
     (setq package-check-signature nil)
