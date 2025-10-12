@@ -15,8 +15,10 @@
 ;; * org-mode
 ;; To upgrade org, run this command in a shell, with no emacs open
 ;; emacs -Q -batch -eval "(progn (require 'package) (package-initialize) (package-refresh-contents) (package-upgrade 'org))"
-;; load this first before anything else to avoid mixed installations
-(straight-use-package 'org)
+;; Built-in org is removed in init.el, and we install from org ELPA
+(use-package org
+  :ensure t
+  :pin org)
 
 ;; Use the current window for C-c ' source editing
 (setq org-src-window-setup 'current-window
@@ -209,9 +211,20 @@
 ;; https://github.com/Wilfred/mustache.el
 (use-package mustache)
 
+;; (when (executable-find "jupyter")
+;;   (use-package jupyter)
+;;   (use-package scimax-jupyter :load-path scimax-dir))
+
 (when (executable-find "jupyter")
-  (use-package jupyter)
+  (use-package jupyter :load-path (lambda () "/Users/jkitchin/Dropbox/emacs/emacs-jupyter"))
   (use-package scimax-jupyter :load-path scimax-dir))
+
+(use-package org-db-v3
+  :load-path (lambda () "/Users/jkitchin/Dropbox/emacs/scimax/org-db-v3/elisp/")
+  :init (setq org-db-v3-auto-start-server t)
+  :config
+  (global-set-key (kbd "H-v") 'org-db-menu)
+  (org-db-v3-start-server))
 
 (use-package ov)
 
@@ -223,7 +236,22 @@
 (use-package ivy-bibtex)
 (use-package citeproc)
 
+;; (use-package org-ref
+;;   :init
+;;   (require 'bibtex)
+;;   (setq bibtex-autokey-year-length 4
+;; 	bibtex-autokey-name-year-separator "-"
+;; 	bibtex-autokey-year-title-separator "-"
+;; 	bibtex-autokey-titleword-separator "-"
+;; 	bibtex-autokey-titlewords 2
+;; 	bibtex-autokey-titlewords-stretch 1
+;; 	bibtex-autokey-titleword-length 5)
+;;   (define-key bibtex-mode-map (kbd "H-b") 'org-ref-bibtex-hydra/body)
+;;   (define-key org-mode-map (kbd "C-c ]") 'org-ref-insert-link)
+;;   (define-key org-mode-map (kbd "s-[") 'org-ref-insert-link-hydra/body))
+
 (use-package org-ref
+  :load-path (lambda () "/Users/jkitchin/Dropbox/emacs/org-ref/")
   :init
   (require 'bibtex)
   (setq bibtex-autokey-year-length 4
@@ -239,7 +267,8 @@
 
 
 (use-package org-ref-ivy
-  :load-path (lambda () (file-name-directory (locate-library "org-ref")))
+  :load-path (lambda () "/Users/jkitchin/Dropbox/emacs/org-ref/")
+  ;; :load-path (lambda () (file-name-directory (locate-library "org-ref")))
   :init (setq org-ref-insert-link-function 'org-ref-insert-link-hydra/body
 	      org-ref-insert-cite-function 'org-ref-cite-insert-ivy
 	      org-ref-insert-label-function 'org-ref-insert-label-link

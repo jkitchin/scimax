@@ -13,8 +13,8 @@
 ;; this makes garbage collection less frequent, which speeds up init by about 2 seconds.
 (setq gc-cons-threshold 80000000)
 
-(when (version< emacs-version "25.0")
-  (warn "You probably need at least Emacs 25. You should upgrade. You may need to install leuven-theme manually."))
+(when (version< emacs-version "30.0")
+  (warn "You probably need at least Emacs 30. You should upgrade. You may need to install leuven-theme manually."))
 
 ;; remember this directory
 (defconst scimax-dir (file-name-directory (or load-file-name (buffer-file-name)))
@@ -39,7 +39,9 @@
        (proto (if no-ssl "http" "https")))
   ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
   (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  
+  ;; Add org ELPA for latest org-mode versions
+  (add-to-list 'package-archives (cons "org" (concat proto "://orgmode.org/elpa/")) t)
+
   (when no-ssl
     (setq package-check-signature nil)
     (setq tls-program
