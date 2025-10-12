@@ -1,4 +1,4 @@
-;;; kitchingroup.el --- Kitchingroup utility functions
+;;; kitchingroup.el --- Kitchingroup utility functions  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; This module is mostly for members of my research group.
