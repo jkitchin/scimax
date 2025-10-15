@@ -1,4 +1,4 @@
-;;; org-mac-link.el --- Insert org-mode links to items selected in various Mac apps
+;;; org-mac-link.el --- Insert org-mode links to items selected in various Mac apps  -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (c) 2010-2021 Free Software Foundation, Inc.
 ;;
@@ -290,9 +290,9 @@ When done, go grab the link, and insert it at point."
 (defun org-mac-paste-applescript-links (as-link-list)
   "Paste in a list of links from an applescript handler.
 The links are of the form <link>::split::<name>."
-  (let* ((noquote-as-link-list 
-	  (if (string-prefix-p "\"" as-link-list) 
-	      (substring as-link-list 1 -1) 
+  (let* ((noquote-as-link-list
+	  (if (string-prefix-p "\"" as-link-list)
+	      (substring as-link-list 1 -1)
 	    as-link-list))
 	 (link-list
           (mapcar (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x)
@@ -485,7 +485,7 @@ The links are of the form <link>::split::<name>."
 (defun org-mac-safari-get-frontmost-url ()
   (interactive)
   (message "Applescript: Getting Safari url...")
-  (org-mac-paste-applescript-links 
+  (org-mac-paste-applescript-links
    (org-as-mac-safari-get-frontmost-url)))
 
 ;;;###autoload
