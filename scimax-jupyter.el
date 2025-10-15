@@ -156,106 +156,7 @@ This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
 ;; Turn on by default
 (scimax-jupyter-advise)
 
-;; * Fixing raw results
-;; in emacs-jupyter :results raw, :results drawer did not work. This function seems to do the trick.
 
-;; This function in emacs-jupyter seems to take a long time, and maybe is run
-;; asynchronously. That messes up the order of results, as faster running things
-;; come first in some process filter. This avoids this step and we do it later
-;; in `scimax-jupyter-org-sync-results'. There is probably no guarantee that
-;; this always works though.
-;; (defun scimax-jupyter-org-export-block-or-pandoc (type value params)
-;;   "Return VALUE, either converted with pandoc or in an export block.
-;; If PARAMS has non-nil value for key ':pandoc' and TYPE is in
-;; `jupyter-org-pandoc-convertable', convert the result with pandoc.
-;; Otherwise, wrap it in an export block."
-;;   (jupyter-org-export-block type value))
-
-
-;; used to advise `jupyter-org-sync-results'. I do this to fix some issues like
-;; results drawers, etc.
-;; (defun scimax-jupyter-org-sync-results (req)
-;;   "Return the result string in org syntax for the results of REQ.
-;; Meant to be used as the return value of
-;; `org-babel-execute:jupyter'."
-;;   (when-let* ((results (nreverse (jupyter-org-request-results req)))
-;; 	      ;; Not sure why these are reversed above, it works right for some things,
-;; 	      ;; but not right for display stuff. I wonder if there is some way
-;; 	      ;; to tell when something is displayed.
-;;               (params (jupyter-org-request-block-params req))
-;;               (result-params (alist-get :result-params params)))
-
-;;     ;; There is an inconsistency when you specify :results value where printed
-;;     ;; outputs and the return value is provided, sometimes as a fixed width.
-;;     ;; That is consistent with the jupyter notebook, but not consistent with
-;;     ;; org-babel. Here I only return the last thing if value is selected, and do
-;;     ;; not require it to be fixed-width. That also isn't quite right, except in
-;;     ;; a drawer.
-;;     (when (member "value" result-params)
-;;       (let ((retval (car (last results))))
-;; 	(setq results
-;; 	      (list
-;; 	       (cond
-;; 		((eq 'fixed-width (org-element-type retval))
-;; 		 (org-element-property :value retval))
-;; 		(t
-;; 		 retval))))))
-
-;;     (when (member "both" result-params)
-;;       (let ((retval (car (last results))))
-;; 	(setf (car (last results))
-;; 	      (cond
-;; 	       ((eq 'fixed-width (org-element-type retval))
-;; 		(org-element-property :value retval))
-;; 	       (t
-;; 		retval)))))
-
-;;     ;; Do pandoc conversion here so the order of results is preserved.
-;;     (when (cdr (assoc :pandoc params))
-;;       (setq results
-;; 	    (cl-loop for result in results
-;; 		     collect
-;; 		     (cond
-;; 		      ((stringp result)
-;; 		       result)
-;; 		      ((and (listp result)
-;; 			    (member (org-element-property :type result) jupyter-org-pandoc-convertable))
-;; 		       (jupyter-pandoc-convert
-;; 			(org-element-property :type result)
-;; 			"org"
-;; 			(org-element-property :value result)))
-;; 		      (t
-;; 		       result)))))
-
-;;     (org-element-interpret-data
-;;      (cond
-;;       ;; This happens when a named block is a variable in another block.
-;;       ;; It is different than a :results silent header.
-;;       ((jupyter-org-request-silent-p req)
-;;        results)
-
-;;       ((member "raw" result-params)
-;;        results)
-
-;;       ;; fall through to a drawer for now.
-;;       (t
-;;        (apply #'jupyter-org-results-drawer results))))))
-
-
-
-;; This was causing a problem in emacs-jupyter for using code blocks as
-;; variables in other blocks. Commenting out the first line seems to fix it for
-;; me.
-;; (defun scimax-jupyter-org--add-result (req result)
-;;   (cond
-;;    ;; ((jupyter-org-request-silent-p req)
-;;    ;;  (unless (equal (jupyter-org-request-silent-p req) "none")
-;;    ;;    (message "%s" (org-element-interpret-data result))))
-;;    ((jupyter-org-request-async-p req)
-;;     (jupyter-org--clear-request-id req)
-;;     (jupyter-org--do-insert-result req result))
-;;    (t
-;;     (push result (jupyter-org-request-results req)))))
 
 
 ;; I don't know where the \\ lines come from, this removes them.
@@ -273,34 +174,6 @@ This is a list of (emacs-jupyter-fn :position scimax-jupyter-fn)"
 
 (add-hook 'org-babel-after-execute-hook 'scimax-rm-backslashes)
 
-;; * Fix org-show-entry so it doesn't collapse results all the time
-;;
-;; I like to see the results, and this function usually hides them. I added the
-;; unless wrapper, so it doesn't happen if point is on a src block. In a
-;; previous version I just commented out the org-cycle-hide-drawers line, and I
-;; may need to go back to that. this version should work as the original one
-;; though except in src blocks. normally it is triggered by jumping to the next
-;; src-block, and this is when I don't want it to hide the previous results.
-
-;; (defun scimax-org-show-entry ()
-;;   "Show the body directly following this heading.
-;; Show the heading too, if it is currently invisible."
-;;   (interactive)
-;;   (unless (org-in-src-block-p)
-;;     (save-excursion
-;;       (ignore-errors
-;; 	(org-back-to-heading t)
-;; 	(outline-flag-region
-;; 	 (max (point-min) (1- (point)))
-;; 	 (save-excursion
-;; 	   (if (re-search-forward
-;; 		(concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
-;; 	       (match-beginning 1)
-;; 	     (point-max)))
-;; 	 nil)
-;; 	(org-cycle-hide-drawers 'children)))))
-
-;; (advice-add 'org-show-entry :override #'scimax-org-show-entry)
 
 ;; * Working with exceptions
 ;;
