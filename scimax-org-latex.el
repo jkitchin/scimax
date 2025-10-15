@@ -5,6 +5,13 @@
 
 (require 'ox-latex)
 
+;; This makes nicer looking previews especially on Retina Mac monitors
+(when (executable-find "dvisvgm")
+  (setq org-preview-latex-default-process 'dvisvgm))
+
+;; The default image size seems too small to me.
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
 (defvar scimax-toggle-latex-fragment-func
   'org-latex-preview
   "Function to toggle latex fragments.
@@ -14,7 +21,6 @@
 
 ;; * Font-lock
 ;; ** Latex fragments
-;;; Code:
 
 (setq org-highlight-latex-and-related '(latex script entities))
 (set-face-foreground 'org-latex-and-related "blue")
@@ -149,7 +155,7 @@ citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
   "Toggle if latex fragment tooltips are used."
   (if  (not (get 'scimax-org-latex-fragment-tooltip 'enabled))
       (progn
-	
+
 	(advice-add 'org--make-preview-overlay :after 'scimax-org-latex-fragment-tooltip)
 	(put 'scimax-org-latex-fragment-tooltip 'enabled t)
 	(message "LaTeX fragment tooltips are enabled."))
