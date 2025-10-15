@@ -208,6 +208,21 @@ Alternatively, add scimax to your load path in your init file and just require w
 It is not uncommon to have to restart emacs a few times while all the packages from MELPA are installed. Windows seems to be like that.
 
 
+* Configuration
+
+With scimax 4.0 I am working on separating out at least some of the more opinionated settings. That includes the theme and font. You can put something like this in your user file if you don't want the default Emacs settings for these.
+
+#+BEGIN_SRC emacs-lisp
+(load-theme 'leuven)
+
+;; Source code pro for the font if it is available
+(let ((f "Source Code Pro"))
+  (when (member f (font-family-list))
+    (set-face-attribute 'default nil :font f)))
+#+END_SRC
+
+
+
 * Known / reported issues
 
 ** AUCTeX installation

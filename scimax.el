@@ -3,22 +3,6 @@
 ;;; Commentary:
 ;;
 ;; * Basic settings
-(defcustom scimax-theme 'leuven
-  "Theme to use for scimax. Defaults to `leuven'.
-Set to nil to avoid loading a theme."
-  :group 'scimax
-  :type 'symbol)
-
-
-(when scimax-theme
-  (load-theme scimax-theme))
-
-
-;; Source code pro for the font if it is available
-
-(let ((f "Source Code Pro"))
-  (when (member f (font-family-list))
-    (set-face-attribute 'default nil :font f)))
 
 (setq inhibit-startup-screen t) ;; stop showing startup screen
 (tool-bar-mode 0)           ; remove the icons

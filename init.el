@@ -14,7 +14,7 @@
 (setq gc-cons-threshold 80000000)
 
 (when (version< emacs-version "30.0")
-  (warn "You probably need at least Emacs 30. You should upgrade. You may need to install leuven-theme manually."))
+  (warn "You probably need at least Emacs 30. You should upgrade."))
 
 ;; remember this directory
 (defconst scimax-dir (file-name-directory (or load-file-name (buffer-file-name)))
