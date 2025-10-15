@@ -216,11 +216,16 @@
 
 (when (executable-find "jupyter")
   (use-package jupyter :load-path (lambda () "/Users/jkitchin/Dropbox/emacs/emacs-jupyter"))
-  (use-package scimax-jupyter :load-path scimax-dir))
+  (use-package scimax-jupyter :load-path scimax-dir)
+  )
 
 (use-package org-db-v3
   :load-path (lambda () "/Users/jkitchin/Dropbox/emacs/scimax/org-db-v3/elisp/")
-  :init (setq org-db-v3-auto-start-server t)
+  :init
+  (setenv "ORG_DB_DB_PATH" "/Users/jkitchin/Dropbox/emacs/cache/org-db-v3/org-db-v3.db")
+  (setq org-db-v3-server-host "127.0.0.1"
+	org-db-v3-server-port 8765
+	org-db-v3-auto-start-server t)
   :config
   (global-set-key (kbd "H-v") 'org-db-menu)
   (org-db-v3-start-server))
@@ -397,9 +402,21 @@
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-spellcheck
-  :ensure nil
-  :load-path scimax-dir)
+;; Choose between jinx (modern, faster) or traditional spellcheck
+;; Set this to nil to use the traditional scimax-spellcheck with ispell/aspell
+(defcustom scimax-use-jinx t
+  "When non-nil, use jinx for spell checking. Otherwise use traditional ispell/aspell."
+  :type 'boolean
+  :group 'scimax)
+
+(if scimax-use-jinx
+    ;; scimax-jinx will check for enchant and conditionally load jinx
+    (use-package scimax-jinx
+      :ensure nil
+      :load-path scimax-dir)
+  (use-package scimax-spellcheck
+    :ensure nil
+    :load-path scimax-dir))
 
 (org-babel-load-file (expand-file-name "scimax-notebook.org" scimax-dir))
 
