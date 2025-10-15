@@ -15,7 +15,7 @@
 ;; The main function is `@-insert-link' and when you load this library, that is
 ;; bound to the @ key.
 
-(require 'org-db)
+(require 'org-db nil t)
 (require 'org-ref)
 
 
