@@ -621,20 +621,54 @@ Usually called in a hook function."
 (defvar-local scimax-ob-number-line-overlays '()
   "List of overlays for line numbers.")
 
+(defvar-local scimax-ob--refresh-timer nil
+  "Per-buffer idle timer that refreshes line-number overlays after edits.")
+
+(defun scimax-ob--schedule-refresh (&rest _)
+  "Queue a refresh of the line-number overlays after a short idle delay.
+Bound to `after-change-functions' so refreshes happen only when the buffer
+content changes — not on every cursor movement.  The previous implementation
+hooked `post-command-hook' which made `org-element-context' (an O(buffer)
+parse) fire on every keystroke and caused severe typing lag."
+  (when (timerp scimax-ob--refresh-timer)
+    (cancel-timer scimax-ob--refresh-timer))
+  (setq scimax-ob--refresh-timer
+        (run-with-idle-timer 0.3 nil #'scimax-ob--refresh-current-buffer
+                             (current-buffer))))
+
+(defun scimax-ob--refresh-current-buffer (buf)
+  "Refresh line-number overlays in BUF if it is still live and has overlays."
+  (when (and (buffer-live-p buf)
+             (with-current-buffer buf scimax-ob-number-line-overlays))
+    (with-current-buffer buf
+      (scimax-ob-add-line-numbers))))
+
 (defun scimax-ob-toggle-line-numbers ()
   (interactive)
   (if scimax-ob-number-line-overlays
       (scimax-ob-remove-line-numbers)
-    (scimax-ob-add-line-numbers)))
+    (scimax-ob-add-line-numbers)
+    ;; Only install the auto-refresh hook if overlays were actually added.
+    ;; `scimax-ob-add-line-numbers' silently bails outside a src block, and
+    ;; hooking unconditionally would leave a dangling local
+    ;; `after-change-functions' entry scheduling wasted idle timers on every
+    ;; buffer edit for the lifetime of the buffer.
+    (when scimax-ob-number-line-overlays
+      (add-hook 'after-change-functions
+                #'scimax-ob--schedule-refresh nil 'local))))
 
 
 (defun scimax-ob-remove-line-numbers ()
-  "Remove line numbers from "
+  "Remove line numbers from the current Org source block."
   (interactive)
-  (mapc 'delete-overlay
-	scimax-ob-number-line-overlays)
+  (mapc #'delete-overlay scimax-ob-number-line-overlays)
   (setq-local scimax-ob-number-line-overlays '())
-  (remove-hook 'post-command-hook 'scimax-ob-add-line-numbers t))
+  (when (timerp scimax-ob--refresh-timer)
+    (cancel-timer scimax-ob--refresh-timer)
+    (setq-local scimax-ob--refresh-timer nil))
+  (remove-hook 'after-change-functions #'scimax-ob--schedule-refresh t)
+  ;; Remove legacy post-command-hook entry in case of mid-session upgrade.
+  (remove-hook 'post-command-hook #'scimax-ob-add-line-numbers t))
 
 
 (defun scimax-ob-add-line-numbers ()
@@ -642,34 +676,31 @@ Usually called in a hook function."
   (interactive)
   (save-excursion
     (let* ((src-block (org-element-context))
-	   (nlines (- (length
-		       (s-split
-			"\n"
-			(org-element-property :value src-block)))
-		      1)))
-      ;; clear any existing overlays
-      (scimax-ob-remove-line-numbers)
+	   (value (and (eq (org-element-type src-block) 'src-block)
+		       (org-element-property :value src-block)))
+	   (nlines (if value (1- (length (s-split "\n" value))) 0)))
+      (when value
+	;; clear any existing overlays
+	(scimax-ob-remove-line-numbers)
 
-      (goto-char (org-element-property :begin src-block))
-      ;; the beginning may be header, so we move forward to get the #+BEGIN
-      ;; line. Then jump one more to get in the code block
-      (while (not (looking-at "#\\+BEGIN"))
-	(forward-line))
-      (forward-line)
-      (cl-loop for i from 1 to nlines
-	       do
-	       (beginning-of-line)
-	       (let (ov)
-		 (setq ov (make-overlay (point)(point)))
-		 (overlay-put
-		  ov
-		  'before-string (propertize
-				  (format "%03s " (number-to-string i))
-				  'font-lock-face '(:foreground "black" :background "gray80")))
-		 (push ov scimax-ob-number-line-overlays))
-	       (forward-line))))
-  ;; This allows you to update the numbers if you change the block, e.g. add/remove lines
-  (add-hook 'post-command-hook 'scimax-ob-add-line-numbers nil 'local))
+	(goto-char (org-element-property :begin src-block))
+	;; the beginning may be header, so we move forward to get the #+BEGIN
+	;; line. Then jump one more to get in the code block
+	(while (not (looking-at "#\\+BEGIN"))
+	  (forward-line))
+	(forward-line)
+	(cl-loop for i from 1 to nlines
+		 do
+		 (beginning-of-line)
+		 (let (ov)
+		   (setq ov (make-overlay (point)(point)))
+		   (overlay-put
+		    ov
+		    'before-string (propertize
+				    (format "%03s " (number-to-string i))
+				    'font-lock-face '(:foreground "black" :background "gray80")))
+		   (push ov scimax-ob-number-line-overlays))
+		 (forward-line))))))
 
 ;; * Header editing
 
