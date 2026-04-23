@@ -11,6 +11,8 @@ See the [[./scimax.org][manual]] for more details.
 
 * NEWS
 
+** [2026-04-23 Thu] Emacs and scimax have been a central part of my work for over a decade now, and I learned a lot from it. Thanks to Claude Code, I have been able to replicate almost everything I did in scimax in VS Code in the past few months, and now I no longer use Emacs. Noone is more suprised by this result than I am! As a result, I am discontinuing development of scimax :( I will leave it here for others who still want to use it, but I don't have current plans to maintain it further at this time. I appreciate everyone who made scimax possible, who contributed bug reports and pull requests, but my efforts have moved elsewhere.
+
 ** [2025-10-07 Tue] scimax 4.0
 
 It is hard to believe it is over two years again since the last big update. Scimax development hasn't been as vigorous in these two years as years past, but there were a few new modules like org-db-audio, and scimax-qr, and some refactoring of scimax-jupyter. In some ways that stability is a feature of maturity. I make a lot of videos about electronic lab notebooks (https://www.youtube.com/playlist?list=PL0sMmOaE_gs1Ox-wIIbHPLZ9O5uLJ_rQW) and data sharing (https://www.youtube.com/playlist?list=PL0sMmOaE_gs0r3h4lOaQLp7MTVolHH6pr).
