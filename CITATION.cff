@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "scimax: an Emacs starter kit for scientists and engineers"
+type: software
+authors:
+  - family-names: Kitchin
+    given-names: John R.
+    orcid: "https://orcid.org/0000-0003-2625-9232"
+    affiliation: Carnegie Mellon University
+repository-code: "https://github.com/jkitchin/scimax"
+date-released: "2026-10-20"
+license: [CC-BY-SA-4.0, GPL-3.0-or-later]
+abstract: "An Emacs starter kit for literate programming, reproducible research documentation, and scientific publishing with org-mode, integrating code, data, figures, equations, and citations in executable documents."
+keywords: [reproducible research, literate programming, org-mode, emacs, data sharing]
